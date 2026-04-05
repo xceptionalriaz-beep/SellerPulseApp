@@ -3,9 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Your original files
 import 'landing_page.dart'; 
-import 'product_research/product_deep_dive.dart'; 
-import 'product_research/product_research_launchpad.dart'; 
-import 'product_research/product_list_view.dart'; 
+import 'product_research/deep_dive/deep_dive_screen.dart';
+import 'product_research/launchpad/launchpad_screen.dart';
+import 'product_research/keyword_search/keyword_search_screen.dart';
 import 'inventory_page.dart'; 
 import 'profit_calculator.dart'; 
 import 'admin_management_page.dart'; 
@@ -95,12 +95,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ✨ YOUR DECISION ENGINE FOR PRODUCT RESEARCH ✨
+// ✨ YOUR DECISION ENGINE FOR PRODUCT RESEARCH ✨
   Widget _buildProductResearchArea() {
     if (_researchState == 1) {
-      return const ProductDeepDivePage();
+      // ✨ UPGRADED: Pass the URL to the Deep Dive!
+      return ProductDeepDivePage(productUrl: _currentQuery); 
     } else if (_researchState == 2) {
-      return ProductListViewPage(
+      return KeywordSearchScreen(
         searchQuery: _currentQuery,
         onSearch: _runSmartSearch, 
       );
