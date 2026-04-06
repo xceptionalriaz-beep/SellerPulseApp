@@ -28,8 +28,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   bool _dropshipSafe = true; 
   bool _hideAds = false;     
   bool _selectAll = false;
-  
-  // ✨ The Pagination Variable is now actively used!
   int _currentPage = 1;
 
   late TextEditingController _topSearchController;
@@ -37,6 +35,9 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   
   bool _isLoading = false;
   List<dynamic> _liveProducts = [];
+  
+  // ✨ NEW: THE ERROR TRACKER
+  String _errorMessage = "";
 
   @override
   void initState() {
@@ -55,17 +56,17 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     super.dispose();
   }
 
-  // ✨ THE FULLY UPGRADED LIVE ENGINE
   Future<void> _fetchLiveData(String query) async {
     if (query.isEmpty) return;
     
     setState(() {
       _isLoading = true;
       _liveProducts.clear(); 
+      _errorMessage = ""; // Clear old errors
     });
 
     try {
-      // 1. Fetch your IDs from your Supabase API Vault
+      // 1. Fetch Keys
       final configResponse = await Supabase.instance.client
           .from('api_fleet_config')
           .select('primary_key_1, primary_key_2') 
@@ -75,10 +76,8 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       final String appId = configResponse['primary_key_1'];
       final String certId = configResponse['primary_key_2'];
 
-      // 2. EXCHANGE IDs FOR A TEMPORARY OAUTH TOKEN (The "Keycard")
+      // 2. OAUTH TOKEN
       final String credentials = base64Encode(utf8.encode('$appId:$certId'));
-      
-      // Using corsproxy.io so Chrome/Vercel doesn't block the request!
       final tokenUrl = 'https://corsproxy.io/?' + Uri.encodeComponent('https://api.ebay.com/identity/v1/oauth2/token');
       
       final tokenResponse = await http.post(
@@ -93,15 +92,18 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         },
       );
 
+      // ✨ Catch Token Errors Visually!
       if (tokenResponse.statusCode != 200) {
-        print("❌ Token Error: ${tokenResponse.body}");
-        setState(() => _isLoading = false);
+        setState(() {
+          _errorMessage = "🚨 eBay Token Denied: ${tokenResponse.statusCode}\nDetails: ${tokenResponse.body}";
+          _isLoading = false;
+        });
         return;
       }
 
       final String accessToken = json.decode(tokenResponse.body)['access_token'];
 
-      // 3. PERFORM THE ACTUAL EBAY SEARCH WITH THE NEW TOKEN
+      // 3. SEARCH EBAY
       int offset = (_currentPage - 1) * 25;
       final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
       final String searchUrl = 'https://corsproxy.io/?' + Uri.encodeComponent(targetUrl);
@@ -120,28 +122,29 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
         setState(() {
           _liveProducts = itemSummaries.map((item) {
-            final title = item['title'] ?? 'Unknown Product';
-            final imageUrl = item['image']?['imageUrl'] ?? 'https://via.placeholder.com/150';
-            final price = item['price']?['value'] ?? '0.00';
-            
             return {
-              "title": title,
-              "image": imageUrl,
-              "sales": "\$$price", 
+              "title": item['title'] ?? 'Unknown Product',
+              "image": item['image']?['imageUrl'] ?? 'https://via.placeholder.com/150',
+              "sales": "\$${item['price']?['value'] ?? '0.00'}", 
               "itemWebUrl": item['itemWebUrl'] 
             };
           }).toList();
-          
           _isLoading = false;
         });
       } else {
-        print("❌ eBay API Error: ${searchResponse.statusCode} - ${searchResponse.body}");
-        setState(() => _isLoading = false);
+        // ✨ Catch Search Errors Visually!
+        setState(() {
+          _errorMessage = "🚨 eBay Search Failed: ${searchResponse.statusCode}\nDetails: ${searchResponse.body}";
+          _isLoading = false;
+        });
       }
 
     } catch (e) {
-      print("❌ Error fetching live data: $e");
-      setState(() => _isLoading = false);
+      // ✨ Catch Supabase/Proxy Errors Visually!
+      setState(() {
+        _errorMessage = "🚨 Connection Crash: $e";
+        _isLoading = false;
+      });
     }
   }
 
@@ -151,8 +154,8 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       setState(() {
         _searchTags.add(cleanValue);
         _topSearchController.clear();
-        _currentPage = 1; // ✨ Reset to page 1 on new search
-        _fetchLiveData(_searchTags.join(', ')); // Fetch the new search
+        _currentPage = 1; 
+        _fetchLiveData(_searchTags.join(', '));
       });
     } else {
       _topSearchController.clear();
@@ -320,26 +323,28 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     Expanded(
                       child: _isLoading 
                         ? const Center(child: CircularProgressIndicator(color: Color(0xFF8FFF00))) 
-                        : _liveProducts.isEmpty 
-                          ? const Center(child: Text("No products found. Try a different search!"))
-                          : ListView.builder(
-                              itemCount: _liveProducts.length,
-                              itemBuilder: (context, index) {
-                                final item = _liveProducts[index];
-                                return HoverableDataRow(
-                                  imageUrl: item["image"] ?? "https://via.placeholder.com/150", 
-                                  title: item["title"] ?? "Unknown Product", 
-                                  veroWord: null,
-                                  flag: "🇺🇸", score: "🔥 99", sales: item["sales"] ?? "0", 
-                                  returns: "🟢 2% (Safe)", risk: "🛡️ Safe", margin: "🟢 40%", 
-                                  actionColor: Colors.orange, actionLabel: "Amz",
-                                  isSelected: _selectAll,
-                                );
-                              },
-                            ),
+                        // ✨ NEW: This displays the red error message if it exists!
+                        : _errorMessage.isNotEmpty 
+                            ? Center(child: Padding(padding: const EdgeInsets.all(20), child: Text(_errorMessage, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center)))
+                            : _liveProducts.isEmpty 
+                              ? const Center(child: Text("No products found. Try a different search!"))
+                              : ListView.builder(
+                                  itemCount: _liveProducts.length,
+                                  itemBuilder: (context, index) {
+                                    final item = _liveProducts[index];
+                                    return HoverableDataRow(
+                                      imageUrl: item["image"] ?? "https://via.placeholder.com/150", 
+                                      title: item["title"] ?? "Unknown Product", 
+                                      veroWord: null,
+                                      flag: "🇺🇸", score: "🔥 99", sales: item["sales"] ?? "0", 
+                                      returns: "🟢 2% (Safe)", risk: "🛡️ Safe", margin: "🟢 40%", 
+                                      actionColor: Colors.orange, actionLabel: "Amz",
+                                      isSelected: _selectAll,
+                                    );
+                                  },
+                                ),
                     ),
                     
-                    // ✨ UI ADDED HERE: The Pagination Buttons!
                     const Divider(height: 1, color: Color(0xFFE2E8F0)),
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
