@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class MarketTrendChart extends StatefulWidget {
@@ -14,9 +15,16 @@ class _MarketTrendChartState extends State<MarketTrendChart> {
 
   @override
   Widget build(BuildContext context) {
+    String displayQuery = widget.searchQuery.isEmpty ? "Overall Market" : widget.searchQuery;
+
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+      decoration: BoxDecoration(
+        color: Colors.white, 
+        borderRadius: BorderRadius.circular(16), 
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 15, offset: Offset(0, 5))],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -24,7 +32,7 @@ class _MarketTrendChartState extends State<MarketTrendChart> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("📈 SEARCH TREND (\"${widget.searchQuery}\")", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 1.1)),
+              Text("📈 SEARCH TREND (\"$displayQuery\")", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 1.1)),
               Row(
                 children: [
                   _buildTimeToggle("7D"), _buildTimeToggle("30D"),
@@ -38,23 +46,61 @@ class _MarketTrendChartState extends State<MarketTrendChart> {
           // --- LEGEND ---
           Row(
             children: [
-              Container(width: 10, height: 10, decoration: const BoxDecoration(color: Color(0xFF8FFF00), shape: BoxShape.circle)),
+              Container(width: 10, height: 10, decoration: const BoxDecoration(color: Color(0xFF8FFF00), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Color(0xFF8FFF00), blurRadius: 4)])),
               const SizedBox(width: 5),
               const Text("Sales Vol", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
               const SizedBox(width: 15),
-              Container(width: 10, height: 10, decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle)),
+              Container(width: 10, height: 10, decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.blue, blurRadius: 4)])),
               const SizedBox(width: 5),
               const Text("Avg Price", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
             ],
           ),
           
-          const SizedBox(height: 15),
+          const SizedBox(height: 25),
           
-          // --- THE DUAL-LINE CHART CANVAS ---
+          // --- THE UPGRADED INTERACTIVE CHART ENGINE ---
           Expanded(
-            child: CustomPaint(
-              size: const Size(double.infinity, double.infinity),
-              painter: _ProTrendLinePainter(), // Draws the upgraded chart!
+            child: LineChart(
+              LineChartData(
+                // Grid styling
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.shade100, strokeWidth: 1, dashArray: [5, 5])
+                ),
+                // Hide default numbers around the chart
+                titlesData: const FlTitlesData(show: false),
+                borderData: FlBorderData(show: false),
+                // ✨ Enables the hover tooltips!
+                lineTouchData: const LineTouchData(handleBuiltInTouches: true), 
+                
+                lineBarsData: [
+                  // 🟢 The Sales Line (Neon Green)
+                  LineChartBarData(
+                    spots: _getSalesData(),
+                    isCurved: true,
+                    color: const Color(0xFF8FFF00),
+                    barWidth: 4,
+                    isStrokeCapRound: true,
+                    dotData: const FlDotData(show: false),
+                    // Adds the beautiful glowing fade underneath the line
+                    belowBarData: BarAreaData(show: true, color: const Color(0xFF8FFF00).withOpacity(0.15)), 
+                  ),
+                  
+                  // 🔵 The Average Price Line (Blue)
+                  LineChartBarData(
+                    spots: _getPriceData(),
+                    isCurved: true,
+                    color: Colors.blue,
+                    barWidth: 3,
+                    isStrokeCapRound: true,
+                    dotData: const FlDotData(show: false),
+                  ),
+                ],
+              ),
+              // ✨ Smooth animation when you click the 7D/30D buttons!
+              duration: const Duration(milliseconds: 350), 
+              curve: Curves.easeInOut,
             ),
           )
         ],
@@ -62,6 +108,25 @@ class _MarketTrendChartState extends State<MarketTrendChart> {
     );
   }
 
+  // ✨ DYNAMIC DATA GENERATORS ✨
+  // These change the shape of the graph when you click the time buttons!
+  List<FlSpot> _getSalesData() {
+    if (_selectedTime == "7D") return const [FlSpot(0, 1), FlSpot(1, 2.5), FlSpot(2, 2.0), FlSpot(3, 4), FlSpot(4, 5)];
+    if (_selectedTime == "90D") return const [FlSpot(0, 3), FlSpot(1, 4), FlSpot(2, 1.5), FlSpot(3, 5), FlSpot(4, 7)];
+    if (_selectedTime == "1Y") return const [FlSpot(0, 1), FlSpot(1, 2), FlSpot(2, 5), FlSpot(3, 3), FlSpot(4, 6)];
+    // Default 30D (Similar to your original custom paint curve)
+    return const [FlSpot(0, 2), FlSpot(1, 2.5), FlSpot(2, 4), FlSpot(3, 3.5), FlSpot(4, 5), FlSpot(5, 4.5), FlSpot(6, 6)]; 
+  }
+
+  List<FlSpot> _getPriceData() {
+    if (_selectedTime == "7D") return const [FlSpot(0, 3.5), FlSpot(1, 3.2), FlSpot(2, 3.4), FlSpot(3, 3.1), FlSpot(4, 3.0)];
+    if (_selectedTime == "90D") return const [FlSpot(0, 2.5), FlSpot(1, 2.8), FlSpot(2, 3.0), FlSpot(3, 2.9), FlSpot(4, 3.2)];
+    if (_selectedTime == "1Y") return const [FlSpot(0, 4.0), FlSpot(1, 3.5), FlSpot(2, 3.2), FlSpot(3, 3.6), FlSpot(4, 3.1)];
+    // Default 30D
+    return const [FlSpot(0, 3), FlSpot(1, 2.8), FlSpot(2, 3.2), FlSpot(3, 3.1), FlSpot(4, 2.9), FlSpot(5, 3.3), FlSpot(6, 3.5)]; 
+  }
+
+  // --- YOUR ORIGINAL BUTTON UI ---
   Widget _buildTimeToggle(String label) {
     bool isActive = _selectedTime == label;
     return InkWell(
@@ -78,63 +143,4 @@ class _MarketTrendChartState extends State<MarketTrendChart> {
       ),
     );
   }
-}
-
-// ✨ THE UPGRADED CHART PAINTER ✨
-class _ProTrendLinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 1. Grid Lines
-    final gridPaint = Paint()..color = Colors.grey.shade100..strokeWidth = 1;
-    canvas.drawLine(Offset(0, size.height * 0.33), Offset(size.width, size.height * 0.33), gridPaint);
-    canvas.drawLine(Offset(0, size.height * 0.66), Offset(size.width, size.height * 0.66), gridPaint);
-    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), gridPaint);
-
-    // 2. The Seasonality Flag (Vertical Line)
-    final flagPaint = Paint()..color = Colors.orange.shade200..strokeWidth = 2;
-    double flagX = size.width * 0.75; 
-    canvas.drawLine(Offset(flagX, 0), Offset(flagX, size.height), flagPaint);
-    
-    // 3. The Sales Line (Neon Green)
-    final salesLine = Paint()..color = const Color(0xFF8FFF00)..strokeWidth = 4..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
-    final salesFill = Paint()..color = const Color(0xFF8FFF00).withAlpha(30)..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, size.height * 0.8);
-    path.quadraticBezierTo(size.width * 0.2, size.height * 0.9, size.width * 0.35, size.height * 0.5); 
-    path.quadraticBezierTo(size.width * 0.45, size.height * 0.2, size.width * 0.6, size.height * 0.6); // Dip
-    path.quadraticBezierTo(size.width * 0.75, size.height * 0.1, size.width * 0.85, size.height * 0.3); // Peak near flag
-    path.quadraticBezierTo(size.width * 0.95, size.height * 0.4, size.width, size.height * 0.2); 
-
-    final fillPath = Path.from(path);
-    fillPath.lineTo(size.width, size.height);
-    fillPath.lineTo(0, size.height);
-    fillPath.close();
-    
-    canvas.drawPath(fillPath, salesFill);
-    canvas.drawPath(path, salesLine);
-
-    // 4. The Average Price Line (Blue)
-    final priceLine = Paint()..color = Colors.blue.withAlpha(150)..strokeWidth = 2..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
-    final pricePath = Path();
-    pricePath.moveTo(0, size.height * 0.4);
-    pricePath.quadraticBezierTo(size.width * 0.3, size.height * 0.45, size.width * 0.5, size.height * 0.6); // Price drops
-    pricePath.quadraticBezierTo(size.width * 0.7, size.height * 0.8, size.width, size.height * 0.85); // Price bottoms out
-    canvas.drawPath(pricePath, priceLine);
-
-    // 5. Data Dots (Peak and Valley)
-    final dotPaint = Paint()..color = Colors.black..style = PaintingStyle.fill;
-    final glowPaint = Paint()..color = const Color(0xFF8FFF00)..style = PaintingStyle.fill;
-    
-    // Peak Dot
-    canvas.drawCircle(Offset(size.width * 0.72, size.height * 0.17), 6, glowPaint);
-    canvas.drawCircle(Offset(size.width * 0.72, size.height * 0.17), 3, dotPaint);
-
-    // Valley Dot
-    canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.88), 6, Paint()..color = Colors.redAccent);
-    canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.88), 3, dotPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
