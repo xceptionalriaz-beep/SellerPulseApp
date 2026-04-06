@@ -55,6 +55,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     super.dispose();
   }
 
+  // ✨ THE FULLY UPGRADED LIVE ENGINE
   Future<void> _fetchLiveData(String query) async {
     if (query.isEmpty) return;
     
@@ -64,28 +65,57 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
 
     try {
-      final response = await Supabase.instance.client
+      // 1. Fetch your IDs from your Supabase API Vault
+      final configResponse = await Supabase.instance.client
           .from('api_fleet_config')
-          .select('api_key')
-          .limit(1)
+          .select('primary_key_1, primary_key_2') 
+          .eq('platform_name', 'ebay')
           .single();
 
-      final String ebayKey = response['api_key'];
+      final String appId = configResponse['primary_key_1'];
+      final String certId = configResponse['primary_key_2'];
 
-      // ✨ PAGE LOGIC ADDED HERE: Calculates how many items to skip based on _currentPage
-      int offset = (_currentPage - 1) * 25;
-      final String apiUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
-
-      final ebayResponse = await http.get(
-        Uri.parse(apiUrl),
+      // 2. EXCHANGE IDs FOR A TEMPORARY OAUTH TOKEN (The "Keycard")
+      final String credentials = base64Encode(utf8.encode('$appId:$certId'));
+      
+      // Using corsproxy.io so Chrome/Vercel doesn't block the request!
+      final tokenUrl = 'https://corsproxy.io/?' + Uri.encodeComponent('https://api.ebay.com/identity/v1/oauth2/token');
+      
+      final tokenResponse = await http.post(
+        Uri.parse(tokenUrl),
         headers: {
-          'Authorization': 'Bearer $ebayKey',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic $credentials',
+        },
+        body: {
+          'grant_type': 'client_credentials', 
+          'scope': 'https://api.ebay.com/oauth/api_scope'
+        },
+      );
+
+      if (tokenResponse.statusCode != 200) {
+        print("❌ Token Error: ${tokenResponse.body}");
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final String accessToken = json.decode(tokenResponse.body)['access_token'];
+
+      // 3. PERFORM THE ACTUAL EBAY SEARCH WITH THE NEW TOKEN
+      int offset = (_currentPage - 1) * 25;
+      final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
+      final String searchUrl = 'https://corsproxy.io/?' + Uri.encodeComponent(targetUrl);
+
+      final searchResponse = await http.get(
+        Uri.parse(searchUrl),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
       );
 
-      if (ebayResponse.statusCode == 200) {
-        final data = json.decode(ebayResponse.body);
+      if (searchResponse.statusCode == 200) {
+        final data = json.decode(searchResponse.body);
         final List itemSummaries = data['itemSummaries'] ?? [];
 
         setState(() {
@@ -105,7 +135,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
           _isLoading = false;
         });
       } else {
-        print("❌ eBay API Error: ${ebayResponse.statusCode} - ${ebayResponse.body}");
+        print("❌ eBay API Error: ${searchResponse.statusCode} - ${searchResponse.body}");
         setState(() => _isLoading = false);
       }
 
