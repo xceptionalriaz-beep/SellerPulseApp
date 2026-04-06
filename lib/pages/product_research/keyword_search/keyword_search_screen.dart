@@ -78,7 +78,9 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
       // 2. OAUTH TOKEN
       final String credentials = base64Encode(utf8.encode('$appId:$certId'));
-      final tokenUrl = 'https://corsproxy.io/?' + Uri.encodeComponent('https://api.ebay.com/identity/v1/oauth2/token');
+      
+      // 🚀 FIX: Removed Uri.encodeComponent from the base URL so the proxy doesn't crash!
+      final tokenUrl = 'https://corsproxy.io/?https://api.ebay.com/identity/v1/oauth2/token';
       
       final tokenResponse = await http.post(
         Uri.parse(tokenUrl),
@@ -105,8 +107,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
       // 3. SEARCH EBAY
       int offset = (_currentPage - 1) * 25;
+      
+      // 🚀 FIX: Only encode the query word, not the entire website address!
       final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
-      final String searchUrl = 'https://corsproxy.io/?' + Uri.encodeComponent(targetUrl);
+      final String searchUrl = 'https://corsproxy.io/?$targetUrl';
 
       final searchResponse = await http.get(
         Uri.parse(searchUrl),
