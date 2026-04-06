@@ -55,7 +55,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     super.dispose();
   }
 
-  // ✨ THE DUAL-PROXY LIVE ENGINE
+  // ✨ THE ULTIMATE PROXY ENGINE
   Future<void> _fetchLiveData(String query) async {
     if (query.isEmpty) return;
     
@@ -66,7 +66,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
 
     try {
-      // 1. Fetch Keys
+      // 1. Fetch Keys from Supabase
       final configResponse = await Supabase.instance.client
           .from('api_fleet_config')
           .select('primary_key_1, primary_key_2') 
@@ -76,27 +76,37 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       final String appId = configResponse['primary_key_1'];
       final String certId = configResponse['primary_key_2'];
 
-      // 2. OAUTH TOKEN (With Clean URL)
+      // 2. OAUTH TOKEN (Using clean corsproxy for POST)
       final String credentials = base64Encode(utf8.encode('$appId:$certId'));
       
-      // 🚀 Clean URL without scrambling!
       String tokenUrl = 'https://corsproxy.io/?https://api.ebay.com/identity/v1/oauth2/token';
-      
       http.Response tokenResponse;
       
       try {
         tokenResponse = await http.post(
           Uri.parse(tokenUrl),
-          headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Basic $credentials'},
-          body: {'grant_type': 'client_credentials', 'scope': 'https://api.ebay.com/oauth/api_scope'},
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded', 
+            'Authorization': 'Basic $credentials'
+          },
+          body: {
+            'grant_type': 'client_credentials', 
+            'scope': 'https://api.ebay.com/oauth/api_scope'
+          },
         );
       } catch (e) {
-        // 🚀 BACKUP PROXY: If corsproxy.io crashes, we use codetabs!
+        // Backup proxy if the first one fails
         tokenUrl = 'https://api.codetabs.com/v1/proxy?quest=https://api.ebay.com/identity/v1/oauth2/token';
         tokenResponse = await http.post(
           Uri.parse(tokenUrl),
-          headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Basic $credentials'},
-          body: {'grant_type': 'client_credentials', 'scope': 'https://api.ebay.com/oauth/api_scope'},
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded', 
+            'Authorization': 'Basic $credentials'
+          },
+          body: {
+            'grant_type': 'client_credentials', 
+            'scope': 'https://api.ebay.com/oauth/api_scope'
+          },
         );
       }
 
@@ -110,20 +120,32 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
       final String accessToken = json.decode(tokenResponse.body)['access_token'];
 
-      // 3. SEARCH EBAY
+      // 3. SEARCH EBAY (Using allorigins for reliable GET)
       int offset = (_currentPage - 1) * 25;
       final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
       
-      // 🚀 Clean search URL
-      String searchUrl = 'https://corsproxy.io/?$targetUrl';
+      // 🚀 THE MAGIC FIX: allorigins is specifically designed to bypass strict browser blocks
+      String searchUrl = 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(targetUrl)}';
       http.Response searchResponse;
 
       try {
-        searchResponse = await http.get(Uri.parse(searchUrl), headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'});
+        searchResponse = await http.get(
+          Uri.parse(searchUrl), 
+          headers: {
+            'Authorization': 'Bearer $accessToken', 
+            'Content-Type': 'application/json'
+          }
+        );
       } catch (e) {
-        // 🚀 BACKUP PROXY
-        searchUrl = 'https://api.codetabs.com/v1/proxy?quest=$targetUrl';
-        searchResponse = await http.get(Uri.parse(searchUrl), headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'});
+        // Backup proxy
+        searchUrl = 'https://corsproxy.io/?$targetUrl';
+        searchResponse = await http.get(
+          Uri.parse(searchUrl), 
+          headers: {
+            'Authorization': 'Bearer $accessToken', 
+            'Content-Type': 'application/json'
+          }
+        );
       }
 
       if (searchResponse.statusCode == 200) {
@@ -150,7 +172,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
     } catch (e) {
       setState(() {
-        _errorMessage = "🚨 Connection Crash: $e";
+        _errorMessage = "🚨 Connection Crash: $e\n(If testing locally, run Chrome with web-security disabled)";
         _isLoading = false;
       });
     }
