@@ -36,7 +36,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   bool _isLoading = false;
   List<dynamic> _liveProducts = [];
   
-  // ✨ NEW: THE ERROR TRACKER
   String _errorMessage = "";
 
   @override
@@ -62,11 +61,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     setState(() {
       _isLoading = true;
       _liveProducts.clear(); 
-      _errorMessage = ""; // Clear old errors
+      _errorMessage = ""; 
     });
 
     try {
-      // 1. Fetch Keys
       final configResponse = await Supabase.instance.client
           .from('api_fleet_config')
           .select('primary_key_1, primary_key_2') 
@@ -76,11 +74,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       final String appId = configResponse['primary_key_1'];
       final String certId = configResponse['primary_key_2'];
 
-      // 2. OAUTH TOKEN
       final String credentials = base64Encode(utf8.encode('$appId:$certId'));
       
-      // 🚀 FIX: Removed Uri.encodeComponent from the base URL so the proxy doesn't crash!
-      final tokenUrl = 'https://corsproxy.io/?https://api.ebay.com/identity/v1/oauth2/token';
+      // 🚀 FIX: Swapped to a new, reliable backup proxy server!
+      final tokenUrl = 'https://thingproxy.freeboard.io/fetch/https://api.ebay.com/identity/v1/oauth2/token';
       
       final tokenResponse = await http.post(
         Uri.parse(tokenUrl),
@@ -94,7 +91,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         },
       );
 
-      // ✨ Catch Token Errors Visually!
       if (tokenResponse.statusCode != 200) {
         setState(() {
           _errorMessage = "🚨 eBay Token Denied: ${tokenResponse.statusCode}\nDetails: ${tokenResponse.body}";
@@ -105,12 +101,11 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
       final String accessToken = json.decode(tokenResponse.body)['access_token'];
 
-      // 3. SEARCH EBAY
       int offset = (_currentPage - 1) * 25;
       
-      // 🚀 FIX: Only encode the query word, not the entire website address!
       final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
-      final String searchUrl = 'https://corsproxy.io/?$targetUrl';
+      // 🚀 FIX: Using the new proxy for the search request as well!
+      final String searchUrl = 'https://thingproxy.freeboard.io/fetch/$targetUrl';
 
       final searchResponse = await http.get(
         Uri.parse(searchUrl),
@@ -136,7 +131,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
           _isLoading = false;
         });
       } else {
-        // ✨ Catch Search Errors Visually!
         setState(() {
           _errorMessage = "🚨 eBay Search Failed: ${searchResponse.statusCode}\nDetails: ${searchResponse.body}";
           _isLoading = false;
@@ -144,7 +138,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       }
 
     } catch (e) {
-      // ✨ Catch Supabase/Proxy Errors Visually!
       setState(() {
         _errorMessage = "🚨 Connection Crash: $e";
         _isLoading = false;
@@ -327,7 +320,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     Expanded(
                       child: _isLoading 
                         ? const Center(child: CircularProgressIndicator(color: Color(0xFF8FFF00))) 
-                        // ✨ NEW: This displays the red error message if it exists!
                         : _errorMessage.isNotEmpty 
                             ? Center(child: Padding(padding: const EdgeInsets.all(20), child: Text(_errorMessage, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center)))
                             : _liveProducts.isEmpty 
