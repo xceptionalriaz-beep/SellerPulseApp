@@ -55,7 +55,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     super.dispose();
   }
 
-  // ✨ THE ULTIMATE PROXY ENGINE
+  // ✨ THE PRO BACKEND ENGINE
   Future<void> _fetchLiveData(String query) async {
     if (query.isEmpty) return;
     
@@ -66,113 +66,38 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
 
     try {
-      // 1. Fetch Keys from Supabase
-      final configResponse = await Supabase.instance.client
-          .from('api_fleet_config')
-          .select('primary_key_1, primary_key_2') 
-          .eq('platform_name', 'ebay')
-          .single();
+      // Look how clean this is! We just ask our secure Supabase Edge Function to do the work.
+      final response = await Supabase.instance.client.functions.invoke(
+        'ebay-search', // Matches your Edge Function name in Supabase
+        body: {'query': query, 'page': _currentPage},
+      );
 
-      final String appId = configResponse['primary_key_1'];
-      final String certId = configResponse['primary_key_2'];
-
-      // 2. OAUTH TOKEN (Using clean corsproxy for POST)
-      final String credentials = base64Encode(utf8.encode('$appId:$certId'));
+      final data = response.data;
       
-      String tokenUrl = 'https://corsproxy.io/?https://api.ebay.com/identity/v1/oauth2/token';
-      http.Response tokenResponse;
-      
-      try {
-        tokenResponse = await http.post(
-          Uri.parse(tokenUrl),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded', 
-            'Authorization': 'Basic $credentials'
-          },
-          body: {
-            'grant_type': 'client_credentials', 
-            'scope': 'https://api.ebay.com/oauth/api_scope'
-          },
-        );
-      } catch (e) {
-        // Backup proxy if the first one fails
-        tokenUrl = 'https://api.codetabs.com/v1/proxy?quest=https://api.ebay.com/identity/v1/oauth2/token';
-        tokenResponse = await http.post(
-          Uri.parse(tokenUrl),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded', 
-            'Authorization': 'Basic $credentials'
-          },
-          body: {
-            'grant_type': 'client_credentials', 
-            'scope': 'https://api.ebay.com/oauth/api_scope'
-          },
-        );
+      // If the backend sends an error, display it!
+      if (data != null && data is Map && data['error'] != null) {
+        throw Exception(data['error']);
       }
 
-      if (tokenResponse.statusCode != 200) {
-        setState(() {
-          _errorMessage = "🚨 eBay Token Denied: ${tokenResponse.statusCode}\nDetails: ${tokenResponse.body}";
-          _isLoading = false;
-        });
-        return;
-      }
+      final List itemSummaries = data['itemSummaries'] ?? [];
 
-      final String accessToken = json.decode(tokenResponse.body)['access_token'];
-
-      // 3. SEARCH EBAY (Using allorigins for reliable GET)
-      int offset = (_currentPage - 1) * 25;
-      final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
-      
-      // 🚀 THE MAGIC FIX: allorigins is specifically designed to bypass strict browser blocks
-      String searchUrl = 'https://api.allorigins.win/raw?url=${Uri.encodeComponent(targetUrl)}';
-      http.Response searchResponse;
-
-      try {
-        searchResponse = await http.get(
-          Uri.parse(searchUrl), 
-          headers: {
-            'Authorization': 'Bearer $accessToken', 
-            'Content-Type': 'application/json'
-          }
-        );
-      } catch (e) {
-        // Backup proxy
-        searchUrl = 'https://corsproxy.io/?$targetUrl';
-        searchResponse = await http.get(
-          Uri.parse(searchUrl), 
-          headers: {
-            'Authorization': 'Bearer $accessToken', 
-            'Content-Type': 'application/json'
-          }
-        );
-      }
-
-      if (searchResponse.statusCode == 200) {
-        final data = json.decode(searchResponse.body);
-        final List itemSummaries = data['itemSummaries'] ?? [];
-
-        setState(() {
-          _liveProducts = itemSummaries.map((item) {
-            return {
-              "title": item['title'] ?? 'Unknown Product',
-              "image": item['image']?['imageUrl'] ?? 'https://via.placeholder.com/150',
-              "sales": "\$${item['price']?['value'] ?? '0.00'}", 
-              "itemWebUrl": item['itemWebUrl'] 
-            };
-          }).toList();
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _errorMessage = "🚨 eBay Search Failed: ${searchResponse.statusCode}\nDetails: ${searchResponse.body}";
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _liveProducts = itemSummaries.map((item) {
+          final priceData = item['price'];
+          final imageData = item['image'];
+          return {
+            "title": item['title'] ?? 'Unknown Product',
+            "image": imageData != null ? imageData['imageUrl'] : 'https://via.placeholder.com/150',
+            "sales": "\$${priceData != null ? priceData['value'] : '0.00'}", 
+            "itemWebUrl": item['itemWebUrl'] 
+          };
+        }).toList();
+        _isLoading = false;
+      });
 
     } catch (e) {
       setState(() {
-        _errorMessage = "🚨 Connection Crash: $e\n(If testing locally, run Chrome with web-security disabled)";
+        _errorMessage = "🚨 Backend Crash: $e";
         _isLoading = false;
       });
     }
@@ -366,7 +291,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                                       title: item["title"] ?? "Unknown Product", 
                                       veroWord: null,
                                       flag: "🇺🇸", score: "🔥 99", sales: item["sales"] ?? "0", 
-                                      returns: "🟢 2% (Safe)", risk: "🛡️ Safe", margin: "🟢 40%", 
+                                      returns: "🟢 2%", risk: "🛡️ Safe", margin: "🟢 40%", 
                                       actionColor: Colors.orange, actionLabel: "Amz",
                                       isSelected: _selectAll,
                                     );
