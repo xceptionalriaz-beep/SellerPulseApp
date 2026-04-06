@@ -55,6 +55,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     super.dispose();
   }
 
+  // ✨ THE DUAL-PROXY LIVE ENGINE
   Future<void> _fetchLiveData(String query) async {
     if (query.isEmpty) return;
     
@@ -65,6 +66,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
 
     try {
+      // 1. Fetch Keys
       final configResponse = await Supabase.instance.client
           .from('api_fleet_config')
           .select('primary_key_1, primary_key_2') 
@@ -74,22 +76,29 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       final String appId = configResponse['primary_key_1'];
       final String certId = configResponse['primary_key_2'];
 
+      // 2. OAUTH TOKEN (With Clean URL)
       final String credentials = base64Encode(utf8.encode('$appId:$certId'));
       
-      // 🚀 FIX: Swapped to a new, reliable backup proxy server!
-      final tokenUrl = 'https://thingproxy.freeboard.io/fetch/https://api.ebay.com/identity/v1/oauth2/token';
+      // 🚀 Clean URL without scrambling!
+      String tokenUrl = 'https://corsproxy.io/?https://api.ebay.com/identity/v1/oauth2/token';
       
-      final tokenResponse = await http.post(
-        Uri.parse(tokenUrl),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic $credentials',
-        },
-        body: {
-          'grant_type': 'client_credentials', 
-          'scope': 'https://api.ebay.com/oauth/api_scope'
-        },
-      );
+      http.Response tokenResponse;
+      
+      try {
+        tokenResponse = await http.post(
+          Uri.parse(tokenUrl),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Basic $credentials'},
+          body: {'grant_type': 'client_credentials', 'scope': 'https://api.ebay.com/oauth/api_scope'},
+        );
+      } catch (e) {
+        // 🚀 BACKUP PROXY: If corsproxy.io crashes, we use codetabs!
+        tokenUrl = 'https://api.codetabs.com/v1/proxy?quest=https://api.ebay.com/identity/v1/oauth2/token';
+        tokenResponse = await http.post(
+          Uri.parse(tokenUrl),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Basic $credentials'},
+          body: {'grant_type': 'client_credentials', 'scope': 'https://api.ebay.com/oauth/api_scope'},
+        );
+      }
 
       if (tokenResponse.statusCode != 200) {
         setState(() {
@@ -101,19 +110,21 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
       final String accessToken = json.decode(tokenResponse.body)['access_token'];
 
+      // 3. SEARCH EBAY
       int offset = (_currentPage - 1) * 25;
-      
       final String targetUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?q=${Uri.encodeComponent(query)}&limit=25&offset=$offset';
-      // 🚀 FIX: Using the new proxy for the search request as well!
-      final String searchUrl = 'https://thingproxy.freeboard.io/fetch/$targetUrl';
+      
+      // 🚀 Clean search URL
+      String searchUrl = 'https://corsproxy.io/?$targetUrl';
+      http.Response searchResponse;
 
-      final searchResponse = await http.get(
-        Uri.parse(searchUrl),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-      );
+      try {
+        searchResponse = await http.get(Uri.parse(searchUrl), headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'});
+      } catch (e) {
+        // 🚀 BACKUP PROXY
+        searchUrl = 'https://api.codetabs.com/v1/proxy?quest=$targetUrl';
+        searchResponse = await http.get(Uri.parse(searchUrl), headers: {'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json'});
+      }
 
       if (searchResponse.statusCode == 200) {
         final data = json.decode(searchResponse.body);
