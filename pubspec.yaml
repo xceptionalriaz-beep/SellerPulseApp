@@ -26,6 +26,7 @@ dependencies:
   # --- UTILITIES ---
   file_picker: ^10.3.10
   desktop_drop: ^0.7.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

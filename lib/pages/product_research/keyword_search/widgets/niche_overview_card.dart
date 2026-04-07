@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 
 class NicheOverviewCard extends StatelessWidget {
-  const NicheOverviewCard({super.key});
+  // ✨ These slots will now receive real data from your Search Screen
+  final String marketVol;
+  final String avgPrice;
+  final String successRate;
+  final String totalActive;
+  final Color successColor;
+
+  const NicheOverviewCard({
+    super.key,
+    this.marketVol = "\$0",
+    this.avgPrice = "\$0",
+    this.successRate = "0%",
+    this.totalActive = "0",
+    this.successColor = Colors.grey,
+  });
 
   Widget _buildNicheStatRow(IconData icon, String label, String value, {Color? valueColor}) {
     return Row(
@@ -34,10 +48,11 @@ class NicheOverviewCard extends StatelessWidget {
         children: [
           const Text("📊 NICHE OVERVIEW", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 1.1)),
           const SizedBox(height: 10),
-          _buildNicheStatRow(Icons.monetization_on_outlined, "Market Vol:", "\$142,500"),
-          _buildNicheStatRow(Icons.sell_outlined, "Avg Price:", "\$16.50"),
-          _buildNicheStatRow(Icons.track_changes, "Success Rate:", "64% (High)", valueColor: Colors.green),
-          _buildNicheStatRow(Icons.inventory_2_outlined, "Total Active:", "140,000+ listings"),
+          // ✨ Now using the dynamic variables instead of static text
+          _buildNicheStatRow(Icons.monetization_on_outlined, "Market Vol:", marketVol),
+          _buildNicheStatRow(Icons.sell_outlined, "Avg Price:", avgPrice),
+          _buildNicheStatRow(Icons.track_changes, "Success Rate:", successRate, valueColor: successColor),
+          _buildNicheStatRow(Icons.inventory_2_outlined, "Total Active:", totalActive),
         ],
       ),
     );
