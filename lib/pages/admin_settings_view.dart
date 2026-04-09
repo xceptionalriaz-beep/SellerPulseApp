@@ -10,7 +10,9 @@ import 'admin_settings_tabs/plan_limits_tab.dart';
 import 'admin_settings_tabs/email_automations_tab.dart';
 import 'admin_settings_tabs/webhooks_tab.dart';
 import 'admin_settings_tabs/gamification_tab.dart';
-import 'admin_settings_tabs/global_api_fleet_tab.dart'; // 🚀 NEW: The API Tab Import
+import 'admin_settings_tabs/global_api_fleet_tab.dart';
+import 'admin_settings_tabs/affiliate_vault_tab.dart';
+import 'admin_settings_tabs/founder_ops_tab.dart';
 
 class AdminSettingsView extends StatefulWidget {
   final bool isMobile;
@@ -39,7 +41,9 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
     {"title": "Emails", "icon": Icons.email_outlined},
     {"title": "Webhooks", "icon": Icons.webhook},
     {"title": "Gamification", "icon": Icons.sports_esports_outlined},
-    {"title": "API Fleet", "icon": Icons.vpn_key_outlined}, // 🚀 NEW: The API Button
+    {"title": "API Fleet", "icon": Icons.vpn_key_outlined},
+    {"title": "Affiliate Vault", "icon": Icons.monetization_on_outlined},
+    {"title": "Founder Ops", "icon": Icons.insights_rounded}, // 🧠 NEW
   ];
 
   @override
@@ -210,7 +214,9 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
       case 6: return const EmailAutomationsTab(key: ValueKey("emails"));
       case 7: return const WebhooksTab(key: ValueKey("hooks"));
       case 8: return const GamificationTab(key: ValueKey("game"));
-      case 9: return const GlobalApiFleetTab(key: ValueKey("api")); // 🚀 NEW: The API Route
+      case 9: return const GlobalApiFleetTab(key: ValueKey("api"));
+      case 10: return const AffiliateVaultTab(key: ValueKey("affiliate"));
+      case 11: return const FounderOpsTab(key: ValueKey("founder_ops"));
       default: return _buildPlaceholder("Module Active");
     }
   }

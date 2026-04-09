@@ -25,6 +25,9 @@ import 'admin_settings_tabs/webhooks_tab.dart';
 import 'admin_settings_tabs/gamification_tab.dart';
 // 🚀 NEW: We use "as vault" so it doesn't conflict with the Dashboard tab!
 import 'admin_settings_tabs/global_api_fleet_tab.dart' as vault; 
+// 💰 NEW: Import the Affiliate Vault settings tab!
+import 'admin_settings_tabs/affiliate_vault_tab.dart';
+import 'admin_settings_tabs/founder_ops_tab.dart'; // 🧠 NEW: Founder Operations
 
 class AdminManagementPage extends StatefulWidget {
   const AdminManagementPage({super.key});
@@ -306,7 +309,8 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
               _buildPillTab("Emails", Icons.email_outlined, 6, isSettings: true),
               _buildPillTab("Webhooks", Icons.webhook, 7, isSettings: true),
               _buildPillTab("Gamification", Icons.sports_esports_outlined, 8, isSettings: true),
-              _buildPillTab("API Vault", Icons.vpn_key_outlined, 9, isSettings: true), // 🚀 NEW
+              _buildPillTab("API Vault", Icons.vpn_key_outlined, 9, isSettings: true),
+              _buildPillTab("Affiliate Vault", Icons.monetization_on_outlined, 10, isSettings: true), 
             ],
           ),
           const SizedBox(height: 24),
@@ -341,7 +345,9 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
               _buildSidebarItem("Emails", Icons.email_outlined, 6),
               _buildSidebarItem("Webhooks", Icons.webhook, 7),
               _buildSidebarItem("Gamification", Icons.sports_esports_outlined, 8),
-              _buildSidebarItem("API Vault", Icons.vpn_key_outlined, 9), // 🚀 NEW
+              _buildSidebarItem("API Vault", Icons.vpn_key_outlined, 9), 
+              _buildSidebarItem("Affiliate Vault", Icons.monetization_on_outlined, 10),
+              _buildSidebarItem("Founder Ops", Icons.insights_rounded, 11), // 🚀 Index 11 
             ],
           ),
         ),
@@ -380,8 +386,9 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
       case 6: return const EmailAutomationsTab(key: ValueKey("emails"));
       case 7: return const WebhooksTab(key: ValueKey("webhooks"));
       case 8: return const GamificationTab(key: ValueKey("gamification"));
-      // 🚀 NEW: Connects to the vault using our special alias
       case 9: return const vault.GlobalApiFleetTab(key: ValueKey("api_vault")); 
+      case 10: return const AffiliateVaultTab(key: ValueKey("affiliate_vault_settings")); 
+      case 11: return const FounderOpsTab(key: ValueKey("founder_ops")); // 🧠 NEW
       default: return _buildPlaceholder("Settings Module Active");
     }
   }

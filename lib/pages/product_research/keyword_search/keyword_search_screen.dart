@@ -1,8 +1,8 @@
+import 'package:fl_chart/fl_chart.dart'; 
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; 
-import 'package:intl/intl.dart'; // ✨ NEW: For formatting perfect money/numbers!
 
 import '../../../widgets/market_trend_chart.dart'; 
+import '../../../../core/services/market_brain_service.dart'; // ✨ IMPORT YOUR NEW BRAIN
 
 import '../shared/neon_icon.dart';
 import '../shared/universal_scan_button.dart';
@@ -36,12 +36,15 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   List<dynamic> _liveProducts = [];
   String _errorMessage = "";
 
-  // ✨ NEW: State variables for the Niche Overview Card
+  // State variables for the Niche Overview Card
   String _nicheMarketVol = "\$0";
   String _nicheAvgPrice = "\$0.00";
   String _nicheSuccessRate = "0%";
   String _nicheTotalActive = "0";
   Color _nicheSuccessColor = Colors.grey;
+  double _nicheSaturationScore = 0.0;
+  String _nicheAdInsight = "Analyzing competition...";
+  List<FlSpot> _historicalSalesData = [];
 
   @override
   void initState() {
@@ -60,86 +63,38 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     super.dispose();
   }
 
-  // ✨ THE PRO BACKEND ENGINE WITH 100% ACCURATE MATH
+  // ✨ THE NEW, CLEAN DATA FETCHER
   Future<void> _fetchLiveData(String query) async {
     if (query.isEmpty) return;
     
     setState(() {
       _isLoading = true;
       _liveProducts.clear(); 
+      _historicalSalesData.clear(); 
       _errorMessage = ""; 
     });
 
     try {
-      final response = await Supabase.instance.client.functions.invoke(
-        'ebay-search', 
-        body: {'query': query, 'page': _currentPage},
-      );
+      // 1. Ask the Brain for the data
+      final result = await MarketBrainService.conductResearch(query, _currentPage);
 
-      final data = response.data;
-      
-      if (data != null && data is Map && data['error'] != null) {
-        throw Exception(data['error']);
-      }
-
-      final List itemSummaries = data['itemSummaries'] ?? [];
-      
-      // 🧠 1. Get the True Total from eBay
-      final int totalEbayListings = data['total'] ?? 0; 
-
-      // 🧠 2. Calculate the True Average Price
-      double totalPrice = 0.0;
-      int validPrices = 0;
-
-      for (var item in itemSummaries) {
-        final priceData = item['price'];
-        if (priceData != null && priceData['value'] != null) {
-          // Safely convert string price to decimal math number
-          double price = double.tryParse(priceData['value'].toString()) ?? 0.0;
-          totalPrice += price;
-          validPrices++;
-        }
-      }
-
-      double calculatedAvgPrice = validPrices > 0 ? (totalPrice / validPrices) : 0.0;
-      
-      // 🧠 3. Calculate Estimated Market Volume (Avg Price * Total Listings * 10% monthly sell-through proxy)
-      double calculatedMarketVol = calculatedAvgPrice * (totalEbayListings * 0.10);
-
-      // 🧠 4. Format the numbers beautifully
-      final moneyFormat = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-      final compactFormat = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
-      final numberFormat = NumberFormat.decimalPattern('en_US');
-
+      // 2. Display the data
       setState(() {
-        // Update the Niche Variables!
-        _nicheTotalActive = "${numberFormat.format(totalEbayListings)}+ listings";
-        _nicheAvgPrice = moneyFormat.format(calculatedAvgPrice);
-        _nicheMarketVol = compactFormat.format(calculatedMarketVol);
-        
-        // Mocking a dynamic success rate based on competition count for MVP
-        int successInt = totalEbayListings > 1000 ? 78 : (totalEbayListings > 100 ? 54 : 32);
-        _nicheSuccessRate = "$successInt% ${successInt > 60 ? '(High)' : '(Medium)'}";
-        _nicheSuccessColor = successInt > 60 ? Colors.green : Colors.orange;
-
-        // Populate the Product Table
-        _liveProducts = itemSummaries.map((item) {
-          final priceData = item['price'];
-          final imageData = item['image'];
-          return {
-            "title": item['title'] ?? 'Unknown Product',
-            "image": imageData != null ? imageData['imageUrl'] : 'https://via.placeholder.com/150',
-            "sales": "\$${priceData != null ? priceData['value'] : '0.00'}", 
-            "itemWebUrl": item['itemWebUrl'] 
-          };
-        }).toList();
-        
+        _nicheTotalActive = result.nicheTotalActive;
+        _nicheAvgPrice = result.nicheAvgPrice;
+        _nicheMarketVol = result.nicheMarketVol;
+        _nicheSuccessRate = result.nicheSuccessRate;
+        _nicheSuccessColor = result.nicheSuccessColor;
+        _nicheSaturationScore = result.nicheSaturationScore;
+        _nicheAdInsight = result.nicheAdInsight;
+        _historicalSalesData = result.historicalSalesData;
+        _liveProducts = result.liveProducts;
         _isLoading = false;
       });
 
     } catch (e) {
       setState(() {
-        _errorMessage = "🚨 Backend Crash: $e";
+        _errorMessage = "🚨 Backend Connection Issue: $e";
         _isLoading = false;
       });
     }
@@ -251,11 +206,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
           const SizedBox(height: 20),
 
           SizedBox(
-            height: 180, 
+            height: 280, 
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ✨ HERE IS THE MAGIC! Passing our calculated data into the card:
                 Expanded(
                   flex: 4, 
                   child: NicheOverviewCard(
@@ -264,10 +218,20 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     successRate: _nicheSuccessRate,
                     totalActive: _nicheTotalActive,
                     successColor: _nicheSuccessColor,
+                    saturationScore: _nicheSaturationScore, 
+                    adInsight: _nicheAdInsight,
                   )
                 ),
                 const SizedBox(width: 20),
-                Expanded(flex: 7, child: MarketTrendChart(searchQuery: widget.searchQuery)),
+                
+                Expanded(
+                  flex: 7, 
+                  child: MarketTrendChart(
+                    searchQuery: widget.searchQuery,
+                    liveData: _historicalSalesData, 
+                  )
+                ),
+                
               ],
             ),
           ),
