@@ -17,7 +17,8 @@
         "http",
         "intl",
         "provider",
-        "supabase_flutter"
+        "supabase_flutter",
+        "web"
       ],
       "devDependencies": [
         "flutter_lints",
@@ -48,6 +49,11 @@
         "test_api",
         "vector_math"
       ]
+    },
+    {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
     },
     {
       "name": "intl",
@@ -258,11 +264,6 @@
     {
       "name": "universal_platform",
       "version": "1.1.0",
-      "dependencies": []
-    },
-    {
-      "name": "web",
-      "version": "1.1.1",
       "dependencies": []
     },
     {

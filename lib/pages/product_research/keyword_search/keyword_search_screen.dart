@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:html' as html;
+import 'dart:js_interop'; 
+import 'package:web/web.dart' as web;
 import 'package:fl_chart/fl_chart.dart'; 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,9 +11,11 @@ import '../../../../core/services/market_brain_service.dart';
 import '../shared/neon_icon.dart';
 import '../shared/universal_scan_button.dart';
 import 'widgets/niche_overview_card.dart';
-import 'widgets/advanced_filters_modal.dart';
-// ✨ IMPORT THE NEW INTELLIGENCE ROW
 import 'widgets/intelligence_row.dart'; 
+
+// ✨ IMPORT THE NEW FILTER FILES
+import 'models/search_filters.dart';
+import 'widgets/filter_hub.dart';
 
 class KeywordSearchScreen extends StatefulWidget {
   final String searchQuery;
@@ -51,8 +54,12 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
   // ✨ BULK ACTION STATE TRACKERS
   bool _selectAll = false;
-  Set<String> _selectedItemIds = {}; // Remembers which rows are checked
-  Map<String, double> _itemProfits = {}; // Remembers the live profit of each row
+  Set<String> _selectedItemIds = {}; 
+  Map<String, double> _itemProfits = {}; 
+
+  // ✨ NEW: FILTER HUB STATE
+  bool _showFilters = true;
+  final SearchFilters _activeFilters = SearchFilters();
 
   // Math to calculate total potential profit
   double get _totalPotentialProfit {
@@ -88,12 +95,12 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       _liveProducts.clear(); 
       _historicalSalesData.clear(); 
       _errorMessage = ""; 
-      // Reset selections when page loads new data
       _selectedItemIds.clear(); 
       _selectAll = false;
     });
 
     try {
+      // Future upgrade: Pass _activeFilters into conductResearch here!
       final result = await MarketBrainService.conductResearch(query, _currentPage);
 
       setState(() {
@@ -131,7 +138,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     }
   }
 
-  // ✨ BULK SELECTION LOGIC
   void _toggleSelectAll(bool? val) {
     setState(() {
       _selectAll = val ?? false;
@@ -147,7 +153,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
   }
 
-  // ✨ ACTION: SAVE TO SUPABASE WATCHLIST (With Free Tier Logic Gate)
   Future<void> _saveToWatchlist() async {
     final supabase = Supabase.instance.client;
     final userId = supabase.auth.currentUser?.id;
@@ -160,18 +165,17 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. THE COUNT CHECK
       final countResponse = await supabase
           .from('user_watchlist')
           .select('id')
           .eq('user_id', userId)
           .count(CountOption.exact);
 
-      int currentSavedCount = countResponse.count ?? 0;
+      // ✨ Linting Bug Fixed: Safely assigning count directly
+      int currentSavedCount = countResponse.count;
       int itemsTryingToSave = _selectedItemIds.length;
 
-      // 2. THE LOGIC GATE (Change this to 2 to test the popup immediately!)
-      const int FREE_TIER_LIMIT = 2;
+      const int FREE_TIER_LIMIT = 50;
 
       if (currentSavedCount + itemsTryingToSave > FREE_TIER_LIMIT) {
         setState(() => _isLoading = false);
@@ -179,7 +183,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         return; 
       }
 
-      // 3. IF UNDER LIMIT, PROCEED TO SAVE
       final List<Map<String, dynamic>> itemsToSave = [];
 
       for (var id in _selectedItemIds) {
@@ -216,43 +219,74 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     }
   }
 
-  // ✨ ACTION: EXPORT TO CSV (Fixed MIME Type and Commas)
-  void _downloadCSV() {
-    // 1. Create Headers
+void _downloadCSV() {
+    // 1. Headers for a Professional Workflow
     List<List<String>> rows = [
-      ["Title", "eBay Price", "Est. Profit", "Item Link"]
+      [
+        "Product Title", 
+        "eBay Item ID",
+        "eBay Price", 
+        "Buy Cost", 
+        "Est. Net Profit", 
+        "Total Sold",
+        "Watchers",
+        "Category",
+        "eBay Link",
+        "Sourcing Link (Lens)"
+      ]
     ];
 
-    // 2. Add Selected Data
+    // 2. Map the data from your selected items
     for (var id in _selectedItemIds) {
-      final item = _liveProducts.firstWhere((p) => (p["itemId"] ?? p["itemWebUrl"] ?? p.toString()) == id, orElse: () => {});
+      final item = _liveProducts.firstWhere(
+        (p) => (p["itemId"] ?? p["itemWebUrl"] ?? p.toString()) == id, 
+        orElse: () => {}
+      );
+      
       if (item.isNotEmpty) {
+        String cleanTitle = (item["title"] ?? "Unknown").replaceAll('"', '""').replaceAll(',', ' ');
+        double ebayPrice = double.tryParse(item["sales"].toString().replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+        double profit = _itemProfits[id] ?? 0.0;
+        double buyCost = _itemProfits[id] != null ? (ebayPrice - profit - 5.00) : 0.0;
+        if (buyCost < 0) buyCost = 0.0;
+        
         rows.add([
-          item["title"]?.replaceAll(',', '') ?? "Unknown", // Remove commas to prevent breaking CSV layout
-          item["sales"] ?? "0",
-          "\$${_itemProfits[id]?.toStringAsFixed(2) ?? '0.00'}",
-          item["itemWebUrl"] ?? "No Link"
+          cleanTitle,
+          item["itemId"]?.toString() ?? "N/A",
+          item["sales"]?.toString() ?? "0",
+          "\$${buyCost.toStringAsFixed(2)}",
+          "\$${profit.toStringAsFixed(2)}",
+          item["totalSold"]?.toString() ?? "0",
+          item["watchCount"]?.toString() ?? "0",
+          item["category"]?.toString() ?? "N/A",
+          item["itemWebUrl"]?.toString() ?? "No Link",
+          "https://lens.google.com/uploadbyurl?url=${Uri.encodeComponent(item["image"] ?? '')}"
         ]);
       }
     }
 
-    // 3. Generate CSV String
+    // 3. Generate CSV String & Excel Fix
     String csvContent = rows.map((row) => row.map((field) => '"$field"').join(',')).join('\n');
+    final contentWithBOM = '\uFEFF$csvContent';
+    final bytes = utf8.encode(contentWithBOM);
     
-    // 4. ✨ FIX: Explicitly set MIME type to 'text/csv'
-    final bytes = utf8.encode(csvContent);
-    final blob = html.Blob([bytes], 'text/csv'); 
-    final url = html.Url.createObjectUrlFromBlob(blob);
+    // 4. ✨ MODERN WEB DOWNLOAD (Wasm Compatible)
+    // Uses js_interop (.toJS) to securely pass data to the browser
+    final blob = web.Blob([bytes.toJS].toJS, web.BlobPropertyBag(type: 'text/csv;charset=utf-8'));
+    final url = web.URL.createObjectURL(blob);
     
-    // 5. ✨ FIX: Ensure the extension is strictly .csv
-    final anchor = html.AnchorElement(href: url)
-      ..setAttribute("download", "SellerPulse_Export_${DateTime.now().millisecondsSinceEpoch}.csv")
-      ..click();
-      
-    html.Url.revokeObjectUrl(url);
+    // Create the anchor element the modern way
+    final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+    anchor.href = url;
+    anchor.download = "SellerPulse_Research_${DateTime.now().millisecondsSinceEpoch}.csv";
+    
+    // Trigger download
+    anchor.click();
+    
+    // Cleanup memory
+    web.URL.revokeObjectURL(url);
   }
 
-  // ✨ THE PAYWALL POPUP
   void _showUpgradeDialog(int currentCount, int limit) {
     showDialog(
       context: context,
@@ -357,7 +391,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                                   child: TextField(
                                     controller: _topSearchController,
                                     decoration: InputDecoration(
-                                      hintText: _searchTags.isEmpty ? "Type keyword & hit Enter..." : "Add more...",
+                                      hintText: _searchTags.isEmpty ? "Type keyword..." : "Add more...",
                                       hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
                                       border: InputBorder.none,
                                       isDense: true,
@@ -383,11 +417,14 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                     ),
                   ),
                   const SizedBox(width: 15),
-                  _buildTopButton(Icons.tune, "Advanced Filters", onTap: () {
-                    showDialog(context: context, builder: (BuildContext context) => const AdvancedFiltersModal());
+                  
+                  // ✨ CONNECTED ADVANCED FILTERS TOGGLE
+                  _buildTopButton(Icons.tune, "Advanced Filters", isHighlight: _showFilters, onTap: () {
+                    setState(() => _showFilters = !_showFilters);
                   }),
+                  
                   const SizedBox(width: 10),
-                  _buildTopButton(Icons.sort, "Sort: Opp Score 🔥", isHighlight: true, onTap: () {}),
+                  _buildTopButton(Icons.sort, "Sort: Opp Score 🔥", isHighlight: false, onTap: () {}),
                 ],
               ),
               const SizedBox(height: 20),
@@ -420,6 +457,23 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   ],
                 ),
               ),
+
+              // ✨ INJECTED THE ANIMATED FILTER HUB HERE
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+                child: _showFilters ? Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: FilterHub(
+                    filters: _activeFilters,
+                    onApply: () {
+                      setState(() => _showFilters = false); // Hide automatically after apply
+                      _fetchLiveData(_searchTags.join(', ')); // Refresh data
+                    },
+                  ),
+                ) : const SizedBox.shrink(),
+              ),
+
               const SizedBox(height: 25),
 
               SingleChildScrollView(
@@ -568,7 +622,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
           ),
         ),
 
-        // ✨ THE FLOATING BULK ACTION HUB ✨
+        // ✨ THE FLOATING BULK ACTION HUB
         AnimatedPositioned(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
@@ -601,7 +655,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   ),
                   const SizedBox(width: 25),
                   
-                  // ✨ BOUND TO SUPABASE SAVE
                   ElevatedButton.icon(
                     onPressed: _saveToWatchlist,
                     icon: const Icon(Icons.bookmark, color: Colors.black, size: 16),
@@ -610,7 +663,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                   ),
                   const SizedBox(width: 10),
                   
-                  // ✨ BOUND TO CSV EXPORT
                   OutlinedButton.icon(
                     onPressed: _downloadCSV,
                     icon: const Icon(Icons.download, color: Colors.white, size: 16),
@@ -653,7 +705,11 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     return OutlinedButton.icon(
       onPressed: onTap, icon: Icon(icon, size: 16, color: isHighlight ? Colors.black : const Color(0xFF64748B)), 
       label: Text(label, style: TextStyle(color: isHighlight ? Colors.black : const Color(0xFF64748B), fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal)),
-      style: OutlinedButton.styleFrom(backgroundColor: isHighlight ? const Color(0xFF8FFF00) : Colors.transparent, side: BorderSide(color: isHighlight ? const Color(0xFF8FFF00) : Colors.grey.shade300), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+      style: OutlinedButton.styleFrom(
+        backgroundColor: isHighlight ? const Color(0xFF8FFF00) : Colors.transparent, 
+        side: BorderSide(color: isHighlight ? const Color(0xFF8FFF00) : Colors.grey.shade300), 
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+      ),
     );
   }
 }
