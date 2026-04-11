@@ -9,6 +9,9 @@ class IntelligenceRow extends StatefulWidget {
   final bool isSelected;
   final ValueChanged<bool?> onSelect;
   final ValueChanged<double>? onProfitChanged;
+  
+  // ✨ NEW: Add a callback to trigger the deep-dive/pulse check
+  final VoidCallback? onPulseCheck; 
 
   final String imageUrl;
   final String title;
@@ -22,7 +25,7 @@ class IntelligenceRow extends StatefulWidget {
   // ✨ NEW: The direct link to the eBay listing
   final String? itemWebUrl; 
   
-  // ✨ DEMAND DATA - Kept in model, but removed from display
+  // ✨ DEMAND DATA
   final int totalSold;
   final String lastSoldDate; 
   final int watchCount;
@@ -39,6 +42,7 @@ class IntelligenceRow extends StatefulWidget {
     required this.isSelected, 
     required this.onSelect, 
     this.onProfitChanged, 
+    this.onPulseCheck, // 👈 Added
     required this.imageUrl, 
     required this.title, 
     required this.price,
@@ -47,7 +51,7 @@ class IntelligenceRow extends StatefulWidget {
     required this.itemLocationCountry,
     required this.sellerRegisteredCountry,
     required this.totalActiveListings,
-    this.itemWebUrl, 
+    this.itemWebUrl, // 👈 Added
     required this.totalSold, 
     required this.lastSoldDate, 
     required this.watchCount,
@@ -69,8 +73,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
 
   // --- INTELLIGENCE LOGIC ENGINES ---
   bool get _isLikelyDropshipping => widget.itemLocationCountry != widget.sellerRegisteredCountry;
-  // bool get _isHot => widget.lastSoldDate.contains("2026") || widget.lastSoldDate.contains("Today"); // Logic not needed for display anymore
-
   Color get _strengthColor {
     if (widget.sellerFeedbackScore > 10000) return Colors.red;
     if (widget.sellerFeedbackScore > 500) return Colors.orange;
@@ -117,10 +119,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
     String encodedUrl = Uri.encodeComponent(widget.imageUrl);
     final Uri url = Uri.parse('https://lens.google.com/uploadbyurl?url=$encodedUrl');
     if (!await launchUrl(url)) debugPrint('Could not launch Google Lens');
-  }
-
-  void _navigateToCompetitorResearch() {
-    debugPrint("🚀 Analyzing ${widget.sellerUsername}...");
   }
 
   @override
@@ -178,7 +176,7 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
                               ),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4), // Slightly smaller to fit inside border seamlessly
+                              borderRadius: BorderRadius.circular(4), 
                               child: Image.network(
                                 widget.imageUrl, width: 34, height: 34, fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) => Container(width: 34, height: 34, color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported, size: 14, color: Colors.grey)),
@@ -224,7 +222,7 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
               ),
             ),
 
-            // 2. SELLER & SPY (Flex 4)
+            // 2. SELLER (Flex 4)
             Expanded(
               flex: 4,
               child: Row(
@@ -238,30 +236,23 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
                       style: TextStyle(fontSize: 11, color: Colors.blueGrey.shade700, fontWeight: FontWeight.bold)
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  InkWell(
-                    onTap: _navigateToCompetitorResearch,
-                    child: const Icon(Icons.analytics_outlined, size: 14, color: Color(0xFF8FFF00)),
-                  ),
                 ],
               ),
             ),
 
-            // 3. ✨ UPGRADED FEEDBACK (Flex 2)
+            // 3. FEEDBACK (Flex 2)
             Expanded(
               flex: 2,
               child: Align(
                 alignment: Alignment.centerLeft,
-                // ✨ Removed the background color/container completely as requested!
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // ✨ Neon Green Star Icon Added
                     const Icon(Icons.star, size: 13, color: Color(0xFF8FFF00)),
                     const SizedBox(width: 4),
                     Text(
-                      formattedFeedback, // ✨ Formatted with commas
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: _strengthColor) // Keeps your original dynamic colors
+                      formattedFeedback, 
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: _strengthColor)
                     ),
                     if (_isLikelyDropshipping) ...[
                       const SizedBox(width: 4),
@@ -272,7 +263,20 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
               ),
             ),
 
-            // ❌ Step 4: DEMAND HEAT/TOTAL SALE COLUMN REMOVED FROM HERE
+            // 4. ✨ UPGRADED TOTAL SALE COLUMN (Flex 2)
+            Expanded(
+              flex: 2,
+              child: Row(
+                children: [
+                  Icon(Icons.shopping_bag_outlined, size: 13, color: Colors.blueGrey.shade400),
+                  const SizedBox(width: 4),
+                  Text(
+                    "${widget.totalSold}", 
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))
+                  ),
+                ],
+              ),
+            ),
 
             // 5. WATCHERS (Flex 2)
             Expanded(
