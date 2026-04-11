@@ -28,6 +28,9 @@ class KeywordSearchScreen extends StatefulWidget {
 }
 
 class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
+  // ✨ GLOBAL SCROLL CONTROLLER
+  final ScrollController _mainScrollController = ScrollController();
+
   bool _hideVero = false;
   bool _minMargin = false;
   bool _usOnly = false;
@@ -52,16 +55,13 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   String _nicheAdInsight = "Analyzing competition...";
   List<FlSpot> _historicalSalesData = [];
 
-  // ✨ BULK ACTION STATE TRACKERS
   bool _selectAll = false;
   Set<String> _selectedItemIds = {}; 
   Map<String, double> _itemProfits = {}; 
 
-  // ✨ NEW: FILTER HUB STATE
   bool _showFilters = true;
   final SearchFilters _activeFilters = SearchFilters();
 
-  // Math to calculate total potential profit
   double get _totalPotentialProfit {
     double total = 0.0;
     for (String id in _selectedItemIds) {
@@ -84,6 +84,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   @override
   void dispose() {
     _topSearchController.dispose();
+    _mainScrollController.dispose(); 
     super.dispose();
   }
 
@@ -100,8 +101,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
 
     try {
-      // Future upgrade: Pass _activeFilters into conductResearch here to actually use them in the backend call!
-      final result = await MarketBrainService.conductResearch(query, _currentPage);
+      final result = await MarketBrainService.conductResearch(query, _currentPage, filters: _activeFilters);
 
       setState(() {
         _nicheTotalActive = result.nicheTotalActive;
@@ -131,10 +131,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         _searchTags.add(cleanValue);
         _topSearchController.clear();
         _currentPage = 1; 
-        
-        // Hide the filter box automatically once they start a search to save screen space
         _showFilters = false; 
-        
         _fetchLiveData(_searchTags.join(', '));
       });
     } else {
@@ -336,287 +333,316 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const NeonIcon(icon: Icons.list_alt),
-                  const SizedBox(width: 15),
-                  SizedBox(
-                    width: 300, 
-                    child: Text(displayTitle, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)), overflow: TextOverflow.ellipsis),
-                  ),
-                  const Spacer(), 
-                  
-                  Container(
-                    width: 450, height: 46, 
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 12),
-                        const Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
+        // ✨ GLOBAL SCROLLBAR WRAPPER
+        RawScrollbar(
+          controller: _mainScrollController,
+          thumbColor: const Color(0xFF8FFF00), 
+          radius: const Radius.circular(20), 
+          thickness: 8, 
+          interactive: true,
+          // ✨ CONVERTED TO CUSTOM SCROLL VIEW
+          child: CustomScrollView(
+            controller: _mainScrollController,
+            slivers: [
+              
+              // --- 1. TOP CONTENT (Scrolls away naturally) ---
+              SliverPadding(
+                padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 30.0, bottom: 15.0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const NeonIcon(icon: Icons.list_alt),
+                          const SizedBox(width: 15),
+                          SizedBox(
+                            width: 300, 
+                            child: Text(displayTitle, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)), overflow: TextOverflow.ellipsis),
+                          ),
+                          const Spacer(), 
+                          
+                          Container(
+                            width: 450, height: 46, 
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade300)),
                             child: Row(
                               children: [
-                                ..._searchTags.map((tag) => Padding(
-                                  padding: const EdgeInsets.only(right: 6.0),
-                                  child: Chip(
-                                    label: Text(tag, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                    onDeleted: () {
-                                      setState(() {
-                                        _searchTags.remove(tag);
-                                        if (_searchTags.isNotEmpty) _fetchLiveData(_searchTags.join(', '));
-                                      });
-                                    },
-                                    backgroundColor: const Color(0xFF8FFF00).withAlpha(40),
-                                    side: BorderSide.none,
-                                    deleteIcon: const Icon(Icons.close, size: 14),
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                )),
-                                SizedBox(
-                                  width: 150, 
-                                  child: TextField(
-                                    controller: _topSearchController,
-                                    decoration: InputDecoration(
-                                      hintText: _searchTags.isEmpty ? "Type keyword..." : "Add more...",
-                                      hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-                                      border: InputBorder.none,
-                                      isDense: true,
+                                const SizedBox(width: 12),
+                                const Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        ..._searchTags.map((tag) => Padding(
+                                          padding: const EdgeInsets.only(right: 6.0),
+                                          child: Chip(
+                                            label: Text(tag, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                            onDeleted: () {
+                                              setState(() {
+                                                _searchTags.remove(tag);
+                                                if (_searchTags.isNotEmpty) _fetchLiveData(_searchTags.join(', '));
+                                              });
+                                            },
+                                            backgroundColor: const Color(0xFF8FFF00).withAlpha(40),
+                                            side: BorderSide.none,
+                                            deleteIcon: const Icon(Icons.close, size: 14),
+                                            visualDensity: VisualDensity.compact,
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                        )),
+                                        SizedBox(
+                                          width: 150, 
+                                          child: TextField(
+                                            controller: _topSearchController,
+                                            decoration: InputDecoration(
+                                              hintText: _searchTags.isEmpty ? "Type keyword..." : "Add more...",
+                                              hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                                              border: InputBorder.none,
+                                              isDense: true,
+                                            ),
+                                            onSubmitted: _addTag,
+                                            onChanged: (value) {
+                                              if (value.endsWith(',')) _addTag(value);
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    onSubmitted: _addTag,
-                                    onChanged: (value) {
-                                      if (value.endsWith(',')) _addTag(value);
-                                    },
                                   ),
+                                ),
+                                UniversalScanButton(
+                                  text: "SEARCH", 
+                                  width: 90, 
+                                  borderRadius: 7, 
+                                  fontSize: 13,
+                                  onTap: () {
+                                    if (_topSearchController.text.trim().isNotEmpty) _addTag(_topSearchController.text);
+                                    if (_searchTags.isNotEmpty) widget.onSearch(_searchTags.join(', '));
+                                  }
                                 ),
                               ],
                             ),
                           ),
+                          const SizedBox(width: 15),
+                          
+                          _buildTopButton(Icons.tune, "Advanced Filters", isHighlight: _showFilters, onTap: () {
+                            setState(() => _showFilters = !_showFilters);
+                          }),
+                          
+                          const SizedBox(width: 10),
+                          _buildTopButton(Icons.sort, "Sort: Opp Score 🔥", isHighlight: false, onTap: () {}),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      SizedBox(
+                        height: 280, 
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              flex: 4, 
+                              child: NicheOverviewCard(
+                                marketVol: _nicheMarketVol,
+                                avgPrice: _nicheAvgPrice,
+                                successRate: _nicheSuccessRate,
+                                totalActive: _nicheTotalActive,
+                                successColor: _nicheSuccessColor,
+                                saturationScore: _nicheSaturationScore, 
+                                adInsight: _nicheAdInsight,
+                              )
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              flex: 7, 
+                              child: MarketTrendChart(
+                                searchQuery: widget.searchQuery,
+                                liveData: _historicalSalesData, 
+                              )
+                            ),
+                          ],
                         ),
-                        // ✨ UPDATED BUTTON: SCAN is now SEARCH
-                        UniversalScanButton(
-                          text: "SEARCH", 
-                          width: 90, 
-                          borderRadius: 7, 
-                          fontSize: 13,
-                          onTap: () {
-                            if (_topSearchController.text.trim().isNotEmpty) _addTag(_topSearchController.text);
-                            if (_searchTags.isNotEmpty) widget.onSearch(_searchTags.join(', '));
-                          }
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  
-                  _buildTopButton(Icons.tune, "Advanced Filters", isHighlight: _showFilters, onTap: () {
-                    setState(() => _showFilters = !_showFilters);
-                  }),
-                  
-                  const SizedBox(width: 10),
-                  _buildTopButton(Icons.sort, "Sort: Opp Score 🔥", isHighlight: false, onTap: () {}),
-                ],
-              ),
-              const SizedBox(height: 20),
+                      ),
 
-              SizedBox(
-                height: 280, 
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      flex: 4, 
-                      child: NicheOverviewCard(
-                        marketVol: _nicheMarketVol,
-                        avgPrice: _nicheAvgPrice,
-                        successRate: _nicheSuccessRate,
-                        totalActive: _nicheTotalActive,
-                        successColor: _nicheSuccessColor,
-                        saturationScore: _nicheSaturationScore, 
-                        adInsight: _nicheAdInsight,
-                      )
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      flex: 7, 
-                      child: MarketTrendChart(
-                        searchQuery: widget.searchQuery,
-                        liveData: _historicalSalesData, 
-                      )
-                    ),
-                  ],
-                ),
-              ),
-
-              // ✨ UPDATED: Filter Hub no longer needs an onApply callback
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutCubic,
-                child: _showFilters ? Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: FilterHub(
-                    filters: _activeFilters,
-                  ),
-                ) : const SizedBox.shrink(),
-              ),
-
-              const SizedBox(height: 25),
-
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    const Text("⚡ QUICK FILTERS: ", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B), fontSize: 13)),
-                    const SizedBox(width: 10),
-                    _buildQuickFilter("Hide VERO", _hideVero, (val) => setState(() => _hideVero = val!)),
-                    const SizedBox(width: 15),
-                    _buildQuickFilter("Min 30% Margin", _minMargin, (val) => setState(() => _minMargin = val!)),
-                    const SizedBox(width: 15),
-                    _buildQuickFilter("US Shippers", _usOnly, (val) => setState(() => _usOnly = val!)),
-                    const SizedBox(width: 15),
-                    _buildQuickFilter("Dropship Safe", _dropshipSafe, (val) => setState(() => _dropshipSafe = val!)),
-                    const SizedBox(width: 15),
-                    _buildQuickFilter("Hide Ads", _hideAds, (val) => setState(() => _hideAds = val!)),
-                    const SizedBox(width: 30),
-                    Container(width: 1, height: 20, color: Colors.grey.shade300),
-                    const SizedBox(width: 20),
-                    Checkbox(value: _selectAll, onChanged: _toggleSelectAll, activeColor: const Color(0xFF8FFF00), checkColor: Colors.black),
-                    const Text("Select All", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white, borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
-                    boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 20, offset: Offset(0, 10))],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                          color: const Color(0xFFF8FAFC),
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 48), 
-                              _headerText("PRODUCT", flex: 8),
-                              _headerText("SELLER", flex: 4),
-                              _headerText("FEEDBACK", flex: 2), 
-                              _headerText("DEMAND", flex: 2),   
-                              _headerText("WATCH", flex: 2),    
-                              _headerText("PRICE", flex: 2),
-                              _headerText("BUY", flex: 2),
-                              _headerText("PROFIT", flex: 2),
-                              _headerText("", flex: 3, alignRight: true),
-                            ],
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOutCubic,
+                        child: _showFilters ? Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: FilterHub(
+                            filters: _activeFilters,
                           ),
+                        ) : const SizedBox.shrink(),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            const Text("⚡ QUICK FILTERS: ", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B), fontSize: 13)),
+                            const SizedBox(width: 10),
+                            _buildQuickFilter("Hide VERO", _hideVero, (val) => setState(() => _hideVero = val!)),
+                            const SizedBox(width: 15),
+                            _buildQuickFilter("Min 30% Margin", _minMargin, (val) => setState(() => _minMargin = val!)),
+                            const SizedBox(width: 15),
+                            _buildQuickFilter("US Shippers", _usOnly, (val) => setState(() => _usOnly = val!)),
+                            const SizedBox(width: 15),
+                            _buildQuickFilter("Dropship Safe", _dropshipSafe, (val) => setState(() => _dropshipSafe = val!)),
+                            const SizedBox(width: 15),
+                            _buildQuickFilter("Hide Ads", _hideAds, (val) => setState(() => _hideAds = val!)),
+                            const SizedBox(width: 30),
+                            Container(width: 1, height: 20, color: Colors.grey.shade300),
+                            const SizedBox(width: 20),
+                            Checkbox(value: _selectAll, onChanged: _toggleSelectAll, activeColor: const Color(0xFF8FFF00), checkColor: Colors.black),
+                            const Text("Select All", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                          ],
                         ),
-                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                        
-                        Expanded(
-                          child: _isLoading 
-                            ? const Center(child: CircularProgressIndicator(color: Color(0xFF8FFF00))) 
-                            : _errorMessage.isNotEmpty 
-                              ? Center(child: Padding(padding: const EdgeInsets.all(20), child: Text(_errorMessage, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center)))
-                              : _liveProducts.isEmpty 
-                                ? const Center(child: Text("No products found. Try a different search!"))
-                                : ListView.builder(
-                                    itemCount: _liveProducts.length,
-                                    itemBuilder: (context, index) {
-                                      final item = _liveProducts[index];
-                                      final String rowId = item["itemId"] ?? item["itemWebUrl"] ?? "id_$index"; 
-                                      
-                                      return IntelligenceRow(
-                                        itemId: rowId,
-                                        isSelected: _selectedItemIds.contains(rowId),
-                                        onSelect: (bool? val) {
-                                          setState(() {
-                                            if (val == true) {
-                                              _selectedItemIds.add(rowId);
-                                            } else {
-                                              _selectedItemIds.remove(rowId);
-                                              _selectAll = false; 
-                                            }
-                                          });
-                                        },
-                                        onProfitChanged: (double profit) {
-                                          Future.microtask(() => setState(() => _itemProfits[rowId] = profit));
-                                        },
-                                        imageUrl: item["image"] ?? "https://via.placeholder.com/150", 
-                                        title: item["title"] ?? "Unknown Product", 
-                                        price: item["sales"] ?? "0", 
-                                        sellerUsername: item["sellerUsername"] ?? "Unknown",
-                                        sellerFeedbackScore: (item["sellerFeedbackScore"] as num?)?.toDouble() ?? 0.0,
-                                        itemLocationCountry: item["itemLocationCountry"] ?? "US",
-                                        sellerRegisteredCountry: item["sellerRegisteredCountry"] ?? "US",
-                                        totalActiveListings: item["totalActiveListings"] ?? 0,
-                                        totalSold: item["totalSold"] ?? 45, 
-                                        lastSoldDate: item["lastSoldDate"] ?? "Today", 
-                                        watchCount: item["watchCount"] ?? 12,
-                                        isVero: item["isVero"] ?? false, 
-                                        categoryPath: item["category"] ?? "Home & Garden > Pet Supplies",
-                                        priceTrend: item["trend"] ?? "up", 
-                                        upc: item["upc"],
-                                      );
-                                    },
-                                  ),
-                        ),
-                        
-                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                          color: Colors.white,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton.icon(
-                                onPressed: _currentPage > 1 && !_isLoading ? () {
-                                  setState(() => _currentPage--);
-                                  _fetchLiveData(_searchTags.join(', '));
-                                } : null,
-                                icon: const Icon(Icons.chevron_left, size: 18),
-                                label: const Text("Previous", style: TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                              Text("Page $_currentPage", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
-                              TextButton(
-                                onPressed: _liveProducts.length == 25 && !_isLoading ? () {
-                                  setState(() => _currentPage++);
-                                  _fetchLiveData(_searchTags.join(', '));
-                                } : null,
-                                child: const Row(
-                                  children: [
-                                    Text("Next", style: TextStyle(fontWeight: FontWeight.bold)),
-                                    SizedBox(width: 5),
-                                    Icon(Icons.chevron_right, size: 18),
-                                  ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // --- 2. ✨ THE STICKY HEADER ---
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickyTableHeaderDelegate(),
+              ),
+
+              // --- 3. THE PRODUCT LIST (Scrolls underneath the sticky header) ---
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white, 
+                      // Rounded corners only on the bottom so it connects to the header seamlessly
+                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                      border: Border(
+                        left: BorderSide(color: Colors.grey.shade200),
+                        right: BorderSide(color: Colors.grey.shade200),
+                        bottom: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 20, offset: Offset(0, 10))],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                      child: Column(
+                        children: [
+                          if (_isLoading)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 100),
+                              child: Center(child: CircularProgressIndicator(color: Color(0xFF8FFF00))),
+                            )
+                          else if (_errorMessage.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 50),
+                              child: Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
+                            )
+                          else if (_liveProducts.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 100),
+                              child: Center(child: Text("No products found. Try a different search!", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))),
+                            )
+                          else
+                            ListView.builder(
+                              shrinkWrap: true, 
+                              physics: const NeverScrollableScrollPhysics(), 
+                              itemCount: _liveProducts.length,
+                              itemBuilder: (context, index) {
+                                final item = _liveProducts[index];
+                                final String rowId = item["itemId"] ?? item["itemWebUrl"] ?? "id_$index"; 
+                                
+                                return IntelligenceRow(
+                                  itemId: rowId,
+                                  isSelected: _selectedItemIds.contains(rowId),
+                                  onSelect: (bool? val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        _selectedItemIds.add(rowId);
+                                      } else {
+                                        _selectedItemIds.remove(rowId);
+                                        _selectAll = false; 
+                                      }
+                                    });
+                                  },
+                                  onProfitChanged: (double profit) {
+                                    Future.microtask(() => setState(() => _itemProfits[rowId] = profit));
+                                  },
+                                  imageUrl: item["image"] ?? "", 
+                                  title: item["title"] ?? "Unknown Product", 
+                                  price: item["sales"]?.toString() ?? "0", 
+                                  sellerUsername: item["sellerUsername"] ?? "Unknown",
+                                  sellerFeedbackScore: (item["sellerFeedbackScore"] as num?)?.toDouble() ?? 0.0,
+                                  itemLocationCountry: item["itemLocationCountry"] ?? "N/A",
+                                  sellerRegisteredCountry: item["sellerRegisteredCountry"] ?? "N/A",
+                                  totalActiveListings: item["totalActiveListings"] ?? 0,
+
+                                  itemWebUrl: item["itemWebUrl"],
+                                  
+                                  totalSold: item["totalSold"] ?? 0, 
+                                  lastSoldDate: item["lastSoldDate"] ?? "N/A", 
+                                  watchCount: item["watchCount"] ?? 0,
+                                  isVero: item["isVero"] ?? false, 
+                                  categoryPath: item["category"] ?? "Unknown",
+                                  priceTrend: item["trend"] ?? "none", 
+                                  upc: item["upc"],
+                                );
+                              },
+                            ),
+                          
+                          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          
+                          // ✨ PAGINATION CONTROLS
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                            color: Colors.white,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: _currentPage > 1 && !_isLoading ? () {
+                                    setState(() => _currentPage--);
+                                    _fetchLiveData(_searchTags.join(', '));
+                                  } : null,
+                                  icon: const Icon(Icons.chevron_left, size: 18),
+                                  label: const Text("Previous", style: TextStyle(fontWeight: FontWeight.bold)),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                                Text("Page $_currentPage", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                                TextButton(
+                                  onPressed: _liveProducts.length >= 25 && !_isLoading ? () {
+                                    setState(() => _currentPage++);
+                                    _fetchLiveData(_searchTags.join(', '));
+                                  } : null,
+                                  child: const Row(
+                                    children: [
+                                      Text("Next", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      SizedBox(width: 5),
+                                      Icon(Icons.chevron_right, size: 18),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              )
+              ),
+              
+              // Extra padding at the bottom so the floating action bar doesn't block the last row
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
         ),
 
-        // ✨ THE FLOATING BULK ACTION HUB
+        // ✨ THE FLOATING BULK ACTION HUB (Remains fixed at the bottom of the screen)
         AnimatedPositioned(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
@@ -691,10 +717,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     );
   }
 
-  Widget _headerText(String text, {required int flex, bool alignRight = false}) {
-    return Expanded(flex: flex, child: Text(text, textAlign: alignRight ? TextAlign.right : TextAlign.left, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF64748B))));
-  }
-
   Widget _buildTopButton(IconData icon, String label, {bool isHighlight = false, required VoidCallback onTap}) {
     return OutlinedButton.icon(
       onPressed: onTap, icon: Icon(icon, size: 16, color: isHighlight ? Colors.black : const Color(0xFF64748B)), 
@@ -706,4 +728,57 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
       ),
     );
   }
+}
+
+// --- ✨ THE STICKY HEADER DELEGATE ---
+class _StickyTableHeaderDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  double get minExtent => 46.0; // Exact fixed height
+  @override
+  double get maxExtent => 46.0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 30.0), // Aligns with the list below it
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC), // Slight off-white to distinguish the header
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)), // Top corners rounded
+        border: Border.all(color: Colors.grey.shade200),
+        // Adds a shadow ONLY when you scroll down and the list slides under it
+        boxShadow: shrinkOffset > 0 
+            ? [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 6, offset: const Offset(0, 3))] 
+            : [],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+      child: Row(
+        children: [
+          const SizedBox(width: 48), 
+          _headerText("PRODUCT", flex: 8),
+          _headerText("SELLER", flex: 4),
+          _headerText("FEEDBACK", flex: 2), 
+          _headerText("DEMAND", flex: 2),   
+          _headerText("WATCH", flex: 2),    
+          _headerText("PRICE", flex: 2),
+          _headerText("BUY", flex: 2),
+          _headerText("PROFIT", flex: 2),
+          _headerText("", flex: 3, alignRight: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _headerText(String text, {required int flex, bool alignRight = false}) {
+    return Expanded(
+      flex: flex, 
+      child: Text(
+        text, 
+        textAlign: alignRight ? TextAlign.right : TextAlign.left, 
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF64748B))
+      )
+    );
+  }
+
+  @override
+  bool shouldRebuild(_StickyTableHeaderDelegate oldDelegate) => false;
 }

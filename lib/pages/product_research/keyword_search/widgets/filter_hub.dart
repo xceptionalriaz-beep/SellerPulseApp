@@ -187,7 +187,7 @@ class _FilterHubState extends State<FilterHub> {
     );
   }
 
-  // --- 🎨 THE "ELITE" PILL DROPDOWN (Matches image_eb2ee9.png perfectly) ---
+// --- 🎨 THE "ELITE" PILL DROPDOWN (Click-Flash Fixed) ---
 
   Widget _buildDropdown({required String value, required List<Map<String, String>> items, required ValueChanged<String?> onChanged}) {
     return SizedBox(
@@ -197,6 +197,8 @@ class _FilterHubState extends State<FilterHub> {
           hoverColor: Colors.transparent,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
+          // ✨ THE FIX: This kills the grey background that flashes when you click!
+          focusColor: Colors.transparent, 
         ),
         child: DropdownButtonFormField<String>(
           isExpanded: true,
@@ -221,31 +223,26 @@ class _FilterHubState extends State<FilterHub> {
             }).toList();
           },
 
-          // ✨ NEW: Interactive Menu Items
           items: items.map((item) {
             bool isSelected = value == item['val'];
+            bool isHovered = false; 
             
             return DropdownMenuItem(
               value: item['val'],
               child: StatefulBuilder(
                 builder: (context, setState) {
-                  bool isHovered = false; // Tracks mouse hover state
-                  
                   return MouseRegion(
                     onEnter: (_) => setState(() => isHovered = true),
                     onExit: (_) => setState(() => isHovered = false),
                     child: Container(
                       width: double.infinity,
-                      height: double.infinity,
                       alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      margin: const EdgeInsets.symmetric(vertical: 2), // Small vertical gap
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), 
+                      margin: const EdgeInsets.symmetric(vertical: 2), 
                       decoration: BoxDecoration(
-                        // 1. Solid Green if selected. Transparent if not.
                         color: isSelected ? const Color(0xFF8FFF00) : Colors.transparent,
                         borderRadius: BorderRadius.circular(25),
                         border: Border.all(
-                          // 2. Green border ONLY if it's hovered AND not selected
                           color: (isHovered && !isSelected) ? const Color(0xFF8FFF00) : Colors.transparent, 
                           width: 1.5,
                         ),
@@ -255,7 +252,7 @@ class _FilterHubState extends State<FilterHub> {
                         style: TextStyle(
                           fontSize: 13, 
                           color: isSelected ? Colors.black : const Color(0xFF0F172A), 
-                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w500, // Thinner text for normal items
+                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w500, 
                         ),
                         overflow: TextOverflow.ellipsis
                       ),

@@ -18,6 +18,9 @@ class IntelligenceRow extends StatefulWidget {
   final String sellerRegisteredCountry;
   final int totalActiveListings;
   
+  // ✨ NEW: The direct link to the eBay listing
+  final String? itemWebUrl; 
+  
   // ✨ DEMAND DATA
   final int totalSold;
   final String lastSoldDate; 
@@ -31,10 +34,10 @@ class IntelligenceRow extends StatefulWidget {
 
   const IntelligenceRow({
     super.key, 
-    required this.itemId, // 👈 Added
-    required this.isSelected, // 👈 Added
-    required this.onSelect, // 👈 Added
-    this.onProfitChanged, // 👈 Added
+    required this.itemId, 
+    required this.isSelected, 
+    required this.onSelect, 
+    this.onProfitChanged, 
     required this.imageUrl, 
     required this.title, 
     required this.price,
@@ -43,6 +46,7 @@ class IntelligenceRow extends StatefulWidget {
     required this.itemLocationCountry,
     required this.sellerRegisteredCountry,
     required this.totalActiveListings,
+    this.itemWebUrl, // 👈 Added
     required this.totalSold, 
     required this.lastSoldDate, 
     required this.watchCount,
@@ -58,6 +62,7 @@ class IntelligenceRow extends StatefulWidget {
 
 class _IntelligenceRowState extends State<IntelligenceRow> {
   bool _isHovering = false;
+  bool _isImageHovering = false; // ✨ NEW: Tracks if mouse is over the image specifically
   final TextEditingController _amzPriceController = TextEditingController();
   ProfitResult? _liveProfit; 
 
@@ -85,9 +90,19 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
     final result = ProfitEngine.calculate(sellingPrice: ebayPrice, buyPrice: amzPrice, shippingCost: 5.00);
     setState(() => _liveProfit = result);
     
-    // ✨ Send the calculated profit up to the main screen for the Bulk Action Hub!
+    // Send the calculated profit up to the main screen for the Bulk Action Hub!
     if (widget.onProfitChanged != null) {
       widget.onProfitChanged!(result.netProfit);
+    }
+  }
+
+  // ✨ NEW: Launches the eBay item URL in a new tab
+  Future<void> _launchItemUrl() async {
+    if (widget.itemWebUrl != null && widget.itemWebUrl!.isNotEmpty) {
+      final Uri url = Uri.parse(widget.itemWebUrl!);
+      if (!await launchUrl(url)) debugPrint('Could not launch $url');
+    } else {
+      debugPrint('No URL available for this product.');
     }
   }
 
@@ -97,7 +112,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
     if (!await launchUrl(url)) debugPrint('Could not launch $url');
   }
 
-  // ✨ GOOGLE LENS LAUNCHER
   Future<void> _launchGoogleLens() async {
     String encodedUrl = Uri.encodeComponent(widget.imageUrl);
     final Uri url = Uri.parse('https://lens.google.com/uploadbyurl?url=$encodedUrl');
@@ -116,7 +130,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          // ✨ Highlight row if selected
           color: widget.isSelected 
               ? const Color(0xFF8FFF00).withAlpha(25) 
               : (_isHovering ? const Color(0xFF8FFF00).withAlpha(15) : Colors.white),
@@ -126,12 +139,11 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Fixed width to match the 48px header spacing exactly
             SizedBox(
               width: 48,
               child: Checkbox(
-                value: widget.isSelected, // 👈 Now controlled by parent
-                onChanged: widget.onSelect, // 👈 Tells parent it was clicked
+                value: widget.isSelected, 
+                onChanged: widget.onSelect, 
                 activeColor: const Color(0xFF8FFF00), 
                 checkColor: Colors.black
               ),
@@ -142,26 +154,45 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
               flex: 8,
               child: Row(
                 children: [
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: Image.network(
-                          widget.imageUrl, width: 38, height: 38, fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(width: 38, height: 38, color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported, size: 14, color: Colors.grey)),
-                        ),
+                  // ✨ UPGRADED: Interactive Image Stack
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click, // Changes to hand pointer
+                    onEnter: (_) => setState(() => _isImageHovering = true),
+                    onExit: (_) => setState(() => _isImageHovering = false),
+                    child: GestureDetector(
+                      onTap: _launchItemUrl, // Opens eBay in new tab
+                      child: Stack(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              // Creates the Neon Green border on hover
+                              border: Border.all(
+                                color: _isImageHovering ? const Color(0xFF8FFF00) : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4), // Slightly smaller to fit inside border seamlessly
+                              child: Image.network(
+                                widget.imageUrl, width: 34, height: 34, fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Container(width: 34, height: 34, color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported, size: 14, color: Colors.grey)),
+                              ),
+                            ),
+                          ),
+                          if (widget.isVero)
+                            Positioned(
+                              right: -2, 
+                              bottom: -2, 
+                              child: Container(
+                                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), 
+                                child: const Icon(Icons.shield, color: Colors.red, size: 12)
+                              )
+                            ),
+                        ],
                       ),
-                      // ✨ VERO SHIELD
-                      if (widget.isVero)
-                        Positioned(
-                          right: -2, 
-                          bottom: -2, 
-                          child: Container(
-                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), 
-                            child: const Icon(Icons.shield, color: Colors.red, size: 12)
-                          )
-                        ),
-                    ],
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -175,7 +206,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
                           overflow: TextOverflow.ellipsis, 
                           style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 11)
                         ),
-                        // ✨ CATEGORY PATH
                         const SizedBox(height: 2),
                         Text(
                           widget.categoryPath, 
@@ -205,7 +235,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  // ✨ SPY ICON
                   InkWell(
                     onTap: _navigateToCompetitorResearch,
                     child: const Icon(Icons.analytics_outlined, size: 14, color: Color(0xFF8FFF00)),
@@ -268,7 +297,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(widget.price, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF1E293B))),
-                  // ✨ PRICE TREND ARROW
                   if (widget.priceTrend != "stable") ...[
                     const SizedBox(width: 2),
                     Icon(
@@ -339,7 +367,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
                     Icons.storefront, Colors.red
                   ),
                   const SizedBox(width: 4),
-                  // ✨ GOOGLE LENS ICON
                   _buildSmallActionIcon(
                     'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Google_Lens_-_new_logo.png/120px-Google_Lens_-_new_logo.png', 
                     _launchGoogleLens,
@@ -361,7 +388,6 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
     );
   }
 
-  // ✨ Safe image handling for external logos
   Widget _buildSmallActionIcon(String url, VoidCallback onTap, IconData fallbackIcon, Color fallbackColor) {
     return InkWell(
       onTap: onTap,
