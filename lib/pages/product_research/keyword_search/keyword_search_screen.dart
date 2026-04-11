@@ -583,7 +583,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                                   totalActiveListings: item["totalActiveListings"] ?? 0,
 
                                   itemWebUrl: item["itemWebUrl"],
-                                  
+
                                   totalSold: item["totalSold"] ?? 0, 
                                   lastSoldDate: item["lastSoldDate"] ?? "N/A", 
                                   watchCount: item["watchCount"] ?? 0,
@@ -757,7 +757,7 @@ class _StickyTableHeaderDelegate extends SliverPersistentHeaderDelegate {
           _headerText("PRODUCT", flex: 8),
           _headerText("SELLER", flex: 4),
           _headerText("FEEDBACK", flex: 2), 
-          _headerText("DEMAND", flex: 2),   
+          _headerText("TOTAL SALE", flex: 2),   
           _headerText("WATCH", flex: 2),    
           _headerText("PRICE", flex: 2),
           _headerText("BUY", flex: 2),

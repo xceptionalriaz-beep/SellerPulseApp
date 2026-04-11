@@ -108,7 +108,24 @@ class _FilterHubState extends State<FilterHub> {
             ),
           ),
 
-          // 7. Min Sales Card
+          // 7. ✨ NEW: Sales Date Range Card
+          _expandedCard(
+            title: "Sales Range",
+            icon: Icons.calendar_month_outlined,
+            helpText: "Filter the sales volume by a\nspecific timeframe (e.g., Last 7 Days).",
+            child: _buildDropdown(
+              value: widget.filters.salesRange,
+              items: [
+                {'val': 'Total', 'label': '📅 Total'},
+                {'val': '7 Days', 'label': '🔥 7 Days'},
+                {'val': '15 Days', 'label': '📈 15 Days'},
+                {'val': '30 Days', 'label': '📆 30 Days'},
+              ],
+              onChanged: (val) => setState(() => widget.filters.salesRange = val!),
+            ),
+          ),
+
+          // 8. Min Sales Card
           _expandedCard(
             title: "Min Sales",
             icon: Icons.trending_up,
@@ -197,7 +214,6 @@ class _FilterHubState extends State<FilterHub> {
           hoverColor: Colors.transparent,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          // ✨ THE FIX: This kills the grey background that flashes when you click!
           focusColor: Colors.transparent, 
         ),
         child: DropdownButtonFormField<String>(

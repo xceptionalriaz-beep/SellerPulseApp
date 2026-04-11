@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart'; // ✨ REQUIRED FOR COMMA FORMATTING
 import '../../../../../core/utils/profit_engine.dart';
 
 class IntelligenceRow extends StatefulWidget {
@@ -46,7 +47,7 @@ class IntelligenceRow extends StatefulWidget {
     required this.itemLocationCountry,
     required this.sellerRegisteredCountry,
     required this.totalActiveListings,
-    this.itemWebUrl, // 👈 Added
+    this.itemWebUrl, 
     required this.totalSold, 
     required this.lastSoldDate, 
     required this.watchCount,
@@ -62,7 +63,7 @@ class IntelligenceRow extends StatefulWidget {
 
 class _IntelligenceRowState extends State<IntelligenceRow> {
   bool _isHovering = false;
-  bool _isImageHovering = false; // ✨ NEW: Tracks if mouse is over the image specifically
+  bool _isImageHovering = false; 
   final TextEditingController _amzPriceController = TextEditingController();
   ProfitResult? _liveProfit; 
 
@@ -70,17 +71,11 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
   bool get _isLikelyDropshipping => widget.itemLocationCountry != widget.sellerRegisteredCountry;
   bool get _isHot => widget.lastSoldDate.contains("2026") || widget.lastSoldDate.contains("Today");
 
-  Color get _strengthColor {
-    if (widget.sellerFeedbackScore > 10000) return Colors.red;
-    if (widget.sellerFeedbackScore > 500) return Colors.orange;
-    return Colors.green;
-  }
-
   // --- ACTIONS ---
   void _calculateRowProfit(String amzPriceString) {
     if (amzPriceString.isEmpty) {
       setState(() => _liveProfit = null);
-      if (widget.onProfitChanged != null) widget.onProfitChanged!(0.0); // Send 0 profit to parent
+      if (widget.onProfitChanged != null) widget.onProfitChanged!(0.0); 
       return;
     }
     double amzPrice = double.tryParse(amzPriceString) ?? 0.0;
@@ -90,13 +85,11 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
     final result = ProfitEngine.calculate(sellingPrice: ebayPrice, buyPrice: amzPrice, shippingCost: 5.00);
     setState(() => _liveProfit = result);
     
-    // Send the calculated profit up to the main screen for the Bulk Action Hub!
     if (widget.onProfitChanged != null) {
       widget.onProfitChanged!(result.netProfit);
     }
   }
 
-  // ✨ NEW: Launches the eBay item URL in a new tab
   Future<void> _launchItemUrl() async {
     if (widget.itemWebUrl != null && widget.itemWebUrl!.isNotEmpty) {
       final Uri url = Uri.parse(widget.itemWebUrl!);
@@ -124,6 +117,9 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
 
   @override
   Widget build(BuildContext context) {
+    // ✨ THE NUMBER FORMATTER: Adds commas to large numbers (e.g., 18,904)
+    final String formattedFeedback = NumberFormat.decimalPattern().format(widget.sellerFeedbackScore.toInt());
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
@@ -154,27 +150,25 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
               flex: 8,
               child: Row(
                 children: [
-                  // ✨ UPGRADED: Interactive Image Stack
                   MouseRegion(
-                    cursor: SystemMouseCursors.click, // Changes to hand pointer
+                    cursor: SystemMouseCursors.click, 
                     onEnter: (_) => setState(() => _isImageHovering = true),
                     onExit: (_) => setState(() => _isImageHovering = false),
                     child: GestureDetector(
-                      onTap: _launchItemUrl, // Opens eBay in new tab
+                      onTap: _launchItemUrl, 
                       child: Stack(
                         children: [
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(6),
-                              // Creates the Neon Green border on hover
                               border: Border.all(
                                 color: _isImageHovering ? const Color(0xFF8FFF00) : Colors.transparent,
                                 width: 2,
                               ),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4), // Slightly smaller to fit inside border seamlessly
+                              borderRadius: BorderRadius.circular(4), 
                               child: Image.network(
                                 widget.imageUrl, width: 34, height: 34, fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) => Container(width: 34, height: 34, color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported, size: 14, color: Colors.grey)),
@@ -243,18 +237,28 @@ class _IntelligenceRowState extends State<IntelligenceRow> {
               ),
             ),
 
-            // 3. FEEDBACK STRENGTH (Flex 2)
+            // 3. ✨ UPGRADED FEEDBACK (Flex 2)
             Expanded(
               flex: 2,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  decoration: BoxDecoration(color: _strengthColor.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A), // Dark slate pill background
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("${widget.sellerFeedbackScore.toInt()}", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: _strengthColor)),
+                      // ✨ Neon Green Star
+                      const Icon(Icons.star, size: 10, color: Color(0xFF8FFF00)),
+                      const SizedBox(width: 4),
+                      // ✨ Formatted Number with Commas
+                      Text(
+                        formattedFeedback, 
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white)
+                      ),
                       if (_isLikelyDropshipping) ...[
                         const SizedBox(width: 4),
                         const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.red),

@@ -12,6 +12,9 @@ class SearchFilters {
   // ✨ NEW ELITE FILTERS
   String shipFrom;
   String listingType;
+  
+  // ✨ THE NEW VELOCITY FILTER
+  String salesRange;
 
   SearchFilters({
     this.marketplace = 'US',
@@ -25,6 +28,7 @@ class SearchFilters {
     this.hideVero = true,
     this.shipFrom = 'Any',       // Defaults to Anywhere
     this.listingType = 'Fixed',  // Defaults to Buy It Now
+    this.salesRange = 'Total',   // ✨ Options: 'Total', '7 Days', '15 Days', '30 Days'
   });
 
   // Automatically switches currency symbols based on the marketplace!
