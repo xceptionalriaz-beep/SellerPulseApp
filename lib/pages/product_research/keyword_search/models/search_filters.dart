@@ -9,6 +9,10 @@ class SearchFilters {
   String condition; 
   bool hideVero;
 
+  // ✨ NEW ELITE FILTERS
+  String shipFrom;
+  String listingType;
+
   SearchFilters({
     this.marketplace = 'US',
     this.shippingTo = 'US',
@@ -19,6 +23,8 @@ class SearchFilters {
     this.minSales = 0,
     this.condition = 'New',
     this.hideVero = true,
+    this.shipFrom = 'Any',       // Defaults to Anywhere
+    this.listingType = 'Fixed',  // Defaults to Buy It Now
   });
 
   // Automatically switches currency symbols based on the marketplace!

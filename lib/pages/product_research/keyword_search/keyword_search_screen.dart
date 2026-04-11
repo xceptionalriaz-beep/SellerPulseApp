@@ -100,7 +100,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     });
 
     try {
-      // Future upgrade: Pass _activeFilters into conductResearch here!
+      // Future upgrade: Pass _activeFilters into conductResearch here to actually use them in the backend call!
       final result = await MarketBrainService.conductResearch(query, _currentPage);
 
       setState(() {
@@ -131,6 +131,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         _searchTags.add(cleanValue);
         _topSearchController.clear();
         _currentPage = 1; 
+        
+        // Hide the filter box automatically once they start a search to save screen space
+        _showFilters = false; 
+        
         _fetchLiveData(_searchTags.join(', '));
       });
     } else {
@@ -171,7 +175,6 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
           .eq('user_id', userId)
           .count(CountOption.exact);
 
-      // ✨ Linting Bug Fixed: Safely assigning count directly
       int currentSavedCount = countResponse.count;
       int itemsTryingToSave = _selectedItemIds.length;
 
@@ -219,8 +222,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
     }
   }
 
-void _downloadCSV() {
-    // 1. Headers for a Professional Workflow
+  void _downloadCSV() {
     List<List<String>> rows = [
       [
         "Product Title", 
@@ -236,7 +238,6 @@ void _downloadCSV() {
       ]
     ];
 
-    // 2. Map the data from your selected items
     for (var id in _selectedItemIds) {
       final item = _liveProducts.firstWhere(
         (p) => (p["itemId"] ?? p["itemWebUrl"] ?? p.toString()) == id, 
@@ -265,25 +266,19 @@ void _downloadCSV() {
       }
     }
 
-    // 3. Generate CSV String & Excel Fix
     String csvContent = rows.map((row) => row.map((field) => '"$field"').join(',')).join('\n');
     final contentWithBOM = '\uFEFF$csvContent';
     final bytes = utf8.encode(contentWithBOM);
     
-    // 4. ✨ MODERN WEB DOWNLOAD (Wasm Compatible)
-    // Uses js_interop (.toJS) to securely pass data to the browser
     final blob = web.Blob([bytes.toJS].toJS, web.BlobPropertyBag(type: 'text/csv;charset=utf-8'));
     final url = web.URL.createObjectURL(blob);
     
-    // Create the anchor element the modern way
     final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
     anchor.href = url;
     anchor.download = "SellerPulse_Research_${DateTime.now().millisecondsSinceEpoch}.csv";
     
-    // Trigger download
     anchor.click();
     
-    // Cleanup memory
     web.URL.revokeObjectURL(url);
   }
 
@@ -406,8 +401,12 @@ void _downloadCSV() {
                             ),
                           ),
                         ),
+                        // ✨ UPDATED BUTTON: SCAN is now SEARCH
                         UniversalScanButton(
-                          text: "SCAN", width: 80, borderRadius: 7, fontSize: 13,
+                          text: "SEARCH", 
+                          width: 90, 
+                          borderRadius: 7, 
+                          fontSize: 13,
                           onTap: () {
                             if (_topSearchController.text.trim().isNotEmpty) _addTag(_topSearchController.text);
                             if (_searchTags.isNotEmpty) widget.onSearch(_searchTags.join(', '));
@@ -418,7 +417,6 @@ void _downloadCSV() {
                   ),
                   const SizedBox(width: 15),
                   
-                  // ✨ CONNECTED ADVANCED FILTERS TOGGLE
                   _buildTopButton(Icons.tune, "Advanced Filters", isHighlight: _showFilters, onTap: () {
                     setState(() => _showFilters = !_showFilters);
                   }),
@@ -458,7 +456,7 @@ void _downloadCSV() {
                 ),
               ),
 
-              // ✨ INJECTED THE ANIMATED FILTER HUB HERE
+              // ✨ UPDATED: Filter Hub no longer needs an onApply callback
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOutCubic,
@@ -466,10 +464,6 @@ void _downloadCSV() {
                   padding: const EdgeInsets.only(top: 20),
                   child: FilterHub(
                     filters: _activeFilters,
-                    onApply: () {
-                      setState(() => _showFilters = false); // Hide automatically after apply
-                      _fetchLiveData(_searchTags.join(', ')); // Refresh data
-                    },
                   ),
                 ) : const SizedBox.shrink(),
               ),
