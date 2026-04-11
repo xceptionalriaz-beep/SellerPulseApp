@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'landing_page.dart'; 
-import 'product_research/deep_dive/deep_dive_screen.dart';
-import 'product_research/launchpad/launchpad_screen.dart';
-import 'product_research/keyword_search/keyword_search_screen.dart';
+// ✨ Your new Master Dashboard import!
+import 'product_research/product_research_master.dart';
 import 'inventory_page.dart'; 
 import 'profit_calculator.dart'; 
 import 'admin_management_page.dart'; 
@@ -21,8 +20,6 @@ class _DashboardPageState extends State<DashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   
   int _selectedIndex = 0;
-  int _researchState = 0; 
-  String _currentQuery = ""; 
 
   final Color neonGreen = const Color(0xFF8FFF00);
   final Color deepNavy = const Color(0xFF131B2F);
@@ -40,17 +37,6 @@ class _DashboardPageState extends State<DashboardPage> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const PublicLandingPage()), (route) => false);
     }
-  }
-
-  void _runSmartSearch(String query) {
-    setState(() {
-      _currentQuery = query;
-      if (query.toLowerCase().contains("ebay.com")) {
-        _researchState = 1; 
-      } else {
-        _researchState = 2; 
-      }
-    });
   }
 
   @override
@@ -130,23 +116,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
   // --- MOBILE COMPONENTS ---
 
-  // ✨ FIXED: Added the Notification Bell to Mobile Header
   Widget _buildMobileHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left: Menu
           IconButton(
             icon: const Icon(Icons.menu_rounded, color: Colors.black, size: 28),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           
-          // Center: Logo
           const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 24),
           
-          // Right: Notifications + Profile (Matches desktop behavior)
           Row(
             children: [
               IconButton(
@@ -212,7 +194,6 @@ class _DashboardPageState extends State<DashboardPage> {
       onTap: () {
         setState(() {
           _selectedIndex = index;
-          if (index == 1) _researchState = 0;
         });
         Navigator.pop(context);
       },
@@ -257,7 +238,6 @@ class _DashboardPageState extends State<DashboardPage> {
       child: InkWell(
         onTap: () => setState(() {
           _selectedIndex = index;
-          if (index == 1) _researchState = 0; 
         }),
         hoverColor: Colors.transparent,
         child: SizedBox(
@@ -295,7 +275,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildCurrentScreen() {
     switch (_selectedIndex) {
       case 0: return _buildDashboardHome();
-      case 1: return _buildProductResearchArea();
+      // ✨ Case 1 seamlessly routes to your new Master Dashboard!
+      case 1: return const ProductResearchMaster(); 
       case 2: return const TitleBuilderMain();
       case 3: return const ProfitCalculatorPage();
       case 4: return const InventoryPage();
@@ -303,12 +284,6 @@ class _DashboardPageState extends State<DashboardPage> {
       case 6: return isOwner ? const AdminManagementPage() : const Center(child: Text("404", style: TextStyle(color: Colors.grey)));
       default: return const SizedBox.shrink();
     }
-  }
-
-  Widget _buildProductResearchArea() {
-    if (_researchState == 1) return ProductDeepDivePage(productUrl: _currentQuery); 
-    if (_researchState == 2) return KeywordSearchScreen(searchQuery: _currentQuery, onSearch: _runSmartSearch);
-    return ProductResearchLaunchpad(onSearch: _runSmartSearch);
   }
 
   Widget _buildDashboardHome() {
@@ -357,4 +332,4 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-}  
+}
