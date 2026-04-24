@@ -251,14 +251,16 @@ class MarketBrainService {
         "sellerRegisteredCountry": sellerLoc,
         "totalActiveListings": 0, 
         "totalSold": soldCount,
-        "lastSoldDate": "Verified", 
+        
+        // ✨ UPGRADED: Dynamically pulls the real timestamp from eBay!
+        "lastSoldDate": item['lastItemUpdateTime']?.toString() ?? item['lastSoldDate']?.toString(), 
+        
         "watchCount": watchers,
         "isVero": false, 
         "category": catPath,
         "trend": "stable", 
         "upc": item['gtin']?.toString(),
         
-        // ✨ THE NEW PRO INTELLIGENCE FIELDS (Safely Parsed)
         "ai_velocity": item['ai_velocity'] != null ? (double.tryParse(item['ai_velocity'].toString()) ?? 0.0) : 0.0,
         "risk_score": item['risk_score']?.toString() ?? "Medium",
         "demand_heat": item['demand_heat'] != null ? (double.tryParse(item['demand_heat'].toString()) ?? 0.05) : 0.05,
@@ -266,52 +268,56 @@ class MarketBrainService {
     }).toList();
 
     // =================================================================
-    // ✨ THE INTELLIGENT VERO SCANNER 2.0 (Keywords + Severity)
+    // ✨ THE INTELLIGENT VERO SCANNER 3.0 (Multi-Match & Inline Targeting)
     // =================================================================
     try {
-      final veroResponse = await supabase.from('vero_list').select('brand_name, keywords, severity');
+      final veroResponse = await supabase.from('vero_brands').select('brand_name, keywords, risk_level');
       final List veroData = veroResponse as List;
-
-      // 🔍 DEBUG LINE 1: See if data is actually coming from Supabase
-      debugPrint("📡 VERO X-RAY: Found ${veroData.length} brands in your Database.");
 
       for (var item in mappedProducts) {
         String title = (item['title'] ?? '').toString().toLowerCase();
-        Map<String, dynamic>? matchedEntry;
+        
+        // ✨ NEW: We now hold a LIST of matches, not just one!
+        List<Map<String, dynamic>> currentMatches = [];
 
         for (var entry in veroData) {
           String brand = entry['brand_name']?.toString().toLowerCase().trim() ?? "";
           String keywords = entry['keywords']?.toString().toLowerCase() ?? "";
           
-          bool isBrandMatch = brand.isNotEmpty && title.contains(brand);
-          
-          bool isKeywordMatch = false;
-          if (keywords.isNotEmpty) {
+          String? triggeredWord; // Remembers the exact word found in the title
+
+          // Check Brand
+          if (brand.isNotEmpty && title.contains(brand)) {
+            triggeredWord = brand;
+          } 
+          // Check Keywords
+          else if (keywords.isNotEmpty) {
             List<String> keywordList = keywords.split(',').map((e) => e.trim()).toList();
             for (var kw in keywordList) {
               if (kw.isNotEmpty && title.contains(kw)) {
-                isKeywordMatch = true;
+                triggeredWord = kw;
                 break;
               }
             }
           }
 
-          if (isBrandMatch || isKeywordMatch) {
-            matchedEntry = entry;
-            // 🔍 DEBUG LINE 2: See exactly what title triggered the match
-            debugPrint("🎯 MATCH FOUND! Title: '$title' matched with Brand: '$brand'");
-            break;
+          // If we found a match, add it to the list for this product!
+          if (triggeredWord != null) {
+            // Prevent duplicate brand flags on the same item
+            if (!currentMatches.any((m) => m['brand_name'] == entry['brand_name'])) {
+              currentMatches.add({
+                'brand_name': entry['brand_name']?.toString() ?? "Unknown",
+                'severity': entry['risk_level']?.toString() ?? "High Risk",
+                'triggered_word': triggeredWord
+              });
+            }
           }
         }
 
-        if (matchedEntry != null) {
-          item['isVero'] = true;
-          item['veroBrandName'] = matchedEntry['brand_name']?.toString() ?? "Unknown";
-          item['veroSeverity'] = matchedEntry['severity']?.toString() ?? "High Risk";
-        }
+        // Attach the list of matches to the item (Can be empty [] if safe)
+        item['veroMatches'] = currentMatches;
       }
     } catch (e) {
-      // 🔍 DEBUG LINE 3: Catch hidden errors (like wrong column names)
       debugPrint("🚨 VERO SCANNER CRITICAL ERROR: $e");
     }
     // =================================================================
