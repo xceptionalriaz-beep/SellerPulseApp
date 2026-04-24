@@ -7,15 +7,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../widgets/market_trend_chart.dart'; 
 import '../../../../core/services/market_brain_service.dart'; 
+import '../../../../core/utils/profit_engine.dart'; 
 
 import '../shared/neon_icon.dart';
 import '../shared/universal_scan_button.dart';
 import 'widgets/niche_overview_card.dart';
 import 'widgets/intelligence_row.dart'; 
 
-// ✨ IMPORT THE NEW FILTER FILES
 import 'models/search_filters.dart';
 import 'widgets/filter_hub.dart';
+import 'widgets/profit_settings_dialog.dart';
 
 class KeywordSearchScreen extends StatefulWidget {
   final String searchQuery;
@@ -28,7 +29,6 @@ class KeywordSearchScreen extends StatefulWidget {
 }
 
 class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
-  // ✨ GLOBAL SCROLL CONTROLLER
   final ScrollController _mainScrollController = ScrollController();
 
   bool _hideVero = false;
@@ -61,6 +61,9 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
   bool _showFilters = true;
   final SearchFilters _activeFilters = SearchFilters();
+  
+  Map<String, dynamic>? _activeDeepDiveProduct;
+  ProfitSettings _globalProfitSettings = const ProfitSettings();
 
   double get _totalPotentialProfit {
     double total = 0.0;
@@ -245,7 +248,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
         String cleanTitle = (item["title"] ?? "Unknown").replaceAll('"', '""').replaceAll(',', ' ');
         double ebayPrice = double.tryParse(item["sales"].toString().replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
         double profit = _itemProfits[id] ?? 0.0;
-        double buyCost = _itemProfits[id] != null ? (ebayPrice - profit - 5.00) : 0.0;
+        double buyCost = _itemProfits[id] != null ? (ebayPrice - profit - _globalProfitSettings.defaultShipping) : 0.0;
         if (buyCost < 0) buyCost = 0.0;
         
         rows.add([
@@ -333,19 +336,15 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
 
     return Stack(
       children: [
-        // ✨ GLOBAL SCROLLBAR WRAPPER
         RawScrollbar(
           controller: _mainScrollController,
           thumbColor: const Color(0xFF8FFF00), 
           radius: const Radius.circular(20), 
           thickness: 8, 
           interactive: true,
-          // ✨ CONVERTED TO CUSTOM SCROLL VIEW
           child: CustomScrollView(
             controller: _mainScrollController,
             slivers: [
-              
-              // --- 1. TOP CONTENT (Scrolls away naturally) ---
               SliverPadding(
                 padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 30.0, bottom: 15.0),
                 sliver: SliverToBoxAdapter(
@@ -433,6 +432,26 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                           
                           const SizedBox(width: 10),
                           _buildTopButton(Icons.sort, "Sort: Opp Score 🔥", isHighlight: false, onTap: () {}),
+
+                          const SizedBox(width: 10),
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => ProfitSettingsDialog(
+                                  currentSettings: _globalProfitSettings,
+                                  onSave: (newSettings) {
+                                    setState(() {
+                                      _globalProfitSettings = newSettings;
+                                    });
+                                  },
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.settings, color: Color(0xFF64748B)),
+                            tooltip: "Global Profit Settings",
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -507,20 +526,17 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                 ),
               ),
 
-              // --- 2. ✨ THE STICKY HEADER ---
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _StickyTableHeaderDelegate(),
               ),
 
-              // --- 3. THE PRODUCT LIST (Scrolls underneath the sticky header) ---
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 sliver: SliverToBoxAdapter(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white, 
-                      // Rounded corners only on the bottom so it connects to the header seamlessly
                       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
                       border: Border(
                         left: BorderSide(color: Colors.grey.shade200),
@@ -559,6 +575,7 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                                 
                                 return IntelligenceRow(
                                   itemId: rowId,
+                                  profitSettings: _globalProfitSettings,
                                   isSelected: _selectedItemIds.contains(rowId),
                                   onSelect: (bool? val) {
                                     setState(() {
@@ -573,6 +590,10 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                                   onProfitChanged: (double profit) {
                                     Future.microtask(() => setState(() => _itemProfits[rowId] = profit));
                                   },
+                                  onPulseCheck: () {
+                                    setState(() => _activeDeepDiveProduct = item as Map<String, dynamic>);
+                                  },
+                                  
                                   imageUrl: item["image"] ?? "", 
                                   title: item["title"] ?? "Unknown Product", 
                                   price: item["sales"]?.toString() ?? "0", 
@@ -581,23 +602,26 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                                   itemLocationCountry: item["itemLocationCountry"] ?? "N/A",
                                   sellerRegisteredCountry: item["sellerRegisteredCountry"] ?? "N/A",
                                   totalActiveListings: item["totalActiveListings"] ?? 0,
-
                                   itemWebUrl: item["itemWebUrl"],
-
                                   totalSold: item["totalSold"] ?? 0, 
                                   lastSoldDate: item["lastSoldDate"] ?? "N/A", 
                                   watchCount: item["watchCount"] ?? 0,
-                                  isVero: item["isVero"] ?? false, 
+                                  isVero: item["isVero"] ?? false,
+                                  veroBrandName: item["veroBrandName"],
+                                  veroSeverity: item["veroSeverity"],
                                   categoryPath: item["category"] ?? "Unknown",
                                   priceTrend: item["trend"] ?? "none", 
                                   upc: item["upc"],
+                                  
+                                  aiVelocity: (item["ai_velocity"] as num?)?.toDouble() ?? 0.0,
+                                  riskScore: item["risk_score"]?.toString() ?? "Medium",
+                                  demandHeat: (item["demand_heat"] as num?)?.toDouble() ?? 0.05,
                                 );
                               },
                             ),
                           
                           const Divider(height: 1, color: Color(0xFFE2E8F0)),
                           
-                          // ✨ PAGINATION CONTROLS
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                             color: Colors.white,
@@ -636,13 +660,11 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
                 ),
               ),
               
-              // Extra padding at the bottom so the floating action bar doesn't block the last row
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
         ),
 
-        // ✨ THE FLOATING BULK ACTION HUB (Remains fixed at the bottom of the screen)
         AnimatedPositioned(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
@@ -703,7 +725,197 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
             ),
           ),
         ),
+
+        if (_activeDeepDiveProduct != null)
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => setState(() => _activeDeepDiveProduct = null),
+              child: Container(color: Colors.black.withAlpha(100)),
+            ),
+          ),
+
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          top: 0, bottom: 0,
+          right: _activeDeepDiveProduct != null ? 0 : -500, 
+          width: 450,
+          child: _buildDeepDivePanel(),
+        ),
       ],
+    );
+  }
+
+  // ✨ HELPER: FULLY UPGRADED DEEP DIVE WITH VISUAL BAR
+  Widget _buildDeepDivePanel() {
+    if (_activeDeepDiveProduct == null) return const SizedBox.shrink();
+    final item = _activeDeepDiveProduct!;
+    
+    double sellingPrice = double.tryParse(item["sales"]?.toString().replaceAll(RegExp(r'[^\d.]'), '') ?? "0") ?? 0.0;
+    
+    // Estimate buy cost based on the profit amount the user has entered so far
+    final String rowId = item["itemId"] ?? item["itemWebUrl"] ?? "";
+    double profitAmount = _itemProfits[rowId] ?? 0.0;
+    double estimatedBuyCost = 0.0;
+    
+    if (profitAmount != 0) {
+       estimatedBuyCost = sellingPrice - profitAmount - (sellingPrice * (_globalProfitSettings.categoryFeePercent/100)) - _globalProfitSettings.fixedFee - _globalProfitSettings.defaultShipping;
+       if (estimatedBuyCost < 0) estimatedBuyCost = 0;
+    }
+
+    // Run the numbers through our Enterprise Profit Engine
+    final ProfitResult result = ProfitEngine.calculate(
+      sellingPrice: sellingPrice,
+      buyPrice: estimatedBuyCost,
+      settings: _globalProfitSettings,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(50), blurRadius: 30, offset: const Offset(-10, 0))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            color: const Color(0xFFF8FAFC),
+            child: Row(
+              children: [
+                const Expanded(child: Text("Deep Dive Analysis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)))),
+                IconButton(icon: const Icon(Icons.close), onPressed: () => setState(() => _activeDeepDiveProduct = null))
+              ],
+            ),
+          ),
+          
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(item["image"] ?? "", width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: 80, height: 80, color: Colors.grey.shade200)),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item["title"] ?? "Unknown", maxLines: 3, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(height: 10),
+                      Text("Seller: ${item["sellerUsername"] ?? "Unknown"}", style: TextStyle(color: Colors.blueGrey.shade600, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("💰 The Truth Equation", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF64748B))),
+                const SizedBox(height: 15),
+                _buildFeeRow("Selling Price", "\$${sellingPrice.toStringAsFixed(2)}", isPositive: true),
+                _buildFeeRow("True Sourcing Cost (Inc. Tax)", "-\$${result.trueBuyCost.toStringAsFixed(2)}", isNegative: true),
+                _buildFeeRow("Total eBay Fees", "-\$${result.totalEbayFees.toStringAsFixed(2)}", isNegative: true),
+                _buildFeeRow("Shipping Cost", "-\$${_globalProfitSettings.defaultShipping.toStringAsFixed(2)}", isNegative: true),
+                
+                if (_globalProfitSettings.isAdvancedEnabled && result.advancedDeductions > 0)
+                  _buildFeeRow("Advanced Deductions", "-\$${result.advancedDeductions.toStringAsFixed(2)}", isNegative: true),
+                
+                if (_globalProfitSettings.isAdvancedEnabled && result.totalCashback > 0)
+                  _buildFeeRow("Hidden Cashback Profit", "+\$${result.totalCashback.toStringAsFixed(2)}", isPositive: true),
+                  
+                const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider()),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Net Profit", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                    Text(
+                      "\$${result.netProfit.toStringAsFixed(2)}", 
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: result.netProfit > 0 ? Colors.green.shade700 : Colors.red.shade700)
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              color: const Color(0xFFF8FAFC),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Visual Margin Breakdown", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+                  const SizedBox(height: 15),
+                  
+                  if (sellingPrice > 0 && estimatedBuyCost > 0) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Row(
+                        children: [
+                          Expanded(flex: (result.trueBuyCost * 100).toInt(), child: Container(height: 24, color: Colors.blue)),
+                          Expanded(flex: ((result.totalEbayFees + _globalProfitSettings.defaultShipping + result.advancedDeductions) * 100).toInt(), child: Container(height: 24, color: Colors.red.shade400)),
+                          if (result.netProfit > 0)
+                            Expanded(flex: (result.netProfit * 100).toInt(), child: Container(height: 24, color: const Color(0xFF8FFF00))),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildLegendItem(Colors.blue, "Sourcing"),
+                        _buildLegendItem(Colors.red.shade400, "Fees"),
+                        _buildLegendItem(const Color(0xFF8FFF00), "Profit (${result.profitMargin.toStringAsFixed(1)}%)"),
+                      ],
+                    )
+                  ] else ...[
+                     const Center(child: Text("Enter a Buy Cost in the table\nto see the visual breakdown.", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic))),
+                  ]
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      children: [
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3))),
+        const SizedBox(width: 6),
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF475569))),
+      ],
+    );
+  }
+
+  Widget _buildFeeRow(String label, String amount, {bool isPositive = false, bool isNegative = false, bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontWeight: isBold ? FontWeight.w900 : FontWeight.normal, fontSize: isBold ? 14 : 13)),
+          Text(amount, style: TextStyle(
+            fontWeight: isBold ? FontWeight.w900 : FontWeight.bold, 
+            fontSize: isBold ? 14 : 13,
+            color: isNegative ? Colors.red : (isPositive ? Colors.green.shade700 : Colors.black)
+          )),
+        ],
+      ),
     );
   }
 
@@ -730,22 +942,20 @@ class _KeywordSearchScreenState extends State<KeywordSearchScreen> {
   }
 }
 
-// --- ✨ THE STICKY HEADER DELEGATE ---
 class _StickyTableHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
-  double get minExtent => 46.0; // Exact fixed height
+  double get minExtent => 46.0; 
   @override
   double get maxExtent => 46.0;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 30.0), // Aligns with the list below it
+      margin: const EdgeInsets.symmetric(horizontal: 30.0), 
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC), // Slight off-white to distinguish the header
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)), // Top corners rounded
+        color: const Color(0xFFF8FAFC), 
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)), 
         border: Border.all(color: Colors.grey.shade200),
-        // Adds a shadow ONLY when you scroll down and the list slides under it
         boxShadow: shrinkOffset > 0 
             ? [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 6, offset: const Offset(0, 3))] 
             : [],
@@ -757,8 +967,9 @@ class _StickyTableHeaderDelegate extends SliverPersistentHeaderDelegate {
           _headerText("PRODUCT", flex: 8),
           _headerText("SELLER", flex: 4),
           _headerText("FEEDBACK", flex: 2), 
-          _headerText("TOTAL SALE", flex: 2),   
-          _headerText("WATCH", flex: 2),    
+          _headerText("TRENDS", flex: 2), 
+          _headerText("TOTAL SALE", flex: 2), 
+          _headerText("WATCH", flex: 2),      
           _headerText("PRICE", flex: 2),
           _headerText("BUY", flex: 2),
           _headerText("PROFIT", flex: 2),

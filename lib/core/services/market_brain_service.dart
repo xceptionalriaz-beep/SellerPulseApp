@@ -62,6 +62,9 @@ class MarketBrainService {
                          filters.minSales != 0;
     }
 
+    // =====================================================================
+    // ⚡ PHASE 1: CACHE INTERCEPTOR (With Safety Upgrades)
+    // =====================================================================
     if (currentPage == 1 && !hasActiveFilters) {
       try {
         final cachedData = await supabase
@@ -80,6 +83,17 @@ class MarketBrainService {
               .map((e) => FlSpot((e['x'] as num).toDouble(), (e['y'] as num).toDouble()))
               .toList();
 
+          // 🛡️ Ensure old cached data doesn't crash the new UI
+          List<dynamic> safeCachedProducts = (cachedData['products'] as List<dynamic>).map((p) {
+            if (p is Map) {
+              p['ai_velocity'] ??= 0.0;
+              p['risk_score'] ??= 'Medium';
+              p['demand_heat'] ??= 0.05;
+              p['isVero'] ??= false;
+            }
+            return p;
+          }).toList();
+
           return MarketResearchResult(
             nicheTotalActive: cachedData['total_active'],
             nicheAvgPrice: cachedData['avg_price'],
@@ -89,7 +103,7 @@ class MarketBrainService {
             nicheSaturationScore: (cachedData['saturation_score'] as num).toDouble(),
             nicheAdInsight: cachedData['ad_insight'],
             historicalSalesData: cachedSpots,
-            liveProducts: cachedData['products'] as List<dynamic>,
+            liveProducts: safeCachedProducts,
           );
         }
       } catch (e) {
@@ -97,6 +111,9 @@ class MarketBrainService {
       }
     }
 
+    // =====================================================================
+    // 🐢 PHASE 2: FRESH FETCH & DATA EXTRACTION
+    // =====================================================================
     final Map<String, dynamic> requestBody = {
       'query': query, 
       'page': currentPage
@@ -107,10 +124,8 @@ class MarketBrainService {
       debugPrint("🚀 Sending Custom Filters to Backend: $filterPayload");
     }
 
-    // 🚨 FIX: Define the exact same Legacy Key you used in main.dart
     const String fallbackAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oZ2VqZXd3c25ieW91b3p5bWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDk3MzksImV4cCI6MjA4OTgyNTczOX0.QytlMBqIV74V5HV1vrVMjDERyY2E9-YUgSp3QoXDbgA';
 
-    // 🚀 We force the app to use the Legacy Key instead of the User Token!
     final response = await supabase.functions.invoke(
       'ebay-search', 
       body: requestBody,
@@ -119,7 +134,6 @@ class MarketBrainService {
       },
     );
 
-    // 🛡️ THE NULL-SAFETY SHIELD: Prevents the White Screen crash if data is empty
     final Map<String, dynamic> data = (response.data as Map<String, dynamic>?) ?? {};
     
     if (data.containsKey('error') && data['error'] != null) {
@@ -137,10 +151,10 @@ class MarketBrainService {
         newTrendData.add(FlSpot(i.toDouble(), (dynamicTrend[i]['volume'] as num).toDouble()));
       }
     } else {
+      // Fallback trend if backend fails
       final int seed = query.hashCode;
       final math.Random seededRandom = math.Random(seed);
       double baseDailySales = (totalEbayListings * 0.05) / 30;
-      
       for (int i = 0; i <= 30; i++) {
         double noise = (seededRandom.nextDouble() - 0.5) * 0.7;
         double trendFactor = (seededRandom.nextDouble() > 0.5 ? 1.15 : 0.85);
@@ -200,6 +214,9 @@ class MarketBrainService {
     final moneyFormat = NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
     final compactFormat = NumberFormat.compactCurrency(locale: 'en_US', symbol: '\$', decimalDigits: 0);
 
+    // =====================================================================
+    // 🧠 PRODUCT MAPPING & INTELLIGENCE INJECTION
+    // =====================================================================
     final mappedProducts = itemSummaries.map((item) {
       final priceData = item['price'];
       final imageData = item['image'];
@@ -240,8 +257,64 @@ class MarketBrainService {
         "category": catPath,
         "trend": "stable", 
         "upc": item['gtin']?.toString(),
+        
+        // ✨ THE NEW PRO INTELLIGENCE FIELDS (Safely Parsed)
+        "ai_velocity": item['ai_velocity'] != null ? (double.tryParse(item['ai_velocity'].toString()) ?? 0.0) : 0.0,
+        "risk_score": item['risk_score']?.toString() ?? "Medium",
+        "demand_heat": item['demand_heat'] != null ? (double.tryParse(item['demand_heat'].toString()) ?? 0.05) : 0.05,
       };
     }).toList();
+
+    // =================================================================
+    // ✨ THE INTELLIGENT VERO SCANNER 2.0 (Keywords + Severity)
+    // =================================================================
+    try {
+      final veroResponse = await supabase.from('vero_list').select('brand_name, keywords, severity');
+      final List veroData = veroResponse as List;
+
+      // 🔍 DEBUG LINE 1: See if data is actually coming from Supabase
+      debugPrint("📡 VERO X-RAY: Found ${veroData.length} brands in your Database.");
+
+      for (var item in mappedProducts) {
+        String title = (item['title'] ?? '').toString().toLowerCase();
+        Map<String, dynamic>? matchedEntry;
+
+        for (var entry in veroData) {
+          String brand = entry['brand_name']?.toString().toLowerCase().trim() ?? "";
+          String keywords = entry['keywords']?.toString().toLowerCase() ?? "";
+          
+          bool isBrandMatch = brand.isNotEmpty && title.contains(brand);
+          
+          bool isKeywordMatch = false;
+          if (keywords.isNotEmpty) {
+            List<String> keywordList = keywords.split(',').map((e) => e.trim()).toList();
+            for (var kw in keywordList) {
+              if (kw.isNotEmpty && title.contains(kw)) {
+                isKeywordMatch = true;
+                break;
+              }
+            }
+          }
+
+          if (isBrandMatch || isKeywordMatch) {
+            matchedEntry = entry;
+            // 🔍 DEBUG LINE 2: See exactly what title triggered the match
+            debugPrint("🎯 MATCH FOUND! Title: '$title' matched with Brand: '$brand'");
+            break;
+          }
+        }
+
+        if (matchedEntry != null) {
+          item['isVero'] = true;
+          item['veroBrandName'] = matchedEntry['brand_name']?.toString() ?? "Unknown";
+          item['veroSeverity'] = matchedEntry['severity']?.toString() ?? "High Risk";
+        }
+      }
+    } catch (e) {
+      // 🔍 DEBUG LINE 3: Catch hidden errors (like wrong column names)
+      debugPrint("🚨 VERO SCANNER CRITICAL ERROR: $e");
+    }
+    // =================================================================
 
     final result = MarketResearchResult(
       nicheTotalActive: "${NumberFormat.decimalPattern().format(totalEbayListings)}+ listings",
@@ -255,6 +328,9 @@ class MarketBrainService {
       liveProducts: mappedProducts,
     );
 
+    // =====================================================================
+    // 💾 PHASE 3: SAVE TO CACHE
+    // =====================================================================
     if (currentPage == 1 && !hasActiveFilters) {
       try {
         await supabase.from('market_cache').insert({

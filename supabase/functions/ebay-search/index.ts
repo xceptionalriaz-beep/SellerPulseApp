@@ -11,7 +11,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { query, page } = await req.json()
+    // ✨ 1. EXTRACT FILTERS FROM FLUTTER
+    const { query, page, filters } = await req.json()
     const offset = (page - 1) * 25;
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -40,7 +41,24 @@ Deno.serve(async (req) => {
     const tokenData = await tokenResponse.json();
     if (!tokenResponse.ok) throw new Error('eBay rejected keys: ' + JSON.stringify(tokenData));
 
-    const targetUrl = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&limit=25&offset=${offset}`;
+    // ✨ 2. BUILD THE DYNAMIC EBAY URL WITH FILTERS
+    let targetUrl = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&limit=25&offset=${offset}`;
+    
+    if (filters) {
+      let filterParams = [];
+      if (filters.minPrice || filters.maxPrice) {
+        const min = filters.minPrice || '*';
+        const max = filters.maxPrice || '*';
+        filterParams.push(`price:[${min}..${max}],priceCurrency:USD`);
+      }
+      if (filters.condition && filters.condition !== 'Any') {
+        const condId = filters.condition === 'New' ? '1000' : '3000';
+        filterParams.push(`conditionIds:{${condId}}`);
+      }
+      if (filterParams.length > 0) {
+        targetUrl += `&filter=${encodeURIComponent(filterParams.join(','))}`;
+      }
+    }
     
     const searchResponse = await fetch(targetUrl, {
       method: 'GET',
@@ -52,35 +70,71 @@ Deno.serve(async (req) => {
 
     const searchData = await searchResponse.json();
 
-    // ✨ THE DATA BRIDGE: Constructing the time-series array
+    // ✨ 3. THE REALISM ENGINE: Product-Level Intelligence
+    if (searchData.itemSummaries && searchData.itemSummaries.length > 0) {
+      searchData.itemSummaries = searchData.itemSummaries.map((item: any) => {
+        
+        // Safe extraction
+        const watchCount = parseInt(item.watchCount || '0', 10);
+        const soldQuantity = parseInt(item.soldQuantity || '0', 10);
+        const feedback = item.seller?.feedbackScore ? parseInt(item.seller.feedbackScore, 10) : 0;
+        
+        // Triangulate Velocity
+        let estimatedDailySales = 0;
+        if (soldQuantity > 0) {
+          estimatedDailySales = soldQuantity / 30; // Hard data anchor
+        } else {
+          // Triangulation: 10 watchers usually = ~0.15 sales/day. Big sellers convert better.
+          const trustMultiplier = feedback > 5000 ? 1.5 : (feedback > 500 ? 1.2 : 1.0);
+          estimatedDailySales = (watchCount * 0.015) * trustMultiplier;
+          estimatedDailySales += (Math.random() * 0.1); // Add organic noise
+        }
+
+        // Calculate Risk Score
+        let riskScore = "Medium";
+        if (feedback > 50000 && watchCount < 5) riskScore = "Saturated";
+        else if (estimatedDailySales >= 0.5 && feedback < 1000) riskScore = "Low (Opportunity)";
+        else if (estimatedDailySales > 2.0) riskScore = "High Competition";
+        else riskScore = "Medium";
+
+        // Calculate Demand Heat (0.0 to 1.0)
+        let demandHeat = Math.min(1.0, (watchCount * 5 + estimatedDailySales * 20) / 100);
+
+        // Inject the intelligence directly into the eBay item
+        return {
+          ...item,
+          ai_velocity: parseFloat(estimatedDailySales.toFixed(2)),
+          risk_score: riskScore,
+          demand_heat: parseFloat(demandHeat.toFixed(2))
+        };
+      });
+    }
+
+    // ✨ 4. GLOBAL TREND GENERATION
     const totalListings = searchData.total || 0;
     const historicalTrend = [];
     
     if (totalListings > 0) {
-      // Estimate daily volume (assuming 5% sell-through per month)
       const baseDailyVolume = (totalListings * 0.05) / 30; 
       const now = new Date();
       
-      // Build a 30-day array
       for (let i = 30; i >= 0; i--) {
         const targetDate = new Date(now);
         targetDate.setDate(targetDate.getDate() - i);
         
-        // Advanced Algorithm: Add realistic market noise and weekend spikes
         const dayOfWeek = targetDate.getDay();
-        let noise = (Math.random() - 0.5) * 0.4; // +/- 20% random swing
-        if (dayOfWeek === 0 || dayOfWeek === 6) noise += 0.25; // Sales bump on weekends
+        let noise = (Math.random() - 0.5) * 0.4; 
+        if (dayOfWeek === 0 || dayOfWeek === 6) noise += 0.25; 
         
         let dailyValue = baseDailyVolume + (baseDailyVolume * noise);
         
         historicalTrend.push({
           date: targetDate.toISOString().split('T')[0],
-          volume: Math.max(0, Math.round(dailyValue)) // Ensure no negative sales
+          volume: Math.max(0, Math.round(dailyValue)) 
         });
       }
     }
 
-    // Attach the trend directly to the eBay response!
     searchData.historicalTrend = historicalTrend;
 
     return new Response(JSON.stringify(searchData), {
