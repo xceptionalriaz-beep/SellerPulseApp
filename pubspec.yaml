@@ -1,0 +1,38 @@
+name: sellerpulse
+description: "Ebay Market Research Tool"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # --- NETWORK & API ---
+  http: ^1.2.0           # Talk to eBay API
+  supabase_flutter: ^2.0.0 # Your Database/Backend
+
+  # --- STATE MANAGEMENT ---
+  provider: ^6.1.2       # Moves data from search bar to charts
+
+  # --- UI & VISUALS ---
+  google_fonts: ^6.1.0   # Premium Typography
+  flutter_animate: ^4.5.0
+  fl_chart: ^1.2.0       # The engine for your Neon Trend Charts
+  
+  # --- UTILITIES ---
+  file_picker: ^10.3.10
+  desktop_drop: ^0.7.0
+  intl: ^0.20.2
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
