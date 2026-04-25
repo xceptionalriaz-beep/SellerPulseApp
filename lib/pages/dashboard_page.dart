@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'landing_page.dart'; 
-// ✨ Your new Master Dashboard import!
 import 'product_research/product_research_master.dart';
 import 'inventory_page.dart'; 
 import 'profit_calculator.dart'; 
 import 'admin_management_page.dart'; 
 import 'title_builder/title_builder_main.dart'; 
-// ✨ IMPORTING THE NEW FULL PAGE SETTINGS
-import 'user_profile_page.dart'; 
+import '../user_profile/user_profile_page.dart';
+import '../user_profile/user_profile_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -49,7 +48,6 @@ class _DashboardPageState extends State<DashboardPage> {
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF8FAFC),
       drawer: !isDesktop ? _buildMobileDrawer() : null,
-      // ✨ REMOVED endDrawer
 
       body: Padding(
         padding: const EdgeInsets.all(10.0), 
@@ -59,50 +57,61 @@ class _DashboardPageState extends State<DashboardPage> {
             if (isDesktop) _buildSlimRail(),
 
             Expanded(
-              child: Stack( 
+              // ✨ CHANGED FROM STACK TO COLUMN FOR PERFECT ALIGNMENT
+              child: Column( 
                 children: [
-                  Column(
-                    children: [
-                      if (!isDesktop) _buildMobileHeader(),
-                      
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(left: isDesktop ? 15 : 0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: _buildCurrentScreen(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   
-                  // ✨ FLOATING ACTION CORNER (Desktop Only)
+                  // --- 🏆 THE NEW GLOBAL TOP BAR (Desktop Only) ---
                   if (isDesktop)
-                    Positioned(
-                      top: 15,
-                      right: 25,
+                    Container(
+                      height: 60,
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
                       child: Row(
                         children: [
-                          _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
-                          const SizedBox(width: 15),
-                          // ✨ WIRED AVATAR TO OPEN SETTINGS TAB
-                          Builder(
-                            builder: (context) {
-                              return InkWell(
-                                borderRadius: BorderRadius.circular(16),
-                                onTap: () => setState(() => _selectedIndex = 5), // ✨ Routes to Settings
-                                child: CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: neonGreen, 
-                                  child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
-                                ),
-                              );
-                            }
+                          // Optional Breadcrumbs to show them where they are
+                          Text(
+                            _selectedIndex == 5 ? "Settings / Overview" : "Marketplace Research",
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w600),
                           ),
+                          const Spacer(),
+                          
+                          // The Notification Bell (Now has a proper home!)
+                          _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
+                          
+                          // ✨ Show avatar ONLY if NOT in settings
+                          if (_selectedIndex != 5) ...[
+                            const SizedBox(width: 15),
+                            Builder(
+                              builder: (context) {
+                                return InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () => setState(() => _selectedIndex = 5), // Routes to Settings
+                                  child: CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: neonGreen, 
+                                    child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+                                  ),
+                                );
+                              }
+                            ),
+                          ]
                         ],
                       ),
                     ),
+
+                  // Mobile Header
+                  if (!isDesktop) _buildMobileHeader(),
+                  
+                  // --- 🖥️ MAIN CONTENT AREA ---
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: isDesktop ? 15 : 0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: _buildCurrentScreen(),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -139,7 +148,14 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           
-          const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 24),
+          // ✨ WIRED UP SHIELD LOGO TO GO TO DASHBOARD (Mobile)
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedIndex = 0),
+              child: const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 24),
+            ),
+          ),
           
           Row(
             children: [
@@ -147,20 +163,22 @@ class _DashboardPageState extends State<DashboardPage> {
                 onPressed: () {},
                 icon: const Icon(Icons.notifications_outlined, color: Color(0xFF64748B), size: 22),
               ),
-              // ✨ WIRED AVATAR TO OPEN SETTINGS TAB
-              Builder(
-                builder: (context) {
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () => setState(() => _selectedIndex = 5), // ✨ Routes to Settings
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundColor: neonGreen,
-                      child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
-                    ),
-                  );
-                }
-              ),
+              
+              // ✨ HIDES AVATAR WHEN IN SETTINGS (Mobile)
+              if (_selectedIndex != 5) 
+                Builder(
+                  builder: (context) {
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () => setState(() => _selectedIndex = 5), // Routes to Settings
+                      child: CircleAvatar(
+                        radius: 14,
+                        backgroundColor: neonGreen,
+                        child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    );
+                  }
+                ),
               const SizedBox(width: 5),
             ],
           ),
@@ -176,7 +194,19 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         children: [
           const SizedBox(height: 50),
-          const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 40),
+          
+          // ✨ WIRED UP SHIELD LOGO TO GO TO DASHBOARD (Drawer)
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {
+                setState(() => _selectedIndex = 0);
+                Navigator.pop(context); // Closes drawer after click
+              },
+              child: const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 40),
+            ),
+          ),
+          
           const SizedBox(height: 30),
           Expanded(
             child: ListView(
@@ -233,7 +263,19 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         children: [
           const SizedBox(height: 30),
-          const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 24),
+          
+          // ✨ WIRED UP SHIELD LOGO TO GO TO DASHBOARD (Desktop Sidebar)
+          Tooltip(
+            message: "Home",
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedIndex = 0),
+                child: const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 24),
+              ),
+            ),
+          ),
+          
           const SizedBox(height: 35),
           _sidebarItem(icon: Icons.dashboard_rounded, title: "Dashboard", index: 0),
           _sidebarItem(icon: Icons.search_rounded, title: "Product Research", index: 1),

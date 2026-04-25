@@ -5,6 +5,7 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
+  
 
 dependencies:
   flutter:
@@ -24,6 +25,7 @@ dependencies:
   fl_chart: ^1.2.0       # The engine for your Neon Trend Charts
   
   # --- UTILITIES ---
+  image_picker: ^1.1.2   # ✨ NEW: Enables Profile Image Selection
   file_picker: ^10.3.10
   desktop_drop: ^0.7.0
   intl: ^0.20.2
