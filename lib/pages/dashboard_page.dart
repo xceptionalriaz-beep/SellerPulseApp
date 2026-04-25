@@ -8,6 +8,8 @@ import 'inventory_page.dart';
 import 'profit_calculator.dart'; 
 import 'admin_management_page.dart'; 
 import 'title_builder/title_builder_main.dart'; 
+// ✨ IMPORTING THE NEW FULL PAGE SETTINGS
+import 'user_profile_page.dart'; 
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -47,6 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF8FAFC),
       drawer: !isDesktop ? _buildMobileDrawer() : null,
+      // ✨ REMOVED endDrawer
 
       body: Padding(
         padding: const EdgeInsets.all(10.0), 
@@ -83,10 +86,19 @@ class _DashboardPageState extends State<DashboardPage> {
                         children: [
                           _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
                           const SizedBox(width: 15),
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundColor: neonGreen, 
-                            child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+                          // ✨ WIRED AVATAR TO OPEN SETTINGS TAB
+                          Builder(
+                            builder: (context) {
+                              return InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () => setState(() => _selectedIndex = 5), // ✨ Routes to Settings
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: neonGreen, 
+                                  child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+                                ),
+                              );
+                            }
                           ),
                         ],
                       ),
@@ -135,10 +147,19 @@ class _DashboardPageState extends State<DashboardPage> {
                 onPressed: () {},
                 icon: const Icon(Icons.notifications_outlined, color: Color(0xFF64748B), size: 22),
               ),
-              CircleAvatar(
-                radius: 14,
-                backgroundColor: neonGreen,
-                child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+              // ✨ WIRED AVATAR TO OPEN SETTINGS TAB
+              Builder(
+                builder: (context) {
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => setState(() => _selectedIndex = 5), // ✨ Routes to Settings
+                    child: CircleAvatar(
+                      radius: 14,
+                      backgroundColor: neonGreen,
+                      child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  );
+                }
               ),
               const SizedBox(width: 5),
             ],
@@ -275,12 +296,11 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildCurrentScreen() {
     switch (_selectedIndex) {
       case 0: return _buildDashboardHome();
-      // ✨ Case 1 seamlessly routes to your new Master Dashboard!
       case 1: return const ProductResearchMaster(); 
       case 2: return const TitleBuilderMain();
       case 3: return const ProfitCalculatorPage();
       case 4: return const InventoryPage();
-      case 5: return const Center(child: Text("User Settings", style: TextStyle(fontSize: 20, color: Colors.grey)));
+      case 5: return const UserProfilePage(); // ✨ NEW FULL PAGE SETTINGS
       case 6: return isOwner ? const AdminManagementPage() : const Center(child: Text("404", style: TextStyle(color: Colors.grey)));
       default: return const SizedBox.shrink();
     }
