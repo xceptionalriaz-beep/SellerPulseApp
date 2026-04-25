@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_page.dart'; 
 import '../widgets/animated_progress_pill.dart'; 
 import '../widgets/clickable_logo.dart'; 
-import 'dashboard_page.dart'; // ✨ NEW: Dashboard import added here!
+import 'dashboard_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -19,6 +19,9 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  
+  // ✨ NEW: State variable to track the selected gender
+  String _selectedGender = 'unspecified'; 
 
   @override
   void dispose() {
@@ -66,26 +69,21 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC), 
       body: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false), // Hides the gray scrollbar
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                
-                // ✨ THIS IS WHERE YOUR NEW WIDGET GOES ✨
                 AnimatedProgressPill(
                   currentStep: _currentStep,
                   onStepTapped: (step) {
-                    // Only allow clicking backward, not skipping ahead
                     if (step < _currentStep) {
                       _pageController.animateToPage(step, duration: const Duration(milliseconds: 300), curve: Curves.ease);
                     }
                   },
                 ),
-                // ----------------------------------------
-
                 const SizedBox(height: 40), 
 
                 Container(
@@ -150,7 +148,7 @@ class _SignupPageState extends State<SignupPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const ClickableLogo(), // Reusable logo!
+          const ClickableLogo(),
           const SizedBox(height: 25),
           
           const Text("Create your account", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
@@ -168,6 +166,11 @@ class _SignupPageState extends State<SignupPage> {
           
           _inputLabel("Create Password"),
           _buildField("••••••••", Icons.lock_outline, isPassword: true, controller: _passwordController),
+          const SizedBox(height: 16),
+
+          // ✨ NEW: Gender Selection Dropdown
+          _inputLabel("Gender"),
+          _buildGenderDropdown(),
           
           const SizedBox(height: 30),
 
@@ -184,10 +187,14 @@ class _SignupPageState extends State<SignupPage> {
               }
 
               try {
+                // ✨ NEW: Sending the selected gender to Supabase!
                 await Supabase.instance.client.auth.signUp(
                   email: email,
                   password: password,
-                  data: {'full_name': name},
+                  data: {
+                    'full_name': name,
+                    'gender': _selectedGender, // Saves 'male', 'female', or 'unspecified'
+                  },
                 );
                 _nextStep(); 
               } on AuthException catch (e) {
@@ -233,6 +240,40 @@ class _SignupPageState extends State<SignupPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  // ✨ NEW: The Custom Dropdown Widget
+  Widget _buildGenderDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedGender,
+          isExpanded: true,
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8)),
+          style: const TextStyle(color: Colors.black, fontSize: 14),
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          items: const [
+            DropdownMenuItem(value: 'unspecified', child: Text("Prefer not to say")),
+            DropdownMenuItem(value: 'male', child: Text("Male")),
+            DropdownMenuItem(value: 'female', child: Text("Female")),
+          ],
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedGender = newValue;
+              });
+            }
+          },
+        ),
       ),
     );
   }
@@ -301,12 +342,11 @@ class _SignupPageState extends State<SignupPage> {
             text: "Go to Dashboard", 
             icon: Icons.dashboard_outlined,
             onPressed: () async {
-               // ✨ FIX: This now instantly routes them to the Dashboard Page!
                if (mounted) {
                  Navigator.pushAndRemoveUntil(
                    context,
                    MaterialPageRoute(builder: (context) => const DashboardPage()),
-                   (route) => false, // This clears navigation history so they can't go "back" to the signup screen
+                   (route) => false, 
                  );
                }
             }

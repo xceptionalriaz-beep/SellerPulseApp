@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:image_picker/image_picker.dart'; 
+import 'package:image_picker/image_picker.dart';
 
 class OverviewTab extends StatefulWidget {
   const OverviewTab({super.key});
@@ -21,8 +21,9 @@ class _OverviewTabState extends State<OverviewTab> {
   String _userEmail = "";
   String _userInitial = "S";
   
-  // ✨ New Avatar State Variables
+  // ✨ Avatar & Gender State Variables
   String? _avatarUrl;
+  String _userGender = "unspecified"; 
   bool _isUploadingImage = false;
 
   bool _isEditing = false;
@@ -33,19 +34,18 @@ class _OverviewTabState extends State<OverviewTab> {
     super.initState();
     _notesController = TextEditingController();
 
-    // Pulling REAL data from your Supabase backend
     final user = Supabase.instance.client.auth.currentUser;
     final String rawName = user?.userMetadata?['full_name']?.toString() ?? "Reaz Uddin";
     final String rawEmail = user?.email ?? "xceptionalriaz@gmail.com";
     
-    // Check if they already have an avatar saved in the database
+    // Load existing metadata
     _avatarUrl = user?.userMetadata?['avatar_url']?.toString();
+    _userGender = user?.userMetadata?['gender']?.toString() ?? "unspecified";
 
     _userName = rawName;
     _userEmail = rawEmail;
     _userInitial = rawName.isNotEmpty ? rawName[0].toUpperCase() : "S";
 
-    // Initialize Form Controllers with current data
     _nameController = TextEditingController(text: _userName);
     _emailController = TextEditingController(text: _userEmail);
     _businessController = TextEditingController(text: "Reazify LLC"); 
@@ -60,7 +60,36 @@ class _OverviewTabState extends State<OverviewTab> {
     super.dispose();
   }
 
-  // ✨ THE ACTIVE IMAGE UPLOAD LOGIC
+  // ✨ UPGRADED: Smart Avatar Logic (Professional Neutral Faces)
+  String _getSmartAvatarUrl() {
+    final user = Supabase.instance.client.auth.currentUser;
+    
+    // 1. Manual Upload (Highest Priority)
+    if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
+      return _avatarUrl!;
+    }
+
+    // 2. Google Account Photo
+    final googlePhoto = user?.userMetadata?['picture'];
+    if (googlePhoto != null) {
+      return googlePhoto.toString();
+    }
+
+    // 3. DiceBear Automatic Avatars
+    final String seed = user?.email ?? "default";
+    
+    if (_userGender == 'male') {
+      // ✨ FIX: "adventurer-neutral" removes angry/weird expressions!
+      return "https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${seed}male&backgroundColor=b6e3f4";
+    } else if (_userGender == 'female') {
+      // Lorelei style creates beautiful, calm female faces
+      return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
+    }
+
+    // Default Neutral Initials
+    return "https://api.dicebear.com/9.x/initials/png?seed=$seed&backgroundColor=0f172a,8fff00";
+  }
+
   Future<void> _pickAndUploadImage() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
@@ -79,7 +108,6 @@ class _OverviewTabState extends State<OverviewTab> {
     try {
       final bytes = await image.readAsBytes();
       
-      // 2MB Size Guard
       final int fileBytes = bytes.length;
       final double fileSizeInMB = fileBytes / (1024 * 1024);
       
@@ -93,27 +121,22 @@ class _OverviewTabState extends State<OverviewTab> {
         return; 
       }
 
-      // ✨ SUPABASE SAVE OPERATION 
       final fileExt = image.path.split('.').last;
       final fileName = '${user.id}-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
       final filePath = 'public/$fileName';
 
-      // 1. Upload to the 'avatars' bucket
       await Supabase.instance.client.storage.from('avatars').uploadBinary(
             filePath,
             bytes,
             fileOptions: FileOptions(contentType: 'image/$fileExt'),
           );
       
-      // 2. Get the Public URL
       final String imageUrl = Supabase.instance.client.storage.from('avatars').getPublicUrl(filePath);
       
-      // 3. Update User Metadata permanently
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(data: {'avatar_url': imageUrl}),
       );
       
-      // 4. Update UI
       setState(() => _avatarUrl = imageUrl);
 
       if (mounted) {
@@ -133,9 +156,12 @@ class _OverviewTabState extends State<OverviewTab> {
     setState(() => _isLoading = true);
     
     try {
-      // Save name to Supabase
       await Supabase.instance.client.auth.updateUser(
-        UserAttributes(data: {'full_name': _nameController.text}),
+        UserAttributes(data: {
+          'full_name': _nameController.text,
+          'gender': _userGender, 
+          'avatar_url': _avatarUrl, 
+        }),
       );
 
       setState(() {
@@ -220,9 +246,6 @@ class _OverviewTabState extends State<OverviewTab> {
     );
   }
 
-  // =========================================================
-  // VIEW STATE
-  // =========================================================
   Widget _buildViewState() {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
     
@@ -232,14 +255,20 @@ class _OverviewTabState extends State<OverviewTab> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✨ AVATAR (View Mode)
-            CircleAvatar(
-              radius: isMobile ? 30 : 40,
-              backgroundColor: const Color(0xFFE2E8F0),
-              backgroundImage: _avatarUrl != null ? NetworkImage(_avatarUrl!) : null,
-              child: _avatarUrl == null 
-                  ? Text(_userInitial, style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)))
-                  : null, 
+            ClipRRect(
+              borderRadius: BorderRadius.circular(isMobile ? 30 : 40),
+              child: Container(
+                width: isMobile ? 60 : 80,
+                height: isMobile ? 60 : 80,
+                color: const Color(0xFFE2E8F0), 
+                child: Image.network(
+                  _getSmartAvatarUrl(),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Center(
+                    child: Text(_userInitial, style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)))
+                  ),
+                ),
+              ),
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -301,9 +330,6 @@ class _OverviewTabState extends State<OverviewTab> {
     );
   }
 
-  // =========================================================
-  // EDIT STATE
-  // =========================================================
   Widget _buildEditState() {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
     
@@ -320,42 +346,62 @@ class _OverviewTabState extends State<OverviewTab> {
         ),
         const SizedBox(height: 24),
         
-        // ✨ INTERACTIVE AVATAR UPLOAD (Edit Mode)
         Center(
-          child: GestureDetector(
-            onTap: _isUploadingImage ? null : _pickAndUploadImage,
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 45,
-                    backgroundColor: const Color(0xFFE2E8F0),
-                    backgroundImage: _avatarUrl != null ? NetworkImage(_avatarUrl!) : null,
-                    child: _avatarUrl == null 
-                        ? Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
-                        : null,
-                  ),
-                  if (_isUploadingImage)
-                    const Positioned(
-                      bottom: 0, right: 0,
-                      child: CircleAvatar(radius: 16, backgroundColor: Colors.white, child: Padding(padding: EdgeInsets.all(4.0), child: CircularProgressIndicator(color: Color(0xFF8FFF00), strokeWidth: 3)))
-                    )
-                  else
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8FFF00),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
-                        boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 5)]
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _isUploadingImage ? null : _pickAndUploadImage,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(45),
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          color: const Color(0xFFE2E8F0), 
+                          child: Image.network(
+                            _getSmartAvatarUrl(),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Center(
+                              child: Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
+                            ),
+                          ),
+                        ),
                       ),
-                      child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
-                    ),
-                ],
+                      if (_isUploadingImage)
+                        const Positioned(
+                          bottom: 0, right: 0,
+                          child: CircleAvatar(radius: 16, backgroundColor: Colors.white, child: Padding(padding: EdgeInsets.all(4.0), child: CircularProgressIndicator(color: Color(0xFF8FFF00), strokeWidth: 3)))
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF8FFF00),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
+                            boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 5)]
+                          ),
+                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 8),
+              
+              if (_avatarUrl != null && _avatarUrl!.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() => _avatarUrl = null); 
+                  },
+                  icon: const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
+                  label: const Text("Remove Custom Photo", style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+                ),
+            ],
           ),
         ),
         
@@ -369,15 +415,27 @@ class _OverviewTabState extends State<OverviewTab> {
                 _buildInputField("Email Address", _emailController, Icons.email_outlined, isReadOnly: true),
                 const SizedBox(height: 16),
                 _buildInputField("Legal Business Name", _businessController, Icons.business_outlined),
+                const SizedBox(height: 16),
+                _buildGenderDropdown(), // ✨ UPDATED GENDER DROPDOWN
               ],
             )
-          : Row(
+          : Column(
               children: [
-                Expanded(child: _buildInputField("Full Name", _nameController, Icons.person_outline)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildInputField("Email Address", _emailController, Icons.email_outlined, isReadOnly: true)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildInputField("Legal Business Name", _businessController, Icons.business_outlined)),
+                Row(
+                  children: [
+                    Expanded(child: _buildInputField("Full Name", _nameController, Icons.person_outline)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildInputField("Email Address", _emailController, Icons.email_outlined, isReadOnly: true)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(child: _buildInputField("Legal Business Name", _businessController, Icons.business_outlined)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildGenderDropdown()), // ✨ UPDATED GENDER DROPDOWN
+                  ],
+                ),
               ],
             ),
             
@@ -418,6 +476,43 @@ class _OverviewTabState extends State<OverviewTab> {
   // HELPER WIDGETS
   // =========================================================
   
+  // ✨ UPGRADED: Clean "Gender" Dropdown
+  Widget _buildGenderDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Gender", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 12)),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _userGender.isEmpty ? 'unspecified' : _userGender,
+              isExpanded: true,
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+              style: const TextStyle(color: Colors.black, fontSize: 14),
+              items: const [
+                DropdownMenuItem(value: 'unspecified', child: Text("Prefer not to say")),
+                DropdownMenuItem(value: 'male', child: Text("Male")),
+                DropdownMenuItem(value: 'female', child: Text("Female")),
+              ],
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() => _userGender = newValue);
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildInputField(String label, TextEditingController controller, IconData icon, {bool isReadOnly = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
