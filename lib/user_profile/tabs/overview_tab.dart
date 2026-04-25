@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart'; // ✨ NEW: Needed for eBay Login
 
 class OverviewTab extends StatefulWidget {
   const OverviewTab({super.key});
@@ -10,8 +10,6 @@ class OverviewTab extends StatefulWidget {
 }
 
 class _OverviewTabState extends State<OverviewTab> {
-  late TextEditingController _notesController;
-  
   // Edit Form Controllers
   late TextEditingController _nameController;
   late TextEditingController _emailController;
@@ -20,136 +18,89 @@ class _OverviewTabState extends State<OverviewTab> {
   String _userName = "Seller";
   String _userEmail = "";
   String _userInitial = "S";
+  String _joinedDate = "Joined Recently"; 
   
-  // ✨ Avatar & Gender State Variables
-  String? _avatarUrl;
+  // ✨ Avatar & Gender State
   String _userGender = "unspecified"; 
-  bool _isUploadingImage = false;
 
+  // ✨ Analytics State
+  int _scansUsed = 84;
+  int _scansLimit = 100;
+  int _savedProductsCount = 12;
+  int _trackedSellersCount = 3;
+  String _safeSourcingScore = "98%";
+
+  // ✨ UI & eBay States
   bool _isEditing = false;
   bool _isLoading = false; 
+  bool _isEbayConnected = false; 
+  bool _isConnectingEbay = false;
+  String _ebayStoreName = "Reaz_Tech_Store"; // Will fetch from DB later
 
   @override
   void initState() {
     super.initState();
-    _notesController = TextEditingController();
-
     final user = Supabase.instance.client.auth.currentUser;
-    final String rawName = user?.userMetadata?['full_name']?.toString() ?? "Reaz Uddin";
-    final String rawEmail = user?.email ?? "xceptionalriaz@gmail.com";
+
+    final String rawName = user?.userMetadata?['full_name']?.toString() ?? "";
+    final String rawEmail = user?.email ?? "";
+    final String rawBusiness = user?.userMetadata?['business_name']?.toString() ?? "";
     
-    // Load existing metadata
-    _avatarUrl = user?.userMetadata?['avatar_url']?.toString();
     _userGender = user?.userMetadata?['gender']?.toString() ?? "unspecified";
 
-    _userName = rawName;
+    _userName = rawName.isEmpty ? "Seller" : rawName;
     _userEmail = rawEmail;
-    _userInitial = rawName.isNotEmpty ? rawName[0].toUpperCase() : "S";
+    _userInitial = _userName[0].toUpperCase();
+    
+    _joinedDate = _formatDate(user?.createdAt);
 
-    _nameController = TextEditingController(text: _userName);
-    _emailController = TextEditingController(text: _userEmail);
-    _businessController = TextEditingController(text: "Reazify LLC"); 
+    _nameController = TextEditingController(text: rawName);
+    _emailController = TextEditingController(text: rawEmail);
+    _businessController = TextEditingController(text: rawBusiness); 
+    
+    _loadAnalyticsData(); 
   }
 
   @override
   void dispose() {
-    _notesController.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _businessController.dispose();
     super.dispose();
   }
 
-  // ✨ UPGRADED: Smart Avatar Logic (Professional Neutral Faces)
+  String _formatDate(String? isoDate) {
+    if (isoDate == null) return "Joined Recently";
+    try {
+      final date = DateTime.parse(isoDate);
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return "Joined ${months[date.month - 1]} ${date.year}";
+    } catch (e) {
+      return "Joined Recently";
+    }
+  }
+
+  Future<void> _loadAnalyticsData() async {
+    // NOTE: When your tables are ready, you will query them here!
+  }
+
   String _getSmartAvatarUrl() {
     final user = Supabase.instance.client.auth.currentUser;
     
-    // 1. Manual Upload (Highest Priority)
-    if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
-      return _avatarUrl!;
-    }
-
-    // 2. Google Account Photo
     final googlePhoto = user?.userMetadata?['picture'];
     if (googlePhoto != null) {
       return googlePhoto.toString();
     }
 
-    // 3. DiceBear Automatic Avatars
     final String seed = user?.email ?? "default";
     
     if (_userGender == 'male') {
-      // ✨ FIX: "adventurer-neutral" removes angry/weird expressions!
       return "https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${seed}male&backgroundColor=b6e3f4";
     } else if (_userGender == 'female') {
-      // Lorelei style creates beautiful, calm female faces
       return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
     }
 
-    // Default Neutral Initials
     return "https://api.dicebear.com/9.x/initials/png?seed=$seed&backgroundColor=0f172a,8fff00";
-  }
-
-  Future<void> _pickAndUploadImage() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 512, 
-      imageQuality: 85,
-    );
-    
-    if (image == null) return;
-
-    setState(() => _isUploadingImage = true);
-
-    try {
-      final bytes = await image.readAsBytes();
-      
-      final int fileBytes = bytes.length;
-      final double fileSizeInMB = fileBytes / (1024 * 1024);
-      
-      if (fileSizeInMB > 2.0) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("⚠️ Image too large! Please select a file under 2MB."), backgroundColor: Colors.redAccent)
-          );
-        }
-        setState(() => _isUploadingImage = false);
-        return; 
-      }
-
-      final fileExt = image.path.split('.').last;
-      final fileName = '${user.id}-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
-      final filePath = 'public/$fileName';
-
-      await Supabase.instance.client.storage.from('avatars').uploadBinary(
-            filePath,
-            bytes,
-            fileOptions: FileOptions(contentType: 'image/$fileExt'),
-          );
-      
-      final String imageUrl = Supabase.instance.client.storage.from('avatars').getPublicUrl(filePath);
-      
-      await Supabase.instance.client.auth.updateUser(
-        UserAttributes(data: {'avatar_url': imageUrl}),
-      );
-      
-      setState(() => _avatarUrl = imageUrl);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Success! Profile picture saved."), backgroundColor: Color(0xFF16A34A)));
-      }
-
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
-      }
-    } finally {
-      if (mounted) setState(() => _isUploadingImage = false);
-    }
   }
 
   Future<void> _saveProfileData() async {
@@ -159,8 +110,8 @@ class _OverviewTabState extends State<OverviewTab> {
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(data: {
           'full_name': _nameController.text,
+          'business_name': _businessController.text, 
           'gender': _userGender, 
-          'avatar_url': _avatarUrl, 
         }),
       );
 
@@ -172,15 +123,40 @@ class _OverviewTabState extends State<OverviewTab> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profile Updated Successfully!"), backgroundColor: Color(0xFF0F172A))
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Profile Updated Successfully!"), backgroundColor: Color(0xFF0F172A)));
       }
     } catch(e) {
        setState(() => _isLoading = false);
-       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
-       }
+       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
+    }
+  }
+
+  // ✨ THE NEW EBAY OAUTH LOGIN FUNCTION
+  Future<void> _startEbayOAuth() async {
+    setState(() => _isConnectingEbay = true);
+
+    try {
+      // Fetch these from your Supabase API Vault in the future!
+      const String appId = "YOUR_EBAY_APP_ID"; 
+      const String ruName = "YOUR_EBAY_RUNAME"; 
+
+      final Uri ebayAuthUrl = Uri.parse(
+        'https://auth.ebay.com/oauth2/authorize'
+        '?client_id=$appId'
+        '&response_type=code'
+        '&redirect_uri=$ruName'
+        '&scope=https://api.ebay.com/oauth/api_scope/sell.inventory'
+      );
+
+      if (await canLaunchUrl(ebayAuthUrl)) {
+        await launchUrl(ebayAuthUrl, mode: LaunchMode.externalApplication);
+      } else {
+        throw "Could not open the eBay login page.";
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
+    } finally {
+      if (mounted) setState(() => _isConnectingEbay = false); 
     }
   }
 
@@ -209,38 +185,15 @@ class _OverviewTabState extends State<OverviewTab> {
                   spacing: 24,
                   runSpacing: 24,
                   children: [
-                    _buildStatColumn("Market Scans", "84 / 100", Icons.search),
-                    _buildStatColumn("Saved Products", "12", Icons.bookmark),
-                    _buildStatColumn("Tracked Sellers", "3", Icons.storefront),
-                    _buildStatColumn("Safe Sourcing", "98%", Icons.shield),
+                    _buildStatColumn("Market Scans", "$_scansUsed / $_scansLimit", Icons.search),
+                    _buildStatColumn("Saved Products", "$_savedProductsCount", Icons.bookmark),
+                    _buildStatColumn("Tracked Sellers", "$_trackedSellersCount", Icons.storefront),
+                    _buildStatColumn("Safe Sourcing", _safeSourcingScore, Icons.shield),
                   ],
                 ),
               ],
             )
           ),
-
-          const SizedBox(height: 24),
-
-          _buildContentCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Private Notes / Global Blocklist", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _notesController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: "Add keywords you always want to block (e.g., Apple, Nike)...",
-                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-                    filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                  ),
-                ),
-              ],
-            )
-          )
         ]
       ],
     );
@@ -292,10 +245,10 @@ class _OverviewTabState extends State<OverviewTab> {
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.cake, color: Colors.grey, size: 14),
-                          SizedBox(width: 4),
-                          Text("Joined Apr 2024", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                        children: [
+                          const Icon(Icons.cake, color: Colors.grey, size: 14),
+                          const SizedBox(width: 4),
+                          Text(_joinedDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                         ],
                       ),
                       Container(
@@ -347,61 +300,20 @@ class _OverviewTabState extends State<OverviewTab> {
         const SizedBox(height: 24),
         
         Center(
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: _isUploadingImage ? null : _pickAndUploadImage,
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(45),
-                        child: Container(
-                          width: 90,
-                          height: 90,
-                          color: const Color(0xFFE2E8F0), 
-                          child: Image.network(
-                            _getSmartAvatarUrl(),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Center(
-                              child: Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_isUploadingImage)
-                        const Positioned(
-                          bottom: 0, right: 0,
-                          child: CircleAvatar(radius: 16, backgroundColor: Colors.white, child: Padding(padding: EdgeInsets.all(4.0), child: CircularProgressIndicator(color: Color(0xFF8FFF00), strokeWidth: 3)))
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF8FFF00),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
-                            boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 5)]
-                          ),
-                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
-                        ),
-                    ],
-                  ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(45),
+            child: Container(
+              width: 90,
+              height: 90,
+              color: const Color(0xFFE2E8F0), 
+              child: Image.network(
+                _getSmartAvatarUrl(),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Center(
+                  child: Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
                 ),
               ),
-              const SizedBox(height: 8),
-              
-              if (_avatarUrl != null && _avatarUrl!.isNotEmpty)
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() => _avatarUrl = null); 
-                  },
-                  icon: const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
-                  label: const Text("Remove Custom Photo", style: TextStyle(color: Colors.redAccent, fontSize: 12)),
-                ),
-            ],
+            ),
           ),
         ),
         
@@ -416,7 +328,7 @@ class _OverviewTabState extends State<OverviewTab> {
                 const SizedBox(height: 16),
                 _buildInputField("Legal Business Name", _businessController, Icons.business_outlined),
                 const SizedBox(height: 16),
-                _buildGenderDropdown(), // ✨ UPDATED GENDER DROPDOWN
+                _buildGenderDropdown(),
               ],
             )
           : Column(
@@ -431,9 +343,9 @@ class _OverviewTabState extends State<OverviewTab> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: _buildInputField("Legal Business Name", _businessController, Icons.business_outlined)),
+                    Expanded(flex: 2, child: _buildInputField("Legal Business Name", _businessController, Icons.business_outlined)),
                     const SizedBox(width: 16),
-                    Expanded(child: _buildGenderDropdown()), // ✨ UPDATED GENDER DROPDOWN
+                    Expanded(flex: 1, child: _buildGenderDropdown()), 
                   ],
                 ),
               ],
@@ -448,6 +360,9 @@ class _OverviewTabState extends State<OverviewTab> {
               onPressed: () {
                 setState(() {
                   _nameController.text = _userName;
+                  final user = Supabase.instance.client.auth.currentUser;
+                  _userGender = user?.userMetadata?['gender']?.toString() ?? "unspecified";
+                  _businessController.text = user?.userMetadata?['business_name']?.toString() ?? "";
                   _isEditing = false;
                 });
               },
@@ -476,40 +391,103 @@ class _OverviewTabState extends State<OverviewTab> {
   // HELPER WIDGETS
   // =========================================================
   
-  // ✨ UPGRADED: Clean "Gender" Dropdown
   Widget _buildGenderDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text("Gender", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 12)),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _userGender.isEmpty ? 'unspecified' : _userGender,
-              isExpanded: true,
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-              style: const TextStyle(color: Colors.black, fontSize: 14),
-              items: const [
-                DropdownMenuItem(value: 'unspecified', child: Text("Prefer not to say")),
-                DropdownMenuItem(value: 'male', child: Text("Male")),
-                DropdownMenuItem(value: 'female', child: Text("Female")),
-              ],
-              onChanged: (String? newValue) {
-                if (newValue != null) {
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+              ),
+              child: PopupMenuButton<String>(
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
+                color: Colors.white,
+                elevation: 6,
+                constraints: BoxConstraints(
+                  minWidth: constraints.maxWidth,
+                  maxWidth: constraints.maxWidth,
+                ),
+                onSelected: (String newValue) {
                   setState(() => _userGender = newValue);
-                }
-              },
-            ),
-          ),
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  _buildPopupMenuItem('unspecified', 'Prefer not to say'),
+                  _buildPopupMenuItem('male', 'Male'),
+                  _buildPopupMenuItem('female', 'Female'),
+                ],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _userGender == 'male' ? 'Male' : _userGender == 'female' ? 'Female' : 'Prefer not to say',
+                        style: const TextStyle(color: Colors.black, fontSize: 14),
+                      ),
+                      const Icon(Icons.keyboard_arrow_down, color: Color(0xFF94A3B8), size: 20),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
         ),
       ],
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem(String value, String text) {
+    final isSelected = _userGender == value;
+    
+    return PopupMenuItem<String>(
+      value: value,
+      height: 40, 
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), 
+      child: StatefulBuilder(
+        builder: (context, setItemState) {
+          bool isHovered = false;
+          return MouseRegion(
+            onEnter: (_) => setItemState(() => isHovered = true),
+            onExit: (_) => setItemState(() => isHovered = false),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), 
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF8FFF00) : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isHovered && !isSelected ? const Color(0xFF8FFF00) : Colors.transparent,
+                  width: 1.5,
+                ),
+              ),
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: isSelected ? Colors.black : const Color(0xFF1E293B),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -550,13 +528,31 @@ class _OverviewTabState extends State<OverviewTab> {
     );
   }
 
+  // ✨ THE SMART EBAY BUTTON WITH ALL 3 STATES
   Widget _buildConnectEbayBtn() {
+    if (_isEbayConnected) {
+      return OutlinedButton.icon(
+        onPressed: () => setState(() => _isEbayConnected = false), // Let them disconnect for testing
+        icon: const Icon(Icons.check_circle, color: Color(0xFF16A34A), size: 16),
+        label: Text("Connected: $_ebayStoreName", style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold, fontSize: 13)),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          backgroundColor: const Color(0xFFEBF6D4),
+          side: const BorderSide(color: Color(0xFF16A34A), width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+        ),
+      );
+    }
+
     return ElevatedButton.icon(
-      onPressed: () {},
-      icon: const Icon(Icons.shopping_cart_checkout, size: 16, color: Colors.black),
-      label: const Text("Connect eBay", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+      onPressed: _isConnectingEbay ? null : _startEbayOAuth,
+      icon: _isConnectingEbay 
+        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
+        : const Icon(Icons.shopping_cart_checkout, size: 16, color: Colors.black),
+      label: Text(_isConnectingEbay ? "Connecting..." : "Connect eBay", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF8FFF00),
+        disabledBackgroundColor: const Color(0xFF8FFF00).withAlpha(150),
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,

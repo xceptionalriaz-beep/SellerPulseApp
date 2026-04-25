@@ -8,7 +8,6 @@ import 'profit_calculator.dart';
 import 'admin_management_page.dart'; 
 import 'title_builder/title_builder_main.dart'; 
 import '../user_profile/user_profile_page.dart';
-import '../user_profile/user_profile_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -31,6 +30,30 @@ class _DashboardPageState extends State<DashboardPage> {
   String get _userInitial {
     final name = user?.userMetadata?['full_name']?.toString() ?? "";
     return name.isNotEmpty ? name.substring(0, 1).toUpperCase() : "S";
+  }
+
+  // ✨ NEW: The Smart Avatar Logic brought over to the Dashboard!
+  String _getSmartAvatarUrl() {
+    if (user == null) return "https://api.dicebear.com/9.x/initials/png?seed=default&backgroundColor=0f172a,8fff00";
+
+    // 1. Google Account Photo
+    final googlePhoto = user?.userMetadata?['picture'];
+    if (googlePhoto != null) {
+      return googlePhoto.toString();
+    }
+
+    // 2. DiceBear Automatic Avatars
+    final String seed = user?.email ?? "default";
+    final String gender = user?.userMetadata?['gender']?.toString() ?? "unspecified";
+    
+    if (gender == 'male') {
+      return "https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${seed}male&backgroundColor=b6e3f4";
+    } else if (gender == 'female') {
+      return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
+    }
+
+    // Default Neutral Initials
+    return "https://api.dicebear.com/9.x/initials/png?seed=$seed&backgroundColor=0f172a,8fff00";
   }
 
   Future<void> _logout() async {
@@ -57,7 +80,6 @@ class _DashboardPageState extends State<DashboardPage> {
             if (isDesktop) _buildSlimRail(),
 
             Expanded(
-              // ✨ CHANGED FROM STACK TO COLUMN FOR PERFECT ALIGNMENT
               child: Column( 
                 children: [
                   
@@ -68,17 +90,15 @@ class _DashboardPageState extends State<DashboardPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 25),
                       child: Row(
                         children: [
-                          // Optional Breadcrumbs to show them where they are
                           Text(
                             _selectedIndex == 5 ? "Settings / Overview" : "Marketplace Research",
                             style: const TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w600),
                           ),
                           const Spacer(),
                           
-                          // The Notification Bell (Now has a proper home!)
                           _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
                           
-                          // ✨ Show avatar ONLY if NOT in settings
+                          // ✨ Hides avatar when in settings
                           if (_selectedIndex != 5) ...[
                             const SizedBox(width: 15),
                             Builder(
@@ -86,10 +106,21 @@ class _DashboardPageState extends State<DashboardPage> {
                                 return InkWell(
                                   borderRadius: BorderRadius.circular(16),
                                   onTap: () => setState(() => _selectedIndex = 5), // Routes to Settings
-                                  child: CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: neonGreen, 
-                                    child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
+                                  // ✨ UPGRADED: Now displays the real Smart Avatar instead of just 'R'
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Container(
+                                      width: 32,
+                                      height: 32,
+                                      color: neonGreen, 
+                                      child: Image.network(
+                                        _getSmartAvatarUrl(),
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Center(
+                                          child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13))
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 );
                               }
@@ -148,7 +179,6 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
           
-          // ✨ WIRED UP SHIELD LOGO TO GO TO DASHBOARD (Mobile)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -164,17 +194,27 @@ class _DashboardPageState extends State<DashboardPage> {
                 icon: const Icon(Icons.notifications_outlined, color: Color(0xFF64748B), size: 22),
               ),
               
-              // ✨ HIDES AVATAR WHEN IN SETTINGS (Mobile)
               if (_selectedIndex != 5) 
                 Builder(
                   builder: (context) {
                     return InkWell(
                       borderRadius: BorderRadius.circular(14),
-                      onTap: () => setState(() => _selectedIndex = 5), // Routes to Settings
-                      child: CircleAvatar(
-                        radius: 14,
-                        backgroundColor: neonGreen,
-                        child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12)),
+                      onTap: () => setState(() => _selectedIndex = 5),
+                      // ✨ UPGRADED: Mobile Avatar
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          color: neonGreen,
+                          child: Image.network(
+                            _getSmartAvatarUrl(),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Center(
+                              child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12))
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   }
@@ -195,13 +235,12 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           const SizedBox(height: 50),
           
-          // ✨ WIRED UP SHIELD LOGO TO GO TO DASHBOARD (Drawer)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
               onTap: () {
                 setState(() => _selectedIndex = 0);
-                Navigator.pop(context); // Closes drawer after click
+                Navigator.pop(context); 
               },
               child: const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 40),
             ),
@@ -264,7 +303,6 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           const SizedBox(height: 30),
           
-          // ✨ WIRED UP SHIELD LOGO TO GO TO DASHBOARD (Desktop Sidebar)
           Tooltip(
             message: "Home",
             child: MouseRegion(
@@ -342,7 +380,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 2: return const TitleBuilderMain();
       case 3: return const ProfitCalculatorPage();
       case 4: return const InventoryPage();
-      case 5: return const UserProfilePage(); // ✨ NEW FULL PAGE SETTINGS
+      case 5: return const UserProfilePage(); 
       case 6: return isOwner ? const AdminManagementPage() : const Center(child: Text("404", style: TextStyle(color: Colors.grey)));
       default: return const SizedBox.shrink();
     }
