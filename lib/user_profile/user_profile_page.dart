@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // ✨ IMPORT THE NEW TAB FILES
 import 'tabs/overview_tab.dart';
-import 'tabs/marketplace_tab.dart';
+import 'tabs/ebay_manager_tab.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -126,11 +126,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  // ✨ THE NEW ROUTER
+// ✨ THE NEW ROUTER
   Widget _buildTabContent() {
     switch (_selectedSettingsTab) {
-      case 0: return const OverviewTab();        // Loads the file we just created!
-      case 1: return const MarketplaceTab();     // Loads the file we just created!
+      case 0: return const OverviewTab();        // Overview Page
+      case 1: return const EbayManagerTab();     // ✨ UPDATED: Now loads the new eBay Hub!
       default: return const Center(child: Text("Coming Soon"));
     }
   }

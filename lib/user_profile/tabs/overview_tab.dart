@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart'; 
 
 class OverviewTab extends StatefulWidget {
   const OverviewTab({super.key});
@@ -30,12 +29,9 @@ class _OverviewTabState extends State<OverviewTab> {
   int _trackedSellersCount = 3;
   String _safeSourcingScore = "98%";
 
-  // ✨ UI & eBay States
+  // ✨ UI States
   bool _isEditing = false;
   bool _isLoading = false; 
-  bool _isEbayConnected = false; // Tracks if they are connected
-  bool _isConnectingEbay = false; // Tracks if the connection is loading
-  String _ebayStoreName = "eBay Account"; // Displays the connected store name
 
   @override
   void initState() {
@@ -59,9 +55,6 @@ class _OverviewTabState extends State<OverviewTab> {
     _businessController = TextEditingController(text: rawBusiness); 
     
     _loadAnalyticsData(); 
-    
-    // ✨ STEP C: Check the eBay connection as soon as the page loads!
-    _checkEbayConnection(); 
   }
 
   @override
@@ -85,34 +78,6 @@ class _OverviewTabState extends State<OverviewTab> {
 
   Future<void> _loadAnalyticsData() async {
     // NOTE: When your tables are ready, you will query them here!
-  }
-
-// ✨ STEP B: THE CONNECTION CHECKER (Fixed Null Safety)
-  Future<void> _checkEbayConnection() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
-    try {
-      // Look inside the ebay_connections table for this specific user
-      final data = await Supabase.instance.client
-          .from('ebay_connections')
-          .select('id, ebay_user_id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-      if (mounted) {
-        setState(() {
-          _isEbayConnected = data != null;
-          
-          // ✨ FIX: Added '?' to safely check if it exists, and '!' to safely extract it
-          if (_isEbayConnected && data?['ebay_user_id'] != null) {
-            _ebayStoreName = data!['ebay_user_id'];
-          }
-        });
-      }
-    } catch (e) {
-      debugPrint("Error checking eBay connection: $e");
-    }
   }
 
   String _getSmartAvatarUrl() {
@@ -159,59 +124,6 @@ class _OverviewTabState extends State<OverviewTab> {
     } catch(e) {
        setState(() => _isLoading = false);
        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
-    }
-  }
-
-  // ✨ THE LIVE EBAY OAUTH LOGIN FUNCTION
-  Future<void> _startEbayOAuth() async {
-    setState(() => _isConnectingEbay = true);
-
-    try {
-      final vaultData = await Supabase.instance.client
-          .from('api_fleet_config') 
-          .select('primary_key_1') 
-          .eq('platform_name', 'ebay') 
-          .single(); 
-
-      final String appId = vaultData['primary_key_1'];
-      const String ruName = "Reazify_LLC-ReazifyL-Seller-qpmttkudp"; 
-
-      if (appId.isEmpty || appId == 'EMPTY') {
-        throw "eBay App ID is missing in your Admin Vault.";
-      }
-
-      final String userId = Supabase.instance.client.auth.currentUser!.id; 
-
-      final Uri ebayAuthUrl = Uri.parse(
-        'https://auth.ebay.com/oauth2/authorize'
-        '?client_id=$appId'
-        '&response_type=code'
-        '&redirect_uri=$ruName'
-        '&scope=https://api.ebay.com/oauth/api_scope/sell.account.readonly '
-        'https://api.ebay.com/oauth/api_scope/sell.inventory.readonly '
-        'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly'
-        '&state=$userId' 
-      );
-
-      if (await canLaunchUrl(ebayAuthUrl)) {
-        await launchUrl(
-          ebayAuthUrl, 
-          mode: LaunchMode.externalApplication,
-        );
-      } else {
-        throw "Could not open the browser. Please check your internet connection.";
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Connection Error: $e"), 
-            backgroundColor: Colors.redAccent
-          )
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isConnectingEbay = false); 
     }
   }
 
@@ -319,21 +231,13 @@ class _OverviewTabState extends State<OverviewTab> {
           ],
         ),
         const SizedBox(height: 24),
-        isMobile ? 
-          Column(
-            children: [
-              SizedBox(width: double.infinity, child: _buildEditProfileBtn()),
-              const SizedBox(height: 12),
-              SizedBox(width: double.infinity, child: _buildConnectEbayBtn()),
-            ],
-          ) 
-        : Row(
-            children: [
-              Expanded(child: _buildEditProfileBtn()),
-              const SizedBox(width: 16),
-              Expanded(child: _buildConnectEbayBtn()),
-            ],
-          )
+        Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: isMobile ? double.infinity : 200, 
+            child: _buildEditProfileBtn()
+          ),
+        ),
       ],
     );
   }
@@ -575,39 +479,6 @@ class _OverviewTabState extends State<OverviewTab> {
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: const BorderSide(color: Color(0xFFE2E8F0)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-      ),
-    );
-  }
-
-  // ✨ STEP D: THE SMART EBAY BUTTON WITH ALL 3 STATES
-  Widget _buildConnectEbayBtn() {
-    if (_isEbayConnected) {
-      return OutlinedButton.icon(
-        // Optionally add a disconnect flow here later if you want
-        onPressed: null, 
-        icon: const Icon(Icons.check_circle, color: Color(0xFF16A34A), size: 16),
-        label: Text("Connected: $_ebayStoreName", style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold, fontSize: 13)),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          backgroundColor: const Color(0xFFEBF6D4),
-          side: const BorderSide(color: Color(0xFF16A34A), width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-        ),
-      );
-    }
-
-    return ElevatedButton.icon(
-      onPressed: _isConnectingEbay ? null : _startEbayOAuth,
-      icon: _isConnectingEbay 
-        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
-        : const Icon(Icons.shopping_cart_checkout, size: 16, color: Colors.black),
-      label: Text(_isConnectingEbay ? "Connecting..." : "Connect eBay", style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF8FFF00),
-        disabledBackgroundColor: const Color(0xFF8FFF00).withAlpha(150),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 0,
       ),
     );
   }
