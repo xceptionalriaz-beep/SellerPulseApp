@@ -66,7 +66,7 @@ serve(async (req) => {
     if (insertError) throw new Error("Failed to save tokens to database")
 
     // 6. SUCCESS! Send the user back to your app
-    return Response.redirect('https://dropnrest.com/dashboard?ebay=success', 302)
+    return Response.redirect('https://dropnrest.com/?ebay=success', 302)
 
   } catch (err: any) {
     return new Response(`eBay Connection Failed: ${err.message}`, { status: 500 })
