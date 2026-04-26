@@ -131,35 +131,58 @@ class _OverviewTabState extends State<OverviewTab> {
     }
   }
 
-  // ✨ THE NEW EBAY OAUTH LOGIN FUNCTION
+  // ✨ THE SECURE EBAY OAUTH LOGIN FUNCTION
   Future<void> _startEbayOAuth() async {
     setState(() => _isConnectingEbay = true);
 
     try {
-      // Fetch these from your Supabase API Vault in the future!
-      const String appId = "YOUR_EBAY_APP_ID"; 
-      const String ruName = "YOUR_EBAY_RUNAME"; 
+      // 1. Fetch the REAL keys from your 'api_fleet_config' table
+      // IMPORTANT: Change 'primary_app_id' and 'ebay_runame' if your column names are different!
+      final vaultData = await Supabase.instance.client
+          .from('api_fleet_config') 
+          .select('primary_app_id, ebay_runame') 
+          .single(); 
 
+      final String appId = vaultData['primary_app_id'];
+      final String ruName = vaultData['ebay_runame'];
+
+      if (appId.isEmpty || ruName.isEmpty) {
+        throw "API keys are missing in the database.";
+      }
+
+      // 2. Build the official eBay Authorization URL
       final Uri ebayAuthUrl = Uri.parse(
         'https://auth.ebay.com/oauth2/authorize'
         '?client_id=$appId'
         '&response_type=code'
         '&redirect_uri=$ruName'
-        '&scope=https://api.ebay.com/oauth/api_scope/sell.inventory'
+        '&scope=https://api.ebay.com/oauth/api_scope/sell.account.readonly '
+        'https://api.ebay.com/oauth/api_scope/sell.inventory.readonly '
+        'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly'
       );
 
+      // 3. Open the secure browser window for the user to log in
       if (await canLaunchUrl(ebayAuthUrl)) {
-        await launchUrl(ebayAuthUrl, mode: LaunchMode.externalApplication);
+        await launchUrl(
+          ebayAuthUrl, 
+          mode: LaunchMode.externalApplication, // Opens in a safe external browser
+        );
       } else {
         throw "Could not open the eBay login page.";
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Connection Error: Please check your API keys in Admin Center. ($e)"), 
+            backgroundColor: Colors.redAccent
+          )
+        );
+      }
     } finally {
       if (mounted) setState(() => _isConnectingEbay = false); 
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Column(
