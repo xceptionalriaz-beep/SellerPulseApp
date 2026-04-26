@@ -22,14 +22,14 @@ serve(async (req) => {
     // 3. Secretly grab your keys from the api_fleet_config table
     const { data: vault, error: vaultError } = await supabaseAdmin
       .from('api_fleet_config')
-      .select('primary_key_1, primary_key_2') // ✨ FIXED: Changed to primary_key_2
+      .select('primary_key_1, primary_key_2') 
       .eq('platform_name', 'ebay')
       .single()
 
     if (vaultError || !vault) throw new Error("Vault keys not found")
 
     const clientId = vault.primary_key_1
-    const clientSecret = vault.primary_key_2 // ✨ FIXED: Changed to primary_key_2
+    const clientSecret = vault.primary_key_2 
     const ruName = "Reazify_LLC-ReazifyL-Seller-qpmttkudp" // Your exact RuName
 
     // 4. Trade the 'code' for the permanent Access Tokens from eBay
@@ -48,16 +48,37 @@ serve(async (req) => {
     })
 
     const tokenData = await tokenResponse.json()
-    if (!tokenResponse.ok) throw new Error(JSON.stringify(tokenData))
+    if (!tokenResponse.ok) throw new Error("Token Exchange Failed: " + JSON.stringify(tokenData))
+
+    // ✨ 5. NEW: The "Identity Upgrade"
+    // We use the new access token to ask eBay for the user's Store Name
+    let ebayUsername = "eBay Account"; // Default fallback
+    try {
+      const idResponse = await fetch('https://api.ebay.com/commerce/identity/v1/user', {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+      });
+      
+      if (idResponse.ok) {
+        const idData = await idResponse.json();
+        if (idData.username) {
+          ebayUsername = idData.username; // Successfully grabbed the real name!
+        }
+      } else {
+         console.log("Could not fetch username, defaulting to 'eBay Account'");
+      }
+    } catch (identityError) {
+      console.log("Identity fetch error: ", identityError);
+    }
 
     // Calculate when the token expires
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
 
-    // 5. Save the tokens securely in the user's account
+    // 6. Save the tokens AND the real username securely in the user's account
     await supabaseAdmin.from('ebay_connections').delete().eq('user_id', userId)
     
     const { error: insertError } = await supabaseAdmin.from('ebay_connections').insert({
       user_id: userId,
+      ebay_user_id: ebayUsername, // ✨ SAVING THE REAL STORE NAME HERE!
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       expires_at: expiresAt
@@ -65,10 +86,12 @@ serve(async (req) => {
 
     if (insertError) throw new Error("Failed to save tokens to database")
 
-    // 6. SUCCESS! Send the user back to your app
+    // 7. SUCCESS! Send the user back to your app
     return Response.redirect('https://dropnrest.com/?ebay=success', 302)
 
   } catch (err: any) {
+    // ✨ Log the error to Supabase Dashboard so we can see exactly why it hangs
+    console.error("eBay OAuth Error:", err.message);
     return new Response(`eBay Connection Failed: ${err.message}`, { status: 500 })
   }
 })
