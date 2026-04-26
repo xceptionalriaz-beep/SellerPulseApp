@@ -131,26 +131,29 @@ class _OverviewTabState extends State<OverviewTab> {
     }
   }
 
-  // ✨ THE SECURE EBAY OAUTH LOGIN FUNCTION
+  // ✨ THE LIVE EBAY OAUTH LOGIN FUNCTION
   Future<void> _startEbayOAuth() async {
     setState(() => _isConnectingEbay = true);
 
     try {
-      // 1. Fetch the REAL keys from your 'api_fleet_config' table
-      // IMPORTANT: Change 'primary_app_id' and 'ebay_runame' if your column names are different!
+      // 1. Fetch your App ID from your 'api_fleet_config' table
       final vaultData = await Supabase.instance.client
           .from('api_fleet_config') 
-          .select('primary_app_id, ebay_runame') 
+          .select('primary_key_1') 
+          .eq('platform_name', 'ebay') 
           .single(); 
 
-      final String appId = vaultData['primary_app_id'];
-      final String ruName = vaultData['ebay_runame'];
+      final String appId = vaultData['primary_key_1'];
 
-      if (appId.isEmpty || ruName.isEmpty) {
-        throw "API keys are missing in the database.";
+      // 🏆 YOUR OFFICIAL GENERATED RUNAME
+      const String ruName = "Reazify_LLC-ReazifyL-Seller-qpmttkudp"; 
+
+      if (appId.isEmpty || appId == 'EMPTY') {
+        throw "eBay App ID is missing in your Admin Vault.";
       }
 
-      // 2. Build the official eBay Authorization URL
+      // 2. Build the Live eBay Authorization URL
+      // These 'scopes' allow your tool to see the user's data safely
       final Uri ebayAuthUrl = Uri.parse(
         'https://auth.ebay.com/oauth2/authorize'
         '?client_id=$appId'
@@ -161,20 +164,20 @@ class _OverviewTabState extends State<OverviewTab> {
         'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly'
       );
 
-      // 3. Open the secure browser window for the user to log in
+      // 3. Launch the official eBay Sign-in Page
       if (await canLaunchUrl(ebayAuthUrl)) {
         await launchUrl(
           ebayAuthUrl, 
-          mode: LaunchMode.externalApplication, // Opens in a safe external browser
+          mode: LaunchMode.externalApplication,
         );
       } else {
-        throw "Could not open the eBay login page.";
+        throw "Could not open the browser. Please check your internet connection.";
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Connection Error: Please check your API keys in Admin Center. ($e)"), 
+            content: Text("Connection Error: $e"), 
             backgroundColor: Colors.redAccent
           )
         );
