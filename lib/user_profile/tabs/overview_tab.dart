@@ -152,8 +152,8 @@ class _OverviewTabState extends State<OverviewTab> {
         throw "eBay App ID is missing in your Admin Vault.";
       }
 
-      // 2. Build the Live eBay Authorization URL
-      // These 'scopes' allow your tool to see the user's data safely
+      final String userId = Supabase.instance.client.auth.currentUser!.id; // ✨ Get the user's ID
+
       final Uri ebayAuthUrl = Uri.parse(
         'https://auth.ebay.com/oauth2/authorize'
         '?client_id=$appId'
@@ -162,6 +162,7 @@ class _OverviewTabState extends State<OverviewTab> {
         '&scope=https://api.ebay.com/oauth/api_scope/sell.account.readonly '
         'https://api.ebay.com/oauth/api_scope/sell.inventory.readonly '
         'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly'
+        '&state=$userId' // ✨ THE NAMETAG! We pass their Supabase ID to eBay
       );
 
       // 3. Launch the official eBay Sign-in Page
