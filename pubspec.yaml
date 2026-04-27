@@ -40,6 +40,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # ✨ NEW: Tell Flutter to include your secret file in the build
+  # ✨ FIXED: Pointing to the safe placeholder file for Vercel!
   assets:
-    - .env
+    - .env.example
