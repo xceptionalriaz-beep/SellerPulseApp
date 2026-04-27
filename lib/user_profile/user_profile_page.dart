@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // ✨ IMPORT THE NEW TAB FILES
 import 'tabs/overview_tab.dart';
 import 'tabs/ebay_manager_tab.dart';
+import 'tabs/billing_tab.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -20,7 +21,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     return Container(
       color: const Color(0xFFF4F7FA),
-      padding: const EdgeInsets.all(16), 
       child: isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
     );
   }
@@ -33,6 +33,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         // 1. MENU
         Container(
           width: 260,
+          margin: const EdgeInsets.only(left: 16, top: 16, bottom: 16),
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -46,11 +47,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ),
         const SizedBox(width: 24),
+        
         // 2. CONTENT
         Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.zero,
-            child: _buildTabContent(),
+          // ✨ NEON GREEN SCROLLBAR THEME
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              scrollbarTheme: ScrollbarThemeData(
+                thumbColor: WidgetStateProperty.all(const Color(0xFF8FFF00)), 
+                thickness: WidgetStateProperty.all(6.0), 
+                radius: const Radius.circular(10), 
+              ),
+            ),
+            child: SingleChildScrollView(
+              // ✨ INNER PADDING FOR BREATHING ROOM
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16, right: 32, bottom: 24), 
+                child: _buildTabContent(),
+              ),
+            ),
           ),
         )
       ],
@@ -64,6 +79,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         // 1. MENU
         Container(
           height: 70, 
+          margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -76,10 +92,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ),
         const SizedBox(height: 16),
+        
         // 2. CONTENT
         Expanded(
-          child: SingleChildScrollView(
-            child: _buildTabContent(),
+          // ✨ NEON GREEN SCROLLBAR THEME (MOBILE)
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              scrollbarTheme: ScrollbarThemeData(
+                thumbColor: WidgetStateProperty.all(const Color(0xFF8FFF00)), 
+                thickness: WidgetStateProperty.all(6.0), 
+                radius: const Radius.circular(10), 
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+                child: _buildTabContent(),
+              ),
+            ),
           ),
         )
       ],
@@ -126,11 +156,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-// ✨ THE NEW ROUTER
+  // ✨ THE ROUTER
   Widget _buildTabContent() {
     switch (_selectedSettingsTab) {
-      case 0: return const OverviewTab();        // Overview Page
-      case 1: return const EbayManagerTab();     // ✨ UPDATED: Now loads the new eBay Hub!
+      case 0: return const OverviewTab();
+      case 1: return const EbayManagerTab();
+      case 3: return const BillingTab();
       default: return const Center(child: Text("Coming Soon"));
     }
   }

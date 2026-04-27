@@ -19,17 +19,17 @@ class _OverviewTabState extends State<OverviewTab> {
   String _userInitial = "S";
   String _joinedDate = "Joined Recently"; 
   
-  // ✨ Avatar & Gender State
+  // Avatar & Gender State
   String _userGender = "unspecified"; 
 
-  // ✨ Analytics State
+  // Analytics State
   int _scansUsed = 84;
   int _scansLimit = 100;
   int _savedProductsCount = 12;
   int _trackedSellersCount = 3;
   String _safeSourcingScore = "98%";
 
-  // ✨ UI States
+  // UI States
   bool _isEditing = false;
   bool _isLoading = false; 
 
@@ -46,7 +46,9 @@ class _OverviewTabState extends State<OverviewTab> {
 
     _userName = rawName.isEmpty ? "Seller" : rawName;
     _userEmail = rawEmail;
-    _userInitial = _userName[0].toUpperCase();
+    
+    // ✨ Extract smart 2-letter initials
+    _userInitial = _getInitials(_userName);
     
     _joinedDate = _formatDate(user?.createdAt);
 
@@ -65,6 +67,17 @@ class _OverviewTabState extends State<OverviewTab> {
     super.dispose();
   }
 
+  // ✨ SMART INITIALS EXTRACTOR
+  String _getInitials(String name) {
+    if (name.trim().isEmpty) return "S"; // Fallback
+    List<String> parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    } else {
+      return name.length >= 2 ? name.substring(0, 2).toUpperCase() : name.toUpperCase();
+    }
+  }
+
   String _formatDate(String? isoDate) {
     if (isoDate == null) return "Joined Recently";
     try {
@@ -77,10 +90,10 @@ class _OverviewTabState extends State<OverviewTab> {
   }
 
   Future<void> _loadAnalyticsData() async {
-    // NOTE: When your tables are ready, you will query them here!
+    // Analytics query placeholder
   }
 
-  String _getSmartAvatarUrl() {
+  String? _getSmartAvatarUrl() {
     final user = Supabase.instance.client.auth.currentUser;
     
     final googlePhoto = user?.userMetadata?['picture'];
@@ -96,13 +109,18 @@ class _OverviewTabState extends State<OverviewTab> {
       return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
     }
 
-    return "https://api.dicebear.com/9.x/initials/png?seed=$seed&backgroundColor=0f172a,8fff00";
+    // Return NULL so it uses the native Flutter neon green initials fallback
+    return null;
   }
 
   Future<void> _saveProfileData() async {
     setState(() => _isLoading = true);
     
     try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) throw "User not logged in.";
+
+      // 1. Update Auth Metadata
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(data: {
           'full_name': _nameController.text,
@@ -111,9 +129,16 @@ class _OverviewTabState extends State<OverviewTab> {
         }),
       );
 
+      // 2. SYNC WITH CRM DATABASE
+      await Supabase.instance.client.from('profiles').update({
+        'name': _nameController.text,
+        'avatar_url': _getSmartAvatarUrl(), 
+      }).eq('id', user.id);
+
+      // 3. Update Local UI State
       setState(() {
         _userName = _nameController.text;
-        _userInitial = _userName.isNotEmpty ? _userName[0].toUpperCase() : "S";
+        _userInitial = _getInitials(_userName); // Update initials on save
         _isEditing = false;
         _isLoading = false;
       });
@@ -141,7 +166,6 @@ class _OverviewTabState extends State<OverviewTab> {
 
         if (!_isEditing) ...[
           const SizedBox(height: 24),
-          
           _buildContentCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,6 +192,7 @@ class _OverviewTabState extends State<OverviewTab> {
 
   Widget _buildViewState() {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
+    final String? currentAvatarUrl = _getSmartAvatarUrl();
     
     return Column(
       key: const ValueKey('view'),
@@ -180,14 +205,19 @@ class _OverviewTabState extends State<OverviewTab> {
               child: Container(
                 width: isMobile ? 60 : 80,
                 height: isMobile ? 60 : 80,
-                color: const Color(0xFFE2E8F0), 
-                child: Image.network(
-                  _getSmartAvatarUrl(),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Center(
-                    child: Text(_userInitial, style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)))
-                  ),
-                ),
+                color: const Color(0xFF8FFF00), // ✨ Neon Green Background
+                child: currentAvatarUrl != null 
+                  ? Image.network(
+                      currentAvatarUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Text(_userInitial, style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)))
+                      ),
+                    )
+                  : Center(
+                      // ✨ Dark Slate Text
+                      child: Text(_userInitial, style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A)))
+                    ),
               ),
             ),
             const SizedBox(width: 20),
@@ -244,6 +274,7 @@ class _OverviewTabState extends State<OverviewTab> {
 
   Widget _buildEditState() {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
+    final String? currentAvatarUrl = _getSmartAvatarUrl();
     
     return Column(
       key: const ValueKey('edit'),
@@ -264,14 +295,19 @@ class _OverviewTabState extends State<OverviewTab> {
             child: Container(
               width: 90,
               height: 90,
-              color: const Color(0xFFE2E8F0), 
-              child: Image.network(
-                _getSmartAvatarUrl(),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Center(
-                  child: Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
-                ),
-              ),
+              color: const Color(0xFF8FFF00), // ✨ Neon Green Background
+              child: currentAvatarUrl != null 
+                ? Image.network(
+                    currentAvatarUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
+                    ),
+                  )
+                : Center(
+                    // ✨ Dark Slate Text
+                    child: Text(_userInitial, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)))
+                  ),
             ),
           ),
         ),

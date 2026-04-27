@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../../services/crm_service.dart'; 
 
 class UserCrmTable extends StatefulWidget {
   final bool isInvestorMode;
@@ -11,68 +12,9 @@ class UserCrmTable extends StatefulWidget {
 }
 
 class _UserCrmTableState extends State<UserCrmTable> {
-  final List<Map<String, dynamic>> _users = [
-    {
-      "name": "Mike Ross",
-      "email": "mike@dropkings.com",
-      "plan": "Elite Plan",
-      "status": "Active",
-      "joinDate": "Mar 12, 2024",
-      "time": "3:40 PM",
-      "usage": 0.8,
-      "dispute": null,
-      "avatarColor": Colors.blueGrey,
-    },
-    {
-      "name": "Sarah Jenkins",
-      "email": "sarah.j@gmail.com",
-      "plan": "Pro Plan",
-      "status": "Active",
-      "joinDate": "May 11, 2024",
-      "time": "9:00 PM",
-      "usage": 0.45,
-      "dispute": "\$99.00 / mut\nRecent support",
-      "avatarColor": Colors.teal,
-    },
-    {
-      "name": "Sarah Jenkins",
-      "email": "sarah.j@gmail.com",
-      "plan": "Pro Plan",
-      "status": "Expired",
-      "joinDate": "May 14, 2024",
-      "time": "9:00 PM",
-      "usage": 0.1,
-      "dispute": null,
-      "avatarColor": Colors.teal,
-    },
-    {
-      "name": "David Chen",
-      "email": "david.chen22@yahoo.com",
-      "plan": "Free Trial",
-      "status": "Past Due",
-      "joinDate": "May 14, 2024",
-      "time": "9:00 PM",
-      "usage": 0.95,
-      "dispute": null,
-      "avatarColor": Colors.orangeAccent,
-    },
-    {
-      "name": "Emma Watson",
-      "email": "emma@ebayseller.co.uk",
-      "plan": "Pro Plan",
-      "status": "Past Due",
-      "joinDate": "May 14, 2024",
-      "time": "9:00 PM",
-      "usage": 0.6,
-      "dispute": "\$99.00 / mut\nMike Ross (\$99)",
-      "avatarColor": Colors.purpleAccent,
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
-    // ✨ THE FIX: Notice there are NO vertical "Expanded" widgets here!
-    // It is just a safe, natural column that hugs its content perfectly.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -98,19 +40,116 @@ class _UserCrmTableState extends State<UserCrmTable> {
                 children: [
                   _buildTableHeader(),
                   const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                  // ✨ We MAP the rows instead of using ListView. This stops all freezing.
-                  ..._users.map((user) => Column(
-                    children: [
-                      _buildDataRow(user),
-                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                    ],
-                  )),
+                  
+                  // ✨ THE LIVE DATABASE STREAM
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: CrmService.getAdminUserStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(40.0),
+                          child: Center(child: CircularProgressIndicator(color: Color(0xFF0F172A))),
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.all(40.0),
+                          child: Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red))),
+                        );
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      final liveUsers = snapshot.data!;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: liveUsers.map((dbUser) {
+                          final formattedUser = _formatDatabaseUser(dbUser);
+                          
+                          return Column(
+                            children: [
+                              _buildDataRow(formattedUser),
+                              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
           ),
         )
       ],
+    );
+  }
+
+  // ✨ SMART DATA FORMATTER
+  Map<String, dynamic> _formatDatabaseUser(Map<String, dynamic> dbData) {
+    final String email = dbData['email'] ?? "unknown@user.com";
+    
+    String name = dbData['name'];
+    if (name == null || name.isEmpty) {
+      name = email.split('@')[0];
+    }
+
+    String joinDate = "Today";
+    String time = "Just Now";
+    if (dbData['created_at'] != null) {
+      try {
+        final dt = DateTime.parse(dbData['created_at']).toLocal();
+        final months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        joinDate = "${months[dt.month - 1]} ${dt.day}, ${dt.year}";
+        
+        int hour = dt.hour;
+        String ampm = hour >= 12 ? "PM" : "AM";
+        hour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+        String minute = dt.minute.toString().padLeft(2, '0');
+        time = "$hour:$minute $ampm";
+      } catch (e) {
+        debugPrint("Date parse error: $e");
+      }
+    }
+
+    // ✨ SMART INITIALS LOGIC
+    String getInitials(String n) {
+      if (n.trim().isEmpty) return "S";
+      List<String> parts = n.trim().split(RegExp(r'\s+'));
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      } else {
+        return n.length >= 2 ? n.substring(0, 2).toUpperCase() : n.toUpperCase();
+      }
+    }
+
+    return {
+      "name": name,
+      "initials": getInitials(name), 
+      "email": email,
+      "plan": dbData['plan_name'] ?? "Free Trial", 
+      "status": dbData['account_status'] ?? "Active", 
+      "joinDate": joinDate,
+      "time": time,
+      "usage": dbData['usage_score'] ?? 0.5, 
+      "dispute": dbData['dispute_note'], 
+      "avatarUrl": dbData['avatar_url'], 
+    };
+  }
+
+  Widget _buildEmptyState() {
+    return const Padding(
+      padding: EdgeInsets.all(40),
+      child: Center(
+        child: Text(
+          "Waiting for your first superstar user...", 
+          style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500)
+        )
+      ),
     );
   }
 
@@ -306,6 +345,8 @@ class _UserCrmTableState extends State<UserCrmTable> {
     String displayName = widget.isInvestorMode ? "${user['name'].split(' ')[0]} ***" : user['name'];
     String displayEmail = widget.isInvestorMode ? "${user['email'][0]}***@${user['email'].split('@')[1]}" : user['email'];
 
+    bool hasAvatar = user['avatarUrl'] != null && user['avatarUrl'].toString().isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
@@ -316,7 +357,15 @@ class _UserCrmTableState extends State<UserCrmTable> {
             flex: 3,
             child: Row(
               children: [
-                CircleAvatar(backgroundColor: user['avatarColor'].withAlpha(30), radius: 18, child: Text(user['name'][0], style: TextStyle(color: user['avatarColor'], fontWeight: FontWeight.bold, fontSize: 14))),
+                // ✨ UPGRADED: Neon Green & 2-Letter Initials
+                CircleAvatar(
+                  backgroundColor: hasAvatar ? Colors.transparent : const Color(0xFF8FFF00), 
+                  radius: 18, 
+                  backgroundImage: hasAvatar ? NetworkImage(user['avatarUrl']) : null,
+                  child: !hasAvatar 
+                      ? Text(user['initials'], style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 0.5))
+                      : null,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

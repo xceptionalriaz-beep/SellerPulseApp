@@ -27,14 +27,25 @@ class _DashboardPageState extends State<DashboardPage> {
   User? get user => Supabase.instance.client.auth.currentUser;
   bool get isOwner => user?.email == 'xceptionalriaz@gmail.com';
 
-  String get _userInitial {
-    final name = user?.userMetadata?['full_name']?.toString() ?? "";
-    return name.isNotEmpty ? name.substring(0, 1).toUpperCase() : "S";
+  // ✨ SMART INITIALS EXTRACTOR (Brought over to Dashboard)
+  String _getInitials(String name) {
+    if (name.trim().isEmpty) return "S"; // Fallback
+    List<String> parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    } else {
+      return name.length >= 2 ? name.substring(0, 2).toUpperCase() : name.toUpperCase();
+    }
   }
 
-  // ✨ NEW: The Smart Avatar Logic brought over to the Dashboard!
-  String _getSmartAvatarUrl() {
-    if (user == null) return "https://api.dicebear.com/9.x/initials/png?seed=default&backgroundColor=0f172a,8fff00";
+  String get _userInitial {
+    final name = user?.userMetadata?['full_name']?.toString() ?? "";
+    return _getInitials(name);
+  }
+
+  // ✨ UPGRADED: Returns null for 'unspecified' to trigger native neon green initials
+  String? _getSmartAvatarUrl() {
+    if (user == null) return null;
 
     // 1. Google Account Photo
     final googlePhoto = user?.userMetadata?['picture'];
@@ -52,8 +63,8 @@ class _DashboardPageState extends State<DashboardPage> {
       return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
     }
 
-    // Default Neutral Initials
-    return "https://api.dicebear.com/9.x/initials/png?seed=$seed&backgroundColor=0f172a,8fff00";
+    // Default Neutral Initials (Returns null so UI draws the Neon Green Circle)
+    return null;
   }
 
   Future<void> _logout() async {
@@ -66,6 +77,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = MediaQuery.of(context).size.width > 900;
+    final String? currentAvatarUrl = _getSmartAvatarUrl();
 
     return Scaffold(
       key: _scaffoldKey,
@@ -98,7 +110,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           
                           _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
                           
-                          // ✨ Hides avatar when in settings
+                          // ✨ Desktop Avatar Logic
                           if (_selectedIndex != 5) ...[
                             const SizedBox(width: 15),
                             Builder(
@@ -106,20 +118,24 @@ class _DashboardPageState extends State<DashboardPage> {
                                 return InkWell(
                                   borderRadius: BorderRadius.circular(16),
                                   onTap: () => setState(() => _selectedIndex = 5), // Routes to Settings
-                                  // ✨ UPGRADED: Now displays the real Smart Avatar instead of just 'R'
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
                                     child: Container(
                                       width: 32,
                                       height: 32,
                                       color: neonGreen, 
-                                      child: Image.network(
-                                        _getSmartAvatarUrl(),
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Center(
-                                          child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13))
-                                        ),
-                                      ),
+                                      child: currentAvatarUrl != null 
+                                        ? Image.network(
+                                            currentAvatarUrl,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => Center(
+                                              child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold, fontSize: 13))
+                                            ),
+                                          )
+                                        : Center(
+                                            // Native text fallback (RU)
+                                            child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5))
+                                          ),
                                     ),
                                   ),
                                 );
@@ -131,7 +147,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
 
                   // Mobile Header
-                  if (!isDesktop) _buildMobileHeader(),
+                  if (!isDesktop) _buildMobileHeader(currentAvatarUrl),
                   
                   // --- 🖥️ MAIN CONTENT AREA ---
                   Expanded(
@@ -168,7 +184,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   // --- MOBILE COMPONENTS ---
 
-  Widget _buildMobileHeader() {
+  Widget _buildMobileHeader(String? currentAvatarUrl) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: Row(
@@ -207,13 +223,17 @@ class _DashboardPageState extends State<DashboardPage> {
                           width: 28,
                           height: 28,
                           color: neonGreen,
-                          child: Image.network(
-                            _getSmartAvatarUrl(),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Center(
-                              child: Text(_userInitial, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12))
-                            ),
-                          ),
+                          child: currentAvatarUrl != null 
+                            ? Image.network(
+                                currentAvatarUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => Center(
+                                  child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold, fontSize: 12))
+                                ),
+                              )
+                            : Center(
+                                child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5))
+                              ),
                         ),
                       ),
                     );
