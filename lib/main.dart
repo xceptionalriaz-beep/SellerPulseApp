@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart'; // ✨ NEW: The Provider tool
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // ✨ NEW: For hidden keys
+
 import 'package:sellerpulse/providers/market_provider.dart'; // ✨ NEW: Importing the Brain
 import 'auth_gate.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Connect to your Supabase database
+  // ✨ 1. Load the hidden .env file before doing anything else
+  await dotenv.load(fileName: ".env");
+  
+  // ✨ 2. Connect to Supabase using the hidden variables
   await Supabase.initialize(
-    url: 'https://ohgejewwsnbyouozymcc.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oZ2VqZXd3c25ieW91b3p5bWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDk3MzksImV4cCI6MjA4OTgyNTczOX0.QytlMBqIV74V5HV1vrVMjDERyY2E9-YUgSp3QoXDbgA',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_SERVICE_ROLE_KEY']!,
   );
   
   runApp(

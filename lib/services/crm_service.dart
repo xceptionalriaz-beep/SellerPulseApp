@@ -6,17 +6,14 @@ class CrmService {
   static final SupabaseClient _supabase = Supabase.instance.client;
 
   // ✨ 1. THE LIVE FEED
-  // This opens a real-time socket to your 'profiles' table. 
-  // Any time a new user signs up, this stream instantly updates your CRM UI.
   static Stream<List<Map<String, dynamic>>> getAdminUserStream() {
     return _supabase
-        .from('profiles') // Ensure your Supabase table is named exactly this
+        .from('profiles') 
         .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false); // Puts the newest signups at the very top
+        .order('created_at', ascending: false); 
   }
 
   // ✨ 2. FOUNDER OVERRIDE ACTIONS
-  // Use this when you click a button in your CRM to manually upgrade or downgrade a user.
   static Future<void> updateUserPlan(String userId, String newPlan) async {
     try {
       await _supabase
@@ -30,7 +27,6 @@ class CrmService {
   }
 
   // ✨ 3. ACCOUNT STATUS MANAGEMENT
-  // Example function for flagging users or marking them as Past Due
   static Future<void> updateUserStatus(String userId, String newStatus) async {
     try {
       await _supabase
@@ -40,6 +36,60 @@ class CrmService {
     } catch (e) {
       debugPrint("CRM Service Error (Update Status): $e");
       throw Exception("Failed to update user status.");
+    }
+  }
+
+  // ✨ 4. CREATE NEW USER 
+  static Future<void> createNewUser({
+    required String email,
+    required String fullName,
+    required String plan,
+    required String tempPassword,
+    required String gender, // ✨ FIXED: The Service now expects the gender!
+    required bool sendWelcomeEmail,
+  }) async {
+    try {
+      // ✨ AUTO-ASSIGN AVATAR URL BASED ON GENDER
+      String avatarUrl = "";
+      if (gender == 'Male') {
+        avatarUrl = "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"; 
+      } else if (gender == 'Female') {
+        avatarUrl = "https://cdn-icons-png.flaticon.com/512/4140/4140047.png";
+      }
+
+      final UserResponse res = await _supabase.auth.admin.createUser(
+        AdminUserAttributes(
+          email: email,
+          password: tempPassword,
+          emailConfirm: true, 
+          userMetadata: {
+            'full_name': fullName,
+            'plan_name': plan,
+            'gender': gender, // Save Gender
+            'avatar_url': avatarUrl, // Save Auto-Avatar
+            'account_status': 'Active',
+          },
+        ),
+      );
+
+      if (res.user != null) {
+        // Force update the public.profiles table
+        await _supabase.from('profiles').update({
+          'name': fullName,
+          'plan_name': plan,
+          'gender': gender, // Save Gender
+          'avatar_url': avatarUrl, // Save Auto-Avatar
+          'account_status': 'Active',
+        }).eq('id', res.user!.id);
+      }
+
+      if (sendWelcomeEmail) {
+        debugPrint("Welcome email trigger flagged for: $email");
+      }
+
+    } catch (e) {
+      debugPrint("CRM Service Error (Create User): $e");
+      throw "Failed to create user: $e";
     }
   }
 }

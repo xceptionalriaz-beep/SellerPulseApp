@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import '../widgets/page_wrapper.dart';
-import '../widgets/user_crm_table.dart';
+import 'admin_settings_tabs/user_crm_tab.dart';
 
 // ✨ DASHBOARD TABS
 import 'admin_tabs/revenue_analytics_tab.dart';
@@ -23,11 +23,9 @@ import 'admin_settings_tabs/plan_limits_tab.dart';
 import 'admin_settings_tabs/email_automations_tab.dart';
 import 'admin_settings_tabs/webhooks_tab.dart';
 import 'admin_settings_tabs/gamification_tab.dart';
-// 🚀 NEW: We use "as vault" so it doesn't conflict with the Dashboard tab!
 import 'admin_settings_tabs/global_api_fleet_tab.dart' as vault; 
-// 💰 NEW: Import the Affiliate Vault settings tab!
 import 'admin_settings_tabs/affiliate_vault_tab.dart';
-import 'admin_settings_tabs/founder_ops_tab.dart'; // 🧠 NEW: Founder Operations
+import 'admin_settings_tabs/founder_ops_tab.dart'; 
 
 class AdminManagementPage extends StatefulWidget {
   const AdminManagementPage({super.key});
@@ -377,7 +375,7 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
 
   Widget _getSettingsContent(bool isMobile) {
     switch (_activeSettingsTab) {
-      case 0: return UserCrmTable(isInvestorMode: _investorMode, key: const ValueKey("crm"));
+      case 0: return UserCrmTab(isInvestorMode: _investorMode, key: const ValueKey("crm"));
       case 1: return const RoleBuilderTab(key: ValueKey("roles"));
       case 2: return SecurityLogsTab(isInvestorMode: _investorMode, key: const ValueKey("logs"));
       case 3: return PromoManagerTab(isMobile: isMobile, key: const ValueKey("promo"));

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // ✨ IMPORT YOUR SETTINGS TABS
-import '../widgets/user_crm_table.dart';
+import 'admin_settings_tabs/user_crm_tab.dart';
 import 'admin_settings_tabs/role_builder_tab.dart';
 import 'admin_settings_tabs/security_logs_tab.dart';
 import 'admin_settings_tabs/promo_manager_tab.dart';
@@ -205,7 +205,7 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
 
   Widget _getSettingsContent() {
     switch (_activeSettingsTab) {
-      case 0: return UserCrmTable(isInvestorMode: widget.isInvestorMode, key: const ValueKey("crm"));
+      case 0: return UserCrmTab(isInvestorMode: widget.isInvestorMode, key: const ValueKey("crm"));
       case 1: return const RoleBuilderTab(key: ValueKey("roles"));
       case 2: return SecurityLogsTab(isInvestorMode: widget.isInvestorMode, key: const ValueKey("logs"));
       case 3: return PromoManagerTab(isMobile: widget.isMobile, key: const ValueKey("promos"));
