@@ -40,6 +40,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # ✨ FIXED: Pointing to the safe placeholder file for Vercel!
+  # ✨ IMPORTANT: You need BOTH here. 
+  # .env is for your local laptop (Real Keys)
+  # .env.example is for Vercel (Placeholder)
   assets:
+    - .env
     - .env.example
