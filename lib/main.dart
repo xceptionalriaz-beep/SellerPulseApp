@@ -9,45 +9,23 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   String? errorMessage;
-  String debugInfo = "Starting init...";
 
   try {
-    // 1. Try to load the REAL .env first
-    try {
-      await dotenv.load(fileName: ".env");
-      debugInfo = "Loaded .env successfully";
-    } catch (e) {
-      debugInfo = ".env load failed, trying .env.example";
-      try {
-        await dotenv.load(fileName: ".env.example");
-        debugInfo = "Loaded .env.example successfully";
-      } catch (ee) {
-        debugInfo = "No .env files found in assets!";
-      }
-    }
+    // 1. Load the .env file (Works locally AND now works perfectly on Vercel!)
+    await dotenv.load(fileName: ".env");
 
-    // 2. Collect Keys
-    final String url = dotenv.maybeGet('SUPABASE_URL') ?? 
-                       const String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://ohgejewwsnbyouozymcc.supabase.co');
-    
-    final String key = dotenv.maybeGet('SUPABASE_SERVICE_ROLE_KEY') ?? 
-                       const String.fromEnvironment('SUPABASE_SERVICE_ROLE_KEY');
+    // 2. Grab the keys
+    final String url = dotenv.env['SUPABASE_URL'] ?? '';
+    final String key = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '';
 
-    // 3. Validation Check
-    if (key.isEmpty) {
-      errorMessage = "Supabase Key is empty! \n$debugInfo \n\nCheck if .env is added to pubspec.yaml assets.";
+    // 3. Safety Check & Connect
+    if (key.isEmpty || url.isEmpty) {
+      errorMessage = "Error: Keys are missing from the .env file!";
     } else {
-      // Show first 5 chars for debugging
-      final maskedKey = "${key.substring(0, 5)}...";
-      debugPrint("Connecting to Supabase with key: $maskedKey");
-
-      await Supabase.initialize(
-        url: url,
-        anonKey: key,
-      );
+      await Supabase.initialize(url: url, anonKey: key);
     }
   } catch (e) {
-    errorMessage = "Critical Failure: $e \n\nDebug: $debugInfo";
+    errorMessage = "Startup Failed: $e";
   }
 
   runApp(SellerPulseApp(error: errorMessage));
@@ -59,6 +37,7 @@ class SellerPulseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🛑 If anything fails, show our beautiful safety net
     if (error != null) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -72,17 +51,11 @@ class SellerPulseApp extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.hub_rounded, color: Colors.redAccent, size: 60),
+                  const Icon(Icons.check_circle_outline, color: Colors.redAccent, size: 60),
                   const SizedBox(height: 24),
-                  const Text("Connection Failed", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                  const Text("Connection Interrupted", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
-                    child: Text(error!, style: const TextStyle(color: Colors.red, fontSize: 13, fontFamily: 'monospace'), textAlign: TextAlign.left),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text("ACTION: Check pubspec.yaml assets and restart the debugger.", style: TextStyle(color: Colors.grey, fontSize: 11, fontWeight: FontWeight.bold)),
+                  Text(error!, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
                 ],
               ),
             ),
@@ -91,6 +64,7 @@ class SellerPulseApp extends StatelessWidget {
       );
     }
 
+    // ✅ If it works, load the app!
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MarketProvider()),
