@@ -20,7 +20,7 @@ class _OverviewTabState extends State<OverviewTab> {
   String _joinedDate = "Joined Recently"; 
   
   // Avatar & Gender State
-  String _userGender = "unspecified"; 
+  String _userGender = "Unspecified";
 
   // Analytics State
   int _scansUsed = 84;
@@ -103,9 +103,10 @@ class _OverviewTabState extends State<OverviewTab> {
 
     final String seed = user?.email ?? "default";
     
-    if (_userGender == 'male') {
+    // ✨ FIXED: Check for 'Male' and 'Female'
+    if (_userGender == 'Male') {
       return "https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${seed}male&backgroundColor=b6e3f4";
-    } else if (_userGender == 'female') {
+    } else if (_userGender == 'Female') {
       return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
     }
 
@@ -129,16 +130,20 @@ class _OverviewTabState extends State<OverviewTab> {
         }),
       );
 
-      // 2. SYNC WITH CRM DATABASE
+      // ✨ 2. SYNC WITH CRM DATABASE (Crucial Fix)
+      // We must tell the public table exactly what the gender and avatar are!
+      final newAvatarUrl = _getSmartAvatarUrl();
+      
       await Supabase.instance.client.from('profiles').update({
         'name': _nameController.text,
-        'avatar_url': _getSmartAvatarUrl(), 
+        'gender': _userGender, // ✨ TELL THE CRM THE GENDER!
+        'avatar_url': newAvatarUrl ?? '', // ✨ Send an empty string if null, so initials trigger
       }).eq('id', user.id);
 
       // 3. Update Local UI State
       setState(() {
         _userName = _nameController.text;
-        _userInitial = _getInitials(_userName); // Update initials on save
+        _userInitial = _getInitials(_userName); 
         _isEditing = false;
         _isLoading = false;
       });
@@ -413,9 +418,9 @@ class _OverviewTabState extends State<OverviewTab> {
                   setState(() => _userGender = newValue);
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  _buildPopupMenuItem('unspecified', 'Prefer not to say'),
-                  _buildPopupMenuItem('male', 'Male'),
-                  _buildPopupMenuItem('female', 'Female'),
+                  _buildPopupMenuItem('Unspecified', 'Prefer not to say'), // ✨ Capitalized
+                  _buildPopupMenuItem('Male', 'Male'), // ✨ Capitalized
+                  _buildPopupMenuItem('Female', 'Female'), // ✨ Capitalized
                 ],
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -428,7 +433,8 @@ class _OverviewTabState extends State<OverviewTab> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _userGender == 'male' ? 'Male' : _userGender == 'female' ? 'Female' : 'Prefer not to say',
+                        // ✨ Update the text display logic
+                        _userGender == 'Male' ? 'Male' : _userGender == 'Female' ? 'Female' : 'Prefer not to say',
                         style: const TextStyle(color: Colors.black, fontSize: 14),
                       ),
                       const Icon(Icons.keyboard_arrow_down, color: Color(0xFF94A3B8), size: 20),

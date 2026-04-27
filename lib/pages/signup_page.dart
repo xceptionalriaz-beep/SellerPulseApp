@@ -21,7 +21,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _passwordController = TextEditingController();
   
   // ✨ NEW: State variable to track the selected gender
-  String _selectedGender = 'unspecified'; 
+  String _selectedGender = 'Unspecified';
 
   @override
   void dispose() {
@@ -187,16 +187,17 @@ class _SignupPageState extends State<SignupPage> {
               }
 
               try {
-                // ✨ NEW: Sending the selected gender to Supabase!
+                // ✨ UPDATED: Sending the Capitalized gender AND an empty avatar string!
                 await Supabase.instance.client.auth.signUp(
                   email: email,
                   password: password,
                   data: {
                     'full_name': name,
-                    'gender': _selectedGender, // Saves 'male', 'female', or 'unspecified'
+                    'gender': _selectedGender, // Now saves 'Male', 'Female', or 'Unspecified'
+                    'avatar_url': '', // ✨ Explicitly empty so the CRM knows to use initials!
                   },
                 );
-                _nextStep(); 
+                _nextStep();
               } on AuthException catch (e) {
                 _showError(e.message);
               } catch (e) {
@@ -244,7 +245,6 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  // ✨ NEW: The Custom Dropdown Widget
   Widget _buildGenderDropdown() {
     return Container(
       decoration: BoxDecoration(
@@ -261,10 +261,11 @@ class _SignupPageState extends State<SignupPage> {
           style: const TextStyle(color: Colors.black, fontSize: 14),
           dropdownColor: Colors.white,
           borderRadius: BorderRadius.circular(12),
+          // ✨ FIXED: The 'value' must be Capitalized to match the CRM!
           items: const [
-            DropdownMenuItem(value: 'unspecified', child: Text("Prefer not to say")),
-            DropdownMenuItem(value: 'male', child: Text("Male")),
-            DropdownMenuItem(value: 'female', child: Text("Female")),
+            DropdownMenuItem(value: 'Unspecified', child: Text("Prefer not to say")),
+            DropdownMenuItem(value: 'Male', child: Text("Male")),
+            DropdownMenuItem(value: 'Female', child: Text("Female")),
           ],
           onChanged: (String? newValue) {
             if (newValue != null) {
