@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/ebay_service.dart';
 
+// ✨ UPGRADE: We add WidgetsBindingObserver to detect when the pop-up closes
 class EbayManagerTab extends StatefulWidget {
   const EbayManagerTab({super.key});
 
@@ -8,12 +9,11 @@ class EbayManagerTab extends StatefulWidget {
   State<EbayManagerTab> createState() => _EbayManagerTabState();
 }
 
-class _EbayManagerTabState extends State<EbayManagerTab> {
+class _EbayManagerTabState extends State<EbayManagerTab> with WidgetsBindingObserver {
   bool _isLoading = true;
   bool _isEbayConnected = false;
   bool _isConnectingEbay = false;
   
-  // eBay Store Data
   String _ebayStoreName = "eBay Account";
   String _feedbackScore = "100%"; 
   String _activeListings = "Syncing..."; 
@@ -21,13 +21,32 @@ class _EbayManagerTabState extends State<EbayManagerTab> {
   @override
   void initState() {
     super.initState();
+    // Start listening to the app lifecycle (detecting when they return from the pop-up)
+    WidgetsBinding.instance.addObserver(this);
     _checkEbayConnection();
   }
 
-  // ✨ 1. Check Connection (Delegated to Service)
+  @override
+  void dispose() {
+    // Stop listening when the page closes
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // ✨ THE MAGIC DETECTOR: This fires automatically when the user closes the eBay pop-up
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // If the user just came back to the app, check the database instantly!
+      if (!_isEbayConnected) {
+        _checkEbayConnection();
+      }
+    }
+  }
+
   Future<void> _checkEbayConnection() async {
     try {
-      final data = await EbayService.checkConnection(); // Call the Brain
+      final data = await EbayService.checkConnection();
 
       if (mounted) {
         setState(() {
@@ -45,13 +64,10 @@ class _EbayManagerTabState extends State<EbayManagerTab> {
     }
   }
 
-  // ✨ 2. Disconnect Function (Delegated to Service)
   Future<void> _disconnectEbay() async {
     setState(() => _isLoading = true);
-
     try {
-      await EbayService.disconnect(); // Call the Brain
-
+      await EbayService.disconnect();
       if (mounted) {
         setState(() {
           _isEbayConnected = false;
@@ -72,12 +88,10 @@ class _EbayManagerTabState extends State<EbayManagerTab> {
     }
   }
 
-  // ✨ 3. The Official Auth Flow (Delegated to Service)
   Future<void> _startEbayOAuth() async {
     setState(() => _isConnectingEbay = true);
-
     try {
-      await EbayService.connectEbay(); // Call the Brain
+      await EbayService.connectEbay(); 
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +122,6 @@ class _EbayManagerTabState extends State<EbayManagerTab> {
         ),
         const SizedBox(height: 24),
         
-        // ✨ Switch between Not Connected and Connected UI
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 400),
           child: _isEbayConnected ? _buildConnectedCard() : _buildInvitationCard(),
@@ -200,7 +213,6 @@ class _EbayManagerTabState extends State<EbayManagerTab> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar with neon ring
               Container(
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
@@ -236,7 +248,6 @@ class _EbayManagerTabState extends State<EbayManagerTab> {
                   ],
                 ),
               ),
-              // Live Pulse Indicator
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
