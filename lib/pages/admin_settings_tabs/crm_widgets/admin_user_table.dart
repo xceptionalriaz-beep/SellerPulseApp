@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../../../services/crm_service.dart'; 
+import '../../../services/crm_service.dart';
+import 'user_detail_drawer.dart'; 
 
 class AdminUserTable extends StatefulWidget {
   final List<Map<String, dynamic>> allUsers; 
@@ -363,7 +364,10 @@ class _AdminUserTableState extends State<AdminUserTable> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // ✨ Trigger the smooth slide-in Drawer!
+                    UserDetailDrawer.show(context, user, widget.onUserUpdated);
+                  },
                   style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12), side: const BorderSide(color: Color(0xFFE2E8F0)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                   child: const Text("Detailed Profile", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
                 ),
