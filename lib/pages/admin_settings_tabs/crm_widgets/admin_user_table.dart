@@ -5,13 +5,13 @@ import '../../../services/crm_service.dart';
 class AdminUserTable extends StatefulWidget {
   final bool isInvestorMode;
   final String searchQuery;
-  final String selectedFilter; // ✨ NEW: Catching the filter from the Boss!
+  final String selectedFilter; 
 
   const AdminUserTable({
     super.key, 
     required this.isInvestorMode,
     required this.searchQuery,
-    required this.selectedFilter, // ✨ NEW: Required parameter
+    required this.selectedFilter, 
   });
 
   @override
@@ -19,6 +19,79 @@ class AdminUserTable extends StatefulWidget {
 }
 
 class _AdminUserTableState extends State<AdminUserTable> {
+
+  // ✨ THE REAL-WORLD SUPPORT NOTE DIALOG
+  Future<void> _showSupportNoteDialog(BuildContext context, String userId, String userName) async {
+    final TextEditingController noteController = TextEditingController();
+    bool isSubmitting = false;
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text("Flag $userName for Support", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Enter the specific issue or reason:", style: TextStyle(fontSize: 13, color: Color(0xFF64748B))),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: noteController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: "e.g., eBay sync failing, requested refund...",
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade300)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF0F172A))),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text("Cancel", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting ? null : () async {
+                    if (noteController.text.trim().isEmpty) return;
+                    
+                    setDialogState(() => isSubmitting = true);
+                    try {
+                      // ✨ SAVES THE REAL NOTE TO SUPABASE
+                      await CrmService.updateSupportNote(userId, noteController.text.trim());
+                      if (context.mounted) {
+                        Navigator.pop(dialogContext);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Support flag added!"), backgroundColor: Color(0xFF0F172A)));
+                      }
+                    } catch (e) {
+                      setDialogState(() => isSubmitting = false);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F172A),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: isSubmitting 
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text("Save Note", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          }
+        );
+      }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +146,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
                     }).toList();
                   }
 
-                  // 🎭 2. BUTTON FILTER LOGIC (The Filter Engine!)
+                  // 🎭 2. BUTTON FILTER LOGIC
                   if (widget.selectedFilter != 'All') {
                     liveUsers = liveUsers.where((user) {
                       final plan = user['plan_name'] ?? 'Free Trial';
@@ -173,20 +246,19 @@ class _AdminUserTableState extends State<AdminUserTable> {
       }
     }
 
-    // ✨ THE NEW "AUTO-AVATAR" LOGIC
     String? finalAvatarUrl = dbData['avatar_url'];
     String? gender = dbData['gender'];
 
-    // If they haven't uploaded a custom photo, check their gender!
     if (finalAvatarUrl == null || finalAvatarUrl.trim().isEmpty) {
       if (gender == 'Male') {
-        finalAvatarUrl = "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"; // Default Male
+        finalAvatarUrl = "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"; 
       } else if (gender == 'Female') {
-        finalAvatarUrl = "https://cdn-icons-png.flaticon.com/512/4140/4140047.png"; // Default Female
+        finalAvatarUrl = "https://cdn-icons-png.flaticon.com/512/4140/4140047.png"; 
       }
     }
 
     return {
+      "id": dbData['id'], // ✨ CRITICAL: Passing the DB ID so buttons know who to update
       "name": name,
       "initials": getInitials(name), 
       "email": email,
@@ -330,7 +402,38 @@ class _AdminUserTableState extends State<AdminUserTable> {
                   child: const Text("Detailed Profile", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.more_vert, size: 20, color: Color(0xFF94A3B8)),
+                
+                // ✨ UPGRADED MENU
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF94A3B8)),
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  onSelected: (value) async {
+                    final String userId = user['id']; 
+                    
+                    if (value == 'suspend') {
+                       await CrmService.updateUserStatus(userId, 'Past Due');
+                    } else if (value == 'upgrade') {
+                       await CrmService.updateUserPlan(userId, 'Pro Plan');
+                       await CrmService.updateUserStatus(userId, 'Active');
+                    } else if (value == 'flag_support') {
+                       _showSupportNoteDialog(context, userId, user['name']);
+                    } else if (value == 'resolve_support') {
+                       await CrmService.updateSupportNote(userId, null);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'upgrade', child: Text("Upgrade to Pro", style: TextStyle(fontWeight: FontWeight.w600))),
+                    
+                    // ✨ DYNAMIC MENU: Changes based on their current status!
+                    if (user['dispute'] == null || user['dispute'].toString().trim().isEmpty)
+                      const PopupMenuItem(value: 'flag_support', child: Text("Flag for Support", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)))
+                    else
+                      const PopupMenuItem(value: 'resolve_support', child: Text("Resolve Support Issue", style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600))),
+                      
+                    const PopupMenuItem(value: 'suspend', child: Text("Suspend User", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600))),
+                  ],
+                ),
               ],
             ),
           ),
