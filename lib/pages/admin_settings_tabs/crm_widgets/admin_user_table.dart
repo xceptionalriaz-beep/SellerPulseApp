@@ -3,15 +3,19 @@ import 'dart:math';
 import '../../../services/crm_service.dart'; 
 
 class AdminUserTable extends StatefulWidget {
+  final List<Map<String, dynamic>> allUsers; 
   final bool isInvestorMode;
   final String searchQuery;
   final String selectedFilter; 
+  final Function(String, String, dynamic) onUserUpdated; 
 
   const AdminUserTable({
     super.key, 
+    required this.allUsers,
     required this.isInvestorMode,
     required this.searchQuery,
     required this.selectedFilter, 
+    required this.onUserUpdated,
   });
 
   @override
@@ -20,7 +24,6 @@ class AdminUserTable extends StatefulWidget {
 
 class _AdminUserTableState extends State<AdminUserTable> {
 
-  // ✨ THE REAL-WORLD SUPPORT NOTE DIALOG
   Future<void> _showSupportNoteDialog(BuildContext context, String userId, String userName) async {
     final TextEditingController noteController = TextEditingController();
     bool isSubmitting = false;
@@ -63,8 +66,10 @@ class _AdminUserTableState extends State<AdminUserTable> {
                     if (noteController.text.trim().isEmpty) return;
                     
                     setDialogState(() => isSubmitting = true);
+                    
+                    widget.onUserUpdated(userId, 'dispute_note', noteController.text.trim());
+
                     try {
-                      // ✨ SAVES THE REAL NOTE TO SUPABASE
                       await CrmService.updateSupportNote(userId, noteController.text.trim());
                       if (context.mounted) {
                         Navigator.pop(dialogContext);
@@ -72,6 +77,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
                       }
                     } catch (e) {
                       setDialogState(() => isSubmitting = false);
+                      widget.onUserUpdated(userId, 'dispute_note', null);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e"), backgroundColor: Colors.redAccent));
                       }
@@ -95,6 +101,37 @@ class _AdminUserTableState extends State<AdminUserTable> {
 
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> liveUsers = widget.allUsers;
+    
+    if (widget.searchQuery.isNotEmpty) {
+      final query = widget.searchQuery.toLowerCase();
+      liveUsers = liveUsers.where((user) {
+        final name = (user['name'] ?? '').toString().toLowerCase();
+        final email = (user['email'] ?? '').toString().toLowerCase();
+        return name.contains(query) || email.contains(query);
+      }).toList();
+    }
+
+    if (widget.selectedFilter != 'All') {
+      liveUsers = liveUsers.where((user) {
+        final plan = user['plan_name'] ?? 'Free Trial';
+        final status = user['account_status'] ?? 'Active';
+        final dispute = user['dispute_note'];
+
+        if (widget.selectedFilter == 'Active Tiers') {
+          return status == 'Active' && plan != 'Free Trial';
+        } else if (widget.selectedFilter == 'Expired Trials') {
+          return status == 'Expired' && plan == 'Free Trial';
+        } else if (widget.selectedFilter == 'Past Due') {
+          return status == 'Past Due';
+        } else if (widget.selectedFilter == 'Support waiting') {
+          return dispute != null && dispute.toString().trim().isNotEmpty;
+        }
+        
+        return true; 
+      }).toList();
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -113,96 +150,37 @@ class _AdminUserTableState extends State<AdminUserTable> {
               _buildTableHeader(),
               const Divider(height: 1, color: Color(0xFFE2E8F0)),
               
-              StreamBuilder<List<Map<String, dynamic>>>(
-                stream: CrmService.getAdminUserStream(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Padding(
-                      padding: EdgeInsets.all(40.0),
-                      child: Center(child: CircularProgressIndicator(color: Color(0xFF0F172A))),
+              if (liveUsers.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.group_off_outlined, size: 40, color: Color(0xFF94A3B8)),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No users match '${widget.selectedFilter}'", 
+                          style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)
+                        ),
+                      ],
+                    )
+                  )
+                )
+              else
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: liveUsers.map((dbUser) {
+                    final formattedUser = _formatDatabaseUser(dbUser);
+                    
+                    return Column(
+                      children: [
+                        _buildDataRow(formattedUser, dbUser), 
+                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      ],
                     );
-                  }
-
-                  if (snapshot.hasError) {
-                    return Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red))),
-                    );
-                  }
-
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return _buildEmptyState();
-                  }
-
-                  List<Map<String, dynamic>> liveUsers = snapshot.data!;
-                  
-                  // 🔍 1. SEARCH FILTER LOGIC
-                  if (widget.searchQuery.isNotEmpty) {
-                    final query = widget.searchQuery.toLowerCase();
-                    liveUsers = liveUsers.where((user) {
-                      final name = (user['name'] ?? '').toString().toLowerCase();
-                      final email = (user['email'] ?? '').toString().toLowerCase();
-                      return name.contains(query) || email.contains(query);
-                    }).toList();
-                  }
-
-                  // 🎭 2. BUTTON FILTER LOGIC
-                  if (widget.selectedFilter != 'All') {
-                    liveUsers = liveUsers.where((user) {
-                      final plan = user['plan_name'] ?? 'Free Trial';
-                      final status = user['account_status'] ?? 'Active';
-                      final dispute = user['dispute_note'];
-
-                      if (widget.selectedFilter == 'Active Tiers') {
-                        return status == 'Active' && plan != 'Free Trial';
-                      } else if (widget.selectedFilter == 'Expired Trials') {
-                        return status == 'Expired' && plan == 'Free Trial';
-                      } else if (widget.selectedFilter == 'Past Due') {
-                        return status == 'Past Due';
-                      } else if (widget.selectedFilter == 'Support waiting') {
-                        return dispute != null && dispute.toString().trim().isNotEmpty;
-                      }
-                      
-                      return true; // Fallback
-                    }).toList();
-                  }
-
-                  // 🚫 NO MATCHES STATE
-                  if (liveUsers.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(40),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.group_off_outlined, size: 40, color: Color(0xFF94A3B8)),
-                            const SizedBox(height: 16),
-                            Text(
-                              "No users match '${widget.selectedFilter}'", 
-                              style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)
-                            ),
-                          ],
-                        )
-                      )
-                    );
-                  }
-
-                  // ✅ BUILD THE TABLE
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: liveUsers.map((dbUser) {
-                      final formattedUser = _formatDatabaseUser(dbUser);
-                      
-                      return Column(
-                        children: [
-                          _buildDataRow(formattedUser),
-                          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                        ],
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
+                  }).toList(),
+                ),
             ],
           ),
         ),
@@ -258,7 +236,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
     }
 
     return {
-      "id": dbData['id'], // ✨ CRITICAL: Passing the DB ID so buttons know who to update
+      "id": dbData['id'], 
       "name": name,
       "initials": getInitials(name), 
       "email": email,
@@ -270,18 +248,6 @@ class _AdminUserTableState extends State<AdminUserTable> {
       "dispute": dbData['dispute_note'], 
       "avatarUrl": finalAvatarUrl, 
     };
-  }
-
-  Widget _buildEmptyState() {
-    return const Padding(
-      padding: EdgeInsets.all(40),
-      child: Center(
-        child: Text(
-          "Waiting for your first superstar user...", 
-          style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500)
-        )
-      ),
-    );
   }
 
   Widget _buildTableHeader() {
@@ -303,7 +269,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
 
   TextStyle _headerStyle() => const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8), letterSpacing: 1);
 
-  Widget _buildDataRow(Map<String, dynamic> user) {
+  Widget _buildDataRow(Map<String, dynamic> user, Map<String, dynamic> rawUser) {
     Color statusColor = Colors.green;
     Color statusBg = Colors.green.withAlpha(20);
     if (user['status'] == 'Expired') { statusColor = Colors.red; statusBg = Colors.red.withAlpha(20); }
@@ -403,7 +369,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
                 ),
                 const SizedBox(width: 8),
                 
-                // ✨ UPGRADED MENU
+                // ✨ UPGRADED MENU WITH SMART PLAN LOGIC
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF94A3B8)),
                   color: Colors.white,
@@ -411,28 +377,90 @@ class _AdminUserTableState extends State<AdminUserTable> {
                   onSelected: (value) async {
                     final String userId = user['id']; 
                     
-                    if (value == 'suspend') {
-                       await CrmService.updateUserStatus(userId, 'Past Due');
-                    } else if (value == 'upgrade') {
-                       await CrmService.updateUserPlan(userId, 'Pro Plan');
-                       await CrmService.updateUserStatus(userId, 'Active');
+                    // ✨ DYNAMIC PLAN CATCHER
+                    if (value.startsWith('change_plan_')) {
+                       final String newPlan = value.replaceFirst('change_plan_', '');
+                       
+                       widget.onUserUpdated(userId, 'plan_name', newPlan);
+                       widget.onUserUpdated(userId, 'account_status', 'Active'); 
+                       try {
+                         await CrmService.updateUserPlan(userId, newPlan);
+                         await CrmService.updateUserStatus(userId, 'Active');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Switched to $newPlan!"), backgroundColor: Colors.green));
+                       } catch (e) {
+                         widget.onUserUpdated(userId, 'plan_name', user['plan']);
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to change plan: $e"), backgroundColor: Colors.redAccent));
+                       }
+                    } else if (value == 'suspend') {
+                       widget.onUserUpdated(userId, 'account_status', 'Past Due');
+                       try {
+                         await CrmService.updateUserStatus(userId, 'Past Due');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User Suspended!"), backgroundColor: Colors.orange));
+                       } catch (e) {
+                         widget.onUserUpdated(userId, 'account_status', 'Active');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to suspend: $e"), backgroundColor: Colors.redAccent));
+                       }
+                    } else if (value == 'reactivate') { 
+                       widget.onUserUpdated(userId, 'account_status', 'Active');
+                       try {
+                         await CrmService.updateUserStatus(userId, 'Active');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("User Reactivated!"), backgroundColor: Colors.green));
+                       } catch (e) {
+                         widget.onUserUpdated(userId, 'account_status', 'Past Due');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to reactivate: $e"), backgroundColor: Colors.redAccent));
+                       }
+                    } else if (value == 'expire_trial') {
+                       widget.onUserUpdated(userId, 'account_status', 'Expired');
+                       try {
+                         await CrmService.updateUserStatus(userId, 'Expired');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Trial marked as Expired!"), backgroundColor: Colors.redAccent));
+                       } catch (e) {
+                         widget.onUserUpdated(userId, 'account_status', 'Active');
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to expire: $e"), backgroundColor: Colors.redAccent));
+                       }
                     } else if (value == 'flag_support') {
                        _showSupportNoteDialog(context, userId, user['name']);
                     } else if (value == 'resolve_support') {
-                       await CrmService.updateSupportNote(userId, null);
+                       widget.onUserUpdated(userId, 'dispute_note', null);
+                       try {
+                         await CrmService.updateSupportNote(userId, null);
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Issue resolved!"), backgroundColor: Color(0xFF16A34A)));
+                       } catch (e) {
+                         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to resolve: $e"), backgroundColor: Colors.redAccent));
+                       }
                     }
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'upgrade', child: Text("Upgrade to Pro", style: TextStyle(fontWeight: FontWeight.w600))),
+                  itemBuilder: (context) {
+                    // Define the plans right here inside the builder
+                    final List<String> availablePlans = ['Free Trial', 'Pro Plan', 'Elite Plan'];
                     
-                    // ✨ DYNAMIC MENU: Changes based on their current status!
-                    if (user['dispute'] == null || user['dispute'].toString().trim().isEmpty)
-                      const PopupMenuItem(value: 'flag_support', child: Text("Flag for Support", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)))
-                    else
-                      const PopupMenuItem(value: 'resolve_support', child: Text("Resolve Support Issue", style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600))),
-                      
-                    const PopupMenuItem(value: 'suspend', child: Text("Suspend User", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600))),
-                  ],
+                    return [
+                      // ✨ DYNAMIC PLAN GENERATOR
+                      ...availablePlans.where((plan) => plan != user['plan']).map((plan) => 
+                        PopupMenuItem(
+                          value: 'change_plan_$plan', 
+                          child: Text("Switch to $plan", style: const TextStyle(fontWeight: FontWeight.w600))
+                        )
+                      ),
+
+                      const PopupMenuDivider(),
+
+                      if (user['plan'] == 'Free Trial' && user['status'] != 'Expired')
+                        const PopupMenuItem(value: 'expire_trial', child: Text("Force Expire Trial", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600))),
+
+                      if (user['dispute'] == null || user['dispute'].toString().trim().isEmpty)
+                        const PopupMenuItem(value: 'flag_support', child: Text("Flag for Support", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)))
+                      else
+                        const PopupMenuItem(value: 'resolve_support', child: Text("Resolve Support Issue", style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600))),
+                        
+                      if (user['status'] == 'Expired' && user['plan'] == 'Free Trial')
+                        const PopupMenuItem(value: 'reactivate', child: Text("Extend Trial", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600)))
+                      else if (user['status'] == 'Past Due' || user['status'] == 'Expired')
+                        const PopupMenuItem(value: 'reactivate', child: Text("Reactivate User", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600)))
+                      else
+                        const PopupMenuItem(value: 'suspend', child: Text("Suspend User", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600))),
+                    ];
+                  },
                 ),
               ],
             ),

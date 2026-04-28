@@ -5,12 +5,19 @@ class CrmService {
   // A private shortcut to your Supabase client
   static final SupabaseClient _supabase = Supabase.instance.client;
 
-  // ✨ 1. THE LIVE FEED
-  static Stream<List<Map<String, dynamic>>> getAdminUserStream() {
-    return _supabase
-        .from('profiles') 
-        .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false); 
+  // ✨ THE ENTERPRISE UPGRADE: Bulletproof one-time fetch. No fragile streams!
+  static Future<List<Map<String, dynamic>>> fetchAllUsers() async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .order('created_at', ascending: false);
+          
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint("CRM Service Error (Fetch Users): $e");
+      return []; // Returns an empty list instead of crashing if internet drops
+    }
   }
 
   // ✨ 2. FOUNDER OVERRIDE ACTIONS

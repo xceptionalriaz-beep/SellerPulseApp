@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Required for copying password to clipboard
 import 'dart:math';
 
-import '../../services/crm_service.dart'; 
+import '../../../services/crm_service.dart';
 
 import 'crm_widgets/admin_hud_section.dart';
 import 'crm_widgets/admin_controls_bar.dart';
@@ -19,10 +19,52 @@ class UserCrmTab extends StatefulWidget {
 
 class _UserCrmTabState extends State<UserCrmTab> {
   String _searchQuery = "";
-  String _selectedFilter = "All"; // ✨ NEW: The Boss now remembers the active filter!
+  String _selectedFilter = "All";
+
+  // ✨ THE MEMORY BANK
+  List<Map<String, dynamic>> _allUsers = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers(); // Fetch the data exactly once when the tab opens
+  }
+
+  // ✨ THE ENTERPRISE DATABSE FETCH
+  Future<void> _loadUsers() async {
+    setState(() => _isLoading = true);
+    final users = await CrmService.fetchAllUsers();
+    if (mounted) {
+      setState(() {
+        _allUsers = users;
+        _isLoading = false;
+      });
+    }
+  }
+
+  // ✨ OPTIMISTIC UI: Instantly updates the screen without waiting for the database!
+  void _updateUserLocally(String userId, String field, dynamic newValue) {
+    setState(() {
+      final index = _allUsers.indexWhere((u) => u['id'] == userId);
+      if (index != -1) {
+        _allUsers[index][field] = newValue;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Show a clean loader while the memory bank fills up
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(60.0),
+          child: CircularProgressIndicator(color: Color(0xFF0F172A)),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 40),
@@ -31,35 +73,37 @@ class _UserCrmTabState extends State<UserCrmTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 1. The 4 Top Cards
-          const AdminHudSection(),
+          AdminHudSection(allUsers: _allUsers),
           
           const SizedBox(height: 24),
           
           // 2. The Search, Filters, and "Add New User" button
           AdminControlsBar(
+            allUsers: _allUsers, // ✨ Pass memory to the badges
             onSearch: (query) {
               setState(() {
                 _searchQuery = query;
               });
             },
             onAddUser: () => _showAddUserDialog(context),
-            // ✨ NEW: Passing the filter state to the buttons
             selectedFilter: _selectedFilter,
             onFilterChanged: (newFilter) {
               setState(() {
                 _selectedFilter = newFilter;
               });
             },
+            onRefresh: _loadUsers,
           ),
           
           const SizedBox(height: 16),
           
           // 3. The Main Live Database Table
           AdminUserTable(
+            allUsers: _allUsers, // ✨ Pass memory to the table
             isInvestorMode: widget.isInvestorMode,
             searchQuery: _searchQuery,
-            // ✨ NEW: Passing the filter state to the Engine so it can sort!
             selectedFilter: _selectedFilter, 
+            onUserUpdated: _updateUserLocally, // ✨ Pass the instant-update superpower!
           ),
         ],
       ),
@@ -311,6 +355,9 @@ class _UserCrmTabState extends State<UserCrmTab> {
                                 gender: selectedGender, 
                                 sendWelcomeEmail: sendWelcomeEmail,
                               );
+
+                              // Refresh the table silently in the background!
+                              _loadUsers();
 
                               if (context.mounted) {
                                 Navigator.pop(dialogContext);
