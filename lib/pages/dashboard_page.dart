@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async'; // ✨ NEW: Required for the listener
 
 import 'landing_page.dart'; 
 import 'product_research/product_research_master.dart';
@@ -24,12 +25,34 @@ class _DashboardPageState extends State<DashboardPage> {
   final Color neonGreen = const Color(0xFF8FFF00);
   final Color deepNavy = const Color(0xFF131B2F);
 
+  // ✨ NEW: The Walkie-Talkie Subscription
+  late final StreamSubscription<AuthState> _authSubscription;
+
   User? get user => Supabase.instance.client.auth.currentUser;
   bool get isOwner => user?.email == 'xceptionalriaz@gmail.com';
 
-  // ✨ SMART INITIALS EXTRACTOR (Brought over to Dashboard)
+  @override
+  void initState() {
+    super.initState();
+    // ✨ THE MAGIC LISTENER: Whenever the user updates their profile, this triggers!
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.userUpdated) {
+        if (mounted) {
+          setState(() {}); // This forces the top bar to instantly redraw with the new avatar!
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription.cancel(); // Turn off the walkie-talkie when leaving
+    super.dispose();
+  }
+
+  // ✨ SMART INITIALS EXTRACTOR
   String _getInitials(String name) {
-    if (name.trim().isEmpty) return "S"; // Fallback
+    if (name.trim().isEmpty) return "S"; 
     List<String> parts = name.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -43,27 +66,24 @@ class _DashboardPageState extends State<DashboardPage> {
     return _getInitials(name);
   }
 
-  // ✨ UPGRADED: Returns null for 'unspecified' to trigger native neon green initials
   String? _getSmartAvatarUrl() {
     if (user == null) return null;
 
-    // 1. Google Account Photo
     final googlePhoto = user?.userMetadata?['picture'];
     if (googlePhoto != null) {
       return googlePhoto.toString();
     }
 
-    // 2. DiceBear Automatic Avatars
     final String seed = user?.email ?? "default";
-    final String gender = user?.userMetadata?['gender']?.toString() ?? "unspecified";
+    // Checks for capital letters now to match your new settings!
+    final String gender = user?.userMetadata?['gender']?.toString() ?? "Unspecified"; 
     
-    if (gender == 'male') {
+    if (gender == 'Male') {
       return "https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${seed}male&backgroundColor=b6e3f4";
-    } else if (gender == 'female') {
+    } else if (gender == 'Female') {
       return "https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf";
     }
 
-    // Default Neutral Initials (Returns null so UI draws the Neon Green Circle)
     return null;
   }
 
@@ -110,14 +130,13 @@ class _DashboardPageState extends State<DashboardPage> {
                           
                           _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
                           
-                          // ✨ Desktop Avatar Logic
                           if (_selectedIndex != 5) ...[
                             const SizedBox(width: 15),
                             Builder(
                               builder: (context) {
                                 return InkWell(
                                   borderRadius: BorderRadius.circular(16),
-                                  onTap: () => setState(() => _selectedIndex = 5), // Routes to Settings
+                                  onTap: () => setState(() => _selectedIndex = 5),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
                                     child: Container(
@@ -133,7 +152,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                             ),
                                           )
                                         : Center(
-                                            // Native text fallback (RU)
                                             child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5))
                                           ),
                                     ),
@@ -183,7 +201,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // --- MOBILE COMPONENTS ---
-
   Widget _buildMobileHeader(String? currentAvatarUrl) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
@@ -216,7 +233,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     return InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: () => setState(() => _selectedIndex = 5),
-                      // ✨ UPGRADED: Mobile Avatar
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(14),
                         child: Container(
