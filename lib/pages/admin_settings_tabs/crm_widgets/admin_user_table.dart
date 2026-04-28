@@ -5,11 +5,13 @@ import '../../../services/crm_service.dart';
 class AdminUserTable extends StatefulWidget {
   final bool isInvestorMode;
   final String searchQuery;
+  final String selectedFilter; // ✨ NEW: Catching the filter from the Boss!
 
   const AdminUserTable({
     super.key, 
     required this.isInvestorMode,
     required this.searchQuery,
+    required this.selectedFilter, // ✨ NEW: Required parameter
   });
 
   @override
@@ -61,6 +63,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
 
                   List<Map<String, dynamic>> liveUsers = snapshot.data!;
                   
+                  // 🔍 1. SEARCH FILTER LOGIC
                   if (widget.searchQuery.isNotEmpty) {
                     final query = widget.searchQuery.toLowerCase();
                     liveUsers = liveUsers.where((user) {
@@ -70,13 +73,48 @@ class _AdminUserTableState extends State<AdminUserTable> {
                     }).toList();
                   }
 
+                  // 🎭 2. BUTTON FILTER LOGIC (The Filter Engine!)
+                  if (widget.selectedFilter != 'All') {
+                    liveUsers = liveUsers.where((user) {
+                      final plan = user['plan_name'] ?? 'Free Trial';
+                      final status = user['account_status'] ?? 'Active';
+                      final dispute = user['dispute_note'];
+
+                      if (widget.selectedFilter == 'Active Tiers') {
+                        return status == 'Active' && plan != 'Free Trial';
+                      } else if (widget.selectedFilter == 'Expired Trials') {
+                        return status == 'Expired' && plan == 'Free Trial';
+                      } else if (widget.selectedFilter == 'Past Due') {
+                        return status == 'Past Due';
+                      } else if (widget.selectedFilter == 'Support waiting') {
+                        return dispute != null && dispute.toString().trim().isNotEmpty;
+                      }
+                      
+                      return true; // Fallback
+                    }).toList();
+                  }
+
+                  // 🚫 NO MATCHES STATE
                   if (liveUsers.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(40),
-                      child: Center(child: Text("No users match your search.", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500))),
+                    return Padding(
+                      padding: const EdgeInsets.all(40),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.group_off_outlined, size: 40, color: Color(0xFF94A3B8)),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No users match '${widget.selectedFilter}'", 
+                              style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)
+                            ),
+                          ],
+                        )
+                      )
                     );
                   }
 
+                  // ✅ BUILD THE TABLE
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: liveUsers.map((dbUser) {
@@ -158,7 +196,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
       "time": time,
       "usage": dbData['usage_score'] ?? 0.5, 
       "dispute": dbData['dispute_note'], 
-      "avatarUrl": finalAvatarUrl, // ✨ Pass the smart URL here
+      "avatarUrl": finalAvatarUrl, 
     };
   }
 
@@ -273,7 +311,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
           ),
           Expanded(
             flex: 2,
-            child: user['dispute'] != null 
+            child: user['dispute'] != null && user['dispute'].toString().trim().isNotEmpty
               ? Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(6)),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Required for copying password to clipboard
 import 'dart:math';
 
-import '../../services/crm_service.dart'; // ✨ IMPORTED THE CRM SERVICE HERE!
+import '../../services/crm_service.dart'; 
 
 import 'crm_widgets/admin_hud_section.dart';
 import 'crm_widgets/admin_controls_bar.dart';
@@ -19,6 +19,7 @@ class UserCrmTab extends StatefulWidget {
 
 class _UserCrmTabState extends State<UserCrmTab> {
   String _searchQuery = "";
+  String _selectedFilter = "All"; // ✨ NEW: The Boss now remembers the active filter!
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +43,13 @@ class _UserCrmTabState extends State<UserCrmTab> {
               });
             },
             onAddUser: () => _showAddUserDialog(context),
+            // ✨ NEW: Passing the filter state to the buttons
+            selectedFilter: _selectedFilter,
+            onFilterChanged: (newFilter) {
+              setState(() {
+                _selectedFilter = newFilter;
+              });
+            },
           ),
           
           const SizedBox(height: 16),
@@ -50,6 +58,8 @@ class _UserCrmTabState extends State<UserCrmTab> {
           AdminUserTable(
             isInvestorMode: widget.isInvestorMode,
             searchQuery: _searchQuery,
+            // ✨ NEW: Passing the filter state to the Engine so it can sort!
+            selectedFilter: _selectedFilter, 
           ),
         ],
       ),
@@ -61,7 +71,7 @@ class _UserCrmTabState extends State<UserCrmTab> {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     String selectedPlan = 'Free Trial';
-    String selectedGender = 'Male'; // ✨ NEW: Variable for Gender
+    String selectedGender = 'Unspecified'; // Defaults to Capitalized
     bool sendWelcomeEmail = true;
     bool isSubmitting = false;
 
@@ -123,18 +133,18 @@ class _UserCrmTabState extends State<UserCrmTab> {
                       label: "Full Name", 
                       controller: nameController, 
                       icon: Icons.person_outline,
-                      onChanged: (val) => setDialogState(() {}), // Triggers validation check
+                      onChanged: (val) => setDialogState(() {}), 
                     ),
                     const SizedBox(height: 16),
                     _buildDialogTextField(
                       label: "Email Address", 
                       controller: emailController, 
                       icon: Icons.email_outlined,
-                      onChanged: (val) => setDialogState(() {}), // Triggers validation check
+                      onChanged: (val) => setDialogState(() {}), 
                     ),
                     const SizedBox(height: 16),
 
-                    // ✨ NEW: GENDER DROPDOWN
+                    // GENDER DROPDOWN
                     const Text("Select Gender", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 12)),
                     const SizedBox(height: 8),
                     LayoutBuilder(
@@ -162,8 +172,9 @@ class _UserCrmTabState extends State<UserCrmTab> {
                               setDialogState(() => selectedGender = newValue);
                             },
                             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                              _buildDropdownItem('Male', selectedGender),
-                              _buildDropdownItem('Female', selectedGender),
+                              _buildDropdownItem('Unspecified', selectedGender, "Prefer not to say"),
+                              _buildDropdownItem('Male', selectedGender, "Male"),
+                              _buildDropdownItem('Female', selectedGender, "Female"),
                             ],
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -175,7 +186,10 @@ class _UserCrmTabState extends State<UserCrmTab> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(selectedGender, style: const TextStyle(color: Colors.black, fontSize: 14)),
+                                  Text(
+                                    selectedGender == 'Male' ? 'Male' : selectedGender == 'Female' ? 'Female' : 'Prefer not to say', 
+                                    style: const TextStyle(color: Colors.black, fontSize: 14)
+                                  ),
                                   const Icon(Icons.keyboard_arrow_down, color: Color(0xFF94A3B8), size: 20),
                                 ],
                               ),
@@ -214,9 +228,9 @@ class _UserCrmTabState extends State<UserCrmTab> {
                               setDialogState(() => selectedPlan = newValue);
                             },
                             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                              _buildDropdownItem('Free Trial', selectedPlan),
-                              _buildDropdownItem('Pro Plan', selectedPlan),
-                              _buildDropdownItem('Elite Plan', selectedPlan),
+                              _buildDropdownItem('Free Trial', selectedPlan, 'Free Trial'),
+                              _buildDropdownItem('Pro Plan', selectedPlan, 'Pro Plan'),
+                              _buildDropdownItem('Elite Plan', selectedPlan, 'Elite Plan'),
                             ],
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -284,29 +298,22 @@ class _UserCrmTabState extends State<UserCrmTab> {
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton(
-                          // ✨ Disables the button visually if the form is invalid
                           onPressed: (!isFormValid || isSubmitting) ? null : () async {
-                            
-                            // ✨ THE REAL SYNC LOGIC
                             try {
                               setDialogState(() => isSubmitting = true);
-
                               final tempPass = generateTempPassword(nameController.text);
 
-                              // 🚀 ACTUAL DATABASE HANDSHAKE
                               await CrmService.createNewUser(
                                 email: emailController.text.trim(),
                                 fullName: nameController.text.trim(),
                                 plan: selectedPlan,
                                 tempPassword: tempPass,
-                                gender: selectedGender, // ✨ NEW: We now send the gender to the service!
+                                gender: selectedGender, 
                                 sendWelcomeEmail: sendWelcomeEmail,
                               );
 
                               if (context.mounted) {
                                 Navigator.pop(dialogContext);
-                                
-                                // ✨ THE "FOUNDER'S SUCCESS BAR" (Shows Password + Copy Action)
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Row(
@@ -334,7 +341,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                                 );
                               }
                             } catch (e) {
-                              // 🛑 ERROR HANDLING (If email exists or DB fails)
                               setDialogState(() => isSubmitting = false);
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -347,7 +353,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            // Button turns neon green ONLY when the form is valid!
                             backgroundColor: isFormValid ? const Color(0xFF8FFF00) : const Color(0xFFE2E8F0),
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
@@ -374,12 +379,11 @@ class _UserCrmTabState extends State<UserCrmTab> {
     );
   }
 
-  // ✨ RENAMED: This builds both the Plan and Gender dropdown items so we don't duplicate code!
-  PopupMenuItem<String> _buildDropdownItem(String text, String currentSelection) {
-    final isSelected = currentSelection == text;
+  PopupMenuItem<String> _buildDropdownItem(String value, String currentSelection, String label) {
+    final isSelected = currentSelection == value;
     
     return PopupMenuItem<String>(
-      value: text,
+      value: value,
       height: 40, 
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), 
       child: StatefulBuilder(
@@ -400,7 +404,7 @@ class _UserCrmTabState extends State<UserCrmTab> {
                 ),
               ),
               child: Text(
-                text,
+                label,
                 style: TextStyle(
                   color: isSelected ? Colors.black : const Color(0xFF1E293B),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,

@@ -39,7 +39,20 @@ class CrmService {
     }
   }
 
-  // ✨ 4. CREATE NEW USER 
+  // ✨ 4. LIVE SUPPORT FLAG MANAGEMENT
+  static Future<void> updateSupportNote(String userId, String? note) async {
+    try {
+      await _supabase
+          .from('profiles')
+          .update({'dispute_note': note}) // Sends the real note, or sends 'null' to clear it
+          .eq('id', userId);
+    } catch (e) {
+      debugPrint("CRM Service Error (Support Note): $e");
+      throw Exception("Failed to update support note.");
+    }
+  }
+
+  // ✨ 5. CREATE NEW USER 
   static Future<void> createNewUser({
     required String email,
     required String fullName,

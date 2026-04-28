@@ -3,11 +3,17 @@ import 'package:flutter/material.dart';
 class AdminControlsBar extends StatelessWidget {
   final Function(String) onSearch;
   final VoidCallback onAddUser;
+  
+  // ✨ NEW: The component now knows which filter is selected
+  final String selectedFilter; 
+  final Function(String) onFilterChanged; 
 
   const AdminControlsBar({
     super.key, 
     required this.onSearch, 
     required this.onAddUser,
+    required this.selectedFilter,
+    required this.onFilterChanged,
   });
 
   @override
@@ -59,7 +65,8 @@ class AdminControlsBar extends StatelessWidget {
           
           const SizedBox(width: 16),
 
-          // 🎭 FILTER CHIPS
+          // 🎭 FILTER CHIPS (Now Clickable & Dynamic!)
+          _buildFilterChip("All", Icons.group), // ✨ Added an 'All' button to reset filters
           _buildFilterChip("Active Tiers", Icons.filter_list),
           _buildFilterChip("Expired Trials", Icons.timer_off_outlined),
           _buildFilterChip("Past Due", Icons.warning_amber_rounded, isAlert: true),
@@ -84,21 +91,41 @@ class AdminControlsBar extends StatelessWidget {
     );
   }
 
+  // ✨ UPGRADED: The filter chip handles taps and changes color if selected
   Widget _buildFilterChip(String label, IconData icon, {bool isAlert = false}) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white, 
-        borderRadius: BorderRadius.circular(12), 
-        border: Border.all(color: const Color(0xFFE2E8F0))
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: isAlert ? Colors.orange : const Color(0xFF64748B)),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF334155))),
-        ],
+    final bool isActive = selectedFilter == label; // Checks if this button is the active one
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: InkWell(
+        onTap: () => onFilterChanged(label), // Tells the parent a new filter was clicked
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            // ✨ Switches to Dark Slate when active
+            color: isActive ? const Color(0xFF0F172A) : Colors.white, 
+            borderRadius: BorderRadius.circular(12), 
+            border: Border.all(color: isActive ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0))
+          ),
+          child: Row(
+            children: [
+              // ✨ Switches to Neon Green when active
+              Icon(icon, size: 16, color: isActive ? const Color(0xFF8FFF00) : (isAlert ? Colors.orange : const Color(0xFF64748B))),
+              const SizedBox(width: 8),
+              Text(
+                label, 
+                style: TextStyle(
+                  fontSize: 12, 
+                  fontWeight: FontWeight.bold, 
+                  // ✨ Switches to White text when active
+                  color: isActive ? Colors.white : const Color(0xFF334155)
+                )
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
