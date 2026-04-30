@@ -168,6 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                             })
                             .eq('id', res.user!.id);
                       } catch (trackingError) {
+                        _showError("Tracking Failed: ${trackingError.toString()}");
                         debugPrint("Tracking Update Failed: $trackingError");
                       }
                     }
