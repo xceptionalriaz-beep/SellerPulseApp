@@ -155,16 +155,16 @@ class _LoginPageState extends State<LoginPage> {
                       throw Exception("Connection timed out. Check your internet or Supabase link.");
                     });
                     
-                    // ✨ 2. TRACK THE LOGIN (Loud Debugging Version)
+                    // ✨ 2. TRACK THE LOGIN (Profiles + History)
                     if (res.user != null) {
                       try {
                         debugPrint("📱 1. Fetching Device Info...");
                         final metadata = await SessionTracker.getLoginMetadata();
                         debugPrint("📱 2. Info Found: $metadata"); 
 
-                        debugPrint("💾 3. Sending to Supabase for User ID: ${res.user!.id}");
+                        debugPrint("💾 3. Updating Profile Snapshot...");
                         
-                        // Adding .select() forces Supabase to return the row if successful
+                        // A. Update the main profile (The Snapshot)
                         final updateResponse = await Supabase.instance.client
                             .from('profiles')
                             .update({
@@ -173,19 +173,28 @@ class _LoginPageState extends State<LoginPage> {
                               'browser_agent': metadata['browser_agent'],
                             })
                             .eq('id', res.user!.id)
-                            .select(); // ✨ THIS IS THE MAGIC WORD
+                            .select(); 
 
-                        // Check if Supabase blocked the update silently
                         if (updateResponse.isEmpty) {
-                          debugPrint("❌ CRITICAL: Update failed! The row was not found, or RLS blocked it.");
-                          _showError("Database blocked the update (RLS or missing row).");
+                          debugPrint("❌ CRITICAL: Profile update failed! RLS blocked it or row missing.");
                         } else {
-                          debugPrint("✅ SUCCESS! Database updated: $updateResponse");
+                          debugPrint("✅ SUCCESS! Profile updated.");
                         }
 
+                        // B. Insert into History (The Security Vault)
+                        debugPrint("📜 4. Recording Login History...");
+                        await Supabase.instance.client
+                            .from('login_history')
+                            .insert({
+                              'user_id': res.user!.id,
+                              'ip_address': metadata['last_login_ip'],
+                              'device_info': "${metadata['device_platform']} • ${metadata['browser_agent']}",
+                            });
+                        debugPrint("✅ SUCCESS! History recorded.");
+
                       } catch (trackingError) {
-                        _showError("Tracking Error: ${trackingError.toString()}");
-                        debugPrint("❌ Tracking Crash: $trackingError");
+                        // Fail silently: If tracking breaks, the user STILL logs in.
+                        debugPrint("❌ Tracking Crash (Ignored): $trackingError");
                       }
                     }
 
