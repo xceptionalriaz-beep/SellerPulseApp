@@ -7,50 +7,72 @@ import 'package:flutter/foundation.dart'; // For kIsWeb
 class SessionTracker {
   /// Captures the IP, Platform, and Browser of the current user
   static Future<Map<String, String>> getLoginMetadata() async {
-    String ip = "Unknown IP";
-    String platform = "Unknown Platform";
-    String browser = "Unknown Browser";
+    String ip = "No IP Logged";
+    String platform = "Unknown";
+    String browser = "Browser";
 
-    // 1. Grab the Public IP Address safely
+    // ==========================================
+    // 1. BULLETPROOF IP FETCH (With Fallback for iPhones)
+    // ==========================================
     try {
       final response = await http.get(Uri.parse('https://api.ipify.org?format=json')).timeout(const Duration(seconds: 3));
       if (response.statusCode == 200) {
         ip = jsonDecode(response.body)['ip'];
       }
     } catch (e) {
-      debugPrint("IP Fetch Error: $e");
+      debugPrint("Primary IP Fetch Failed, trying backup: $e");
+      try {
+        // Backup API if Apple/Safari blocks the first one
+        final backupResponse = await http.get(Uri.parse('https://ipapi.co/json/')).timeout(const Duration(seconds: 3));
+        if (backupResponse.statusCode == 200) {
+          ip = jsonDecode(backupResponse.body)['ip'];
+        }
+      } catch (e2) {
+        debugPrint("Backup IP Fetch Failed: $e2");
+      }
     }
 
-    // 2. Grab the Device Hardware & Browser Info
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    // ==========================================
+    // 2. BULLETPROOF DEVICE FETCH
+    // ==========================================
     try {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      
       if (kIsWeb) {
         WebBrowserInfo webInfo = await deviceInfo.webBrowserInfo;
-        
-        // ✨ CLEANUP LOGIC for Web Platforms
         String rawPlatform = webInfo.platform ?? "Web UI";
-        if (rawPlatform.contains("Win32")) platform = "Windows";
-        else if (rawPlatform.contains("MacIntel")) platform = "macOS";
+        
+        // Mobile & Desktop Cleanup Filters
+        if (rawPlatform.contains("Win32") || rawPlatform.contains("Windows")) platform = "Windows";
+        else if (rawPlatform.contains("MacIntel") || rawPlatform.contains("Mac")) platform = "macOS";
+        else if (rawPlatform.contains("iPhone")) platform = "iPhone";
+        else if (rawPlatform.contains("iPad")) platform = "iPad";
+        else if (rawPlatform.contains("Android")) platform = "Android";
         else platform = rawPlatform;
         
-        // Clean up Browser Name (e.g., "CHROME" -> "Chrome")
-        String rawBrowser = webInfo.browserName.name;
-        browser = rawBrowser.substring(0, 1).toUpperCase() + rawBrowser.substring(1).toLowerCase();
+        // Clean up Browser Name (Crash-proof substring)
+        String rawBrowser = webInfo.browserName.name; 
+        if (rawBrowser.isNotEmpty) {
+          browser = rawBrowser[0].toUpperCase() + rawBrowser.substring(1).toLowerCase();
+        } else {
+          browser = "Web Browser";
+        }
 
-      } else if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        platform = "Android ${androidInfo.version.release}";
-        browser = "Mobile App";
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        platform = "iOS ${iosInfo.systemVersion}";
-        browser = "Mobile App";
-      } else if (Platform.isWindows) {
-        platform = "Windows PC";
-        browser = "Desktop App";
-      } else if (Platform.isMacOS) {
-        platform = "Mac Computer";
-        browser = "Desktop App";
+      } else {
+        // If you ever launch this as a real App Store app!
+        if (Platform.isAndroid) {
+          platform = "Android App";
+          browser = "Native";
+        } else if (Platform.isIOS) {
+          platform = "iOS App";
+          browser = "Native";
+        } else if (Platform.isWindows) {
+          platform = "Windows App";
+          browser = "Native";
+        } else if (Platform.isMacOS) {
+          platform = "Mac App";
+          browser = "Native";
+        }
       }
     } catch (e) {
       debugPrint("Device Fetch Error: $e");
