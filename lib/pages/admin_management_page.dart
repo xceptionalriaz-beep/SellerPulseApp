@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
 import '../widgets/page_wrapper.dart';
-import 'admin_settings_tabs/user_crm_tab.dart';
 
 // ✨ DASHBOARD TABS
 import 'admin_tabs/revenue_analytics_tab.dart';
@@ -15,6 +14,7 @@ import 'admin_tabs/competitor_xray_tab.dart';
 import 'admin_tabs/chrome_extension_tab.dart';
 
 // ✨ SETTINGS TABS
+import 'admin_settings_tabs/user_crm_tab.dart';
 import 'admin_settings_tabs/role_builder_tab.dart';
 import 'admin_settings_tabs/security_logs_tab.dart';
 import 'admin_settings_tabs/promo_manager_tab.dart';
@@ -43,12 +43,36 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
   final String _apiStatus = "Operational";
   bool _startChartAnimation = false;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _mainScrollController = ScrollController();
+
+  final List<Map<String, dynamic>> _settingsMenuItems = [
+    {"title": "User CRM", "icon": Icons.people_outline},
+    {"title": "Role Builder", "icon": Icons.admin_panel_settings_outlined},
+    {"title": "Security Logs", "icon": Icons.security_outlined},
+    {"title": "Promos & Codes", "icon": Icons.local_offer_outlined},
+    {"title": "Kill Switches", "icon": Icons.power_settings_new},
+    {"title": "Plan Limits", "icon": Icons.tune},
+    {"title": "Emails", "icon": Icons.email_outlined},
+    {"title": "Webhooks", "icon": Icons.webhook},
+    {"title": "Gamification", "icon": Icons.sports_esports_outlined},
+    {"title": "API Vault", "icon": Icons.vpn_key_outlined},
+    {"title": "Affiliate Vault", "icon": Icons.monetization_on_outlined},
+    {"title": "Founder Ops", "icon": Icons.insights_rounded}, 
+  ];
+
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _startChartAnimation = true);
     });
+  }
+
+  @override
+  void dispose() {
+    _mainScrollController.dispose();
+    super.dispose();
   }
 
   // ✨ CMD+K GLOBAL COMMAND PALETTE
@@ -144,113 +168,131 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
         }
         return KeyEventResult.ignored;
       },
-      child: PageWrapper(
-        // ✨ THE MASTER FIX: One single scroll view for the entire page. No straitjackets!
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 80),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(isMobile),
-              const SizedBox(height: 24),
-              
-              // Animated Switcher with NO height locks! It grows naturally.
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-                  return Stack(
-                    alignment: Alignment.topCenter,
-                    children: <Widget>[
-                      ...previousChildren,
-                      if (currentChild != null) currentChild,
-                    ],
-                  );
-                },
-                child: _isSettingsMode 
-                    ? _buildSettingsLayout(isMobile, key: const ValueKey('settings')) 
-                    : _buildDashboardLayout(isMobile, key: const ValueKey('dashboard')),
+      child: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Colors.transparent, 
+        drawer: (isMobile && _isSettingsMode) ? _buildMobileDrawer() : null, 
+        body: PageWrapper(
+          child: RawScrollbar(
+            controller: _mainScrollController,
+            thumbColor: const Color(0xFF8FFF00), 
+            thickness: 8,
+            radius: const Radius.circular(10),
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _mainScrollController,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 80, right: 12), 
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(isMobile),
+                  const SizedBox(height: 24),
+                  
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                      return Stack(
+                        alignment: Alignment.topCenter,
+                        children: <Widget>[
+                          ...previousChildren,
+                          if (currentChild != null) currentChild,
+                        ],
+                      );
+                    },
+                    child: _isSettingsMode 
+                        ? _buildSettingsLayout(isMobile, key: const ValueKey('settings')) 
+                        : _buildDashboardLayout(isMobile, key: const ValueKey('dashboard')),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  // ✨ MOBILE DRAWER FOR SETTINGS
+  Widget _buildMobileDrawer() {
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text("ADMIN SETTINGS", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8), letterSpacing: 1.2)),
+            ),
+            Expanded(
+              child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: _settingsMenuItems.length,
+                itemBuilder: (context, index) {
+                  bool isActive = _activeSettingsTab == index;
+                  return ListTile(
+                    selected: isActive,
+                    selectedTileColor: const Color(0xFFF1F5F9),
+                    leading: Icon(_settingsMenuItems[index]["icon"], color: isActive ? const Color(0xFF0F172A) : const Color(0xFF64748B)),
+                    title: Text(_settingsMenuItems[index]["title"], style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.w600, color: isActive ? const Color(0xFF0F172A) : const Color(0xFF64748B))),
+                    onTap: () {
+                      setState(() => _activeSettingsTab = index);
+                      Navigator.pop(context); 
+                    },
+                  );
+                }
+              )
+            )
+          ]
+        )
+      )
+    );
+  }
+
   // ----------------------------------------------------------------------
-  // 🖥️ HEADER COMPONENT
+  // 🖥️ HEADER COMPONENT (UPDATED FOR PERFECT MOBILE CENTERING)
   // ----------------------------------------------------------------------
   Widget _buildHeader(bool isMobile) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [BoxShadow(color: const Color(0xFF8FFF00).withAlpha(50), blurRadius: 10, spreadRadius: 1)],
-          ),
-          child: const Icon(Icons.admin_panel_settings, color: Color(0xFF8FFF00), size: 28),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("SaaS Founder Command Center", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)), overflow: TextOverflow.ellipsis),
-              if (!isMobile)
-                Text(
-                  _isSettingsMode ? "Manage users, team access, and platform security." : "Monitor MRR, analytics, and global platform health.", 
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13), 
-                  overflow: TextOverflow.ellipsis
-                ),
-            ],
-          ),
-        ),
+    if (isMobile) {
+      // ✨ NEW MOBILE HEADER: Everything is stacked in the middle!
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left: Hamburger Menu
+          if (_isSettingsMode)
+            IconButton(
+              icon: const Icon(Icons.menu, color: Color(0xFF0F172A), size: 30),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            )
+          else
+            const SizedBox(width: 48), // Takes up empty space to perfectly balance the right-side menu
 
-        if (!isMobile) ...[
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: _investorMode ? Colors.purple.withAlpha(20) : Colors.transparent,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: _investorMode ? Colors.purpleAccent.withAlpha(100) : const Color(0xFFE2E8F0)),
-            ),
-            child: Row(
+          // Center: Logo stacked on top of the Title
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.visibility_off, color: _investorMode ? Colors.purpleAccent : const Color(0xFF94A3B8), size: 16),
-                const SizedBox(width: 8),
-                Text("Investor Mode", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _investorMode ? Colors.purpleAccent : const Color(0xFF64748B))),
-                const SizedBox(width: 4),
-                Transform.scale(
-                  scale: 0.7,
-                  child: Switch(
-                    value: _investorMode, 
-                    onChanged: (v) => setState(() => _investorMode = v),
-                    activeThumbColor: Colors.purpleAccent,
-                    activeTrackColor: Colors.purple.withAlpha(50),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [BoxShadow(color: const Color(0xFF8FFF00).withAlpha(50), blurRadius: 10, spreadRadius: 1)],
                   ),
-                )
+                  child: const Icon(Icons.admin_panel_settings, color: Color(0xFF8FFF00), size: 28),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "SaaS Founder Command Center", 
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)), 
+                ),
               ],
             ),
           ),
 
-          _isSettingsMode
-              ? ElevatedButton.icon(
-                  onPressed: () => setState(() => _isSettingsMode = false),
-                  icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A), size: 16),
-                  label: const Text("Back to Dashboard", style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, side: const BorderSide(color: Color(0xFFE2E8F0)), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
-                )
-              : ElevatedButton.icon(
-                  onPressed: () => setState(() => _isSettingsMode = true),
-                  icon: const Icon(Icons.settings_outlined, color: Color(0xFF0F172A), size: 18),
-                  label: const Text("Admin Settings", style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF8FFF00), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
-                )
-        ] else ...[
+          // Right: Options Menu
           Container(
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFE2E8F0))),
             child: PopupMenuButton<int>(
@@ -281,7 +323,77 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
               ],
             ),
           )
-        ]
+        ],
+      );
+    }
+
+    // 🖥️ ORIGINAL DESKTOP HEADER
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [BoxShadow(color: const Color(0xFF8FFF00).withAlpha(50), blurRadius: 10, spreadRadius: 1)],
+          ),
+          child: const Icon(Icons.admin_panel_settings, color: Color(0xFF8FFF00), size: 28),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("SaaS Founder Command Center", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)), overflow: TextOverflow.ellipsis),
+              Text(
+                _isSettingsMode ? "Manage users, team access, and platform security." : "Monitor MRR, analytics, and global platform health.", 
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 13), 
+                overflow: TextOverflow.ellipsis
+              ),
+            ],
+          ),
+        ),
+
+        Container(
+          margin: const EdgeInsets.only(right: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: _investorMode ? Colors.purple.withAlpha(20) : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: _investorMode ? Colors.purpleAccent.withAlpha(100) : const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.visibility_off, color: _investorMode ? Colors.purpleAccent : const Color(0xFF94A3B8), size: 16),
+              const SizedBox(width: 8),
+              Text("Investor Mode", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _investorMode ? Colors.purpleAccent : const Color(0xFF64748B))),
+              const SizedBox(width: 4),
+              Transform.scale(
+                scale: 0.7,
+                child: Switch(
+                  value: _investorMode, 
+                  onChanged: (v) => setState(() => _investorMode = v),
+                  activeThumbColor: Colors.purpleAccent,
+                  activeTrackColor: Colors.purple.withAlpha(50),
+                ),
+              )
+            ],
+          ),
+        ),
+
+        _isSettingsMode
+            ? ElevatedButton.icon(
+                onPressed: () => setState(() => _isSettingsMode = false),
+                icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A), size: 16),
+                label: const Text("Back to Dashboard", style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, side: const BorderSide(color: Color(0xFFE2E8F0)), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
+              )
+            : ElevatedButton.icon(
+                onPressed: () => setState(() => _isSettingsMode = true),
+                icon: const Icon(Icons.settings_outlined, color: Color(0xFF0F172A), size: 18),
+                label: const Text("Admin Settings", style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF8FFF00), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14)),
+              )
       ],
     );
   }
@@ -295,23 +407,6 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
         key: key,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 10, runSpacing: 10,
-            children: [
-              _buildPillTab("User CRM", Icons.people_outline, 0, isSettings: true),
-              _buildPillTab("Role Builder", Icons.admin_panel_settings_outlined, 1, isSettings: true),
-              _buildPillTab("Security Logs", Icons.security_outlined, 2, isSettings: true),
-              _buildPillTab("Promos & Codes", Icons.local_offer_outlined, 3, isSettings: true),
-              _buildPillTab("Kill Switches", Icons.power_settings_new, 4, isSettings: true),
-              _buildPillTab("Plan Limits", Icons.tune, 5, isSettings: true),
-              _buildPillTab("Emails", Icons.email_outlined, 6, isSettings: true),
-              _buildPillTab("Webhooks", Icons.webhook, 7, isSettings: true),
-              _buildPillTab("Gamification", Icons.sports_esports_outlined, 8, isSettings: true),
-              _buildPillTab("API Vault", Icons.vpn_key_outlined, 9, isSettings: true),
-              _buildPillTab("Affiliate Vault", Icons.monetization_on_outlined, 10, isSettings: true), 
-            ],
-          ),
-          const SizedBox(height: 24),
           _getSettingsContent(isMobile),
         ],
       );
@@ -345,7 +440,7 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
               _buildSidebarItem("Gamification", Icons.sports_esports_outlined, 8),
               _buildSidebarItem("API Vault", Icons.vpn_key_outlined, 9), 
               _buildSidebarItem("Affiliate Vault", Icons.monetization_on_outlined, 10),
-              _buildSidebarItem("Founder Ops", Icons.insights_rounded, 11), // 🚀 Index 11 
+              _buildSidebarItem("Founder Ops", Icons.insights_rounded, 11), 
             ],
           ),
         ),
@@ -386,7 +481,7 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
       case 8: return const GamificationTab(key: ValueKey("gamification"));
       case 9: return const vault.GlobalApiFleetTab(key: ValueKey("api_vault")); 
       case 10: return const AffiliateVaultTab(key: ValueKey("affiliate_vault_settings")); 
-      case 11: return const FounderOpsTab(key: ValueKey("founder_ops")); // 🧠 NEW
+      case 11: return const FounderOpsTab(key: ValueKey("founder_ops")); 
       default: return _buildPlaceholder("Settings Module Active");
     }
   }
@@ -532,13 +627,10 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
         ],
         const SizedBox(height: 24),
 
-        // ✨ No height locks here! The tab content grows to its true size
         tabContent,
       ],
     );
   }
-
-  // --- UI HELPER COMPONENTS ---
 
   Widget _buildSystemHealthBar() {
     return Container(

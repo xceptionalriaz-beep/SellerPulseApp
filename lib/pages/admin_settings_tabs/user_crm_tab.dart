@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Required for copying password to clipboard
+import 'package:flutter/services.dart'; 
 import 'dart:math';
 
 import '../../../services/crm_service.dart';
@@ -21,17 +21,23 @@ class _UserCrmTabState extends State<UserCrmTab> {
   String _searchQuery = "";
   String _selectedFilter = "All";
 
-  // ✨ THE MEMORY BANK
   List<Map<String, dynamic>> _allUsers = [];
   bool _isLoading = true;
+  
+  final ScrollController _mainScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadUsers(); // Fetch the data exactly once when the tab opens
+    _loadUsers(); 
   }
 
-  // ✨ THE ENTERPRISE DATABSE FETCH
+  @override
+  void dispose() {
+    _mainScrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadUsers() async {
     setState(() => _isLoading = true);
     final users = await CrmService.fetchAllUsers();
@@ -43,7 +49,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
     }
   }
 
-  // ✨ OPTIMISTIC UI: Instantly updates the screen without waiting for the database!
   void _updateUserLocally(String userId, String field, dynamic newValue) {
     setState(() {
       final index = _allUsers.indexWhere((u) => u['id'] == userId);
@@ -55,7 +60,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
 
   @override
   Widget build(BuildContext context) {
-    // Show a clean loader while the memory bank fills up
     if (_isLoading) {
       return const Center(
         child: Padding(
@@ -65,70 +69,77 @@ class _UserCrmTabState extends State<UserCrmTab> {
       );
     }
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 1. The 4 Top Cards
-          AdminHudSection(allUsers: _allUsers),
-          
-          const SizedBox(height: 24),
-          
-          // 2. The Search, Filters, and "Add New User" button
-          AdminControlsBar(
-            allUsers: _allUsers, // ✨ Pass memory to the badges
-            onSearch: (query) {
-              setState(() {
-                _searchQuery = query;
-              });
-            },
-            onAddUser: () => _showAddUserDialog(context),
-            selectedFilter: _selectedFilter,
-            onFilterChanged: (newFilter) {
-              setState(() {
-                _selectedFilter = newFilter;
-              });
-            },
-            onRefresh: _loadUsers,
+    // ✨ FIX: Removed the Stack and FAB. Just the scrollbar and content now!
+    return RawScrollbar(
+      controller: _mainScrollController,
+      thumbColor: const Color(0xFF8FFF00), 
+      thickness: 8, 
+      radius: const Radius.circular(10),
+      thumbVisibility: true, 
+      child: SingleChildScrollView(
+        controller: _mainScrollController, 
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 24, top: 24, bottom: 100, right: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch, 
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AdminHudSection(allUsers: _allUsers),
+              
+              const SizedBox(height: 24),
+              
+              AdminControlsBar(
+                allUsers: _allUsers,
+                onSearch: (query) {
+                  setState(() {
+                    _searchQuery = query;
+                  });
+                },
+                onAddUser: () => _showAddUserDialog(context),
+                selectedFilter: _selectedFilter,
+                onFilterChanged: (newFilter) {
+                  setState(() {
+                    _selectedFilter = newFilter;
+                  });
+                },
+                onRefresh: _loadUsers,
+              ),
+              
+              const SizedBox(height: 16),
+              
+              AdminUserTable(
+                allUsers: _allUsers, 
+                isInvestorMode: widget.isInvestorMode,
+                searchQuery: _searchQuery,
+                selectedFilter: _selectedFilter, 
+                onUserUpdated: _updateUserLocally, 
+              ),
+              
+              const SizedBox(height: 40),
+            ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // 3. The Main Live Database Table
-          AdminUserTable(
-            allUsers: _allUsers, // ✨ Pass memory to the table
-            isInvestorMode: widget.isInvestorMode,
-            searchQuery: _searchQuery,
-            selectedFilter: _selectedFilter, 
-            onUserUpdated: _updateUserLocally, // ✨ Pass the instant-update superpower!
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // ✨ THE SECURE "ADD USER" MODAL
   void _showAddUserDialog(BuildContext context) {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     String selectedPlan = 'Free Trial';
-    String selectedGender = 'Unspecified'; // Defaults to Capitalized
+    String selectedGender = 'Unspecified'; 
     bool sendWelcomeEmail = true;
     bool isSubmitting = false;
 
-    // ✨ Email Regex Validator
     bool isValidEmail(String email) {
       return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
     }
 
-    // ✨ Password Generator (e.g., Rea#482)
     String generateTempPassword(String name) {
       final safeName = name.trim().replaceAll(' ', '');
       final prefix = safeName.length >= 3 ? safeName.substring(0, 3) : "User";
-      final suffix = Random().nextInt(899) + 100; // Random 3 digit number
+      final suffix = Random().nextInt(899) + 100; 
       return "$prefix#$suffix";
     }
 
@@ -139,7 +150,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             
-            // ✨ Live Validation Check
             bool isFormValid = nameController.text.trim().length >= 3 && isValidEmail(emailController.text.trim());
 
             return Dialog(
@@ -153,7 +163,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -172,7 +181,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Inputs (With Live State Updating)
                     _buildDialogTextField(
                       label: "Full Name", 
                       controller: nameController, 
@@ -188,7 +196,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                     ),
                     const SizedBox(height: 16),
 
-                    // GENDER DROPDOWN
                     const Text("Select Gender", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 12)),
                     const SizedBox(height: 8),
                     LayoutBuilder(
@@ -244,7 +251,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Custom Reazify Dropdown for PLAN
                     const Text("Select Initial Plan", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B), fontSize: 12)),
                     const SizedBox(height: 8),
                     LayoutBuilder(
@@ -297,7 +303,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                     ),
                     const SizedBox(height: 20),
 
-                    // The Welcome Email Toggle
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -332,7 +337,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                     ),
                     const SizedBox(height: 30),
 
-                    // Action Buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -356,7 +360,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
                                 sendWelcomeEmail: sendWelcomeEmail,
                               );
 
-                              // Refresh the table silently in the background!
                               _loadUsers();
 
                               if (context.mounted) {
@@ -428,7 +431,6 @@ class _UserCrmTabState extends State<UserCrmTab> {
 
   PopupMenuItem<String> _buildDropdownItem(String value, String currentSelection, String label) {
     final isSelected = currentSelection == value;
-    
     return PopupMenuItem<String>(
       value: value,
       height: 40, 

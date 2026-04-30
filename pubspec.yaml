@@ -13,9 +13,10 @@ dependencies:
   flutter_svg: ^2.0.10+1
 
   # --- NETWORK & API ---
-  http: ^1.2.0           # Talk to eBay API
+  http: ^1.2.1             # Talk to eBay API & Ping for IP Address
   supabase_flutter: ^2.0.0 # Your Database/Backend
-  flutter_dotenv: ^5.1.0   # ✨ NEW: Securely hides your secret keys
+  flutter_dotenv: ^5.1.0   # Securely hides your secret keys
+  device_info_plus: ^10.1.0 # ✨ NEW: Captures Device, OS, and Browser Info
 
   # --- STATE MANAGEMENT ---
   provider: ^6.1.2       # Moves data from search bar to charts
@@ -26,7 +27,7 @@ dependencies:
   fl_chart: ^1.2.0       # The engine for your Neon Trend Charts
   
   # --- UTILITIES ---
-  image_picker: ^1.1.2   # ✨ NEW: Enables Profile Image Selection
+  image_picker: ^1.1.2   # Enables Profile Image Selection
   file_picker: ^10.3.10
   desktop_drop: ^0.7.0
   intl: ^0.20.2

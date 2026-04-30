@@ -30,6 +30,9 @@ class AdminSettingsView extends StatefulWidget {
 
 class _AdminSettingsViewState extends State<AdminSettingsView> {
   int _activeSettingsTab = 0;
+  
+  // ✨ NEW: Controls the slide-out Drawer on Mobile
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<Map<String, dynamic>> _menuItems = [
     {"title": "User CRM", "icon": Icons.people_outline},
@@ -43,7 +46,7 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
     {"title": "Gamification", "icon": Icons.sports_esports_outlined},
     {"title": "API Fleet", "icon": Icons.vpn_key_outlined},
     {"title": "Affiliate Vault", "icon": Icons.monetization_on_outlined},
-    {"title": "Founder Ops", "icon": Icons.insights_rounded}, // 🧠 NEW
+    {"title": "Founder Ops", "icon": Icons.insights_rounded}, 
   ];
 
   @override
@@ -60,14 +63,19 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
       );
     } 
     
-    // 📱 If Mobile: Show the Space-Saving Swipe Bar
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildMobileSwipeBar(),
-        const SizedBox(height: 20),
-        Expanded(child: _buildContentArea()),
-      ],
+    // 📱 If Mobile: Show the Scaffold with a Slide-Out Drawer
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Colors.transparent, // Keeps your page background
+      drawer: _buildMobileDrawer(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildMobileHeader(),
+          const SizedBox(height: 16),
+          Expanded(child: _buildContentArea()),
+        ],
+      ),
     );
   }
 
@@ -135,51 +143,70 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
   }
 
   // ----------------------------------------------------------------------
-  // 📱 MOBILE: HORIZONTAL SWIPE BAR
+  // 📱 MOBILE: HEADER & SLIDE-OUT DRAWER
   // ----------------------------------------------------------------------
-  Widget _buildMobileSwipeBar() {
+  Widget _buildMobileHeader() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: List.generate(_menuItems.length, (index) {
-            return _buildSwipePill(_menuItems[index]["title"], _menuItems[index]["icon"], index);
-          }),
-        ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.menu, color: Color(0xFF0F172A)),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            _menuItems[_activeSettingsTab]["title"], 
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSwipePill(String title, IconData icon, int index) {
-    bool isActive = _activeSettingsTab == index;
-    return InkWell(
-      onTap: () => setState(() => _activeSettingsTab = index),
-      borderRadius: BorderRadius.circular(30),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF0F172A) : Colors.transparent,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: isActive ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: isActive ? const Color(0xFF8FFF00) : const Color(0xFF64748B)),
-            const SizedBox(width: 8),
-            Text(title, style: TextStyle(color: isActive ? Colors.white : const Color(0xFF64748B), fontWeight: FontWeight.bold, fontSize: 13)),
-          ],
-        ),
+  Widget _buildMobileDrawer() {
+    return Drawer(
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.only(top: 60, left: 24, bottom: 24),
+            child: const Text("PLATFORM MGMT", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8), letterSpacing: 1.2)),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              physics: const BouncingScrollPhysics(),
+              itemCount: _menuItems.length,
+              itemBuilder: (context, index) {
+                bool isActive = _activeSettingsTab == index;
+                return ListTile(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  selected: isActive,
+                  selectedTileColor: const Color(0xFFF1F5F9),
+                  leading: Icon(_menuItems[index]["icon"], color: isActive ? const Color(0xFF0F172A) : const Color(0xFF64748B)),
+                  title: Text(
+                    _menuItems[index]["title"], 
+                    style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.w600, color: isActive ? const Color(0xFF0F172A) : const Color(0xFF64748B))
+                  ),
+                  onTap: () {
+                    setState(() => _activeSettingsTab = index);
+                    Navigator.pop(context); // Closes the drawer automatically
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

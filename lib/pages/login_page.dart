@@ -3,7 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'signup_page.dart'; 
 import '../widgets/forgot_password_dialog.dart'; 
 import '../widgets/clickable_logo.dart'; 
-import 'dashboard_page.dart'; 
+import 'dashboard_page.dart';
+import '../services/session_tracker.dart'; // ✨ ADDED: Import your new tracker!
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -146,14 +147,31 @@ class _LoginPageState extends State<LoginPage> {
                   }
 
                   try {
-                    // ✨ 1. ADDED A 10 SECOND TIMEOUT SO IT CAN NEVER FREEZE
-                    await Supabase.instance.client.auth.signInWithPassword(
+                    // ✨ 1. Log the user in
+                    final AuthResponse res = await Supabase.instance.client.auth.signInWithPassword(
                       email: email,
                       password: password,
                     ).timeout(const Duration(seconds: 10), onTimeout: () {
                       throw Exception("Connection timed out. Check your internet or Supabase link.");
                     });
                     
+                    // ✨ 2. TRACK THE LOGIN (Silently)
+                    if (res.user != null) {
+                      try {
+                        final metadata = await SessionTracker.getLoginMetadata();
+                        await Supabase.instance.client
+                            .from('profiles')
+                            .update({
+                              'last_login_ip': metadata['last_login_ip'],
+                              'device_platform': metadata['device_platform'],
+                              'browser_agent': metadata['browser_agent'],
+                            })
+                            .eq('id', res.user!.id);
+                      } catch (trackingError) {
+                        debugPrint("Tracking Update Failed: $trackingError");
+                      }
+                    }
+
                     _showSuccess("Welcome back!");
                     
                     if (mounted) {
@@ -166,7 +184,6 @@ class _LoginPageState extends State<LoginPage> {
                   } on AuthException catch (e) {
                     _showError(e.message); 
                   } catch (e) {
-                    // ✨ 2. VERBOSE LOGGING: If it fails, it prints exactly why.
                     debugPrint("LOGIN CRASH: $e");
                     _showError("Login Error: ${e.toString()}");
                   }
@@ -332,13 +349,11 @@ class _LoadingButtonState extends State<_LoadingButton> {
     return SizedBox(
       width: double.infinity, height: 50,
       child: ElevatedButton(
-        // ✨ 3. BULLETPROOF TRY/FINALLY LOOP
         onPressed: _isLoading ? null : () async { 
           setState(() => _isLoading = true);
           try {
             await widget.onPressed(); 
           } finally {
-            // This guarantees the spinner turns off, no matter what crashes above it!
             if(mounted) setState(() => _isLoading = false);
           }
         },

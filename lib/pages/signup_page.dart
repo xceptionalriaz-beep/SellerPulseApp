@@ -4,6 +4,7 @@ import 'login_page.dart';
 import '../widgets/animated_progress_pill.dart'; 
 import '../widgets/clickable_logo.dart'; 
 import 'dashboard_page.dart';
+import '../services/session_tracker.dart'; // ✨ ADDED: Import the Session Tracker
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -187,20 +188,41 @@ class _SignupPageState extends State<SignupPage> {
               }
 
               try {
-                // ✨ UPDATED: Sending the Capitalized gender AND an empty avatar string!
-                await Supabase.instance.client.auth.signUp(
+                // ✨ 1. GRAB THE TRACKING DATA FIRST
+                final metadata = await SessionTracker.getLoginMetadata();
+
+                // ✨ 2. CREATE THE USER ACCOUNT
+                final AuthResponse res = await Supabase.instance.client.auth.signUp(
                   email: email,
                   password: password,
                   data: {
                     'full_name': name,
-                    'gender': _selectedGender, // Now saves 'Male', 'Female', or 'Unspecified'
-                    'avatar_url': '', // ✨ Explicitly empty so the CRM knows to use initials!
+                    'gender': _selectedGender, 
+                    'avatar_url': '', 
                   },
                 );
+
+                // ✨ 3. ATTACH THE METADATA
+                if (res.user != null) {
+                  try {
+                    await Supabase.instance.client
+                        .from('profiles')
+                        .update({
+                          'last_login_ip': metadata['last_login_ip'],
+                          'device_platform': metadata['device_platform'],
+                          'browser_agent': metadata['browser_agent'],
+                        })
+                        .eq('id', res.user!.id);
+                  } catch (trackingError) {
+                    debugPrint("Tracking Update Failed on Signup: $trackingError");
+                  }
+                }
+
                 _nextStep();
               } on AuthException catch (e) {
                 _showError(e.message);
               } catch (e) {
+                debugPrint("Signup Crash: $e");
                 _showError("Something went wrong. Please try again.");
               }
             }
@@ -261,7 +283,6 @@ class _SignupPageState extends State<SignupPage> {
           style: const TextStyle(color: Colors.black, fontSize: 14),
           dropdownColor: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          // ✨ FIXED: The 'value' must be Capitalized to match the CRM!
           items: const [
             DropdownMenuItem(value: 'Unspecified', child: Text("Prefer not to say")),
             DropdownMenuItem(value: 'Male', child: Text("Male")),
