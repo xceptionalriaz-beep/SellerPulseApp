@@ -4,7 +4,7 @@ import 'signup_page.dart';
 import '../widgets/forgot_password_dialog.dart'; 
 import '../widgets/clickable_logo.dart'; 
 import 'dashboard_page.dart';
-import '../services/session_tracker.dart'; // ✨ ADDED: Import your new tracker!
+import '../services/session_tracker.dart'; 
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                   }
 
                   try {
-                    // ✨ 1. Log the user in
+                    // 1. Log the user in
                     final AuthResponse res = await Supabase.instance.client.auth.signInWithPassword(
                       email: email,
                       password: password,
@@ -155,21 +155,37 @@ class _LoginPageState extends State<LoginPage> {
                       throw Exception("Connection timed out. Check your internet or Supabase link.");
                     });
                     
-                    // ✨ 2. TRACK THE LOGIN (Silently)
+                    // ✨ 2. TRACK THE LOGIN (Loud Debugging Version)
                     if (res.user != null) {
                       try {
+                        debugPrint("📱 1. Fetching Device Info...");
                         final metadata = await SessionTracker.getLoginMetadata();
-                        await Supabase.instance.client
+                        debugPrint("📱 2. Info Found: $metadata"); 
+
+                        debugPrint("💾 3. Sending to Supabase for User ID: ${res.user!.id}");
+                        
+                        // Adding .select() forces Supabase to return the row if successful
+                        final updateResponse = await Supabase.instance.client
                             .from('profiles')
                             .update({
                               'last_login_ip': metadata['last_login_ip'],
                               'device_platform': metadata['device_platform'],
                               'browser_agent': metadata['browser_agent'],
                             })
-                            .eq('id', res.user!.id);
+                            .eq('id', res.user!.id)
+                            .select(); // ✨ THIS IS THE MAGIC WORD
+
+                        // Check if Supabase blocked the update silently
+                        if (updateResponse.isEmpty) {
+                          debugPrint("❌ CRITICAL: Update failed! The row was not found, or RLS blocked it.");
+                          _showError("Database blocked the update (RLS or missing row).");
+                        } else {
+                          debugPrint("✅ SUCCESS! Database updated: $updateResponse");
+                        }
+
                       } catch (trackingError) {
-                        _showError("Tracking Failed: ${trackingError.toString()}");
-                        debugPrint("Tracking Update Failed: $trackingError");
+                        _showError("Tracking Error: ${trackingError.toString()}");
+                        debugPrint("❌ Tracking Crash: $trackingError");
                       }
                     }
 
