@@ -851,25 +851,27 @@ class _AdminUserTableState extends State<AdminUserTable> {
             ),
           ),
 
-          // --- 4. LOCATION (Smart Hybrid Version) ---
+          // --- 4. LOCATION (Final Stacked Grid Version - Bug Free) ---
           Expanded(
             flex: 15,
             child: FutureBuilder<String>(
-              // ✨ If GPS is verified, use that. Otherwise, fallback to IP lookup!
-              future: rawUser['is_location_verified'] == true 
-                  ? Future.value("📍 ${rawUser['verified_city'] ?? 'Unknown City'}")
-                  : CrmService.getLocationFromIP(user['ip']),
+              future: CrmService.getLocationFromIP(user['ip']),
               builder: (context, snapshot) {
-                String locationDisplay = "Loading...";
-                if (snapshot.connectionState == ConnectionState.done) {
-                  locationDisplay = snapshot.data ?? '🌍 Unknown';
-                }
+                String fullIpLocation = snapshot.data ?? '🌍 Loading...';
 
-                // If no IP is logged, show the offline UI
+                // 1. Extract the Flag
+                String flag = fullIpLocation.contains(' ') ? fullIpLocation.split(' ').first : "🌍";
+
+                // 2. Extract the City Text
+                String locationText = rawUser['is_location_verified'] == true
+                    ? "${rawUser['verified_city'] ?? 'Unknown'}"
+                    : (fullIpLocation.contains(' ') ? fullIpLocation.substring(fullIpLocation.indexOf(' ') + 1) : fullIpLocation);
+
+                // Handle Offline State
                 if (user['ip'] == 'No IP Logged') {
                   return Row(
                     children: [
-                      const Icon(Icons.cloud_off, size: 14, color: Colors.grey), 
+                      const Icon(Icons.cloud_off, size: 14, color: Colors.grey),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Column(
@@ -885,46 +887,62 @@ class _AdminUserTableState extends State<AdminUserTable> {
                   );
                 }
 
-                // Live Geo-IP UI with Verification Badge
-                final bool isVerified = rawUser['is_location_verified'] == true;
-
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                // ✨ The Perfect Stacked Grid Layout
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // ✨ NEW: Show a Green Check if the location is GPS Verified
-                    if (isVerified)
-                      const Padding(
-                        padding: EdgeInsets.only(right: 6),
-                        child: Tooltip(
-                          message: "Hardware GPS Verified",
-                          child: Icon(Icons.verified, size: 16, color: Color(0xFF8FFF00)),
+                    
+                    // --- TOP ROW: Flag + City ---
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 22, 
+                          child: Text(flag, style: const TextStyle(fontSize: 14)),
                         ),
-                      ),
-                      
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            locationDisplay, 
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600, 
-                              color: isVerified ? const Color(0xFF0F172A) : const Color(0xFF334155), 
-                              fontSize: 12, 
-                              height: 1.2
-                            ), 
-                            maxLines: 2, 
-                            overflow: TextOverflow.ellipsis
+                        Expanded(
+                          child: Text(
+                            locationText,
+                            style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0F172A), fontSize: 12, height: 1.2),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
-                          Text(user['ip'], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10), overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                    
+                    const SizedBox(height: 4), 
+                    
+                    // --- BOTTOM ROW: Tick Badge + IP ---
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // ✨ This Container aligns the green tick perfectly under the flag
+                        Container(
+                          width: 22, 
+                          alignment: Alignment.centerLeft, 
+                          child: rawUser['is_location_verified'] == true
+                              ? Tooltip(
+                                  message: "Hardware GPS Verified",
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2.5),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF8FFF00), // Neon Green
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.check, size: 9, color: Colors.black),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                        Text(user['ip'], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
+                      ],
+                    ),
+                    
                   ],
                 );
-              }
+              },
             ),
           ),
 

@@ -360,18 +360,31 @@ class CrmService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        final address = data['address'];
         
-        // Grab the most accurate local identifier it can find
-        String city = data['address']['city'] ?? data['address']['town'] ?? data['address']['village'] ?? data['address']['county'] ?? "Unknown City";
-        String country = data['address']['country'] ?? "";
+        if (address != null) {
+          // ✨ SMART PARSER: Grab the specific area AND the broader region
+          String localArea = address['city'] ?? address['town'] ?? address['village'] ?? address['suburb'] ?? "";
+          String region = address['state'] ?? address['county'] ?? address['region'] ?? "";
+          String country = address['country'] ?? "";
 
-        // 4. Save "Verified City" to Supabase
-        await _supabase.from('profiles').update({
-          'verified_city': "$city, $country",
-          'is_location_verified': true,
-        }).eq('id', userId);
-        
-        debugPrint("✅ GPS Location Verified & Saved: $city, $country");
+          // Build a clean string, avoiding duplicates (like "Dhaka, Dhaka")
+          List<String> locationParts = [];
+          if (localArea.isNotEmpty) locationParts.add(localArea);
+          if (region.isNotEmpty && region != localArea) locationParts.add(region);
+          if (country.isNotEmpty) locationParts.add(country);
+
+          String finalLocationString = locationParts.join(", ");
+          if (finalLocationString.isEmpty) finalLocationString = "Verified Location";
+
+          // 4. Save the detailed "Verified City" to Supabase
+          await _supabase.from('profiles').update({
+            'verified_city': finalLocationString,
+            'is_location_verified': true,
+          }).eq('id', userId);
+          
+          debugPrint("✅ GPS Location Verified & Saved: $finalLocationString");
+        }
       }
     } catch (e) {
       debugPrint("GPS Error: $e");
