@@ -253,6 +253,27 @@ class CrmService {
     }
   }
 
+  /// ✨ 5. NEW: Record a Security/Login Event (The Location History Tracker)
+  static Future<void> logSecurityEvent({
+    required String userId,
+    required String ip,
+    required String location,
+    required bool isVerified,
+  }) async {
+    try {
+      await _supabase.from('security_logs').insert({
+        'user_id': userId,
+        'ip_address': ip,
+        'location_name': location,
+        'is_gps_verified': isVerified,
+        'device_info': "Windows - Chrome", // Placeholder, can be pulled dynamically later
+      });
+      debugPrint("🛡️ Security Log Recorded for: $location");
+    } catch (e) {
+      debugPrint("CRM Service Error (Log Security Event): $e");
+    }
+  }
+
   // ===========================================================================
   // ✨ PHASE 3: DEVICE & SESSION MANAGEMENT (New!)
   // ===========================================================================
@@ -377,11 +398,19 @@ class CrmService {
           String finalLocationString = locationParts.join(", ");
           if (finalLocationString.isEmpty) finalLocationString = "Verified Location";
 
-          // 4. Save the detailed "Verified City" to Supabase
+          // 4. Save the detailed "Verified City" to Supabase profile
           await _supabase.from('profiles').update({
             'verified_city': finalLocationString,
             'is_location_verified': true,
           }).eq('id', userId);
+          
+          // ✨ 5. NEW: Add this to the permanent Security Log history!
+          await logSecurityEvent(
+            userId: userId,
+            ip: "Hardware GPS Check", // Identifies this record as a direct hardware ping
+            location: finalLocationString,
+            isVerified: true,
+          );
           
           debugPrint("✅ GPS Location Verified & Saved: $finalLocationString");
         }
@@ -416,7 +445,7 @@ class CrmService {
             (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397)
           );
           
-          // ✨ Extract the City/Region safely!
+          // Extract the City/Region safely
           String city = (data['regionName'] != null && data['regionName'].toString().trim().isNotEmpty) 
               ? "${data['regionName']}, "
               : ""; 

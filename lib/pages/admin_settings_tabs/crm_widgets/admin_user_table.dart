@@ -851,7 +851,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
             ),
           ),
 
-          // --- 4. LOCATION (Final Stacked Grid Version - Bug Free) ---
+          // --- 4. LOCATION (Final Stacked Grid Version - Multi-line Fix) ---
           Expanded(
             flex: 15,
             child: FutureBuilder<String>(
@@ -895,17 +895,19 @@ class _AdminUserTableState extends State<AdminUserTable> {
                     
                     // --- TOP ROW: Flag + City ---
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      // ✨ FIXED: Align to 'start' so the flag stays at the top when text wraps
+                      crossAxisAlignment: CrossAxisAlignment.start, 
                       children: [
-                        SizedBox(
+                        Container(
                           width: 22, 
+                          alignment: Alignment.topLeft,
                           child: Text(flag, style: const TextStyle(fontSize: 14)),
                         ),
                         Expanded(
                           child: Text(
                             locationText,
                             style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0F172A), fontSize: 12, height: 1.2),
-                            maxLines: 1,
+                            maxLines: 2, // ✨ FIXED: Changed back to 2 lines!
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -918,7 +920,6 @@ class _AdminUserTableState extends State<AdminUserTable> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // ✨ This Container aligns the green tick perfectly under the flag
                         Container(
                           width: 22, 
                           alignment: Alignment.centerLeft, 
@@ -928,7 +929,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
                                   child: Container(
                                     padding: const EdgeInsets.all(2.5),
                                     decoration: const BoxDecoration(
-                                      color: Color(0xFF8FFF00), // Neon Green
+                                      color: Color(0xFF8FFF00),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(Icons.check, size: 9, color: Colors.black),
