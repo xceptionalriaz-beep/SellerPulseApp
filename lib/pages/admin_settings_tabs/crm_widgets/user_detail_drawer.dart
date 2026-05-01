@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'dart:ui';
+import 'package:supabase_flutter/supabase_flutter.dart'; // ✨ NEW: Needed for real-time history fetch
 import '../../../services/crm_service.dart';
 
 class UserDetailDrawer extends StatefulWidget {
@@ -48,10 +49,12 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
   bool _isLoggingOut = false;
   
   bool _isLoadingStores = true;
-  bool _isLoadingDevices = true; // ✨ NEW: Device Loading State
+  bool _isLoadingDevices = true; 
+  bool _isLoadingHistory = true; // ✨ NEW: Security History Loading State
   
   List<Map<String, dynamic>> _connectedStores = [];
-  List<Map<String, dynamic>> _activeDevices = []; // ✨ NEW: Active Devices List
+  List<Map<String, dynamic>> _activeDevices = []; 
+  List<Map<String, dynamic>> _loginHistory = []; // ✨ NEW: Live History List
   
   late String _currentPlan;
   late String _currentStatus;
@@ -67,7 +70,7 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
 
   Future<void> _fetchUserData() async {
     try {
-      // ✨ Fetches BOTH stores and devices simultaneously!
+      // Fetch Stores and Devices
       final stores = await CrmService.getConnectedStores(widget.user['id']);
       final devices = await CrmService.fetchUserDevices(widget.user['id']);
       
@@ -79,13 +82,30 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
           _isLoadingDevices = false;
         });
       }
+
+      // ✨ NEW: Fetch the REAL Live Security History from Supabase
+      final historyResponse = await Supabase.instance.client
+          .from('login_history')
+          .select()
+          .eq('user_id', widget.user['id'])
+          .order('login_at', ascending: false)
+          .limit(10); // Get the last 10 logins
+          
+      if (mounted) {
+        setState(() {
+          _loginHistory = List<Map<String, dynamic>>.from(historyResponse);
+          _isLoadingHistory = false;
+        });
+      }
+
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingStores = false;
           _isLoadingDevices = false;
+          _isLoadingHistory = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Could not load data: $e"), backgroundColor: Colors.redAccent));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Could not load all data: $e"), backgroundColor: Colors.redAccent));
       }
     }
   }
@@ -161,7 +181,7 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
     }
 
     // 📡 DYNAMIC SYSTEM METADATA EXTRACTOR
-    final String shortId = _safeString(user['display_id'], fallback: 'Generating...'); // ✨ NEW: Short ID
+    final String shortId = _safeString(user['display_id'], fallback: 'Generating...'); 
     final String fullId = _safeString(user['id'], fallback: 'Unknown');
     final String lastLoginIp = _safeString(user['last_login_ip'], fallback: 'Unknown IP');
     final String devicePlatform = _safeString(user['device_platform'], fallback: 'Unknown Device');
@@ -228,11 +248,10 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
                             Text(email, style: const TextStyle(fontSize: 14, color: Color(0xFF64748B))),
                             const SizedBox(height: 16),
                             
-                            // ✨ REAZIFY CUSTOM DROPDOWNS
+                            // ✨ PLAN & STATUS DROPDOWNS
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Custom Plan Dropdown
                                 PopupMenuButton<String>(
                                   tooltip: "Change Plan",
                                   color: Colors.white,
@@ -259,7 +278,6 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
                                 ),
                                 const SizedBox(width: 8),
                                 
-                                // Custom Status Dropdown
                                 PopupMenuButton<String>(
                                   tooltip: "Change Status",
                                   color: Colors.white,
@@ -297,7 +315,7 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
                       
                       const SizedBox(height: 24),
                       
-                      // ⚡ QUICK ACTIONS
+                      // ⚡ QUICK ACTIONS (KILL SWITCH IS HERE)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -424,7 +442,7 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
                       const Divider(color: Color(0xFFF1F5F9)),
                       const SizedBox(height: 24),
 
-                      // 📱 ✨ NEW: ACTIVE DEVICES SECTION
+                      // 📱 ACTIVE DEVICES SECTION
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -444,6 +462,23 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
                            padding: const EdgeInsets.all(16),
                            decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE2E8F0)), borderRadius: BorderRadius.circular(12)),
                            child: const Center(child: Text("No active sessions recorded", style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))),
+                        ),
+
+                      const SizedBox(height: 32),
+
+                      // 🛡️ ✨ NEW: LIVE SECURITY & SESSION AUDIT
+                      const Text("SECURITY & LOGIN AUDIT", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: Color(0xFF94A3B8))),
+                      const SizedBox(height: 12),
+                      
+                      if (_isLoadingHistory)
+                        const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator(color: Color(0xFF0F172A))))
+                      else if (_loginHistory.isNotEmpty)
+                        ..._loginHistory.map((log) => _buildHistoryItem(log)).toList()
+                      else
+                        Container(
+                           padding: const EdgeInsets.all(16),
+                           decoration: BoxDecoration(border: Border.all(color: const Color(0xFFE2E8F0)), borderRadius: BorderRadius.circular(12)),
+                           child: const Center(child: Text("No historical logins found", style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))),
                         ),
 
                       const SizedBox(height: 32),
@@ -484,12 +519,12 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
                       const Divider(color: Color(0xFFF1F5F9)),
                       const SizedBox(height: 24),
 
-                      // 🔐 ✨ UPDATED: SYSTEM METADATA
+                      // 🔐 SYSTEM METADATA
                       const Text("SYSTEM METADATA", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: Color(0xFF94A3B8))),
                       const SizedBox(height: 16),
-                      _buildSystemRow("Display ID", shortId, copyable: true), // Short ID
+                      _buildSystemRow("Display ID", shortId, copyable: true), 
                       const SizedBox(height: 12),
-                      _buildSystemRow("Account UUID", fullId, copyable: true), // Secret Database ID
+                      _buildSystemRow("Account UUID", fullId, copyable: true), 
                       const SizedBox(height: 12),
                       _buildSystemRow("Last Login IP", lastLoginIp), 
                       const SizedBox(height: 12),
@@ -530,8 +565,52 @@ class _UserDetailDrawerState extends State<UserDetailDrawer> {
   }
 
   // --- UI Helpers & Logic ---
+
+  // ✨ NEW: Live History Item Builder
+  Widget _buildHistoryItem(Map<String, dynamic> log) {
+    String timeAgo = "Unknown";
+    if (log['login_at'] != null) {
+      try {
+        final dt = DateTime.parse(log['login_at']).toLocal();
+        final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+        final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+        timeAgo = "${_monthName(dt.month)} ${dt.day}, ${dt.year} at $hour:${dt.minute.toString().padLeft(2, '0')} $ampm";
+      } catch (e) {
+        timeAgo = "Recent";
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            log['device_info'].toString().contains('iPhone') || log['device_info'].toString().contains('Android') ? Icons.phone_iphone : Icons.computer, 
+            color: const Color(0xFF94A3B8), 
+            size: 18
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(log['device_info'] ?? "Unknown Device", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                const SizedBox(height: 2),
+                Text("IP: ${log['ip_address']} • $timeAgo", style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   
-  // ✨ NEW: Device Item Builder
   Widget _buildDeviceItem(Map<String, dynamic> device) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

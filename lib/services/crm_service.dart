@@ -1,5 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http; // ✨ NEW: Needed for Geo-IP Translation
+import 'dart:convert';                   // ✨ NEW: Needed for JSON Decoding
+import 'package:geolocator/geolocator.dart'; // ✨ NEW: Needed for GPS Hardware Location
 
 class CrmService {
   // A private shortcut to your Supabase client
@@ -333,6 +336,88 @@ class CrmService {
       ];
     } catch (e) {
       throw Exception("Failed to fetch stores: $e");
+    }
+  }
+
+  // ===========================================================================
+  // ✨ PHASE 5: DEVICE GEOLOCATION (GPS / HARDWARE)
+  // ===========================================================================
+  
+  /// Captures physical hardware location via GPS/Browser location
+  static Future<void> updateVerifiedLocation(String userId) async {
+    try {
+      // 1. Request Permission from the user
+      LocationPermission permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) return;
+
+      // 2. Get exact Lat/Long Coordinates
+      Position position = await Geolocator.getCurrentPosition();
+
+      // 3. Convert Lat/Long to City Name (Reverse Geocoding using OpenStreetMap)
+      final response = await http.get(Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}'
+      ));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        // Grab the most accurate local identifier it can find
+        String city = data['address']['city'] ?? data['address']['town'] ?? data['address']['village'] ?? data['address']['county'] ?? "Unknown City";
+        String country = data['address']['country'] ?? "";
+
+        // 4. Save "Verified City" to Supabase
+        await _supabase.from('profiles').update({
+          'verified_city': "$city, $country",
+          'is_location_verified': true,
+        }).eq('id', userId);
+        
+        debugPrint("✅ GPS Location Verified & Saved: $city, $country");
+      }
+    } catch (e) {
+      debugPrint("GPS Error: $e");
+    }
+  }
+
+  // ===========================================================================
+  // ✨ GEO-IP TRANSLATOR (UPDATED WITH CITY)
+  // ===========================================================================
+  static final Map<String, String> _ipCache = {}; // Caches IPs so we don't hit the API twice for the same user
+
+  static Future<String> getLocationFromIP(String ip) async {
+    if (ip == 'No IP Logged' || ip == 'Unknown' || ip == 'Offline') return '🌍 Offline';
+    
+    // Return cached result if we already looked it up
+    if (_ipCache.containsKey(ip)) return _ipCache[ip]!;
+
+    try {
+      // Free API to translate IP to Location
+      final response = await http.get(Uri.parse('http://ip-api.com/json/$ip'));
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          // Convert Country Code (US, BD, GB) into Emoji Flags 🇺🇸 🇧🇩 🇬🇧
+          String countryCode = data['countryCode'];
+          String flag = countryCode.toUpperCase().replaceAllMapped(
+            RegExp(r'[A-Z]'), 
+            (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397)
+          );
+          
+          // ✨ Extract the City/Region safely!
+          String city = (data['regionName'] != null && data['regionName'].toString().trim().isNotEmpty) 
+              ? "${data['regionName']}, "
+              : ""; 
+          
+          // Combine Flag + City + Country (e.g., 🇨🇦 Toronto, Canada)
+          String locationString = "$flag $city${data['country']}";
+          
+          _ipCache[ip] = locationString; // Save to cache
+          return locationString;
+        }
+      }
+      return '🌍 Unknown Location';
+    } catch (e) {
+      return '🌍 Network Error';
     }
   }
 }

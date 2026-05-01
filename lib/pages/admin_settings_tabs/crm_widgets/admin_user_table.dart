@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'dart:math';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 import '../../../services/crm_service.dart';
 import 'user_detail_drawer.dart'; 
 
@@ -25,6 +26,37 @@ class AdminUserTable extends StatefulWidget {
 }
 
 class _AdminUserTableState extends State<AdminUserTable> {
+  final Map<String, List<Map<String, dynamic>>> _userHistories = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _preloadSecurityData();
+  }
+
+  Future<void> _preloadSecurityData() async {
+    for (var user in widget.allUsers) {
+      final userId = user['id'];
+      if (userId != null) {
+        try {
+          final response = await Supabase.instance.client
+              .from('login_history')
+              .select('ip_address')
+              .eq('user_id', userId)
+              .order('login_at', ascending: false)
+              .limit(5);
+          
+          if (mounted) {
+            setState(() {
+              _userHistories[userId] = List<Map<String, dynamic>>.from(response);
+            });
+          }
+        } catch (e) {
+          debugPrint("Silent fail loading history for badge: $e");
+        }
+      }
+    }
+  }
 
   Future<void> _showSupportNoteDialog(BuildContext context, String userId, String userName) async {
     final TextEditingController noteController = TextEditingController();
@@ -68,7 +100,6 @@ class _AdminUserTableState extends State<AdminUserTable> {
                     if (noteController.text.trim().isEmpty) return;
                     
                     setDialogState(() => isSubmitting = true);
-                    
                     widget.onUserUpdated(userId, 'dispute_note', noteController.text.trim());
 
                     try {
@@ -101,7 +132,6 @@ class _AdminUserTableState extends State<AdminUserTable> {
     );
   }
 
-  // ✨ NEW: The Device Manager Popup Dialog
   Future<void> _showDeviceManagerDialog(BuildContext context, String userId, String userName) async {
     showDialog(
       context: context,
@@ -268,7 +298,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
             );
           }
 
-          final double tableWidth = max(1050.0, constraints.maxWidth);
+          final double tableWidth = max(1150.0, constraints.maxWidth);
           
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -307,22 +337,29 @@ class _AdminUserTableState extends State<AdminUserTable> {
   }
 
   // -------------------------------------------------------------------------
-  // ✨ UNIVERSAL ACTION BUTTONS (Works on Mobile AND Desktop)
+  // ✨ ACTION BUTTONS
   // -------------------------------------------------------------------------
   Widget _buildActionButtons(Map<String, dynamic> user, Map<String, dynamic> rawUser) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        OutlinedButton(
-          onPressed: () {
-            UserDetailDrawer.show(context, rawUser, widget.onUserUpdated);
-          },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12), 
-            side: const BorderSide(color: Color(0xFFE2E8F0)), 
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+        Tooltip(
+          message: "View Detailed Profile",
+          child: InkWell(
+            onTap: () {
+              UserDetailDrawer.show(context, rawUser, widget.onUserUpdated);
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.all(6), 
+              decoration: BoxDecoration(
+                color: const Color(0xFF8FFF00).withAlpha(25), 
+                border: Border.all(color: const Color(0xFF8FFF00)), 
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.person_outline, size: 18, color: Color(0xFF0F172A)), 
+            ),
           ),
-          child: const Text("Detailed Profile", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
         ),
         const SizedBox(width: 8),
         
@@ -335,7 +372,6 @@ class _AdminUserTableState extends State<AdminUserTable> {
             
             if (value.startsWith('change_plan_')) {
                 final String newPlan = value.replaceFirst('change_plan_', '');
-                
                 widget.onUserUpdated(userId, 'plan_name', newPlan);
                 widget.onUserUpdated(userId, 'account_status', 'Active'); 
                 try {
@@ -347,7 +383,6 @@ class _AdminUserTableState extends State<AdminUserTable> {
                   if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to change plan: $e"), backgroundColor: Colors.redAccent));
                 }
             } else if (value == 'manage_devices') {
-                // ✨ TRIGGER NEW DEVICE MANAGER DIALOG
                 _showDeviceManagerDialog(context, userId, user['name']);
             } else if (value == 'suspend') {
                 widget.onUserUpdated(userId, 'account_status', 'Past Due');
@@ -398,22 +433,15 @@ class _AdminUserTableState extends State<AdminUserTable> {
                   child: Text("Switch to $plan", style: const TextStyle(fontWeight: FontWeight.w600))
                 )
               ),
-
               const PopupMenuDivider(),
-
-              // ✨ NEW DEVICE OPTION
               const PopupMenuItem(value: 'manage_devices', child: Text("Manage Devices", style: TextStyle(fontWeight: FontWeight.w600))),
-              
               const PopupMenuDivider(),
-
               if (user['plan'] == 'Free Trial' && user['status'] != 'Expired')
                 const PopupMenuItem(value: 'expire_trial', child: Text("Force Expire Trial", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600))),
-
               if (user['dispute'] == null || user['dispute'].toString().trim().isEmpty)
                 const PopupMenuItem(value: 'flag_support', child: Text("Flag for Support", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w600)))
               else
                 const PopupMenuItem(value: 'resolve_support', child: Text("Resolve Support Issue", style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600))),
-                
               if (user['status'] == 'Expired' && user['plan'] == 'Free Trial')
                 const PopupMenuItem(value: 'reactivate', child: Text("Extend Trial", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600)))
               else if (user['status'] == 'Past Due' || user['status'] == 'Expired')
@@ -428,7 +456,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
   }
 
   // -------------------------------------------------------------------------
-  // 📱 MOBILE CARD LAYOUT (Always Visible Data)
+  // 📱 MOBILE CARD LAYOUT (Fully Restored)
   // -------------------------------------------------------------------------
   Widget _buildMobileHeader() {
     return Padding(
@@ -461,15 +489,13 @@ class _AdminUserTableState extends State<AdminUserTable> {
         children: [
           Row(
             children: [
-              Container(width: 16, height: 16, decoration: BoxDecoration(border: Border.all(color: const Color(0xFFCBD5E1)), borderRadius: BorderRadius.circular(4))),
-              const SizedBox(width: 12),
               CircleAvatar(
                 backgroundColor: hasAvatar ? Colors.transparent : const Color(0xFF8FFF00), 
                 radius: 18, 
                 backgroundImage: hasAvatar ? NetworkImage(user['avatarUrl']) : null,
                 child: !hasAvatar 
-                    ? Text(user['initials'], style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 0.5))
-                    : null,
+                  ? Text(user['initials'], style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 0.5))
+                  : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -581,7 +607,7 @@ class _AdminUserTableState extends State<AdminUserTable> {
   }
 
   // -------------------------------------------------------------------------
-  // 🖥️ DATA FORMATTING
+  // 🖥️ DATA FORMATTING (Fully Restored)
   // -------------------------------------------------------------------------
   Map<String, dynamic> _formatDatabaseUser(Map<String, dynamic> dbData) {
     final String email = dbData['email'] ?? "unknown@user.com";
@@ -666,19 +692,21 @@ class _AdminUserTableState extends State<AdminUserTable> {
     };
   }
 
+  // -------------------------------------------------------------------------
+  // ✨ TABLE HEADER (High Density)
+  // -------------------------------------------------------------------------
   Widget _buildTableHeader() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          const SizedBox(width: 32),
-          Expanded(flex: 3, child: Text("USER", style: _headerStyle())),
-          Expanded(flex: 2, child: Text("PLAN / STATUS", style: _headerStyle())),
-          Expanded(flex: 2, child: Text("JOIN DATE", style: _headerStyle())),
-          Expanded(flex: 2, child: Text("ACCOUNT ID", style: _headerStyle())),
-          Expanded(flex: 2, child: Text("PLATFORM & LOGIN", style: _headerStyle())),
-          Expanded(flex: 1, child: Text("DEVICES", style: _headerStyle())),
-          Expanded(flex: 2, child: Align(alignment: Alignment.centerRight, child: Text("ACTION", style: _headerStyle()))),
+          Expanded(flex: 30, child: Text("USER", style: _headerStyle())),
+          Expanded(flex: 15, child: Text("PLAN / STATUS", style: _headerStyle())),
+          Expanded(flex: 15, child: Text("JOINED", style: _headerStyle())),
+          Expanded(flex: 15, child: Text("LOCATION", style: _headerStyle())), 
+          Expanded(flex: 20, child: Text("PLATFORM & ID", style: _headerStyle())),
+          Expanded(flex: 10, child: Text("DEVICES", style: _headerStyle())),
+          Expanded(flex: 10, child: Align(alignment: Alignment.centerRight, child: Text("ACTION", style: _headerStyle()))),
         ],
       ),
     );
@@ -705,6 +733,9 @@ class _AdminUserTableState extends State<AdminUserTable> {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // 🚀 FIXED HIGH-DENSITY DATA ROW
+  // -------------------------------------------------------------------------
   Widget _buildDataRow(Map<String, dynamic> user, Map<String, dynamic> rawUser) {
     Color statusColor = Colors.green;
     Color statusBg = Colors.green.withAlpha(20);
@@ -713,33 +744,58 @@ class _AdminUserTableState extends State<AdminUserTable> {
 
     String displayName = widget.isInvestorMode ? "${user['name'].split(' ')[0]} ***" : user['name'];
     String displayEmail = widget.isInvestorMode ? "${user['email'][0]}***@${user['email'].split('@')[1]}" : user['email'];
-
     bool hasAvatar = user['avatarUrl'] != null && user['avatarUrl'].toString().isNotEmpty;
 
+    // ✨ SCAM DETECTOR LOGIC
+    int uniqueIpsCount = 1;
+    bool isHighRisk = false;
+    if (_userHistories.containsKey(user['id'])) {
+      final history = _userHistories[user['id']]!;
+      final uniqueIps = history.map((e) => e['ip_address']).toSet();
+      uniqueIpsCount = uniqueIps.length;
+      if (uniqueIpsCount > 1) isHighRisk = true; 
+    }
+
+    // 🎯 BUG FIX #1: Only show the "Live Now" dot if they actually have devices connected!
+    bool isLiveNow = user['deviceCount'] != null && user['deviceCount'].toString() != '0' && user['ip'] != 'No IP Logged';
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(width: 16, height: 16, decoration: BoxDecoration(border: Border.all(color: const Color(0xFFCBD5E1)), borderRadius: BorderRadius.circular(4))),
-          const SizedBox(width: 16),
+          
+          // --- 1. USER ---
           Expanded(
-            flex: 3,
+            flex: 30,
             child: Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: hasAvatar ? Colors.transparent : const Color(0xFF8FFF00), 
-                  radius: 18, 
-                  backgroundImage: hasAvatar ? NetworkImage(user['avatarUrl']) : null,
-                  child: !hasAvatar 
-                      ? Text(user['initials'], style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w800, fontSize: 13, letterSpacing: 0.5))
-                      : null,
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: hasAvatar ? Colors.transparent : const Color(0xFF8FFF00), 
+                      radius: 20, 
+                      backgroundImage: hasAvatar ? NetworkImage(user['avatarUrl']) : null,
+                      child: !hasAvatar ? Text(user['initials'], style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w800, fontSize: 13)) : null,
+                    ),
+                    if (isLiveNow) // The Fixed Dot!
+                      Positioned(
+                        bottom: 0, right: 0,
+                        child: Container(
+                          width: 12, height: 12,
+                          decoration: BoxDecoration(color: const Color(0xFF8FFF00), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                        ),
+                      )
+                  ],
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(displayName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 13)),
+                      Text(displayName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 13), overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 2),
                       Text(displayEmail, style: const TextStyle(color: Color(0xFF64748B), fontSize: 11), overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -747,81 +803,184 @@ class _AdminUserTableState extends State<AdminUserTable> {
               ],
             ),
           ),
+          
+          // --- 2. PLAN / STATUS (🎯 BUG FIX #2: Restored Usage Bar) ---
           Expanded(
-            flex: 2,
+            flex: 15,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   children: [
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(6)), child: Text(user['plan'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF334155)))),
-                    const SizedBox(width: 8),
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(6)), child: Text(user['status'], style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: statusColor))),
+                    Text(user['plan'], style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2), 
+                      decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(4)), 
+                      child: Text(user['status'], style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: statusColor))
+                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Container(
-                  width: 100,
+                  width: 80, // Keeps it compact
                   height: 4,
                   decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(2)),
-                  child: FractionallySizedBox(alignment: Alignment.centerLeft, widthFactor: user['usage'], child: Container(decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(2)))),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft, 
+                    widthFactor: user['usage'], 
+                    child: Container(decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(2)))
+                  ),
                 )
               ],
             ),
           ),
+
+          // --- 3. JOINED ---
           Expanded(
-            flex: 2,
+            flex: 15,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(user['joinDate'], style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0F172A), fontSize: 12)),
-                Text(user['time'], style: const TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                const SizedBox(height: 2),
+                Text(user['time'], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
               ],
             ),
           ),
+
+          // --- 4. LOCATION (Smart Hybrid Version) ---
           Expanded(
-            flex: 2,
-            child: Row(
-              children: [
-                Text(user['shortId'], style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.w600, color: Color(0xFF334155), fontSize: 12)),
-                const SizedBox(width: 6),
-                InkWell(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: user['id']));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("ID Copied to clipboard"), duration: Duration(seconds: 1)));
-                  },
-                  child: const Icon(Icons.copy, size: 14, color: Color(0xFF94A3B8)),
-                )
-              ],
+            flex: 15,
+            child: FutureBuilder<String>(
+              // ✨ If GPS is verified, use that. Otherwise, fallback to IP lookup!
+              future: rawUser['is_location_verified'] == true 
+                  ? Future.value("📍 ${rawUser['verified_city'] ?? 'Unknown City'}")
+                  : CrmService.getLocationFromIP(user['ip']),
+              builder: (context, snapshot) {
+                String locationDisplay = "Loading...";
+                if (snapshot.connectionState == ConnectionState.done) {
+                  locationDisplay = snapshot.data ?? '🌍 Unknown';
+                }
+
+                // If no IP is logged, show the offline UI
+                if (user['ip'] == 'No IP Logged') {
+                  return Row(
+                    children: [
+                      const Icon(Icons.cloud_off, size: 14, color: Colors.grey), 
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Offline", style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0F172A), fontSize: 12)),
+                            Text("No IP Logged", style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10), overflow: TextOverflow.ellipsis),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                // Live Geo-IP UI with Verification Badge
+                final bool isVerified = rawUser['is_location_verified'] == true;
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // ✨ NEW: Show a Green Check if the location is GPS Verified
+                    if (isVerified)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 6),
+                        child: Tooltip(
+                          message: "Hardware GPS Verified",
+                          child: Icon(Icons.verified, size: 16, color: Color(0xFF8FFF00)),
+                        ),
+                      ),
+                      
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            locationDisplay, 
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600, 
+                              color: isVerified ? const Color(0xFF0F172A) : const Color(0xFF334155), 
+                              fontSize: 12, 
+                              height: 1.2
+                            ), 
+                            maxLines: 2, 
+                            overflow: TextOverflow.ellipsis
+                          ),
+                          const SizedBox(height: 2),
+                          Text(user['ip'], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10), overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
             ),
           ),
+
+          // --- 5. PLATFORM & ID ---
           Expanded(
-            flex: 2,
+            flex: 20,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text("${user['platform']} • ${user['browser']}", style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0F172A), fontSize: 12), overflow: TextOverflow.ellipsis),
-                Text(user['ip'], style: const TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text("ID: ${user['shortId']}", style: const TextStyle(fontFamily: 'monospace', color: Color(0xFF64748B), fontSize: 10)),
+                    const SizedBox(width: 4),
+                    InkWell(
+                      onTap: () { Clipboard.setData(ClipboardData(text: user['id'])); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Copied!"))); },
+                      child: const Icon(Icons.copy, size: 10, color: Color(0xFF94A3B8)),
+                    )
+                  ],
+                ),
               ],
             ),
           ),
+
+          // --- 6. DEVICES ---
           Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(6), border: Border.all(color: const Color(0xFFE2E8F0))),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.devices, size: 12, color: Color(0xFF64748B)),
-                  const SizedBox(width: 4),
-                  Text(user['deviceCount'], style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF334155), fontSize: 12)),
-                ],
+            flex: 10,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isHighRisk ? Colors.red.withAlpha(20) : const Color(0xFFF8FAFC), 
+                  borderRadius: BorderRadius.circular(6), 
+                  border: Border.all(color: isHighRisk ? Colors.redAccent : const Color(0xFFE2E8F0))
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(isHighRisk ? Icons.warning_amber_rounded : Icons.devices, size: 12, color: isHighRisk ? Colors.redAccent : const Color(0xFF64748B)),
+                    const SizedBox(width: 4),
+                    Text(
+                      isHighRisk ? "$uniqueIpsCount IPs" : user['deviceCount'], 
+                      style: TextStyle(fontWeight: FontWeight.bold, color: isHighRisk ? Colors.redAccent : const Color(0xFF334155), fontSize: 12)
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+
+          // --- 7. ACTION ---
           Expanded(
-            flex: 2,
+            flex: 10,
             child: _buildActionButtons(user, rawUser),
           ),
         ],

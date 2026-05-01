@@ -10,6 +10,9 @@ import 'admin_management_page.dart';
 import 'title_builder/title_builder_main.dart'; 
 import '../user_profile/user_profile_page.dart';
 
+// ✨ IMPORT YOUR NEW POPUP WIDGET
+import '../widgets/location_prompt.dart';
+
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
@@ -28,13 +31,21 @@ class _DashboardPageState extends State<DashboardPage> {
   // ✨ NEW: The Walkie-Talkie Subscription
   late final StreamSubscription<AuthState> _authSubscription;
 
+  // ✨ NEW: Variables to track if we should show the location prompt
+  bool _isLocationVerified = true; // Default true so it doesn't flash before checking
+  bool _isLoadingLocationStatus = true;
+
   User? get user => Supabase.instance.client.auth.currentUser;
   bool get isOwner => user?.email == 'xceptionalriaz@gmail.com';
 
   @override
   void initState() {
     super.initState();
-    // ✨ THE MAGIC LISTENER: Whenever the user updates their profile, this triggers!
+    
+    // 1. Check if the user already verified their location
+    _checkLocationVerification();
+
+    // 2. ✨ THE MAGIC LISTENER: Whenever the user updates their profile, this triggers!
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.userUpdated) {
         if (mounted) {
@@ -42,6 +53,28 @@ class _DashboardPageState extends State<DashboardPage> {
         }
       }
     });
+  }
+
+  // ✨ NEW: Fetch verification status from DB
+  Future<void> _checkLocationVerification() async {
+    if (user == null) return;
+    try {
+      final data = await Supabase.instance.client
+          .from('profiles')
+          .select('is_location_verified')
+          .eq('id', user!.id)
+          .single();
+          
+      if (mounted) {
+        setState(() {
+          _isLocationVerified = data['is_location_verified'] == true;
+          _isLoadingLocationStatus = false;
+        });
+      }
+    } catch (e) {
+      // If error (e.g. table not updated yet), default to false to hide it, or false to show it.
+      if (mounted) setState(() => _isLoadingLocationStatus = false);
+    }
   }
 
   @override
@@ -104,84 +137,100 @@ class _DashboardPageState extends State<DashboardPage> {
       backgroundColor: const Color(0xFFF8FAFC),
       drawer: !isDesktop ? _buildMobileDrawer() : null,
 
-      body: Padding(
-        padding: const EdgeInsets.all(10.0), 
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (isDesktop) _buildSlimRail(),
+      // ✨ STEP 1: WRAPPED THE BODY IN A STACK
+      body: Stack(
+        children: [
+          
+          // --- YOUR MAIN DASHBOARD CONTENT ---
+          Padding(
+            padding: const EdgeInsets.all(10.0), 
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (isDesktop) _buildSlimRail(),
 
-            Expanded(
-              child: Column( 
-                children: [
-                  
-                  // --- 🏆 THE NEW GLOBAL TOP BAR (Desktop Only) ---
-                  if (isDesktop)
-                    Container(
-                      height: 60,
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Row(
-                        children: [
-                          Text(
-                            _selectedIndex == 5 ? "Settings / Overview" : "Marketplace Research",
-                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w600),
+                Expanded(
+                  child: Column( 
+                    children: [
+                      
+                      // --- 🏆 THE NEW GLOBAL TOP BAR (Desktop Only) ---
+                      if (isDesktop)
+                        Container(
+                          height: 60,
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
+                          child: Row(
+                            children: [
+                              Text(
+                                _selectedIndex == 5 ? "Settings / Overview" : "Marketplace Research",
+                                style: const TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                              const Spacer(),
+                              
+                              _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
+                              
+                              if (_selectedIndex != 5) ...[
+                                const SizedBox(width: 15),
+                                Builder(
+                                  builder: (context) {
+                                    return InkWell(
+                                      borderRadius: BorderRadius.circular(16),
+                                      onTap: () => setState(() => _selectedIndex = 5),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: Container(
+                                          width: 32,
+                                          height: 32,
+                                          color: neonGreen, 
+                                          child: currentAvatarUrl != null 
+                                            ? Image.network(
+                                                currentAvatarUrl,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) => Center(
+                                                  child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold, fontSize: 13))
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5))
+                                              ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                ),
+                              ]
+                            ],
                           ),
-                          const Spacer(),
-                          
-                          _buildFloatingIcon(Icons.notifications_outlined, "Notifications"),
-                          
-                          if (_selectedIndex != 5) ...[
-                            const SizedBox(width: 15),
-                            Builder(
-                              builder: (context) {
-                                return InkWell(
-                                  borderRadius: BorderRadius.circular(16),
-                                  onTap: () => setState(() => _selectedIndex = 5),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Container(
-                                      width: 32,
-                                      height: 32,
-                                      color: neonGreen, 
-                                      child: currentAvatarUrl != null 
-                                        ? Image.network(
-                                            currentAvatarUrl,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => Center(
-                                              child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold, fontSize: 13))
-                                            ),
-                                          )
-                                        : Center(
-                                            child: Text(_userInitial, style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5))
-                                          ),
-                                    ),
-                                  ),
-                                );
-                              }
-                            ),
-                          ]
-                        ],
-                      ),
-                    ),
+                        ),
 
-                  // Mobile Header
-                  if (!isDesktop) _buildMobileHeader(currentAvatarUrl),
-                  
-                  // --- 🖥️ MAIN CONTENT AREA ---
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: isDesktop ? 15 : 0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: _buildCurrentScreen(),
+                      // Mobile Header
+                      if (!isDesktop) _buildMobileHeader(currentAvatarUrl),
+                      
+                      // --- 🖥️ MAIN CONTENT AREA ---
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(left: isDesktop ? 15 : 0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: _buildCurrentScreen(),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // --- ✨ STEP 2: THE FLOATING LOCATION PROMPT ---
+          // It only shows if we are done loading, the location isn't verified, and the user is logged in.
+          if (!_isLoadingLocationStatus && !_isLocationVerified && user != null)
+            LocationPrompt(
+              userId: user!.id,
+              isVerified: _isLocationVerified,
+            ),
+            
+        ],
       ),
     );
   }
