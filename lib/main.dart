@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:provider/provider.dart'; 
-import 'package:flutter_dotenv/flutter_dotenv.dart'; 
-import 'package:sellerpulse/providers/market_provider.dart'; 
-import 'auth_gate.dart'; 
+import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sellerpulse/providers/market_provider.dart';
+import 'auth_gate.dart';
+import 'pages/competitor_research/competitor_research_main.dart';
+import 'pages/competitor_research/listing_ideas_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   String? errorMessage;
 
   try {
@@ -47,15 +49,26 @@ class SellerPulseApp extends StatelessWidget {
             child: Container(
               width: 500,
               padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_circle_outline, color: Colors.redAccent, size: 60),
+                  const Icon(Icons.check_circle_outline,
+                      color: Colors.redAccent, size: 60),
                   const SizedBox(height: 24),
-                  const Text("Connection Interrupted", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                  const Text("Connection Interrupted",
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A))),
                   const SizedBox(height: 16),
-                  Text(error!, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                  Text(error!,
+                      style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center),
                 ],
               ),
             ),
@@ -72,8 +85,18 @@ class SellerPulseApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'SellerPulse',
-        theme: ThemeData(scaffoldBackgroundColor: const Color(0xFFF8FAFC)),
+        theme: ThemeData(
+            scaffoldBackgroundColor: const Color(0xFFF8FAFC)),
+
+        // ── Entry point (unchanged) ──
         home: const AuthGate(),
+
+        // ── NEW: Competitor Research routes ──
+        routes: {
+          '/competitor': (context) => const CompetitorResearchMain(),
+          '/competitor/listing-ideas': (context) =>
+              const ListingIdeasScreen(),
+        },
       ),
     );
   }

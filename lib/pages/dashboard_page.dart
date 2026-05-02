@@ -12,6 +12,7 @@ import '../user_profile/user_profile_page.dart';
 
 // ✨ IMPORT YOUR NEW POPUP WIDGET
 import '../widgets/location_prompt.dart';
+import 'competitor_research/competitor_research_main.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -341,8 +342,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 _drawerItem(Icons.text_fields_rounded, "Title Builder", 2),
                 _drawerItem(Icons.calculate_rounded, "Profit Calculator", 3),
                 _drawerItem(Icons.inventory_2_rounded, "Inventory", 4),
+                _drawerItem(Icons.radar_rounded, "Competitor Research", 5),
                 const Divider(color: Colors.white10, height: 40),
-                _drawerItem(Icons.settings_rounded, "Settings", 5),
+                _drawerItem(Icons.settings_rounded, "Settings", 6),
                 if (isOwner) _drawerItem(Icons.admin_panel_settings_rounded, "Admin Center", 6),
               ],
             ),
@@ -405,10 +407,11 @@ class _DashboardPageState extends State<DashboardPage> {
           _sidebarItem(icon: Icons.text_fields_rounded, title: "Title Builder", index: 2),
           _sidebarItem(icon: Icons.calculate_rounded, title: "Profit Calculator", index: 3),
           _sidebarItem(icon: Icons.inventory_2_rounded, title: "Inventory", index: 4),
+          _sidebarItem(icon: Icons.radar_rounded, title: "Competitor Research", index: 5),
           const Spacer(),
-          _sidebarItem(icon: Icons.settings_rounded, title: "Settings", index: 5), 
+          _sidebarItem(icon: Icons.settings_rounded, title: "Settings", index: 6),
           if (isOwner)
-            _sidebarItem(icon: Icons.admin_panel_settings_rounded, title: "Admin Center", index: 6),
+            _sidebarItem(icon: Icons.admin_panel_settings_rounded, title: "Admin Center", index: 7),
           const SizedBox(height: 10),
           IconButton(onPressed: _logout, icon: const Icon(Icons.logout_rounded, color: Colors.white54, size: 20)),
           const SizedBox(height: 25),
@@ -465,8 +468,9 @@ class _DashboardPageState extends State<DashboardPage> {
       case 2: return const TitleBuilderMain();
       case 3: return const ProfitCalculatorPage();
       case 4: return const InventoryPage();
-      case 5: return const UserProfilePage(); 
-      case 6: return isOwner ? const AdminManagementPage() : const Center(child: Text("404", style: TextStyle(color: Colors.grey)));
+      case 5: return const CompetitorResearchMain();
+      case 6: return const UserProfilePage();
+      case 7: return isOwner ? const AdminManagementPage() : const Center(child: Text("404", style: TextStyle(color: Colors.grey)));
       default: return const SizedBox.shrink();
     }
   }
