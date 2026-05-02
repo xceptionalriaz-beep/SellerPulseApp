@@ -321,32 +321,77 @@ class CompetitorService {
 
   Future<StoreScanResult> scanStore(String username) async {
     try {
-      final token = await _getAccessToken();
+      // Call Edge Function instead of eBay directly (fixes CORS)
+      final response = await _supabase.functions.invoke(
+        'ebay-scan',
+        body: {'username': username},
+      );
 
-      // 1. Fetch seller's active listings
-      final listings = await _fetchSellerListings(username, token);
+      if (response.status != 200) {
+        throw Exception(response.data?['error'] ?? 'Scan failed');
+      }
 
-      // 2. Fetch sold items (last 30 days)
-      final soldItems = await _fetchSoldItems(username, token);
+      final data = response.data as Map<String, dynamic>;
 
-      // 3. Build store overview
-      final overview = _buildStoreOverview(username, listings, soldItems);
+      // Build overview from response
+      final overviewMap = data['overview'] as Map<String, dynamic>;
+      final overview = StoreOverview(
+        username: overviewMap['username'] ?? username,
+        storeName: overviewMap['storeName'],
+        feedbackScore: overviewMap['feedbackScore'] ?? 0,
+        feedbackPercent: (overviewMap['feedbackPercent'] ?? 0.0).toDouble(),
+        activeListings: overviewMap['activeListings'] ?? 0,
+        totalSold: overviewMap['totalSold'] ?? 0,
+        estimatedRevenue: (overviewMap['estimatedRevenue'] ?? 0.0).toDouble(),
+        avgPrice: (overviewMap['avgPrice'] ?? 0.0).toDouble(),
+        sellThroughRate: (overviewMap['sellThroughRate'] ?? 0.0).toDouble(),
+        storeUrl: overviewMap['storeUrl'],
+      );
 
-      // 4. Build scanned products list
-      final products = _buildProductList(listings, soldItems);
+      // Build products from response
+      final productsList = data['products'] as List<dynamic>;
+      final products = productsList.map((p) {
+        final m = p as Map<String, dynamic>;
+        return ScannedProduct(
+          itemId: m['itemId'] ?? '',
+          title: m['title'] ?? '',
+          price: (m['price'] ?? 0.0).toDouble(),
+          soldCount: m['soldCount'] ?? 0,
+          revenue: (m['revenue'] ?? 0.0).toDouble(),
+          sellThrough: (m['sellThrough'] ?? 0.0).toDouble(),
+          imageUrl: m['imageUrl'],
+          category: m['category'],
+          condition: m['condition'] ?? 'Unknown',
+          freeShipping: m['freeShipping'] ?? false,
+          watchCount: m['watchCount'] ?? 0,
+          listingType: m['listingType'] ?? 'FixedPrice',
+          trend: m['trend'] ?? 'stable',
+          opportunityScore: m['opportunityScore'] ?? 5,
+          ebayUrl: m['ebayUrl'],
+          topKeywords: List<String>.from(m['topKeywords'] ?? []),
+        );
+      }).toList();
 
-      // 5. Run gap finder
-      final gaps = _runGapFinder(products, username);
+      // Build gaps from response
+      final gapsList = data['gaps'] as List<dynamic>;
+      final gaps = gapsList.map((g) {
+        final m = g as Map<String, dynamic>;
+        return GapProduct(
+          title: m['title'] ?? '',
+          category: m['category'] ?? '',
+          estimatedDemand: (m['estimatedDemand'] ?? 0.0).toDouble(),
+          reason: m['reason'] ?? '',
+        );
+      }).toList();
 
-      // 6. Extract top keywords across all titles
-      final keywords = _extractTopKeywords(products);
+      final topKeywords = List<String>.from(data['topKeywords'] ?? []);
 
-      // 7. Save scan to Supabase
+      // Save scan to Supabase
       final scanId = await _saveScanToSupabase(
         overview: overview,
         products: products,
         gaps: gaps,
-        keywords: keywords,
+        keywords: topKeywords,
       );
 
       return StoreScanResult(
@@ -354,7 +399,7 @@ class CompetitorService {
         overview: overview,
         products: products,
         gaps: gaps,
-        topKeywords: keywords,
+        topKeywords: topKeywords,
         scannedAt: DateTime.now(),
       );
     } catch (e) {
