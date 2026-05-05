@@ -17,7 +17,7 @@ import 'services/competitor_service.dart';
 // ─────────────────────────────────────────────
 class _C {
   static const bg = Color(0xFFF8FAFC);
-  static const surface = Color(0xFF0F172A);
+  static const surface = Color(0xFFFFFFFF);
   static const surfaceHover = Color(0xFFF1F5F9);
   static const border = Color(0xFFE2E8F0);
   static const accent = Color(0xFF5CB800);
@@ -49,6 +49,30 @@ class _StoreResultsScreenState extends State<StoreResultsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _service = CompetitorService();
+
+  Widget _inlineTab(String value, String label, String current, Function(String) onTap) {
+  final active = current == value;
+  return GestureDetector(
+    onTap: () => onTap(value),
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: active ? const Color(0xFFE8FFB0) : Colors.white,
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: active ? const Color(0xFF5CB800) : const Color(0xFFE2E8F0),
+          width: active ? 1.5 : 1,
+        ),
+      ),
+      child: Text(label, style: TextStyle(
+        fontSize: 12,
+        fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+        color: active ? const Color(0xFF5CB800) : const Color(0xFF64748B),
+      )),
+    ),
+  );
+}
 
   // Filter state
   String _sortBy = 'opportunity'; // opportunity / revenue / sold / price
@@ -160,7 +184,14 @@ class _StoreResultsScreenState extends State<StoreResultsScreen>
 
     return list;
   }
-
+  
+String _calcSuccessful() {
+  final products = widget.result.products;
+  if (products.isEmpty) return '0';
+  final successful = products.where((p) => p.soldCount > 0).length;
+  final pct = (successful / products.length * 100).round();
+  return '$pct% (${successful}/${products.length})';
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -294,7 +325,7 @@ class _StoreResultsScreenState extends State<StoreResultsScreen>
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(o.storeUrl ?? ''),
-                  backgroundColor: _C.surface,
+                  backgroundColor: Colors.white,
                 ),
               );
             },
@@ -465,83 +496,70 @@ class _StoreResultsScreenState extends State<StoreResultsScreen>
 
     return Column(
       children: [
-        // Filter bar
-        Container(
-          padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
-          decoration: BoxDecoration(
-            color: _C.bg,
-            border: Border(bottom: BorderSide(color: _C.border)),
-          ),
-          child: Row(
-            children: [
-              // Search
-              Expanded(
-                flex: 3,
-                child: Container(
-                  height: 38,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: _C.surface,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: _C.border),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded,
-                          size: 16, color: _C.textHint),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          onChanged: (v) =>
-                              setState(() => _searchProducts = v),
-                          style: GoogleFonts.inter(
-                              fontSize: 13, color: _C.textPrimary),
-                          decoration: InputDecoration(
-                            hintText: 'Search products...',
-                            hintStyle: GoogleFonts.inter(
-                                fontSize: 13, color: _C.textHint),
-                            border: InputBorder.none,
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-
-              // Sort
-              _FilterChip(
-                label: 'Sort: ${_sortLabel(_sortBy)}',
-                icon: Icons.sort_rounded,
-                onTap: _showSortSheet,
-              ),
-              const SizedBox(width: 8),
-
-              // Trend filter
-              _FilterChip(
-                label: _filterTrend == 'all'
-                    ? 'All trends'
-                    : _filterTrend.capitalize(),
-                icon: Icons.trending_up_rounded,
-                active: _filterTrend != 'all',
-                onTap: _showTrendFilter,
-              ),
-
-              const SizedBox(width: 8),
-
-              // Count
-              Text(
-                '${products.length} products',
-                style: GoogleFonts.inter(
-                    fontSize: 12, color: _C.textHint),
-              ),
-            ],
-          ),
+// ── Filter bar — inline, no popups ──
+Container(
+  color: Colors.white,
+  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+  child: Column(children: [
+    Row(children: [
+      Expanded(child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
+        child: Row(children: [
+          const Icon(Icons.search_rounded, size: 15, color: Color(0xFF94A3B8)),
+          const SizedBox(width: 8),
+          Expanded(child: TextField(
+            onChanged: (v) => setState(() => _searchProducts = v),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF0F172A)),
+            decoration: const InputDecoration(
+              hintText: 'Search products...',
+              hintStyle: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+              border: InputBorder.none, isDense: true,
+            ),
+          )),
+        ]),
+      )),
+      const SizedBox(width: 12),
+      Text('${products.length} products',
+        style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+    ]),
+    const SizedBox(height: 10),
+    Row(children: [
+      const Text('SORT BY', style: TextStyle(
+        fontSize: 10, fontWeight: FontWeight.w700,
+        color: Color(0xFF94A3B8), letterSpacing: 0.8)),
+      const SizedBox(width: 10),
+      _inlineTab('opportunity', '⚡ AI Score', _sortBy, (v) => setState(() => _sortBy = v)),
+      const SizedBox(width: 6),
+      _inlineTab('revenue', '\$ Revenue', _sortBy, (v) => setState(() => _sortBy = v)),
+      const SizedBox(width: 6),
+      _inlineTab('sold', '📦 Sold', _sortBy, (v) => setState(() => _sortBy = v)),
+      const SizedBox(width: 6),
+      _inlineTab('price', '💲 Price', _sortBy, (v) => setState(() => _sortBy = v)),
+      Container(height: 24, width: 1, color: const Color(0xFFE2E8F0),
+        margin: const EdgeInsets.symmetric(horizontal: 14)),
+      const Text('TREND', style: TextStyle(
+        fontSize: 10, fontWeight: FontWeight.w700,
+        color: Color(0xFF94A3B8), letterSpacing: 0.8)),
+      const SizedBox(width: 10),
+      _inlineTab('all', 'All', _filterTrend, (v) => setState(() => _filterTrend = v)),
+      const SizedBox(width: 6),
+      _inlineTab('rising', '📈 Rising', _filterTrend, (v) => setState(() => _filterTrend = v)),
+      const SizedBox(width: 6),
+      _inlineTab('stable', '➡️ Stable', _filterTrend, (v) => setState(() => _filterTrend = v)),
+      const SizedBox(width: 6),
+      _inlineTab('fading', '📉 Fading', _filterTrend, (v) => setState(() => _filterTrend = v)),
+    ]),
+  ]),
+),
 
         // Product list
+        _ProductTableHeader(),
         Expanded(
           child: products.isEmpty
               ? Center(
@@ -554,7 +572,7 @@ class _StoreResultsScreenState extends State<StoreResultsScreen>
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];
-                    return _ProductCard(
+                    return _ProductRow(
                       product: product,
                       isSaved: _savedIds.contains(product.itemId),
                       onSave: () => _toggleSave(product),
@@ -1053,17 +1071,96 @@ class _StoreResultsScreenState extends State<StoreResultsScreen>
 }
 
 // ─────────────────────────────────────────────
-// PRODUCT CARD WIDGET
+// REPLACE the entire _ProductCard class in store_results_screen.dart
+// with this clean table-row style matching your existing tool design
 // ─────────────────────────────────────────────
 
-class _ProductCard extends StatefulWidget {
+// Also replace _buildProductsTab() column headers section with this:
+// Add this widget ABOVE the ListView in _buildProductsTab():
+//
+//   _ProductTableHeader(),
+//
+// Then replace ListView.builder itemBuilder with:
+//   _ProductRow(...)
+
+// ══════════════════════════════════════════════
+// TABLE HEADER
+// ══════════════════════════════════════════════
+
+class _ProductTableHeader extends StatelessWidget {
+  const _ProductTableHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        border: Border(
+          bottom: BorderSide(color: const Color(0xFFE2E8F0)),
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 40), // checkbox space
+          const SizedBox(width: 56), // image space
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 4,
+            child: _headerText('PRODUCT'),
+          ),
+          _headerCell('TREND', flex: 2),
+          _headerCell('TOTAL SALE', flex: 2),
+          _headerCell('WATCH', flex: 1),
+          _headerCell('PRICE', flex: 2),
+          _headerCell('AI SCORE', flex: 1),
+          _headerCell('ACTIONS', flex: 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _headerText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF94A3B8),
+        letterSpacing: 0.8,
+      ),
+    );
+  }
+
+  Widget _headerCell(String text, {required int flex}) {
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF94A3B8),
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════
+// PRODUCT ROW — clean table row style
+// ══════════════════════════════════════════════
+
+class _ProductRow extends StatefulWidget {
   final ScannedProduct product;
   final bool isSaved;
   final VoidCallback onSave;
   final VoidCallback onCopyTitle;
   final VoidCallback onCalculatePrice;
 
-  const _ProductCard({
+  const _ProductRow({
     required this.product,
     required this.isSaved,
     required this.onSave,
@@ -1072,56 +1169,76 @@ class _ProductCard extends StatefulWidget {
   });
 
   @override
-  State<_ProductCard> createState() => _ProductCardState();
+  State<_ProductRow> createState() => _ProductRowState();
 }
 
-class _ProductCardState extends State<_ProductCard> {
-  bool _expanded = false;
+class _ProductRowState extends State<_ProductRow> {
   bool _hovering = false;
+  bool _expanded = false;
+
+  Color get _trendColor {
+    switch (widget.product.trend) {
+      case 'rising': return const Color(0xFF16A34A);
+      case 'fading': return const Color(0xFFDC2626);
+      default: return const Color(0xFFD97706);
+    }
+  }
+
+  Color get _scoreColor {
+    final s = widget.product.opportunityScore;
+    if (s >= 8) return const Color(0xFF16A34A);
+    if (s >= 6) return const Color(0xFF2563EB);
+    if (s >= 4) return const Color(0xFFD97706);
+    return const Color(0xFFDC2626);
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.product;
-    final trendColor = p.trend == 'rising'
-        ? _C.rising
-        : p.trend == 'fading'
-            ? _C.error
-            : _C.warning;
-    final trendBg = p.trend == 'rising'
-        ? _C.risingDim
-        : p.trend == 'fading'
-            ? _C.fadingDim
-            : _C.warningDim;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        margin: const EdgeInsets.only(bottom: 12),
+        duration: const Duration(milliseconds: 120),
         decoration: BoxDecoration(
-          color: _hovering ? _C.surfaceHover : _C.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: _hovering ? _C.accent.withOpacity(0.3) : _C.border,
+          color: _hovering
+              ? const Color(0xFFF8FAFC)
+              : Colors.white,
+          border: Border(
+            bottom: BorderSide(color: const Color(0xFFE2E8F0)),
           ),
         ),
         child: Column(
           children: [
-            // Main row
+            // ── Main row ──
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24, vertical: 12),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Product image / placeholder
+                  // Checkbox
+                  SizedBox(
+                    width: 40,
+                    child: Checkbox(
+                      value: widget.isSaved,
+                      onChanged: (_) => widget.onSave(),
+                      activeColor: const Color(0xFF5CB800),
+                      side: const BorderSide(
+                          color: Color(0xFFCBD5E1)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)),
+                    ),
+                  ),
+
+                  // Product image
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
-                      color: _C.bg,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _C.border),
+                      color: const Color(0xFFF1F5F9),
                       image: p.imageUrl != null
                           ? DecorationImage(
                               image: NetworkImage(p.imageUrl!),
@@ -1131,211 +1248,437 @@ class _ProductCardState extends State<_ProductCard> {
                     ),
                     child: p.imageUrl == null
                         ? const Icon(Icons.inventory_2_outlined,
-                            size: 24, color: _C.textHint)
+                            size: 22,
+                            color: Color(0xFF94A3B8))
                         : null,
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
 
-                  // Title + badges
+                  // Product title + category
                   Expanded(
+                    flex: 4,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           p.title,
-                          style: GoogleFonts.inter(
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: _C.textPrimary,
+                            color: Color(0xFF0F172A),
                             height: 1.4,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        if (p.category != null) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            p.category!,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
                         Row(
                           children: [
-                            // Trend badge
-                            _Badge(
-                              label: p.trend.capitalize(),
-                              color: trendColor,
-                              bg: trendBg,
-                            ),
-                            const SizedBox(width: 6),
-                            // Condition
-                            _Badge(
+                            // Condition badge
+                            _SmallBadge(
                               label: p.condition,
-                              color: _C.textSecondary,
-                              bg: _C.bg,
+                              color: const Color(0xFF64748B),
+                              bg: const Color(0xFFF1F5F9),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 4),
                             if (p.freeShipping)
-                              _Badge(
+                              _SmallBadge(
                                 label: 'Free Ship',
-                                color: _C.rising,
-                                bg: _C.risingDim,
+                                color: const Color(0xFF16A34A),
+                                bg: const Color(0xFFDCFCE7),
                               ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 14),
 
-                  // AI Score + metrics
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // AI Score
-                      _ScoreCircle(score: p.opportunityScore),
-                      const SizedBox(height: 8),
-                      Text(
-                        '\$${p.price.toStringAsFixed(2)}',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: _C.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        '${p.soldCount} sold',
-                        style: GoogleFonts.inter(
-                            fontSize: 11, color: _C.textSecondary),
-                      ),
-                    ],
+                  // Trend
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: _TrendMiniChart(trend: p.trend),
+                    ),
                   ),
-                ],
-              ),
-            ),
 
-            // Action bar
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Row(
-                children: [
-                  // Revenue
-                  _MiniStat(
-                      label: 'Revenue',
-                      value:
-                          '\$${p.revenue >= 1000 ? '${(p.revenue / 1000).toStringAsFixed(1)}K' : p.revenue.toStringAsFixed(0)}'),
-                  const SizedBox(width: 16),
-                  // Sell-through
-                  _MiniStat(
-                      label: 'Sell-through',
-                      value:
-                          '${p.sellThrough.toStringAsFixed(1)}%'),
-                  const SizedBox(width: 16),
-                  // Watchers
-                  _MiniStat(
-                      label: 'Watchers',
-                      value: p.watchCount.toString()),
-
-                  const Spacer(),
-
-                  // Price calculator
-                  _IconAction(
-                    icon: Icons.calculate_outlined,
-                    tooltip: 'Price calculator',
-                    onTap: widget.onCalculatePrice,
-                  ),
-                  const SizedBox(width: 6),
-
-                  // Copy title
-                  _IconAction(
-                    icon: Icons.title_rounded,
-                    tooltip: 'Copy optimized title',
-                    onTap: widget.onCopyTitle,
-                  ),
-                  const SizedBox(width: 6),
-
-                  // Expand keywords
-                  _IconAction(
-                    icon: _expanded
-                        ? Icons.expand_less_rounded
-                        : Icons.expand_more_rounded,
-                    tooltip: 'Keywords',
-                    onTap: () =>
-                        setState(() => _expanded = !_expanded),
-                  ),
-                  const SizedBox(width: 6),
-
-                  // Save to listing ideas
-                  GestureDetector(
-                    onTap: widget.onSave,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: widget.isSaved
-                            ? _C.accentDim
-                            : _C.bg,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: widget.isSaved
-                              ? _C.accent
-                              : _C.border,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                  // Total sold
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Column(
                         children: [
-                          Icon(
-                            widget.isSaved
-                                ? Icons.bookmark_rounded
-                                : Icons.bookmark_outline_rounded,
-                            size: 14,
-                            color: widget.isSaved
-                                ? _C.accent
-                                : _C.textSecondary,
-                          ),
-                          const SizedBox(width: 5),
                           Text(
-                            widget.isSaved ? 'Saved' : 'Save idea',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: widget.isSaved
-                                  ? _C.accent
-                                  : _C.textSecondary,
+                            p.soldCount.toString(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          Text(
+                            'sold',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF94A3B8),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+
+                  // Watchers
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.visibility_outlined,
+                              size: 12,
+                              color: Color(0xFF94A3B8)),
+                          const SizedBox(width: 3),
+                          Text(
+                            p.watchCount.toString(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Price
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Text(
+                        '\$${p.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // AI Score
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _scoreColor.withOpacity(0.1),
+                          border: Border.all(
+                              color: _scoreColor, width: 1.5),
+                        ),
+                        child: Center(
+                          child: Text(
+                            p.opportunityScore.toString(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: _scoreColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Actions
+                  Expanded(
+                    flex: 2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Price calculator
+                        _RowAction(
+                          icon: Icons.calculate_outlined,
+                          tooltip: 'Price calculator',
+                          onTap: widget.onCalculatePrice,
+                        ),
+                        const SizedBox(width: 6),
+                        // Copy title
+                        _RowAction(
+                          icon: Icons.copy_rounded,
+                          tooltip: 'Copy title',
+                          onTap: widget.onCopyTitle,
+                        ),
+                        const SizedBox(width: 6),
+                        // Expand keywords
+                        _RowAction(
+                          icon: _expanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          tooltip: 'Keywords',
+                          onTap: () =>
+                              setState(() => _expanded = !_expanded),
+                        ),
+                        const SizedBox(width: 6),
+                        // Save idea
+                        GestureDetector(
+                          onTap: widget.onSave,
+                          child: AnimatedContainer(
+                            duration:
+                                const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: widget.isSaved
+                                  ? const Color(0xFFE8FFB0)
+                                  : Colors.white,
+                              borderRadius:
+                                  BorderRadius.circular(6),
+                              border: Border.all(
+                                color: widget.isSaved
+                                    ? const Color(0xFF5CB800)
+                                    : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  widget.isSaved
+                                      ? Icons.bookmark_rounded
+                                      : Icons.bookmark_outline_rounded,
+                                  size: 13,
+                                  color: widget.isSaved
+                                      ? const Color(0xFF5CB800)
+                                      : const Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  widget.isSaved
+                                      ? 'Saved'
+                                      : 'Save',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: widget.isSaved
+                                        ? const Color(0xFF5CB800)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Expanded keywords
+            // ── Expanded keywords ──
             if (_expanded)
               Container(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Divider(color: _C.border, height: 1),
-                    const SizedBox(height: 12),
-                    Text('Top keywords',
-                        style: GoogleFonts.inter(
-                            fontSize: 11, color: _C.textSecondary)),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: p.topKeywords
-                          .map((kw) => _Badge(
-                                label: kw,
-                                color: _C.accent.withOpacity(0.8),
-                                bg: _C.accentDim,
-                              ))
-                          .toList(),
-                    ),
-                  ],
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(132, 0, 24, 12),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: p.topKeywords
+                      .map((kw) => Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8FFB0),
+                              borderRadius:
+                                  BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              kw,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF5CB800),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ))
+                      .toList(),
                 ),
-              ).animate().fadeIn(duration: 200.ms),
+              ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════
+// TREND MINI CHART — small sparkline-style
+// ══════════════════════════════════════════════
+
+class _TrendMiniChart extends StatelessWidget {
+  final String trend;
+  const _TrendMiniChart({required this.trend});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = trend == 'rising'
+        ? const Color(0xFF16A34A)
+        : trend == 'fading'
+            ? const Color(0xFFDC2626)
+            : const Color(0xFFD97706);
+
+    return Column(
+      children: [
+        CustomPaint(
+          size: const Size(60, 28),
+          painter: _SparklinePainter(trend: trend, color: color),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          trend == 'rising'
+              ? '📈 Rising'
+              : trend == 'fading'
+                  ? '📉 Fading'
+                  : '➡️ Stable',
+          style: TextStyle(
+            fontSize: 10,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SparklinePainter extends CustomPainter {
+  final String trend;
+  final Color color;
+
+  _SparklinePainter({required this.trend, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final path = Path();
+    List<Offset> points;
+
+    if (trend == 'rising') {
+      points = [
+        Offset(0, size.height * 0.8),
+        Offset(size.width * 0.2, size.height * 0.7),
+        Offset(size.width * 0.4, size.height * 0.5),
+        Offset(size.width * 0.6, size.height * 0.35),
+        Offset(size.width * 0.8, size.height * 0.2),
+        Offset(size.width, size.height * 0.1),
+      ];
+    } else if (trend == 'fading') {
+      points = [
+        Offset(0, size.height * 0.1),
+        Offset(size.width * 0.2, size.height * 0.2),
+        Offset(size.width * 0.4, size.height * 0.4),
+        Offset(size.width * 0.6, size.height * 0.55),
+        Offset(size.width * 0.8, size.height * 0.7),
+        Offset(size.width, size.height * 0.85),
+      ];
+    } else {
+      points = [
+        Offset(0, size.height * 0.5),
+        Offset(size.width * 0.15, size.height * 0.35),
+        Offset(size.width * 0.3, size.height * 0.55),
+        Offset(size.width * 0.5, size.height * 0.4),
+        Offset(size.width * 0.7, size.height * 0.5),
+        Offset(size.width * 0.85, size.height * 0.38),
+        Offset(size.width, size.height * 0.48),
+      ];
+    }
+
+    path.moveTo(points[0].dx, points[0].dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ══════════════════════════════════════════════
+// SMALL REUSABLE WIDGETS
+// ══════════════════════════════════════════════
+
+class _SmallBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  final Color bg;
+  const _SmallBadge(
+      {required this.label, required this.color, required this.bg});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _RowAction extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  const _RowAction(
+      {required this.icon,
+      required this.tooltip,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Icon(icon, size: 14, color: const Color(0xFF64748B)),
         ),
       ),
     );
