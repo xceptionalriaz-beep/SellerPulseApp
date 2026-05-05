@@ -86,6 +86,9 @@ class _OrderDetailPanelState extends State<OrderDetailPanel> {
   bool _showBuyerHistory = false;
   List<Map<String, dynamic>> _evidenceList = [];
   bool _loadingEvidence = false;
+  bool _isShipped = false;  // ← ADD THIS LINE
+  Map<String, dynamic>? _shipInfo;
+  List<Map<String, dynamic>> _sentMessages = [];
 
   // Mock buyer history for display
   final List<Map<String, dynamic>> _buyerHistory = [
@@ -96,12 +99,14 @@ class _OrderDetailPanelState extends State<OrderDetailPanel> {
     {'date': 'Jun 5', 'item': 'AirPods Pro', 'price': '\$249', 'outcome': 'RETURNED', 'reason': 'Missing accessories', 'isRed': true},
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadChecklist();
-    _loadEvidence();
-  }
+@override
+void initState() {
+  super.initState();
+  _loadChecklist();
+  _loadEvidence();
+  _loadShipInfo();        // ADD THIS
+  _loadSentMessages();    // ADD THIS
+}
 
   void _loadChecklist() {
     final raw = widget.order['protection_checklist'];
@@ -129,161 +134,199 @@ class _OrderDetailPanelState extends State<OrderDetailPanel> {
     }
   }
 
-  Future<void> _toggleStep(String key) async {
-    if (_checklist == null) return;
+  Future<void> _loadShipInfo() async {
+  final status = widget.order['order_status'] as String? ?? '';
+  final tracking = widget.order['tracking_number'] as String?;
+  if (status == 'shipped' && tracking != null) {
     setState(() {
-      _checklist![key]['completed'] = !(_checklist![key]['completed'] ?? false);
-      _checklist![key]['timestamp'] = _checklist![key]['completed']
-          ? DateTime.now().toIso8601String()
-          : null;
+      _isShipped = true;
+      _shipInfo = {
+        'carrier': widget.order['carrier'] ?? 'Unknown',
+        'tracking': tracking,
+        'shipped_at': widget.order['shipped_at'],
+        'expected_delivery': widget.order['expected_delivery'],
+        'signature_required': widget.order['signature_required'] ?? false,
+        'insurance_amount': widget.order['insurance_amount'],
+      };
     });
-    try {
-      await _supabase.from('protected_orders').update({
-        'protection_checklist': _checklist,
-        'checklist_completed': _allDone,
-      }).eq('id', widget.order['id']);
-    } catch (e) {
-      debugPrint('Checklist error: $e');
-    }
   }
+}
 
-  bool get _allDone =>
-      _checklist == null ? false : _checklist!.values.every((s) => s['completed'] == true);
+Future<void> _loadSentMessages() async {
+  try {
+    final data = await _supabase.from('sent_messages').select()
+        .eq('order_id', widget.order['id']).order('sent_at', ascending: false);
+    setState(() => _sentMessages = List<Map<String, dynamic>>.from(data));
+  } catch (_) {}
+}
 
-  int get _doneCount =>
-      _checklist == null ? 0 : _checklist!.values.where((s) => s['completed'] == true).length;
-
-  int get _totalCount => _checklist?.length ?? 0;
-
-  double get _pct => _totalCount == 0 ? 0 : _doneCount / _totalCount;
-
-  // ─── Helpers ───────────────────────────────────────────────
-  Color _riskColor(String lvl) {
-    if (lvl == 'HIGH') return _C.riskHigh;
-    if (lvl == 'MEDIUM') return _C.riskMedium;
-    return _C.riskLow;
+Future<void> _toggleStep(String key) async {
+  print('🔄 TOGGLE CLICKED - Key: $key');
+  print('📋 Checklist before: $_checklist');
+  
+  if (_checklist == null) {
+    print('❌ Checklist is NULL!');
+    return;
   }
-
-  Color _riskBg(String lvl) {
-    if (lvl == 'HIGH') return _C.riskHighBg;
-    if (lvl == 'MEDIUM') return _C.riskMedBg;
-    return _C.riskLowBg;
+  
+  setState(() {
+    _checklist![key]['completed'] = !(_checklist![key]['completed'] ?? false);
+    _checklist![key]['timestamp'] = _checklist![key]['completed']
+        ? DateTime.now().toIso8601String()
+        : null;
+  });
+  
+  print('✅ Checklist after: $_checklist');
+  
+  try {
+    await _supabase.from('protected_orders').update({
+      'protection_checklist': _checklist,
+      'checklist_completed': _allDone,
+    }).eq('id', widget.order['id']);
+    print('💾 Saved to database!');
+  } catch (e) {
+    print('❌ Database error: $e');
+    debugPrint('Checklist error: $e');
   }
+}
 
-  String _formatDate(DateTime d) {
-    final diff = DateTime.now().difference(d);
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${d.day}/${d.month}/${d.year}';
-  }
+bool get _allDone =>
+    _checklist == null ? false : _checklist!.values.every((s) => s['completed'] == true);
 
-  // ─── checklist step descriptions ───────────────────────────
-  final List<Map<String, String>> _steps = [
-    {
-      'label': 'Record item video before packing',
-      'warning': 'Without this: Cannot prove item condition to eBay',
-    },
-    {
-      'label': 'Film packing process (uncut video)',
-      'warning': "Without this: Buyer can claim 'wrong item sent'",
-    },
-    {
-      'label': 'Use signature-required shipping',
-      'warning': "Without this: Buyer can claim 'never received'",
-    },
-    {
-      'label': 'Send pre-shipment message to buyer',
-      'warning': 'Without this: No communication record if disputed',
-    },
-    {
-      'label': 'Upload evidence to vault',
-      'warning': 'Without this: No proof stored for eBay case',
-    },
-  ];
+int get _doneCount =>
+    _checklist == null ? 0 : _checklist!.values.where((s) => s['completed'] == true).length;
 
-  @override
-  Widget build(BuildContext context) {
-    final riskLevel    = widget.order['risk_level']        as String? ?? 'LOW';
-    final riskScore    = widget.order['risk_score']        as int?    ?? 0;
-    final itemTitle    = widget.order['item_title']        as String? ?? 'Unknown Item';
-    final itemPrice    = widget.order['item_price']        as num?    ?? 0.0;
-    final buyerName    = widget.order['buyer_username']    as String? ?? 'Unknown';
-    final orderId      = widget.order['ebay_order_id']                ?? 'Unknown';
-    final orderStatus  = widget.order['order_status']      as String? ?? 'pending';
-    final createdAt    = DateTime.tryParse(widget.order['created_at'] ?? '');
-    final profile      = widget.order['buyer_profiles'];
-    final returnRate   = profile?['return_rate']  as num? ?? 0.0;
-    final disputeCount = profile?['dispute_count'] as int? ?? 0;
-    final aiAnalysis   = profile?['ai_analysis']  as String?;
-    final patterns     = profile?['risk_patterns'] as List<dynamic>? ?? [];
+int get _totalCount => _checklist?.length ?? 0;
 
-    final rc  = _riskColor(riskLevel);
-    final rbg = _riskBg(riskLevel);
+double get _pct => _totalCount == 0 ? 0 : _doneCount / _totalCount;
 
-    // Financial risk
-    final potentialLoss = itemPrice;
-    final isSafe        = _allDone;
-    final daysUntilDeadline = 3; // mock
+// ─── Helpers ───────────────────────────────────────────────
+Color _riskColor(String lvl) {
+  if (lvl == 'HIGH') return _C.riskHigh;
+  if (lvl == 'MEDIUM') return _C.riskMedium;
+  return _C.riskLow;
+}
 
-    return Column(
-      children: [
-        // ══════ HEADER ══════════════════════════════════════════
-        _buildHeader(orderId, createdAt),
+Color _riskBg(String lvl) {
+  if (lvl == 'HIGH') return _C.riskHighBg;
+  if (lvl == 'MEDIUM') return _C.riskMedBg;
+  return _C.riskLowBg;
+}
 
-        // ══════ BODY ════════════════════════════════════════════
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+String _formatDate(DateTime d) {
+  final diff = DateTime.now().difference(d);
+  if (diff.inHours < 24) return '${diff.inHours}h ago';
+  if (diff.inDays < 7) return '${diff.inDays}d ago';
+  return '${d.day}/${d.month}/${d.year}';
+}
 
-                // 1. ALERT BANNER
-                _buildAlertBanner(riskLevel, rc, rbg, potentialLoss, daysUntilDeadline, isSafe),
-                const SizedBox(height: 16),
+// ─── checklist step descriptions ───────────────────────────
+final List<Map<String, String>> _steps = [
+  {
+    'label': 'Record item video before packing',
+    'warning': 'Without this: Cannot prove item condition to eBay',
+  },
+  {
+    'label': 'Film packing process (uncut video)',
+    'warning': "Without this: Buyer can claim 'wrong item sent'",
+  },
+  {
+    'label': 'Use signature-required shipping',
+    'warning': "Without this: Buyer can claim 'never received'",
+  },
+  {
+    'label': 'Send pre-shipment message to buyer',
+    'warning': 'Without this: No communication record if disputed',
+  },
+  {
+    'label': 'Upload evidence to vault',
+    'warning': 'Without this: No proof stored for eBay case',
+  },
+];
 
-                // 2. ORDER SUMMARY + RISK SCORE (side by side)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: _buildOrderSummary(itemTitle, itemPrice, buyerName, orderStatus)),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildRiskScore(riskLevel, riskScore, rc, rbg, returnRate, disputeCount)),
-                  ],
-                ),
-                const SizedBox(height: 16),
+@override
+Widget build(BuildContext context) {
+  final riskLevel    = widget.order['risk_level']        as String? ?? 'LOW';
+  final riskScore    = widget.order['risk_score']        as int?    ?? 0;
+  final itemTitle    = widget.order['item_title']        as String? ?? 'Unknown Item';
+  final itemPrice    = widget.order['item_price']        as num?    ?? 0.0;
+  final buyerName    = widget.order['buyer_username']    as String? ?? 'Unknown';
+  final orderId      = widget.order['ebay_order_id']                ?? 'Unknown';
+  final orderStatus  = widget.order['order_status']      as String? ?? 'pending';
+  final createdAt    = DateTime.tryParse(widget.order['created_at'] ?? '');
+  final profile      = widget.order['buyer_profiles'];
+  final returnRate   = profile?['return_rate']  as num? ?? 0.0;
+  final disputeCount = profile?['dispute_count'] as int? ?? 0;
+  final aiAnalysis   = profile?['ai_analysis']  as String?;
+  final patterns     = profile?['risk_patterns'] as List<dynamic>? ?? [];
 
-                // 3. WHY IS THIS BUYER RISKY
-                _buildWhyRisky(rc, rbg, riskLevel, patterns, aiAnalysis),
-                const SizedBox(height: 16),
+  final rc  = _riskColor(riskLevel);
+  final rbg = _riskBg(riskLevel);
 
-                // 4. PROTECTION CHECKLIST
-                if (_checklist != null && _checklist!.isNotEmpty)
-                  _buildChecklist(rc),
-                const SizedBox(height: 16),
+  // Financial risk
+  final potentialLoss = itemPrice;
+  final isSafe        = _allDone;
+  final daysUntilDeadline = 3; // mock
 
-                // 5. EVIDENCE VAULT
-                _buildEvidenceVault(),
-                const SizedBox(height: 16),
+  return Column(
+    children: [
+      // ══════ HEADER ══════════════════════════════════════════
+      _buildHeader(orderId, createdAt),
 
-                // 6. BUYER HISTORY
-                _buildBuyerHistory(rc),
-                const SizedBox(height: 16),
+      // ══════ BODY ════════════════════════════════════════════
+      Expanded(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
 
-                // 7. SHIPPING
-                _buildShipping(riskLevel, rc),
-                const SizedBox(height: 16),
+              // 1. ALERT BANNER
+              _buildAlertBanner(riskLevel, rc, rbg, potentialLoss, daysUntilDeadline, isSafe),
+              const SizedBox(height: 16),
 
-                // 8. QUICK ACTIONS
-                _buildQuickActions(rc),
-                const SizedBox(height: 32),
-              ],
-            ),
+              // 2. ORDER SUMMARY + RISK SCORE (side by side)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _buildOrderSummary(itemTitle, itemPrice, buyerName, orderStatus)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildRiskScore(riskLevel, riskScore, rc, rbg, returnRate, disputeCount)),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 3. WHY IS THIS BUYER RISKY
+              _buildWhyRisky(rc, rbg, riskLevel, patterns, aiAnalysis),
+              const SizedBox(height: 16),
+
+              // 4. PROTECTION CHECKLIST
+              if (_checklist != null && _checklist!.isNotEmpty)
+                _buildChecklist(rc),
+              const SizedBox(height: 16),
+
+              // 5. EVIDENCE VAULT
+              _buildEvidenceVault(),
+              const SizedBox(height: 16),
+
+              // 6. BUYER HISTORY
+              _buildBuyerHistory(rc),
+              const SizedBox(height: 16),
+
+              // 7. SHIPPING
+              _buildShipping(riskLevel, rc),
+              const SizedBox(height: 16),
+
+              // 8. QUICK ACTIONS
+              _buildQuickActions(rc),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   // ═══════════════════════════════════════════════════════════════
   // HEADER
@@ -1529,9 +1572,7 @@ class _OrderDetailPanelState extends State<OrderDetailPanel> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: _allDone
-                  ? () => _snack('Mark as shipped coming soon!')
-                  : null,
+              onPressed: _allDone ? _showMarkAsShippedDialog : null,
               icon: const Icon(Icons.local_shipping_outlined, size: 16),
               label: Text(_allDone ? 'Mark as Shipped' : 'Complete checklist first'),
               style: ElevatedButton.styleFrom(
@@ -1581,7 +1622,7 @@ class _OrderDetailPanelState extends State<OrderDetailPanel> {
             label: 'Send Pre-Shipment Message',
             subtitle: 'Template: Notify buyer with tracking proof',
             color: const Color(0xFF1976D2),
-            onTap: () => _snack('Message template coming soon!'),
+            onTap: _showMessageTemplateDialog,
           ),
           const SizedBox(height: 8),
 
@@ -1728,4 +1769,395 @@ class _OrderDetailPanelState extends State<OrderDetailPanel> {
       ),
     );
   }
+
+  void _showMessageTemplateDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Message Templates'),
+        content: Text('Template system will be added in next update!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+void _showMarkAsShippedDialog() {
+  final trackingCtrl = TextEditingController();
+  String carrier = 'UPS';
+  bool sigRequired = true;
+  bool insurance = true;
+  final insuranceAmt = (widget.order['item_price'] as num?)?.toDouble() ?? 0.0;
+  bool autoMessage = true;
+  DateTime shipDate = DateTime.now();
+  DateTime expectedDelivery = DateTime.now().add(const Duration(days: 3));
+
+  showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setInner) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(
+                color: _C.accent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.local_shipping, size: 18, color: _C.accentDark),
+            ),
+            const SizedBox(width: 10),
+            Text('Mark as Shipped',
+              style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700, fontSize: 18)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: SizedBox(
+            width: 420,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                
+                // ─ Carrier ─
+                Text('Carrier *',
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                  ),
+                  child: DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    value: carrier,
+                    icon: const Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF0F172A)),
+                    dropdownColor: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    focusColor: Colors.transparent,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black.withAlpha(150), width: 1.2),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF8FFF00), width: 2.0),
+                      ),
+                    ),
+                    
+                    selectedItemBuilder: (BuildContext context) {
+                      return ['UPS', 'FedEx', 'USPS', 'DHL', 'Other'].map<Widget>((item) {
+                        return Text(
+                          item,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF1E293B),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        );
+                      }).toList();
+                    },
+
+                    items: ['UPS', 'FedEx', 'USPS', 'DHL', 'Other'].map((item) {
+                      final isSelected = carrier == item;
+                      
+                      return DropdownMenuItem(
+                        value: item,
+                        child: StatefulBuilder(
+                          builder: (context, setDropdownState) {
+                            bool isHovered = false;
+                            
+                            return MouseRegion(
+                              onEnter: (_) => setDropdownState(() => isHovered = true),
+                              onExit: (_) => setDropdownState(() => isHovered = false),
+                              child: Container(
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                margin: const EdgeInsets.symmetric(vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? const Color(0xFF8FFF00) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(25),
+                                  border: Border.all(
+                                    color: (isHovered && !isSelected) 
+                                        ? const Color(0xFF8FFF00) 
+                                        : Colors.transparent,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  item,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isSelected ? Colors.black : const Color(0xFF0F172A),
+                                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
+                    
+                    onChanged: (v) {
+                      setInner(() {
+                        carrier = v!;
+                        int days = carrier == 'UPS' ? 3 : carrier == 'FedEx' ? 2 : 5;
+                        expectedDelivery = shipDate.add(Duration(days: days));
+                      });
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+                
+                // ─ Tracking ─
+                Text('Tracking Number *',
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: trackingCtrl,
+                  decoration: InputDecoration(
+                    hintText: '1Z999AA10123456784',
+                    hintStyle: GoogleFonts.inter(fontSize: 13, color: _C.textHint),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.all(12),
+                    prefixIcon: const Icon(Icons.confirmation_number, size: 20),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                
+                // ─ Ship Date ─
+                Text('Ship Date *',
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: ctx,
+                      initialDate: shipDate,
+                      firstDate: DateTime.now().subtract(const Duration(days: 3)),
+                      lastDate: DateTime.now().add(const Duration(days: 1)),
+                    );
+                    if (picked != null) {
+                      setInner(() {
+                        shipDate = picked;
+                        int days = carrier == 'UPS' ? 3 : carrier == 'FedEx' ? 2 : 5;
+                        expectedDelivery = shipDate.add(Duration(days: days));
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: _C.border),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today, size: 16, color: _C.textHint),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${shipDate.month}/${shipDate.day}/${shipDate.year}',
+                          style: GoogleFonts.inter(fontSize: 14, color: _C.textPrimary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // ─ Expected Delivery (UPDATED COLORS) ─
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8FFF00), // ← UPDATED: Neon green background
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.schedule, size: 16, color: Colors.black), // ← Black icon
+                      const SizedBox(width: 8),
+                      Text('Expected Delivery: ',
+                        style: GoogleFonts.inter(fontSize: 12, color: Colors.black)), // ← Black text
+                      Text(
+                        '${expectedDelivery.month}/${expectedDelivery.day}/${expectedDelivery.year}',
+                        style: GoogleFonts.inter(fontSize: 12, 
+                            fontWeight: FontWeight.w700, color: Colors.black), // ← Black text
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // ─ Options (UPDATED CHECKBOXES WITH SHADOW) ─
+                Text('Shipping Options',
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                
+                CheckboxListTile(
+                  value: sigRequired,
+                  onChanged: (v) => setInner(() => sigRequired = v!),
+                  title: Text('Signature Required',
+                    style: GoogleFonts.inter(fontSize: 13)),
+                  subtitle: Text('Recommended for high-risk orders',
+                    style: GoogleFonts.inter(fontSize: 11, color: _C.textHint)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: _C.accent,
+                  checkColor: Colors.black, // ← Black checkmark
+                  side: BorderSide(color: _C.border, width: 2), // ← Visible border
+                ),
+                
+                CheckboxListTile(
+                  value: insurance,
+                  onChanged: (v) => setInner(() => insurance = v!),
+                  title: Text('Insurance (\$${insuranceAmt.toStringAsFixed(2)})',
+                    style: GoogleFonts.inter(fontSize: 13)),
+                  subtitle: Text('Full item value coverage',
+                    style: GoogleFonts.inter(fontSize: 11, color: _C.textHint)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: _C.accent,
+                  checkColor: Colors.black, // ← Black checkmark
+                  side: BorderSide(color: _C.border, width: 2), // ← Visible border
+                ),
+                
+                CheckboxListTile(
+                  value: autoMessage,
+                  onChanged: (v) => setInner(() => autoMessage = v!),
+                  title: Text('Auto-send tracking to buyer',
+                    style: GoogleFonts.inter(fontSize: 13)),
+                  subtitle: Text('Pre-shipment message with tracking info',
+                    style: GoogleFonts.inter(fontSize: 11, color: _C.textHint)),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: _C.accent,
+                  checkColor: Colors.black, // ← Black checkmark
+                  side: BorderSide(color: _C.border, width: 2), // ← Visible border
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              if (trackingCtrl.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter tracking number')),
+                );
+                return;
+              }
+              
+              try {
+                await _supabase.from('protected_orders').update({
+                  'order_status': 'shipped',
+                  'tracking_number': trackingCtrl.text.trim(),
+                  'carrier': carrier,
+                  'shipped_at': shipDate.toIso8601String(),
+                  'expected_delivery': expectedDelivery.toIso8601String(),
+                  'signature_required': sigRequired,
+                  'insurance_amount': insurance ? insuranceAmt : null,
+                }).eq('id', widget.order['id']);
+                
+                if (autoMessage) {
+                  await _supabase.from('sent_messages').insert({
+                    'order_id': widget.order['id'],
+                    'template_name': 'Pre-Shipment (Auto)',
+                    'recipient': widget.order['buyer_username'],
+                    'body': 'Your order has shipped! Tracking: ${trackingCtrl.text.trim()}',
+                    'sent_via': 'auto',
+                  });
+                }
+                
+                if (ctx.mounted) Navigator.pop(ctx);
+                
+                if (mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      title: Row(
+                        children: [
+                          Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              color: _C.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.check, color: Colors.black),
+                          ),
+                          const SizedBox(width: 12),
+                          Text('Order Shipped!',
+                            style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('✅ Tracking: ${trackingCtrl.text.trim()}',
+                            style: GoogleFonts.inter(fontSize: 14)),
+                          const SizedBox(height: 4),
+                          Text('✅ Expected: ${expectedDelivery.month}/${expectedDelivery.day}',
+                            style: GoogleFonts.inter(fontSize: 14)),
+                          if (autoMessage) ...[
+                            const SizedBox(height: 4),
+                            Text('✅ Buyer notified automatically',
+                              style: GoogleFonts.inter(fontSize: 14)),
+                          ],
+                        ],
+                      ),
+                      actions: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _C.accent,
+                            foregroundColor: Colors.black,
+                          ),
+                          child: const Text('Done'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            icon: const Icon(Icons.check, size: 18),
+            label: const Text('Mark as Shipped'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _C.accent,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }

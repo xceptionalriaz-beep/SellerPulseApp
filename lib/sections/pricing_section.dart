@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../widgets/animated_cta_button.dart';
 
-// ─── Reusable fade+slide animation widget ────────────────────
+// ─── Fade+Slide animation ─────────────────────────────────────
 class _FadeSlideIn extends StatefulWidget {
   final Widget child;
   final Duration delay;
   const _FadeSlideIn({required this.child, this.delay = Duration.zero});
-
   @override
   State<_FadeSlideIn> createState() => _FadeSlideInState();
 }
@@ -24,9 +23,8 @@ class _FadeSlideInState extends State<_FadeSlideIn>
         vsync: this, duration: const Duration(milliseconds: 650));
     _opacity = Tween<double>(begin: 0, end: 1)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-    _slide =
-        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-            .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _slide = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     Future.delayed(widget.delay, () {
       if (mounted) _ctrl.forward();
     });
@@ -39,15 +37,12 @@ class _FadeSlideInState extends State<_FadeSlideIn>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
+  Widget build(BuildContext context) => FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(position: _slide, child: widget.child),
-    );
-  }
+      child: SlideTransition(position: _slide, child: widget.child));
 }
 
-// ─── Pricing Section ──────────────────────────────────────────
+// ─── Main Section ─────────────────────────────────────────────
 class PricingSection extends StatelessWidget {
   const PricingSection({super.key});
 
@@ -57,250 +52,161 @@ class PricingSection extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: const Color(0xFFF9F8F6),
+      color: const Color(0xFFF6F7F9),
       padding: EdgeInsets.symmetric(
         vertical: 80,
-        horizontal: isDesktop ? 60 : 20,
+        horizontal: isDesktop ? 48 : 20,
       ),
       child: Column(
         children: [
-          // Label
+          // ── HEADER ─────────────────────────────────────
           _FadeSlideIn(
-            delay: const Duration(milliseconds: 100),
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F2EC),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: const Text(
-                "PRICING",
-                style: TextStyle(
-                  color: Color(0xFF2E6B3E),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          _FadeSlideIn(
-            delay: const Duration(milliseconds: 200),
+            delay: const Duration(milliseconds: 80),
             child: Text(
-              "Stop overpaying for ZIK Analytics.",
+              "Simple, transparent pricing",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: isDesktop ? 38 : 26,
+                fontSize: isDesktop ? 36 : 26,
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF111827),
-                height: 1.15,
-                letterSpacing: -0.5,
+                letterSpacing: -0.6,
               ),
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           _FadeSlideIn(
-            delay: const Duration(milliseconds: 280),
+            delay: const Duration(milliseconds: 160),
             child: const Text(
-              "Simple pricing. No hidden renewal fees. No \$1 trial gimmicks.",
+              "Start free. Upgrade when you're ready. Cancel anytime.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 16,
                 color: Color(0xFF6B7280),
-                height: 1.6,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          _FadeSlideIn(
-            delay: const Duration(milliseconds: 340),
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.bolt_rounded,
-                      size: 15, color: Color(0xFF2E6B3E)),
-                  SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      "Up to 60% cheaper than ZIK Analytics Pro+",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF374151),
-                      ),
-                    ),
-                  ),
-                ],
+                height: 1.5,
               ),
             ),
           ),
 
           const SizedBox(height: 48),
 
-          // ── CARDS ─────────────────────────────────────────
+          // ── CARDS ──────────────────────────────────────
           LayoutBuilder(builder: (ctx, constraints) {
             final useRow = constraints.maxWidth > 800;
-            if (useRow) {
-              return IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _FadeSlideIn(
-                        delay: const Duration(milliseconds: 200),
-                        child: _PricingCard(
-                          title: "Starter",
-                          price: "\$19",
-                          subtitle: "Cancel ZIK. Start here.",
-                          features: const [
-                            "Unlimited Product Research",
-                            "Manual Scammer Checks",
-                            "Basic Ad Auditor",
-                            "eBay & AliExpress Sync",
-                            "Standard Support",
-                          ],
-                          isHighlighted: false,
-                          badge: "",
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _FadeSlideIn(
-                        delay: const Duration(milliseconds: 330),
-                        child: _PricingCard(
-                          title: "Pro",
-                          price: "\$29",
-                          subtitle: "Half the price of ZIK Pro+.",
-                          features: const [
-                            "Unlimited Product Research",
-                            "Auto-Block Scammers",
-                            "Live Ad Fee Alerts",
-                            "Competitor Tracking",
-                            "Shopify Integration",
-                            "Priority Support",
-                          ],
-                          isHighlighted: true,
-                          badge: "BEST VALUE",
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _FadeSlideIn(
-                        delay: const Duration(milliseconds: 460),
-                        child: _PricingCard(
-                          title: "Elite",
-                          price: "\$59",
-                          subtitle: "For multi-store dropshippers.",
-                          features: const [
-                            "Everything in Pro",
-                            "Connect 3 eBay Accounts",
-                            "Wholesale Supplier DB",
-                            "AutoDS & Shopify Sync",
-                            "Advanced Analytics",
-                            "24/7 VIP Support",
-                          ],
-                          isHighlighted: false,
-                          badge: "POWER SELLER",
-                        ),
-                      ),
-                    ),
+
+            final cards = [
+              _FadeSlideIn(
+                delay: const Duration(milliseconds: 150),
+                child: _PricingCard(
+                  title: "Starter",
+                  tagline: "Perfect for new eBay sellers.",
+                  originalPrice: null,
+                  price: "\$19",
+                  period: "per month",
+                  ctaLabel: "Get Starter",
+                  ctaColor: const Color(0xFF374151),
+                  isRecommended: false,
+                  features: const [
+                    "Unlimited Product Research",
+                    "Manual Scammer Checks",
+                    "Basic Ad Auditor",
+                    "eBay & AliExpress Sync",
+                    "Standard Support",
                   ],
+                  featuresHeader: "Key features:",
                 ),
+              ),
+              _FadeSlideIn(
+                delay: const Duration(milliseconds: 260),
+                child: _PricingCard(
+                  title: "Pro",
+                  tagline: "For sellers ready to scale faster.",
+                  originalPrice: "\$49",
+                  price: "\$29",
+                  period: "per month",
+                  ctaLabel: "Get Pro",
+                  ctaColor: const Color(0xFF2563EB),
+                  isRecommended: true,
+                  features: const [
+                    "Everything in Starter, plus:",
+                    "Auto-Block Scammers",
+                    "Live Ad Fee Alerts",
+                    "Competitor Tracking",
+                    "Shopify Integration",
+                    "Priority Support",
+                  ],
+                  featuresHeader: "Everything in Starter, plus:",
+                ),
+              ),
+              _FadeSlideIn(
+                delay: const Duration(milliseconds: 370),
+                child: _PricingCard(
+                  title: "Elite",
+                  tagline: "Built for multi-store power sellers.",
+                  originalPrice: "\$99",
+                  price: "\$59",
+                  period: "per month",
+                  ctaLabel: "Get Elite",
+                  ctaColor: const Color(0xFF7C3AED),
+                  isRecommended: false,
+                  features: const [
+                    "Connect 3 eBay Accounts",
+                    "Wholesale Supplier Database",
+                    "AutoDS & Shopify Sync",
+                    "Advanced Analytics Dashboard",
+                    "24/7 VIP Support",
+                  ],
+                  featuresHeader: "Everything in Pro, plus:",
+                ),
+              ),
+            ];
+
+            if (useRow) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: cards[0]),
+                  const SizedBox(width: 16),
+                  Expanded(child: cards[1]),
+                  const SizedBox(width: 16),
+                  Expanded(child: cards[2]),
+                ],
               );
             } else {
               return Column(
                 children: [
-                  _FadeSlideIn(
-                    delay: const Duration(milliseconds: 200),
-                    child: _PricingCard(
-                      title: "Starter",
-                      price: "\$19",
-                      subtitle: "Cancel ZIK. Start here.",
-                      features: const [
-                        "Unlimited Product Research",
-                        "Manual Scammer Checks",
-                        "Basic Ad Auditor",
-                        "Standard Support",
-                      ],
-                      isHighlighted: false,
-                      badge: "",
-                    ),
-                  ),
+                  cards[0],
                   const SizedBox(height: 16),
-                  _FadeSlideIn(
-                    delay: const Duration(milliseconds: 300),
-                    child: _PricingCard(
-                      title: "Pro",
-                      price: "\$29",
-                      subtitle: "Half the price of ZIK Pro+.",
-                      features: const [
-                        "Everything in Starter",
-                        "Auto-Block Scammers",
-                        "Live Ad Fee Alerts",
-                        "Competitor Tracking",
-                        "Priority Support",
-                      ],
-                      isHighlighted: true,
-                      badge: "BEST VALUE",
-                    ),
-                  ),
+                  cards[1],
                   const SizedBox(height: 16),
-                  _FadeSlideIn(
-                    delay: const Duration(milliseconds: 400),
-                    child: _PricingCard(
-                      title: "Elite",
-                      price: "\$59",
-                      subtitle: "For multi-store dropshippers.",
-                      features: const [
-                        "Everything in Pro",
-                        "3 eBay Accounts",
-                        "Wholesale Supplier DB",
-                        "AutoDS & Shopify Sync",
-                        "24/7 VIP Support",
-                      ],
-                      isHighlighted: false,
-                      badge: "POWER SELLER",
-                    ),
-                  ),
+                  cards[2],
                 ],
               );
             }
           }),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 36),
 
-          // Trust row
+          // ── COMPARE LINK ───────────────────────────────
           _FadeSlideIn(
-            delay: const Duration(milliseconds: 500),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 28,
-              runSpacing: 14,
-              children: const [
-                _TrustItem(Icons.lock_outline_rounded, "256-bit SSL"),
-                _TrustItem(Icons.cancel_outlined, "Cancel anytime"),
-                _TrustItem(Icons.credit_card_off_outlined,
-                    "No credit card needed"),
-                _TrustItem(
-                    Icons.support_agent_outlined, "7-day free trial"),
+            delay: const Duration(milliseconds: 480),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    "Compare all features",
+                    style: TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -313,223 +219,295 @@ class PricingSection extends StatelessWidget {
 // ─── Pricing Card ─────────────────────────────────────────────
 class _PricingCard extends StatelessWidget {
   final String title;
+  final String tagline;
+  final String? originalPrice;
   final String price;
-  final String subtitle;
+  final String period;
+  final String ctaLabel;
+  final Color ctaColor;
+  final bool isRecommended;
   final List<String> features;
-  final bool isHighlighted;
-  final String badge;
+  final String featuresHeader;
 
   const _PricingCard({
     required this.title,
+    required this.tagline,
+    required this.originalPrice,
     required this.price,
-    required this.subtitle,
+    required this.period,
+    required this.ctaLabel,
+    required this.ctaColor,
+    required this.isRecommended,
     required this.features,
-    required this.isHighlighted,
-    required this.badge,
+    required this.featuresHeader,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: isHighlighted ? const Color(0xFF111827) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isHighlighted
-              ? Colors.transparent
-              : const Color(0xFFE5E7EB),
-          width: 1.5,
-        ),
-        boxShadow: isHighlighted
-            ? [
-                const BoxShadow(
-                  color: Color(0x2A000000),
-                  blurRadius: 40,
-                  offset: Offset(0, 16),
-                )
-              ]
-            : [],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (badge.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: isHighlighted
-                    ? const Color(0xFF8FFF00)
-                    : const Color(0xFFE8F2EC),
-                borderRadius: BorderRadius.circular(50),
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ── RECOMMENDED BADGE (sits above card) ──────────
+        if (isRecommended)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: ctaColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: const Center(
               child: Text(
-                badge,
+                "Recommended",
                 style: TextStyle(
-                  color: isHighlighted
-                      ? const Color(0xFF111827)
-                      : const Color(0xFF2E6B3E),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.1,
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
                 ),
               ),
             ),
+          )
+        else
+          // Invisible spacer to keep card tops aligned
+          const SizedBox(height: 37),
 
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: isHighlighted ? Colors.white : const Color(0xFF111827),
+        // ── CARD BODY ────────────────────────────────────
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isRecommended ? 0 : 16),
+              topRight: Radius.circular(isRecommended ? 0 : 16),
+              bottomLeft: const Radius.circular(16),
+              bottomRight: const Radius.circular(16),
             ),
+            border: Border.all(
+              color: isRecommended
+                  ? ctaColor
+                  : const Color(0xFFE5E7EB),
+              width: isRecommended ? 2 : 1.5,
+            ),
+            boxShadow: isRecommended
+                ? [
+                    BoxShadow(
+                      color: ctaColor.withOpacity(0.12),
+                      blurRadius: 32,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
-
-          const SizedBox(height: 12),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Title
               Text(
-                price,
-                style: TextStyle(
-                  fontSize: 44,
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: isHighlighted
-                      ? Colors.white
-                      : const Color(0xFF111827),
-                  letterSpacing: -1,
+                  color: Color(0xFF111827),
+                  letterSpacing: -0.3,
                 ),
               ),
+
+              const SizedBox(height: 6),
+
+              // Tagline
               Text(
-                " /mo",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isHighlighted
-                      ? Colors.white54
-                      : const Color(0xFF9CA3AF),
+                tagline,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  color: Color(0xFF6B7280),
+                  height: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Price row
+              if (originalPrice != null)
+                Text(
+                  originalPrice!,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Color(0xFFB0B7C3),
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.lineThrough,
+                    decorationColor: Color(0xFFB0B7C3),
+                    decorationThickness: 2,
+                  ),
+                ),
+
+              if (originalPrice != null) const SizedBox(height: 2),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    price,
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF111827),
+                      letterSpacing: -2,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                period,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF9CA3AF),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // CTA button
+              SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ctaColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: Text(ctaLabel),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Free trial link
+              Center(
+                child: GestureDetector(
+                  onTap: () {},
+                  child: RichText(
+                    text: TextSpan(
+                      text: "or ",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                      children: [
+                        TextSpan(
+                          text: "start free trial",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: ctaColor,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                            decorationColor: ctaColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Divider
+              const Divider(color: Color(0xFFF3F4F6), height: 1),
+
+              const SizedBox(height: 22),
+
+              // Features header
+              Text(
+                featuresHeader,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF374151),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // Features list — skip first item if it's the header
+              ...features
+                  .where((f) => f != featuresHeader)
+                  .map((f) => Padding(
+                        padding: const EdgeInsets.only(bottom: 11),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3),
+                              child: Icon(
+                                Icons.check,
+                                size: 15,
+                                color: ctaColor,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                f,
+                                style: const TextStyle(
+                                  fontSize: 13.5,
+                                  color: Color(0xFF374151),
+                                  height: 1.45,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+
+              const SizedBox(height: 20),
+
+              // Compare link
+              Center(
+                child: TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    "Compare all features",
+                    style: TextStyle(
+                      color: Color(0xFF9CA3AF),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color(0xFFD1D5DB),
+                    ),
+                  ),
                 ),
               ),
             ],
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 13,
-              color: isHighlighted
-                  ? const Color(0xFF9CA3AF)
-                  : const Color(0xFF6B7280),
-              height: 1.4,
-            ),
-          ),
-
-          const SizedBox(height: 22),
-
-          Divider(
-            color: isHighlighted
-                ? const Color(0xFF1F2937)
-                : const Color(0xFFF3F4F6),
-            height: 1,
-          ),
-
-          const SizedBox(height: 20),
-
-          ...features.map((f) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 3),
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: isHighlighted
-                            ? const Color(0xFF1F2937)
-                            : const Color(0xFFE8F2EC),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 11,
-                        color: isHighlighted
-                            ? const Color(0xFF8FFF00)
-                            : const Color(0xFF2E6B3E),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        f,
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          color: isHighlighted
-                              ? const Color(0xFFD1D5DB)
-                              : const Color(0xFF374151),
-                          height: 1.4,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-
-          const SizedBox(height: 24),
-
-          SizedBox(
-            width: double.infinity,
-            child: AnimatedCtaButton(
-              text: "Start Free 7-Day Trial",
-              isSmall: true,
-              onPressed: () {},
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Center(
-            child: Text(
-              "No credit card required.",
-              style: TextStyle(
-                fontSize: 11,
-                color: isHighlighted
-                    ? const Color(0xFF6B7280)
-                    : const Color(0xFF9CA3AF),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Trust Item ───────────────────────────────────────────────
-class _TrustItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _TrustItem(this.icon, this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 15, color: const Color(0xFF9CA3AF)),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF6B7280),
-            fontWeight: FontWeight.w500,
           ),
         ),
       ],

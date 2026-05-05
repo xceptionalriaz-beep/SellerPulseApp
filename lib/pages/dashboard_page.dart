@@ -472,7 +472,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 3: return const ProfitCalculatorPage();
       case 4: return const InventoryPage();
       case 5: return const CompetitorResearchMain();
-      case 6: return const OrdersDashboard(); // ← ADD THIS LINE
+      case 6: return OrdersDashboard(); // ← ADD THIS LINE
       case 7: return const UserProfilePage(); // ← CHANGED from 6 to 7
       case 8: return isOwner ? const AdminManagementPage() : const Center(child: Text("404", style: TextStyle(color: Colors.grey))); // ← CHANGED from 7 to 8
       default: return const SizedBox.shrink();
