@@ -1,5 +1,52 @@
 import 'package:flutter/material.dart';
 
+// ─── Reusable fade+slide animation widget ────────────────────
+class _FadeSlideIn extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+  const _FadeSlideIn({required this.child, this.delay = Duration.zero});
+
+  @override
+  State<_FadeSlideIn> createState() => _FadeSlideInState();
+}
+
+class _FadeSlideInState extends State<_FadeSlideIn>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _opacity;
+  late Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 650));
+    _opacity = Tween<double>(begin: 0, end: 1)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _slide =
+        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
+            .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    Future.delayed(widget.delay, () {
+      if (mounted) _ctrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
+}
+
+// ─── Feature Showcase ─────────────────────────────────────────
 class FeatureShowcase extends StatelessWidget {
   const FeatureShowcase({super.key});
 
@@ -12,77 +59,86 @@ class FeatureShowcase extends StatelessWidget {
       color: Colors.white,
       child: Column(
         children: [
-          // ── SECTION HEADER ─────────────────────────────────
+          // ── HEADER ───────────────────────────────────────
           Padding(
             padding: EdgeInsets.fromLTRB(
-              isDesktop ? 60 : 24,
-              96,
-              isDesktop ? 60 : 24,
-              72,
+              isDesktop ? 60 : 20, 80, isDesktop ? 60 : 20, 60,
             ),
             child: Column(
               children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F2EC),
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: const Text(
-                    "THE SOLUTION",
-                    style: TextStyle(
-                      color: Color(0xFF2E6B3E),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
+                _FadeSlideIn(
+                  delay: const Duration(milliseconds: 100),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F2EC),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: const Text(
+                      "THE SOLUTION",
+                      style: TextStyle(
+                        color: Color(0xFF2E6B3E),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
-                const Text(
-                  "Everything you need to scale,\nall in one dashboard.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF111827),
-                    height: 1.15,
-                    letterSpacing: -0.8,
-                  ),
-                ),
                 const SizedBox(height: 16),
-                const Text(
-                  "Stop jumping between 5 different tools. DropNRest combines\nproduct research, ad auditing and scammer protection in one place.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Color(0xFF6B7280),
-                    height: 1.65,
+                _FadeSlideIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: Text(
+                    "Everything you need to scale,\nall in one dashboard.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isDesktop ? 38 : 26,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF111827),
+                      height: 1.15,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _FadeSlideIn(
+                  delay: const Duration(milliseconds: 300),
+                  child: const Text(
+                    "Stop jumping between 5 tools. DropNRest combines product research,\nad auditing and scammer protection in one place.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF6B7280),
+                      height: 1.65,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
 
-          // ── TAB PILLS ──────────────────────────────────────
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: [
-                _TabPill(label: "Product Research", isActive: true),
-                _TabPill(label: "Ad Fee Auditor"),
-                _TabPill(label: "Buyer Shield"),
-                _TabPill(label: "Competitor Tracking"),
-                _TabPill(label: "AliExpress Sync"),
-              ],
+          // ── TAB PILLS ────────────────────────────────────
+          _FadeSlideIn(
+            delay: const Duration(milliseconds: 350),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  _TabPill(label: "Product Research", isActive: true),
+                  _TabPill(label: "Ad Fee Auditor"),
+                  _TabPill(label: "Buyer Shield"),
+                  _TabPill(label: "Competitor Tracking"),
+                  _TabPill(label: "AliExpress Sync"),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 72),
+          const SizedBox(height: 64),
 
-          // ── FEATURE 1: Product Research ─────────────────────
+          // ── FEATURE 1 ─────────────────────────────────────
           _FeatureRow(
             isDesktop: isDesktop,
             isImageLeft: false,
@@ -91,7 +147,7 @@ class FeatureShowcase extends StatelessWidget {
             badgeTextColor: const Color(0xFF2E6B3E),
             title: "Find Winning Products\nin Seconds.",
             description:
-                "Ditch slow, outdated analytics. Spot high-demand, low-competition items instantly with our live eBay and AliExpress sync. See real sell-through rates, average prices, and competition scores — all updated daily.",
+                "Ditch slow, outdated analytics. Spot high-demand, low-competition items instantly with live eBay and AliExpress sync. See real sell-through rates, average prices, and competition scores — all updated daily.",
             bullets: [
               "Live eBay & AliExpress product sync",
               "Sell-through rate & competition score",
@@ -99,11 +155,12 @@ class FeatureShowcase extends StatelessWidget {
             ],
             bulletColor: const Color(0xFF2E6B3E),
             mockWidget: _ProductResearchMock(),
+            animDelay: const Duration(milliseconds: 200),
           ),
 
-          const SizedBox(height: 80),
+          const SizedBox(height: 72),
 
-          // ── FEATURE 2: Ad Auditor ───────────────────────────
+          // ── FEATURE 2 ─────────────────────────────────────
           _FeatureRow(
             isDesktop: isDesktop,
             isImageLeft: true,
@@ -120,11 +177,12 @@ class FeatureShowcase extends StatelessWidget {
             ],
             bulletColor: const Color(0xFFD97706),
             mockWidget: _AdAuditorMock(),
+            animDelay: const Duration(milliseconds: 200),
           ),
 
-          const SizedBox(height: 80),
+          const SizedBox(height: 72),
 
-          // ── FEATURE 3: Buyer Shield ─────────────────────────
+          // ── FEATURE 3 ─────────────────────────────────────
           _FeatureRow(
             isDesktop: isDesktop,
             isImageLeft: false,
@@ -141,18 +199,17 @@ class FeatureShowcase extends StatelessWidget {
             ],
             bulletColor: const Color(0xFFDC2626),
             mockWidget: _BuyerShieldMock(),
+            animDelay: const Duration(milliseconds: 200),
           ),
 
-          const SizedBox(height: 96),
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
 }
 
-// ════════════════════════════════════════════════════════════
-// FEATURE ROW — alternating layout
-// ════════════════════════════════════════════════════════════
+// ─── Feature Row ──────────────────────────────────────────────
 class _FeatureRow extends StatelessWidget {
   final bool isDesktop;
   final bool isImageLeft;
@@ -164,6 +221,7 @@ class _FeatureRow extends StatelessWidget {
   final List<String> bullets;
   final Color bulletColor;
   final Widget mockWidget;
+  final Duration animDelay;
 
   const _FeatureRow({
     required this.isDesktop,
@@ -176,15 +234,17 @@ class _FeatureRow extends StatelessWidget {
     required this.bullets,
     required this.bulletColor,
     required this.mockWidget,
+    required this.animDelay,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textBlock = Expanded(
+    final textBlock = _FadeSlideIn(
+      delay: animDelay,
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: isDesktop ? 48 : 24,
-          vertical: isDesktop ? 0 : 32,
+          horizontal: isDesktop ? 40 : 20,
+          vertical: isDesktop ? 0 : 24,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,89 +266,85 @@ class _FeatureRow extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 32,
+              style: TextStyle(
+                fontSize: isDesktop ? 30 : 24,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF111827),
+                color: const Color(0xFF111827),
                 height: 1.2,
-                letterSpacing: -0.5,
+                letterSpacing: -0.4,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Text(
               description,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 color: Color(0xFF6B7280),
                 height: 1.7,
               ),
             ),
-            const SizedBox(height: 24),
-            ...bullets.map(
-              (b) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: bulletColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        b,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Color(0xFF374151),
-                          fontWeight: FontWeight.w500,
+            const SizedBox(height: 20),
+            ...bullets.map((b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 7),
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: bulletColor,
+                          shape: BoxShape.circle,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          b,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF374151),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
           ],
         ),
       ),
     );
 
-    final imageBlock = Expanded(child: mockWidget);
+    final imageBlock = _FadeSlideIn(
+      delay: Duration(milliseconds: animDelay.inMilliseconds + 150),
+      child: mockWidget,
+    );
 
     if (!isDesktop) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0),
-        child: Column(
-          children: [imageBlock, textBlock],
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(children: [imageBlock, textBlock]),
       );
     }
 
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 1200),
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: isImageLeft
-            ? [imageBlock, textBlock]
-            : [textBlock, imageBlock],
+            ? [Expanded(child: imageBlock), Expanded(child: textBlock)]
+            : [Expanded(child: textBlock), Expanded(child: imageBlock)],
       ),
     );
   }
 }
 
-// ════════════════════════════════════════════════════════════
-// TAB PILL
-// ════════════════════════════════════════════════════════════
+// ─── Tab Pill ─────────────────────────────────────────────────
 class _TabPill extends StatelessWidget {
   final String label;
   final bool isActive;
@@ -297,10 +353,12 @@ class _TabPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
+        color: isActive
+            ? const Color(0xFF111827)
+            : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(50),
         border: Border.all(
           color: isActive
@@ -312,7 +370,7 @@ class _TabPill extends StatelessWidget {
         label,
         style: TextStyle(
           color: isActive ? Colors.white : const Color(0xFF6B7280),
-          fontSize: 13.5,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -320,99 +378,88 @@ class _TabPill extends StatelessWidget {
   }
 }
 
-// ════════════════════════════════════════════════════════════
-// MOCK UI CARDS — placeholder until real screenshots are ready
-// ════════════════════════════════════════════════════════════
-
+// ─── Mock: Product Research ───────────────────────────────────
 class _ProductResearchMock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(12),
-      height: 380,
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFF0F9FF),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFBAE6FD)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Mock toolbar
+          // Toolbar
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+              border:
+                  Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
             ),
             child: Row(
               children: [
-                const Icon(Icons.search, size: 16, color: Color(0xFF9CA3AF)),
+                const Icon(Icons.search, size: 15,
+                    color: Color(0xFF9CA3AF)),
                 const SizedBox(width: 8),
                 const Expanded(
-                  child: Text(
-                    "wireless earbuds dropship",
-                    style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
-                  ),
+                  child: Text("wireless earbuds dropship",
+                      style: TextStyle(
+                          fontSize: 12, color: Color(0xFF374151))),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: const Color(0xFF111827),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    "Search",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600),
-                  ),
+                  child: const Text("Search",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
           ),
-          // Mock results
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: List.generate(
-                  4,
-                  (i) => _MockResultRow(
-                    name: [
-                      "Wireless Earbuds Pro",
-                      "Bluetooth Headset X200",
-                      "TWS Earphones V3",
-                      "Sport Earbuds Lite"
-                    ][i],
-                    score: ["94", "87", "82", "76"][i],
-                    color: [
-                      const Color(0xFF16A34A),
-                      const Color(0xFF16A34A),
-                      const Color(0xFFD97706),
-                      const Color(0xFFD97706),
-                    ][i],
-                    sellThrough: ["89%", "74%", "68%", "55%"][i],
-                  ),
-                ),
-              ),
+          // Results
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                _ResultRow("Wireless Earbuds Pro", "94", "89%",
+                    const Color(0xFF16A34A)),
+                const SizedBox(height: 6),
+                _ResultRow("Bluetooth Headset X200", "87", "74%",
+                    const Color(0xFF16A34A)),
+                const SizedBox(height: 6),
+                _ResultRow("TWS Earphones V3", "82", "68%",
+                    const Color(0xFFD97706)),
+                const SizedBox(height: 6),
+                _ResultRow("Sport Earbuds Lite", "76", "55%",
+                    const Color(0xFFD97706)),
+              ],
             ),
           ),
-          // Bottom tag
+          // Footer label
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
               color: Color(0xFFE0F2FE),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+              borderRadius:
+                  BorderRadius.vertical(bottom: Radius.circular(18)),
             ),
             child: const Center(
               child: Text(
                 "📸  Product Research Tool — Screenshot goes here",
                 style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Color(0xFF0369A1),
                     fontWeight: FontWeight.w500),
               ),
@@ -424,27 +471,20 @@ class _ProductResearchMock extends StatelessWidget {
   }
 }
 
-class _MockResultRow extends StatelessWidget {
+class _ResultRow extends StatelessWidget {
   final String name;
   final String score;
+  final String sell;
   final Color color;
-  final String sellThrough;
-
-  const _MockResultRow({
-    required this.name,
-    required this.score,
-    required this.color,
-    required this.sellThrough,
-  });
+  const _ResultRow(this.name, this.score, this.sell, this.color);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Row(
@@ -452,25 +492,25 @@ class _MockResultRow extends StatelessWidget {
           Expanded(
             child: Text(name,
                 style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111827))),
           ),
-          Text("$sellThrough sell-through",
-              style:
-                  const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
-          const SizedBox(width: 10),
+          Text("$sell sell-through",
+              style: const TextStyle(
+                  fontSize: 11, color: Color(0xFF9CA3AF))),
+          const SizedBox(width: 8),
           Container(
-            width: 34,
-            height: 24,
+            width: 30,
+            height: 22,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(6),
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(5),
             ),
             child: Center(
               child: Text(score,
                   style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
                       color: color)),
             ),
@@ -481,110 +521,91 @@ class _MockResultRow extends StatelessWidget {
   }
 }
 
+// ─── Mock: Ad Auditor ─────────────────────────────────────────
 class _AdAuditorMock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(12),
-      height: 380,
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFFDE68A)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+              borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(18)),
+              border:
+                  Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF3C7),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.warning_amber_rounded,
-                      size: 18, color: Color(0xFFD97706)),
+                      size: 16, color: Color(0xFFD97706)),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 const Text("Ad Fee Auditor",
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Color(0xFF111827))),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                      horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEE2E2),
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: const Text("2 Alerts",
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFFB91C1C))),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _AdAlertRow(
-                    listing: "USB-C Hub 7-in-1",
-                    spend: "45%",
-                    status: "Cannibalizing",
-                    isWarning: true,
-                  ),
-                  const SizedBox(height: 8),
-                  _AdAlertRow(
-                    listing: "Laptop Stand Aluminium",
-                    spend: "38%",
-                    status: "High Spend",
-                    isWarning: true,
-                  ),
-                  const SizedBox(height: 8),
-                  _AdAlertRow(
-                    listing: "Phone Holder Car Mount",
-                    spend: "12%",
-                    status: "Healthy",
-                    isWarning: false,
-                  ),
-                  const SizedBox(height: 8),
-                  _AdAlertRow(
-                    listing: "Wireless Charging Pad",
-                    spend: "9%",
-                    status: "Healthy",
-                    isWarning: false,
-                  ),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                _AdRow("USB-C Hub 7-in-1", "45%", "Cannibalizing", true),
+                const SizedBox(height: 6),
+                _AdRow("Laptop Stand Aluminium", "38%", "High Spend", true),
+                const SizedBox(height: 6),
+                _AdRow("Phone Holder Car Mount", "12%", "Healthy", false),
+                const SizedBox(height: 6),
+                _AdRow("Wireless Charging Pad", "9%", "Healthy", false),
+              ],
             ),
           ),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
               color: Color(0xFFFEF3C7),
               borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(20)),
+                  BorderRadius.vertical(bottom: Radius.circular(18)),
             ),
             child: const Center(
               child: Text(
                 "📸  Ad Auditor Tool — Screenshot goes here",
                 style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Color(0xFF92400E),
                     fontWeight: FontWeight.w500),
               ),
@@ -596,28 +617,22 @@ class _AdAuditorMock extends StatelessWidget {
   }
 }
 
-class _AdAlertRow extends StatelessWidget {
+class _AdRow extends StatelessWidget {
   final String listing;
   final String spend;
   final String status;
-  final bool isWarning;
-
-  const _AdAlertRow({
-    required this.listing,
-    required this.spend,
-    required this.status,
-    required this.isWarning,
-  });
+  final bool isWarn;
+  const _AdRow(this.listing, this.spend, this.status, this.isWarn);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isWarning
+          color: isWarn
               ? const Color(0xFFFDE68A)
               : const Color(0xFFE5E7EB),
         ),
@@ -627,23 +642,23 @@ class _AdAlertRow extends StatelessWidget {
           Expanded(
             child: Text(listing,
                 style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111827))),
           ),
           Text("Ad: $spend",
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: isWarning
+                  color: isWarn
                       ? const Color(0xFFD97706)
                       : const Color(0xFF9CA3AF))),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Container(
             padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
-              color: isWarning
+              color: isWarn
                   ? const Color(0xFFFEE2E2)
                   : const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(50),
@@ -651,9 +666,9 @@ class _AdAlertRow extends StatelessWidget {
             child: Text(
               status,
               style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: isWarning
+                  color: isWarn
                       ? const Color(0xFFB91C1C)
                       : const Color(0xFF16A34A)),
             ),
@@ -664,106 +679,96 @@ class _AdAlertRow extends StatelessWidget {
   }
 }
 
+// ─── Mock: Buyer Shield ───────────────────────────────────────
 class _BuyerShieldMock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(12),
-      height: 380,
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFFEF2F2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFFECACA)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+              borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(18)),
+              border:
+                  Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEE2E2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.shield_outlined,
-                      size: 18, color: Color(0xFFDC2626)),
+                      size: 16, color: Color(0xFFDC2626)),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 const Text("Buyer Shield",
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Color(0xFF111827))),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                      horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEE2E2),
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: const Text("1 Blocked",
                       style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFFB91C1C))),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _BuyerRow(
-                      name: "buyer_xyz99",
-                      risk: "HIGH RISK",
-                      detail: "4x INR claims",
-                      isBlocked: true),
-                  const SizedBox(height: 8),
-                  _BuyerRow(
-                      name: "deals_hunter22",
-                      risk: "MEDIUM",
-                      detail: "2x returns",
-                      isBlocked: false),
-                  const SizedBox(height: 8),
-                  _BuyerRow(
-                      name: "top_buyer_uk",
-                      risk: "SAFE",
-                      detail: "99.8% feedback",
-                      isBlocked: false),
-                  const SizedBox(height: 8),
-                  _BuyerRow(
-                      name: "fastship_deals",
-                      risk: "SAFE",
-                      detail: "2,400 purchases",
-                      isBlocked: false),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                _BuyerRow("buyer_xyz99", "4x INR claims", "HIGH RISK",
+                    const Color(0xFFDC2626), const Color(0xFFFEE2E2),
+                    blocked: true),
+                const SizedBox(height: 6),
+                _BuyerRow("deals_hunter22", "2x returns", "MEDIUM",
+                    const Color(0xFFD97706), const Color(0xFFFEF3C7)),
+                const SizedBox(height: 6),
+                _BuyerRow("top_buyer_uk", "99.8% feedback", "SAFE",
+                    const Color(0xFF16A34A), const Color(0xFFF0FDF4)),
+                const SizedBox(height: 6),
+                _BuyerRow("fastship_deals", "2,400 purchases", "SAFE",
+                    const Color(0xFF16A34A), const Color(0xFFF0FDF4)),
+              ],
             ),
           ),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
               color: Color(0xFFFEE2E2),
               borderRadius:
-                  BorderRadius.vertical(bottom: Radius.circular(20)),
+                  BorderRadius.vertical(bottom: Radius.circular(18)),
             ),
             child: const Center(
               child: Text(
                 "📸  Buyer Shield Tool — Screenshot goes here",
                 style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Color(0xFF991B1B),
                     fontWeight: FontWeight.w500),
               ),
@@ -777,38 +782,25 @@ class _BuyerShieldMock extends StatelessWidget {
 
 class _BuyerRow extends StatelessWidget {
   final String name;
-  final String risk;
   final String detail;
-  final bool isBlocked;
+  final String risk;
+  final Color riskColor;
+  final Color riskBg;
+  final bool blocked;
 
-  const _BuyerRow({
-    required this.name,
-    required this.risk,
-    required this.detail,
-    required this.isBlocked,
-  });
+  const _BuyerRow(
+      this.name, this.detail, this.risk, this.riskColor, this.riskBg,
+      {this.blocked = false});
 
   @override
   Widget build(BuildContext context) {
-    final Color riskColor = risk == "HIGH RISK"
-        ? const Color(0xFFDC2626)
-        : risk == "MEDIUM"
-            ? const Color(0xFFD97706)
-            : const Color(0xFF16A34A);
-
-    final Color riskBg = risk == "HIGH RISK"
-        ? const Color(0xFFFEE2E2)
-        : risk == "MEDIUM"
-            ? const Color(0xFFFEF3C7)
-            : const Color(0xFFF0FDF4);
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isBlocked
+          color: blocked
               ? const Color(0xFFFECACA)
               : const Color(0xFFE5E7EB),
         ),
@@ -821,18 +813,18 @@ class _BuyerRow extends StatelessWidget {
               children: [
                 Text(name,
                     style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF111827))),
                 Text(detail,
                     style: const TextStyle(
-                        fontSize: 11, color: Color(0xFF9CA3AF))),
+                        fontSize: 10, color: Color(0xFF9CA3AF))),
               ],
             ),
           ),
           Container(
             padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
               color: riskBg,
               borderRadius: BorderRadius.circular(50),
@@ -843,10 +835,10 @@ class _BuyerRow extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: riskColor)),
           ),
-          if (isBlocked) ...[
+          if (blocked) ...[
             const SizedBox(width: 6),
             const Icon(Icons.block_rounded,
-                size: 16, color: Color(0xFFDC2626)),
+                size: 14, color: Color(0xFFDC2626)),
           ],
         ],
       ),

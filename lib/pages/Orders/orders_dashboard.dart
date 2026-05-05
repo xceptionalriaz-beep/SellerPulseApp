@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'order_detail_screen.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // DESIGN TOKENS - Match your existing app
@@ -15,16 +16,15 @@ class _C {
   static const surface = Color(0xFFFFFFFF);
   static const surfaceHover = Color(0xFFF1F5F9);
   static const border = Color(0xFFE2E8F0);
-  static const accent = Color(0xFF5CB800);  // Your neon green
+  static const accent = Color(0xFF8FFF00);  // ← Neon green
   static const accentDim = Color(0xFFE8FFB0);
-  static const textPrimary = Color(0xFF0F172A);
+  static const textPrimary = Color(0xFF131B2F);  // ← Changed to your dark blue
   static const textSecondary = Color(0xFF64748B);
   static const textHint = Color(0xFF94A3B8);
   
-  // Risk level colors
-  static const riskLow = Color(0xFF00C48C);     // Green
-  static const riskMedium = Color(0xFFFFB800);  // Amber
-  static const riskHigh = Color(0xFFFF4D6A);    // Red
+  static const riskLow = Color(0xFF00C48C);
+  static const riskMedium = Color(0xFFFFB800);
+  static const riskHigh = Color(0xFFFF4D6A);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -45,6 +45,8 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
   bool _isLoading = true;
   String _selectedFilter = 'all'; // all, low, medium, high
   List<Map<String, dynamic>> _orders = [];
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
   
   // Stats
   int _lowRiskCount = 0;
@@ -57,6 +59,12 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
   void initState() {
     super.initState();
     _loadOrders();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadOrders() async {
@@ -111,10 +119,22 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
   }
 
   List<Map<String, dynamic>> get _filteredOrders {
-    if (_selectedFilter == 'all') return _orders;
-    return _orders.where((o) => 
-      o['risk_level']?.toString().toLowerCase() == _selectedFilter
-    ).toList();
+    var orders = _selectedFilter == 'all'
+        ? _orders
+        : _orders.where((o) =>
+            o['risk_level']?.toString().toLowerCase() == _selectedFilter).toList();
+
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      orders = orders.where((o) {
+        final orderId = (o['ebay_order_id'] ?? '').toString().toLowerCase();
+        final title = (o['item_title'] ?? '').toString().toLowerCase();
+        final buyer = (o['buyer_username'] ?? '').toString().toLowerCase();
+        return orderId.contains(q) || title.contains(q) || buyer.contains(q);
+      }).toList();
+    }
+
+    return orders;
   }
 
   @override
@@ -177,7 +197,7 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.fromLTRB(40, 16, 40, 0),
-              padding: const EdgeInsets.fromLTRB(20, 12, 50, 12), // ← Extra right padding
+              padding: const EdgeInsets.fromLTRB(20, 12, 50, 12),
               decoration: BoxDecoration(
                 color: const Color(0xFFF1F5F9),
                 borderRadius: const BorderRadius.only(
@@ -188,28 +208,179 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
               ),
               child: Row(
                 children: [
-                  SizedBox(width: 90, child: _headerText('Risk')),
+                  // ── Risk ──
+                  SizedBox(
+                    width: 90,
+                    child: Text(
+                      'RISK',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 180, child: _headerText('Order ID')),
+                  
+                  // ── Order ID ──
+                  SizedBox(
+                    width: 180,
+                    child: Text(
+                      'ORDER ID',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(flex: 3, child: _headerText('Item')),
+                  
+                  // ── Item ──
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'ITEM',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 130, child: _headerText('Buyer')),
+                  
+                  // ── Buyer ──
+                  SizedBox(
+                    width: 130,
+                    child: Text(
+                      'BUYER',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 100, child: _headerText('Risk Score')),
+                  
+                  // ── Risk Score ──
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      'RISK SCORE',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 70, child: _headerText('Returns')),
+                  
+                  // ── Returns ──
+                  SizedBox(
+                    width: 70,
+                    child: Text(
+                      'RETURNS',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  SizedBox(width: 60, child: _headerText('Disputes')),
+                  
+                  // ── Disputes ──
+                  SizedBox(
+                    width: 60,
+                    child: Text(
+                      'DISPUTES',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 110, child: _headerText('Protection')),
+                  
+                  // ── Protection ──
+                  SizedBox(
+                    width: 110,
+                    child: Text(
+                      'PROTECTION',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 80, child: _headerText('Status')),
+                  
+                  // ── Status ──
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      'STATUS',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  
+                  // ── Price ──
+                  SizedBox(
+                    width: 110,
+                    child: Text(
+                      'PRICE',
+                      textAlign: TextAlign.right,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  SizedBox(width: 110, child: _headerText('Price')),
-                  const SizedBox(width: 16),
-                  SizedBox(width: 80, child: _headerText('Time')),
-                  const SizedBox(width: 16),
+                  
+                  // ── Time ──
+                  SizedBox(
+                    width: 80,
+                    child: Text(
+                      'TIME',
+                      textAlign: TextAlign.right,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textHint,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  // ── Eye Icon Column (Empty Header) ──
+                  const SizedBox(width: 24), // Space for eye icon
                 ],
               ),
             ),
@@ -351,8 +522,8 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
           TextButton(
             onPressed: () => setState(() => _selectedFilter = 'high'),
             style: TextButton.styleFrom(
-              backgroundColor: _C.riskHigh,
-              foregroundColor: Colors.white,
+              backgroundColor: _C.accent,  // ← Neon green background
+              foregroundColor: const Color(0xFF131B2F),  // ← Dark blue text
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -404,7 +575,7 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
           isActive: _selectedFilter == 'high',
           onTap: () => setState(() => _selectedFilter = 'high'),
         ),
-      ],
+              ],
     );
   }
 
@@ -450,10 +621,8 @@ class _OrdersDashboardState extends State<OrdersDashboard> {
     );
   }
 
-  void _openOrderDetails(Map<String, dynamic> order) {
-  
-    // TODO: Navigate to order detail screen
-    debugPrint('Open order: ${order['ebay_order_id']}');
+void _openOrderDetails(Map<String, dynamic> order) {
+    showOrderDetailPanel(context, order);
   }
     Widget _headerText(String text) {
     return Text(
@@ -645,12 +814,10 @@ class _OrderCardState extends State<_OrderCard> {
     final orderStatus = widget.order['order_status'] as String? ?? 'pending';
     final orderId = widget.order['ebay_order_id'] ?? 'Unknown';
     
-    // Get buyer profile data
     final buyerProfile = widget.order['buyer_profiles'];
     final returnRate = buyerProfile?['return_rate'] as num? ?? 0.0;
     final disputeCount = buyerProfile?['dispute_count'] as int? ?? 0;
     
-    // Determine colors
     Color riskColor;
     Color riskBgColor;
     
@@ -669,6 +836,7 @@ class _OrderCardState extends State<_OrderCard> {
     }
     
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: GestureDetector(
@@ -676,7 +844,7 @@ class _OrderCardState extends State<_OrderCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           margin: const EdgeInsets.only(bottom: 1),
-          padding: const EdgeInsets.fromLTRB(20, 14, 40, 14),
+          padding: const EdgeInsets.fromLTRB(20, 14, 50, 14),
           decoration: BoxDecoration(
             color: _hovering ? _C.surfaceHover : _C.surface,
             border: Border(
@@ -969,13 +1137,16 @@ class _OrderCardState extends State<_OrderCard> {
                 ),
               ),
               
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               
-              // ── Arrow ──
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 12,
-                color: _hovering ? _C.accent : _C.textHint,
+              // ── Eye Icon ──
+              SizedBox(
+                width: 24,
+                child: Icon(
+                  Icons.visibility_outlined,
+                  size: 18,
+                  color: _hovering ? _C.accent : _C.textHint,
+                ),
               ),
             ],
           ),
