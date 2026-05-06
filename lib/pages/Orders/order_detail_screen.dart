@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'buyer_profile_panel.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // DESIGN TOKENS
@@ -519,7 +520,18 @@ Widget build(BuildContext context) {
           const SizedBox(height: 12),
           const Divider(height: 1, color: _C.border),
           const SizedBox(height: 10),
-          _miniRow(Icons.person_outline, 'Buyer', buyer),
+          GestureDetector(
+            onTap: () => showBuyerProfilePanel(context, buyer),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _miniRow(Icons.person_outline, 'Buyer', buyer),
+                ),
+                const Icon(Icons.open_in_new,
+                    size: 12, color: Color(0xFF8FFF00)),
+              ],
+            ),
+          ),
           const SizedBox(height: 6),
           Row(
             children: [
@@ -1770,21 +1782,564 @@ Widget build(BuildContext context) {
     );
   }
 
-  void _showMessageTemplateDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Message Templates'),
-        content: Text('Template system will be added in next update!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Close'),
+void _showMessageTemplateDialog() {
+  final buyerName = widget.order['buyer_username'] as String? ?? 'Buyer';
+  final itemTitle = widget.order['item_title'] as String? ?? 'your item';
+  final orderId = widget.order['ebay_order_id'] as String? ?? 'Unknown';
+  final itemPrice = widget.order['item_price']?.toString() ?? '0.00';
+
+  final templates = {
+    'Pre-Shipment (Standard)': '''Hi $buyerName,
+
+I wanted to let you know that your order for "$itemTitle" (Order #$orderId) is being carefully prepared for shipment.
+
+I will be sending you the tracking number as soon as it ships. I take great care packaging all items to ensure they arrive in perfect condition.
+
+Please don't hesitate to message me if you have any questions!
+
+Thank you for your purchase!''',
+
+    'Pre-Shipment (High-Risk)': '''Hi $buyerName,
+
+Thank you for your order of "$itemTitle" (Order #$orderId - \$$itemPrice).
+
+Before I ship, I want to confirm:
+✅ Item has been video recorded showing full condition
+✅ Packing process is being filmed (uncut)
+✅ Signature will be required on delivery
+✅ Full insurance has been added
+
+Your tracking number will be sent immediately upon shipment. All evidence is stored securely.
+
+Thank you for your business!''',
+
+    'Delivery Follow-Up': '''Hi $buyerName,
+
+I hope your order "$itemTitle" (Order #$orderId) has arrived safely!
+
+Could you please confirm receipt when you get a chance? I want to make sure everything arrived in perfect condition as described.
+
+If there are any issues at all, please message me BEFORE opening a case - I\'m always happy to resolve any problems quickly and fairly!
+
+Thank you!''',
+
+    'Thank You Message': '''Hi $buyerName,
+
+Thank you so much for your purchase of "$itemTitle"!
+
+I hope you\'re absolutely delighted with your order. Your satisfaction means everything to me.
+
+If you\'re happy with your purchase, I\'d really appreciate a positive review when you get a chance!
+
+Feel free to check out my other listings - I have many more great items available.
+
+Thanks again for your business! 😊''',
+  };
+
+  String selectedTemplate = 'Pre-Shipment (Standard)';
+  final messageCtrl = TextEditingController(text: templates['Pre-Shipment (Standard)']!);
+  bool showHistory = false;
+
+  showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setInner) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.all(20),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        title: Row(
+          children: [
+            Container(
+              width: 32, height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1976D2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.message, size: 18, color: Colors.white),
+            ),
+            const SizedBox(width: 10),
+            Text('Message Templates',
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w700, fontSize: 18)),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => setInner(() => showHistory = !showHistory),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: showHistory
+                      ? const Color(0xFF8FFF00)
+                      : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: showHistory
+                        ? const Color(0xFF8FFF00)
+                        : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      showHistory ? Icons.edit_note : Icons.history,
+                      size: 14,
+                      color: showHistory ? Colors.black : const Color(0xFF64748B),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      showHistory ? 'Compose' : 'History',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: showHistory ? Colors.black : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],      // ← closes title Row children
+        ),        
+        content: SingleChildScrollView(
+          child: SizedBox(
+            width: 480,
+            child: showHistory
+                ? _buildMessageHistory()
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                      // ─ Template Selector ─
+                      Text('Choose Template',
+                        style: GoogleFonts.inter(
+                          fontSize: 12, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: templates.keys.map((name) {
+                          final isSelected = selectedTemplate == name;
+                          return GestureDetector(
+                            onTap: () {
+                              setInner(() {
+                                selectedTemplate = name;
+                                messageCtrl.text = templates[name]!;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF8FFF00)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(25),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF8FFF00)
+                                      : const Color(0xFFE2E8F0),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Text(
+                                name,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? Colors.black
+                                      : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      const SizedBox(height: 16),
+                      const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                      const SizedBox(height: 16),
+
+                      // ─ Editable Message ─
+                      Row(
+                        children: [
+                          Text('Message',
+                            style: GoogleFonts.inter(
+                              fontSize: 12, fontWeight: FontWeight.w600)),
+                          const Spacer(),
+                          // Character counter
+                          ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: messageCtrl,
+                            builder: (_, value, __) => Text(
+                              '${value.text.length} chars',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: value.text.length > 1000
+                                    ? Colors.red
+                                    : const Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      StatefulBuilder(
+                        builder: (context, setBoxState) {
+                          double boxHeight = 200;
+                          const double minHeight = 150;
+                          const double maxHeight = 380;
+
+                          return StatefulBuilder(
+                            builder: (context, setHeightState) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  // Message text box
+                                  Container(
+                                    height: boxHeight,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: const Color(0xFFE2E8F0)),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: TextField(
+                                      controller: messageCtrl,
+                                      maxLines: null,
+                                      expands: true,
+                                      scrollPhysics:
+                                          const NeverScrollableScrollPhysics(),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: const Color(0xFF131B2F),
+                                        height: 1.5,
+                                      ),
+                                      decoration: InputDecoration(
+                                        contentPadding:
+                                            const EdgeInsets.all(14),
+                                        border: InputBorder.none,
+                                        hintText: 'Your message here...',
+                                        hintStyle: GoogleFonts.inter(
+                                            color: const Color(0xFF94A3B8)),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // ─ Resize Handle ─
+                                  MouseRegion(
+                                    cursor: SystemMouseCursors.resizeUpDown,
+                                    child: GestureDetector(
+                                      onVerticalDragUpdate: (details) {
+                                        setHeightState(() {
+                                          boxHeight = (boxHeight +
+                                                  details.delta.dy)
+                                              .clamp(minHeight, maxHeight);
+                                        });
+                                      },
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF8FAFC),
+                                          borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(8),
+                                            bottomRight: Radius.circular(8),
+                                          ),
+                                          border: Border.all(
+                                              color: const Color(0xFFE2E8F0)),
+                                        ),
+                                        child: Center(
+                                          child: Container(
+                                            width: 40,
+                                            height: 4,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFCBD5E1),
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // ─ Auto-filled variables info ─
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEFFCC),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFF8FFF00).withOpacity(0.4)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.auto_fix_high,
+                              size: 14, color: Color(0xFF131B2F)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Auto-filled: buyer name, item title, order ID, price',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: const Color(0xFF131B2F),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
           ),
-        ],
+        ),
+        actions: showHistory
+            ? [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Close'),
+                ),
+              ]
+            : [
+                // Copy to clipboard button
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: messageCtrl.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            const Icon(Icons.check, color: Colors.black, size: 18),
+                            const SizedBox(width: 8),
+                            Text('Message copied to clipboard!',
+                              style: GoogleFonts.inter(color: Colors.black)),
+                          ],
+                        ),
+                        backgroundColor: const Color(0xFF8FFF00),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.copy, size: 16),
+                  label: const Text('Copy'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF131B2F),
+                    side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                ),
+
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+
+                // Send button
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    if (messageCtrl.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Message cannot be empty!')),
+                      );
+                      return;
+                    }
+
+                    try {
+                      // Save to sent_messages table
+                      await _supabase.from('sent_messages').insert({
+                        'order_id': widget.order['id'],
+                        'user_id': _supabase.auth.currentUser?.id,
+                        'template_name': selectedTemplate,
+                        'recipient': buyerName,
+                        'body': messageCtrl.text.trim(),
+                        'sent_via': 'manual',
+                        'sent_at': DateTime.now().toIso8601String(),
+                      });
+
+                      // Reload messages
+                      await _loadSentMessages();
+
+                      await Clipboard.setData(
+                          ClipboardData(text: messageCtrl.text.trim()));
+
+                      if (ctx.mounted) Navigator.pop(ctx);
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(Icons.check,
+                                    color: Colors.black, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '✅ Saved & copied! Paste into eBay messages.',
+                                    style: GoogleFonts.inter(color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: const Color(0xFF8FFF00),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.send, size: 16),
+                  label: const Text('Save & Copy'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1976D2),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 12),
+                  ),
+                ),
+              ],
+      ),
+    ),
+  );
+}
+
+// ─ Message History Widget ─
+Widget _buildMessageHistory() {
+  if (_sentMessages.isEmpty) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          children: [
+            Icon(Icons.history, size: 48, color: Colors.grey.shade300),
+            const SizedBox(height: 12),
+            Text('No messages sent yet',
+              style: GoogleFonts.inter(
+                fontSize: 14, color: const Color(0xFF94A3B8))),
+            const SizedBox(height: 4),
+            Text('Messages you save will appear here',
+              style: GoogleFonts.inter(
+                fontSize: 12, color: const Color(0xFF94A3B8))),
+          ],
+        ),
       ),
     );
   }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text('SENT MESSAGES',
+        style: GoogleFonts.inter(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF94A3B8),
+          letterSpacing: 0.5,
+        )),
+      const SizedBox(height: 12),
+      ..._sentMessages.map((msg) {
+        final sentAt = DateTime.tryParse(msg['sent_at'] ?? '');
+        final templateName = msg['template_name'] as String? ?? 'Unknown';
+        final body = msg['body'] as String? ?? '';
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8FFF00),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(templateName,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      )),
+                  ),
+                  const Spacer(),
+                  if (sentAt != null)
+                    Text(
+                      '${sentAt.day}/${sentAt.month} ${sentAt.hour}:${sentAt.minute.toString().padLeft(2, '0')}',
+                      style: GoogleFonts.inter(
+                        fontSize: 10, color: const Color(0xFF94A3B8)),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                body.length > 120 ? '${body.substring(0, 120)}...' : body,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: const Color(0xFF64748B),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Copy button
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: body));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Copied to clipboard!',
+                        style: GoogleFonts.inter(color: Colors.black)),
+                      backgroundColor: const Color(0xFF8FFF00),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: Row(
+                  children: [
+                    const Icon(Icons.copy, size: 12,
+                      color: Color(0xFF94A3B8)),
+                    const SizedBox(width: 4),
+                    Text('Copy full message',
+                      style: GoogleFonts.inter(
+                        fontSize: 11, color: const Color(0xFF94A3B8))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    ],
+  );
+}
 
 void _showMarkAsShippedDialog() {
   final trackingCtrl = TextEditingController();
@@ -1941,13 +2496,31 @@ void _showMarkAsShippedDialog() {
                 Text('Ship Date *',
                   style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),
-                InkWell(
+InkWell(
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: ctx,
                       initialDate: shipDate,
                       firstDate: DateTime.now().subtract(const Duration(days: 3)),
                       lastDate: DateTime.now().add(const Duration(days: 1)),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: Color(0xFF8FFF00),      // ← Selected date circle
+                              onPrimary: Colors.black,          // ← Text on selected date
+                              onSurface: Color(0xFF131B2F),     // ← Calendar text color
+                              surface: Colors.white,            // ← Calendar background
+                            ),
+                            textButtonTheme: TextButtonThemeData(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Color(0xFF131B2F), // ← Cancel/OK button color
+                              ),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
                     if (picked != null) {
                       setInner(() {
