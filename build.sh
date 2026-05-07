@@ -5,6 +5,10 @@ set -e
 curl -o flutter.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.0-stable.tar.xz
 tar xf flutter.tar.xz
 
+# Fix ownership issue - tell Git this directory is safe
+git config --global --add safe.directory /vercel/path0/flutter
+git config --global --add safe.directory '*'
+
 # Add Flutter to PATH
 export PATH="$PATH:`pwd`/flutter/bin"
 
