@@ -10,7 +10,7 @@ import 'admin_settings_tabs/plan_limits_tab.dart';
 import 'admin_settings_tabs/email_automations_tab.dart';
 import 'admin_settings_tabs/webhooks_tab.dart';
 import 'admin_settings_tabs/gamification_tab.dart';
-import 'admin_settings_tabs/global_api_fleet_tab.dart';
+import 'admin_settings_tabs/api_vault_complete.dart';
 import 'admin_settings_tabs/affiliate_vault_tab.dart';
 import 'admin_settings_tabs/founder_ops_tab.dart';
 
@@ -241,7 +241,7 @@ class _AdminSettingsViewState extends State<AdminSettingsView> {
       case 6: return const EmailAutomationsTab(key: ValueKey("emails"));
       case 7: return const WebhooksTab(key: ValueKey("hooks"));
       case 8: return const GamificationTab(key: ValueKey("game"));
-      case 9: return const GlobalApiFleetTab(key: ValueKey("api"));
+      case 9: return const ApiVaultPage(key: ValueKey("api"));
       case 10: return const AffiliateVaultTab(key: ValueKey("affiliate"));
       case 11: return const FounderOpsTab(key: ValueKey("founder_ops"));
       default: return _buildPlaceholder("Module Active");

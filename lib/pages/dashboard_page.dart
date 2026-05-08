@@ -196,7 +196,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   return InkWell(
                                     borderRadius: BorderRadius.circular(16),
                                     onTap: () => setState(
-                                        () => _selectedIndex = 7),
+                                        () => _selectedIndex = 8),
                                     child: ClipRRect(
                                       borderRadius:
                                           BorderRadius.circular(16),
@@ -403,7 +403,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Builder(builder: (context) {
                   return InkWell(
                     borderRadius: BorderRadius.circular(14),
-                    onTap: () => setState(() => _selectedIndex = 7),
+                    onTap: () => setState(() => _selectedIndex = 8),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(14),
                       child: Container(
@@ -660,7 +660,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 0:
         return DashboardHome(
           onGoToOrders: () => setState(() => _selectedIndex = 6),
-          onGoToAnalytics: () => setState(() => _selectedIndex = 7),
+          onGoToAnalytics: () => setState(() => _selectedIndex = 8),
         );
       case 1:
         return const ProductResearchMaster();

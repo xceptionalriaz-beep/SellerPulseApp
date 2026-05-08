@@ -5,7 +5,7 @@ import '../widgets/page_wrapper.dart';
 
 // ✨ DASHBOARD TABS
 import 'admin_tabs/revenue_analytics_tab.dart';
-import 'admin_tabs/global_api_fleet_tab.dart';
+import 'admin_tabs/global_api_fleet_analytics_tab.dart';
 import 'admin_tabs/vero_command_center_tab.dart';
 import 'admin_tabs/affiliate_center_tab.dart';
 import 'admin_tabs/feature_roadmap_tab.dart';
@@ -23,9 +23,9 @@ import 'admin_settings_tabs/plan_limits_tab.dart';
 import 'admin_settings_tabs/email_automations_tab.dart';
 import 'admin_settings_tabs/webhooks_tab.dart';
 import 'admin_settings_tabs/gamification_tab.dart';
-import 'admin_settings_tabs/global_api_fleet_tab.dart' as vault; 
+import 'admin_settings_tabs/api_vault_complete.dart';
 import 'admin_settings_tabs/affiliate_vault_tab.dart';
-import 'admin_settings_tabs/founder_ops_tab.dart'; 
+import 'admin_settings_tabs/founder_ops_tab.dart';
 
 class AdminManagementPage extends StatefulWidget {
   const AdminManagementPage({super.key});
@@ -479,7 +479,7 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
       case 6: return const EmailAutomationsTab(key: ValueKey("emails"));
       case 7: return const WebhooksTab(key: ValueKey("webhooks"));
       case 8: return const GamificationTab(key: ValueKey("gamification"));
-      case 9: return const vault.GlobalApiFleetTab(key: ValueKey("api_vault")); 
+      case 9: return const ApiVaultPage(key: ValueKey("api_vault"));
       case 10: return const AffiliateVaultTab(key: ValueKey("affiliate_vault_settings")); 
       case 11: return const FounderOpsTab(key: ValueKey("founder_ops")); 
       default: return _buildPlaceholder("Settings Module Active");
@@ -576,7 +576,7 @@ class _AdminManagementPageState extends State<AdminManagementPage> with TickerPr
       child: _activeDashboardTab == 0 
           ? RevenueAnalyticsTab(isDesktop: !isMobile, isInvestorMode: _investorMode, startChartAnimation: _startChartAnimation, key: const ValueKey("revenue")) 
           : _activeDashboardTab == 1 
-              ? GlobalApiFleetTab(startChartAnimation: _startChartAnimation, key: const ValueKey("api"))
+              ? const GlobalApiFleetAnalyticsTab(key: ValueKey("api"))
               : _activeDashboardTab == 2
                   ? const VeroCommandCenterTab(key: ValueKey("vero"))
                   : _activeDashboardTab == 3

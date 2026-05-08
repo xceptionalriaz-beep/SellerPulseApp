@@ -12,12 +12,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10+1
   geolocator: ^14.0.2
-
+    
   # --- NETWORK & API ---
-  http: ^1.2.1             # Talk to eBay API & Ping for IP Address
+  http: ^1.2.1             # Talk to eBay API & Ping for IP Address (KEEP THIS ONE)
   supabase_flutter: ^2.0.0 # Your Database/Backend
   flutter_dotenv: ^5.1.0   # Securely hides your secret keys
-  device_info_plus: ^10.1.0 # ✨ NEW: Captures Device, OS, and Browser Info
+  device_info_plus: ^10.1.0 # Captures Device, OS, and Browser Info
 
   # --- STATE MANAGEMENT ---
   provider: ^6.1.2       # Moves data from search bar to charts
@@ -34,7 +34,7 @@ dependencies:
   intl: ^0.20.2
   web: ^1.1.1
 
-  # Export & Reports
+  # --- Export & Reports ---
   csv: ^6.0.0
   pdf: ^3.10.8
 
@@ -46,9 +46,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # ✨ IMPORTANT: You need BOTH here. 
-  # .env is for your local laptop (Real Keys)
-  # .env.example is for Vercel (Placeholder)
   assets:
     - .env
-    - .env.example
