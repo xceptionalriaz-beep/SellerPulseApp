@@ -1,25 +1,24 @@
 #!/bin/bash
 set -e
 
-# Download and extract Flutter
-curl -o flutter.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.0-stable.tar.xz
-tar xf flutter.tar.xz
+echo "=== Flutter Web Build Started ==="
 
-# Fix ownership issue - tell Git this directory is safe
-git config --global --add safe.directory /vercel/path0/flutter
-git config --global --add safe.directory '*'
+# Disable analytics to speed up build
+flutter config --no-analytics
 
-# Add Flutter to PATH
-export PATH="$PATH:`pwd`/flutter/bin"
-
-# Configure Flutter for web
+# Enable web support
 flutter config --enable-web
 
-# Clean previous builds
+# Clean old builds
+echo "Cleaning..."
 flutter clean
 
 # Get dependencies
+echo "Getting dependencies..."
 flutter pub get
 
-# Build for web
+# Build web
+echo "Building web..."
 flutter build web --release
+
+echo "=== Build Complete ==="
