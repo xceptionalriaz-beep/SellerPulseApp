@@ -12,10 +12,9 @@ import '../user_profile/user_profile_page.dart';
 import '../widgets/location_prompt.dart';
 import 'competitor_research/competitor_research_main.dart';
 import 'orders/orders_dashboard.dart';
-// NEW: Import notifications
 import 'orders/notifications_panel.dart';
 import 'orders/notifications_service.dart';
-import 'orders/analytics_dashboard.dart';
+// REMOVED: analytics_dashboard.dart import (analytics now live inside orders dashboard)
 import 'dashboard_home.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -38,7 +37,6 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _isLocationVerified = true;
   bool _isLoadingLocationStatus = true;
 
-  // NEW: Notification count state
   int _notificationCount = 0;
   Timer? _notificationTimer;
 
@@ -49,9 +47,8 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _checkLocationVerification();
-    _loadNotificationCount(); // NEW: Load count on start
+    _loadNotificationCount();
 
-    // NEW: Refresh notification count every 60 seconds
     _notificationTimer = Timer.periodic(
       const Duration(seconds: 60),
       (_) => _loadNotificationCount(),
@@ -65,7 +62,6 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  // NEW: Load notification count
   Future<void> _loadNotificationCount() async {
     final notifications = await NotificationsService.getNotifications();
     if (mounted) {
@@ -96,7 +92,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void dispose() {
     _authSubscription.cancel();
-    _notificationTimer?.cancel(); // NEW: Cancel timer
+    _notificationTimer?.cancel();
     super.dispose();
   }
 
@@ -167,7 +163,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 Expanded(
                   child: Column(
                     children: [
-                      // ─ TOP BAR (Desktop) ─
                       if (isDesktop)
                         Container(
                           height: 60,
@@ -176,9 +171,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           child: Row(
                             children: [
                               Text(
-                                _selectedIndex == 5
-                                    ? "Settings / Overview"
-                                    : "Marketplace Research",
+                                "Marketplace Research",
                                 style: const TextStyle(
                                   color: Color(0xFF64748B),
                                   fontSize: 13,
@@ -186,60 +179,51 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ),
                               const Spacer(),
-
-                              // NEW: Bell icon with badge
                               _buildNotificationBell(),
-
-                              if (_selectedIndex != 5) ...[
-                                const SizedBox(width: 15),
-                                Builder(builder: (context) {
-                                  return InkWell(
+                              const SizedBox(width: 15),
+                              Builder(builder: (context) {
+                                return InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  // UPDATED: Settings is now index 7
+                                  onTap: () => setState(() => _selectedIndex = 7),
+                                  child: ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
-                                    onTap: () => setState(
-                                        () => _selectedIndex = 8),
-                                    child: ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.circular(16),
-                                      child: Container(
-                                        width: 32,
-                                        height: 32,
-                                        color: neonGreen,
-                                        child: currentAvatarUrl != null
-                                            ? Image.network(
-                                                currentAvatarUrl,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context,
-                                                        error,
-                                                        stackTrace) =>
-                                                    Center(
-                                                  child: Text(
-                                                    _userInitial,
-                                                    style: const TextStyle(
-                                                      color: Color(0xFF0F172A),
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 13,
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                            : Center(
+                                    child: Container(
+                                      width: 32,
+                                      height: 32,
+                                      color: neonGreen,
+                                      child: currentAvatarUrl != null
+                                          ? Image.network(
+                                              currentAvatarUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error,
+                                                      stackTrace) =>
+                                                  Center(
                                                 child: Text(
                                                   _userInitial,
                                                   style: const TextStyle(
                                                     color: Color(0xFF0F172A),
-                                                    fontWeight:
-                                                        FontWeight.w900,
+                                                    fontWeight: FontWeight.bold,
                                                     fontSize: 13,
-                                                    letterSpacing: 0.5,
                                                   ),
                                                 ),
                                               ),
-                                      ),
+                                            )
+                                          : Center(
+                                              child: Text(
+                                                _userInitial,
+                                                style: const TextStyle(
+                                                  color: Color(0xFF0F172A),
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 13,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                            ),
                                     ),
-                                  );
-                                }),
-                              ],
+                                  ),
+                                );
+                              }),
                             ],
                           ),
                         ),
@@ -248,8 +232,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
                       Expanded(
                         child: Padding(
-                          padding: EdgeInsets.only(
-                              left: isDesktop ? 15 : 0),
+                          padding:
+                              EdgeInsets.only(left: isDesktop ? 15 : 0),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(24),
                             child: _buildCurrentScreen(),
@@ -275,15 +259,12 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // NEW: Bell icon with red badge
   Widget _buildNotificationBell() {
     return Tooltip(
       message: 'Notifications',
       child: GestureDetector(
         onTap: () {
-          // Open notification panel
           showNotificationsPanel(context);
-          // Reload count after panel closes
           Future.delayed(const Duration(milliseconds: 500), () {
             _loadNotificationCount();
           });
@@ -304,7 +285,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 size: 22,
               ),
             ),
-            // RED BADGE with count
             if (_notificationCount > 0)
               Positioned(
                 right: 4,
@@ -357,7 +337,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           Row(
             children: [
-              // NEW: Mobile notification bell with badge
               Stack(
                 children: [
                   IconButton(
@@ -399,43 +378,42 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                 ],
               ),
-              if (_selectedIndex != 5)
-                Builder(builder: (context) {
-                  return InkWell(
+              // UPDATED: Settings is now index 7
+              Builder(builder: (context) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () => setState(() => _selectedIndex = 7),
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
-                    onTap: () => setState(() => _selectedIndex = 8),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        color: neonGreen,
-                        child: currentAvatarUrl != null
-                            ? Image.network(
-                                currentAvatarUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                        Center(
-                                  child: Text(_userInitial,
-                                      style: const TextStyle(
-                                          color: Color(0xFF0F172A),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12)),
-                                ),
-                              )
-                            : Center(
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      color: neonGreen,
+                      child: currentAvatarUrl != null
+                          ? Image.network(
+                              currentAvatarUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Center(
                                 child: Text(_userInitial,
                                     style: const TextStyle(
                                         color: Color(0xFF0F172A),
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 11,
-                                        letterSpacing: 0.5)),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12)),
                               ),
-                      ),
+                            )
+                          : Center(
+                              child: Text(_userInitial,
+                                  style: const TextStyle(
+                                      color: Color(0xFF0F172A),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 11,
+                                      letterSpacing: 0.5)),
+                            ),
                     ),
-                  );
-                }),
+                  ),
+                );
+              }),
               const SizedBox(width: 5),
             ],
           ),
@@ -458,8 +436,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 setState(() => _selectedIndex = 0);
                 Navigator.pop(context);
               },
-              child:
-                  const Icon(Icons.shield, color: Color(0xFF8FFF00), size: 40),
+              child: const Icon(Icons.shield,
+                  color: Color(0xFF8FFF00), size: 40),
             ),
           ),
           const SizedBox(height: 30),
@@ -470,16 +448,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 _drawerItem(Icons.dashboard_rounded, "Dashboard", 0),
                 _drawerItem(Icons.search_rounded, "Product Research", 1),
                 _drawerItem(Icons.text_fields_rounded, "Title Builder", 2),
-                _drawerItem(
-                    Icons.calculate_rounded, "Profit Calculator", 3),
+                _drawerItem(Icons.calculate_rounded, "Profit Calculator", 3),
                 _drawerItem(Icons.inventory_2_rounded, "Inventory", 4),
-                _drawerItem(
-                    Icons.radar_rounded, "Competitor Research", 5),
+                _drawerItem(Icons.radar_rounded, "Competitor Research", 5),
                 _drawerItem(Icons.shield_outlined, "Orders", 6),
-                _drawerItem(Icons.insights, "Analytics", 7),
+                // REMOVED: Analytics drawer item
                 const Divider(color: Colors.white10, height: 40),
+                // UPDATED: Settings is now index 7
                 _drawerItem(Icons.settings_rounded, "Settings", 7),
                 if (isOwner)
+                  // UPDATED: Admin is now index 8
                   _drawerItem(Icons.admin_panel_settings_rounded,
                       "Admin Center", 8),
               ],
@@ -506,8 +484,7 @@ class _DashboardPageState extends State<DashboardPage> {
       selectedTileColor: neonGreen.withAlpha(20),
       shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      leading: Icon(icon,
-          color: isActive ? neonGreen : Colors.white54),
+      leading: Icon(icon, color: isActive ? neonGreen : Colors.white54),
       title: Text(title,
           style: TextStyle(
               color: isActive ? Colors.white : Colors.white54,
@@ -570,16 +547,17 @@ class _DashboardPageState extends State<DashboardPage> {
               index: 5),
           _sidebarItem(
               icon: Icons.shield_outlined, title: "Orders", index: 6),
-          _sidebarItem(
-              icon: Icons.insights, title: "Analytics", index: 7),
+          // REMOVED: Analytics sidebar item (index 7 was here)
           const Spacer(),
+          // UPDATED: Settings is now index 7
           _sidebarItem(
-              icon: Icons.settings_rounded, title: "Settings", index: 8),
+              icon: Icons.settings_rounded, title: "Settings", index: 7),
           if (isOwner)
+            // UPDATED: Admin is now index 8
             _sidebarItem(
                 icon: Icons.admin_panel_settings_rounded,
                 title: "Admin Center",
-                index: 9),
+                index: 8),
           const SizedBox(height: 10),
           IconButton(
               onPressed: _logout,
@@ -660,7 +638,6 @@ class _DashboardPageState extends State<DashboardPage> {
       case 0:
         return DashboardHome(
           onGoToOrders: () => setState(() => _selectedIndex = 6),
-          onGoToAnalytics: () => setState(() => _selectedIndex = 8),
         );
       case 1:
         return const ProductResearchMaster();
@@ -674,11 +651,12 @@ class _DashboardPageState extends State<DashboardPage> {
         return const CompetitorResearchMain();
       case 6:
         return const OrdersDashboard();
+      // REMOVED: case 7 AnalyticsDashboard
+      // UPDATED: Settings is now index 7
       case 7:
-        return const AnalyticsDashboard();
-      case 8:
         return const UserProfilePage();
-      case 9:
+      // UPDATED: Admin is now index 8
+      case 8:
         return isOwner
             ? const AdminManagementPage()
             : const Center(
@@ -687,100 +665,5 @@ class _DashboardPageState extends State<DashboardPage> {
       default:
         return const SizedBox.shrink();
     }
-  }
-
-  Widget _buildDashboardHome() {
-    final String rawName =
-        user?.userMetadata?['full_name']?.toString() ?? "";
-    final String displayName =
-        rawName.isNotEmpty ? rawName : "Seller";
-    return SingleChildScrollView(
-      padding:
-          const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Welcome back, $displayName! 👋",
-              style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B))),
-          const SizedBox(height: 40),
-          Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            children: [
-              _buildStatCard("Total Revenue", "\$12,450.00", "+14.5%",
-                  Icons.attach_money),
-              _buildStatCard(
-                  "Active Listings", "842", "+12", Icons.inventory_2_outlined),
-              _buildStatCard("Net Profit", "\$4,120.50", "+8.2%",
-                  Icons.trending_up,
-                  isHighlight: true),
-              _buildStatCard("Pending Orders", "18", "Needs shipping",
-                  Icons.local_shipping_outlined),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-      String title, String value, String subtitle, IconData icon,
-      {bool isHighlight = false}) {
-    return Container(
-      width: 250,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: isHighlight ? neonGreen : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: isHighlight
-            ? [
-                BoxShadow(
-                    color: neonGreen.withAlpha(77),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ]
-            : [],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(title,
-                  style: TextStyle(
-                      color: isHighlight
-                          ? Colors.black87
-                          : const Color(0xFF64748B),
-                      fontWeight: FontWeight.w600)),
-              Icon(icon,
-                  color: isHighlight
-                      ? Colors.black
-                      : const Color(0xFF64748B),
-                  size: 20),
-            ],
-          ),
-          const SizedBox(height: 15),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: isHighlight
-                      ? Colors.black
-                      : const Color(0xFF1E293B))),
-          const SizedBox(height: 5),
-          Text(subtitle,
-              style: TextStyle(
-                  fontSize: 13,
-                  color: isHighlight
-                      ? Colors.black54
-                      : Colors.green.shade600,
-                  fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
   }
 }
