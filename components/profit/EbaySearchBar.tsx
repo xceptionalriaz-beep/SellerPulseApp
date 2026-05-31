@@ -77,7 +77,6 @@ export default function EbaySearchBar({ onFetch }: EbaySearchBarProps) {
           onKeyDown={e => e.key === 'Enter' && handleFetch()}
           placeholder="Paste eBay URL or Item ID..."
           className="flex-1 text-[13px] bg-transparent" style={{ outline: 'none', color: '#0F172A' }}
-          style={{ color: '#0F172A' }}
         />
       </div>
 
