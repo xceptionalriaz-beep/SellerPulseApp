@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Custom Properties (Design Tokens) ─────────────────────────────── */
+:root {
+  /* Brand */
+  --lime:        #8FFF00;
+  --lime-deep:   #4A8F00;
+  --lime-tint:   #F4FFE6;
+  --lime-muted:  #D4FF80;
+
+  /* Base */
+  --dark:        #0A0D08;
+  --surface:     #FFFFFF;
+  --bg:          #F7F9F5;
+  --border:      #E8EDE2;
+
+  /* Admin */
+  --admin-dark:  #0F172A;
+
+  /* Risk */
+  --risk-high:     #FF0000;
+  --risk-high-bg:  #FFEEEE;
+  --risk-med:      #92400E;
+  --risk-med-bg:   #FFFBEA;
+  --risk-low:      #2D6A00;
+  --risk-low-bg:   #F4FFE6;
+
+  /* Sidebar */
+  --sidebar-width: 60px;
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--dark);
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* ─── Scrollbar (Lime Theme) ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--border);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lime-deep);
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lime);
+}
+
+/* ─── Sidebar Scrollbar (Hidden) ─────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Selection Color ─────────────────────────────────────────────────────── */
+::selection {
+  background-color: rgba(143, 255, 0, 0.3);
+  color: var(--dark);
+}
+
+/* ─── Focus Ring (Lime) ──────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+/* ─── Utility Classes ─────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-gradient-lime {
+    background: linear-gradient(135deg, #8FFF00 0%, #4A8F00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-lime-gradient {
+    background: linear-gradient(135deg, #8FFF00 0%, #4A8F00 100%);
+  }
+
+  .glow-lime {
+    box-shadow: 0 0 20px rgba(143, 255, 0, 0.3);
+  }
+
+  .glow-lime-strong {
+    box-shadow: 0 0 40px rgba(143, 255, 0, 0.5);
+  }
+
+  .sidebar-rail {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+  }
+}
+
+/* ─── Component Layer ─────────────────────────────────────────────────────── */
+@layer components {
+  /* Card base */
+  .card {
+    @apply bg-surface rounded-lg border border-border shadow-card;
+  }
+
+  /* Lime button */
+  .btn-lime {
+    @apply bg-lime text-dark font-semibold px-4 py-2 rounded-lg
+           hover:shadow-lime transition-all duration-200
+           active:scale-[0.98] cursor-pointer;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply bg-transparent text-dark border border-border px-4 py-2 rounded-lg
+           hover:bg-border transition-all duration-200 cursor-pointer;
+  }
+
+  /* Risk badge */
+  .badge-high   { @apply text-xs font-bold px-2 py-0.5 rounded; background: #FFEEEE; color: #FF0000; }
+  .badge-medium { @apply text-xs font-bold px-2 py-0.5 rounded; background: #FFFBEA; color: #92400E; }
+  .badge-low    { @apply text-xs font-bold px-2 py-0.5 rounded; background: #F4FFE6; color: #2D6A00; }
+
+  /* Input base */
+  .input-base {
+    @apply w-full px-3 py-2 rounded-lg border border-border bg-surface
+           text-dark placeholder:text-gray-400
+           focus:outline-none focus:ring-2 focus:ring-lime focus:border-transparent
+           transition-all duration-200;
+  }
+}
