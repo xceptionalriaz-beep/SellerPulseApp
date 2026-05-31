@@ -6,7 +6,7 @@
 //
 // This replaces the AuthChangeEvent.passwordRecovery listener in auth_gate.dart
 
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   const next  = searchParams.get('next') ?? '/dashboard'
 
   if (code) {
-    const supabase = createServerSupabaseClient()
+    const supabase = createClient()
     await supabase.auth.exchangeCodeForSession(code)
 
     // Password recovery → go to reset password page
