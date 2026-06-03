@@ -37,7 +37,7 @@ interface TabItem {
 
 const TABS: TabItem[] = [
   { title: 'Revenue Analytics',      description: 'MRR, subscriptions & financial overview',  icon: BarChart2 },
-  { title: 'Global API Fleet',       description: 'eBay API usage, limits & health',           icon: Globe     },
+  { title: 'Global API Fleet',       description: 'eBay API usage, limits & health',           icon: Globe,    hasAlert: true, alertText: 'New brands added'   },
   { title: 'VeRO Command Center',    description: 'Brand protection & VeRO violations',        icon: Shield,   hasAlert: true, alertText: 'New brands added'   },
   { title: 'Affiliate Center',       description: 'Partner performance & commissions',         icon: Handshake },
   { title: 'Feature Roadmap',        description: 'Planned features & release timeline',       icon: Map       },
@@ -47,17 +47,30 @@ const TABS: TabItem[] = [
 ]
 
 interface AnalyticsHubProps {
-  isInvestorMode: boolean; isMobile: boolean; onBack: () => void
+  isInvestorMode: boolean
+  isMobile:       boolean
+  onBack:         () => void
+  initialTab?:    number
 }
 
-export default function AnalyticsHub({ isInvestorMode, isMobile, onBack }: AnalyticsHubProps) {
-  const [activeTab,            setActiveTab]           = useState(0)
-  const [startChartAnimation,  setStartChartAnimation] = useState(false)
+export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initialTab }: AnalyticsHubProps) {
+  const [activeTab,           setActiveTab]           = useState(initialTab ?? 0)
+  const [startChartAnimation, setStartChartAnimation] = useState(false)
 
+  // ── Initial mount animation ────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => setStartChartAnimation(true), 300)
     return () => clearTimeout(t)
   }, [])
+
+  // ── Jump to tab when initialTab changes ────────────────────
+  useEffect(() => {
+    if (initialTab !== undefined) {
+      setActiveTab(initialTab)
+      setStartChartAnimation(false)
+      setTimeout(() => setStartChartAnimation(true), 100)
+    }
+  }, [initialTab])
 
   function switchTab(index: number) {
     if (activeTab === index) return
@@ -94,7 +107,10 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack }: Analy
     return (
       <button onClick={() => switchTab(index)}
         className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl mb-1 text-left transition-all"
-        style={{ backgroundColor: isActive ? 'rgba(143,255,0,0.12)' : 'transparent', borderLeft: `3px solid ${isActive ? C.lime : 'transparent'}` }}>
+        style={{
+          backgroundColor: isActive ? 'rgba(143,255,0,0.12)' : 'transparent',
+          borderLeft: `3px solid ${isActive ? C.lime : 'transparent'}`,
+        }}>
         <Icon size={15} style={{ color: isActive ? C.lime : 'rgba(255,255,255,0.4)', flexShrink: 0 }} />
         <span className="flex-1 text-[12px] truncate"
               style={{ color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: isActive ? 700 : 500 }}>
@@ -190,7 +206,10 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack }: Analy
           return (
             <button key={i} onClick={() => switchTab(i)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-full border shrink-0 transition-all"
-              style={{ backgroundColor: isActive ? C.dark : C.surface, borderColor: isActive ? 'rgba(143,255,0,0.5)' : C.border }}>
+              style={{
+                backgroundColor: isActive ? C.dark : C.surface,
+                borderColor:     isActive ? 'rgba(143,255,0,0.5)' : C.border,
+              }}>
               <Icon size={12} style={{ color: isActive ? C.lime : C.textMuted }} />
               <span className="text-[11px] font-semibold" style={{ color: isActive ? '#fff' : C.textMuted }}>{t.title}</span>
               {t.hasAlert && !isActive && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#F87171' }} />}

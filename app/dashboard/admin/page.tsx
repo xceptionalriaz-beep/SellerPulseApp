@@ -1,6 +1,6 @@
 'use client'
-// app/admin/page.tsx
-// Converted 1:1 from lib/pages/admin_management_page.dart
+// app/dashboard/admin/page.tsx
+// Updated: stat cards, tool stats, quick stats bar — all real Supabase data
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -8,10 +8,10 @@ import {
   Shield, BarChart2, Settings, ArrowLeft, Search,
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
   Wrench, Trophy, Zap, UserPlus, Key, FileText,
-  Power, MoreVertical, Menu, X, ChevronDown,
+  Power, MoreVertical, Menu, X, ChevronDown, Globe,
 } from 'lucide-react'
-import PersistentSidebar from '@/components/admin/PersistentSidebar'
-import AnalyticsHub      from '@/components/admin/AnalyticsHub'
+import PersistentSidebar   from '@/components/admin/PersistentSidebar'
+import AnalyticsHub        from '@/components/admin/AnalyticsHub'
 import UserCrmTab          from '@/components/admin/settings-tabs/UserCrmTab'
 import RoleBuilderTab      from '@/components/admin/settings-tabs/RoleBuilderTab'
 import SecurityLogsTab     from '@/components/admin/settings-tabs/SecurityLogsTab'
@@ -36,7 +36,7 @@ const C = {
   hint:   '#94A3B8',
 }
 
-// ── Settings menu items ────────────────────────────────────────
+// ── Settings menu ──────────────────────────────────────────────
 const SETTINGS_MENU = [
   { title: 'User CRM',        icon: Users        },
   { title: 'Role Builder',    icon: Shield       },
@@ -52,27 +52,45 @@ const SETTINGS_MENU = [
   { title: 'Founder Ops',     icon: BarChart2    },
 ]
 
-// ── Stat card data ─────────────────────────────────────────────
-const STAT_CARDS = [
-  { title: 'Monthly Recurring Revenue', titleMobile: 'MRR',        value: '$12,450', sub: '+14% this month',      icon: DollarSign,  isHighlight: true,  isGood: false, isToolCard: false, isTopTool: false },
-  { title: 'Active Subscribers',        titleMobile: 'Users',       value: '842',     sub: '+12 new today',        icon: Users,       isHighlight: false, isGood: false, isToolCard: false, isTopTool: false },
-  { title: 'Trial Conversion Rate',     titleMobile: 'Conversion',  value: '24.5%',   sub: 'Industry avg: 15%',    icon: TrendingUp,  isHighlight: false, isGood: false, isToolCard: false, isTopTool: false },
-  { title: 'Churn Rate',                titleMobile: 'Churn',       value: '2.1%',    sub: 'Healthy ↓',            icon: TrendingDown,isHighlight: false, isGood: true,  isToolCard: false, isTopTool: false },
-  { title: 'Total Tool Usage',          titleMobile: 'Tool Uses',   value: '1,284',   sub: 'Across all tools today',icon: Wrench,     isHighlight: false, isGood: false, isToolCard: true,  isTopTool: false },
-  { title: 'Most Used Tool',            titleMobile: 'Top Tool',    value: 'Orders',  sub: '642 sessions today',   icon: Trophy,      isHighlight: false, isGood: false, isToolCard: true,  isTopTool: true  },
+// ── Tool definitions (static metadata only — no dummy stats) ──
+const TOOL_DEFS = [
+  { name: 'Orders',              dbKey: 'ebay_orders',         desc: 'Protect orders from risky buyers & disputes',  icon: Shield,   isLive: true,  accent: '#8FFF00', eta: '' },
+  { name: 'Profit Calculator',   dbKey: 'profit_calculator',   desc: 'Calculate real eBay profit after all fees',    icon: BarChart2,isLive: true,  accent: '#FBBF24', eta: '' },
+  { name: 'Title Builder',       dbKey: 'title_builder',       desc: 'AI-powered eBay listing title optimizer',      icon: FileText, isLive: true,  accent: '#60A5FA', eta: '' },
+  { name: 'Product Research',    dbKey: 'product_research',    desc: 'Find winning products with demand data',       icon: Search,   isLive: false, accent: '#A78BFA', eta: 'Q3 2025' },
+  { name: 'Competitor Research', dbKey: 'competitor_research', desc: 'Spy on top sellers in any niche',             icon: EyeOff,   isLive: false, accent: '#FB923C', eta: 'Q3 2025' },
+  { name: 'Dropship Analyzer',   dbKey: 'dropship_analyzer',   desc: 'Analyze dropship margins & supplier risk',    icon: Wrench,   isLive: false, accent: '#2DD4BF', eta: 'Q4 2025' },
 ]
 
-// ── Tool cards data ────────────────────────────────────────────
-const TOOLS = [
-  { name: 'Orders',              desc: 'Protect orders from risky buyers & disputes',  icon: Shield,   isLive: true,  accent: '#8FFF00', sessions: 642, users: 198, eta: '' },
-  { name: 'Profit Calculator',   desc: 'Calculate real eBay profit after all fees',    icon: BarChart2,isLive: true,  accent: '#FBBF24', sessions: 381, users: 134, eta: '' },
-  { name: 'Title Builder',       desc: 'AI-powered eBay listing title optimizer',      icon: FileText, isLive: true,  accent: '#60A5FA', sessions: 261, users: 97,  eta: '' },
-  { name: 'Product Research',    desc: 'Find winning products with demand data',       icon: Search,   isLive: false, accent: '#A78BFA', sessions: 0,   users: 0,   eta: 'Q3 2025' },
-  { name: 'Competitor Research', desc: 'Spy on top sellers in any niche',             icon: EyeOff,   isLive: false, accent: '#FB923C', sessions: 0,   users: 0,   eta: 'Q3 2025' },
-  { name: 'Dropship Analyzer',   desc: 'Analyze dropship margins & supplier risk',    icon: Wrench,   isLive: false, accent: '#2DD4BF', sessions: 0,   users: 0,   eta: 'Q4 2025' },
-]
+// ── Admin stats shape ──────────────────────────────────────────
+interface AdminStats {
+  mrr:           number
+  activeSubs:    number
+  totalUsers:    number
+  convRate:      number
+  churnRate:     number
+  totalUsage:    number
+  mostUsedTool:  string
+  mostUsedCount: number
+  onlineNow:     number
+  signupsToday:  number
+  revToday:      number
+  toolStats:     Record<string, { sessions: number; users: number }>
+  countryStats:  { country: string; count: number }[]
+  recentTx:      any[]
+  loading:       boolean
+}
 
-// ── Analytics Hub button (matches Dart AnalyticsHubButton) ────
+const DEFAULT_STATS: AdminStats = {
+  mrr: 0, activeSubs: 0, totalUsers: 0,
+  convRate: 0, churnRate: 0,
+  totalUsage: 0, mostUsedTool: '—', mostUsedCount: 0,
+  onlineNow: 0, signupsToday: 0, revToday: 0,
+  toolStats: {}, countryStats: [], recentTx: [],
+  loading: true,
+}
+
+// ── Analytics Hub button ───────────────────────────────────────
 function AnalyticsHubButton({ isActive, onTap }: { isActive: boolean; onTap: () => void }) {
   return (
     <button onClick={onTap}
@@ -88,8 +106,14 @@ function AnalyticsHubButton({ isActive, onTap }: { isActive: boolean; onTap: () 
   )
 }
 
-// ── Stat Card (matches Dart _buildStatCard2) ───────────────────
-function StatCard({ d, isMobile }: { d: typeof STAT_CARDS[0]; isMobile: boolean }) {
+// ── Stat Card ──────────────────────────────────────────────────
+interface StatCardData {
+  title: string; titleMobile: string; value: string; sub: string
+  icon: React.ElementType
+  isHighlight: boolean; isGood: boolean; isToolCard: boolean; isTopTool: boolean
+}
+
+function StatCard({ d, isMobile }: { d: StatCardData; isMobile: boolean }) {
   const Icon = d.icon
   return (
     <div className="flex flex-col gap-3 p-4 rounded-2xl border transition-all"
@@ -126,10 +150,10 @@ function StatCard({ d, isMobile }: { d: typeof STAT_CARDS[0]; isMobile: boolean 
   )
 }
 
-// ── Tool Card (matches Dart _buildToolCard) ────────────────────
-function ToolCard({ tool, index }: { tool: typeof TOOLS[0]; index: number }) {
-  const Icon    = tool.icon
-  const isLime  = tool.accent === '#8FFF00'
+// ── Tool Card ──────────────────────────────────────────────────
+function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; users: number } }) {
+  const Icon   = tool.icon
+  const isLime = tool.accent === '#8FFF00'
   return (
     <div className="flex flex-col p-3.5 rounded-2xl border"
          style={{
@@ -139,7 +163,6 @@ function ToolCard({ tool, index }: { tool: typeof TOOLS[0]; index: number }) {
            boxShadow:       tool.isLive ? `0 4px 12px ${tool.accent}1A` : 'none',
            opacity:         tool.isLive ? 1 : 0.62,
          }}>
-      {/* Top row */}
       <div className="flex items-center justify-between mb-2.5">
         <div className="relative w-10 h-10 rounded-xl flex items-center justify-center"
              style={{ backgroundColor: tool.accent + (tool.isLive ? '1F' : '14') }}>
@@ -150,7 +173,6 @@ function ToolCard({ tool, index }: { tool: typeof TOOLS[0]; index: number }) {
             </div>
           )}
         </div>
-        {/* Status badge */}
         <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full border"
              style={{
                backgroundColor: tool.isLive ? tool.accent + '1F' : '#F1F5F9',
@@ -164,21 +186,22 @@ function ToolCard({ tool, index }: { tool: typeof TOOLS[0]; index: number }) {
           </span>
         </div>
       </div>
-      {/* Name + description */}
       <p className="text-[13px] font-extrabold tracking-tight mb-0.5" style={{ color: C.text }}>{tool.name}</p>
       <p className="text-[10px] leading-snug mb-3" style={{ color: C.muted }}>{tool.desc}</p>
-      {/* Divider */}
       <div className="h-px mb-2.5" style={{ backgroundColor: C.border }} />
-      {/* Stats or ETA */}
       {tool.isLive ? (
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <p className="text-[15px] font-extrabold" style={{ color: isLime ? '#4A8F00' : tool.accent }}>{tool.sessions}</p>
+            <p className="text-[15px] font-extrabold" style={{ color: isLime ? '#4A8F00' : tool.accent }}>
+              {tool.sessions.toLocaleString()}
+            </p>
             <p className="text-[9px] font-semibold" style={{ color: C.hint }}>sessions</p>
           </div>
           <div className="w-px h-7" style={{ backgroundColor: C.border }} />
           <div className="flex-1">
-            <p className="text-[15px] font-extrabold" style={{ color: C.text }}>{tool.users}</p>
+            <p className="text-[15px] font-extrabold" style={{ color: C.text }}>
+              {tool.users.toLocaleString()}
+            </p>
             <p className="text-[9px] font-semibold" style={{ color: C.hint }}>users</p>
           </div>
         </div>
@@ -195,29 +218,27 @@ function ToolCard({ tool, index }: { tool: typeof TOOLS[0]; index: number }) {
   )
 }
 
-// ── CMD+K Command Palette ──────────────────────────────────────
-function CommandPalette({ onClose, onNavigate }: { onClose: () => void; onNavigate: (mode: string) => void }) {
+// ── CMD+K Palette ──────────────────────────────────────────────
+function CommandPalette({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24"
          style={{ backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
          onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="w-full max-w-[650px] rounded-2xl border overflow-hidden"
            style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
-        {/* Search input */}
         <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: C.border }}>
           <Search size={22} style={{ color: C.muted }} />
           <input autoFocus placeholder="Search users, settings, or execute commands..."
             className="flex-1 text-[18px] outline-none" style={{ color: C.text }}
             onKeyDown={e => e.key === 'Escape' && onClose()} />
         </div>
-        {/* Quick actions */}
         <div className="p-2" style={{ backgroundColor: C.bg }}>
           <p className="px-4 py-2 text-[11px] font-bold tracking-wide" style={{ color: C.hint }}>QUICK ACTIONS</p>
           {[
-            { icon: UserPlus,  label: 'Search User: Mike Ross',         tag: 'CRM',        danger: false },
-            { icon: Power,     label: 'Trigger Emergency Kill Switch',   tag: 'System',     danger: true  },
-            { icon: EyeOff,    label: 'Toggle Investor Mode',            tag: 'Settings',   danger: false },
-            { icon: BarChart2, label: 'Jump to Revenue Analytics',       tag: 'Navigation', danger: false },
+            { icon: UserPlus,  label: 'Add New User',               tag: 'CRM',        danger: false },
+            { icon: Power,     label: 'Emergency Kill Switch',       tag: 'System',     danger: true  },
+            { icon: EyeOff,    label: 'Toggle Investor Mode',        tag: 'Settings',   danger: false },
+            { icon: BarChart2, label: 'Jump to Revenue Analytics',   tag: 'Navigation', danger: false },
           ].map((item, i) => {
             const Icon = item.icon
             return (
@@ -243,54 +264,509 @@ function CommandPalette({ onClose, onNavigate }: { onClose: () => void; onNaviga
 }
 
 // ── Quick Action Dialogs ───────────────────────────────────────
-function AddUserDialog({ onClose }: { onClose: () => void }) {
+// ── Custom Dropdown (matches tool design) ─────────────────────
+function CustomDropdown({ value, options, onChange }: {
+  value:   string
+  options: { value: string; label: string }[]
+  onChange: (v: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const selected = options.find(o => o.value === value)
+
+  return (
+    <div className="relative">
+      {/* Trigger */}
+      <button onClick={() => setOpen(s => !s)}
+        className="w-full flex items-center justify-between h-10 px-3 rounded-xl border text-[13px] font-semibold transition-all"
+        style={{
+          backgroundColor: '#fff',
+          borderColor:     open ? C.lime : C.border,
+          color:           C.text,
+        }}>
+        <span>{selected?.label ?? 'Select...'}</span>
+        <ChevronDown size={15}
+          style={{
+            color:     C.hint,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
+          }} />
+      </button>
+
+      {/* Dropdown menu */}
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl border overflow-hidden"
+               style={{
+                 backgroundColor: '#fff',
+                 borderColor:     C.border,
+                 boxShadow:       '0 8px 24px rgba(0,0,0,0.10)',
+                 animation:       'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+               }}>
+            {options.map((o, i) => {
+              const isSelected = o.value === value
+              return (
+                <button key={o.value}
+                  onClick={() => { onChange(o.value); setOpen(false) }}
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-left text-[13px] font-semibold transition-all hover:bg-gray-50"
+                  style={{
+                    backgroundColor: isSelected ? C.lime : 'transparent',
+                    color:           isSelected ? C.dark : C.text,
+                    borderBottom:    i < options.length - 1 ? `1px solid ${C.border}` : 'none',
+                  }}>
+                  {o.label}
+                  {isSelected && (
+                    <span style={{ fontSize: 12 }}>✓</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?: () => void }) {
+  const supabase = createClient()
+
+  const [name,         setName]         = useState('')
+  const [email,        setEmail]        = useState('')
+  const [gender,       setGender]       = useState('Unspecified')
+  const [plan,         setPlan]         = useState('Free Trial')
+  const [role,         setRole]         = useState('user')
+  const [sendWelcome,  setSendWelcome]  = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error,        setError]        = useState('')
+  const [success,      setSuccess]      = useState(false)
+  const [tempPassword, setTempPassword] = useState('')
+  const [copied,       setCopied]       = useState(false)
+
+  // ── Generate temp password ─────────────────────────────────
+  function generatePassword(n: string) {
+    const safe   = (n ?? '').trim().replace(/\s/g, '')
+    const prefix = safe.length >= 3 ? safe.substring(0, 3) : 'Usr'
+    const suffix = Math.floor(Math.random() * 8999) + 1000
+    return `${prefix}#${suffix}`
+  }
+
+  useEffect(() => {
+    setTempPassword(generatePassword(name || 'User'))
+  }, [name])
+
+  // ── Validation ─────────────────────────────────────────────
+  const isValidEmail = (e: string) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(e.trim())
+  const isFormValid  = name.trim().length >= 2 && isValidEmail(email)
+
+  // ── Copy password ──────────────────────────────────────────
+  function copyPassword() {
+    navigator.clipboard.writeText(tempPassword)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // ── Create user ────────────────────────────────────────────
+  async function handleCreate() {
+    if (!isFormValid || isSubmitting) return
+    setError(''); setIsSubmitting(true)
+
+    try {
+      // Get current session token to pass to API route
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+
+      // Call server-side API route (uses service role key safely)
+      const res = await fetch('/api/admin/create-user', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          name,
+          email:       email.trim(),
+          password:    tempPassword,
+          gender,
+          plan,
+          role,
+          sendWelcome,
+        }),
+      })
+
+      const json = await res.json()
+
+      if (!res.ok) {
+        setError(json.error ?? 'Failed to create user')
+        setIsSubmitting(false)
+        return
+      }
+
+      setSuccess(true)
+      onCreated?.()
+      setTimeout(() => onClose(), 2500)
+
+    } catch (e: any) {
+      setError(e?.message ?? 'Something went wrong. Please try again.')
+    }
+    setIsSubmitting(false)
+  }
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white rounded-2xl border p-6 w-full max-w-sm" style={{ borderColor: C.border }}>
-        <div className="flex items-center gap-2.5 mb-5">
-          <UserPlus size={20} style={{ color: C.lime }} />
-          <p className="text-[16px] font-bold" style={{ color: C.text }}>Add New User</p>
+         style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.25s ease-out' }}
+         onClick={e => e.target === e.currentTarget && !isSubmitting && onClose()}>
+      <style>{`
+        @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(28px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      `}</style>
+      <div className="bg-white rounded-2xl border w-full max-w-[480px] overflow-hidden shadow-2xl"
+           style={{ borderColor: C.border, animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b"
+             style={{ borderColor: C.border }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                 style={{ backgroundColor: C.dark }}>
+              <UserPlus size={16} style={{ color: C.lime }} />
+            </div>
+            <p className="text-[17px] font-bold" style={{ color: C.text }}>Add New User</p>
+          </div>
+          <button onClick={onClose} disabled={isSubmitting}
+            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all group"
+            style={{ backgroundColor: 'transparent' }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#FEF2F2')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+            <X size={16} className="transition-colors"
+               style={{ color: C.hint }}
+               onMouseEnter={e => ((e.currentTarget as SVGElement).style.color = '#F87171')}
+               onMouseLeave={e => ((e.currentTarget as SVGElement).style.color = C.hint)} />
+          </button>
         </div>
-        <div className="flex flex-col gap-3">
-          <input placeholder="Email address" className="w-full h-10 px-3 rounded-lg border text-[13px] outline-none"
-                 style={{ borderColor: C.border, color: C.text }} />
-          <select className="w-full h-10 px-3 rounded-lg border text-[13px] outline-none"
-                  style={{ borderColor: C.border, color: C.text }}>
-            {['Free Trial', 'Pro Plan', 'Elite Plan'].map(p => <option key={p}>{p}</option>)}
-          </select>
-        </div>
-        <div className="flex gap-2 mt-5">
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg border text-[13px] font-semibold"
-                  style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg text-[13px] font-bold"
-                  style={{ backgroundColor: C.lime, color: C.dark }}>Add User</button>
-        </div>
+
+        {/* Success state */}
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-10 px-6">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                 style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
+              <span className="text-3xl">🎉</span>
+            </div>
+            <p className="text-[18px] font-bold mb-1" style={{ color: C.text }}>User Created!</p>
+            <p className="text-[13px] text-center mb-4" style={{ color: C.muted }}>
+              {name} has been added successfully.
+            </p>
+            {/* Show temp password */}
+            <div className="w-full flex items-center gap-2 px-4 py-3 rounded-xl border"
+                 style={{ backgroundColor: C.bg, borderColor: C.border }}>
+              <Key size={14} style={{ color: C.hint }} />
+              <span className="flex-1 text-[13px] font-mono font-bold" style={{ color: C.text }}>
+                {tempPassword}
+              </span>
+              <button onClick={copyPassword}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
+                style={{ backgroundColor: copied ? 'rgba(143,255,0,0.1)' : C.border, color: copied ? '#4A8F00' : C.muted }}>
+                {copied ? '✅ Copied!' : '📋 Copy'}
+              </button>
+            </div>
+            <p className="text-[11px] mt-2" style={{ color: C.hint }}>
+              Share this temporary password with the user
+            </p>
+          </div>
+        ) : (
+          <div className="p-6 flex flex-col gap-4">
+
+            {/* Error message */}
+            {error && (
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border"
+                   style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
+                <span className="text-[12px] font-semibold" style={{ color: '#F87171' }}>⚠️ {error}</span>
+              </div>
+            )}
+
+            {/* Full Name */}
+            <div>
+              <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>FULL NAME</p>
+              <input value={name} onChange={e => setName(e.target.value)}
+                placeholder="Enter full name"
+                className="w-full h-10 px-3 rounded-lg border text-[13px] outline-none"
+                style={{ borderColor: name.trim().length >= 2 ? C.lime : C.border, color: C.text, backgroundColor: C.bg }} />
+            </div>
+
+            {/* Email */}
+            <div>
+              <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>EMAIL ADDRESS</p>
+              <input value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="email@example.com" type="email"
+                className="w-full h-10 px-3 rounded-lg border text-[13px] outline-none"
+                style={{ borderColor: email && !isValidEmail(email) ? '#F87171' : email && isValidEmail(email) ? C.lime : C.border, color: C.text, backgroundColor: C.bg }} />
+              {email && !isValidEmail(email) && (
+                <p className="text-[11px] mt-1" style={{ color: '#F87171' }}>Enter a valid email address</p>
+              )}
+            </div>
+
+            {/* Gender + Plan — one row side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>GENDER</p>
+                <CustomDropdown
+                  value={gender}
+                  options={[
+                    { value: 'Unspecified', label: 'Prefer not to say' },
+                    { value: 'Male',        label: 'Male'              },
+                    { value: 'Female',      label: 'Female'            },
+                  ]}
+                  onChange={setGender}
+                />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>INITIAL PLAN</p>
+                <CustomDropdown
+                  value={plan}
+                  options={[
+                    { value: 'Free Trial', label: 'Free Trial' },
+                    { value: 'Pro Plan',   label: 'Pro Plan'   },
+                    { value: 'Elite Plan', label: 'Elite Plan' },
+                  ]}
+                  onChange={setPlan}
+                />
+              </div>
+            </div>
+
+            {/* Role */}
+            <div>
+              <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>ROLE</p>
+              <div className="grid grid-cols-2 gap-2">
+                {['user', 'admin'].map(r => (
+                  <button key={r} onClick={() => setRole(r)}
+                    className="py-2 rounded-lg border text-[12px] font-bold transition-all"
+                    style={{
+                      backgroundColor: role === r ? C.dark : C.bg,
+                      borderColor:     role === r ? C.dark : C.border,
+                      color:           role === r ? C.lime : C.muted,
+                    }}>
+                    {r === 'admin' ? '🔑 Admin' : '👤 User'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Temp password preview */}
+            <div>
+              <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>TEMP PASSWORD</p>
+              <div className="flex items-center gap-2 h-10 px-3 rounded-lg border"
+                   style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                <Key size={13} style={{ color: C.hint }} />
+                <span className="flex-1 text-[13px] font-mono font-bold" style={{ color: C.text }}>
+                  {tempPassword}
+                </span>
+                <button onClick={() => setTempPassword(generatePassword(name || 'User'))}
+                  className="text-[11px] px-2 py-1 rounded hover:bg-gray-100"
+                  style={{ color: C.hint }}>🔄</button>
+                <button onClick={copyPassword}
+                  className="text-[11px] px-2 py-1 rounded hover:bg-gray-100"
+                  style={{ color: copied ? '#4A8F00' : C.hint }}>
+                  {copied ? '✅' : '📋'}
+                </button>
+              </div>
+            </div>
+
+            {/* Send Welcome Email toggle */}
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl border"
+                 style={{ backgroundColor: '#F8FAFC', borderColor: C.border }}>
+              <div>
+                <p className="text-[13px] font-bold" style={{ color: C.text }}>Send Welcome Email</p>
+                <p className="text-[11px]" style={{ color: C.muted }}>Includes temporary password</p>
+              </div>
+              <div onClick={() => setSendWelcome(s => !s)}
+                   className="relative w-11 h-6 rounded-full cursor-pointer transition-colors"
+                   style={{ backgroundColor: sendWelcome ? C.dark : '#CBD5E1' }}>
+                <div className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+                     style={{ backgroundColor: sendWelcome ? C.lime : '#fff', left: sendWelcome ? '22px' : '2px' }} />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-1">
+              <button onClick={onClose} disabled={isSubmitting}
+                className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold transition-all"
+                style={{ borderColor: C.border, color: C.muted, backgroundColor: '#fff' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = '#FEF2F2'
+                  e.currentTarget.style.borderColor     = '#FECACA'
+                  e.currentTarget.style.color           = '#F87171'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = '#fff'
+                  e.currentTarget.style.borderColor     = C.border
+                  e.currentTarget.style.color           = C.muted
+                }}>
+                Cancel
+              </button>
+              <button onClick={handleCreate}
+                disabled={!isFormValid || isSubmitting}
+                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all"
+                style={{
+                  backgroundColor: isFormValid ? C.lime : C.border,
+                  color:           isFormValid ? C.dark : C.hint,
+                }}>
+                {isSubmitting ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
+                       style={{ borderTopColor: C.dark }} />
+                ) : '✅ Create User'}
+              </button>
+            </div>
+
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 function ResetApiDialog({ onClose }: { onClose: () => void }) {
+  const supabase = createClient()
+  const [resetting,  setResetting]  = useState(false)
+  const [success,    setSuccess]    = useState(false)
+  const [resetDaily, setResetDaily] = useState(true)
+  const [resetRate,  setResetRate]  = useState(true)
+
+  async function handleReset() {
+    if (!resetDaily && !resetRate) return
+    setResetting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+
+      const res = await fetch('/api/admin/reset-api', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      })
+
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Reset failed')
+
+      setSuccess(true)
+      setTimeout(() => onClose(), 2000)
+    } catch (e: any) {
+      console.error('Reset error:', e)
+    }
+    setResetting(false)
+  }
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white rounded-2xl border p-6 w-full max-w-sm" style={{ borderColor: C.border }}>
-        <div className="flex items-center gap-2.5 mb-3">
-          <Key size={20} style={{ color: C.lime }} />
-          <p className="text-[16px] font-bold" style={{ color: C.text }}>Reset API Keys</p>
+         style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease-out' }}
+         onClick={e => e.target === e.currentTarget && !resetting && onClose()}>
+      <style>{`
+        @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      `}</style>
+      <div className="bg-white rounded-2xl border w-full max-w-sm overflow-hidden shadow-2xl"
+           style={{ borderColor: C.border, animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b"
+             style={{ borderColor: C.border }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                 style={{ backgroundColor: C.dark }}>
+              <Key size={15} style={{ color: C.lime }} />
+            </div>
+            <p className="text-[16px] font-bold" style={{ color: C.text }}>Reset API Counters</p>
+          </div>
+          <button onClick={onClose} disabled={resetting}
+            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEF2F2' }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}>
+            <X size={15} style={{ color: C.hint }} />
+          </button>
         </div>
-        <p className="text-[13px] mb-5" style={{ color: C.muted }}>
-          This will invalidate all current API keys and generate new ones. All connected apps will need to be updated.
-        </p>
-        <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg border text-[13px] font-semibold"
-                  style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg text-[13px] font-bold"
-                  style={{ backgroundColor: C.lime, color: C.dark }}>Reset Now</button>
-        </div>
+
+        {success ? (
+          /* Success state */
+          <div className="flex flex-col items-center py-8 px-5">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
+                 style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
+              <span className="text-2xl">✅</span>
+            </div>
+            <p className="text-[16px] font-bold mb-1" style={{ color: C.text }}>Reset Complete!</p>
+            <p className="text-[12px] text-center" style={{ color: C.muted }}>
+              API counters have been reset successfully.
+            </p>
+          </div>
+        ) : (
+          <div className="p-5 flex flex-col gap-4">
+            <p className="text-[13px]" style={{ color: C.muted }}>
+              Select what you want to reset:
+            </p>
+
+            {/* Checkboxes */}
+            {[
+              { label: 'Daily request counters',  sub: 'Resets requests_today to 0',   val: resetDaily, set: setResetDaily },
+              { label: 'Rate limit usage',        sub: 'Resets rate_limit_used to 0',  val: resetRate,  set: setResetRate  },
+            ].map((item, i) => (
+              <div key={i}
+                onClick={() => item.set(s => !s)}
+                className="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
+                style={{
+                  backgroundColor: item.val ? 'rgba(143,255,0,0.05)' : C.bg,
+                  borderColor:     item.val ? C.lime : C.border,
+                }}>
+                <div className="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all"
+                     style={{
+                       backgroundColor: item.val ? C.lime : '#fff',
+                       borderColor:     item.val ? C.lime : C.border,
+                     }}>
+                  {item.val && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold" style={{ color: C.text }}>{item.label}</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>{item.sub}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Warning */}
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg border"
+                 style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
+              <span className="text-[13px]">⚠️</span>
+              <p className="text-[11px]" style={{ color: '#92400E' }}>
+                This affects all platforms in your API Fleet. This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2">
+              <button onClick={onClose} disabled={resetting}
+                className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold transition-all"
+                style={{ borderColor: C.border, color: C.muted, backgroundColor: '#fff' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#F87171'; e.currentTarget.style.borderColor = '#FECACA' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.color = C.muted; e.currentTarget.style.borderColor = C.border }}>
+                Cancel
+              </button>
+              <button onClick={handleReset}
+                disabled={resetting || (!resetDaily && !resetRate)}
+                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all"
+                style={{
+                  backgroundColor: (!resetDaily && !resetRate) ? C.border : C.lime,
+                  color:           (!resetDaily && !resetRate) ? C.hint   : C.dark,
+                }}>
+                {resetting ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
+                       style={{ borderTopColor: C.dark }} />
+                ) : '🔄 Reset Now'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -307,7 +783,7 @@ function KillSwitchDialog({ onClose }: { onClose: () => void }) {
           <p className="text-[16px] font-bold" style={{ color: '#F87171' }}>Emergency Kill Switch</p>
         </div>
         <p className="text-[13px] mb-5" style={{ color: C.muted }}>
-          ⚠️ This will immediately disable ALL user access to the platform. This action is logged and cannot be undone without manual restore.
+          ⚠️ This will immediately disable ALL user access. This action is logged and cannot be undone without manual restore.
         </p>
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 py-2 rounded-lg border text-[13px] font-semibold"
@@ -325,21 +801,29 @@ function KillSwitchDialog({ onClose }: { onClose: () => void }) {
 // ══════════════════════════════════════════════════════════════
 export default function AdminPage() {
   const supabase = createClient()
-  const [authorized,       setAuthorized]       = useState(false)
-  const [checking,         setChecking]         = useState(true)
-  const [isSettingsMode,   setIsSettingsMode]   = useState(false)
-  const [isAnalyticsMode,  setIsAnalyticsMode]  = useState(false)
-  const [activeSettingsTab,setActiveSettingsTab]= useState(0)
-  const [investorMode,     setInvestorMode]     = useState(false)
-  const [showCmdPalette,   setShowCmdPalette]   = useState(false)
-  const [showAddUser,      setShowAddUser]       = useState(false)
-  const [showResetApi,     setShowResetApi]      = useState(false)
-  const [showKillSwitch,   setShowKillSwitch]    = useState(false)
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-  const [isMobile,         setIsMobile]         = useState(() => typeof window !== 'undefined' ? window.innerWidth < 950 : false)
+
+  const [authorized,        setAuthorized]        = useState(false)
+  const [checking,          setChecking]          = useState(true)
+  const [isSettingsMode,    setIsSettingsMode]    = useState(false)
+  const [isAnalyticsMode,   setIsAnalyticsMode]   = useState(false)
+  const [activeSettingsTab, setActiveSettingsTab] = useState(0)
+  const [investorMode,      setInvestorMode]      = useState(false)
+  const [showCmdPalette,    setShowCmdPalette]    = useState(false)
+  const [showAddUser,       setShowAddUser]       = useState(false)
+  const [showResetApi,      setShowResetApi]      = useState(false)
+  const [analyticsTab,      setAnalyticsTab]      = useState(0)
+  const [showKillSwitch,    setShowKillSwitch]    = useState(false)
+  const [mobileDrawerOpen,  setMobileDrawerOpen]  = useState(false)
+  const [isMobile,          setIsMobile]          = useState(
+    () => typeof window !== 'undefined' ? window.innerWidth < 950 : false
+  )
+
+  // ── Real stats state ───────────────────────────────────────
+  const [stats, setStats] = useState<AdminStats>(DEFAULT_STATS)
+
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // ── Role check ──────────────────────────────────────────────
+  // ── Role check ─────────────────────────────────────────────
   useEffect(() => {
     async function check() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -351,6 +835,143 @@ export default function AdminPage() {
     check()
   }, [])
 
+  // ── Load real admin stats ──────────────────────────────────
+  const loadAdminStats = useCallback(async () => {
+    try {
+      // 1. Fetch all profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('plan_name, account_status, created_at, last_seen')
+
+      const all   = (profiles ?? []) as any[]
+      const total = all.length
+
+      // 2. MRR — from subscriptions table (payment-provider ready)
+      const { data: subs } = await supabase
+        .from('subscriptions')
+        .select('amount, status, plan_name, paid_at')
+
+      const allSubs = (subs ?? []) as any[]
+
+      // Active MRR = sum of active subscriptions
+      const mrr = allSubs
+        .filter((s: any) => s.status === 'active')
+        .reduce((sum: number, s: any) => sum + (Number(s.amount) ?? 0), 0)
+
+      // Active subscribers = active paid subscriptions
+      const activeSubs = allSubs.filter((s: any) =>
+        s.status === 'active' &&
+        !(s.plan_name ?? '').toLowerCase().includes('free')
+      ).length
+
+      // Cancelled/churned this month
+      const monthStart = new Date()
+      monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0)
+      const churned = allSubs.filter((s: any) =>
+        s.status === 'cancelled' || s.status === 'past_due'
+      ).length
+
+      // Conversion rate — from subscriptions (more accurate)
+      const everPaid  = allSubs.filter((s: any) =>
+        s.amount > 0 && ['active', 'cancelled', 'past_due'].includes(s.status)
+      ).length
+      const convRate  = total > 0 ? (everPaid  / total) * 100 : 0
+      const churnRate = total > 0 ? (churned   / total) * 100 : 0
+
+      // Online now — last_seen within 5 minutes
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      const onlineNow  = all.filter((p: any) =>
+        p.last_seen && p.last_seen > fiveMinAgo
+      ).length
+
+      // Signups today
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const signupsToday = all.filter((p: any) =>
+        p.created_at && new Date(p.created_at) >= todayStart
+      ).length
+
+      // Rev today — real payments where paid_at >= today midnight
+      const todayMidnight = new Date()
+      todayMidnight.setHours(0, 0, 0, 0)
+      const revToday = allSubs
+        .filter((s: any) =>
+          s.paid_at && new Date(s.paid_at) >= todayMidnight
+        )
+        .reduce((sum: number, s: any) => sum + (Number(s.amount) ?? 0), 0)
+
+      // 2. Fetch tool usage from user_tool_usage
+      const { data: usageRows } = await supabase
+        .from('user_tool_usage')
+        .select('tool_name, usage_count, user_id')
+
+      const toolMap: Record<string, { sessions: number; users: Set<string> }> = {}
+      for (const row of (usageRows ?? []) as any[]) {
+        const key = (row.tool_name ?? 'unknown').toLowerCase()
+        if (!toolMap[key]) toolMap[key] = { sessions: 0, users: new Set() }
+        toolMap[key].sessions += row.usage_count ?? 1
+        if (row.user_id) toolMap[key].users.add(row.user_id)
+      }
+
+      // Flatten for easier consumption
+      const toolStats: Record<string, { sessions: number; users: number }> = {}
+      let totalUsage = 0
+      let mostUsedTool  = '—'
+      let mostUsedCount = 0
+
+      for (const [key, data] of Object.entries(toolMap)) {
+        toolStats[key] = { sessions: data.sessions, users: data.users.size }
+        totalUsage += data.sessions
+        if (data.sessions > mostUsedCount) {
+          mostUsedCount = data.sessions
+          mostUsedTool = key
+            .split('_')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' ')
+        }
+      }
+
+      // 3. Country stats from profiles
+      const { data: profilesGeo } = await supabase
+        .from('profiles')
+        .select('country')
+
+      const countryMap: Record<string, number> = {}
+      for (const p of (profilesGeo ?? []) as any[]) {
+        const c = (p.country ?? '').trim()
+        if (c) countryMap[c] = (countryMap[c] ?? 0) + 1
+      }
+      const countryStats = Object.entries(countryMap)
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8)
+
+      // 4. Recent transactions from subscriptions
+      const { data: txData } = await supabase
+        .from('subscriptions')
+        .select('user_id, plan_name, amount, status, paid_at')
+        .order('paid_at', { ascending: false })
+        .limit(5)
+      const recentTx = (txData ?? []) as any[]
+
+      setStats({
+        mrr, activeSubs, totalUsers: total,
+        convRate, churnRate,
+        totalUsage, mostUsedTool, mostUsedCount,
+        onlineNow, signupsToday, revToday,
+        toolStats, countryStats, recentTx,
+        loading: false,
+      })
+    } catch (e) {
+      console.error('Admin stats error:', e)
+      setStats(s => ({ ...s, loading: false }))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (authorized) loadAdminStats()
+  }, [authorized, loadAdminStats])
+
   // ── Responsive ─────────────────────────────────────────────
   useEffect(() => {
     const ro = new ResizeObserver(entries => {
@@ -360,7 +981,7 @@ export default function AdminPage() {
     return () => ro.disconnect()
   }, [])
 
-  // ── CMD+K keyboard shortcut ─────────────────────────────────
+  // ── CMD+K ───────────────────────────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
@@ -372,6 +993,52 @@ export default function AdminPage() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // ── Computed stat cards from real data ─────────────────────
+  const statCards: StatCardData[] = [
+    {
+      title: 'Monthly Recurring Revenue', titleMobile: 'MRR',
+      value: stats.loading ? '—' : `$${stats.mrr.toLocaleString()}`,
+      sub: stats.loading ? 'Loading...' : `+${stats.signupsToday} signups today`,
+      icon: DollarSign, isHighlight: true, isGood: false, isToolCard: false, isTopTool: false,
+    },
+    {
+      title: 'Active Subscribers', titleMobile: 'Users',
+      value: stats.loading ? '—' : String(stats.activeSubs),
+      sub: stats.loading ? 'Loading...' : `${stats.totalUsers} total accounts`,
+      icon: Users, isHighlight: false, isGood: false, isToolCard: false, isTopTool: false,
+    },
+    {
+      title: 'Trial Conversion Rate', titleMobile: 'Conversion',
+      value: stats.loading ? '—' : `${stats.convRate.toFixed(1)}%`,
+      sub: 'Industry avg: 15%',
+      icon: TrendingUp, isHighlight: false, isGood: false, isToolCard: false, isTopTool: false,
+    },
+    {
+      title: 'Churn Rate', titleMobile: 'Churn',
+      value: stats.loading ? '—' : `${stats.churnRate.toFixed(1)}%`,
+      sub: stats.loading ? 'Loading...' : stats.churnRate < 5 ? 'Healthy ↓' : 'Action needed ↑',
+      icon: TrendingDown, isHighlight: false, isGood: stats.churnRate < 5, isToolCard: false, isTopTool: false,
+    },
+    {
+      title: 'Total Tool Usage', titleMobile: 'Tool Uses',
+      value: stats.loading ? '—' : stats.totalUsage.toLocaleString(),
+      sub: 'Across all tools today',
+      icon: Wrench, isHighlight: false, isGood: false, isToolCard: true, isTopTool: false,
+    },
+    {
+      title: 'Most Used Tool', titleMobile: 'Top Tool',
+      value: stats.loading ? '—' : stats.mostUsedTool,
+      sub: stats.loading ? 'Loading...' : `${stats.mostUsedCount.toLocaleString()} sessions today`,
+      icon: Trophy, isHighlight: false, isGood: false, isToolCard: true, isTopTool: true,
+    },
+  ]
+
+  // ── Tools with real sessions/users ────────────────────────
+  const tools = TOOL_DEFS.map(t => {
+    const data = stats.toolStats[t.dbKey] ?? { sessions: 0, users: 0 }
+    return { ...t, sessions: data.sessions, users: data.users }
+  })
 
   if (checking) return (
     <div className="flex items-center justify-center h-full min-h-[400px]">
@@ -391,7 +1058,7 @@ export default function AdminPage() {
     </div>
   )
 
-  // ── Settings content router ─────────────────────────────────
+  // ── Settings content router ────────────────────────────────
   function getSettingsContent() {
     switch (activeSettingsTab) {
       case 0:  return <UserCrmTab          isInvestorMode={investorMode} isMobile={isMobile} />
@@ -410,7 +1077,7 @@ export default function AdminPage() {
     }
   }
 
-  // ── Header ──────────────────────────────────────────────────
+  // ── Header ─────────────────────────────────────────────────
   function Header() {
     const subtitle = isSettingsMode
       ? 'Manage users, team access & platform security'
@@ -427,7 +1094,6 @@ export default function AdminPage() {
             <Menu size={22} style={{ color: C.text }} />
           </button>
         ) : <div className="w-10" />}
-
         <div className="flex-1 flex flex-col items-center gap-2">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
                style={{ backgroundColor: 'rgba(143,255,0,0.10)', borderColor: 'rgba(143,255,0,0.35)' }}>
@@ -435,33 +1101,27 @@ export default function AdminPage() {
             <span className="text-[10px] font-bold" style={{ color: '#4A8F00' }}>All systems operational</span>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        <div className="relative">
-          <button className="w-10 h-10 flex items-center justify-center rounded-lg border"
-                  style={{ borderColor: C.border }}>
-            <MoreVertical size={18} style={{ color: C.text }} />
-          </button>
-        </div>
+        <button className="w-10 h-10 flex items-center justify-center rounded-lg border"
+                style={{ borderColor: C.border }}>
+          <MoreVertical size={18} style={{ color: C.text }} />
+        </button>
       </div>
     )
 
-    // Desktop header
     return (
       <div className="flex items-center gap-3 flex-wrap">
-        {/* Subtitle only */}
         <div className="flex items-center gap-1.5 mr-2">
           <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: C.lime }} />
           <p className="text-[13px] truncate" style={{ color: C.muted }}>{subtitle}</p>
         </div>
 
-        {/* Quick stats bar */}
+        {/* Real quick stats bar */}
         <div className="flex items-center gap-0 px-3 py-1.5 rounded-full border ml-auto"
              style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.2)' }}>
           {[
-            { val: '24',   label: 'online',    color: C.lime    },
-            { val: '8',    label: 'signups',   color: '#60A5FA' },
-            { val: '$420', label: 'rev today', color: '#FBBF24' },
+            { val: stats.loading ? '—' : String(stats.onlineNow),           label: 'online',    color: C.lime    },
+            { val: stats.loading ? '—' : String(stats.signupsToday),        label: 'signups',   color: '#60A5FA' },
+            { val: stats.loading ? '—' : `$${stats.revToday.toLocaleString()}`, label: 'rev today', color: '#FBBF24' },
           ].map((s, i) => (
             <div key={i} className="flex items-center">
               {i > 0 && <div className="w-px h-3.5 mx-2.5" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />}
@@ -498,13 +1158,13 @@ export default function AdminPage() {
           </div>
         </button>
 
-        {/* Analytics Hub button */}
+        {/* Analytics Hub */}
         <AnalyticsHubButton
           isActive={isAnalyticsMode}
-          onTap={() => { setIsAnalyticsMode(m => !m); setIsSettingsMode(false) }}
+          onTap={() => { setIsAnalyticsMode(m => !m); setIsSettingsMode(false); setAnalyticsTab(0) }}
         />
 
-        {/* Settings / Back button */}
+        {/* Settings / Back */}
         {(isSettingsMode || isAnalyticsMode) ? (
           <button onClick={() => { setIsSettingsMode(false); setIsAnalyticsMode(false) }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-[13px] font-bold"
@@ -522,7 +1182,7 @@ export default function AdminPage() {
     )
   }
 
-  // ── Settings sidebar item ───────────────────────────────────
+  // ── Settings sidebar item ──────────────────────────────────
   function SidebarItem({ index }: { index: number }) {
     const item     = SETTINGS_MENU[index]
     const Icon     = item.icon
@@ -544,7 +1204,7 @@ export default function AdminPage() {
     )
   }
 
-  // ── Quick action bar ────────────────────────────────────────
+  // ── Quick Action Bar ───────────────────────────────────────
   function QuickActionBar() {
     return (
       <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border"
@@ -558,10 +1218,10 @@ export default function AdminPage() {
         )}
         <div className="flex gap-2 overflow-x-auto">
           {[
-            { icon: UserPlus,  label: 'Add User',      bg: C.lime,         color: C.dark,     border: null,       action: () => setShowAddUser(true)    },
-            { icon: Key,       label: 'Reset API',     bg: '#F1F5F9',      color: C.text,     border: null,       action: () => setShowResetApi(true)   },
-            { icon: FileText,  label: 'Export Report', bg: '#F1F5F9',      color: C.text,     border: null,       action: () => {}                      },
-            { icon: Power,     label: 'Kill Switch',   bg: '#FEF2F2',      color: '#F87171',  border: '#FFCDD2',  action: () => setShowKillSwitch(true)  },
+            { icon: UserPlus, label: 'Add User',      bg: C.lime,    color: C.dark,    border: null,       action: () => setShowAddUser(true)   },
+            { icon: Key,      label: 'Reset API',     bg: '#F1F5F9', color: C.text,    border: null,       action: () => setShowResetApi(true)  },
+            { icon: FileText, label: 'Export Report', bg: '#F1F5F9', color: C.text,    border: null,       action: () => {}                     },
+            { icon: Power,    label: 'Kill Switch',   bg: '#FEF2F2', color: '#F87171', border: '#FFCDD2',  action: () => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(4) } },
           ].map((a, i) => {
             const Icon = a.icon
             return (
@@ -578,17 +1238,17 @@ export default function AdminPage() {
     )
   }
 
-  // ── Dashboard layout ────────────────────────────────────────
+  // ── Dashboard Layout ───────────────────────────────────────
   function DashboardLayout() {
-    const liveCount     = TOOLS.filter(t => t.isLive).length
-    const totalSessions = TOOLS.filter(t => t.isLive).reduce((s, t) => s + t.sessions, 0)
-    const totalUsers    = TOOLS.filter(t => t.isLive).reduce((s, t) => s + t.users, 0)
+    const liveCount     = tools.filter(t => t.isLive).length
+    const totalSessions = tools.filter(t => t.isLive).reduce((s, t) => s + t.sessions, 0)
+    const totalUsers    = tools.filter(t => t.isLive).reduce((s, t) => s + t.users, 0)
 
     return (
       <div className="flex flex-col gap-6">
-        {/* Stat cards */}
+        {/* Stat cards — real data */}
         <div className={`grid gap-3 ${isMobile ? 'grid-cols-2' : 'grid-cols-6'}`}>
-          {STAT_CARDS.map((d, i) => <StatCard key={i} d={d} isMobile={isMobile} />)}
+          {statCards.map((d, i) => <StatCard key={i} d={d} isMobile={isMobile} />)}
         </div>
 
         {/* Tools Overview */}
@@ -600,7 +1260,7 @@ export default function AdminPage() {
                 <p className="text-[16px] font-extrabold tracking-tight" style={{ color: C.text }}>Tools Overview</p>
               </div>
               <p className="text-[12px] font-medium ml-3.5 mt-1" style={{ color: C.muted }}>
-                {liveCount} active tools  •  {totalSessions} sessions today  •  {totalUsers} users
+                {liveCount} active tools  •  {totalSessions.toLocaleString()} sessions today  •  {totalUsers.toLocaleString()} users
               </p>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
@@ -610,29 +1270,136 @@ export default function AdminPage() {
             </div>
           </div>
           <div className={`grid gap-3 ${isMobile ? 'grid-cols-2' : 'grid-cols-6'}`}>
-            {TOOLS.map((t, i) => <ToolCard key={i} tool={t} index={i} />)}
+            {tools.map((t, i) => <ToolCard key={i} tool={t} />)}
           </div>
         </div>
 
-        {/* Quick actions */}
+        {/* Quick Actions */}
         <QuickActionBar />
+
+        {/* Row 4: Live Transaction Ledger + Geographic Heatmap */}
+        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+
+          {/* Live Transaction Ledger */}
+          <div className="p-5 rounded-2xl border"
+               style={{ backgroundColor: '#fff', borderColor: C.border }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: C.lime }} />
+                <div>
+                  <p className="text-[14px] font-bold" style={{ color: C.text }}>Live Transactions</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>Recent payment activity</p>
+                </div>
+              </div>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.lime }} />
+            </div>
+            {stats.recentTx.length === 0 ? (
+              <div className="flex flex-col items-center py-8 gap-2">
+                <DollarSign size={28} style={{ color: C.border }} />
+                <p className="text-[13px]" style={{ color: C.muted }}>No transactions yet</p>
+                <p className="text-[11px]" style={{ color: C.hint }}>Payments will appear here</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {stats.recentTx.map((tx: any, i: number) => {
+                  const isActive = tx.status === 'active'
+                  const isTrial  = tx.status === 'trial'
+                  const color    = isActive ? '#16A34A' : isTrial ? '#60A5FA' : '#F87171'
+                  const bg       = isActive ? 'rgba(22,163,74,0.08)' : isTrial ? 'rgba(96,165,250,0.08)' : 'rgba(248,113,113,0.08)'
+                  return (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
+                         style={{ backgroundColor: C.bg }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                           style={{ backgroundColor: bg }}>
+                        <DollarSign size={14} style={{ color }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>
+                          {(tx.user_id?.slice(0, 8) ?? 'Unknown') + '...'}
+                        </p>
+                        <p className="text-[10px]" style={{ color: C.muted }}>
+                          {tx.plan_name} · {tx.paid_at ? new Date(tx.paid_at).toLocaleDateString() : '—'}
+                        </p>
+                      </div>
+                      <span className="text-[13px] font-extrabold shrink-0"
+                            style={{ color: Number(tx.amount) > 0 ? '#16A34A' : C.muted }}>
+                        {Number(tx.amount) > 0 ? `+$${Number(tx.amount).toFixed(2)}` : '$0'}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Geographic Heatmap */}
+          <div className="p-5 rounded-2xl border"
+               style={{ backgroundColor: '#fff', borderColor: C.border }}>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-1 h-4 rounded-full" style={{ backgroundColor: '#60A5FA' }} />
+              <div>
+                <p className="text-[14px] font-bold" style={{ color: C.text }}>Geographic Overview</p>
+                <p className="text-[11px]" style={{ color: C.muted }}>Users by country</p>
+              </div>
+            </div>
+            {stats.countryStats.length === 0 ? (
+              <div className="flex flex-col items-center py-8 gap-2">
+                <Globe size={28} style={{ color: C.border }} />
+                <p className="text-[13px]" style={{ color: C.muted }}>No location data yet</p>
+                <p className="text-[11px] text-center" style={{ color: C.hint }}>
+                  Location data will appear here when users verify their country in profile settings
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {stats.countryStats.map((c: any, i: number) => {
+                  const pct = stats.totalUsers > 0
+                    ? Math.round((c.count / stats.totalUsers) * 100)
+                    : 0
+                  const colors = ['#8FFF00','#60A5FA','#FB923C','#A78BFA','#F472B6','#34D399','#FBBF24','#F87171']
+                  const barColor = colors[i % colors.length]
+                  return (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full shrink-0"
+                               style={{ backgroundColor: barColor }} />
+                          <span className="text-[12px] font-semibold" style={{ color: C.text }}>
+                            {c.country}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px]" style={{ color: C.muted }}>{c.count} users</span>
+                          <span className="text-[11px] font-bold" style={{ color: C.text }}>{pct}%</span>
+                        </div>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden"
+                           style={{ backgroundColor: C.border }}>
+                        <div className="h-full rounded-full transition-all"
+                             style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+        </div>
+
       </div>
     )
   }
 
-  // ── Settings layout ─────────────────────────────────────────
+  // ── Settings Layout ────────────────────────────────────────
   function SettingsLayout() {
-    if (isMobile) return (
-      <div>{getSettingsContent()}</div>
-    )
+    if (isMobile) return <div>{getSettingsContent()}</div>
     return (
       <div className="flex gap-6 items-start">
-        {/* Sidebar */}
         <div className="w-[250px] shrink-0 py-4 rounded-2xl border"
              style={{ backgroundColor: '#fff', borderColor: C.border }}>
           {SETTINGS_MENU.map((_, i) => <SidebarItem key={i} index={i} />)}
         </div>
-        {/* Content */}
         <div className="flex-1 min-w-0 p-6 rounded-2xl border"
              style={{ backgroundColor: '#fff', borderColor: C.border }}>
           {getSettingsContent()}
@@ -641,7 +1408,7 @@ export default function AdminPage() {
     )
   }
 
-  // ── Mobile settings drawer ──────────────────────────────────
+  // ── Mobile Drawer ──────────────────────────────────────────
   function MobileDrawer() {
     if (!mobileDrawerOpen) return null
     return (
@@ -654,7 +1421,7 @@ export default function AdminPage() {
           </p>
           <div className="flex-1 overflow-y-auto">
             {SETTINGS_MENU.map((item, i) => {
-              const Icon = item.icon
+              const Icon     = item.icon
               const isActive = activeSettingsTab === i
               return (
                 <button key={i} onClick={() => { setActiveSettingsTab(i); setMobileDrawerOpen(false) }}
@@ -677,7 +1444,6 @@ export default function AdminPage() {
 
   return (
     <div ref={containerRef} className="min-h-full" style={{ backgroundColor: '#F7F9F5' }}>
-      {/* Lime scrollbar only in dashboard mode (matches Dart RawScrollbar) */}
       <style>{`
         ${!isSettingsMode && !isAnalyticsMode ? `
           ::-webkit-scrollbar { width: 6px; }
@@ -688,23 +1454,19 @@ export default function AdminPage() {
       `}</style>
 
       <div className="w-full px-4 md:px-6 lg:px-8 pt-4 pb-20 flex flex-col gap-6">
-
-        {/* Header */}
         <Header />
 
-        {/* Settings mode */}
         {isSettingsMode && <SettingsLayout />}
 
-        {/* Analytics mode */}
         {isAnalyticsMode && !isSettingsMode && (
           <AnalyticsHub
             isInvestorMode={investorMode}
             isMobile={isMobile}
-            onBack={() => setIsAnalyticsMode(false)}
+            initialTab={analyticsTab}
+            onBack={() => { setIsAnalyticsMode(false); setAnalyticsTab(0) }}
           />
         )}
 
-        {/* Dashboard mode */}
         {!isSettingsMode && !isAnalyticsMode && (
           isMobile ? (
             <DashboardLayout />
@@ -719,9 +1481,8 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* Overlays */}
-      {showCmdPalette  && <CommandPalette  onClose={() => setShowCmdPalette(false)}  onNavigate={() => {}} />}
-      {showAddUser     && <AddUserDialog   onClose={() => setShowAddUser(false)}     />}
+      {showCmdPalette  && <CommandPalette  onClose={() => setShowCmdPalette(false)}  />}
+      {showAddUser     && <AddUserDialog   onClose={() => setShowAddUser(false)} onCreated={loadAdminStats} />}
       {showResetApi    && <ResetApiDialog  onClose={() => setShowResetApi(false)}    />}
       {showKillSwitch  && <KillSwitchDialog onClose={() => setShowKillSwitch(false)} />}
       <MobileDrawer />

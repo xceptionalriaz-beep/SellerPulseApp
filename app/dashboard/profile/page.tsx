@@ -4,25 +4,27 @@
 // SHELL ONLY — tab content comes from separate files in /tabs/
 
 import { useState } from 'react'
-import { Shield, User, Globe, BarChart2, Bookmark, CreditCard, Lock } from 'lucide-react'
+import { Shield, User, Globe, BarChart2, Bookmark, CreditCard, Lock, DollarSign } from 'lucide-react'
 import OverviewTab    from './tabs/OverviewTab'
 import EbayManagerTab from './tabs/EbayManagerTab'
 import ToolUsageTab   from './tabs/ToolUsageTab'
 import VaultTab       from './tabs/VaultTab'
 import BillingTab     from './tabs/BillingTab'
 import SecurityTab    from './tabs/SecurityTab'
+import AffiliateTab   from './tabs/AffiliateTab'
 
 const pageBg    = '#F4F7FA'
 const sidebarBg = '#0F172A'
 const accent    = '#8FFF00'
 
 const TABS = [
-  { icon: User,       label: 'Overview'    },
-  { icon: Globe,      label: 'Marketplace' },
-  { icon: BarChart2,  label: 'Tool Usage'  },
-  { icon: Bookmark,   label: 'Vault'       },
-  { icon: CreditCard, label: 'Billing'     },
-  { icon: Lock,       label: 'Security'    },
+  { icon: User,        label: 'Overview'    },
+  { icon: Globe,       label: 'Marketplace' },
+  { icon: BarChart2,   label: 'Tool Usage'  },
+  { icon: Bookmark,    label: 'Vault'       },
+  { icon: CreditCard,  label: 'Billing'     },
+  { icon: Lock,        label: 'Security'    },
+  { icon: DollarSign,  label: 'Affiliate'   },
 ]
 
 export default function UserProfilePage() {
@@ -36,6 +38,7 @@ export default function UserProfilePage() {
       case 3: return <VaultTab       />
       case 4: return <BillingTab     />
       case 5: return <SecurityTab    />
+      case 6: return <AffiliateTab   />
       default: return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="text-[48px]">🚧</div>

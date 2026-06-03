@@ -1,6 +1,6 @@
 'use client'
 // components/admin/settings-tabs/ApiVaultPage.tsx
-// Converted 1:1 from lib/pages/admin_settings_tabs/api_vault_complete.dart
+// Fixed: saveToVault now auto-sets expires_at to 90 days from save date
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -11,7 +11,6 @@ import {
   Bell, X, ExternalLink,
 } from 'lucide-react'
 
-// ── Design tokens (matches Dart _C) ──────────────────────────
 const C = {
   bg:        '#F8FAFC',
   surface:   '#FFFFFF',
@@ -30,7 +29,6 @@ const C = {
 
 interface Props { isInvestorMode?: boolean; isMobile?: boolean }
 
-// ── Scope badge (matches Dart _ScopeBadge) ────────────────────
 function ScopeBadge({ name, granted }: { name: string; granted: boolean }) {
   const color  = granted ? C.green   : C.red
   const bg     = granted ? '#F0FDF4' : '#FEF2F2'
@@ -45,7 +43,6 @@ function ScopeBadge({ name, granted }: { name: string; granted: boolean }) {
   )
 }
 
-// ── Key row (matches Dart _KeyRow) ────────────────────────────
 function KeyRow({ label1, hint1, label2, hint2, val1, val2, obscure, onToggle, isPrimary, onChange1, onChange2 }: {
   label1: string; hint1: string; label2: string; hint2: string
   val1: string; val2: string; obscure: boolean; onToggle: () => void
@@ -83,7 +80,6 @@ function KeyRow({ label1, hint1, label2, hint2, val1, val2, obscure, onToggle, i
   )
 }
 
-// ── Locked panel (matches Dart _LockedPanel) ──────────────────
 function LockedPanel({ platform }: { platform: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 rounded-2xl border"
@@ -99,7 +95,6 @@ function LockedPanel({ platform }: { platform: string }) {
   )
 }
 
-// ── Notifications modal (matches Dart _showNotificationsModal) ─
 function NotificationsModal({ notifications, onClose, onMarkRead }: {
   notifications: any[]; onClose: () => void; onMarkRead: () => void
 }) {
@@ -115,7 +110,7 @@ function NotificationsModal({ notifications, onClose, onMarkRead }: {
             const color = p >= 4 ? C.red : p >= 3 ? C.orange : C.blue
             return (
               <div key={i} className="p-3.5 rounded-xl border"
-                   style={{ backgroundColor: color + '14', borderColor: color + '4D' }}>
+                   style={{ backgroundColor: color+'14', borderColor: color+'4D' }}>
                 <div className="flex items-center gap-2 mb-1">
                   <Bell size={13} style={{ color }} />
                   <p className="text-[13px] font-bold" style={{ color }}>{n.title}</p>
@@ -141,7 +136,6 @@ function NotificationsModal({ notifications, onClose, onMarkRead }: {
   )
 }
 
-// ── eBay Config Panel (matches Dart EbayConfigPanel) ──────────
 function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
   const supabase = createClient()
 
@@ -155,6 +149,7 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
   const [isSaving,          setIsSaving]          = useState(false)
   const [isTesting,         setIsTesting]         = useState(false)
   const [isLoading,         setIsLoading]         = useState(true)
+  const [saveSuccess,       setSaveSuccess]        = useState(false)
 
   const [status,          setStatus]          = useState('disconnected')
   const [daysUntilExpiry, setDaysUntilExpiry] = useState(0)
@@ -202,16 +197,15 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
       if (data.last_tested_at) setLastTested(new Date(data.last_tested_at))
       if (Array.isArray(data.scopes)) setScopes(data.scopes)
 
-      // Health score — matches Dart calculation exactly
       const pct = tot > 0 ? Math.round(used / tot * 100) : 0
       let hs = 30
-      if      (st === 'expired')                    hs = 0
-      else if (st === 'error')                      hs = 25
-      else if (pct > 95)                            hs = 40
-      else if (pct > 85)                            hs = 60
-      else if (days > 0 && days <= 7)               hs = 50
-      else if (days > 7 && days <= 30)              hs = 75
-      else if (st === 'connected')                  hs = 100
+      if      (st === 'expired')          hs = 0
+      else if (st === 'error')            hs = 25
+      else if (pct > 95)                  hs = 40
+      else if (pct > 85)                  hs = 60
+      else if (days > 0 && days <= 7)     hs = 50
+      else if (days > 7 && days <= 30)    hs = 75
+      else if (st === 'connected')        hs = 100
       setHealthScore(hs)
     } catch (e) { console.error('Load error:', e) }
     setIsLoading(false)
@@ -221,8 +215,13 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
     if (!appId.trim())  { alert('⚠️ Primary App ID is required');  return }
     if (!certId.trim()) { alert('⚠️ Primary Cert ID is required'); return }
     setIsSaving(true)
+    setSaveSuccess(false)
     try {
       const { data: { user } } = await supabase.auth.getUser()
+
+      // ✅ FIX: auto-set expires_at to 90 days from now on every save
+      const newExpiresAt = new Date(Date.now() + 90 * 86400000).toISOString()
+
       await (supabase.from('api_fleet_config') as any).update({
         primary_key_1: appId.trim(),
         primary_key_2: certId.trim(),
@@ -230,6 +229,7 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
         backup_key_2:  backupCert.trim() || 'EMPTY',
         updated_at:    new Date().toISOString(),
         status:        'connected',
+        expires_at:    newExpiresAt,   // ✅ FIXED: was missing before
       }).eq('platform_name', 'ebay')
 
       if (user && appId.trim().length >= 8) {
@@ -241,11 +241,13 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
             key_fingerprint: appId.trim().substring(0, 8),
             key_type:        'primary',
             changed_by:      user.email ?? 'admin',
-            notes:           'Keys updated via API Vault',
+            notes:           `Keys updated via API Vault — expires ${new Date(newExpiresAt).toLocaleDateString()}`,
           })
         } catch {}
       }
 
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 4000)
       await loadFromDatabase()
       onRefresh()
     } catch (e) { console.error('Save error:', e) }
@@ -261,7 +263,6 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
     const start = Date.now()
     const { data: { user } } = await supabase.auth.getUser()
     try {
-      // matches Dart supabase.functions.invoke('ebay-proxy')
       const result = await supabase.functions.invoke('ebay-proxy', {
         body: { appId: appId.trim(), devId: backupApp.trim(), certId: certId.trim(), testMode: true }
       })
@@ -294,7 +295,6 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
       const ms  = Date.now() - start
       const msg = e.toString()
       setLastTestSuccess(false); setLastTestMs(ms); setLastTestError(msg)
-
       if (user) {
         try {
           await (supabase.from('api_test_results') as any).insert({
@@ -310,14 +310,14 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
   const lastTestedText = (() => {
     if (!lastTested) return 'Never tested'
     const d = Date.now() - lastTested.getTime()
-    if (d < 60000)      return 'Just now'
-    if (d < 3600000)    return `${Math.floor(d/60000)} mins ago`
-    if (d < 86400000)   return `${Math.floor(d/3600000)} hours ago`
+    if (d < 60000)    return 'Just now'
+    if (d < 3600000)  return `${Math.floor(d/60000)} mins ago`
+    if (d < 86400000) return `${Math.floor(d/3600000)} hours ago`
     return `${Math.floor(d/86400000)} days ago`
   })()
 
-  const hColor = healthScore >= 80 ? C.green : healthScore >= 50 ? C.orange : C.red
-  const usagePct = rateLimitTotal > 0 ? Math.min(rateLimitUsed / rateLimitTotal, 1) : 0
+  const hColor   = healthScore >= 80 ? C.green : healthScore >= 50 ? C.orange : C.red
+  const usagePct = rateLimitTotal > 0 ? Math.min(rateLimitUsed/rateLimitTotal, 1) : 0
   const barColor = usagePct > 0.85 ? C.red : usagePct > 0.70 ? C.orange : C.green
 
   const defaultScopes = [
@@ -339,9 +339,7 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
     <div className="rounded-2xl border overflow-hidden"
          style={{ backgroundColor: C.surface, borderColor: C.border, boxShadow: '0 4px 10px rgba(0,0,0,0.04)' }}>
 
-      {/* ── Metrics section ── */}
       <div className="p-6">
-
         {/* Title + health score */}
         <div className="flex items-start justify-between gap-4 mb-5">
           <div className="flex items-center gap-4">
@@ -366,9 +364,8 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
               </div>
             </div>
           </div>
-          {/* Health badge */}
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl border shrink-0"
-               style={{ backgroundColor: hColor + '1A', borderColor: hColor + '4D' }}>
+               style={{ backgroundColor: hColor+'1A', borderColor: hColor+'4D' }}>
             {healthScore >= 80
               ? <CheckCircle size={17} style={{ color: hColor }} />
               : <AlertTriangle size={17} style={{ color: hColor }} />}
@@ -379,19 +376,38 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
           </div>
         </div>
 
-        {/* Expiry warning */}
-        {daysUntilExpiry > 0 && daysUntilExpiry < 30 && (
+        {/* ✅ Expiry info — shows 90 days remaining after save */}
+        {daysUntilExpiry > 0 && (
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl border mb-5"
                style={{
-                 backgroundColor: daysUntilExpiry < 7 ? '#FEF2F2' : '#FFFBEB',
-                 borderColor:     daysUntilExpiry < 7 ? 'rgba(255,77,106,0.4)' : 'rgba(255,184,0,0.4)',
+                 backgroundColor: daysUntilExpiry < 7  ? '#FEF2F2'
+                                : daysUntilExpiry < 30 ? '#FFFBEB'
+                                : '#F0FDF4',
+                 borderColor:     daysUntilExpiry < 7  ? 'rgba(255,77,106,0.4)'
+                                : daysUntilExpiry < 30 ? 'rgba(255,184,0,0.4)'
+                                : 'rgba(0,196,140,0.3)',
                }}>
-            <AlertTriangle size={17} style={{ color: daysUntilExpiry < 7 ? C.red : C.orange }} />
+            {daysUntilExpiry >= 30
+              ? <CheckCircle size={17} style={{ color: C.green }} />
+              : <AlertTriangle size={17} style={{ color: daysUntilExpiry < 7 ? C.red : C.orange }} />}
             <p className="text-[12px] font-bold flex-1"
-               style={{ color: daysUntilExpiry < 7 ? '#991B1B' : '#92400E' }}>
-              {daysUntilExpiry < 7
-                ? `🚨 URGENT: Keys expire in ${daysUntilExpiry} days! Rotate immediately.`
-                : `Action Required: Keys expire in ${daysUntilExpiry} days.`}
+               style={{ color: daysUntilExpiry < 7 ? '#991B1B' : daysUntilExpiry < 30 ? '#92400E' : '#166534' }}>
+              {daysUntilExpiry >= 30
+                ? `✅ Keys valid for ${daysUntilExpiry} more days (auto-set on save)`
+                : daysUntilExpiry < 7
+                ? `🚨 URGENT: Keys expire in ${daysUntilExpiry} days! Save keys again to renew.`
+                : `Action Required: Keys expire in ${daysUntilExpiry} days. Save to renew.`}
+            </p>
+          </div>
+        )}
+
+        {/* Save success banner */}
+        {saveSuccess && (
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border mb-5"
+               style={{ backgroundColor: C.green+'14', borderColor: C.green+'4D' }}>
+            <CheckCircle size={15} style={{ color: C.green }} />
+            <p className="flex-1 text-[12px] font-semibold" style={{ color: C.green }}>
+              ✅ Keys saved! Expiry reset to 90 days from today.
             </p>
           </div>
         )}
@@ -400,8 +416,8 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
         {lastTestSuccess !== null && (
           <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border mb-5"
                style={{
-                 backgroundColor: (lastTestSuccess ? C.green : C.red) + '14',
-                 borderColor:     (lastTestSuccess ? C.green : C.red) + '4D',
+                 backgroundColor: (lastTestSuccess ? C.green : C.red)+'14',
+                 borderColor:     (lastTestSuccess ? C.green : C.red)+'4D',
                }}>
             {lastTestSuccess
               ? <CheckCircle size={15} style={{ color: C.green }} />
@@ -420,22 +436,19 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
 
         {/* Rate limit + scopes */}
         <div className="flex gap-10">
-          {/* Rate limit bar */}
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[12px] font-bold" style={{ color: C.txt1 }}>Daily Rate Limit</p>
               <p className="text-[12px] font-bold" style={{ color: C.txt2 }}>{rateLimitUsed} / {rateLimitTotal} reqs</p>
             </div>
             <div className="h-1.5 rounded-full overflow-hidden mb-1.5" style={{ backgroundColor: '#F1F5F9' }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${usagePct * 100}%`, backgroundColor: barColor }} />
+              <div className="h-full rounded-full transition-all" style={{ width: `${usagePct*100}%`, backgroundColor: barColor }} />
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-[10px]" style={{ color: C.txt3 }}>{Math.round(usagePct * 100)}% used</p>
+              <p className="text-[10px]" style={{ color: C.txt3 }}>{Math.round(usagePct*100)}% used</p>
               <p className="text-[10px]" style={{ color: C.txt3 }}>{requestsToday} requests today</p>
             </div>
           </div>
-
-          {/* Active scopes */}
           <div className="flex-1">
             <p className="text-[12px] font-bold mb-2" style={{ color: C.txt1 }}>Active Scopes</p>
             <div className="flex flex-wrap gap-2">
@@ -449,20 +462,19 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
 
       <div className="h-px" style={{ backgroundColor: C.border }} />
 
-      {/* ── Form section ── */}
       <div className="p-6" style={{ backgroundColor: C.bg }}>
         <div className="flex flex-col gap-5">
           <KeyRow
-            label1="Primary App ID"   hint1="e.g. ReazifyL-SellerPu-PRD-..."
-            label2="Primary Cert ID"  hint2="e.g. PRD-f605e695..."
+            label1="Primary App ID"  hint1="e.g. ReazifyL-SellerPu-PRD-..."
+            label2="Primary Cert ID" hint2="e.g. PRD-f605e695..."
             val1={appId}   onChange1={setAppId}
             val2={certId}  onChange2={setCertId}
             obscure={obscureCert} onToggle={() => setObscureCert(s => !s)}
             isPrimary={true}
           />
           <KeyRow
-            label1="Fallback App ID"   hint1="Paste Fallback App ID..."
-            label2="Fallback Cert ID"  hint2="Paste Fallback Cert ID..."
+            label1="Fallback App ID"  hint1="Paste Fallback App ID..."
+            label2="Fallback Cert ID" hint2="Paste Fallback Cert ID..."
             val1={backupApp}   onChange1={setBackupApp}
             val2={backupCert}  onChange2={setBackupCert}
             obscure={obscureBackupCert} onToggle={() => setObscureBackupCert(s => !s)}
@@ -489,12 +501,11 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
             </button>
           </div>
 
-          {/* Edge function info note */}
           <div className="flex items-start gap-2 p-3 rounded-lg border"
                style={{ backgroundColor: C.accentDim, borderColor: 'rgba(143,255,0,0.4)' }}>
             <Info size={13} style={{ color: C.navy, marginTop: 1 }} />
             <p className="text-[11px]" style={{ color: C.navy }}>
-              Test uses Supabase Edge Function "ebay-proxy" to bypass browser CORS. Deploy it in Supabase Dashboard → Edge Functions.
+              Saving keys auto-resets expiry to 90 days. Test uses Supabase Edge Function "ebay-proxy" to bypass CORS.
             </p>
           </div>
         </div>
@@ -503,7 +514,6 @@ function EbayConfigPanel({ onRefresh }: { onRefresh: () => void }) {
   )
 }
 
-// ── Main Page (matches Dart ApiVaultPage) ─────────────────────
 export default function ApiVaultPage(_props: Props) {
   const supabase = createClient()
 
@@ -550,8 +560,6 @@ export default function ApiVaultPage(_props: Props) {
 
   return (
     <div className="flex flex-col gap-6" style={{ backgroundColor: C.bg }}>
-
-      {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-3 mb-1.5">
@@ -559,8 +567,7 @@ export default function ApiVaultPage(_props: Props) {
               Global API Command Center
             </h2>
             {activeNotifications > 0 && (
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl"
-                   style={{ backgroundColor: C.red }}>
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl" style={{ backgroundColor: C.red }}>
                 <Bell size={11} style={{ color: '#fff' }} />
                 <span className="text-[11px] font-bold text-white">{activeNotifications}</span>
               </div>
@@ -570,8 +577,6 @@ export default function ApiVaultPage(_props: Props) {
             Manage rate limits, failovers, and security scopes.
           </p>
         </div>
-
-        {/* Production/Sandbox toggle */}
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border"
              style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <div className="w-4 h-4 rounded-full" style={{ backgroundColor: isProductionMode ? C.green : C.orange }} />
@@ -590,13 +595,9 @@ export default function ApiVaultPage(_props: Props) {
         </div>
       </div>
 
-      {/* Notifications banner */}
       {activeNotifications > 0 && (
         <div className="flex items-center gap-3 p-4 rounded-xl border"
-             style={{
-               backgroundColor: isCrit ? '#FEF2F2' : '#FFFBEB',
-               borderColor:     isCrit ? '#FECACA' : '#FDE68A',
-             }}>
+             style={{ backgroundColor: isCrit ? '#FEF2F2' : '#FFFBEB', borderColor: isCrit ? '#FECACA' : '#FDE68A' }}>
           {isCrit
             ? <XCircle size={21} style={{ color: '#DC2626' }} />
             : <AlertTriangle size={21} style={{ color: C.orange }} />}
@@ -615,7 +616,6 @@ export default function ApiVaultPage(_props: Props) {
         </div>
       )}
 
-      {/* Platform tabs */}
       <div className="flex flex-wrap gap-3">
         {TABS.map(t => {
           const Icon       = t.icon
@@ -638,12 +638,10 @@ export default function ApiVaultPage(_props: Props) {
         })}
       </div>
 
-      {/* Panel */}
       {selectedPlatform === 'ebay'
         ? <EbayConfigPanel onRefresh={loadNotifications} />
         : <LockedPanel platform={selectedPlatform} />}
 
-      {/* Notifications modal */}
       {showNotifications && (
         <NotificationsModal
           notifications={notifications}
