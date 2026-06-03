@@ -541,6 +541,104 @@ function GenerateLinkDialog({ affiliates, onClose }: { affiliates: Affiliate[]; 
 // ════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ════════════════════════════════════════════════════════════
+
+// Payout Line Chart using Chart.js
+function PayoutLineChart({ payouts }: { payouts: Payout[] }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!canvasRef.current || payouts.length === 0) return
+
+    const list   = payouts.slice(0, 8)
+    const labels = list.map((p: Payout) =>
+      new Date(p.paid_at ?? p.created_at)
+        .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    )
+    const data = list.map((p: Payout) => p.amount)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let chartInstance: any = null
+
+    import('chart.js').then(({ Chart, registerables }) => {
+      if (!canvasRef.current) return
+      Chart.register(...registerables)
+
+      // Destroy any existing chart on this canvas
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const existing = (Chart as any).getChart(canvasRef.current)
+      if (existing) existing.destroy()
+
+      chartInstance = new Chart(canvasRef.current, {
+        type: 'line' as const,
+        data: {
+          labels,
+          datasets: [{
+            label: 'Payout',
+            data,
+            borderColor: '#3B6D11',
+            backgroundColor: 'rgba(59,109,17,0.08)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#3B6D11',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: { padding: { left: 4, right: 16, top: 8, bottom: 0 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                label: (ctx: any) => '$' + ctx.parsed.y.toLocaleString(),
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                font: { size: 10 } as any,
+                color: '#8a9e78',
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 6,
+              },
+            },
+            y: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              grid: { color: 'rgba(0,0,0,0.05)' } as any,
+              ticks: {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                font: { size: 10 } as any,
+                color: '#8a9e78',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                callback: (v: any) => '$' + Number(v).toLocaleString(),
+              },
+              min: 0,
+            },
+          },
+        },
+      })
+    })
+
+    return () => { if (chartInstance) chartInstance.destroy() }
+  }, [payouts])
+
+  return (
+    <div style={{ position: 'relative', height: 160 }}>
+      <canvas ref={canvasRef} />
+    </div>
+  )
+}
+
 export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }: Props) {
   const supabase = createClient()
 
@@ -791,20 +889,35 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
   return (
     <div className="flex flex-col gap-5">
 
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-[18px] font-bold" style={{ color: C.text }}>
-            Affiliate & Partner Command Center
-          </h2>
-          <p className="text-[13px] mt-0.5" style={{ color: C.muted }}>
-            Track promoters, referral clicks, and pending payouts
-          </p>
+      {/* Header — stats + buttons in one row */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border"
+           style={{ backgroundColor: C.surface, borderColor: C.border }}>
+
+        {/* 3 stat boxes — stretch to fill space */}
+        <div className="flex gap-2 flex-1">
+          {[
+            { label: 'Commission', value: `${affiliateSettings ? (affiliateSettings.commission_rate * 100).toFixed(0) : '25'}% · ${affiliateSettings?.commission_months ?? 12}mo`, color: C.limeDeep, bg: C.limeTint },
+            { label: 'Min payout', value: `$${affiliateSettings?.min_payout ?? 50}`,                                                                                              color: C.text,     bg: C.bg      },
+            { label: 'Status',     value: affiliateSettings && !affiliateSettings.is_program_active ? 'Paused' : 'Active',                                                         color: affiliateSettings && !affiliateSettings.is_program_active ? '#f97316' : C.limeDeep, bg: affiliateSettings && !affiliateSettings.is_program_active ? '#FEF3C7' : C.bg },
+          ].map((s, i) => (
+            <div key={i} className="flex-1 px-3 py-2 rounded-xl text-center"
+                 style={{ backgroundColor: s.bg }}>
+              <p className="text-[10px] font-bold mb-0.5"
+                 style={{ color: s.color === C.limeDeep ? C.limeDeep : s.color === '#f97316' ? '#92400E' : C.muted }}>
+                {s.label}
+              </p>
+              <p className="text-[13px] font-extrabold" style={{ color: s.color }}>{s.value}</p>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Applications button with badge */}
+
+        {/* Divider */}
+        <div className="w-px h-8 shrink-0" style={{ backgroundColor: C.border }} />
+
+        {/* Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
           <button onClick={() => setShowApplications(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80 relative"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
             style={{
               borderColor:     applications.filter(a => a.status === 'pending').length > 0 ? C.lime : C.border,
               color:           applications.filter(a => a.status === 'pending').length > 0 ? C.limeDeep : C.muted,
@@ -818,37 +931,22 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
               </span>
             )}
           </button>
-          <button onClick={() => setShowSettings(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
-            style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
-            <Settings size={14} /> Commission Settings
-          </button>
-          <button onClick={exportCSV}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
-            style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
-            <Download size={14} /> Export CSV
-          </button>
-          <button onClick={() => setShowLinkDialog(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
-            style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
-            <Link size={14} /> Generate Link
-          </button>
+          {[
+            { icon: Settings,  onClick: () => setShowSettings(true),   title: 'Commission Settings' },
+            { icon: Download,  onClick: exportCSV,                     title: 'Export CSV'          },
+            { icon: Link,      onClick: () => setShowLinkDialog(true), title: 'Generate Link'       },
+            { icon: RefreshCw, onClick: handleRefresh,                 title: 'Refresh'             },
+          ].map((btn, i) => (
+            <button key={i} onClick={btn.onClick} title={btn.title}
+              className="w-9 h-9 flex items-center justify-center rounded-xl border transition-all hover:opacity-80"
+              style={{ borderColor: C.border, backgroundColor: C.surface }}>
+              <btn.icon size={15} style={{ color: C.muted }} />
+            </button>
+          ))}
           <button onClick={() => setShowAddDialog(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
             style={{ backgroundColor: C.limeDeep, color: '#fff' }}>
-            <Plus size={15} /> Add Affiliate
-          </button>
-          <button onClick={handleRefresh} disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
-            style={{
-              borderColor:     C.border,
-              color:           refreshing ? C.limeDeep : C.muted,
-              backgroundColor: refreshing ? C.limeTint : C.surface,
-            }}>
-            <RefreshCw size={13} style={{
-              color:     refreshing ? C.limeDeep : C.muted,
-              animation: refreshing ? 'spin 1s linear infinite' : 'none',
-            }} />
+            <Plus size={15} /> Add
           </button>
         </div>
       </div>
@@ -873,76 +971,102 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
         ))}
       </div>
 
-      {/* Program paused banner */}
-      {affiliateSettings && !affiliateSettings.is_program_active && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
-             style={{ backgroundColor: '#FEF3C7', border: '1px solid #FDE68A' }}>
-          <AlertTriangle size={16} style={{ color: '#92400E', flexShrink: 0 }} />
-          <p className="text-[13px] font-bold" style={{ color: '#92400E' }}>
-            Affiliate program is currently paused — affiliates see a paused notice
-          </p>
-          <button onClick={() => setShowSettings(true)}
-            className="ml-auto text-[11px] font-bold px-3 py-1 rounded-lg shrink-0"
-            style={{ backgroundColor: '#FDE68A', color: '#92400E' }}>
-            Enable Program
-          </button>
-        </div>
-      )}
+      {/* Charts row */}
+      <div className="grid grid-cols-2 gap-4">
 
-      {/* Commission model info card — reads from affiliate_settings */}
-      <div className="rounded-2xl p-5" style={{ backgroundColor: C.dark }}>
-        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
-          <div className="flex flex-col items-center gap-1.5 py-2 px-4"
-               style={{ borderRight: !isMobile ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-            <p className="text-[11px] font-bold uppercase tracking-wide"
-               style={{ color: 'rgba(255,255,255,0.4)' }}>Commission Rate</p>
-            <p className="text-[28px] font-extrabold" style={{ color: C.lime }}>
-              {affiliateSettings ? `${(affiliateSettings.commission_rate * 100).toFixed(0)}%` : '25%'}
-            </p>
-            <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>flat for everyone</p>
-          </div>
-          <div className="flex flex-col items-center gap-1.5 py-2 px-4"
-               style={{ borderRight: !isMobile ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
-            <p className="text-[11px] font-bold uppercase tracking-wide"
-               style={{ color: 'rgba(255,255,255,0.4)' }}>Duration</p>
-            <p className="text-[28px] font-extrabold" style={{ color: C.lime }}>
-              {affiliateSettings?.commission_months ?? 12}
-            </p>
-            <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>months per user</p>
-          </div>
-          <div className="flex flex-col items-center gap-1.5 py-2 px-4">
-            <p className="text-[11px] font-bold uppercase tracking-wide"
-               style={{ color: 'rgba(255,255,255,0.4)' }}>Min. Payout</p>
-            <p className="text-[28px] font-extrabold" style={{ color: C.lime }}>
-              ${affiliateSettings?.min_payout ?? 50}
-            </p>
-            <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>to request withdrawal</p>
+        {/* Chart 1 — Top affiliates by revenue */}
+        <div className="p-5 rounded-2xl border"
+             style={{ backgroundColor: C.surface, borderColor: C.border }}>
+          <p className="text-[13px] font-bold mb-4" style={{ color: C.text }}>Top Affiliates by Revenue</p>
+          <div className="flex flex-col gap-3">
+            {[...affiliates]
+              .sort((a, b) => b.mrr - a.mrr)
+              .slice(0, 6)
+              .map((aff, i) => {
+                const max        = Math.max(...affiliates.map(a => a.mrr), 1)
+                const pct        = (aff.mrr / max) * 100
+                const barColors  = [C.limeDeep, '#5ab300', '#78c400', '#97c459', '#b5d97e', '#c0dd97']
+                const badgeBgs   = ['#EAF3DE', '#EAF3DE', '#EAF3DE', '#EAF3DE', '#EAF3DE', '#EAF3DE']
+                const badgeTexts = [C.limeDeep, '#3B6D11', '#3B6D11', '#3B6D11', '#3B6D11', '#639922']
+                const barColor   = barColors[i] ?? '#c0dd97'
+                return (
+                  <div key={aff.id} className="flex items-center gap-3">
+                    {/* Rank + Name */}
+                    <div className="flex items-center gap-1.5 shrink-0 w-24">
+                      <span className="text-[10px] font-bold w-4 text-center"
+                            style={{ color: i === 0 ? C.limeDeep : C.muted }}>
+                        #{i + 1}
+                      </span>
+                      <p className="text-[11px] font-bold truncate"
+                         style={{ color: i === 0 ? C.text : C.muted }}>
+                        {aff.name.split(' ')[0]}
+                      </p>
+                    </div>
+                    {/* Bar */}
+                    <div className="flex-1 flex items-center gap-2 min-w-0">
+                      <div className="h-5 rounded-lg shrink-0"
+                           style={{
+                             width: `${pct}%`,
+                             maxWidth: 'calc(100% - 80px)',
+                             backgroundColor: barColor,
+                             minWidth: 4,
+                           }} />
+                      {/* Smart revenue badge */}
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg shrink-0"
+                            style={{
+                              backgroundColor: badgeBgs[i],
+                              color: badgeTexts[i],
+                            }}>
+                        ${aff.mrr.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
           </div>
         </div>
+
+        {/* Chart 2 — Payout history (Line chart via Chart.js) */}
+        <div className="rounded-2xl border overflow-hidden"
+             style={{ backgroundColor: C.surface, borderColor: C.border }}>
+
+          {/* Header */}
+          <div className="flex items-start justify-between px-5 pt-5 pb-3">
+            <p className="text-[13px] font-bold" style={{ color: C.text }}>Payout History</p>
+            <div className="text-right">
+              <p className="text-[10px] font-bold mb-0.5" style={{ color: C.muted }}>Total paid out</p>
+              <p className="text-[18px] font-extrabold" style={{ color: C.green }}>
+                ${payouts.reduce((s, p) => s + p.amount, 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          {/* Chart canvas */}
+          {payouts.length === 0 ? (
+            <div className="flex items-center justify-center pb-8">
+              <p className="text-[12px]" style={{ color: C.muted }}>No payout data yet</p>
+            </div>
+          ) : (
+            <PayoutLineChart payouts={payouts} />
+          )}
+        </div>
+
       </div>
 
       {/* View tabs — proper tab bar */}
       <div style={{ borderBottom: `2px solid ${C.border}` }}>
         <div className="flex gap-0">
           {([
-            { key: 'affiliates',  label: 'Affiliates',          count: affiliates.length,                                        badge: null },
-            { key: 'withdrawals', label: 'Withdrawal Requests',  count: withdrawals.length,  badge: withdrawals.filter(w => w.status === 'pending').length },
-            { key: 'history',     label: 'Payout History',          count: payouts.length,      badge: null },
+            { key: 'affiliates',  label: 'Affiliates',         count: affiliates.length,  badge: null },
+            { key: 'withdrawals', label: 'Withdrawal Requests', count: withdrawals.length, badge: withdrawals.filter(w => w.status === 'pending').length },
+            { key: 'history',     label: 'Payout History',      count: payouts.length,     badge: null },
           ] as const).map(tab => (
             <button key={tab.key} onClick={() => setTableView(tab.key)}
               className="flex items-center gap-2 px-5 py-3 text-[13px] font-bold transition-all relative"
-              style={{
-                color:         tableView === tab.key ? C.limeDeep : C.muted,
-                borderBottom:  tableView === tab.key ? `2px solid ${C.limeDeep}` : '2px solid transparent',
-                marginBottom:  -2,
-                background:    'transparent',
-              }}>
+              style={{ color: tableView === tab.key ? C.limeDeep : C.muted, borderBottom: tableView === tab.key ? `2px solid ${C.limeDeep}` : '2px solid transparent', marginBottom: -2, background: 'transparent' }}>
               {tab.label}
               <span className="text-[11px] px-1.5 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: tableView === tab.key ? C.limeTint : C.bg,
-                      color:           tableView === tab.key ? C.limeDeep : C.muted,
-                    }}>
+                    style={{ backgroundColor: tableView === tab.key ? C.limeTint : C.bg, color: tableView === tab.key ? C.limeDeep : C.muted }}>
                 {tab.count}
               </span>
               {tab.badge != null && tab.badge > 0 && (
@@ -974,180 +1098,125 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
       {tableView === 'withdrawals' && (
         <div className="flex items-center gap-2 flex-wrap">
           {([
-            { key: 'all',      label: `All (${withdrawals.length})`,                                              activeBg: C.dark,    activeColor: C.lime,     inactiveBg: C.bg,       inactiveColor: C.muted    },
-            { key: 'pending',  label: `Pending (${withdrawals.filter(w => w.status === 'pending').length})`,      activeBg: '#92400E', activeColor: '#fff',     inactiveBg: '#FEF3C7',  inactiveColor: '#92400E'  },
-            { key: 'paid',     label: `Paid (${withdrawals.filter(w => w.status === 'paid').length})`,            activeBg: '#166534', activeColor: '#fff',     inactiveBg: '#F0FDF4',  inactiveColor: C.green    },
-            { key: 'rejected', label: `Rejected (${withdrawals.filter(w => w.status === 'rejected').length})`,   activeBg: '#991B1B', activeColor: '#fff',     inactiveBg: '#FEF2F2',  inactiveColor: C.red      },
+            { key: 'all',      label: `All (${withdrawals.length})`,                                             activeBg: C.dark,    activeColor: C.lime,    inactiveBg: C.bg,      inactiveColor: C.muted   },
+            { key: 'pending',  label: `Pending (${withdrawals.filter(w=>w.status==='pending').length})`,         activeBg: '#92400E', activeColor: '#fff',    inactiveBg: '#FEF3C7', inactiveColor: '#92400E' },
+            { key: 'paid',     label: `Paid (${withdrawals.filter(w=>w.status==='paid').length})`,               activeBg: '#166534', activeColor: '#fff',    inactiveBg: '#F0FDF4', inactiveColor: C.green   },
+            { key: 'rejected', label: `Rejected (${withdrawals.filter(w=>w.status==='rejected').length})`,      activeBg: '#991B1B', activeColor: '#fff',    inactiveBg: '#FEF2F2', inactiveColor: C.red     },
           ] as const).map(f => (
             <button key={f.key} onClick={() => setWdFilter(f.key)}
               className="px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all"
-              style={{
-                backgroundColor: wdFilter === f.key ? f.activeBg   : f.inactiveBg,
-                color:           wdFilter === f.key ? f.activeColor : f.inactiveColor,
-                border:          `1px solid ${wdFilter === f.key ? f.activeBg : 'transparent'}`,
-              }}>
+              style={{ backgroundColor: wdFilter === f.key ? f.activeBg : f.inactiveBg, color: wdFilter === f.key ? f.activeColor : f.inactiveColor, border: `1px solid ${wdFilter === f.key ? f.activeBg : 'transparent'}` }}>
               {f.label}
             </button>
           ))}
         </div>
       )}
 
-      {/* Tables — toggle between views */}
+      {/* Affiliates Table */}
       {tableView === 'affiliates' && (<>
-      {/* Affiliate table */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center py-12 rounded-2xl border"
              style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <p className="text-[15px] font-bold" style={{ color: C.muted }}>
             {affiliates.length === 0 ? 'No affiliates yet' : 'No results found'}
           </p>
-          <p className="text-[13px] mt-1" style={{ color: C.muted }}>
-            {affiliates.length === 0 ? 'Add your first affiliate to get started' : 'Try adjusting your search'}
-          </p>
         </div>
       ) : (
-        <div className="rounded-2xl border overflow-hidden" style={{ overflowX: 'auto' }}>
-          <div style={{ width: "100%", backgroundColor: C.surface }}>
-
-          {/* Table header */}
+        <div className="rounded-2xl border overflow-hidden"
+             style={{ backgroundColor: C.surface, borderColor: C.border }}>
+          <div style={{ overflowX: 'auto' }}>
+          <div style={{ width: '100%', backgroundColor: C.surface }}>
+          {/* Header */}
           <div className="grid items-center px-4 py-2.5"
-               style={{
-                 gridTemplateColumns: '1.4fr 1fr 1.1fr 1fr 0.8fr 0.8fr 0.8fr 0.9fr 0.7fr 1.1fr 40px',
-                 columnGap: 8,
-                 backgroundColor: C.bg,
-                 borderBottom: `1px solid ${C.border}`,
-               }}>
-            {['Affiliate', 'Coupon', 'Discount', 'Commission', 'Clicks', 'Signups', 'Conv%', 'Revenue', 'Rate', 'Payout', ''].map((h, i) => (
-              <p key={i} className="text-[10px] font-bold uppercase tracking-wide"
-                 style={{ color: C.muted }}>{h}</p>
+               style={{ gridTemplateColumns: '1.4fr 1fr 1.1fr 1fr 0.8fr 0.8fr 0.8fr 0.9fr 0.7fr 1.1fr 40px', backgroundColor: C.bg, borderBottom: `1px solid ${C.border}`, columnGap: 8 }}>
+            {['Affiliate','Coupon','Discount','Commission','Clicks','Signups','Conv%','Revenue','Rate','Payout',''].map((h,i) => (
+              <p key={i} className="text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>{h}</p>
             ))}
           </div>
-
-          {/* Table rows */}
+          {/* Rows */}
           <div className="divide-y" style={{ borderColor: C.border }}>
             {paginated.map((aff, rowIdx) => {
               const isPaying    = markingPaid === aff.id
               const alreadyPaid = aff.payout_status === 'paid'
-              const wr          = withdrawals
-                .filter(w => w.affiliate_id === aff.id)
-                .sort((a, b) => new Date(b.requested_at).getTime() - new Date(a.requested_at).getTime())[0]
+              const wr          = withdrawals.filter(w => w.affiliate_id === aff.id).sort((a,b) => new Date(b.requested_at).getTime() - new Date(a.requested_at).getTime())[0]
               const isInactive  = aff.status === 'inactive'
-
               return (
-                <div key={aff.id}
-                     className="grid items-center px-4 py-2.5 hover:bg-opacity-50 transition-colors"
-                     style={{
-                       gridTemplateColumns: '1.4fr 1fr 1.1fr 1fr 0.8fr 0.8fr 0.8fr 0.9fr 0.7fr 1.1fr 40px',
-                       columnGap: 8,
-                       backgroundColor: rowIdx % 2 === 0 ? 'transparent' : C.bg,
-                       opacity: isInactive ? 0.6 : 1,
-                     }}>
-
-                  {/* Col 1 — Affiliate */}
+                <div key={aff.id} className="grid items-center px-4 py-2.5 hover:bg-opacity-50 transition-colors"
+                     style={{ gridTemplateColumns: '1.4fr 1fr 1.1fr 1fr 0.8fr 0.8fr 0.8fr 0.9fr 0.7fr 1.1fr 40px', backgroundColor: rowIdx % 2 === 0 ? 'transparent' : C.bg, opacity: isInactive ? 0.6 : 1, columnGap: 8 }}>
+                  {/* Affiliate */}
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
-                         style={{ backgroundColor: C.dark, color: C.lime }}>
-                      {aff.name.charAt(0)}
-                    </div>
+                         style={{ backgroundColor: C.dark, color: C.lime }}>{aff.name.charAt(0)}</div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>
-                          {aff.name}
-                        </p>
-                        {isInactive && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
-                                style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>Inactive</span>
-                        )}
+                        <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>{aff.name}</p>
+                        {isInactive && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>Inactive</span>}
                       </div>
-                      <p className="text-[10px] truncate" style={{ color: C.muted }}>
-                        {aff.email ?? '—'}
-                      </p>
+                      <p className="text-[10px] truncate" style={{ color: C.muted }}>{aff.email ?? '—'}</p>
                     </div>
                   </div>
-
-                  {/* Col 2 — Coupon */}
+                  {/* Coupon */}
                   <div>
                     <span className="inline-block text-[11px] font-bold px-2 py-1 rounded-lg"
                           style={{ backgroundColor: C.bg, color: C.text, border: `1px solid ${C.border}`, fontFamily: 'monospace', letterSpacing: '0.04em' }}>
                       {aff.code}
                     </span>
                   </div>
-
-                  {/* Col 3 — Discount (editable) */}
+                  {/* Discount */}
                   <div>
                     {editDiscount === aff.id ? (
                       <div className="flex items-center gap-1">
-                        <input value={discountInput}
-                          onChange={e => setDiscountInput(e.target.value.replace(/[^0-9]/g, ''))}
-                          placeholder="50" autoFocus
-                          className="w-9 h-5 px-1 rounded text-[10px] outline-none"
+                        <input value={discountInput} onChange={e => setDiscountInput(e.target.value.replace(/[^0-9]/g,''))}
+                          placeholder="50" autoFocus className="w-9 h-5 px-1 rounded text-[10px] outline-none"
                           style={{ border: `1.5px solid ${C.lime}`, color: C.text }} />
                         <span className="text-[9px]" style={{ color: C.muted }}>%×</span>
                         <select value={discountMonthsInput} onChange={e => setDiscountMonthsInput(e.target.value)}
                           className="h-5 px-0.5 rounded text-[9px] outline-none"
                           style={{ border: `1.5px solid ${C.lime}`, color: C.text }}>
-                          <option value="1">1mo</option>
-                          <option value="2">2mo</option>
-                          <option value="3">3mo</option>
+                          <option value="1">1mo</option><option value="2">2mo</option><option value="3">3mo</option>
                         </select>
                         <button onClick={() => saveDiscount(aff.id)} disabled={savingDiscount}
-                          className="p-0.5 rounded" style={{ backgroundColor: C.lime, color: C.dark }}>
-                          <CheckCircle size={9} />
-                        </button>
+                          className="p-0.5 rounded" style={{ backgroundColor: C.lime, color: C.dark }}><CheckCircle size={9} /></button>
                         <button onClick={() => { setEditDiscount(null); setDiscountInput('') }}
-                          className="p-0.5 rounded" style={{ backgroundColor: C.bg, color: C.muted }}>
-                          <X size={9} />
-                        </button>
+                          className="p-0.5 rounded" style={{ backgroundColor: C.bg, color: C.muted }}><X size={9} /></button>
                       </div>
                     ) : (
                       <button onClick={() => { setEditDiscount(aff.id); setDiscountInput(String(aff.discount_percent ?? affiliateSettings?.default_discount ?? 50)); setDiscountMonthsInput(String(aff.discount_months ?? affiliateSettings?.default_discount_months ?? 1)) }}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold hover:opacity-80 transition-all"
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold hover:opacity-80"
                         style={{ backgroundColor: '#FFF7ED', color: '#C2410C', border: '1px solid #FED7AA' }}>
-                        <Tag size={9} />
-                        {aff.discount_percent ?? affiliateSettings?.default_discount ?? 50}% × {aff.discount_months ?? affiliateSettings?.default_discount_months ?? 1}mo
+                        <Tag size={9} />{aff.discount_percent ?? affiliateSettings?.default_discount ?? 50}% × {aff.discount_months ?? affiliateSettings?.default_discount_months ?? 1}mo
                       </button>
                     )}
                   </div>
-
-                  {/* Col 4 — Commission (earnings per user per month) */}
+                  {/* Commission */}
                   <div>
                     <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>
                       ${(49 * (aff.custom_commission ?? affiliateSettings?.commission_rate ?? COMMISSION_RATE)).toFixed(2)}
                     </p>
                     <p className="text-[9px]" style={{ color: C.muted }}>per user/mo</p>
                   </div>
-
-                  {/* Col 5-9 — Stats + Rate (unchanged) */}
+                  {/* Stats */}
                   <p className="text-[12px] font-bold" style={{ color: C.text }}>{aff.clicks.toLocaleString()}</p>
                   <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>{aff.signups}</p>
                   <p className="text-[12px]" style={{ color: C.text }}>{convRate(aff.clicks, aff.signups)}</p>
                   <p className="text-[12px] font-bold" style={{ color: C.text }}>${aff.mrr.toLocaleString()}</p>
-                  <p className="text-[12px] font-bold" style={{ color: C.text }}>
-                    {((aff.custom_commission ?? affiliateSettings?.commission_rate ?? COMMISSION_RATE) * 100).toFixed(0)}%
-                  </p>
-
-                  {/* Col 7 — Payout status */}
+                  <p className="text-[12px] font-bold" style={{ color: C.text }}>{((aff.custom_commission ?? affiliateSettings?.commission_rate ?? COMMISSION_RATE)*100).toFixed(0)}%</p>
+                  {/* Payout */}
                   <div>
                     {(() => {
                       if (!wr && aff.payout >= 50) return (
-                        <button onClick={() => setConfirmPay(aff)}
-                          disabled={isPaying}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all hover:opacity-80"
+                        <button onClick={() => setConfirmPay(aff)} disabled={isPaying}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80"
                           style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.lime}50` }}>
                           {isPaying ? '...' : `$${aff.payout.toFixed(2)}`}
                         </button>
                       )
                       if (!wr && aff.payout > 0 && aff.payout < 50) return (
-                        <div>
-                          <p className="text-[11px] font-bold" style={{ color: C.muted }}>${aff.payout.toFixed(2)}</p>
-                          <p className="text-[9px]" style={{ color: C.muted }}>Min. $50</p>
-                        </div>
+                        <div><p className="text-[11px] font-bold" style={{ color: C.muted }}>${aff.payout.toFixed(2)}</p><p className="text-[9px]" style={{ color: C.muted }}>Min. $50</p></div>
                       )
-                      if (!wr && aff.payout === 0) return (
-                        <span className="text-[11px]" style={{ color: C.muted }}>—</span>
-                      )
+                      if (!wr && aff.payout === 0) return <span className="text-[11px]" style={{ color: C.muted }}>—</span>
                       if (wr?.status === 'pending') return (
-                        <button onClick={() => withdrawalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                        <button onClick={() => withdrawalRef.current?.scrollIntoView({ behavior: 'smooth' })}
                           className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
                           style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>
                           <Clock size={10} /> ${wr.amount.toFixed(2)}
@@ -1155,25 +1224,14 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                       )
                       if (wr?.status === 'paid' || alreadyPaid) return (
                         <div>
-                          <span className="flex items-center gap-1 text-[10px] font-bold" style={{ color: C.green }}>
-                            <CheckCircle size={10} /> Paid
-                          </span>
-                          {aff.paid_at && (
-                            <p className="text-[9px]" style={{ color: C.muted }}>
-                              {new Date(aff.paid_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </p>
-                          )}
+                          <span className="flex items-center gap-1 text-[10px] font-bold" style={{ color: C.green }}><CheckCircle size={10} /> Paid</span>
+                          {aff.paid_at && <p className="text-[9px]" style={{ color: C.muted }}>{new Date(aff.paid_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>}
                         </div>
                       )
-                      if (wr?.status === 'rejected') return (
-                        <span className="flex items-center gap-1 text-[10px] font-bold" style={{ color: C.red }}>
-                          <X size={10} /> Rejected
-                        </span>
-                      )
+                      if (wr?.status === 'rejected') return <span className="flex items-center gap-1 text-[10px] font-bold" style={{ color: C.red }}><X size={10} /> Rejected</span>
                       if (wr?.status === 'cancelled') return (
-                        <button onClick={() => setConfirmPay(aff)}
-                          disabled={isPaying}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all hover:opacity-80"
+                        <button onClick={() => setConfirmPay(aff)} disabled={isPaying}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80"
                           style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.lime}50` }}>
                           ${aff.payout.toFixed(2)}
                         </button>
@@ -1181,12 +1239,11 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                       return <span className="text-[11px]" style={{ color: C.muted }}>—</span>
                     })()}
                   </div>
-
-                  {/* Col 8 — ⋮ Actions */}
+                  {/* Action menu */}
                   <div className="relative flex items-center justify-center">
                     <button onClick={() => setActionMenu(actionMenu === aff.id ? null : aff.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70 transition-all"
-                      style={{ border: `1px solid ${C.border}` }}>
+                      className="w-7 h-7 flex items-center justify-center rounded-lg border hover:opacity-80"
+                      style={{ borderColor: C.border }}>
                       <MoreVertical size={13} style={{ color: C.muted }} />
                     </button>
                     {actionMenu === aff.id && (
@@ -1196,14 +1253,10 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                              style={{ backgroundColor: C.surface, borderColor: C.border, minWidth: 170, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
                           <button onClick={() => { navigator.clipboard.writeText(`https://riazify.com?ref=${aff.code}`); setActionMenu(null) }}
                             className="w-full px-4 py-2.5 text-left text-[12px] font-bold hover:opacity-80"
-                            style={{ color: C.text }}>
-                            Copy Referral Link
-                          </button>
+                            style={{ color: C.text }}>Copy Referral Link</button>
                           <button onClick={() => { setConfirmRemove(aff.id); setActionMenu(null) }}
                             className="w-full px-4 py-2.5 text-left text-[12px] font-bold hover:opacity-80"
-                            style={{ color: C.red }}>
-                            Remove Affiliate
-                          </button>
+                            style={{ color: C.red }}>Remove Affiliate</button>
                         </div>
                       </>
                     )}
@@ -1212,250 +1265,123 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
               )
             })}
           </div>
-
-          </div>
-          {/* end minWidth wrapper */}
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-3"
                  style={{ borderTop: `1px solid ${C.border}`, backgroundColor: C.bg }}>
               <p className="text-[12px]" style={{ color: C.muted }}>
-                Showing {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
+                Showing {((page-1)*PAGE_SIZE)+1}–{Math.min(page*PAGE_SIZE, filtered.length)} of {filtered.length}
               </p>
               <div className="flex gap-2">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-3 py-1.5 rounded-xl text-[12px] font-bold border transition-all hover:opacity-80 disabled:opacity-40"
-                  style={{ borderColor: C.border, color: C.muted }}>
-                  ← Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => setPage(p)}
+                <button onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}
+                  className="px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 disabled:opacity-40"
+                  style={{ borderColor: C.border, color: C.muted }}>← Prev</button>
+                {Array.from({length:totalPages},(_,i)=>i+1).map(p=>(
+                  <button key={p} onClick={()=>setPage(p)}
                     className="w-8 h-8 rounded-xl text-[12px] font-bold transition-all"
-                    style={{
-                      backgroundColor: page === p ? C.dark : 'transparent',
-                      color:           page === p ? C.lime : C.muted,
-                      border:          `1px solid ${page === p ? C.dark : C.border}`,
-                    }}>
-                    {p}
-                  </button>
+                    style={{ backgroundColor: page===p?C.dark:'transparent', color: page===p?C.lime:C.muted, border: `1px solid ${page===p?C.dark:C.border}` }}>{p}</button>
                 ))}
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-3 py-1.5 rounded-xl text-[12px] font-bold border transition-all hover:opacity-80 disabled:opacity-40"
-                  style={{ borderColor: C.border, color: C.muted }}>
-                  Next →
-                </button>
+                <button onClick={() => setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages}
+                  className="px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 disabled:opacity-40"
+                  style={{ borderColor: C.border, color: C.muted }}>Next →</button>
               </div>
             </div>
           )}
+          </div>
+          </div>
         </div>
       )}
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <AffiliateSettingsPanel
-          settings={affiliateSettings}
-          onClose={() => setShowSettings(false)}
-          onSaved={(s) => { setAffiliateSettings(s); setShowSettings(false) }}
-        />
-      )}
-
-      {/* Applications Panel */}
-      {showApplications && (
-        <AffiliateApplicationsPanel
-          applications={applications}
-          onClose={() => setShowApplications(false)}
-          onRefresh={load}
-        />
-      )}
-
       </>)}
 
-      {/* Withdrawal Requests — table view */}
+      {/* Withdrawal Requests Table */}
       {tableView === 'withdrawals' && (
-        <div className="rounded-2xl border overflow-hidden"
-             style={{ backgroundColor: C.surface, borderColor: C.border }}>
-
-          {/* Table header */}
+        <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <div className="grid items-center px-4 py-2.5"
-               style={{
-                 gridTemplateColumns: '1.6fr 0.8fr 1fr 1fr 1fr 1fr 1.4fr',
-                 backgroundColor: C.bg,
-                 borderBottom: `1px solid ${C.border}`,
-                 columnGap: 8,
-               }}>
-            {['Affiliate', 'Amount', 'Method', 'Pay To', 'Requested', 'Status', 'Actions'].map((h, i) => (
-              <p key={i} className="text-[10px] font-bold uppercase tracking-wide"
-                 style={{ color: C.muted }}>{h}</p>
+               style={{ gridTemplateColumns: '1.6fr 0.8fr 1fr 1fr 1fr 1fr 1.4fr', backgroundColor: C.bg, borderBottom: `1px solid ${C.border}`, columnGap: 8 }}>
+            {['Affiliate','Amount','Method','Pay To','Requested','Status','Actions'].map((h,i)=>(
+              <p key={i} className="text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>{h}</p>
             ))}
           </div>
-
-          {/* Rows */}
           <div className="divide-y" style={{ borderColor: C.border }}>
             {withdrawals
-              .filter(w => wdFilter === 'all' ? true : wdFilter === 'pending' ? w.status === 'pending' : wdFilter === 'paid' ? w.status === 'paid' : w.status === 'rejected')
-              .sort((a, b) => {
-                const order = { pending: 0, rejected: 1, paid: 2, cancelled: 3 }
-                if ((order[a.status as keyof typeof order] ?? 3) !== (order[b.status as keyof typeof order] ?? 3))
-                  return (order[a.status as keyof typeof order] ?? 3) - (order[b.status as keyof typeof order] ?? 3)
-                return b.amount - a.amount
-              })
-              .map((w, rowIdx) => {
-                const aff          = affiliates.find(a => a.id === w.affiliate_id)
-                const isPending    = w.status === 'pending'
-                const isPaid       = w.status === 'paid'
-                const isRejected   = w.status === 'rejected'
-                const isCancelled  = w.status === 'cancelled'
-                const isProcessing = processingW === w.id
-                const statusColor  = isPaid ? C.green : isRejected ? C.red : isCancelled ? C.muted : '#92400E'
-                const statusLabel  = isPaid ? 'Paid' : isRejected ? 'Rejected' : isCancelled ? 'Cancelled' : 'Pending'
-
+              .filter(w => wdFilter==='all'?true:wdFilter==='pending'?w.status==='pending':wdFilter==='paid'?w.status==='paid':w.status==='rejected')
+              .sort((a,b)=>{const o={pending:0,rejected:1,paid:2,cancelled:3};if((o[a.status as keyof typeof o]??3)!==(o[b.status as keyof typeof o]??3))return(o[a.status as keyof typeof o]??3)-(o[b.status as keyof typeof o]??3);return b.amount-a.amount})
+              .map((w,rowIdx)=>{
+                const aff=affiliates.find(a=>a.id===w.affiliate_id)
+                const isPending=w.status==='pending',isPaid=w.status==='paid',isRejected=w.status==='rejected',isCancelled=w.status==='cancelled'
+                const isProcessing=processingW===w.id
+                const statusColor=isPaid?C.green:isRejected?C.red:isCancelled?C.muted:'#92400E'
+                const statusLabel=isPaid?'Paid':isRejected?'Rejected':isCancelled?'Cancelled':'Pending'
                 return (
-                  <div key={w.id}
-                       className="grid items-start px-4 py-3"
-                       style={{
-                         gridTemplateColumns: '1.6fr 0.8fr 1fr 1fr 1fr 1fr 1.4fr',
-                         backgroundColor: isPending   ? '#FFFBEB'
-                                         : isPaid      ? '#F0FDF4'
-                                         : isRejected  ? '#FEF2F2'
-                                         : isCancelled ? C.bg
-                                         : 'transparent',
-                         columnGap: 8,
-                         borderLeft: `3px solid ${isPending ? '#FDE68A' : isPaid ? '#86EFAC' : isRejected ? '#FECACA' : 'transparent'}`,
-                       }}>
-
-                    {/* Affiliate */}
+                  <div key={w.id} className="grid items-start px-4 py-3"
+                       style={{ gridTemplateColumns:'1.6fr 0.8fr 1fr 1fr 1fr 1fr 1.4fr', backgroundColor:isPending?'#FFFBEB':isPaid?'#F0FDF4':isRejected?'#FEF2F2':rowIdx%2===0?'transparent':C.bg, borderLeft:`3px solid ${isPending?'#FDE68A':isPaid?'#86EFAC':isRejected?'#FECACA':'transparent'}`, columnGap:8 }}>
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                           style={{ backgroundColor: C.dark, color: C.lime }}>
-                        {aff?.name.charAt(0) ?? '?'}
-                      </div>
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor:C.dark, color:C.lime }}>{aff?.name.charAt(0)??'?'}</div>
                       <div className="min-w-0">
-                        <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>
-                          {aff?.name ?? 'Unknown'}
-                        </p>
-                        <p className="text-[10px] truncate" style={{ color: C.muted }}>
-                          {aff?.email ?? '—'}
-                        </p>
+                        <p className="text-[12px] font-bold truncate" style={{ color:C.text }}>{aff?.name??'Unknown'}</p>
+                        <p className="text-[10px] truncate" style={{ color:C.muted }}>{aff?.email??'—'}</p>
                       </div>
                     </div>
-
-                    {/* Amount */}
                     <div>
-                      <p className="text-[13px] font-extrabold" style={{ color: isPaid ? C.green : isRejected ? C.red : isCancelled ? C.muted : C.limeDeep }}>
-                        ${w.amount.toFixed(2)}
-                      </p>
-                      {w.amount >= 500 && isPending && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                              style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>HIGH</span>
-                      )}
+                      <p className="text-[13px] font-extrabold" style={{ color:isPaid?C.green:isRejected?C.red:isCancelled?C.muted:C.limeDeep }}>${w.amount.toFixed(2)}</p>
+                      {w.amount>=500&&isPending&&<span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor:'#FEF3C7',color:'#92400E' }}>HIGH</span>}
                     </div>
-
-                    {/* Method */}
-                    <p className="text-[12px]" style={{ color: C.text }}>
-                      {formatMethod(w.payment_method ?? 'paypal')}
-                    </p>
-
-                    {/* Pay To */}
-                    <p className="text-[11px] truncate" style={{ color: C.muted }}>
-                      {w.payment_details ?? '—'}
-                    </p>
-
-                    {/* Requested */}
-                    <p className="text-[11px]" style={{ color: C.muted }}>
-                      {new Date(w.requested_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-
-                    {/* Status */}
+                    <p className="text-[12px]" style={{ color:C.text }}>{formatMethod(w.payment_method??'paypal')}</p>
+                    <p className="text-[11px] truncate" style={{ color:C.muted }}>{w.payment_details??'—'}</p>
+                    <p className="text-[11px]" style={{ color:C.muted }}>{new Date(w.requested_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>
                     <div>
-                      <span className="flex items-center gap-1 text-[11px] font-bold w-fit"
-                            style={{ color: statusColor }}>
-                        {isPaid ? <CheckCircle size={11} /> : isRejected ? <X size={11} /> : isCancelled ? <X size={11} /> : <Clock size={11} />}
-                        {statusLabel}
+                      <span className="flex items-center gap-1 text-[11px] font-bold w-fit" style={{ color:statusColor }}>
+                        {isPaid?<CheckCircle size={11}/>:isRejected?<X size={11}/>:isCancelled?<X size={11}/>:<Clock size={11}/>}{statusLabel}
                       </span>
-                      {isRejected && w.rejection_reason && (
-                        <p className="text-[10px] mt-1" style={{ color: C.red }}>
-                          {w.rejection_reason}
-                        </p>
-                      )}
+                      {isRejected&&w.rejection_reason&&<p className="text-[10px] mt-1" style={{ color:C.red }}>{w.rejection_reason}</p>}
                     </div>
-
-                    {/* Actions */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      {isPending && !isProcessing && (
-                        <>
-                          <button onClick={() => { setRejectDialog(w); setRejectReason('') }}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all hover:opacity-80"
-                            style={{ borderColor: C.border, color: C.muted }}>
-                            Reject
-                          </button>
-                          <button onClick={() => approveWithdrawal(w, w.payment_method ?? 'paypal')}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all hover:opacity-80"
-                            style={{ backgroundColor: C.dark, color: C.lime }}>
-                            Approve
-                          </button>
-                        </>
-                      )}
-                      {isProcessing && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-                               style={{ borderTopColor: C.lime }} />
-                          <span className="text-[11px]" style={{ color: C.muted }}>Processing...</span>
-                        </div>
-                      )}
-                      {(isPaid || isCancelled) && (
-                        <span className="text-[11px]" style={{ color: C.muted }}>—</span>
-                      )}
+                      {isPending&&!isProcessing&&(<>
+                        <button onClick={()=>{setRejectDialog(w);setRejectReason('')}} className="px-2.5 py-1 rounded-lg text-[11px] font-bold border hover:opacity-80" style={{ borderColor:C.border,color:C.muted }}>Reject</button>
+                        <button onClick={()=>approveWithdrawal(w,w.payment_method??'paypal')} className="px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80" style={{ backgroundColor:C.dark,color:C.lime }}>Approve</button>
+                      </>)}
+                      {isProcessing&&<div className="flex items-center gap-1.5"><div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.lime }}/><span className="text-[11px]" style={{ color:C.muted }}>Processing...</span></div>}
+                      {(isPaid||isCancelled)&&<span className="text-[11px]" style={{ color:C.muted }}>—</span>}
                     </div>
                   </div>
                 )
               })}
-
-            {withdrawals.filter(w => wdFilter === 'all' ? true : w.status === wdFilter).length === 0 && (
+            {withdrawals.filter(w=>wdFilter==='all'?true:w.status===wdFilter).length===0&&(
               <div className="flex items-center justify-center py-10">
-                <p className="text-[13px]" style={{ color: C.muted }}>No {wdFilter === 'all' ? '' : wdFilter} requests</p>
+                <p className="text-[13px]" style={{ color:C.muted }}>No {wdFilter==='all'?'':wdFilter} requests</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Payout History — tab view */}
+      {/* Payout History Table */}
       {tableView === 'history' && (
-        <div className="rounded-2xl border overflow-hidden"
-             style={{ backgroundColor: C.surface, borderColor: C.border }}>
+        <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor:C.surface,borderColor:C.border }}>
           <div className="grid items-center px-4 py-2.5"
-               style={{ gridTemplateColumns: '1.8fr 0.8fr 1fr 1fr', backgroundColor: C.bg, borderBottom: `1px solid ${C.border}`, columnGap: 8 }}>
-            {['Affiliate', 'Amount', 'Method', 'Paid On'].map((h, i) => (
-              <p key={i} className="text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>{h}</p>
+               style={{ gridTemplateColumns:'1.8fr 0.8fr 1fr 1fr', backgroundColor:C.bg, borderBottom:`1px solid ${C.border}`, columnGap:8 }}>
+            {['Affiliate','Amount','Method','Paid On'].map((h,i)=>(
+              <p key={i} className="text-[10px] font-bold uppercase tracking-wide" style={{ color:C.muted }}>{h}</p>
             ))}
           </div>
-          <div className="divide-y" style={{ borderColor: C.border }}>
-            {payouts.length === 0 ? (
-              <div className="flex items-center justify-center py-10">
-                <p className="text-[13px]" style={{ color: C.muted }}>No payouts yet</p>
-              </div>
-            ) : payouts.map((p, i) => {
-              const aff = affiliates.find(a => a.id === p.affiliate_id)
+          <div className="divide-y" style={{ borderColor:C.border }}>
+            {payouts.length===0?(
+              <div className="flex items-center justify-center py-10"><p className="text-[13px]" style={{ color:C.muted }}>No payouts yet</p></div>
+            ):payouts.map((p,i)=>{
+              const aff=affiliates.find(a=>a.id===p.affiliate_id)
               return (
                 <div key={p.id} className="grid items-center px-4 py-3"
-                     style={{ gridTemplateColumns: '1.8fr 0.8fr 1fr 1fr', backgroundColor: '#F0FDF4', borderLeft: '3px solid #86EFAC', columnGap: 8 }}>
+                     style={{ gridTemplateColumns:'1.8fr 0.8fr 1fr 1fr', backgroundColor:'#F0FDF4', borderLeft:'3px solid #86EFAC', columnGap:8 }}>
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                         style={{ backgroundColor: C.dark, color: C.lime }}>
-                      {aff?.name.charAt(0) ?? '?'}
-                    </div>
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor:C.dark,color:C.lime }}>{aff?.name.charAt(0)??'?'}</div>
                     <div className="min-w-0">
-                      <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>{aff?.name ?? 'Unknown'}</p>
-                      <p className="text-[10px] truncate" style={{ color: C.muted }}>{aff?.email ?? '—'}</p>
+                      <p className="text-[12px] font-bold truncate" style={{ color:C.text }}>{aff?.name??'Unknown'}</p>
+                      <p className="text-[10px] truncate" style={{ color:C.muted }}>{aff?.email??'—'}</p>
                     </div>
                   </div>
-                  <p className="text-[13px] font-extrabold" style={{ color: C.green }}>+${p.amount.toFixed(2)}</p>
-                  <p className="text-[12px]" style={{ color: C.text }}>{formatMethod(p.payment_method ?? 'paypal')}</p>
-                  <p className="text-[12px]" style={{ color: C.muted }}>
-                    {p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
-                  </p>
+                  <p className="text-[13px] font-extrabold" style={{ color:C.green }}>+${p.amount.toFixed(2)}</p>
+                  <p className="text-[12px]" style={{ color:C.text }}>{formatMethod(p.payment_method??'paypal')}</p>
+                  <p className="text-[12px]" style={{ color:C.muted }}>{p.paid_at?new Date(p.paid_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—'}</p>
                 </div>
               )
             })}
@@ -1463,59 +1389,38 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
         </div>
       )}
 
-      {/* Confirm Pay Dialog */}      {/* Confirm Pay Dialog */}
+      {/* Settings Panel */}
+      {showSettings && (
+        <AffiliateSettingsPanel settings={affiliateSettings} onClose={()=>setShowSettings(false)} onSaved={(s)=>{setAffiliateSettings(s);setShowSettings(false)}} />
+      )}
+
+      {/* Applications Panel */}
+      {showApplications && (
+        <AffiliateApplicationsPanel applications={applications} onClose={()=>setShowApplications(false)} onRefresh={load} />
+      )}
+
+      {/* Confirm Pay Dialog */}
       {confirmPay && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6"
-             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-             onClick={e => e.target === e.currentTarget && setConfirmPay(null)}>
-          <div className="w-full max-w-sm rounded-2xl overflow-hidden"
-               style={{ backgroundColor: C.surface, boxShadow: '0 24px 60px rgba(0,0,0,0.25)' }}>
-            <div className="px-5 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-              <p className="text-[15px] font-bold" style={{ color: C.text }}>Mark as Paid</p>
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6" style={{ backgroundColor:'rgba(0,0,0,0.5)' }}
+             onClick={e=>e.target===e.currentTarget&&setConfirmPay(null)}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ backgroundColor:C.surface, boxShadow:'0 24px 60px rgba(0,0,0,0.25)' }}>
+            <div className="px-5 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <p className="text-[15px] font-bold" style={{ color:C.text }}>Mark as Paid</p>
             </div>
             <div className="p-5">
-              <div className="p-4 rounded-xl mb-4" style={{ backgroundColor: C.bg }}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12px]" style={{ color: C.muted }}>Amount</span>
-                  <span className="text-[18px] font-extrabold" style={{ color: C.limeDeep }}>${confirmPay.payout.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12px]" style={{ color: C.muted }}>Method</span>
-                  <span className="text-[12px] font-bold capitalize" style={{ color: C.text }}>{formatMethod(confirmPay.payout_method ?? 'paypal')}</span>
-                </div>
-                {confirmPay.payment_details && (
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[12px]" style={{ color: C.muted }}>Pay to</span>
-                    <span className="text-[12px] font-bold" style={{ color: C.limeDeep }}>{confirmPay.payment_details}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12px]" style={{ color: C.muted }}>Affiliate</span>
-                  <span className="text-[12px] font-bold" style={{ color: C.text }}>{confirmPay.name} · {confirmPay.email ?? '—'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[12px]" style={{ color: C.muted }}>Commission</span>
-                  <span className="text-[12px] font-bold" style={{ color: C.text }}>
-                    {((confirmPay.custom_commission ?? affiliateSettings?.commission_rate ?? COMMISSION_RATE) * 100).toFixed(0)}% · {affiliateSettings?.commission_months ?? COMMISSION_MONTHS} months
-                  </span>
-                </div>
+              <div className="p-4 rounded-xl mb-4" style={{ backgroundColor:C.bg }}>
+                <div className="flex items-center justify-between mb-2"><span className="text-[12px]" style={{ color:C.muted }}>Amount</span><span className="text-[18px] font-extrabold" style={{ color:C.limeDeep }}>${confirmPay.payout.toFixed(2)}</span></div>
+                <div className="flex items-center justify-between mb-2"><span className="text-[12px]" style={{ color:C.muted }}>Method</span><span className="text-[12px] font-bold" style={{ color:C.text }}>{formatMethod(confirmPay.payout_method??'paypal')}</span></div>
+                {confirmPay.payment_details&&<div className="flex items-center justify-between mb-2"><span className="text-[12px]" style={{ color:C.muted }}>Pay to</span><span className="text-[12px] font-bold" style={{ color:C.limeDeep }}>{confirmPay.payment_details}</span></div>}
+                <div className="flex items-center justify-between mb-2"><span className="text-[12px]" style={{ color:C.muted }}>Affiliate</span><span className="text-[12px] font-bold" style={{ color:C.text }}>{confirmPay.name}</span></div>
+                <div className="flex items-center justify-between"><span className="text-[12px]" style={{ color:C.muted }}>Commission</span><span className="text-[12px] font-bold" style={{ color:C.text }}>{((confirmPay.custom_commission??affiliateSettings?.commission_rate??COMMISSION_RATE)*100).toFixed(0)}% · {affiliateSettings?.commission_months??COMMISSION_MONTHS}mo</span></div>
               </div>
-              <p className="text-[11px] mb-4 text-center" style={{ color: C.muted }}>
-                This will mark the payout as complete and log it in payout history.
-              </p>
               <div className="flex gap-2">
-                <button onClick={() => setConfirmPay(null)}
-                  className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold"
-                  style={{ borderColor: C.border, color: C.muted }}>
-                  Cancel
-                </button>
-                <button onClick={() => markAsPaid(confirmPay)}
-                  disabled={markingPaid === confirmPay.id}
+                <button onClick={()=>setConfirmPay(null)} className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold" style={{ borderColor:C.border,color:C.muted }}>Cancel</button>
+                <button onClick={()=>markAsPaid(confirmPay)} disabled={markingPaid===confirmPay.id}
                   className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
-                  {markingPaid === confirmPay.id
-                    ? <><div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> Paying...</>
-                    : 'Yes, Confirm'}
+                  style={{ backgroundColor:C.dark,color:C.lime }}>
+                  {markingPaid===confirmPay.id?<><div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.lime }}/> Paying...</>:'Yes, Confirm'}
                 </button>
               </div>
             </div>
@@ -1525,37 +1430,19 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
 
       {/* Reject Dialog */}
       {rejectDialog && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6"
-             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-             onClick={e => e.target === e.currentTarget && setRejectDialog(null)}>
-          <div className="w-full max-w-sm rounded-2xl overflow-hidden"
-               style={{ backgroundColor: C.surface, boxShadow: '0 24px 60px rgba(0,0,0,0.25)' }}>
-            <div className="px-5 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-              <p className="text-[15px] font-bold" style={{ color: C.text }}>Reject Withdrawal</p>
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6" style={{ backgroundColor:'rgba(0,0,0,0.5)' }}
+             onClick={e=>e.target===e.currentTarget&&setRejectDialog(null)}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ backgroundColor:C.surface, boxShadow:'0 24px 60px rgba(0,0,0,0.25)' }}>
+            <div className="px-5 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <p className="text-[15px] font-bold" style={{ color:C.text }}>Reject Withdrawal</p>
             </div>
             <div className="p-5">
-              <p className="text-[13px] mb-3" style={{ color: C.muted }}>
-                Rejecting ${rejectDialog.amount.toFixed(2)} for {affiliates.find(a => a.id === rejectDialog.affiliate_id)?.name ?? 'affiliate'}.
-              </p>
-              <textarea
-                value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
-                placeholder="Reason for rejection (optional but recommended)..."
-                rows={3}
-                className="w-full p-3 rounded-xl text-[13px] resize-none"
-                style={{ border: `1.5px solid ${C.border}`, color: C.text, outline: 'none' }}
-              />
+              <p className="text-[13px] mb-3" style={{ color:C.muted }}>Rejecting ${rejectDialog.amount.toFixed(2)} for {affiliates.find(a=>a.id===rejectDialog.affiliate_id)?.name??'affiliate'}.</p>
+              <textarea value={rejectReason} onChange={e=>setRejectReason(e.target.value)} placeholder="Reason for rejection..." rows={3}
+                className="w-full p-3 rounded-xl text-[13px] resize-none" style={{ border:`1.5px solid ${C.border}`,color:C.text,outline:'none' }} />
               <div className="flex gap-2 mt-4">
-                <button onClick={() => setRejectDialog(null)}
-                  className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold"
-                  style={{ borderColor: C.border, color: C.muted }}>
-                  Cancel
-                </button>
-                <button onClick={() => rejectWithdrawal(rejectDialog, rejectReason)}
-                  className="flex-1 py-2.5 rounded-xl text-[13px] font-bold"
-                  style={{ backgroundColor: C.red, color: '#fff' }}>
-                  Reject
-                </button>
+                <button onClick={()=>setRejectDialog(null)} className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold" style={{ borderColor:C.border,color:C.muted }}>Cancel</button>
+                <button onClick={()=>rejectWithdrawal(rejectDialog,rejectReason)} className="flex-1 py-2.5 rounded-xl text-[13px] font-bold" style={{ backgroundColor:C.red,color:'#fff' }}>Reject</button>
               </div>
             </div>
           </div>
@@ -1564,26 +1451,14 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
 
       {/* Confirm Remove Dialog */}
       {confirmRemove && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6"
-             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-             onClick={e => e.target === e.currentTarget && setConfirmRemove(null)}>
-          <div className="w-full max-w-sm rounded-2xl p-5"
-               style={{ backgroundColor: C.surface, boxShadow: '0 24px 60px rgba(0,0,0,0.25)' }}>
-            <p className="text-[15px] font-bold mb-2" style={{ color: C.text }}>Remove Affiliate?</p>
-            <p className="text-[13px] mb-4" style={{ color: C.muted }}>
-              This will permanently remove the affiliate and cancel any pending withdrawal requests.
-            </p>
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6" style={{ backgroundColor:'rgba(0,0,0,0.5)' }}
+             onClick={e=>e.target===e.currentTarget&&setConfirmRemove(null)}>
+          <div className="w-full max-w-sm rounded-2xl p-5" style={{ backgroundColor:C.surface, boxShadow:'0 24px 60px rgba(0,0,0,0.25)' }}>
+            <p className="text-[15px] font-bold mb-2" style={{ color:C.text }}>Remove Affiliate?</p>
+            <p className="text-[13px] mb-4" style={{ color:C.muted }}>This will permanently remove the affiliate and cancel any pending withdrawal requests.</p>
             <div className="flex gap-2">
-              <button onClick={() => setConfirmRemove(null)}
-                className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold"
-                style={{ borderColor: C.border, color: C.muted }}>
-                Cancel
-              </button>
-              <button onClick={() => removeAffiliate(confirmRemove)}
-                className="flex-1 py-2.5 rounded-xl text-[13px] font-bold"
-                style={{ backgroundColor: C.red, color: '#fff' }}>
-                Remove
-              </button>
+              <button onClick={()=>setConfirmRemove(null)} className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold" style={{ borderColor:C.border,color:C.muted }}>Cancel</button>
+              <button onClick={()=>removeAffiliate(confirmRemove)} className="flex-1 py-2.5 rounded-xl text-[13px] font-bold" style={{ backgroundColor:C.red,color:'#fff' }}>Remove</button>
             </div>
           </div>
         </div>
