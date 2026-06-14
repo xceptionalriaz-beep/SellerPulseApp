@@ -477,7 +477,7 @@ function ToolShowcase() {
 // ── Live Stats ─────────────────────────────────────────────────
 function LiveStats() {
   const stats = [
-    { val: 48392, label: 'Niche Scans Today',   suffix: '+', icon: Search     },
+    { val: 48392, label: 'Niche Scans Todays',   suffix: '+', icon: Search     },
     { val: 127,   label: 'Niches Tracked Live', suffix: 'K', icon: TrendingUp },
     { val: 12841, label: 'Sellers Active Now',  suffix: '+', icon: Users      },
     { val: 4200,  label: 'Revenue Protected',   prefix: '$', suffix: 'K+', icon: Shield },
