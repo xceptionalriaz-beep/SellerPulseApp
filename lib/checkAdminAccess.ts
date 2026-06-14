@@ -6,7 +6,7 @@
 // Checks role updated_at timestamp to detect stale sessions.
 // ══════════════════════════════════════════════════════════════
 
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -49,7 +49,18 @@ export async function checkAdminAccess(
   } = {}
 ): Promise<AccessCheckResult> {
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
 
   // ── 1. Verify session exists ───────────────────────────────
   const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -191,7 +202,18 @@ export async function verifyAdminToken(token: string): Promise<{
   userId?: string
   error?: string
 }> {
-  const supabase = createRouteHandlerClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  )
 
   const { data: { user }, error } = await supabase.auth.getUser(token)
   if (error || !user) return { authorized: false, error: 'Invalid token' }
