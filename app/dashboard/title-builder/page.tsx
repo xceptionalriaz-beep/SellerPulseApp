@@ -9,6 +9,7 @@ import TbStudio        from './components/TbStudio'
 import TbProHud        from './components/TbProHud'
 import TbKeywordTables from './components/TbKeywordTables'
 import TbSettingsPanel from './components/TbSettingsPanel'
+import KillSwitchGate from '@/components/KillSwitchGate'
 
 const supabase = createClient()
 
@@ -146,68 +147,70 @@ export default function TitleBuilderPage() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto" style={{ backgroundColor: '#F8FAFC' }}>
-      <div className="p-5 lg:p-8 flex flex-col gap-8">
+    <KillSwitchGate switchTitle="Title Builder">
+      <div className="flex flex-col h-full overflow-y-auto" style={{ backgroundColor: '#F8FAFC' }}>
+        <div className="p-5 lg:p-8 flex flex-col gap-8">
 
-        {/* Page title */}
-        <h1 className="text-[24px] font-bold" style={{ color: '#0F172A' }}>
-          SellerPulse Pro Title Builder
-        </h1>
+          {/* Page title */}
+          <h1 className="text-[24px] font-bold" style={{ color: '#0F172A' }}>
+            SellerPulse Pro Title Builder
+          </h1>
 
-        {/* Top bar */}
-        <TbTopBar
-          selectedTimeframe={activeTimeframe}   onTimeframeChanged={setActiveTimeframe}
-          selectedMarket={activeMarket}         onMarketChanged={setActiveMarket}
-          selectedLocation={activeLocation}     onLocationChanged={setActiveLocation}
-          onExtract={handleExtract}
-          onSearch={handleSearch}
-          onOpenSettings={() => setShowSettings(true)}
-        />
+          {/* Top bar */}
+          <TbTopBar
+            selectedTimeframe={activeTimeframe}   onTimeframeChanged={setActiveTimeframe}
+            selectedMarket={activeMarket}         onMarketChanged={setActiveMarket}
+            selectedLocation={activeLocation}     onLocationChanged={setActiveLocation}
+            onExtract={handleExtract}
+            onSearch={handleSearch}
+            onOpenSettings={() => setShowSettings(true)}
+          />
 
-        {/* Studio + HUD — desktop: side by side (65/35), mobile: stacked */}
-        <div className="flex flex-col xl:flex-row gap-5">
-          <div style={{ flex: 65 }}>
-            <TbStudio
-              value={title}
-              onChange={handleTitleChange}
-              charCount={charCount}
-              veroCount={flaggedVero.length}
-              duplicateCount={flaggedDups.length}
-            />
+          {/* Studio + HUD */}
+          <div className="flex flex-col xl:flex-row gap-5">
+            <div style={{ flex: 65 }}>
+              <TbStudio
+                value={title}
+                onChange={handleTitleChange}
+                charCount={charCount}
+                veroCount={flaggedVero.length}
+                duplicateCount={flaggedDups.length}
+              />
+            </div>
+            <div style={{ flex: 35 }}>
+              <TbProHud
+                veroCount={flaggedVero.length}
+                currentTitle={title}
+                timeframe={activeTimeframe}
+                saturScore={saturScore}
+                trendData={trendData}
+                isLoading={marketLoading}
+              />
+            </div>
           </div>
-          <div style={{ flex: 35 }}>
-            <TbProHud
-              veroCount={flaggedVero.length}
-              currentTitle={title}
-              timeframe={activeTimeframe}
-              saturScore={saturScore}
-              trendData={trendData}
-              isLoading={marketLoading}
-            />
-          </div>
+
+          {/* Keyword tables */}
+          <TbKeywordTables
+            currentTitle={title}
+            onInject={injectKeyword}
+            veroDatabase={veroDb}
+            longTailData={longTailKeywords}
+            genericData={genericKeywords}
+            isLoading={isFetching}
+          />
+
         </div>
 
-        {/* Keyword tables */}
-        <TbKeywordTables
-          currentTitle={title}
-          onInject={injectKeyword}
-          veroDatabase={veroDb}
-          longTailData={longTailKeywords}
-          genericData={genericKeywords}
-          isLoading={isFetching}
-        />
-
+        {/* Settings panel */}
+        {showSettings && (
+          <TbSettingsPanel
+            autoCapitalize={autoCapitalize}  onAutoCapitalizeChanged={setAutoCapitalize}
+            autoCopy={autoCopy}              onAutoCopyChanged={setAutoCopy}
+            veroMode={veroMode}              onVeroModeChanged={setVeroMode}
+            onClose={() => setShowSettings(false)}
+          />
+        )}
       </div>
-
-      {/* Settings panel */}
-      {showSettings && (
-        <TbSettingsPanel
-          autoCapitalize={autoCapitalize}  onAutoCapitalizeChanged={setAutoCapitalize}
-          autoCopy={autoCopy}              onAutoCopyChanged={setAutoCopy}
-          veroMode={veroMode}              onVeroModeChanged={setVeroMode}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
-    </div>
+    </KillSwitchGate>
   )
 }

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/orders/page.tsx
 // ═══════════════════════════════════════════════════════════════
 // Converted from: lib/pages/orders/orders_dashboard.dart
@@ -41,6 +41,7 @@ import BuyerProfilePanel from '@/app/dashboard/orders/components/BuyerProfilePan
 import { OrderDetailInline } from '@/app/dashboard/orders/components/OrderDetailInline'
 import { createClient } from '@/lib/supabase'
 import { cn, timeAgo } from '@/lib/utils'
+import KillSwitchGate from '@/components/KillSwitchGate'
 
 // ── Design tokens (exact match to Dart _C) ────────────────────
 const C = {
@@ -359,11 +360,10 @@ export default function OrdersDashboardPage() {
       setStats({ low, med, high, protected: prot, unprotected: unprot, shipped, today, total: rows.length, atRisk, protVal, totalVal })
       setOrders(rows)
 
-      // Load buyer profiles — keyed by buyer_username (matches Dart)
+      // Load buyer profiles
       const buyerNames = [...new Set(rows.map((o: any) => o.buyer_username).filter(Boolean))] as string[]
       if (buyerNames.length > 0) {
         try {
-          // Try buyer_username first, fall back to ebay_buyer_username (Dart field name)
           const { data: profileRows } = await supabase
             .from('buyer_profiles')
             .select('*')
@@ -376,7 +376,6 @@ export default function OrdersDashboardPage() {
             }
             setBuyerProfiles(map)
           } else {
-            // Try alternate column name
             const { data: altRows } = await supabase
               .from('buyer_profiles')
               .select('*')
@@ -393,7 +392,7 @@ export default function OrdersDashboardPage() {
         } catch (_) {}
       }
 
-      // Build chart data filtered by time range
+      // Build chart data
       const fromDate = timeRange === 'all' ? null : new Date(Date.now() - Number(timeRange) * 86400000)
       const sortedKeys = Object.keys(dailyMap).sort()
         .filter(k => !fromDate || new Date(k) >= fromDate)
@@ -523,7 +522,6 @@ export default function OrdersDashboardPage() {
 
         {/* Middle section skeleton */}
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Left col */}
           <div className="flex flex-col gap-3 lg:flex-[3]">
             <div className="rounded-xl p-4 h-[96px]" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
               <div className="flex gap-4">
@@ -537,7 +535,6 @@ export default function OrdersDashboardPage() {
               </div>
             </div>
           </div>
-          {/* Right col */}
           <div className="flex flex-col gap-3 lg:flex-[2]">
             <div className="rounded-xl h-[120px]" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }} />
             <div className="rounded-xl h-[80px]" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }} />
@@ -600,853 +597,829 @@ export default function OrdersDashboardPage() {
   )
 
   return (
-    <div className="min-h-full overflow-auto" style={{ backgroundColor: C.bg }}>
-      <div className="w-full px-4 md:px-6 lg:px-8 pt-4 pb-10 space-y-4">
+    <KillSwitchGate switchTitle="Orders Management">
+      <div className="min-h-full overflow-auto" style={{ backgroundColor: C.bg }}>
+        <div className="w-full px-4 md:px-6 lg:px-8 pt-4 pb-10 space-y-4">
 
-        {/* ── HEADER ── */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <p className="flex-1 text-[13px] font-medium" style={{ color: C.textSecondary }}>Protect your orders from risky buyers</p>
-            {/* LIVE badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border"
-               style={{ backgroundColor: C.accentDim, borderColor: C.accent + '80' }}>
-            {refreshing
-              ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.accent }} />
-              : <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: C.accent }} />
-            }
-            <span className="text-[10px] font-bold" style={{ color: C.accentDeep }}>
-              {refreshing ? 'UPDATING…' : 'LIVE'}
-            </span>
-          </div>
+          {/* ── HEADER ── */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="flex-1 text-[13px] font-medium" style={{ color: C.textSecondary }}>Protect your orders from risky buyers</p>
+              {/* LIVE badge */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border"
+                 style={{ backgroundColor: C.accentDim, borderColor: C.accent + '80' }}>
+              {refreshing
+                ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.accent }} />
+                : <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: C.accent }} />
+              }
+              <span className="text-[10px] font-bold" style={{ color: C.accentDeep }}>
+                {refreshing ? 'UPDATING…' : 'LIVE'}
+              </span>
+            </div>
 
-          <button onClick={() => loadData(true)} className="text-[#4A5E38] hover:text-dark transition-colors">
-            <RefreshCw size={18} />
-          </button>
-
-          {/* Time range — desktop: pills, mobile: dropdown */}
-          <div className="hidden md:flex items-center gap-1">
-            {[['7','7D'],['30','30D'],['all','All']].map(([v,l]) => (
-              <button key={v} onClick={() => setTimeRange(v)}
-                className="px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all"
-                style={{
-                  backgroundColor: timeRange === v ? C.accent : 'transparent',
-                  color: timeRange === v ? C.accentDark : C.textSecondary,
-                }}>
-                {l}
-              </button>
-            ))}
-          </div>
-          {/* Mobile dropdown */}
-          <div className="relative md:hidden">
-            <button
-              onClick={() => setTimeDropdown(d => !d)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-all"
-              style={{ backgroundColor: C.accentDim, borderColor: C.accent, color: C.accentDeep }}>
-              {timeRange === '7' ? '7D' : timeRange === '30' ? '30D' : 'All'}
-              <ChevronDown size={12} style={{ color: C.accentDeep, transform: timeDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            <button onClick={() => loadData(true)} className="text-[#4A5E38] hover:text-dark transition-colors">
+              <RefreshCw size={18} />
             </button>
-            {timeDropdown && (
-              <div className="absolute right-0 top-full mt-1 z-50 rounded-xl border shadow-lg overflow-hidden"
-                   style={{ backgroundColor: C.surface, borderColor: C.border, minWidth: 80 }}>
-                {[['7','7D'],['30','30D'],['all','All']].map(([v,l]) => (
-                  <button key={v}
-                    onClick={() => { setTimeRange(v); setTimeDropdown(false) }}
-                    className="w-full px-4 py-2.5 text-left text-[12px] font-semibold transition-colors"
-                    style={{
-                      backgroundColor: timeRange === v ? C.accent : 'transparent',
-                      color: timeRange === v ? C.accentDark : C.textPrimary,
-                    }}>
-                    {l}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* PDF Export */}
-          <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white text-[11px] font-bold"
-                  style={{ backgroundColor: C.accentDeep }}>
-            <FileText size={13} />
-            PDF
-          </button>
-        </div>
-
-        {/* ── ERROR BANNER ── */}
-        {hasError && (
-          <div className="flex items-center gap-3 p-3 rounded-xl border"
-               style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '50' }}>
-            <AlertTriangle size={16} style={{ color: C.riskHigh }} />
-            <p className="text-[12px] flex-1" style={{ color: C.riskHigh }}>
-              Failed to load orders. Pull down to retry.
-            </p>
-            <button onClick={() => loadData()} className="text-[11px] font-bold" style={{ color: C.riskHigh }}>Retry</button>
-          </div>
-        )}
-
-        {/* ── TOP SECTION ── */}
-        {/* Mobile: stats(1) → monthly+today(2) → revenue(3) | Desktop: left(stats+revenue) | right(monthly+today) */}
-        <div className="flex flex-col lg:flex-row gap-4">
-
-          {/* ── MOBILE STATS (hidden on desktop) ── */}
-          <div className="lg:hidden flex flex-col gap-2 order-1">
-            <div className="grid grid-cols-3 gap-2">
-              <StatCard icon={Shield}        label="Low Risk"    value={`${stats.low}`}
-                sub="Safe to ship"    color={C.riskLow}   bg={C.riskLowBg}
-                barColor={C.riskLow}  barFraction={stats.low/tot}  index={0} />
-              <StatCard icon={AlertTriangle} label="Medium Risk" value={`${stats.med}`}
-                sub="Extra care"     color={C.riskMed}   bg={C.riskMedBg}
-                barColor={C.riskMed}  barFraction={stats.med/tot}  index={1} />
-              <StatCard icon={ShieldOff}     label="High Risk"   value={`${stats.high}`}
-                sub="Action needed"  color={C.riskHigh}  bg={C.riskHighBg}
-                barColor={C.riskHigh} barFraction={stats.high/tot} index={2} />
+            {/* Time range — desktop: pills, mobile: dropdown */}
+            <div className="hidden md:flex items-center gap-1">
+              {[['7','7D'],['30','30D'],['all','All']].map(([v,l]) => (
+                <button key={v} onClick={() => setTimeRange(v)}
+                  className="px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all"
+                  style={{
+                    backgroundColor: timeRange === v ? C.accent : 'transparent',
+                    color: timeRange === v ? C.accentDark : C.textSecondary,
+                  }}>
+                  {l}
+                </button>
+              ))}
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <StatCard icon={Truck}       label="Shipped"   value={`${stats.shipped}/${stats.total}`}
-                sub="Orders shipped" color={C.shipped}   bg={C.shippedBg}
-                barColor={C.shipped}  barFraction={stats.shipped/tot} index={3} />
-              <StatCard icon={CheckCircle} label="Protected" value={`${stats.protected}/${stats.total}`}
-                sub={`${protRate}% done`} color={C.accentDeep} bg={C.accentDim}
-                barColor={C.accent}   barFraction={stats.protected/tot} index={4} />
-            </div>
-          </div>
-
-          {/* ── MOBILE MONTHLY + TODAY (hidden on desktop) ── */}
-          <div className="lg:hidden flex flex-col gap-3 order-2">
-            {/* Monthly Report */}
-            <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-              <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.accentDim }}>
-                <Calendar size={14} style={{ color: C.accentDeep }} />
-                <span className="text-[13px] font-bold flex-1" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>Monthly Report</span>
-                <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: C.accentDeep }}>{monthlyData.length} mo</span>
-              </div>
-              <div className="grid grid-cols-6 px-3.5 py-2 text-[8px] font-bold tracking-wide" style={{ color: C.textHint }}>
-                <span className="col-span-2">MONTH</span>
-                <span className="text-center">ORD</span>
-                <span className="text-center" style={{ color: C.accentDeep }}>PROT</span>
-                <span className="text-center" style={{ color: C.riskHigh }}>HIGH</span>
-                <span className="text-right">RATE</span>
-              </div>
-              {monthlyData.length === 0 ? (
-                <p className="text-center text-[11px] p-4" style={{ color: C.textHint }}>No data yet</p>
-              ) : monthlyData.map((m, i) => {
-                const rc = m.rate >= 80 ? C.riskLow : m.rate >= 50 ? C.riskMed : C.riskHigh
-                return (
-                  <div key={i} className="grid grid-cols-6 px-3.5 py-2 border-t text-[11px]" style={{ borderColor: C.border }}>
-                    <span className="col-span-2 font-semibold" style={{ color: C.textPrimary }}>{m.label}</span>
-                    <span className="text-center" style={{ color: C.textSecondary }}>{m.total}</span>
-                    <span className="text-center font-bold" style={{ color: C.accentDeep }}>{m.protected}</span>
-                    <span className="text-center" style={{ color: m.high > 0 ? C.riskHigh : C.textHint }}>{m.high}</span>
-                    <div className="flex justify-end">
-                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ backgroundColor: rc + '20', color: rc }}>{m.rate}%</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            {/* Today's Orders */}
-            <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-              <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.shippedBg }}>
-                <Bolt size={14} style={{ color: C.shipped }} />
-                <span className="text-[13px] font-bold flex-1" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>Today&apos;s Orders</span>
-                <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: todayOrders.length === 0 ? C.textHint : C.shipped }}>
-                  {todayOrders.length === 0 ? 'None' : `${todayOrders.length} new`}
-                </span>
-              </div>
-              {todayOrders.length === 0 ? (
-                <p className="px-3.5 py-3 text-[11px]" style={{ color: C.textHint }}>No orders yet today</p>
-              ) : (
-                <>
-                  {todayOrders.map((o, i) => {
-                    const dotColor = (o.risk_level||'').toUpperCase() === 'HIGH' ? C.riskHigh
-                      : (o.risk_level||'').toUpperCase() === 'MEDIUM' ? C.riskMed : C.riskLow
-                    return (
-                      <button key={i} onClick={() => setSelectedOrder(o)}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 border-t hover:opacity-80"
-                        style={{ borderColor: C.border }}>
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
-                        <div className="flex-1 text-left min-w-0">
-                          <p className="text-[11px] font-semibold truncate" style={{ color: C.textPrimary }}>{o.item_title || 'Unknown'}</p>
-                          {o.buyer_username && <p className="text-[9px] truncate" style={{ color: C.textHint }}>{o.buyer_username}</p>}
-                        </div>
-                        <span className="text-[12px] font-extrabold shrink-0" style={{ fontFamily: 'var(--font-space-grotesk)', color: C.textPrimary }}>
-                          {currencySymbol}{Number(o.item_price||0).toFixed(2)}
-                        </span>
-                      </button>
-                    )
-                  })}
-                  <div className="flex justify-between px-3.5 py-2 border-t text-[10px]" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                    <span style={{ color: C.textHint }}>Today&apos;s total</span>
-                    <span className="font-bold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{todayTotal.toFixed(2)}</span>
-                  </div>
-                </>
+            {/* Mobile dropdown */}
+            <div className="relative md:hidden">
+              <button
+                onClick={() => setTimeDropdown(d => !d)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-all"
+                style={{ backgroundColor: C.accentDim, borderColor: C.accent, color: C.accentDeep }}>
+                {timeRange === '7' ? '7D' : timeRange === '30' ? '30D' : 'All'}
+                <ChevronDown size={12} style={{ color: C.accentDeep, transform: timeDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+              {timeDropdown && (
+                <div className="absolute right-0 top-full mt-1 z-50 rounded-xl border shadow-lg overflow-hidden"
+                     style={{ backgroundColor: C.surface, borderColor: C.border, minWidth: 80 }}>
+                  {[['7','7D'],['30','30D'],['all','All']].map(([v,l]) => (
+                    <button key={v}
+                      onClick={() => { setTimeRange(v); setTimeDropdown(false) }}
+                      className="w-full px-4 py-2.5 text-left text-[12px] font-semibold transition-colors"
+                      style={{
+                        backgroundColor: timeRange === v ? C.accent : 'transparent',
+                        color: timeRange === v ? C.accentDark : C.textPrimary,
+                      }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
+
+            {/* PDF Export */}
+            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white text-[11px] font-bold"
+                    style={{ backgroundColor: C.accentDeep }}>
+              <FileText size={13} />
+              PDF
+            </button>
           </div>
 
-          {/* ── MOBILE REVENUE (hidden on desktop) ── */}
-          <div className="lg:hidden flex flex-col gap-2 order-3">
-            <div className="flex items-center gap-4 px-5 py-4 rounded-xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-              <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-extrabold" style={{ color: stats.atRisk > 0 ? C.riskHigh : C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.atRisk.toFixed(2)}</p>
-                <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Revenue at risk</p>
-                <p className="text-[10px]" style={{ color: C.textHint }}>{stats.high > 0 ? stats.high : 'No'} unprotected HIGH orders</p>
-                <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: stats.atRisk > 0 ? C.riskHighBg : C.accentDim }}>
-                  <div className="h-full rounded-full" style={{ width: `${atRiskPct*100}%`, backgroundColor: stats.atRisk > 0 ? C.riskHigh : C.accentDeep }} />
-                </div>
-              </div>
-              <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-extrabold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.protVal.toFixed(2)}</p>
-                <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Value protected</p>
-                <p className="text-[10px]" style={{ color: C.textHint }}>{stats.protected} orders secured</p>
-                <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.accentDim }}>
-                  <div className="h-full rounded-full" style={{ width: `${protectedPct*100}%`, backgroundColor: C.accent }} />
-                </div>
-              </div>
-              <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-extrabold" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>{stats.today}</p>
-                <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>New today</p>
-                <p className="text-[10px]" style={{ color: C.textHint }}>Orders since midnight</p>
-                <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.shippedBg }}>
-                  <div className="h-full rounded-full" style={{ width: `${stats.total > 0 ? Math.min(stats.today/stats.total,1)*100 : 0}%`, backgroundColor: C.shipped }} />
-                </div>
-              </div>
+          {/* ── ERROR BANNER ── */}
+          {hasError && (
+            <div className="flex items-center gap-3 p-3 rounded-xl border"
+                 style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '50' }}>
+              <AlertTriangle size={16} style={{ color: C.riskHigh }} />
+              <p className="text-[12px] flex-1" style={{ color: C.riskHigh }}>
+                Failed to load orders. Pull down to retry.
+              </p>
+              <button onClick={() => loadData()} className="text-[11px] font-bold" style={{ color: C.riskHigh }}>Retry</button>
             </div>
-            {stats.atRisk > 0 && (
-              <button onClick={() => setFilter('not_protected')}
-                className="w-full py-3 rounded-xl text-[13px] font-bold hover:opacity-90"
-                style={{ backgroundColor: C.accent, color: C.accentDark }}>
-                Protect now →
-              </button>
-            )}
-          </div>
+          )}
 
-          {/* ── DESKTOP LEFT COL: stats + revenue (hidden on mobile) ── */}
-          <div className="hidden lg:flex flex-col gap-3 flex-[3]">
-            <div className="grid grid-cols-5 gap-2">
-              <StatCard icon={Shield}        label="Low Risk"    value={`${stats.low}`}
-                sub="Safe to ship"    color={C.riskLow}   bg={C.riskLowBg}
-                barColor={C.riskLow}  barFraction={stats.low/tot}  index={0} />
-              <StatCard icon={AlertTriangle} label="Medium Risk" value={`${stats.med}`}
-                sub="Extra care"     color={C.riskMed}   bg={C.riskMedBg}
-                barColor={C.riskMed}  barFraction={stats.med/tot}  index={1} />
-              <StatCard icon={ShieldOff}     label="High Risk"   value={`${stats.high}`}
-                sub="Action needed"  color={C.riskHigh}  bg={C.riskHighBg}
-                barColor={C.riskHigh} barFraction={stats.high/tot} index={2} />
-              <StatCard icon={Truck}       label="Shipped"   value={`${stats.shipped}/${stats.total}`}
-                sub="Orders shipped" color={C.shipped}   bg={C.shippedBg}
-                barColor={C.shipped}  barFraction={stats.shipped/tot} index={3} />
-              <StatCard icon={CheckCircle} label="Protected" value={`${stats.protected}/${stats.total}`}
-                sub={`${protRate}% done`} color={C.accentDeep} bg={C.accentDim}
-                barColor={C.accent}   barFraction={stats.protected/tot} index={4} />
+          {/* ── TOP SECTION ── */}
+          <div className="flex flex-col lg:flex-row gap-4">
+
+            {/* ── MOBILE STATS (hidden on desktop) ── */}
+            <div className="lg:hidden flex flex-col gap-2 order-1">
+              <div className="grid grid-cols-3 gap-2">
+                <StatCard icon={Shield}        label="Low Risk"    value={`${stats.low}`}
+                  sub="Safe to ship"    color={C.riskLow}   bg={C.riskLowBg}
+                  barColor={C.riskLow}  barFraction={stats.low/tot}  index={0} />
+                <StatCard icon={AlertTriangle} label="Medium Risk" value={`${stats.med}`}
+                  sub="Extra care"     color={C.riskMed}   bg={C.riskMedBg}
+                  barColor={C.riskMed}  barFraction={stats.med/tot}  index={1} />
+                <StatCard icon={ShieldOff}     label="High Risk"   value={`${stats.high}`}
+                  sub="Action needed"  color={C.riskHigh}  bg={C.riskHighBg}
+                  barColor={C.riskHigh} barFraction={stats.high/tot} index={2} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <StatCard icon={Truck}       label="Shipped"   value={`${stats.shipped}/${stats.total}`}
+                  sub="Orders shipped" color={C.shipped}   bg={C.shippedBg}
+                  barColor={C.shipped}  barFraction={stats.shipped/tot} index={3} />
+                <StatCard icon={CheckCircle} label="Protected" value={`${stats.protected}/${stats.total}`}
+                  sub={`${protRate}% done`} color={C.accentDeep} bg={C.accentDim}
+                  barColor={C.accent}   barFraction={stats.protected/tot} index={4} />
+              </div>
             </div>
-            {/* Revenue bar */}
-            <div className="flex items-center gap-4 px-5 py-4 rounded-xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-              <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-extrabold" style={{ color: stats.atRisk > 0 ? C.riskHigh : C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.atRisk.toFixed(2)}</p>
-                <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Revenue at risk</p>
-                <p className="text-[10px]" style={{ color: C.textHint }}>{stats.high > 0 ? stats.high : 'No'} unprotected HIGH orders</p>
-                <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: stats.atRisk > 0 ? C.riskHighBg : C.accentDim }}>
-                  <div className="h-full rounded-full" style={{ width: `${atRiskPct*100}%`, backgroundColor: stats.atRisk > 0 ? C.riskHigh : C.accentDeep }} />
+
+            {/* ── MOBILE MONTHLY + TODAY (hidden on desktop) ── */}
+            <div className="lg:hidden flex flex-col gap-3 order-2">
+              {/* Monthly Report */}
+              <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.accentDim }}>
+                  <Calendar size={14} style={{ color: C.accentDeep }} />
+                  <span className="text-[13px] font-bold flex-1" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>Monthly Report</span>
+                  <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: C.accentDeep }}>{monthlyData.length} mo</span>
                 </div>
-              </div>
-              <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-extrabold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.protVal.toFixed(2)}</p>
-                <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Value protected</p>
-                <p className="text-[10px]" style={{ color: C.textHint }}>{stats.protected} orders secured</p>
-                <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.accentDim }}>
-                  <div className="h-full rounded-full" style={{ width: `${protectedPct*100}%`, backgroundColor: C.accent }} />
+                <div className="grid grid-cols-6 px-3.5 py-2 text-[8px] font-bold tracking-wide" style={{ color: C.textHint }}>
+                  <span className="col-span-2">MONTH</span>
+                  <span className="text-center">ORD</span>
+                  <span className="text-center" style={{ color: C.accentDeep }}>PROT</span>
+                  <span className="text-center" style={{ color: C.riskHigh }}>HIGH</span>
+                  <span className="text-right">RATE</span>
                 </div>
+                {monthlyData.length === 0 ? (
+                  <p className="text-center text-[11px] p-4" style={{ color: C.textHint }}>No data yet</p>
+                ) : monthlyData.map((m, i) => {
+                  const rc = m.rate >= 80 ? C.riskLow : m.rate >= 50 ? C.riskMed : C.riskHigh
+                  return (
+                    <div key={i} className="grid grid-cols-6 px-3.5 py-2 border-t text-[11px]" style={{ borderColor: C.border }}>
+                      <span className="col-span-2 font-semibold" style={{ color: C.textPrimary }}>{m.label}</span>
+                      <span className="text-center" style={{ color: C.textSecondary }}>{m.total}</span>
+                      <span className="text-center font-bold" style={{ color: C.accentDeep }}>{m.protected}</span>
+                      <span className="text-center" style={{ color: m.high > 0 ? C.riskHigh : C.textHint }}>{m.high}</span>
+                      <div className="flex justify-end">
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ backgroundColor: rc + '20', color: rc }}>{m.rate}%</span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-              <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[17px] font-extrabold" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>{stats.today}</p>
-                <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>New today</p>
-                <p className="text-[10px]" style={{ color: C.textHint }}>Orders since midnight</p>
-                <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.shippedBg }}>
-                  <div className="h-full rounded-full" style={{ width: `${stats.total > 0 ? Math.min(stats.today/stats.total,1)*100 : 0}%`, backgroundColor: C.shipped }} />
+              {/* Today's Orders */}
+              <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.shippedBg }}>
+                  <Bolt size={14} style={{ color: C.shipped }} />
+                  <span className="text-[13px] font-bold flex-1" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>Today&apos;s Orders</span>
+                  <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: todayOrders.length === 0 ? C.textHint : C.shipped }}>
+                    {todayOrders.length === 0 ? 'None' : `${todayOrders.length} new`}
+                  </span>
+                </div>
+                {todayOrders.length === 0 ? (
+                  <p className="px-3.5 py-3 text-[11px]" style={{ color: C.textHint }}>No orders yet today</p>
+                ) : (
+                  <>
+                    {todayOrders.map((o, i) => {
+                      const dotColor = (o.risk_level||'').toUpperCase() === 'HIGH' ? C.riskHigh
+                        : (o.risk_level||'').toUpperCase() === 'MEDIUM' ? C.riskMed : C.riskLow
+                      return (
+                        <button key={i} onClick={() => setSelectedOrder(o)}
+                          className="w-full flex items-center gap-2 px-3.5 py-2 border-t hover:opacity-80"
+                          style={{ borderColor: C.border }}>
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-[11px] font-semibold truncate" style={{ color: C.textPrimary }}>{o.item_title || 'Unknown'}</p>
+                            {o.buyer_username && <p className="text-[9px] truncate" style={{ color: C.textHint }}>{o.buyer_username}</p>}
+                          </div>
+                          <span className="text-[12px] font-extrabold shrink-0" style={{ fontFamily: 'var(--font-space-grotesk)', color: C.textPrimary }}>
+                            {currencySymbol}{Number(o.item_price||0).toFixed(2)}
+                          </span>
+                        </button>
+                      )
+                    })}
+                    <div className="flex justify-between px-3.5 py-2 border-t text-[10px]" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                      <span style={{ color: C.textHint }}>Today&apos;s total</span>
+                      <span className="font-bold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{todayTotal.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* ── MOBILE REVENUE (hidden on desktop) ── */}
+            <div className="lg:hidden flex flex-col gap-2 order-3">
+              <div className="flex items-center gap-4 px-5 py-4 rounded-xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-extrabold" style={{ color: stats.atRisk > 0 ? C.riskHigh : C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.atRisk.toFixed(2)}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Revenue at risk</p>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>{stats.high > 0 ? stats.high : 'No'} unprotected HIGH orders</p>
+                  <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: stats.atRisk > 0 ? C.riskHighBg : C.accentDim }}>
+                    <div className="h-full rounded-full" style={{ width: `${atRiskPct*100}%`, backgroundColor: stats.atRisk > 0 ? C.riskHigh : C.accentDeep }} />
+                  </div>
+                </div>
+                <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-extrabold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.protVal.toFixed(2)}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Value protected</p>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>{stats.protected} orders secured</p>
+                  <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.accentDim }}>
+                    <div className="h-full rounded-full" style={{ width: `${protectedPct*100}%`, backgroundColor: C.accent }} />
+                  </div>
+                </div>
+                <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-extrabold" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>{stats.today}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>New today</p>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>Orders since midnight</p>
+                  <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.shippedBg }}>
+                    <div className="h-full rounded-full" style={{ width: `${stats.total > 0 ? Math.min(stats.today/stats.total,1)*100 : 0}%`, backgroundColor: C.shipped }} />
+                  </div>
                 </div>
               </div>
               {stats.atRisk > 0 && (
                 <button onClick={() => setFilter('not_protected')}
-                  className="px-5 py-3 rounded-xl text-[12px] font-bold hover:opacity-90 shrink-0"
+                  className="w-full py-3 rounded-xl text-[13px] font-bold hover:opacity-90"
                   style={{ backgroundColor: C.accent, color: C.accentDark }}>
                   Protect now →
                 </button>
               )}
             </div>
-          </div>
 
-          {/* ── DESKTOP RIGHT COL: monthly + today (hidden on mobile) ── */}
-          <div className="hidden lg:flex flex-col gap-3 flex-[2]">
-            {/* Monthly Report */}
-            <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-              <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.accentDim }}>
-                <Calendar size={14} style={{ color: C.accentDeep }} />
-                <span className="text-[13px] font-bold flex-1" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>Monthly Report</span>
-                <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: C.accentDeep }}>{monthlyData.length} mo</span>
+            {/* ── DESKTOP LEFT COL: stats + revenue (hidden on mobile) ── */}
+            <div className="hidden lg:flex flex-col gap-3 flex-[3]">
+              <div className="grid grid-cols-5 gap-2">
+                <StatCard icon={Shield}        label="Low Risk"    value={`${stats.low}`}
+                  sub="Safe to ship"    color={C.riskLow}   bg={C.riskLowBg}
+                  barColor={C.riskLow}  barFraction={stats.low/tot}  index={0} />
+                <StatCard icon={AlertTriangle} label="Medium Risk" value={`${stats.med}`}
+                  sub="Extra care"     color={C.riskMed}   bg={C.riskMedBg}
+                  barColor={C.riskMed}  barFraction={stats.med/tot}  index={1} />
+                <StatCard icon={ShieldOff}     label="High Risk"   value={`${stats.high}`}
+                  sub="Action needed"  color={C.riskHigh}  bg={C.riskHighBg}
+                  barColor={C.riskHigh} barFraction={stats.high/tot} index={2} />
+                <StatCard icon={Truck}       label="Shipped"   value={`${stats.shipped}/${stats.total}`}
+                  sub="Orders shipped" color={C.shipped}   bg={C.shippedBg}
+                  barColor={C.shipped}  barFraction={stats.shipped/tot} index={3} />
+                <StatCard icon={CheckCircle} label="Protected" value={`${stats.protected}/${stats.total}`}
+                  sub={`${protRate}% done`} color={C.accentDeep} bg={C.accentDim}
+                  barColor={C.accent}   barFraction={stats.protected/tot} index={4} />
               </div>
-              <div className="grid grid-cols-6 px-3.5 py-2 text-[8px] font-bold tracking-wide" style={{ color: C.textHint }}>
-                <span className="col-span-2">MONTH</span>
-                <span className="text-center">ORD</span>
-                <span className="text-center" style={{ color: C.accentDeep }}>PROT</span>
-                <span className="text-center" style={{ color: C.riskHigh }}>HIGH</span>
-                <span className="text-right">RATE</span>
+              {/* Revenue bar */}
+              <div className="flex items-center gap-4 px-5 py-4 rounded-xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-extrabold" style={{ color: stats.atRisk > 0 ? C.riskHigh : C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.atRisk.toFixed(2)}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Revenue at risk</p>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>{stats.high > 0 ? stats.high : 'No'} unprotected HIGH orders</p>
+                  <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: stats.atRisk > 0 ? C.riskHighBg : C.accentDim }}>
+                    <div className="h-full rounded-full" style={{ width: `${atRiskPct*100}%`, backgroundColor: stats.atRisk > 0 ? C.riskHigh : C.accentDeep }} />
+                  </div>
+                </div>
+                <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-extrabold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{stats.protVal.toFixed(2)}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>Value protected</p>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>{stats.protected} orders secured</p>
+                  <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.accentDim }}>
+                    <div className="h-full rounded-full" style={{ width: `${protectedPct*100}%`, backgroundColor: C.accent }} />
+                  </div>
+                </div>
+                <div className="w-px h-11 shrink-0" style={{ backgroundColor: C.border }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-extrabold" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>{stats.today}</p>
+                  <p className="text-[11px] font-semibold" style={{ color: C.textSecondary }}>New today</p>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>Orders since midnight</p>
+                  <div className="mt-1.5 h-1 rounded-full" style={{ backgroundColor: C.shippedBg }}>
+                    <div className="h-full rounded-full" style={{ width: `${stats.total > 0 ? Math.min(stats.today/stats.total,1)*100 : 0}%`, backgroundColor: C.shipped }} />
+                  </div>
+                </div>
+                {stats.atRisk > 0 && (
+                  <button onClick={() => setFilter('not_protected')}
+                    className="px-5 py-3 rounded-xl text-[12px] font-bold hover:opacity-90 shrink-0"
+                    style={{ backgroundColor: C.accent, color: C.accentDark }}>
+                    Protect now →
+                  </button>
+                )}
               </div>
-              {monthlyData.length === 0 ? (
-                <p className="text-center text-[11px] p-4" style={{ color: C.textHint }}>No data yet</p>
-              ) : monthlyData.map((m, i) => {
-                const rc = m.rate >= 80 ? C.riskLow : m.rate >= 50 ? C.riskMed : C.riskHigh
-                return (
-                  <div key={i} className="grid grid-cols-6 px-3.5 py-2 border-t text-[11px]" style={{ borderColor: C.border }}>
-                    <span className="col-span-2 font-semibold" style={{ color: C.textPrimary }}>{m.label}</span>
-                    <span className="text-center" style={{ color: C.textSecondary }}>{m.total}</span>
-                    <span className="text-center font-bold" style={{ color: C.accentDeep }}>{m.protected}</span>
-                    <span className="text-center" style={{ color: m.high > 0 ? C.riskHigh : C.textHint }}>{m.high}</span>
-                    <div className="flex justify-end">
-                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ backgroundColor: rc + '20', color: rc }}>{m.rate}%</span>
+            </div>
+
+            {/* ── DESKTOP RIGHT COL: monthly + today (hidden on mobile) ── */}
+            <div className="hidden lg:flex flex-col gap-3 flex-[2]">
+              {/* Monthly Report */}
+              <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.accentDim }}>
+                  <Calendar size={14} style={{ color: C.accentDeep }} />
+                  <span className="text-[13px] font-bold flex-1" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>Monthly Report</span>
+                  <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: C.accentDeep }}>{monthlyData.length} mo</span>
+                </div>
+                <div className="grid grid-cols-6 px-3.5 py-2 text-[8px] font-bold tracking-wide" style={{ color: C.textHint }}>
+                  <span className="col-span-2">MONTH</span>
+                  <span className="text-center">ORD</span>
+                  <span className="text-center" style={{ color: C.accentDeep }}>PROT</span>
+                  <span className="text-center" style={{ color: C.riskHigh }}>HIGH</span>
+                  <span className="text-right">RATE</span>
+                </div>
+                {monthlyData.length === 0 ? (
+                  <p className="text-center text-[11px] p-4" style={{ color: C.textHint }}>No data yet</p>
+                ) : monthlyData.map((m, i) => {
+                  const rc = m.rate >= 80 ? C.riskLow : m.rate >= 50 ? C.riskMed : C.riskHigh
+                  return (
+                    <div key={i} className="grid grid-cols-6 px-3.5 py-2 border-t text-[11px]" style={{ borderColor: C.border }}>
+                      <span className="col-span-2 font-semibold" style={{ color: C.textPrimary }}>{m.label}</span>
+                      <span className="text-center" style={{ color: C.textSecondary }}>{m.total}</span>
+                      <span className="text-center font-bold" style={{ color: C.accentDeep }}>{m.protected}</span>
+                      <span className="text-center" style={{ color: m.high > 0 ? C.riskHigh : C.textHint }}>{m.high}</span>
+                      <div className="flex justify-end">
+                        <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ backgroundColor: rc + '20', color: rc }}>{m.rate}%</span>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-            {/* Today's Orders */}
-            <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-              <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.shippedBg }}>
-                <Bolt size={14} style={{ color: C.shipped }} />
-                <span className="text-[13px] font-bold flex-1" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>Today&apos;s Orders</span>
-                <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: todayOrders.length === 0 ? C.textHint : C.shipped }}>
-                  {todayOrders.length === 0 ? 'None' : `${todayOrders.length} new`}
-                </span>
+                  )
+                })}
               </div>
-              {todayOrders.length === 0 ? (
-                <p className="px-3.5 py-3 text-[11px]" style={{ color: C.textHint }}>No orders yet today</p>
-              ) : (
-                <>
-                  {todayOrders.map((o, i) => {
-                    const dotColor = (o.risk_level||'').toUpperCase() === 'HIGH' ? C.riskHigh
-                      : (o.risk_level||'').toUpperCase() === 'MEDIUM' ? C.riskMed : C.riskLow
-                    return (
-                      <button key={i} onClick={() => setSelectedOrder(o)}
-                        className="w-full flex items-center gap-2 px-3.5 py-2 border-t hover:opacity-80"
-                        style={{ borderColor: C.border }}>
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
-                        <div className="flex-1 text-left min-w-0">
-                          <p className="text-[11px] font-semibold truncate" style={{ color: C.textPrimary }}>{o.item_title || 'Unknown'}</p>
-                          {o.buyer_username && <p className="text-[9px] truncate" style={{ color: C.textHint }}>{o.buyer_username}</p>}
-                        </div>
-                        <span className="text-[12px] font-extrabold shrink-0" style={{ fontFamily: 'var(--font-space-grotesk)', color: C.textPrimary }}>
-                          {currencySymbol}{Number(o.item_price||0).toFixed(2)}
-                        </span>
-                      </button>
-                    )
-                  })}
-                  <div className="flex justify-between px-3.5 py-2 border-t text-[10px]" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                    <span style={{ color: C.textHint }}>Today&apos;s total</span>
-                    <span className="font-bold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{todayTotal.toFixed(2)}</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-        </div>
-
-        {/* ── ANALYTICS SECTION ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
-
-          {/* Protection Trend Chart */}
-          <div className="lg:col-span-3 p-3 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-            <div className="flex items-start justify-between mb-0.5">
-              <div>
-                <h3 className="text-[13px] font-bold" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>Protection Trend</h3>
-                <p className="text-[10px]" style={{ color: C.textHint }}>Protected vs total per day</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-0.5" style={{ backgroundColor: C.accent }} />
-                  <span className="text-[9px]" style={{ color: C.textSecondary }}>Protected</span>
+              {/* Today's Orders */}
+              <div className="rounded-[14px] border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                <div className="flex items-center gap-2 px-3.5 py-3" style={{ backgroundColor: C.shippedBg }}>
+                  <Bolt size={14} style={{ color: C.shipped }} />
+                  <span className="text-[13px] font-bold flex-1" style={{ color: C.shipped, fontFamily: 'var(--font-space-grotesk)' }}>Today&apos;s Orders</span>
+                  <span className="text-[9px] font-semibold text-white px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: todayOrders.length === 0 ? C.textHint : C.shipped }}>
+                    {todayOrders.length === 0 ? 'None' : `${todayOrders.length} new`}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-0.5 border-t border-dashed" style={{ borderColor: '#888780' }} />
-                  <span className="text-[9px]" style={{ color: C.textSecondary }}>Total</span>
-                </div>
-              </div>
-            </div>
-            {trendData.length === 0 ? (
-              <div className="h-[160px] flex items-center justify-center">
-                <p className="text-[11px]" style={{ color: C.textHint }}>No data for this period</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <ComposedChart data={trendData}>
-                  <defs>
-                    <linearGradient id="limeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#8FFF00" stopOpacity={0.33} />
-                      <stop offset="95%" stopColor="#8FFF00" stopOpacity={0.03} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 8, fill: C.textHint }}
-                    tickFormatter={(v) => { const p = v?.split('-'); return p?.length >= 3 ? `${p[2]}/${p[1]}` : v }} />
-                  <YAxis tick={{ fontSize: 8, fill: C.textHint }} width={24} allowDecimals={false} ticks={[0, 6, 12, 18, 24, 30, 36]} domain={[0, 36]} />
-                  <Tooltip
-                    cursor={{ stroke: C.accent, strokeWidth: 1, strokeDasharray: '4 2' }}
-                    content={({ active, payload, label }: any) => {
-                      if (!active || !payload?.length) return null
-                      const total = payload.find((p: any) => p.dataKey === 'total')?.value ?? 0
-                      const prot  = payload.find((p: any) => p.dataKey === 'protected')?.value ?? 0
+                {todayOrders.length === 0 ? (
+                  <p className="px-3.5 py-3 text-[11px]" style={{ color: C.textHint }}>No orders yet today</p>
+                ) : (
+                  <>
+                    {todayOrders.map((o, i) => {
+                      const dotColor = (o.risk_level||'').toUpperCase() === 'HIGH' ? C.riskHigh
+                        : (o.risk_level||'').toUpperCase() === 'MEDIUM' ? C.riskMed : C.riskLow
                       return (
-                        <div style={{ background: C.accentDark, borderRadius: 6, padding: '6px 10px', fontSize: 10 }}>
-                          <div style={{ color: '#aaa', marginBottom: 2 }}>{label}</div>
-                          <div style={{ color: '#888780' }}>Total: <b style={{ color: '#fff' }}>{total}</b></div>
-                          <div style={{ color: C.accent }}>Protected: <b>{prot}</b></div>
-                          {total - prot > 0 && <div style={{ color: '#FF6666' }}>At risk: <b>{total - prot}</b></div>}
-                        </div>
+                        <button key={i} onClick={() => setSelectedOrder(o)}
+                          className="w-full flex items-center gap-2 px-3.5 py-2 border-t hover:opacity-80"
+                          style={{ borderColor: C.border }}>
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-[11px] font-semibold truncate" style={{ color: C.textPrimary }}>{o.item_title || 'Unknown'}</p>
+                            {o.buyer_username && <p className="text-[9px] truncate" style={{ color: C.textHint }}>{o.buyer_username}</p>}
+                          </div>
+                          <span className="text-[12px] font-extrabold shrink-0" style={{ fontFamily: 'var(--font-space-grotesk)', color: C.textPrimary }}>
+                            {currencySymbol}{Number(o.item_price||0).toFixed(2)}
+                          </span>
+                        </button>
                       )
-                    }}
-                  />
-                  {/* Lime fill area below protected line */}
-                  <Area type="monotone" dataKey="protected"
-                    stroke="none" fill="url(#limeGrad)" fillOpacity={1} dot={false} legendType="none" tooltipType="none" />
-                  {/* Total orders — dashed grey line */}
-                  <Line type="monotone" dataKey="total" name="Total orders"
-                    stroke="#888780" strokeWidth={2} strokeDasharray="6 4" dot={false} />
-                  {/* Protected — solid lime line on top */}
-                  <Line type="monotone" dataKey="protected" name="Protected"
-                    stroke={C.accent} strokeWidth={3} dot={false} activeDot={{ r: 5 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            )}
-            <div className="flex items-center gap-1.5 mt-1 px-2 py-1 rounded-md" style={{ backgroundColor: C.bg }}>
-              <span className="text-[9px]" style={{ color: C.textHint }}>ℹ Gap between lines = unprotected orders at risk. Lime fill = protected.</span>
+                    })}
+                    <div className="flex justify-between px-3.5 py-2 border-t text-[10px]" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                      <span style={{ color: C.textHint }}>Today&apos;s total</span>
+                      <span className="font-bold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{currencySymbol}{todayTotal.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
+
           </div>
 
-          {/* Orders Overview Bar Chart */}
-          <div className="lg:col-span-2 p-3 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="text-[13px] font-bold mb-0.5" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>Orders Overview</h3>
-                <p className="text-[10px]" style={{ color: C.textHint }}>Total orders per day</p>
-              </div>
-              <div className="flex items-center gap-2.5">
-                {[['#8FFF00','≥80% protected'],['#6BCC00','50–80%'],['#E8FFCC','<50%']].map(([c,l]) => (
-                  <div key={l} className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-sm border" style={{ backgroundColor: c, borderColor: C.border }} />
-                    <span className="text-[9px]" style={{ color: C.textHint }}>{l}</span>
+          {/* ── ANALYTICS SECTION ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
+
+            {/* Protection Trend Chart */}
+            <div className="lg:col-span-3 p-3 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              <div className="flex items-start justify-between mb-0.5">
+                <div>
+                  <h3 className="text-[13px] font-bold" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>Protection Trend</h3>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>Protected vs total per day</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-0.5" style={{ backgroundColor: C.accent }} />
+                    <span className="text-[9px]" style={{ color: C.textSecondary }}>Protected</span>
                   </div>
-                ))}
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-0.5 border-t border-dashed" style={{ borderColor: '#888780' }} />
+                    <span className="text-[9px]" style={{ color: C.textSecondary }}>Total</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            {(() => {
-              const paddedBar = [...barData]
-              while (paddedBar.length < 7) paddedBar.unshift({ date: '', total: 0, protected: 0 })
-              return barData.length === 0 ? (
+              {trendData.length === 0 ? (
                 <div className="h-[160px] flex items-center justify-center">
                   <p className="text-[11px]" style={{ color: C.textHint }}>No data for this period</p>
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={paddedBar} barCategoryGap="20%">
+                <ResponsiveContainer width="100%" height={200}>
+                  <ComposedChart data={trendData}>
+                    <defs>
+                      <linearGradient id="limeGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#8FFF00" stopOpacity={0.33} />
+                        <stop offset="95%" stopColor="#8FFF00" stopOpacity={0.03} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
-                    <XAxis dataKey="date" tick={{ fontSize: 8, fill: C.textHint }} tickFormatter={(v: string) => {
-                      if (!v) return ''
-                      const parts = v.split('-')
-                      return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : v
-                    }} />
-                      <YAxis tick={{ fontSize: 8, fill: C.textHint }} width={20} allowDecimals={false} />
+                    <XAxis dataKey="date" tick={{ fontSize: 8, fill: C.textHint }}
+                      tickFormatter={(v) => { const p = v?.split('-'); return p?.length >= 3 ? `${p[2]}/${p[1]}` : v }} />
+                    <YAxis tick={{ fontSize: 8, fill: C.textHint }} width={24} allowDecimals={false} ticks={[0, 6, 12, 18, 24, 30, 36]} domain={[0, 36]} />
                     <Tooltip
-                      cursor={{ fill: 'transparent' }}
-                      content={({ active, payload }: any) => {
+                      cursor={{ stroke: C.accent, strokeWidth: 1, strokeDasharray: '4 2' }}
+                      content={({ active, payload, label }: any) => {
                         if (!active || !payload?.length) return null
-                        const d = payload[0]?.payload
-                        if (!d?.date) return null
+                        const total = payload.find((p: any) => p.dataKey === 'total')?.value ?? 0
+                        const prot  = payload.find((p: any) => p.dataKey === 'protected')?.value ?? 0
                         return (
-                          <div style={{ background: C.accentDark, borderRadius: 6, padding: '6px 10px', fontSize: 10, color: C.accent }}>
-                            <div style={{ color: '#fff', marginBottom: 2 }}>{d.date}</div>
-                            <div>Total: <b>{d.total}</b></div>
-                            <div>Protected: <b style={{ color: C.accent }}>{d.protected}</b></div>
-                            <div>Unprotected: <b style={{ color: '#FF6666' }}>{d.total - d.protected}</b></div>
+                          <div style={{ background: C.accentDark, borderRadius: 6, padding: '6px 10px', fontSize: 10 }}>
+                            <div style={{ color: '#aaa', marginBottom: 2 }}>{label}</div>
+                            <div style={{ color: '#888780' }}>Total: <b style={{ color: '#fff' }}>{total}</b></div>
+                            <div style={{ color: C.accent }}>Protected: <b>{prot}</b></div>
+                            {total - prot > 0 && <div style={{ color: '#FF6666' }}>At risk: <b>{total - prot}</b></div>}
                           </div>
                         )
                       }}
                     />
-                    <Bar dataKey="total" radius={[6,6,0,0]} isAnimationActive={false}>
-                      {paddedBar.map((d: any, i: number) => {
-                        if (d.total === 0) return <Cell key={i} fill="transparent" stroke="none" />
-                        const ratio = d.protected / d.total
-                        const fill = ratio >= 0.8 ? '#8FFF00'
-                          : ratio >= 0.5 ? '#6BCC00'
-                          : '#E8FFCC'
-                        return <Cell key={i} fill={fill} />
-                      })}
-                    </Bar>
-                  </BarChart>
+                    <Area type="monotone" dataKey="protected"
+                      stroke="none" fill="url(#limeGrad)" fillOpacity={1} dot={false} legendType="none" tooltipType="none" />
+                    <Line type="monotone" dataKey="total" name="Total orders"
+                      stroke="#888780" strokeWidth={2} strokeDasharray="6 4" dot={false} />
+                    <Line type="monotone" dataKey="protected" name="Protected"
+                      stroke={C.accent} strokeWidth={3} dot={false} activeDot={{ r: 5 }} />
+                  </ComposedChart>
                 </ResponsiveContainer>
-              )
-            })()}
-          </div>
+              )}
+              <div className="flex items-center gap-1.5 mt-1 px-2 py-1 rounded-md" style={{ backgroundColor: C.bg }}>
+                <span className="text-[9px]" style={{ color: C.textHint }}>ℹ Gap between lines = unprotected orders at risk. Lime fill = protected.</span>
+              </div>
+            </div>
 
-          {/* Protection Rate Donut */}
-          <div className="lg:col-span-2 p-3 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
-            <h3 className="text-[13px] font-bold mb-0.5" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>Protection Rate</h3>
-            <p className="text-[10px] mb-3" style={{ color: C.textHint }}>Current order status</p>
-            <div className="flex items-center gap-4">
-              <div className="relative shrink-0" style={{ width: 140, height: 140 }}>
-                <PieChart width={140} height={140}>
-                  <Pie data={donutData} dataKey="value" cx={70} cy={70}
-                    innerRadius={42} outerRadius={64}
-                    paddingAngle={2}
-                    startAngle={90} endAngle={450}
-                    stroke="none">
-                    {donutData.map((d: any, i: number) => (
-                      <Cell key={i} fill={d.color} stroke="none" />
-                    ))}
-                  </Pie>
-                </PieChart>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[18px] font-extrabold leading-none" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{protRate}%</span>
-                  <span className="text-[9px]" style={{ color: C.textHint }}>safe</span>
+            {/* Orders Overview Bar Chart */}
+            <div className="lg:col-span-2 p-3 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="text-[13px] font-bold mb-0.5" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>Orders Overview</h3>
+                  <p className="text-[10px]" style={{ color: C.textHint }}>Total orders per day</p>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  {[['#8FFF00','80%+'],['#6BCC00','50-80%'],['#E8FFCC','under 50%']].map(([c,l]) => (
+                    <div key={l} className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-sm border" style={{ backgroundColor: c, borderColor: C.border }} />
+                      <span className="text-[9px]" style={{ color: C.textHint }}>{l}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="flex flex-col gap-2 flex-1">
-                {[
-                  { dot: '#888780', label: 'Total', value: stats.total, color: C.textPrimary },
-                  { dot: C.accent,  label: 'Protected', value: stats.protected, color: C.accentDeep },
-                  { dot: C.riskHigh,label: 'Need action', value: stats.unprotected, color: C.riskHigh },
-                  { dot: C.riskHigh,label: 'At risk', value: `${currencySymbol}${stats.atRisk.toFixed(0)}`, color: C.riskHigh },
-                ].map((r,i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: r.dot }} />
-                    <span className="text-[11px] flex-1" style={{ color: C.textSecondary }}>{r.label}</span>
-                    <span className="text-[11px] font-semibold" style={{ color: r.color }}>{r.value}</span>
+              {(() => {
+                const paddedBar = [...barData]
+                while (paddedBar.length < 7) paddedBar.unshift({ date: '', total: 0, protected: 0 })
+                return barData.length === 0 ? (
+                  <div className="h-[160px] flex items-center justify-center">
+                    <p className="text-[11px]" style={{ color: C.textHint }}>No data for this period</p>
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="mt-6">
-              <div className="flex justify-between text-[9px] mb-1" style={{ color: C.textHint }}>
-                <span>Progress</span><span style={{ color: C.accentDeep, fontWeight: 600 }}>Target: 80%</span>
-              </div>
-              <div className="relative h-[7px] rounded-full" style={{ backgroundColor: C.border }}>
-                <div className="absolute h-full rounded-full" style={{ width: '80%', backgroundColor: C.accentDim }} />
-                <div className="absolute h-full rounded-full transition-all" style={{ width: `${protRate}%`, backgroundColor: C.accent }} />
-              </div>
-              <div className="flex justify-between text-[8px] mt-1" style={{ color: C.textHint }}>
-                <span>0%</span><span style={{ color: C.accentDeep }}>{protRate}%</span><span>100%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── UNIFIED TOOLBAR ── */}
-        <div className="space-y-2">
-
-          {/* Pill tabs */}
-          <div className="flex items-center gap-2 p-2 rounded-2xl border overflow-x-auto"
-               style={{ backgroundColor: C.surface, borderColor: C.border }}>
-            <div className="flex items-center gap-1.5 min-w-max">
-              {(
-                [
-                  { f: 'all',          label: 'All',         count: stats.total,               color: null        },
-                  { f: 'low',          label: 'Low',         count: stats.low,                 color: C.riskLow   },
-                  { f: 'medium',       label: 'Medium',      count: stats.med,                 color: C.riskMed   },
-                  { f: 'high',         label: 'High',        count: stats.high,                color: C.riskHigh  },
-                  { f: 'shipped',      label: 'Shipped',     count: stats.shipped,             color: C.shipped   },
-                  { f: 'not_shipped',  label: 'Not Shipped', count: stats.total-stats.shipped, color: C.pending   },
-                  { f: 'not_protected',label: 'Unprotected', count: stats.unprotected,         color: C.riskHigh  },
-                ] as { f: string; label: string; count: number; color: string | null }[]
-              ).map(({ f, label, count, color }) => {
-                const isActive = filter === f
-                const tabColor = color || C.accentDeep
-                return (
-                  <button key={f} onClick={() => setFilter(f)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all whitespace-nowrap"
-                    style={{
-                      backgroundColor: isActive ? tabColor : 'transparent',
-                      borderColor: isActive ? 'transparent' : C.border,
-                      color: isActive ? '#fff' : C.textSecondary,
-                    }}>
-                    {label}
-                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold"
-                          style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : C.bg, color: isActive ? '#fff' : C.textHint }}>
-                      {count}
-                    </span>
-                  </button>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={paddedBar} barCategoryGap="20%">
+                      <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
+                      <XAxis dataKey="date" tick={{ fontSize: 8, fill: C.textHint }} tickFormatter={(v: string) => {
+                        if (!v) return ''
+                        const parts = v.split('-')
+                        return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : v
+                      }} />
+                      <YAxis tick={{ fontSize: 8, fill: C.textHint }} width={20} allowDecimals={false} />
+                      <Tooltip
+                        cursor={{ fill: 'transparent' }}
+                        content={({ active, payload }: any) => {
+                          if (!active || !payload?.length) return null
+                          const d = payload[0]?.payload
+                          if (!d?.date) return null
+                          return (
+                            <div style={{ background: C.accentDark, borderRadius: 6, padding: '6px 10px', fontSize: 10, color: C.accent }}>
+                              <div style={{ color: '#fff', marginBottom: 2 }}>{d.date}</div>
+                              <div>Total: <b>{d.total}</b></div>
+                              <div>Protected: <b style={{ color: C.accent }}>{d.protected}</b></div>
+                              <div>Unprotected: <b style={{ color: '#FF6666' }}>{d.total - d.protected}</b></div>
+                            </div>
+                          )
+                        }}
+                      />
+                      <Bar dataKey="total" radius={[6,6,0,0]} isAnimationActive={false}>
+                        {paddedBar.map((d: any, i: number) => {
+                          if (d.total === 0) return <Cell key={i} fill="transparent" stroke="none" />
+                          const ratio = d.protected / d.total
+                          const fill = ratio >= 0.8 ? '#8FFF00' : ratio >= 0.5 ? '#6BCC00' : '#E8FFCC'
+                          return <Cell key={i} fill={fill} />
+                        })}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 )
-              })}
+              })()}
             </div>
-            {stats.high > 0 && (
-              <button onClick={() => setFilter('high')}
-                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white whitespace-nowrap"
-                style={{ backgroundColor: C.riskHigh }}>
-                <AlertTriangle size={11} />
-                {stats.high} at risk
-              </button>
-            )}
+
+            {/* Protection Rate Donut */}
+            <div className="lg:col-span-2 p-3 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              <h3 className="text-[13px] font-bold mb-0.5" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>Protection Rate</h3>
+              <p className="text-[10px] mb-3" style={{ color: C.textHint }}>Current order status</p>
+              <div className="flex items-center gap-4">
+                <div className="relative shrink-0" style={{ width: 140, height: 140 }}>
+                  <PieChart width={140} height={140}>
+                    <Pie data={donutData} dataKey="value" cx={70} cy={70}
+                      innerRadius={42} outerRadius={64}
+                      paddingAngle={2}
+                      startAngle={90} endAngle={450}
+                      stroke="none">
+                      {donutData.map((d: any, i: number) => (
+                        <Cell key={i} fill={d.color} stroke="none" />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[18px] font-extrabold leading-none" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>{protRate}%</span>
+                    <span className="text-[9px]" style={{ color: C.textHint }}>safe</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 flex-1">
+                  {[
+                    { dot: '#888780', label: 'Total', value: stats.total, color: C.textPrimary },
+                    { dot: C.accent,  label: 'Protected', value: stats.protected, color: C.accentDeep },
+                    { dot: C.riskHigh,label: 'Need action', value: stats.unprotected, color: C.riskHigh },
+                    { dot: C.riskHigh,label: 'At risk', value: `${currencySymbol}${stats.atRisk.toFixed(0)}`, color: C.riskHigh },
+                  ].map((r,i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: r.dot }} />
+                      <span className="text-[11px] flex-1" style={{ color: C.textSecondary }}>{r.label}</span>
+                      <span className="text-[11px] font-semibold" style={{ color: r.color }}>{r.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-6">
+                <div className="flex justify-between text-[9px] mb-1" style={{ color: C.textHint }}>
+                  <span>Progress</span><span style={{ color: C.accentDeep, fontWeight: 600 }}>Target: 80%</span>
+                </div>
+                <div className="relative h-[7px] rounded-full" style={{ backgroundColor: C.border }}>
+                  <div className="absolute h-full rounded-full" style={{ width: '80%', backgroundColor: C.accentDim }} />
+                  <div className="absolute h-full rounded-full transition-all" style={{ width: `${protRate}%`, backgroundColor: C.accent }} />
+                </div>
+                <div className="flex justify-between text-[8px] mt-1" style={{ color: C.textHint }}>
+                  <span>0%</span><span style={{ color: C.accentDeep }}>{protRate}%</span><span>100%</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Sort + Search */}
-          <div className="flex items-center gap-3 p-3 rounded-2xl border flex-wrap"
-               style={{ backgroundColor: C.surface, borderColor: C.border }}>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-medium" style={{ color: C.textHint }}>Sort:</span>
-              <SortChip label="Score ↓" active={sortBy==='riskScoreDesc'} onClick={() => setSortBy(s => s==='riskScoreDesc' ? 'none' : 'riskScoreDesc')} />
-              <SortChip label="Price ↓" active={sortBy==='priceDesc'}     onClick={() => setSortBy(s => s==='priceDesc' ? 'none' : 'priceDesc')} />
-              <SortChip label="Price ↑" active={sortBy==='priceAsc'}      onClick={() => setSortBy(s => s==='priceAsc' ? 'none' : 'priceAsc')} />
-              <SortChip label="Newest"  active={sortBy==='newest'}         onClick={() => setSortBy(s => s==='newest' ? 'none' : 'newest')} />
-              <SortChip label="Oldest"  active={sortBy==='oldest'}         onClick={() => setSortBy(s => s==='oldest' ? 'none' : 'oldest')} />
-            </div>
-            <div className="w-px h-6 hidden md:block" style={{ backgroundColor: C.border }} />
-            <div className="flex-1 min-w-[200px] relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: C.textHint }} />
-              <input
-                ref={searchRef}
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search by order ID, item, or buyer…"
-                className="w-full h-[38px] pl-8 pr-8 rounded-full border text-[12px] outline-none transition-all"
-                style={{ borderColor: C.border, backgroundColor: C.surface, color: C.textPrimary }}
-              />
-              {search && (
-                <button onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: C.textHint }}>
-                  <X size={13} />
+          {/* ── UNIFIED TOOLBAR ── */}
+          <div className="space-y-2">
+            {/* Pill tabs */}
+            <div className="flex items-center gap-2 p-2 rounded-2xl border overflow-x-auto"
+                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              <div className="flex items-center gap-1.5 min-w-max">
+                {(
+                  [
+                    { f: 'all',          label: 'All',         count: stats.total,               color: null        },
+                    { f: 'low',          label: 'Low',         count: stats.low,                 color: C.riskLow   },
+                    { f: 'medium',       label: 'Medium',      count: stats.med,                 color: C.riskMed   },
+                    { f: 'high',         label: 'High',        count: stats.high,                color: C.riskHigh  },
+                    { f: 'shipped',      label: 'Shipped',     count: stats.shipped,             color: C.shipped   },
+                    { f: 'not_shipped',  label: 'Not Shipped', count: stats.total-stats.shipped, color: C.pending   },
+                    { f: 'not_protected',label: 'Unprotected', count: stats.unprotected,         color: C.riskHigh  },
+                  ] as { f: string; label: string; count: number; color: string | null }[]
+                ).map(({ f, label, count, color }) => {
+                  const isActive = filter === f
+                  const tabColor = color || C.accentDeep
+                  return (
+                    <button key={f} onClick={() => setFilter(f)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all whitespace-nowrap"
+                      style={{
+                        backgroundColor: isActive ? tabColor : 'transparent',
+                        borderColor: isActive ? 'transparent' : C.border,
+                        color: isActive ? '#fff' : C.textSecondary,
+                      }}>
+                      {label}
+                      <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold"
+                            style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : C.bg, color: isActive ? '#fff' : C.textHint }}>
+                        {count}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+              {stats.high > 0 && (
+                <button onClick={() => setFilter('high')}
+                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white whitespace-nowrap"
+                  style={{ backgroundColor: C.riskHigh }}>
+                  <AlertTriangle size={11} />
+                  {stats.high} at risk
                 </button>
               )}
             </div>
-            <button
-              onClick={() => {
-                const label = filter === 'all' ? 'All Orders' : filter.replace(/_/g,' ').toUpperCase()
-                const csv = ['ORDER ID,ITEM,BUYER,RISK,SCORE,STATUS,PRICE,DATE']
-                  .concat(filteredOrders.map(o => [
-                    o.ebay_order_id || '', (o.item_title||'').replace(/,/g,''), o.buyer_username||'',
-                    o.risk_level||'', o.risk_score||0, o.order_status||'',
-                    Number(o.item_price||0).toFixed(2), (o.created_at||'').split('T')[0]
-                  ].join(','))).join('\n')
-                const a = document.createElement('a')
-                a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
-                a.download = `Riazify_${label}_${new Date().toISOString().split('T')[0]}.csv`
-                a.click()
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[11px] font-semibold"
-              title="Export orders to CSV"
-              style={{ backgroundColor: C.bg, borderColor: C.border, color: C.accentDeep }}>
-              <Download size={13} />
-              Export
-            </button>
-          </div>
-        </div>
 
-        {/* ── TABLE HEADER (desktop only) ── */}
-        <div className="hidden lg:grid rounded-none py-2.5 px-3.5 text-[9px] font-extrabold tracking-wide"
-             style={{ backgroundColor: C.accent, color: C.accentDark,
-               gridTemplateColumns: '44px 1fr 1fr 2fr 2fr 2fr 1fr 2fr 2fr 24px 24px 1fr 1fr 1fr' }}>
-          <div className="text-center">VIEW</div>
-          <div>RISK</div>
-          <div className="pl-2">ORDER ID</div>
-          <div className="pl-2">ITEM</div>
-          <div className="pl-2 font-black">BUYER</div>
-          <div className="pl-2">BUYER RISK</div>
-          <div className="pl-2">SCORE</div>
-          <div className="pl-8">PROTECTION</div>
-          <div className="pl-2">STATUS</div>
-          <div />
-          <div />
-          <div className="text-center">MSG</div>
-          <div
-            className="text-right cursor-pointer flex items-center justify-end gap-1"
-            onClick={() => setSortBy(s => s==='priceDesc' ? 'priceAsc' : s==='priceAsc' ? 'none' : 'priceDesc')}>
-            {sortBy==='priceDesc' ? <ArrowDown size={9}/> : sortBy==='priceAsc' ? <ArrowUp size={9}/> : <ArrowUpDown size={9}/>}
-            PRICE
-          </div>
-          <div className="text-right">TIME</div>
-        </div>
-
-        {/* ── ORDER ROWS ── */}
-        {filteredOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.accentDim }}>
-              <Package size={32} style={{ color: C.accentDeep }} />
-            </div>
-            <p className="text-[16px] font-bold" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>
-              {search ? `No results for "${search}"` : filter === 'not_protected' ? 'All orders are protected! 🎉' : 'No orders in this filter'}
-            </p>
-            {search && (
-              <button onClick={() => setSearch('')} className="text-[12px] font-semibold" style={{ color: C.accentDeep }}>
-                Clear search
-              </button>
-            )}
-          </div>
-        ) : filteredOrders.map((o, i) => {
-          const rc = riskColors(o.risk_level)
-          const sc = statusColors(o.order_status)
-          const price = Number(o.item_price || 0)
-          const score = Number(o.risk_score || 0)
-          const isProt = o.checklist_completed === true
-          const msgCount = msgCounts[o.id] || 0
-          const buyer = buyerProfiles[o.buyer_username] || null
-          const sigThreshold = currencySymbol === '£' ? 450 : currencySymbol === '€' ? 550 : 750
-          const needsSig = price > 0 && price >= sigThreshold && o.signature_required !== true && !['shipped','delivered'].includes((o.order_status||'').toLowerCase())
-          const highUnprot = (o.risk_level||'').toUpperCase() === 'HIGH' && !isProt
-
-          return (
-            <div key={o.id || i} className="contents">
-              {/* Desktop row */}
-              <div
-                className="hidden lg:grid items-center py-2.5 px-3.5 cursor-default transition-all"
-                style={{
-                  backgroundColor: C.surface,
-                  borderLeft: `3px solid ${rc.color}`,
-                  borderBottom: `1px solid ${C.border}`,
-                  gridTemplateColumns: '44px 1fr 1fr 2fr 2fr 2fr 1fr 2fr 2fr 24px 24px 1fr 1fr 1fr',
+            {/* Sort + Search */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl border flex-wrap"
+                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-medium" style={{ color: C.textHint }}>Sort:</span>
+                <SortChip label="Score ↓" active={sortBy==='riskScoreDesc'} onClick={() => setSortBy(s => s==='riskScoreDesc' ? 'none' : 'riskScoreDesc')} />
+                <SortChip label="Price ↓" active={sortBy==='priceDesc'}     onClick={() => setSortBy(s => s==='priceDesc' ? 'none' : 'priceDesc')} />
+                <SortChip label="Price ↑" active={sortBy==='priceAsc'}      onClick={() => setSortBy(s => s==='priceAsc' ? 'none' : 'priceAsc')} />
+                <SortChip label="Newest"  active={sortBy==='newest'}         onClick={() => setSortBy(s => s==='newest' ? 'none' : 'newest')} />
+                <SortChip label="Oldest"  active={sortBy==='oldest'}         onClick={() => setSortBy(s => s==='oldest' ? 'none' : 'oldest')} />
+              </div>
+              <div className="w-px h-6 hidden md:block" style={{ backgroundColor: C.border }} />
+              <div className="flex-1 min-w-[200px] relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: C.textHint }} />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search by order ID, item, or buyer"
+                  className="w-full h-[38px] pl-8 pr-8 rounded-full border text-[12px] outline-none transition-all"
+                  style={{ borderColor: C.border, backgroundColor: C.surface, color: C.textPrimary }}
+                />
+                {search && (
+                  <button onClick={() => setSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: C.textHint }}>
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  const label = filter === 'all' ? 'All Orders' : filter.replace(/_/g,' ').toUpperCase()
+                  const csv = ['ORDER ID,ITEM,BUYER,RISK,SCORE,STATUS,PRICE,DATE']
+                    .concat(filteredOrders.map(o => [
+                      o.ebay_order_id || '', (o.item_title||'').replace(/,/g,''), o.buyer_username||'',
+                      o.risk_level||'', o.risk_score||0, o.order_status||'',
+                      Number(o.item_price||0).toFixed(2), (o.created_at||'').split('T')[0]
+                    ].join(','))).join('\n')
+                  const a = document.createElement('a')
+                  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+                  a.download = `Riazify_${label}_${new Date().toISOString().split('T')[0]}.csv`
+                  a.click()
                 }}
-                onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surfaceHover}
-                onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface}>
-                {/* VIEW */}
-                <div className="flex justify-center">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[11px] font-semibold"
+                style={{ backgroundColor: C.bg, borderColor: C.border, color: C.accentDeep }}>
+                <Download size={13} />
+                Export
+              </button>
+            </div>
+          </div>
+
+          {/* ── TABLE HEADER (desktop only) ── */}
+          <div className="hidden lg:grid rounded-none py-2.5 px-3.5 text-[9px] font-extrabold tracking-wide"
+               style={{ backgroundColor: C.accent, color: C.accentDark,
+                 gridTemplateColumns: '44px 1fr 1fr 2fr 2fr 2fr 1fr 2fr 2fr 24px 24px 1fr 1fr 1fr' }}>
+            <div className="text-center">VIEW</div>
+            <div>RISK</div>
+            <div className="pl-2">ORDER ID</div>
+            <div className="pl-2">ITEM</div>
+            <div className="pl-2 font-black">BUYER</div>
+            <div className="pl-2">BUYER RISK</div>
+            <div className="pl-2">SCORE</div>
+            <div className="pl-8">PROTECTION</div>
+            <div className="pl-2">STATUS</div>
+            <div />
+            <div />
+            <div className="text-center">MSG</div>
+            <div
+              className="text-right cursor-pointer flex items-center justify-end gap-1"
+              onClick={() => setSortBy(s => s==='priceDesc' ? 'priceAsc' : s==='priceAsc' ? 'none' : 'priceDesc')}>
+              {sortBy==='priceDesc' ? <ArrowDown size={9}/> : sortBy==='priceAsc' ? <ArrowUp size={9}/> : <ArrowUpDown size={9}/>}
+              PRICE
+            </div>
+            <div className="text-right">TIME</div>
+          </div>
+
+          {/* ── ORDER ROWS ── */}
+          {filteredOrders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-4">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.accentDim }}>
+                <Package size={32} style={{ color: C.accentDeep }} />
+              </div>
+              <p className="text-[16px] font-bold" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>
+                {search ? `No results for "${search}"` : filter === 'not_protected' ? 'All orders are protected! 🎉' : 'No orders in this filter'}
+              </p>
+              {search && (
+                <button onClick={() => setSearch('')} className="text-[12px] font-semibold" style={{ color: C.accentDeep }}>
+                  Clear search
+                </button>
+              )}
+            </div>
+          ) : filteredOrders.map((o, i) => {
+            const rc = riskColors(o.risk_level)
+            const sc = statusColors(o.order_status)
+            const price = Number(o.item_price || 0)
+            const score = Number(o.risk_score || 0)
+            const isProt = o.checklist_completed === true
+            const msgCount = msgCounts[o.id] || 0
+            const buyer = buyerProfiles[o.buyer_username] || null
+            const sigThreshold = currencySymbol === '£' ? 450 : currencySymbol === '€' ? 550 : 750
+            const needsSig = price > 0 && price >= sigThreshold && o.signature_required !== true && !['shipped','delivered'].includes((o.order_status||'').toLowerCase())
+            const highUnprot = (o.risk_level||'').toUpperCase() === 'HIGH' && !isProt
+
+            return (
+              <div key={o.id || i} className="contents">
+                {/* Desktop row */}
+                <div
+                  className="hidden lg:grid items-center py-2.5 px-3.5 cursor-default transition-all"
+                  style={{
+                    backgroundColor: C.surface,
+                    borderLeft: `3px solid ${rc.color}`,
+                    borderBottom: `1px solid ${C.border}`,
+                    gridTemplateColumns: '44px 1fr 1fr 2fr 2fr 2fr 1fr 2fr 2fr 24px 24px 1fr 1fr 1fr',
+                  }}
+                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surfaceHover}
+                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.surface}>
+                  {/* VIEW */}
+                  <div className="flex justify-center">
+                    <button onClick={() => setSelectedOrder(o)}
+                      className="w-7 h-7 rounded-md flex items-center justify-center transition-all group hover:scale-105"
+                            style={{ backgroundColor: C.accentDim }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accent }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accentDim }}>
+                      <Eye size={14} style={{ color: C.accentDeep }} />
+                    </button>
+                  </div>
+                  <div><RiskBadge level={o.risk_level} /></div>
+                  <div className="pl-2 text-[10px] font-medium truncate" style={{ color: C.textSecondary }}>
+                    #{o.ebay_order_id}
+                  </div>
+                  <div className="pl-2 text-[12px] font-medium truncate" style={{ color: C.textPrimary }}>
+                    {o.item_title || 'Unknown'}
+                  </div>
+                  <div className="pl-2 flex items-center gap-2">
+                    <button onClick={() => o.buyer_username && setSelectedBuyer(o.buyer_username)}
+                      className="w-6 h-6 rounded-md flex items-center justify-center border transition-all hover:scale-105"
+                            style={{ backgroundColor: C.accentDim, borderColor: C.accent }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accent; (e.currentTarget as HTMLButtonElement).style.borderColor = C.accentDeep }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accentDim; (e.currentTarget as HTMLButtonElement).style.borderColor = C.accent }}>
+                      <User size={12} style={{ color: C.accentDeep }} />
+                    </button>
+                    <span className="text-[11px] font-medium truncate" style={{ color: C.textPrimary }}>
+                      {o.buyer_username || '—'}
+                    </span>
+                  </div>
+                  <div className="pl-2"><BuyerRiskBadges profile={buyer} /></div>
+                  <div className="pl-2"><ScoreBar score={score} color={rc.color} /></div>
+                  <div className="pl-8"><ProtectionBadge protected={isProt} riskLevel={o.risk_level} /></div>
+                  <div className="pl-2"><StatusBadge status={o.order_status} /></div>
+                  <div>
+                    {needsSig && (
+                      <BubbleTip color={C.riskHigh} message={`Order value exceeds signature threshold (${currencySymbol}${sigThreshold}). Signature-required shipping is mandatory.`}>
+                        <div className="w-5 h-5 rounded flex items-center justify-center border cursor-help"
+                             style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '66' }}>
+                          <span className="text-[9px]" style={{ color: C.riskHigh }}>✍</span>
+                        </div>
+                      </BubbleTip>
+                    )}
+                  </div>
+                  <div>
+                    {highUnprot && (
+                      <BubbleTip color={C.riskHigh} message="HIGH RISK order with incomplete protection. Complete the evidence vault before shipping.">
+                        <div className="w-5 h-5 rounded flex items-center justify-center border cursor-help"
+                             style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '66' }}>
+                          <ShieldOff size={10} style={{ color: C.riskHigh }} />
+                        </div>
+                      </BubbleTip>
+                    )}
+                  </div>
+                  <div className="flex justify-center">
+                    {msgCount > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-semibold"
+                            style={{ backgroundColor: C.shippedBg, color: C.shipped }}>
+                        <MessageSquare size={9} />{msgCount}
+                      </span>
+                    ) : <span className="text-[11px]" style={{ color: C.textHint }}>—</span>}
+                  </div>
+                  <div className="text-right text-[13px] font-extrabold" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>
+                    {currencySymbol}{price.toFixed(2)}
+                  </div>
+                  <div className="text-right text-[10px]" style={{ color: C.textHint }}>
+                    {o.created_at ? timeAgo(o.created_at) : '—'}
+                  </div>
+                </div>
+
+                {/* Mobile card */}
+                <div className="lg:hidden flex items-center gap-2 px-3 py-2.5"
+                     style={{ backgroundColor: C.surface, borderLeft: `2px solid ${rc.color}`, borderBottom: `1px solid ${C.border}` }}>
                   <button onClick={() => setSelectedOrder(o)}
-                    className="w-7 h-7 rounded-md flex items-center justify-center transition-all group hover:scale-105"
-                          style={{ backgroundColor: C.accentDim }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accent }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accentDim }}>
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                       style={{ backgroundColor: C.accentDim }}>
                     <Eye size={14} style={{ color: C.accentDeep }} />
                   </button>
-                </div>
-                {/* RISK */}
-                <div><RiskBadge level={o.risk_level} /></div>
-                {/* ORDER ID */}
-                <div className="pl-2 text-[10px] font-medium truncate" style={{ color: C.textSecondary }}>
-                  #{o.ebay_order_id}
-                </div>
-                {/* ITEM */}
-                <div className="pl-2 text-[12px] font-medium truncate" style={{ color: C.textPrimary }}>
-                  {o.item_title || 'Unknown'}
-                </div>
-                {/* BUYER */}
-                <div className="pl-2 flex items-center gap-2">
-                  <button onClick={() => o.buyer_username && setSelectedBuyer(o.buyer_username)}
-                    className="w-6 h-6 rounded-md flex items-center justify-center border transition-all hover:scale-105"
-                          style={{ backgroundColor: C.accentDim, borderColor: C.accent }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accent; (e.currentTarget as HTMLButtonElement).style.borderColor = C.accentDeep }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = C.accentDim; (e.currentTarget as HTMLButtonElement).style.borderColor = C.accent }}>
-                    <User size={12} style={{ color: C.accentDeep }} />
-                  </button>
-                  <span className="text-[11px] font-medium truncate" style={{ color: C.textPrimary }}>
-                    {o.buyer_username || '—'}
-                  </span>
-                </div>
-                {/* BUYER RISK */}
-                <div className="pl-2"><BuyerRiskBadges profile={buyer} /></div>
-                {/* SCORE */}
-                <div className="pl-2"><ScoreBar score={score} color={rc.color} /></div>
-                {/* PROTECTION */}
-                <div className="pl-8"><ProtectionBadge protected={isProt} riskLevel={o.risk_level} /></div>
-                {/* STATUS */}
-                <div className="pl-2"><StatusBadge status={o.order_status} /></div>
-                {/* SIG ALERT */}
-                <div>
-                  {needsSig && (
-                    <BubbleTip color={C.riskHigh} message={`Order value exceeds signature threshold (${currencySymbol}${sigThreshold}). Signature-required shipping is mandatory.`}>
-                      <div className="w-5 h-5 rounded flex items-center justify-center border cursor-help"
-                           style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '66' }}>
-                        <span className="text-[9px]" style={{ color: C.riskHigh }}>✍</span>
-                      </div>
-                    </BubbleTip>
-                  )}
-                </div>
-                {/* RISK ALERT */}
-                <div>
-                  {highUnprot && (
-                    <BubbleTip color={C.riskHigh} message="HIGH RISK order with incomplete protection. Complete the evidence vault before shipping.">
-                      <div className="w-5 h-5 rounded flex items-center justify-center border cursor-help"
-                           style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '66' }}>
-                        <ShieldOff size={10} style={{ color: C.riskHigh }} />
-                      </div>
-                    </BubbleTip>
-                  )}
-                </div>
-                {/* MSG */}
-                <div className="flex justify-center">
-                  {msgCount > 0 ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-semibold"
-                          style={{ backgroundColor: C.shippedBg, color: C.shipped }}>
-                      <MessageSquare size={9} />{msgCount}
+                  <div className="w-[58px] shrink-0 px-1.5 py-1 rounded-md text-center text-[8px] font-bold"
+                       style={{ backgroundColor: rc.bg, color: rc.color }}>
+                    {(o.risk_level||'LOW').toUpperCase()}
+                  </div>
+                  <div className="flex-[2] text-[11px] font-semibold truncate" style={{ color: C.textSecondary }}>
+                    #{o.ebay_order_id}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => o.buyer_username && setSelectedBuyer(o.buyer_username)}
+                      className="w-6 h-6 rounded-lg flex items-center justify-center border"
+                         style={{ backgroundColor: C.accentDim, borderColor: C.accent }}>
+                      <User size={11} style={{ color: C.accentDeep }} />
+                    </button>
+                    <span className="flex-[2] text-[10px] truncate" style={{ color: C.textSecondary }}>
+                      {o.buyer_username || '—'}
                     </span>
-                  ) : <span className="text-[11px]" style={{ color: C.textHint }}>—</span>}
-                </div>
-                {/* PRICE */}
-                <div className="text-right text-[13px] font-extrabold" style={{ color: C.textPrimary, fontFamily: 'var(--font-space-grotesk)' }}>
-                  {currencySymbol}{price.toFixed(2)}
-                </div>
-                {/* TIME */}
-                <div className="text-right text-[10px]" style={{ color: C.textHint }}>
-                  {o.created_at ? timeAgo(o.created_at) : '—'}
+                  </div>
+                  <div className="w-16 text-right text-[12px] font-extrabold shrink-0"
+                       style={{ fontFamily: 'var(--font-space-grotesk)', color: C.textPrimary }}>
+                    {currencySymbol}{price.toFixed(2)}
+                  </div>
                 </div>
               </div>
+            )
+          })}
 
-              {/* Mobile card */}
-              <div className="lg:hidden flex items-center gap-2 px-3 py-2.5"
-                   style={{ backgroundColor: C.surface, borderLeft: `2px solid ${rc.color}`, borderBottom: `1px solid ${C.border}` }}>
-                {/* Eye */}
-                <button onClick={() => setSelectedOrder(o)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                     style={{ backgroundColor: C.accentDim }}>
-                  <Eye size={14} style={{ color: C.accentDeep }} />
-                </button>
-                {/* Risk */}
-                <div className="w-[58px] shrink-0 px-1.5 py-1 rounded-md text-center text-[8px] font-bold"
-                     style={{ backgroundColor: rc.bg, color: rc.color }}>
-                  {(o.risk_level||'LOW').toUpperCase()}
-                </div>
-                {/* Order ID */}
-                <div className="flex-[2] text-[11px] font-semibold truncate" style={{ color: C.textSecondary }}>
-                  #{o.ebay_order_id}
-                </div>
-                {/* Buyer */}
-                <div className="flex items-center gap-1">
-                  <button onClick={() => o.buyer_username && setSelectedBuyer(o.buyer_username)}
-                    className="w-6 h-6 rounded-lg flex items-center justify-center border"
-                       style={{ backgroundColor: C.accentDim, borderColor: C.accent }}>
-                    <User size={11} style={{ color: C.accentDeep }} />
-                  </button>
-                  <span className="flex-[2] text-[10px] truncate" style={{ color: C.textSecondary }}>
-                    {o.buyer_username || '—'}
-                  </span>
-                </div>
-                {/* Price */}
-                <div className="w-16 text-right text-[12px] font-extrabold shrink-0"
-                     style={{ fontFamily: 'var(--font-space-grotesk)', color: C.textPrimary }}>
-                  {currencySymbol}{price.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          )
-        })}
+        </div>
 
+        {/* Order Detail Panel */}
+        {selectedOrder && (
+          <OrderSlideWrapper
+            orderId={selectedOrder.id}
+            onClose={() => setSelectedOrder(null)}
+          />
+        )}
+
+        {/* Buyer Profile Panel */}
+        {selectedBuyer && (
+          <BuyerProfilePanel
+            buyerUsername={selectedBuyer}
+            onClose={() => setSelectedBuyer(null)}
+          />
+        )}
       </div>
-
-      {/* Order Detail Panel — full slide-in using [id] page */}
-      {selectedOrder && (
-        <OrderSlideWrapper
-          orderId={selectedOrder.id}
-          onClose={() => setSelectedOrder(null)}
-        />
-      )}
-
-      {/* Buyer Profile Panel */}
-      {selectedBuyer && (
-        <BuyerProfilePanel
-          buyerUsername={selectedBuyer}
-          onClose={() => setSelectedBuyer(null)}
-        />
-      )}
-    </div>
+    </KillSwitchGate>
   )
 }
 

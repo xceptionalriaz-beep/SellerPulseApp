@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profit-calculator/page.tsx
 // ═══════════════════════════════════════════════════════════════
 // Converted from: lib/pages/profit_calculator.dart
@@ -26,6 +26,7 @@ import CommandCenter   from '@/components/profit/CommandCenter'
 import EbaySearchBar  from '@/components/profit/EbaySearchBar'
 import ProDashboard  from '@/components/profit/ProDashboard'
 import { MathEngine } from '@/lib/math-engine'
+import KillSwitchGate from '@/components/KillSwitchGate'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -329,6 +330,7 @@ export default function ProfitCalculatorPage() {
 
 
   return (
+    <KillSwitchGate switchTitle="Profit Calculator">
     <div className="min-h-full overflow-auto bg-[#F7F9F5]">
       <div className="w-full px-4 md:px-6 lg:px-8 pt-8 pb-10">
 
@@ -447,5 +449,6 @@ export default function ProfitCalculatorPage() {
 
       </div>
     </div>
+    </KillSwitchGate>
   )
 }

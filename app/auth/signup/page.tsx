@@ -118,6 +118,19 @@ function getPasswordStrength(password: string): {
   return                       { strength, label: 'Strong', color: '#8FFF00' }
 }
 
+// ── NEW: Read referral from localStorage ───────────────────────
+function readReferral(): Record<string, any> | null {
+  try {
+    const raw = localStorage.getItem('riazify_referral')
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+// ── NEW: Clear referral after use (one-time capture) ──────────
+function clearReferral() {
+  try { localStorage.removeItem('riazify_referral') } catch {}
+}
+
 // ══════════════════════════════════════════════════════════════
 // MAIN SIGNUP PAGE
 // ══════════════════════════════════════════════════════════════
@@ -189,6 +202,37 @@ export default function SignupPage() {
           } as never).eq('id', data.user.id)
         } catch { /* non-critical */ }
 
+        // ── NEW: Capture referral source ──────────────────────
+        // Reads UTM params stored by ReferralCapture component
+        // in localStorage. Saves to profiles + logs to timeline.
+        try {
+          const referral = readReferral() ?? { source: 'direct' }
+
+          // Save referral_source to profiles table
+          await (supabase.from('profiles') as any)
+            .update({ referral_source: referral })
+            .eq('id', data.user.id)
+
+          // Log signup event to user journey timeline
+          await (supabase.from('user_events') as any).insert({
+            user_id:     data.user.id,
+            event_type:  'signup',
+            event_title: 'Signed up for Riazify',
+            event_desc:  `${referral.source ?? 'Direct'} · Free Trial started`,
+            metadata:    {
+              source:   referral.source   ?? 'direct',
+              medium:   referral.medium   ?? null,
+              ref:      referral.ref      ?? null,
+              campaign: referral.campaign ?? null,
+            },
+            created_at: new Date().toISOString(),
+          })
+
+          // Clear after saving — one-time capture only
+          clearReferral()
+        } catch { /* non-critical — don't block signup */ }
+        // ─────────────────────────────────────────────────────
+
         // Send welcome email via Resend
         try {
           await sendWelcomeEmail({
@@ -245,6 +289,31 @@ export default function SignupPage() {
       await supabase.auth.refreshSession()
       const { data: { user } } = await supabase.auth.getUser()
       if (user?.email_confirmed_at) {
+
+        // ── Affiliate signup tracking ─────────────────────────
+        // Reads riazify_ref cookie → credits affiliate +1 signup
+        // Last Click Wins: whoever's link they clicked last gets credit
+        try {
+          await fetch('/api/affiliate/signup', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ newUserId: user.id, newUserEmail: user.email }),
+          })
+        } catch { /* non-critical — don't block signup flow */ }
+        // ─────────────────────────────────────────────────────
+
+        // ── NEW: Log email verified event to journey timeline ─
+        try {
+          await (supabase.from('user_events') as any).insert({
+            user_id:     user.id,
+            event_type:  'email_verified',
+            event_title: 'Email Address Verified',
+            event_desc:  'Account fully activated',
+            created_at:  new Date().toISOString(),
+          })
+        } catch { /* non-critical */ }
+        // ─────────────────────────────────────────────────────
+
         setCurrentStep(2)
       } else {
         toast.warning('Email not verified yet. Please check your inbox.')

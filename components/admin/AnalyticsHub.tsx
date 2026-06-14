@@ -1,11 +1,10 @@
 'use client'
 // components/admin/AnalyticsHub.tsx
-// Converted 1:1 from lib/pages/admin_analytics_hub.dart
 
 import { useState, useEffect } from 'react'
 import {
   BarChart2, Globe, Shield, Handshake, Map,
-  Server, Eye, Chrome, ArrowLeft, RefreshCw,
+  Server, Eye, Chrome, ArrowLeft,
 } from 'lucide-react'
 
 import RevenueAnalyticsTab      from './tabs/RevenueAnalyticsTab'
@@ -57,13 +56,11 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
   const [activeTab,           setActiveTab]           = useState(initialTab ?? 0)
   const [startChartAnimation, setStartChartAnimation] = useState(false)
 
-  // ── Initial mount animation ────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => setStartChartAnimation(true), 300)
     return () => clearTimeout(t)
   }, [])
 
-  // ── Jump to tab when initialTab changes ────────────────────
   useEffect(() => {
     if (initialTab !== undefined) {
       setActiveTab(initialTab)
@@ -75,11 +72,6 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
   function switchTab(index: number) {
     if (activeTab === index) return
     setActiveTab(index)
-    setStartChartAnimation(false)
-    setTimeout(() => setStartChartAnimation(true), 100)
-  }
-
-  function refreshTab() {
     setStartChartAnimation(false)
     setTimeout(() => setStartChartAnimation(true), 100)
   }
@@ -100,7 +92,6 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
   }
 
   const alertCount = TABS.filter(t => t.hasAlert).length
-  const tab        = TABS[activeTab]
 
   function SidebarItem({ t, index }: { t: TabItem; index: number }) {
     const Icon = t.icon; const isActive = activeTab === index
@@ -119,38 +110,6 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
         {t.hasAlert && !isActive && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#F87171' }} />}
         {isActive           && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: C.lime }} />}
       </button>
-    )
-  }
-
-  function TabHeader() {
-    const Icon = tab.icon
-    return (
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl border"
-           style={{ backgroundColor: C.dark, borderColor: C.limeBorder }}>
-        <div className="w-0.5 h-9 rounded-full shrink-0" style={{ backgroundColor: C.lime }} />
-        <div className="p-1.5 rounded-lg shrink-0" style={{ backgroundColor: C.limeTint }}>
-          <Icon size={14} style={{ color: C.lime }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[14px] font-extrabold text-white">{tab.title}</span>
-            {tab.hasAlert && (
-              <div className="px-1.5 py-0.5 rounded-full border text-[9px] font-bold"
-                   style={{ backgroundColor: 'rgba(248,113,113,0.15)', borderColor: 'rgba(248,113,113,0.35)', color: '#F87171' }}>
-                {tab.alertText}
-              </div>
-            )}
-          </div>
-          <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{tab.description}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{activeTab + 1} of {TABS.length}</span>
-          <button onClick={refreshTab} className="flex items-center gap-1 px-2 py-1 rounded-md" style={{ backgroundColor: C.limeTint }}>
-            <RefreshCw size={10} style={{ color: C.lime }} />
-            <span className="text-[10px] font-bold" style={{ color: C.lime }}>Refresh</span>
-          </button>
-        </div>
-      </div>
     )
   }
 
@@ -182,8 +141,8 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
           {TABS.map((t, i) => <SidebarItem key={i} t={t} index={i} />)}
         </div>
       </div>
-      <div className="flex-1 min-w-0 flex flex-col gap-4">
-        <TabHeader />
+      {/* TabHeader removed — content renders directly */}
+      <div className="flex-1 min-w-0">
         <div key={activeTab}>{getTabContent()}</div>
       </div>
     </div>
@@ -217,7 +176,7 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
           )
         })}
       </div>
-      <TabHeader />
+      {/* TabHeader removed — content renders directly */}
       <div key={activeTab}>{getTabContent()}</div>
     </div>
   )

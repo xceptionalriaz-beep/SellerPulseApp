@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/layout.tsx
 // ═══════════════════════════════════════════════════════════════
 // Converted from: lib/pages/dashboard_page.dart
@@ -18,6 +18,15 @@
 //   ✅ Polls notifications every 60 seconds
 //   ✅ Location verification prompt
 //   ✅ Role-based routing
+//
+// NEW (presence system):
+//   ✅ useHeartbeat — updates last_seen every 2 min (invisible)
+//   ✅ usePresence  — joins Supabase Realtime channel so admin
+//                    CRM shows who is online right now
+//
+// NEW (kill switch visibility):
+//   ✅ Tools hidden from sidebar when kill switch is OFF
+//   ✅ Re-appear when kill switch is turned back ON
 // ═══════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useCallback } from 'react'
@@ -34,17 +43,34 @@ import { useToast } from '@/components/ui/AppToast'
 import { cn, initials } from '@/lib/utils'
 import type { Profile } from '@/types/database'
 
+// ── Presence system ────────────────────────────────────────────
+import { useHeartbeat } from '@/hooks/useHeartbeat'
+import { usePresence }  from '@/hooks/usePresence'
+import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
+
 // ── Nav items (mirrors Dart sidebar exactly) ───────────────────
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard',           href: '/dashboard'              },
-  { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'    },
-  { icon: Type,            label: 'Title Builder',       href: '/dashboard/title-builder'       },
-  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/profit-calculator'   },
-  { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'           },
-  { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research' },
-  { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'              },
-  { icon: Settings,        label: 'Settings',            href: '/dashboard/profile'             },
+  { icon: LayoutDashboard, label: 'Dashboard',           href: '/dashboard'                           },
+  { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'          },
+  { icon: Type,            label: 'Title Builder',       href: '/dashboard/title-builder'             },
+  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/profit-calculator'         },
+  { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'                 },
+  { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research'       },
+  { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                    },
+  { icon: Settings,        label: 'Settings',            href: '/dashboard/profile'                   },
 ]
+
+// ── Kill switch → nav label mapping ───────────────────────────
+// Maps kill_switches.title → NAV_ITEMS label
+// When a switch is OFF → that nav item is hidden from sidebar
+const KILL_SWITCH_MAP: Record<string, string> = {
+  'Title Builder':       'Title Builder',
+  'Product Research':    'eBay Product Research Tool',
+  'Profit Calculator':   'Profit Calculator',
+  'Inventory':           'Inventory Manager',
+  'Competitor Research': 'Competitor Research',
+  'Orders':              'Orders Management',
+}
 
 // ── Sidebar Item ───────────────────────────────────────────────
 function SidebarItem({
@@ -63,11 +89,9 @@ function SidebarItem({
       title={label}
       className="relative flex items-center justify-center w-[60px] h-[52px] group"
     >
-      {/* Lime left border indicator */}
       {isActive && (
         <div className="absolute left-0 w-[3px] h-6 bg-lime rounded-r-[10px]" />
       )}
-      {/* Icon circle */}
       <div className={cn(
         'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-250',
         isActive
@@ -108,8 +132,8 @@ function NotificationBell({
         size={22}
         className={cn(
           'transition-colors duration-200',
-          hovering        ? 'text-limeDeep' :
-          count > 0       ? 'text-red-700'  : 'text-[#8A9E78]'
+          hovering  ? 'text-limeDeep' :
+          count > 0 ? 'text-red-700'  : 'text-[#8A9E78]'
         )}
       />
       {count > 0 && (
@@ -180,20 +204,13 @@ function NotifToast({
   return (
     <div
       className="fixed z-50 w-[320px] rounded-[14px] overflow-hidden border border-lime/25 shadow-[0_8px_20px_rgba(0,0,0,0.3)] animate-slide-up cursor-pointer"
-      style={{
-        right: 20,
-        bottom: 20 + bottomOffset,
-        backgroundColor: '#0F172A',
-      }}
+      style={{ right: 20, bottom: 20 + bottomOffset, backgroundColor: '#0F172A' }}
       onClick={onTap}
     >
       <div className="flex items-start gap-3 p-3.5 pr-3">
-        {/* Icon */}
         <div className="w-9 h-9 rounded-[10px] bg-lime/12 flex items-center justify-center shrink-0">
           <Bell size={18} className="text-lime" />
         </div>
-
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-white text-[13px] font-bold truncate">{title}</span>
@@ -202,11 +219,9 @@ function NotifToast({
           <p className="text-white/55 text-[11px] leading-relaxed line-clamp-2">{message}</p>
           <div className="flex items-center justify-between mt-1.5">
             <span className="text-white/30 text-[10px]">Just now</span>
-            <span className="text-lime/70 text-[10px] font-semibold">Tap to view →</span>
+            <span className="text-lime/70 text-[10px] font-semibold">Tap to view</span>
           </div>
         </div>
-
-        {/* Close */}
         <button
           onClick={(e) => { e.stopPropagation(); onDismiss() }}
           className="text-white/30 hover:text-white/60 transition-colors shrink-0 mt-0.5"
@@ -214,13 +229,8 @@ function NotifToast({
           <X size={14} />
         </button>
       </div>
-
-      {/* Progress bar */}
       <div className="h-[3px] bg-white/5">
-        <div
-          className="h-full bg-lime transition-all duration-100"
-          style={{ width: `${progress}%` }}
-        />
+        <div className="h-full bg-lime transition-all duration-100" style={{ width: `${progress}%` }} />
       </div>
     </div>
   )
@@ -229,11 +239,7 @@ function NotifToast({
 // ══════════════════════════════════════════════════════════════
 // DASHBOARD LAYOUT
 // ══════════════════════════════════════════════════════════════
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter()
   const pathname = usePathname()
   const toast    = useToast()
@@ -247,9 +253,16 @@ export default function DashboardLayout({
   const [showNotifPanel, setShowNotifPanel] = useState(false)
   const [toasts,         setToasts]         = useState<Array<{id: string; title: string; message: string}>>([])
 
+  // ── Kill switch visibility state ───────────────────────────────
+  const [disabledTools,  setDisabledTools]  = useState<Set<string>>(new Set())
+
   const isAdmin = profile?.role === 'admin'
 
-  // ── Load profile ─────────────────────────────────────────────
+  // ── Presence system ────────────────────────────────────────────
+  useHeartbeat()
+  usePresence()
+
+  // ── Load profile + kill switches ──────────────────────────────
   useEffect(() => {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -262,11 +275,47 @@ export default function DashboardLayout({
         .single()
 
       if (data) setProfile(data as Profile)
+
+      // ── Fetch kill switches to hide disabled tools from sidebar ──
+      try {
+        const { data: switches } = await (supabase.from('kill_switches') as any)
+          .select('title, is_enabled, is_visible')
+        const disabled = new Set<string>(
+          (switches ?? [])
+            .filter((s: any) => !s.is_visible)
+            .map((s: any) => s.title as string)
+        )
+        setDisabledTools(disabled)
+      } catch { /* non-critical — show all tools if check fails */ }
     }
     loadProfile()
   }, [])
 
-  // ── Load notification count ───────────────────────────────────
+  // ── Reload kill switches every 60 seconds ──────────────────────
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const { data: switches } = await (supabase.from('kill_switches') as any)
+          .select('title, is_enabled, is_visible')
+        const disabled = new Set<string>(
+          (switches ?? [])
+            .filter((s: any) => !s.is_visible)
+            .map((s: any) => s.title as string)
+        )
+        setDisabledTools(disabled)
+      } catch { /* non-critical */ }
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [supabase])
+
+  // ── Filter nav items based on kill switches ────────────────────
+  const visibleNavItems = NAV_ITEMS.filter(item => {
+    const switchTitle = KILL_SWITCH_MAP[item.label]
+    if (!switchTitle) return true // no kill switch = always show (Dashboard, Settings)
+    return !disabledTools.has(switchTitle)
+  })
+
+  // ── Load notification count ────────────────────────────────────
   const loadNotifCount = useCallback(async () => {
     if (!profile) return
     try {
@@ -297,29 +346,21 @@ export default function DashboardLayout({
     } catch {}
   }, [profile, prevCount])
 
-  // Poll every 60 seconds (same as Dart)
   useEffect(() => {
     loadNotifCount()
     const timer = setInterval(loadNotifCount, 60000)
     return () => clearInterval(timer)
   }, [loadNotifCount])
 
-  // ── Logout ────────────────────────────────────────────────────
+  // ── Logout ─────────────────────────────────────────────────────
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/auth/login')
     router.refresh()
   }
 
-  // ── Show notification panel ───────────────────────────────────
-  function openNotifPanel() {
-    setShowNotifPanel(true)
-  }
-
-  // ── Remove toast ──────────────────────────────────────────────
-  function removeToast(id: string) {
-    setToasts(prev => prev.filter(t => t.id !== id))
-  }
+  function openNotifPanel() { setShowNotifPanel(true) }
+  function removeToast(id: string) { setToasts(prev => prev.filter(t => t.id !== id)) }
 
   return (
     <div className="min-h-screen bg-bg">
@@ -341,9 +382,9 @@ export default function DashboardLayout({
             </button>
           </div>
 
-          {/* Nav items */}
+          {/* Nav items — filtered by kill switches */}
           <div className="flex flex-col flex-1">
-            {NAV_ITEMS.map((item) => (
+            {visibleNavItems.map((item) => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}
@@ -381,32 +422,26 @@ export default function DashboardLayout({
 
           {/* ── TOP NAVBAR ── */}
           <header className="h-[60px] flex items-center px-6 shrink-0">
-
-            {/* Mobile: hamburger */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden mr-3 text-dark"
-            >
+            <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
               <Menu size={28} />
             </button>
 
-            {/* Welcome message — time-based on main dashboard, fixed on others */}
             {(() => {
               const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
               const hour = new Date().getHours()
-              const timeGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}! 🌅`
-                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}! ☀️`
-                : hour >= 17 && hour < 21 ? `Good evening, ${firstName}! 🌙`
-                : `Good night, ${firstName}! 🌙`
+              const timeGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
+                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
+                : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                : `Good night, ${firstName}!`
               const isMain   = pathname === '/dashboard'
               const isOrders = pathname === '/dashboard/orders'
-              const isAdmin  = pathname.startsWith('/dashboard/admin')
-              const adminGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}! ☀️`
-                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}! 👋`
-                : hour >= 17 && hour < 21 ? `Good evening, ${firstName}! 🌆`
-                : `Working late, ${firstName}! 🌙`
-              const desktopMsg = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}! 👋` : isAdmin ? adminGreeting : `Hi, ${firstName}! 👋`
-              const mobileMsg  = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}! 👋` : isAdmin ? adminGreeting : `Hi, ${firstName}! 👋`
+              const isAdminP = pathname.startsWith('/dashboard/admin')
+              const adminGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
+                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
+                : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                : `Working late, ${firstName}!`
+              const desktopMsg = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
+              const mobileMsg  = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
               return (
                 <div className="flex flex-col min-w-0">
                   <span className="hidden lg:block font-extrabold tracking-tight truncate"
@@ -423,41 +458,25 @@ export default function DashboardLayout({
 
             <div className="flex-1" />
 
-            {/* Notification Bell */}
-            <NotificationBell
-              count={notifCount}
-              isPulsing={bellPulsing}
-              onClick={openNotifPanel}
-            />
-
+            <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
             <div className="w-[15px]" />
-
-            {/* Avatar → goes to profile */}
-            <UserAvatar
-              profile={profile}
-              onClick={() => router.push('/dashboard/profile')}
-            />
+            <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
           </header>
+
+          {/* ── TEAM SWITCHER BANNER ── */}
+          <TeamSwitcherBanner />
 
           {/* ── PAGE CONTENT ── */}
           <main className="flex-1 overflow-auto min-h-0">
-            <div>
-              {children}
-            </div>
+            <div>{children}</div>
           </main>
-
         </div>
       </div>
 
       {/* ── MOBILE DRAWER ── */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Drawer */}
+          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
           <div className="relative w-[250px] bg-dark flex flex-col z-10 animate-slide-right">
             <div className="pt-[50px] pb-[30px] flex flex-col items-center">
               <button onClick={() => { router.push('/dashboard'); setMobileOpen(false) }}>
@@ -467,7 +486,8 @@ export default function DashboardLayout({
             </div>
 
             <nav className="flex-1 px-4 space-y-0.5">
-              {NAV_ITEMS.map((item) => {
+              {/* Mobile also uses visibleNavItems */}
+              {visibleNavItems.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href
                 return (
@@ -503,7 +523,6 @@ export default function DashboardLayout({
               )}
             </nav>
 
-            {/* Logout */}
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 mx-4 mb-8 px-3 py-2.5 text-white/40 hover:text-white/60 transition-colors"

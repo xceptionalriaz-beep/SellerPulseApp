@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/inventory/page.tsx
 // ═══════════════════════════════════════════════════════════════
 // Converted from: lib/pages/inventory_page.dart
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/components/ui/AppToast'
 import { cn } from '@/lib/utils'
+import KillSwitchGate from '@/components/KillSwitchGate'
 
 // ── Types ──────────────────────────────────────────────────────
 interface InventoryItem {
@@ -240,6 +241,7 @@ export default function InventoryPage() {
   }
 
   return (
+    <KillSwitchGate switchTitle="Inventory Manager">
     <div className="flex h-full" style={{ backgroundColor: '#F8FAFC' }}>
 
       {/* ── LEFT SIDEBAR ── */}
@@ -383,5 +385,6 @@ export default function InventoryPage() {
         </div>
       </div>
     </div>
+    </KillSwitchGate>
   )
 }

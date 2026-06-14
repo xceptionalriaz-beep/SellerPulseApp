@@ -1,8 +1,10 @@
-'use client'
-// app/auth/login/page.tsx — updated to use ForgotPasswordDialog
+﻿'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+export const dynamic = 'force-dynamic'
+
+// app/auth/login/page.tsx — updated to use ForgotPasswordDialog
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Shield, Eye, EyeOff, Mail, Lock, Star, BadgeCheck, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
@@ -31,10 +33,13 @@ function StatPill({ value, label }: { value: string; label: string }) {
   )
 }
 
-export default function LoginPage() {
-  const router   = useRouter()
-  const toast    = useToast()
-  const supabase = createClient()
+function LoginPageInner() {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const toast        = useToast()
+  const supabase     = createClient()
+
+  const nextUrl = searchParams.get('next') ?? '/dashboard'
 
   const [email,         setEmail]         = useState('')
   const [password,      setPassword]      = useState('')
@@ -65,8 +70,8 @@ export default function LoginPage() {
       if (error) { toast.error(error.message); return }
       if (data.user) {
         await logLogin()
-        toast.show('Welcome back! 👋')
-        router.push('/dashboard')
+        toast.show('Welcome back!')
+        router.push(nextUrl)
         router.refresh()
       }
     } catch {
@@ -82,7 +87,9 @@ export default function LoginPage() {
       toast.info('Opening Google Sign-In...')
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${nextUrl}`,
+        },
       })
       if (error) toast.error('Google Sign-In failed. Please try again.')
     } catch {
@@ -94,8 +101,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center px-5 py-10">
-
-      {/* Forgot Password Dialog */}
       {showForgot && (
         <ForgotPasswordDialog
           initialEmail={email}
@@ -103,7 +108,6 @@ export default function LoginPage() {
         />
       )}
 
-      {/* Top bar — back link + logo */}
       <div className="flex items-center justify-between w-full max-w-[1000px] mb-8">
         <button onClick={() => router.push('/')}
           className="flex items-center gap-2 text-[13px] font-semibold transition-all hover:opacity-70 group"
@@ -119,7 +123,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Main Card */}
       <div className="w-full max-w-[1000px] rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.1)] overflow-hidden"
            style={{ backgroundColor: '#131B2F' }}>
         <div className="flex flex-col lg:flex-row lg:min-h-[660px]">
@@ -130,21 +133,18 @@ export default function LoginPage() {
               <h1 className="text-[28px] font-bold text-[#1E293B] leading-tight">Welcome back</h1>
               <p className="text-[#64748B] text-sm mt-1.5 mb-7">Log in to your Riazify account.</p>
 
-              {/* Google Button */}
               <button onClick={handleGoogleLogin} disabled={googleLoading}
                 className="w-full h-[50px] flex items-center justify-center gap-2.5 bg-white border border-[#E2E8F0] rounded-xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-150 disabled:opacity-60">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center"><GoogleLogo /></div>
                 <span className="text-sm font-semibold text-[#1E293B]">{googleLoading ? 'Opening...' : 'Continue with Google'}</span>
               </button>
 
-              {/* Divider */}
               <div className="flex items-center gap-3 my-5">
                 <div className="flex-1 h-px bg-[#E2E8F0]" />
                 <span className="text-xs text-gray-400">or continue with email</span>
                 <div className="flex-1 h-px bg-[#E2E8F0]" />
               </div>
 
-              {/* Email */}
               <label className="text-[13px] font-bold text-[#1E293B] mb-1.5 block">Business Email</label>
               <div className="relative mb-4">
                 <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
@@ -157,7 +157,6 @@ export default function LoginPage() {
                 {errors.email && <p className="text-[11px] text-[#EF4444] mt-1">{errors.email}</p>}
               </div>
 
-              {/* Password */}
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[13px] font-bold text-[#1E293B]">Password</label>
                 <button onClick={() => setShowForgot(true)}
@@ -180,7 +179,6 @@ export default function LoginPage() {
                 {errors.password && <p className="text-[11px] text-[#EF4444] mt-1">{errors.password}</p>}
               </div>
 
-              {/* Remember Me */}
               <label className="flex items-center gap-2 cursor-pointer mb-6">
                 <div className={cn('w-5 h-5 rounded border-[1.5px] border-lime flex items-center justify-center transition-colors cursor-pointer', rememberMe ? 'bg-lime' : 'bg-white')}
                   onClick={() => setRememberMe(!rememberMe)}>
@@ -189,7 +187,6 @@ export default function LoginPage() {
                 <span className="text-[13px] text-[#64748B]">Remember me</span>
               </label>
 
-              {/* Login Button */}
               <button onClick={handleLogin} disabled={loading}
                 className="w-full h-[50px] bg-lime text-dark font-bold text-base rounded-xl hover:shadow-lime transition-all duration-200 disabled:opacity-50 flex items-center justify-center">
                 {loading ? (
@@ -202,7 +199,10 @@ export default function LoginPage() {
 
               <p className="text-center text-sm text-[#64748B] mt-6">
                 Don&apos;t have an account?{' '}
-                <Link href="/auth/signup" className="font-bold text-black hover:text-lime transition-colors">Sign Up</Link>
+                <Link href={`/auth/signup${nextUrl !== '/dashboard' ? `?next=${nextUrl}` : ''}`}
+                  className="font-bold text-black hover:text-lime transition-colors">
+                  Sign Up
+                </Link>
               </p>
             </div>
           </div>
@@ -239,4 +239,7 @@ export default function LoginPage() {
       </div>
     </div>
   )
+}
+export default function LoginPage() {
+  return <Suspense><LoginPageInner /></Suspense>
 }

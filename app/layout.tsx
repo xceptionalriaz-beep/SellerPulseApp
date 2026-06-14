@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import { ToastProvider } from '@/components/ui/AppToast'
+import AffiliateTracker from '@/components/AffiliateTracker'
 import './globals.css'
 
 // ─── Fonts ────────────────────────────────────────────────────────────────────
@@ -54,6 +55,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-body antialiased bg-bg text-dark min-h-screen">
+        {/* Affiliate click tracker — reads cookie set by middleware */}
+        <AffiliateTracker />
         {/* ToastProvider wraps everything — toast works on every page */}
         <ToastProvider>
           {children}

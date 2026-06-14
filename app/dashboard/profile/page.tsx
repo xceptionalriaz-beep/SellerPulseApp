@@ -4,7 +4,7 @@
 // SHELL ONLY — tab content comes from separate files in /tabs/
 
 import { useState } from 'react'
-import { Shield, User, Globe, BarChart2, Bookmark, CreditCard, Lock, DollarSign } from 'lucide-react'
+import { Shield, User, Globe, BarChart2, Bookmark, CreditCard, Lock, DollarSign, Users } from 'lucide-react'
 import OverviewTab    from './tabs/OverviewTab'
 import EbayManagerTab from './tabs/EbayManagerTab'
 import ToolUsageTab   from './tabs/ToolUsageTab'
@@ -12,6 +12,7 @@ import VaultTab       from './tabs/VaultTab'
 import BillingTab     from './tabs/BillingTab'
 import SecurityTab    from './tabs/SecurityTab'
 import AffiliateTab   from './tabs/AffiliateTab'
+import TeamTab        from '@/components/admin/settings-tabs/TeamTab'
 
 const pageBg    = '#F4F7FA'
 const sidebarBg = '#0F172A'
@@ -25,6 +26,7 @@ const TABS = [
   { icon: CreditCard,  label: 'Billing'     },
   { icon: Lock,        label: 'Security'    },
   { icon: DollarSign,  label: 'Affiliate'   },
+  { icon: Users,       label: 'Team'        },
 ]
 
 export default function UserProfilePage() {
@@ -39,6 +41,7 @@ export default function UserProfilePage() {
       case 4: return <BillingTab     />
       case 5: return <SecurityTab    />
       case 6: return <AffiliateTab   />
+      case 7: return <TeamTab        />
       default: return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="text-[48px]">🚧</div>

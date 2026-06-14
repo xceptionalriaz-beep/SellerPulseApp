@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/admin/page.tsx
 // Updated: stat cards, tool stats, quick stats bar — all real Supabase data
 
@@ -8,7 +8,7 @@ import {
   Shield, BarChart2, Settings, ArrowLeft, Search,
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
   Wrench, Trophy, Zap, UserPlus, Key, FileText,
-  Power, MoreVertical, Menu, X, ChevronDown, Globe,
+  Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail,
 } from 'lucide-react'
 import PersistentSidebar   from '@/components/admin/PersistentSidebar'
 import AnalyticsHub        from '@/components/admin/AnalyticsHub'
@@ -24,6 +24,7 @@ import GamificationTab     from '@/components/admin/settings-tabs/GamificationTa
 import ApiVaultPage        from '@/components/admin/settings-tabs/ApiVaultPage'
 import AffiliateVaultTab   from '@/components/admin/settings-tabs/AffiliateVaultTab'
 import FounderOpsTab       from '@/components/admin/settings-tabs/FounderOpsTab'
+import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -50,6 +51,7 @@ const SETTINGS_MENU = [
   { title: 'API Vault',       icon: Key          },
   { title: 'Affiliate Vault', icon: DollarSign   },
   { title: 'Founder Ops',     icon: BarChart2    },
+  { title: 'Marketing',       icon: Mail         },
 ]
 
 // ── Tool definitions (static metadata only — no dummy stats) ──
@@ -814,6 +816,7 @@ export default function AdminPage() {
   const [analyticsTab,      setAnalyticsTab]      = useState(0)
   const [showKillSwitch,    setShowKillSwitch]    = useState(false)
   const [mobileDrawerOpen,  setMobileDrawerOpen]  = useState(false)
+  const [marketingUsers,    setMarketingUsers]    = useState<any[]>([])
   const [isMobile,          setIsMobile]          = useState(
     () => typeof window !== 'undefined' ? window.innerWidth < 950 : false
   )
@@ -1061,10 +1064,17 @@ export default function AdminPage() {
   // ── Settings content router ────────────────────────────────
   function getSettingsContent() {
     switch (activeSettingsTab) {
-      case 0:  return <UserCrmTab          isInvestorMode={investorMode} isMobile={isMobile} />
+      case 0:  return <UserCrmTab
+        isInvestorMode={investorMode}
+        isMobile={isMobile}
+        onGoToMarketing={(users) => {
+          setMarketingUsers(users)
+          setActiveSettingsTab(12)
+        }}
+      />
       case 1:  return <RoleBuilderTab />
       case 2:  return <SecurityLogsTab     isInvestorMode={investorMode} />
-      case 3:  return <PromoManagerTab     isMobile={isMobile} />
+      case 3:  return <PromoManagerTab />
       case 4:  return <KillSwitchesTab />
       case 5:  return <PlanLimitsTab />
       case 6:  return <EmailAutomationsTab />
@@ -1073,6 +1083,7 @@ export default function AdminPage() {
       case 9:  return <ApiVaultPage />
       case 10: return <AffiliateVaultTab />
       case 11: return <FounderOpsTab />
+      case 12: return <MarketingTab initialUsers={marketingUsers} />
       default: return null
     }
   }

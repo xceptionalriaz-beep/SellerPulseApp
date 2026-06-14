@@ -4,6 +4,12 @@
   "devCommand": "next dev",
   "installCommand": "npm install",
   "regions": ["sin1"],
+  "crons": [
+    {
+      "path": "/api/admin/maintenance/run-schedules",
+      "schedule": "* * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Settings, CheckCircle, RefreshCw } from 'lucide-react'
+import { Settings, CheckCircle, X } from 'lucide-react'
 
 const C = {
   dark:     '#0a0d08',
@@ -76,7 +76,7 @@ interface Props {
 export default function AffiliateSettingsPanel({ onClose, onSaved, settings: initial }: Props) {
   const supabase = createClient()
 
-  const [rate,       setRate]       = useState(String(Math.round((initial?.commission_rate   ?? 0.30) * 100)))
+  const [rate,       setRate]       = useState(String(Math.round((initial?.commission_rate   ?? 0.25) * 100)))
   const [months,     setMonths]     = useState(String(initial?.commission_months ?? 12))
   const [minPay,     setMinPay]     = useState(String(initial?.min_payout        ?? 50))
   const [cookie,     setCookie]     = useState(String(initial?.cookie_days       ?? 30))
@@ -194,9 +194,9 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
             </div>
           </div>
           <button onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full"
+            className="w-8 h-8 flex items-center justify-center rounded-full transition-all hover:opacity-70"
             style={{ backgroundColor: C.bg }}>
-            <span style={{ color: C.muted, fontSize: 18 }}>×</span>
+            <X size={16} style={{ color: C.muted }} />
           </button>
         </div>
 
@@ -221,7 +221,7 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
                      style={{ backgroundColor: C.limeTint, border: `1px solid ${C.lime}50` }}>
                   <CheckCircle size={14} style={{ color: C.limeDeep }} />
                   <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>
-                    ✅ Settings saved! All pages updated automatically.
+                    Settings saved — all pages updated automatically
                   </p>
                 </div>
               )}
@@ -406,12 +406,12 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
               {/* Earnings preview */}
               <div className="p-4 rounded-2xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
                 <p className="text-[12px] font-bold mb-3" style={{ color: C.text }}>
-                  Earnings example
+                  Earnings example <span className="font-normal text-[11px]" style={{ color: C.muted }}>(Pro $49 · Elite $99)</span>
                 </p>
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between">
-                    <span className="text-[12px]" style={{ color: C.muted }}>Pro plan price</span>
-                    <span className="text-[12px] font-bold" style={{ color: C.text }}>$49.00</span>
+                    <span className="text-[12px]" style={{ color: C.muted }}>Pro / Elite plan price</span>
+                    <span className="text-[12px] font-bold" style={{ color: C.text }}>$49 / $99</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[12px]" style={{ color: C.muted }}>
@@ -442,12 +442,22 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[12px]" style={{ color: C.muted }}>
-                      Over {months} months
+                      Pro total ({months}mo)
                     </span>
                     <span className="text-[13px] font-extrabold" style={{ color: C.limeDeep }}>
                       ${earnOnDisc
                         ? (49 * (1 - Number(discount)/100) * Number(rate)/100 * Number(months)).toFixed(2)
-                        : (49 * Number(rate)/100 * Number(months)).toFixed(2)} total
+                        : (49 * Number(rate)/100 * Number(months)).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[12px]" style={{ color: C.muted }}>
+                      Elite total ({months}mo)
+                    </span>
+                    <span className="text-[13px] font-extrabold" style={{ color: C.green }}>
+                      ${earnOnDisc
+                        ? (99 * (1 - Number(discount)/100) * Number(rate)/100 * Number(months)).toFixed(2)
+                        : (99 * Number(rate)/100 * Number(months)).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -459,13 +469,16 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
                   Updates automatically in:
                 </p>
                 {[
-                  '✅ Affiliate apply page',
-                  '✅ User affiliate dashboard',
-                  '✅ Admin affiliate center',
-                  '✅ Commission calculations',
-                  '✅ Payout amounts',
+                  'Affiliate apply page',
+                  'User affiliate dashboard',
+                  'Admin affiliate center',
+                  'Commission calculations',
+                  'Payout amounts',
                 ].map((item, i) => (
-                  <p key={i} className="text-[12px] py-0.5" style={{ color: C.muted }}>{item}</p>
+                  <div key={i} className="flex items-center gap-2 py-0.5">
+                    <CheckCircle size={12} style={{ color: C.green, flexShrink: 0 }} />
+                    <p className="text-[12px]" style={{ color: C.muted }}>{item}</p>
+                  </div>
                 ))}
               </div>
 
@@ -497,7 +510,7 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
             {saving
               ? <><div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                        style={{ borderTopColor: C.lime }}></div> Saving...</>
-              : '💾 Save Settings'}
+              : 'Save Settings'}
           </button>
         </div>
       </div>

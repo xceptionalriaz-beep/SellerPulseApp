@@ -1,10 +1,11 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/page.tsx
 // Converted 1:1 from lib/pages/product_research/product_research_master.dart
 
 import { useState } from 'react'
 import KeywordSearchScreen from './components/keyword-search/KeywordSearchScreen'
 import DeepDiveScreen      from './components/deep-dive/DeepDiveScreen'
+import KillSwitchGate from '@/components/KillSwitchGate'
 
 const C = {
   bg:     '#F8FAFC',
@@ -26,6 +27,7 @@ export default function ProductResearchMaster() {
   const [productUrl,  setProductUrl]  = useState('')
 
   return (
+    <KillSwitchGate switchTitle="eBay Product Research Tool">
     <div className="flex flex-col h-full" style={{ backgroundColor: C.bg }}>
 
       {/* Tab bar — matches Dart TabBar isScrollable + tabAlignment:start */}
@@ -66,5 +68,6 @@ export default function ProductResearchMaster() {
       </div>
 
     </div>
+    </KillSwitchGate>
   )
 }

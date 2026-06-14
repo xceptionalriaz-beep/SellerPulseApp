@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── Verify caller is admin ─────────────────────────────────
+    // ── Verify caller is admin ────────────────────────────────
     const authHeader = req.headers.get('authorization')
     if (!authHeader) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,10 +26,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check caller is admin
     const { data: callerProfile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, name')
       .eq('id', caller.id)
       .single()
 
@@ -74,6 +73,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
     }
 
+    const newUserId = data.user.id
+
     // ── Update profiles table ─────────────────────────────────
     await supabase.from('profiles').update({
       name:           name.trim(),
@@ -81,14 +82,14 @@ export async function POST(req: NextRequest) {
       plan_name:      plan ?? 'Free Trial',
       account_status: 'Active',
       role:           role ?? 'user',
-    }).eq('id', data.user.id)
+    }).eq('id', newUserId)
 
     // ── Insert into subscriptions ─────────────────────────────
     const amount = (plan ?? '').toLowerCase().includes('elite') ? 99
                  : (plan ?? '').toLowerCase().includes('pro')   ? 49 : 0
 
     await supabase.from('subscriptions').insert({
-      user_id:         data.user.id,
+      user_id:         newUserId,
       plan_name:       plan ?? 'Free Trial',
       amount,
       status:          amount === 0 ? 'trial' : 'active',
@@ -105,10 +106,64 @@ export async function POST(req: NextRequest) {
       is_read: false,
     })
 
+    // ── Get caller IP ─────────────────────────────────────────
+    const ipAddress =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      null
+
+    // ── Log to admin_logs ─────────────────────────────────────
+    try {
+      await (supabase.from('admin_logs') as any).insert({
+        admin_id:   caller.id,
+        target_id:  newUserId,
+        action:     'create_user',
+        details:    `Created new user account — ${name.trim()} (${email.trim()})`,
+        metadata:   {
+          admin_name:   (callerProfile as any)?.name ?? 'Admin',
+          target_name:  name.trim(),
+          target_email: email.trim(),
+          plan:         plan ?? 'Free Trial',
+          role:         role ?? 'user',
+        },
+        ip_address: ipAddress,
+        created_at: new Date().toISOString(),
+      })
+    } catch { /* non-critical */ }
+
+    // ── Log signup event to user journey timeline ─────────────
+    try {
+      await supabase.from('user_events').insert({
+        user_id:     newUserId,
+        event_type:  'signup',
+        event_title: 'Signed up for Riazify',
+        event_desc:  `${plan ?? 'Free Trial'} started · Created by admin`,
+        metadata:    {
+          plan:         plan ?? 'Free Trial',
+          role:         role ?? 'user',
+          created_by:   caller.id,
+          send_welcome: sendWelcome ?? true,
+        },
+        created_at: new Date().toISOString(),
+      })
+
+      // If paid plan — also log the upgrade event
+      if (amount > 0) {
+        await supabase.from('user_events').insert({
+          user_id:     newUserId,
+          event_type:  'plan_upgraded',
+          event_title: `Upgraded to ${plan}`,
+          event_desc:  `$${amount}/month · Activated by admin`,
+          metadata:    { plan, amount, created_by: caller.id },
+          created_at:  new Date().toISOString(),
+        })
+      }
+    } catch { /* non-critical — user is already created */ }
+
     return NextResponse.json({
-      success:  true,
-      userId:   data.user.id,
-      message:  'User created successfully',
+      success: true,
+      userId:  newUserId,
+      message: 'User created successfully',
     })
 
   } catch (err) {

@@ -10,6 +10,7 @@ import {
   X, ChevronDown, AlertTriangle,
   ClipboardList, Settings, Tag, Clock,
   Filter, DollarSign, TrendingUp,
+  Mail, MessageCircle,
 } from 'lucide-react'
 import AffiliateApplicationsPanel, { Application } from '@/components/admin/tabs/AffiliateApplicationsPanel'
 import AffiliateSettingsPanel, { AffiliateSettings } from '@/components/admin/tabs/AffiliateSettingsPanel'
@@ -49,6 +50,8 @@ interface Affiliate {
   discount_percent:  number | null
   discount_months:   number | null
   notes:             string | null
+  traffic_source:    string | null
+  country:           string | null
   created_at:        string
 }
 
@@ -218,6 +221,18 @@ function AddAffiliateDialog({ onClose, onCreated }: { onClose: () => void; onCre
   const [notes,          setNotes]          = useState('')
   const [saving,         setSaving]         = useState(false)
   const [error,          setError]          = useState('')
+  const [visible,        setVisible]        = useState(false)
+
+  useEffect(() => {
+    // Trigger animation on mount
+    const t = setTimeout(() => setVisible(true), 10)
+    return () => clearTimeout(t)
+  }, [])
+
+  function handleClose() {
+    setVisible(false)
+    setTimeout(onClose, 220)
+  }
 
   // Payment details placeholder based on method
   function getPaymentPlaceholder() {
@@ -271,16 +286,25 @@ function AddAffiliateDialog({ onClose, onCreated }: { onClose: () => void; onCre
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
+         style={{
+           backgroundColor: `rgba(0,0,0,${visible ? 0.4 : 0})`,
+           transition: 'background-color 0.22s ease',
+         }}
+         onClick={e => e.target === e.currentTarget && handleClose()}>
       <div className="bg-white rounded-2xl border w-full max-w-md"
-           style={{ borderColor: C.border, maxHeight: '90vh', overflowY: 'auto' }}>
-        <div className="p-6">
+           style={{
+             borderColor:  C.border,
+             overflow:     'hidden',
+             transform:    visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
+             opacity:      visible ? 1 : 0,
+             transition:   'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease',
+           }}>
+        <div className="p-6" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
 
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <p className="text-[16px] font-bold" style={{ color: C.text }}>Add New Affiliate</p>
-            <button onClick={onClose}><X size={18} style={{ color: C.muted }} /></button>
+            <button onClick={handleClose}><X size={18} style={{ color: C.muted }} /></button>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -452,7 +476,7 @@ function AddAffiliateDialog({ onClose, onCreated }: { onClose: () => void; onCre
 
             {/* Buttons */}
             <div className="flex gap-2 mt-2">
-              <button onClick={onClose}
+              <button onClick={handleClose}
                 className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold transition-all"
                 style={{ borderColor: C.border, color: C.muted, backgroundColor: '#fff' }}
                 onMouseEnter={e => {
@@ -489,48 +513,201 @@ function AddAffiliateDialog({ onClose, onCreated }: { onClose: () => void; onCre
 
 // ── Generate Link Dialog ──────────────────────────────────────
 function GenerateLinkDialog({ affiliates, onClose }: { affiliates: Affiliate[]; onClose: () => void }) {
-  const [selected, setSelected] = useState(affiliates[0]?.id ?? '')
-  const [copied,   setCopied]   = useState(false)
-  const aff = affiliates.find(a => a.id === selected)
-  const link = aff ? `https://riazify.com/ref/${aff.code}` : ''
+  const [selected,      setSelected]      = useState(affiliates[0]?.id ?? '')
+  const [copiedLink,    setCopiedLink]    = useState(false)
+  const [copiedCoupon,  setCopiedCoupon]  = useState(false)
+  const [searchQuery,   setSearchQuery]   = useState('')
+  const [dropdownOpen,  setDropdownOpen]  = useState(false)
+  const [visible,       setVisible]       = useState(false)
+  const [hoverClose,    setHoverClose]    = useState(false)
 
-  function copy() {
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 10)
+    return () => clearTimeout(t)
+  }, [])
+
+  function handleClose() {
+    setVisible(false)
+    setTimeout(onClose, 220)
+  }
+
+  const filtered = affiliates.filter(a =>
+    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.code.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const aff    = affiliates.find(a => a.id === selected)
+  const link   = aff ? `https://riazify.com?ref=${aff.code}` : ''
+  const coupon = aff?.code ?? ''
+
+  function copyLink() {
     navigator.clipboard.writeText(link)
-    setCopied(true); setTimeout(() => setCopied(false), 2000)
+    setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000)
+  }
+
+  function copyCoupon() {
+    navigator.clipboard.writeText(coupon)
+    setCopiedCoupon(true); setTimeout(() => setCopiedCoupon(false), 2000)
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white rounded-2xl border p-6 w-full max-w-md" style={{ borderColor: C.border }}>
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-[16px] font-bold" style={{ color: C.text }}>Generate Referral Link</p>
-          <button onClick={onClose}><X size={18} style={{ color: C.muted }} /></button>
-        </div>
-        <div className="flex flex-col gap-4">
-          <div>
-            <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>Select Affiliate</p>
-            <PillDropdown
-              value={selected}
-              onChange={setSelected}
-              options={affiliates.map(a => ({ value: a.id, label: `${a.name} — ${a.code}` }))}
-            />
-          </div>
-          {link && (
-            <div className="p-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
-              <p className="text-[12px] font-bold mb-1" style={{ color: C.muted }}>Referral Link</p>
-              <p className="text-[13px] font-bold break-all" style={{ color: C.text }}>{link}</p>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <button onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold"
-              style={{ borderColor: C.border, color: C.muted }}>Close</button>
-            <button onClick={copy}
-              className="flex-1 py-2.5 rounded-xl text-[13px] font-bold"
-              style={{ backgroundColor: C.lime, color: C.dark }}>
-              {copied ? 'Copied!' : 'Copy Link'}
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+         style={{
+           backgroundColor: `rgba(0,0,0,${visible ? 0.4 : 0})`,
+           transition: 'background-color 0.22s ease',
+         }}
+         onClick={e => e.target === e.currentTarget && handleClose()}>
+      <div className="bg-white rounded-2xl border overflow-hidden w-full max-w-md"
+           style={{
+             borderColor: C.border,
+             transform:   visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
+             opacity:     visible ? 1 : 0,
+             transition:  'transform 0.22s cubic-bezier(0.34,1.56,0.64,1), opacity 0.18s ease',
+           }}>
+        <div className="p-6" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+
+          {/* Header */}
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[16px] font-bold" style={{ color: C.text }}>Share Affiliate Details</p>
+            <button onClick={handleClose}
+              className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
+              style={{ backgroundColor: hoverClose ? '#FEF2F2' : 'transparent', color: hoverClose ? C.red : C.muted }}
+              onMouseEnter={() => setHoverClose(true)}
+              onMouseLeave={() => setHoverClose(false)}>
+              <X size={16} />
             </button>
+          </div>
+
+          <div className="flex flex-col gap-4">
+
+            {/* Searchable Affiliate Picker */}
+            <div>
+              <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>Select Affiliate</p>
+              <div className="relative">
+
+                {/* Search input */}
+                <div className="flex items-center gap-2 h-10 px-3 rounded-xl"
+                     style={{ border: `1.5px solid ${dropdownOpen ? C.lime : C.border}`, backgroundColor: C.bg, boxShadow: dropdownOpen ? '0 0 0 3px rgba(143,255,0,0.15)' : 'none' }}>
+                  <Search size={14} style={{ color: C.muted, flexShrink: 0 }} />
+                  <input
+                    value={dropdownOpen ? searchQuery : (aff?.name ?? '')}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onFocus={() => { setDropdownOpen(true); setSearchQuery('') }}
+                    placeholder="Search affiliates..."
+                    className="flex-1 text-[13px] bg-transparent"
+                    style={{ color: C.text, outline: 'none', border: 'none' }}
+                  />
+                  <ChevronDown size={14} style={{ color: C.muted, transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }} />
+                </div>
+
+                {/* Dropdown list */}
+                {dropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => { setDropdownOpen(false); setSearchQuery('') }} />
+                    <div className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-2xl border py-1.5 flex flex-col"
+                         style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', maxHeight: 200, overflowY: 'auto' }}>
+                      {filtered.length === 0 ? (
+                        <p className="text-[12px] text-center py-4" style={{ color: C.muted }}>No affiliates found</p>
+                      ) : filtered.map(a => (
+                        <button key={a.id}
+                          onClick={() => { setSelected(a.id); setDropdownOpen(false); setSearchQuery('') }}
+                          className="flex items-center justify-between px-3 py-2 mx-1.5 rounded-xl hover:opacity-80 transition-all text-left"
+                          style={{ backgroundColor: selected === a.id ? C.limeTint : 'transparent' }}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                                 style={{ backgroundColor: C.dark, color: C.lime }}>
+                              {a.name.charAt(0)}
+                            </div>
+                            <span className="text-[13px] font-semibold" style={{ color: C.text }}>{a.name}</span>
+                          </div>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                                style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'monospace' }}>
+                            {a.code}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {aff && (<>
+
+              {/* Referral Link */}
+              <div className="p-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[11px] font-bold" style={{ color: C.muted }}>Referral Link</p>
+                  <button onClick={copyLink}
+                    className="text-[11px] font-bold px-2 py-0.5 rounded-lg transition-all"
+                    style={{ backgroundColor: copiedLink ? C.limeTint : 'transparent', color: copiedLink ? C.limeDeep : C.muted }}>
+                    {copiedLink ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="text-[12px] break-all" style={{ color: C.text }}>{link}</p>
+              </div>
+
+              {/* Coupon Code */}
+              <div className="p-3 rounded-xl border" style={{ backgroundColor: C.limeTint, borderColor: `${C.lime}80` }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[11px] font-bold" style={{ color: C.limeDeep }}>Coupon Code</p>
+                  <button onClick={copyCoupon}
+                    className="text-[11px] font-bold px-2 py-0.5 rounded-lg transition-all"
+                    style={{ backgroundColor: copiedCoupon ? C.limeDeep : 'transparent', color: copiedCoupon ? '#fff' : C.limeDeep }}>
+                    {copiedCoupon ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[20px] font-extrabold tracking-widest" style={{ color: C.limeDeep, fontFamily: 'monospace' }}>
+                    {coupon}
+                  </p>
+                  <div className="text-right">
+                    <p className="text-[11px] font-bold" style={{ color: C.limeDeep }}>
+                      {aff.discount_percent ?? 30}% OFF
+                    </p>
+                    <p className="text-[10px]" style={{ color: C.muted }}>
+                      for {aff.discount_months ?? 2} month{(aff.discount_months ?? 2) > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Promo Message */}
+              <div className="p-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[11px] font-bold" style={{ color: C.muted }}>Ready-to-Share Message</p>
+                  <button onClick={() => {
+                    navigator.clipboard.writeText(`Use code ${coupon} to get ${aff.discount_percent ?? 30}% off for ${aff.discount_months ?? 2} month${(aff.discount_months ?? 2) > 1 ? 's' : ''} on Riazify → ${link}`)
+                    setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000)
+                  }}
+                    className="text-[11px] font-bold px-2 py-0.5 rounded-lg transition-all"
+                    style={{ backgroundColor: copiedLink ? C.limeTint : 'transparent', color: copiedLink ? C.limeDeep : C.muted }}>
+                    {copiedLink ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="text-[12px] leading-relaxed" style={{ color: C.text }}>
+                  Use code <span className="font-bold" style={{ color: C.limeDeep }}>{coupon}</span> to get <span className="font-bold">{aff.discount_percent ?? 30}% off</span> for {aff.discount_months ?? 2} month{(aff.discount_months ?? 2) > 1 ? 's' : ''} on Riazify → <span style={{ color: C.limeDeep }}>{link}</span>
+                </p>
+              </div>
+
+              {/* Share buttons */}
+              <div className="flex gap-2">
+                <a href={`mailto:?subject=Special offer for you&body=Use code ${coupon} to get ${aff.discount_percent ?? 30}%25 off for ${aff.discount_months ?? 2} months on Riazify → ${link}`}
+                   target="_blank" rel="noreferrer"
+                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
+                   style={{ borderColor: C.border, color: C.muted }}>
+                  <Mail size={14} /> Email
+                </a>
+                <a href={`https://wa.me/?text=Use code ${coupon} to get ${aff.discount_percent ?? 30}%25 off for ${aff.discount_months ?? 2} months on Riazify → ${link}`}
+                   target="_blank" rel="noreferrer"
+                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-[12px] font-bold transition-all hover:opacity-80"
+                   style={{ borderColor: '#25D366', color: '#25D366', backgroundColor: '#F0FDF4' }}>
+                  <MessageCircle size={14} /> WhatsApp
+                </a>
+              </div>
+
+            </>)}
+
           </div>
         </div>
       </div>
@@ -648,6 +825,7 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
   const [withdrawals,    setWithdrawals]    = useState<Withdrawal[]>([])
   const [applications,   setApplications]   = useState<Application[]>([])
   const [rejectDialog,   setRejectDialog]   = useState<Withdrawal | null>(null)
+  const [toast,          setToast]          = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
   const [rejectReason,   setRejectReason]   = useState('')
   const [processingW,    setProcessingW]    = useState<string | null>(null)
   const [searchQuery,    setSearchQuery]    = useState('')
@@ -655,7 +833,6 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [markingPaid,    setMarkingPaid]    = useState<string | null>(null)
   const [confirmPay,     setConfirmPay]     = useState<Affiliate | null>(null)
-  const [payStep,        setPayStep]        = useState<1 | 2>(1)
   const [approveTarget,  setApproveTarget]  = useState<Withdrawal | null>(null)
   const [payMethodUsed,  setPayMethodUsed]  = useState('paypal')
   const [payMethodCustom,setPayMethodCustom]= useState('')
@@ -663,6 +840,14 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
   const [searchFocused,  setSearchFocused]  = useState(false)
   const [confirmRemove,  setConfirmRemove]  = useState<string | null>(null)
   const [refreshing,     setRefreshing]     = useState(false)
+  const [chartMounted,   setChartMounted]   = useState(false)
+
+  useEffect(() => {
+    if (affiliates.length === 0) return
+    setChartMounted(false)
+    const t = setTimeout(() => setChartMounted(true), 60)
+    return () => clearTimeout(t)
+  }, [affiliates.length])
   const [editDiscount,   setEditDiscount]   = useState<string | null>(null)
   const [discountInput,      setDiscountInput]      = useState('')
   const [discountMonthsInput,setDiscountMonthsInput] = useState('1')
@@ -678,7 +863,7 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
     try {
       const [{ data: affData }, { data: payData }, { data: wdData }, { data: appData }, { data: settingsData }] = await Promise.all([
         supabase.from('affiliates').select('*').order('signups', { ascending: false }),
-        (supabase.from('affiliate_payouts') as any).select('*').order('created_at', { ascending: false }).limit(10),
+        (supabase.from('affiliate_payouts') as any).select('*').order('created_at', { ascending: false }).limit(50),
         (supabase.from('affiliate_withdrawal_requests') as any).select('*').order('requested_at', { ascending: false }),
         (supabase.from('affiliate_applications') as any).select('*').order('created_at', { ascending: false }),
         (supabase.from('affiliate_settings') as any).select('*').limit(1).maybeSingle(),
@@ -692,7 +877,7 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
       const enriched = affs.map(a => ({
         ...a,
         tier:   'Standard',
-        payout: calcPayout(a.mrr, a.custom_commission ?? commissionRate),
+        payout: a.payout,  // use real DB balance, not recalculated
       }))
       setAffiliates(enriched)
 
@@ -736,8 +921,15 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
         .eq('affiliate_id', aff.id)
         .eq('status', 'pending')
       await load()
-    } catch (e) { console.error(e) }
+      showToast('Payment recorded successfully')
+    } catch (e) { console.error(e); showToast('Failed to record payment', 'error') }
     setMarkingPaid(null)
+    setConfirmPay(null)
+  }
+
+  function showToast(msg: string, type: 'success' | 'error' = 'success') {
+    setToast({ msg, type })
+    setTimeout(() => setToast(null), 3500)
   }
 
   async function handleRefresh() {
@@ -771,7 +963,8 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
       // Then remove affiliate
       await supabase.from('affiliates').delete().eq('id', id)
       await load()
-    } catch (e) { console.error(e) }
+      showToast('Affiliate removed')
+    } catch (e) { console.error(e); showToast('Failed to remove affiliate', 'error') }
     setActionMenu(null)
     setConfirmRemove(null)
   }
@@ -802,7 +995,8 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
       }).eq('id', w.affiliate_id)
 
       await load()
-    } catch (e) { console.error(e) }
+      showToast('Withdrawal approved & paid')
+    } catch (e) { console.error(e); showToast('Failed to approve withdrawal', 'error') }
     setProcessingW(null)
   }
 
@@ -817,36 +1011,86 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
         rejection_reason: reason,
       }).eq('id', w.id)
       await load()
-    } catch (e) { console.error(e) }
+      showToast('Withdrawal rejected')
+    } catch (e) { console.error(e); showToast('Failed to reject withdrawal', 'error') }
     setProcessingW(null)
   }
 
   function exportCSV() {
-    const rows = [
-      ['Name', 'Code', 'Email', 'Clicks', 'Signups', 'Conv%', 'MRR', 'Commission', 'Discount%', 'Discount Months', 'Payout', 'Payout Status', 'Withdrawal Status'],
-      ...affiliates.map(a => {
-        const wr = withdrawals
-          .filter(w => w.affiliate_id === a.id)
-          .sort((x, y) => new Date(y.requested_at).getTime() - new Date(x.requested_at).getTime())[0]
-        const wStatus = wr ? wr.status : 'none'
-        return [
-          a.name, a.code, a.email ?? '',
-          a.clicks, a.signups, convRate(a.clicks, a.signups),
-          `$${a.mrr}`, `${((a.custom_commission ?? affiliateSettings?.commission_rate ?? COMMISSION_RATE)*100).toFixed(0)}%`,
-          `${a.discount_percent ?? affiliateSettings?.default_discount ?? 50}%`,
-          String(a.discount_months ?? affiliateSettings?.default_discount_months ?? 1),
-          `$${a.payout.toFixed(2)}`,
-          a.payout_status ?? 'pending',
-          wStatus,
-        ]
-      })
+    // Safely quote a CSV cell value
+    const q = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`
+
+    const headers = [
+      'Name',
+      'Email',
+      'Status',
+      'Coupon Code',
+      'Referral Link',
+      'Commission Rate',
+      'Duration (months)',
+      'Discount %',
+      'Discount Months',
+      'Payment Method',
+      'Pay To',
+      'Clicks',
+      'Signups',
+      'Conv %',
+      'Revenue (MRR)',
+      'Pending Payout',
+      'Payout Status',
+      'Withdrawal Status',
+      'Withdrawal Amount',
+      'Total Paid Out',
+      'Joined Date',
     ]
-    const csv  = rows.map(r => r.join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
+
+    const rows = affiliates.map(a => {
+      const allPayouts    = payouts.filter(p => p.affiliate_id === a.id)
+      const totalPaidOut  = allPayouts.reduce((s, p) => s + p.amount, 0)
+
+      const allWd         = withdrawals.filter(w => w.affiliate_id === a.id)
+      const latestWd      = allWd.sort((x, y) => new Date(y.requested_at).getTime() - new Date(x.requested_at).getTime())[0]
+      const pendingWd     = allWd.find(w => w.status === 'pending')
+
+      const commRate      = (a.custom_commission ?? affiliateSettings?.commission_rate ?? COMMISSION_RATE) * 100
+      const discPct       = a.discount_percent   ?? affiliateSettings?.default_discount         ?? 50
+      const discMonths    = a.discount_months     ?? affiliateSettings?.default_discount_months  ?? 1
+      const commMonths    = affiliateSettings?.commission_months ?? COMMISSION_MONTHS
+      const referralLink  = `https://riazify.com?ref=${a.code}`
+
+      return [
+        q(a.name),
+        q(a.email ?? ''),
+        q(a.status ?? 'active'),
+        q(a.code),
+        q(referralLink),
+        q(`${commRate.toFixed(0)}%`),
+        q(commMonths),
+        q(`${discPct}%`),
+        q(discMonths),
+        q(a.payout_method ?? 'paypal'),
+        q(a.payment_details ?? ''),
+        q(a.clicks),
+        q(a.signups),
+        q(convRate(a.clicks, a.signups)),
+        q(`$${a.mrr.toLocaleString()}`),
+        q(pendingWd ? `$${pendingWd.amount.toFixed(2)}` : '—'),
+        q(a.payout_status ?? 'pending'),
+        q(latestWd ? latestWd.status : 'none'),
+        q(latestWd ? `$${latestWd.amount.toFixed(2)}` : '—'),
+        q(`$${totalPaidOut.toFixed(2)}`),
+        q(a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'),
+      ]
+    })
+
+    const csv  = [headers.map(h => q(h)), ...rows].map(r => r.join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv, ], { type: 'text/csv;charset=utf-8;' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
-    a.href = url; a.download = `affiliates-${new Date().toISOString().slice(0,10)}.csv`
-    a.click(); URL.revokeObjectURL(url)
+    a.href = url
+    a.download = `riazify-affiliates-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   // Filtered list
@@ -935,7 +1179,6 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
             { icon: Settings,  onClick: () => setShowSettings(true),   title: 'Commission Settings' },
             { icon: Download,  onClick: exportCSV,                     title: 'Export CSV'          },
             { icon: Link,      onClick: () => setShowLinkDialog(true), title: 'Generate Link'       },
-            { icon: RefreshCw, onClick: handleRefresh,                 title: 'Refresh'             },
           ].map((btn, i) => (
             <button key={i} onClick={btn.onClick} title={btn.title}
               className="w-9 h-9 flex items-center justify-center rounded-xl border transition-all hover:opacity-80"
@@ -943,6 +1186,22 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
               <btn.icon size={15} style={{ color: C.muted }} />
             </button>
           ))}
+
+          {/* Refresh button — with spin animation */}
+          <button onClick={handleRefresh} disabled={refreshing} title="Refresh"
+            className="w-9 h-9 flex items-center justify-center rounded-xl border transition-all hover:opacity-80"
+            style={{
+              borderColor:     refreshing ? C.lime      : C.border,
+              backgroundColor: refreshing ? C.limeTint  : C.surface,
+            }}>
+            <RefreshCw
+              size={15}
+              style={{
+                color:     refreshing ? C.limeDeep : C.muted,
+                animation: refreshing ? 'spin 0.8s linear infinite' : 'none',
+              }}
+            />
+          </button>
           <button onClick={() => setShowAddDialog(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
             style={{ backgroundColor: C.limeDeep, color: '#fff' }}>
@@ -1006,16 +1265,19 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                     <div className="flex-1 flex items-center gap-2 min-w-0">
                       <div className="h-5 rounded-lg shrink-0"
                            style={{
-                             width: `${pct}%`,
-                             maxWidth: 'calc(100% - 80px)',
+                             width:           chartMounted ? `${pct}%` : '0%',
+                             maxWidth:        'calc(100% - 80px)',
                              backgroundColor: barColor,
-                             minWidth: 4,
+                             minWidth:        chartMounted ? 4 : 0,
+                             transition:      `width 0.65s cubic-bezier(0.34,1.2,0.64,1) ${i * 90}ms`,
                            }} />
-                      {/* Smart revenue badge */}
+                      {/* Revenue badge — fades in after bar */}
                       <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg shrink-0"
                             style={{
                               backgroundColor: badgeBgs[i],
-                              color: badgeTexts[i],
+                              color:           badgeTexts[i],
+                              opacity:         chartMounted ? 1 : 0,
+                              transition:      `opacity 0.3s ease ${i * 90 + 400}ms`,
                             }}>
                         ${aff.mrr.toLocaleString()}
                       </span>
@@ -1216,7 +1478,7 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                       )
                       if (!wr && aff.payout === 0) return <span className="text-[11px]" style={{ color: C.muted }}>—</span>
                       if (wr?.status === 'pending') return (
-                        <button onClick={() => withdrawalRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                        <button onClick={() => setTableView('withdrawals')}
                           className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
                           style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>
                           <Clock size={10} /> ${wr.amount.toFixed(2)}
@@ -1399,6 +1661,22 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
         <AffiliateApplicationsPanel applications={applications} onClose={()=>setShowApplications(false)} onRefresh={load} />
       )}
 
+      {/* Add Affiliate Dialog */}
+      {showAddDialog && (
+        <AddAffiliateDialog
+          onClose={() => setShowAddDialog(false)}
+          onCreated={() => { setShowAddDialog(false); load() }}
+        />
+      )}
+
+      {/* Generate Link Dialog */}
+      {showLinkDialog && (
+        <GenerateLinkDialog
+          affiliates={affiliates}
+          onClose={() => setShowLinkDialog(false)}
+        />
+      )}
+
       {/* Confirm Pay Dialog */}
       {confirmPay && (
         <div className="fixed inset-0 z-[9998] flex items-center justify-center p-6" style={{ backgroundColor:'rgba(0,0,0,0.5)' }}
@@ -1461,6 +1739,22 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
               <button onClick={()=>removeAffiliate(confirmRemove)} className="flex-1 py-2.5 rounded-xl text-[13px] font-bold" style={{ backgroundColor:C.red,color:'#fff' }}>Remove</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
+             style={{
+               backgroundColor: toast.type === 'error' ? '#FEF2F2' : C.dark,
+               border:          `1px solid ${toast.type === 'error' ? '#FECACA' : C.lime}`,
+               color:           toast.type === 'error' ? C.red : C.lime,
+               animation:       'slideInUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+             }}>
+          {toast.type === 'error'
+            ? <X size={15} />
+            : <CheckCircle size={15} />}
+          <p className="text-[13px] font-bold">{toast.msg}</p>
         </div>
       )}
 

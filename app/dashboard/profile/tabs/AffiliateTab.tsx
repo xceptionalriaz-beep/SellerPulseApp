@@ -199,7 +199,6 @@ export default function AffiliateTab() {
   const [refreshing,      setRefreshing]      = useState(false)
   const [cancelDone,      setCancelDone]      = useState(false)
   const [confirmCancel,   setConfirmCancel]   = useState(false)
-  const [withdrawError,setWithdrawError]= useState('')
   const [copied,      setCopied]      = useState(false)
   const [couponCopied,  setCouponCopied]  = useState(false)
   const [calcSignups,   setCalcSignups]   = useState(10)
@@ -223,7 +222,7 @@ export default function AffiliateTab() {
           .eq('email', user.email)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
         if (appData) setApplication(appData)
         setNotAffiliate(true)
         setLoading(false)
@@ -237,18 +236,17 @@ export default function AffiliateTab() {
       if (aff.payment_details) setPayDetails(aff.payment_details)
 
       const [{ data: payData }, { data: wdData }] = await Promise.all([
-        (supabase.from('affiliate_payouts') as any).select('*').eq('affiliate_id', aff.id).order('created_at', { ascending: false }).limit(10),
-        (supabase.from('affiliate_withdrawal_requests') as any).select('*').eq('affiliate_id', aff.id).order('requested_at', { ascending: false }).limit(5),
+        (supabase.from('affiliate_payouts') as any).select('*').eq('affiliate_id', aff.id).order('created_at', { ascending: false }).limit(50),
+        (supabase.from('affiliate_withdrawal_requests') as any).select('*').eq('affiliate_id', aff.id).order('requested_at', { ascending: false }).limit(20),
       ])
       setPayoutHistory((payData ?? []) as PayoutHistory[])
       setWithdrawals((wdData ?? []) as WithdrawalRequest[])
     } catch (e) { console.error(e) }
     setLoading(false)
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     load()
-    return () => {}  // cleanup placeholder
   }, [load])
 
   function copyLink() {
@@ -280,7 +278,7 @@ export default function AffiliateTab() {
   async function savePayoutSettings() {
     if (!affiliate) return
     const validationError = validatePayDetails()
-    if (validationError) { setWithdrawError(validationError); return }
+    if (validationError) { setWithdrawPopupError(validationError); return }
     setSavingPay(true)
     try {
       await (supabase.from('affiliates') as any).update({
@@ -306,7 +304,7 @@ export default function AffiliateTab() {
       setTimeout(() => setCancelDone(false), 3000)
     } catch (e) {
       console.error(e)
-      setWithdrawError('Failed to cancel — please try again')
+      setWithdrawPopupError('Failed to cancel — please try again')
     } finally {
       setCancelling(false)
     }
@@ -462,9 +460,10 @@ export default function AffiliateTab() {
   const earnOnDisc      = settings?.earn_on_discounted ?? true
   const discPct         = affiliate.discount_percent ?? settings?.default_discount ?? 50
   const discMonths      = affiliate.discount_months  ?? settings?.default_discount_months ?? 1
-  const discountedPrice = 49 * (1 - discPct / 100)
-  const month1Earn      = earnOnDisc ? discountedPrice * commission : 49 * commission
-  const monthFullEarn   = 49 * commission
+  const planPrice       = calcPlan  // uses $49 or $99 from earnings calculator
+  const discountedPrice = planPrice * (1 - discPct / 100)
+  const month1Earn      = earnOnDisc ? discountedPrice * commission : planPrice * commission
+  const monthFullEarn   = planPrice * commission
   const minPayout    = settings?.min_payout ?? 50
   const commMonths   = settings?.commission_months ?? 12
   const totalPaid      = payoutHistory.reduce((s, p) => s + p.amount, 0)
@@ -1172,7 +1171,7 @@ export default function AffiliateTab() {
                 )}
               </div>
               {affiliate.payout >= minPayout && (
-                <button onClick={() => { setWithdrawAmount(affiliate.payout.toFixed(2)); setWithdrawStep(1); setWithdrawError(''); setShowWithdrawPopup(true) }}
+                <button onClick={() => { setWithdrawAmount(affiliate.payout.toFixed(2)); setWithdrawStep(1); setWithdrawPopupError(''); setShowWithdrawPopup(true) }}
                   className="flex items-center gap-2 px-5 py-3 rounded-xl text-[14px] font-bold transition-all hover:opacity-90"
                   style={{ backgroundColor: C.dark, color: C.lime }}>
                   Request Withdrawal <ArrowRight size={16} />
@@ -1181,11 +1180,11 @@ export default function AffiliateTab() {
             </div>
           )}
 
-          {withdrawError && !showWithdrawPopup && (
+          {withdrawPopupError && !showWithdrawPopup && (
             <div className="flex items-start gap-2 p-3 rounded-xl"
                  style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
               <AlertTriangle size={14} style={{ color: C.red, flexShrink: 0 }} />
-              <p className="text-[12px] font-bold" style={{ color: C.red }}>{withdrawError}</p>
+              <p className="text-[12px] font-bold" style={{ color: C.red }}>{withdrawPopupError}</p>
             </div>
           )}
 
@@ -1625,6 +1624,7 @@ export default function AffiliateTab() {
                             status:          'pending',
                             payment_method:  affiliate.payout_method,
                             payment_details: affiliate.payment_details,
+                            requested_at:    new Date().toISOString(),
                           }])
                           setShowWithdrawPopup(false)
                           setWithdrawStep(1)

@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 // app/dashboard/competitor-research/page.tsx
 // Converted 1:1 from lib/pages/competitor_research/competitor_research_main.dart
-
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import KillSwitchGate from '@/components/KillSwitchGate'
 import {
   Radar, BookmarkPlus, Eye, Store, Search,
   Info, Zap, ScanSearch, Key, Bookmark,
@@ -50,14 +50,12 @@ interface ScannedProduct {
   opportunityScore: number
   topKeywords:      string[]
 }
-
 interface GapProduct {
   title:             string
   reason:            string
   category:          string
   estimatedDemand:   number
 }
-
 interface StoreOverview {
   username:          string
   storeName:         string | null
@@ -69,7 +67,6 @@ interface StoreOverview {
   feedbackScore:     number
   feedbackPercent:   number
 }
-
 interface StoreScanResult {
   overview:    StoreOverview
   products:    ScannedProduct[]
@@ -100,20 +97,16 @@ function timeAgo(dt: Date): string {
   return `Scanned ${d}d ago`
 }
 
-// ── Sparkline — seeded random canvas (matches competitor_research_main.dart exactly)
+// ── Sparkline ─────────────────────────────────────────────────
 function Sparkline({ trend, itemId }: { trend: string; itemId: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return
     const ctx = canvas.getContext('2d'); if (!ctx) return
     const W = canvas.width, H = canvas.height
-
-    // Seeded random — matches Dart math.Random(itemId.hashCode)
     let seed = 0
     for (let i = 0; i < itemId.length; i++) seed = (seed * 31 + itemId.charCodeAt(i)) >>> 0
     function rand() { seed = (seed * 1664525 + 1013904223) >>> 0; return (seed >>> 0) / 4294967296 }
-
     const baseVelocity = trend === 'rising' ? 8.0 : trend === 'fading' ? 3.0 : 5.5
     const volatility   = 0.3 + rand() * 0.5
     const phaseShift   = Math.floor(rand() * 7)
@@ -122,10 +115,8 @@ function Sparkline({ trend, itemId }: { trend: string; itemId: string }) {
       : trend === 'fading'
       ? -(0.04 + rand() * 0.06)
       : (rand() - 0.5) * 0.04
-
     const rawY: number[] = []
     let minY = Infinity, maxY = -Infinity
-
     for (let day = 0; day < 14; day++) {
       const cycle = ((day + phaseShift) % 7 >= 5) ? 1.35 : 0.85
       const noise = 1.0 + ((rand() - 0.5) * volatility)
@@ -137,15 +128,11 @@ function Sparkline({ trend, itemId }: { trend: string; itemId: string }) {
       if (y > maxY) maxY = y
     }
     minY *= 0.5; maxY *= 1.15
-
     const points: {x:number;y:number}[] = rawY.map((v, i) => ({
       x: (i / 13) * W,
       y: Math.max(2, Math.min(H-2, H - ((v - minY) / (maxY - minY)) * H))
     }))
-
     ctx.clearRect(0, 0, W, H)
-
-    // Fill area below line
     ctx.beginPath()
     ctx.moveTo(points[0].x, H)
     points.forEach(p => ctx.lineTo(p.x, p.y))
@@ -153,8 +140,6 @@ function Sparkline({ trend, itemId }: { trend: string; itemId: string }) {
     ctx.closePath()
     ctx.fillStyle = 'rgba(143,255,0,0.08)'
     ctx.fill()
-
-    // Smooth bezier line
     ctx.beginPath()
     ctx.moveTo(points[0].x, points[0].y)
     for (let i = 1; i < points.length; i++) {
@@ -166,10 +151,8 @@ function Sparkline({ trend, itemId }: { trend: string; itemId: string }) {
     ctx.lineCap = 'round'
     ctx.stroke()
   }, [trend, itemId])
-
   const trendColor = trend === 'rising' ? '#5CB800' : trend === 'fading' ? '#DC2626' : '#D97706'
-  const trendLabel = trend === 'rising' ? '📈 Rising' : trend === 'fading' ? '📉 Fading' : '➡️ Stable'
-
+  const trendLabel = trend === 'rising' ? 'Rising' : trend === 'fading' ? 'Fading' : 'Stable'
   return (
     <div className="flex flex-col items-center gap-1">
       <canvas ref={canvasRef} width={75} height={32} />
@@ -178,7 +161,7 @@ function Sparkline({ trend, itemId }: { trend: string; itemId: string }) {
   )
 }
 
-// ── Gap card (matches Dart _GapCard) ──────────────────────────
+// ── Gap card ──────────────────────────────────────────────────
 function GapCard({ gap }: { gap: GapProduct }) {
   return (
     <div className="flex items-center gap-3 p-4 rounded-xl border mb-2.5"
@@ -204,7 +187,7 @@ function GapCard({ gap }: { gap: GapProduct }) {
   )
 }
 
-// ── Price calc sheet (matches Dart _PriceCalcSheet) ────────────
+// ── Price calc sheet ──────────────────────────────────────────
 function PriceCalcSheet({ product, onClose }: { product: ScannedProduct; onClose: () => void }) {
   const [cost,   setCost]   = useState('')
   const [sell,   setSell]   = useState<number|null>(null)
@@ -214,10 +197,10 @@ function PriceCalcSheet({ product, onClose }: { product: ScannedProduct; onClose
   function calc(val: string) {
     const c = parseFloat(val)
     if (isNaN(c)) { setSell(null); return }
-    const s  = product.price * 0.94
+    const s   = product.price * 0.94
     const fee = s * 0.1325 + 0.30
-    const p  = s - c - fee
-    const r  = c > 0 ? p / c * 100 : 0
+    const p   = s - c - fee
+    const r   = c > 0 ? p / c * 100 : 0
     setSell(s); setProfit(p); setRoi(r)
   }
 
@@ -240,9 +223,9 @@ function PriceCalcSheet({ product, onClose }: { product: ScannedProduct; onClose
           <>
             <div className="grid grid-cols-3 gap-2 mb-2">
               {[
-                { label: 'Sell price',  value: `$${sell!.toFixed(2)}`,    color: C.accent   },
-                { label: 'Net profit',  value: `$${profit!.toFixed(2)}`,   color: profit! >= 0 ? C.success : C.error },
-                { label: 'ROI',         value: `${roi!.toFixed(1)}%`,       color: roi! >= 20 ? C.success : roi! >= 0 ? C.warning : C.error },
+                { label: 'Sell price', value: `$${sell!.toFixed(2)}`,  color: C.accent },
+                { label: 'Net profit', value: `$${profit!.toFixed(2)}`, color: profit! >= 0 ? C.success : C.error },
+                { label: 'ROI',        value: `${roi!.toFixed(1)}%`,    color: roi! >= 20 ? C.success : roi! >= 0 ? C.warning : C.error },
               ].map((c, i) => (
                 <div key={i} className="p-3 rounded-xl border"
                      style={{ backgroundColor: c.color + '14', borderColor: c.color + '33' }}>
@@ -261,14 +244,13 @@ function PriceCalcSheet({ product, onClose }: { product: ScannedProduct; onClose
   )
 }
 
-// ── Product row (matches Dart _ProductRow) ────────────────────
+// ── Product row ───────────────────────────────────────────────
 function ProductRow({ product, isSaved, onSave, onCopyTitle, onCalculatePrice }: {
   product: ScannedProduct; isSaved: boolean
   onSave: () => void; onCopyTitle: () => void; onCalculatePrice: () => void
 }) {
   const [hover,    setHover]    = useState(false)
   const [expanded, setExpanded] = useState(false)
-
   const scoreColor = product.opportunityScore >= 8 ? C.accent
     : product.opportunityScore >= 6 ? C.blue
     : product.opportunityScore >= 4 ? C.warning : C.error
@@ -277,29 +259,19 @@ function ProductRow({ product, isSaved, onSave, onCopyTitle, onCalculatePrice }:
     <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
          style={{ backgroundColor: hover ? C.bg : C.white, borderBottom: `1px solid ${C.border}` }}>
       <div className="flex items-center gap-2.5 px-4 py-2.5">
-
-        {/* Checkbox */}
         <div className="w-9 shrink-0">
           <div onClick={onSave}
                className="rounded border-2 flex items-center justify-center cursor-pointer"
-               style={{
-                 width: 18, height: 18,
-                 backgroundColor: isSaved ? C.accent : C.white,
-                 borderColor:     isSaved ? C.accent : C.border,
-               }}>
+               style={{ width: 18, height: 18, backgroundColor: isSaved ? C.accent : C.white, borderColor: isSaved ? C.accent : C.border }}>
             {isSaved && <CheckCircle size={10} color="white" />}
           </div>
         </div>
-
-        {/* Image */}
         <div className="w-14 h-14 rounded-lg border shrink-0 overflow-hidden flex items-center justify-center"
              style={{ backgroundColor: C.bg, borderColor: C.border }}>
           {product.imageUrl
             ? <img src={product.imageUrl} className="w-full h-full object-cover" />
             : <Package size={18} style={{ color: C.textHint }} />}
         </div>
-
-        {/* Title + badges */}
         <div className="flex-[5] min-w-0">
           <p className="text-[12px] font-medium leading-snug line-clamp-2 mb-1" style={{ color: C.textPri }}>
             {product.title}
@@ -314,46 +286,30 @@ function ProductRow({ product, isSaved, onSave, onCopyTitle, onCalculatePrice }:
             )}
           </div>
         </div>
-
-        {/* Sparkline */}
         <div className="flex-[2] flex justify-center">
           <Sparkline trend={product.trend} itemId={product.itemId} />
         </div>
-
-        {/* Sold */}
         <div className="flex-[2] text-center">
           <p className="text-[13px] font-bold" style={{ color: C.textPri }}>{product.soldCount}</p>
           <p className="text-[9px]" style={{ color: C.textHint }}>sold</p>
         </div>
-
-        {/* Watch */}
         <div className="flex-[1] flex items-center justify-center gap-1">
           <Eye size={11} style={{ color: C.textHint }} />
           <span className="text-[11px] font-semibold" style={{ color: C.textSec }}>{product.watchCount}</span>
         </div>
-
-        {/* Price */}
         <div className="flex-[2] text-center">
-          <span className="text-[13px] font-bold" style={{ color: C.textPri }}>
-            ${product.price.toFixed(2)}
-          </span>
+          <span className="text-[13px] font-bold" style={{ color: C.textPri }}>${product.price.toFixed(2)}</span>
         </div>
-
-        {/* AI Score */}
         <div className="flex-[1] flex justify-center">
           <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center"
                style={{ backgroundColor: scoreColor + '1A', borderColor: scoreColor }}>
-            <span className="text-[12px] font-bold" style={{ color: scoreColor }}>
-              {product.opportunityScore}
-            </span>
+            <span className="text-[12px] font-bold" style={{ color: scoreColor }}>{product.opportunityScore}</span>
           </div>
         </div>
-
-        {/* Actions */}
         <div className="flex-[3] flex items-center justify-center gap-1">
           {[
-            { icon: Calculator, tip: 'Price calc',  fn: onCalculatePrice },
-            { icon: Copy,       tip: 'Copy title',  fn: onCopyTitle      },
+            { icon: Calculator, tip: 'Price calc', fn: onCalculatePrice },
+            { icon: Copy,       tip: 'Copy title', fn: onCopyTitle      },
             { icon: expanded ? ChevronUp : ChevronDown, tip: 'Keywords', fn: () => setExpanded(s => !s) },
           ].map((a, i) => {
             const Icon = a.icon
@@ -377,8 +333,6 @@ function ProductRow({ product, isSaved, onSave, onCopyTitle, onCalculatePrice }:
           </button>
         </div>
       </div>
-
-      {/* Expanded keywords */}
       {expanded && (
         <div className="flex flex-wrap gap-1.5 px-4 pb-2.5" style={{ paddingLeft: 122 }}>
           {product.topKeywords.map((kw, i) => (
@@ -391,35 +345,31 @@ function ProductRow({ product, isSaved, onSave, onCopyTitle, onCalculatePrice }:
   )
 }
 
-// ── Price Analysis Tab
+// ── Price Analysis Tab ────────────────────────────────────────
 function PriceTab({ products }: { products: ScannedProduct[] }) {
   if (!products.length) return (
     <p className="text-center py-10 text-[14px]" style={{ color: C.textSec }}>No price data</p>
   )
-
   const prices = [...products].map(p => p.price).sort((a,b) => a-b)
   const avg    = prices.reduce((a,b) => a+b, 0) / prices.length
   const min    = prices[0]
   const max    = prices[prices.length-1]
-
-  const buckets: { label: string; count: number }[] = [
-    { label: '$0–25',    count: prices.filter(p => p < 25).length },
-    { label: '$25–50',   count: prices.filter(p => p >= 25  && p < 50).length },
-    { label: '$50–100',  count: prices.filter(p => p >= 50  && p < 100).length },
-    { label: '$100–200', count: prices.filter(p => p >= 100 && p < 200).length },
+  const buckets = [
+    { label: '$0-25',    count: prices.filter(p => p < 25).length },
+    { label: '$25-50',   count: prices.filter(p => p >= 25  && p < 50).length },
+    { label: '$50-100',  count: prices.filter(p => p >= 50  && p < 100).length },
+    { label: '$100-200', count: prices.filter(p => p >= 100 && p < 200).length },
     { label: '$200+',    count: prices.filter(p => p >= 200).length },
   ]
   const maxCount = Math.max(...buckets.map(b => b.count), 1)
 
   return (
     <div className="p-6 flex flex-col gap-5">
-
-      {/* Min / Avg / Max cards */}
       <div className="flex gap-4">
         {[
-          { label: 'Min Price', value: `$${min.toFixed(2)}`,  color: C.success },
-          { label: 'Avg Price', value: `$${avg.toFixed(2)}`,  color: C.accent  },
-          { label: 'Max Price', value: `$${max.toFixed(2)}`,  color: C.error   },
+          { label: 'Min Price', value: `$${min.toFixed(2)}`, color: C.success },
+          { label: 'Avg Price', value: `$${avg.toFixed(2)}`, color: C.accent  },
+          { label: 'Max Price', value: `$${max.toFixed(2)}`, color: C.error   },
         ].map((s, i) => (
           <div key={i} className="flex-1 p-4 rounded-xl border"
                style={{ backgroundColor: C.white, borderColor: C.border }}>
@@ -428,46 +378,37 @@ function PriceTab({ products }: { products: ScannedProduct[] }) {
           </div>
         ))}
       </div>
-
-      {/* Bar chart */}
       <div className="p-5 rounded-xl border" style={{ backgroundColor: C.white, borderColor: C.border }}>
         <p className="text-[15px] font-bold mb-1" style={{ color: C.textPri }}>Price Distribution</p>
         <p className="text-[12px] mb-5" style={{ color: C.textSec }}>How many products fall into each price range</p>
-
         <div className="flex items-end gap-3" style={{ height: 180 }}>
           {buckets.map((b, i) => {
-            const pct = b.count / maxCount
+            const pct  = b.count / maxCount
             const barH = Math.round(pct * 140)
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                {/* Count label */}
                 <span className="text-[12px] font-bold" style={{ color: b.count > 0 ? C.accent : 'transparent' }}>
                   {b.count}
                 </span>
-                {/* Bar container */}
                 <div className="w-full flex flex-col justify-end rounded-lg"
                      style={{ height: 140, backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
                   {b.count > 0 && (
-                    <div className="w-full rounded-lg"
-                         style={{ height: Math.max(barH, 8), backgroundColor: C.accent }} />
+                    <div className="w-full rounded-lg" style={{ height: Math.max(barH, 8), backgroundColor: C.accent }} />
                   )}
                 </div>
-                {/* Label */}
                 <span className="text-[10px] font-medium text-center" style={{ color: C.textSec }}>{b.label}</span>
               </div>
             )
           })}
         </div>
       </div>
-
-      {/* Sweet spot tip */}
       <div className="flex items-start gap-3 p-4 rounded-xl border"
            style={{ backgroundColor: C.accentDim, borderColor: `${C.accent}4D` }}>
         <Zap size={16} style={{ color: C.accent, flexShrink: 0, marginTop: 1 }} />
         <p className="text-[13px] leading-relaxed" style={{ color: C.textSec }}>
           Sweet spot for entry:{' '}
           <span className="font-bold" style={{ color: C.accent }}>
-            ${(avg * 0.85).toFixed(0)} – ${(avg * 1.15).toFixed(0)}
+            ${(avg * 0.85).toFixed(0)} - ${(avg * 1.15).toFixed(0)}
           </span>
           . Slightly undercuts the average while staying competitive.
         </p>
@@ -476,38 +417,36 @@ function PriceTab({ products }: { products: ScannedProduct[] }) {
   )
 }
 
-
 // ══════════════════════════════════════════════
 // MAIN PAGE
 // ══════════════════════════════════════════════
 export default function CompetitorResearchPage() {
   const supabase = createClient()
 
-  // States — matches Dart 'idle' | 'scanning' | 'results'
-  const [pageState,       setPageState]       = useState<'idle'|'scanning'|'results'>('idle')
-  const [searchVal,       setSearchVal]        = useState('')
-  const [isFocused,       setIsFocused]        = useState(false)
-  const [errorMsg,        setErrorMsg]         = useState<string|null>(null)
-  const [scanStage,       setScanStage]        = useState(0)
-  const [result,          setResult]           = useState<StoreScanResult|null>(null)
-  const [history,         setHistory]          = useState<any[]>([])
-  const [historyLoading,  setHistoryLoading]   = useState(true)
-  const [activeTab,       setActiveTab]        = useState(0)
-  const [sortBy,          setSortBy]           = useState('opportunity')
-  const [filterTrend,     setFilterTrend]      = useState('all')
-  const [searchProd,      setSearchProd]       = useState('')
-  const [savedIds,        setSavedIds]         = useState<Set<string>>(new Set())
-  const [onWatchlist,     setOnWatchlist]      = useState(false)
-  const [calcProduct,     setCalcProduct]      = useState<ScannedProduct|null>(null)
+  const [pageState,      setPageState]      = useState<'idle'|'scanning'|'results'>('idle')
+  const [searchVal,      setSearchVal]      = useState('')
+  const [isFocused,      setIsFocused]      = useState(false)
+  const [errorMsg,       setErrorMsg]       = useState<string|null>(null)
+  const [scanStage,      setScanStage]      = useState(0)
+  const [result,         setResult]         = useState<StoreScanResult|null>(null)
+  const [history,        setHistory]        = useState<any[]>([])
+  const [historyLoading, setHistoryLoading] = useState(true)
+  const [activeTab,      setActiveTab]      = useState(0)
+  const [sortBy,         setSortBy]         = useState('opportunity')
+  const [filterTrend,    setFilterTrend]    = useState('all')
+  const [searchProd,     setSearchProd]     = useState('')
+  const [savedIds,       setSavedIds]       = useState<Set<string>>(new Set())
+  const [onWatchlist,    setOnWatchlist]    = useState(false)
+  const [calcProduct,    setCalcProduct]    = useState<ScannedProduct|null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const STAGES = [
-    '🔍  Connecting to eBay...',
-    '📦  Fetching store listings...',
-    '📊  Analysing products...',
-    '🧠  Running AI scoring...',
-    '🎯  Finding gaps...',
-    '💾  Saving results...',
+    'Connecting to eBay...',
+    'Fetching store listings...',
+    'Analysing products...',
+    'Running AI scoring...',
+    'Finding gaps...',
+    'Saving results...',
   ]
 
   useEffect(() => { loadHistory() }, [])
@@ -515,7 +454,7 @@ export default function CompetitorResearchPage() {
   async function loadHistory() {
     setHistoryLoading(true)
     try {
-      const { data } = await supabase.from('competitor_scan_history' as any)
+      const { data } = await (supabase.from('competitor_scan_history') as any)
         .select('*').order('scanned_at', { ascending: false }).limit(20)
       setHistory((data ?? []) as any[])
     } catch {}
@@ -529,14 +468,12 @@ export default function CompetitorResearchPage() {
     inputRef.current?.blur()
     setPageState('scanning'); setErrorMsg(null); setScanStage(0); setResult(null)
 
-    // Animate stages — matches Dart 600ms per stage
     for (let i = 0; i < STAGES.length; i++) {
       await new Promise(r => setTimeout(r, 600))
       setScanStage(i)
     }
 
     try {
-      // Try real edge function, fall back to rich mock data if not deployed yet
       let scanData: StoreScanResult | null = null
       try {
         const res = await supabase.functions.invoke('ebay-scan', { body: { username: name } })
@@ -545,24 +482,23 @@ export default function CompetitorResearchPage() {
           scanData = {
             scannedAt: new Date(),
             overview: {
-              username: d.overview.username ?? name,
-              storeName: d.overview.storeName ?? `${name}'s eBay Store`,
+              username:         d.overview.username ?? name,
+              storeName:        d.overview.storeName ?? `${name}'s eBay Store`,
               estimatedRevenue: d.overview.estimatedRevenue ?? 0,
-              totalSold: d.overview.totalSold ?? 0,
-              activeListings: d.overview.activeListings ?? 0,
-              avgPrice: d.overview.avgPrice ?? 0,
-              sellThroughRate: d.overview.sellThroughRate ?? 0,
-              feedbackScore: d.overview.feedbackScore ?? 0,
-              feedbackPercent: d.overview.feedbackPercent ?? 0,
+              totalSold:        d.overview.totalSold ?? 0,
+              activeListings:   d.overview.activeListings ?? 0,
+              avgPrice:         d.overview.avgPrice ?? 0,
+              sellThroughRate:  d.overview.sellThroughRate ?? 0,
+              feedbackScore:    d.overview.feedbackScore ?? 0,
+              feedbackPercent:  d.overview.feedbackPercent ?? 0,
             },
-            products: d.products ?? [],
-            gaps: d.gaps ?? [],
+            products:    d.products ?? [],
+            gaps:        d.gaps ?? [],
             topKeywords: d.topKeywords ?? [],
           }
         }
       } catch {}
 
-      // Rich mock data — always shows until edge function is deployed
       const mockResult: StoreScanResult = scanData ?? {
         scannedAt: new Date(),
         overview: {
@@ -594,13 +530,12 @@ export default function CompetitorResearchPage() {
         topKeywords: ['wireless', 'noise canceling', 'bluetooth', 'apple', 'sony', 'earbuds', 'headphones', 'premium', 'usb-c', 'true wireless', 'anc', 'over-ear', 'in-ear', 'portable'],
       }
 
-      // Save to history
       try {
         await (supabase.from('competitor_scan_history') as any).upsert({
-          username:           name,
-          estimated_revenue:  mockResult.overview.estimatedRevenue,
-          total_sold:         mockResult.overview.totalSold,
-          scanned_at:         new Date().toISOString(),
+          username:          name,
+          estimated_revenue: mockResult.overview.estimatedRevenue,
+          total_sold:        mockResult.overview.totalSold,
+          scanned_at:        new Date().toISOString(),
         }, { onConflict: 'username' })
       } catch {}
 
@@ -638,11 +573,8 @@ export default function CompetitorResearchPage() {
     }
   }
 
-  function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text)
-  }
+  function copyToClipboard(text: string) { navigator.clipboard.writeText(text) }
 
-  // ── Products tab filtered/sorted list ──────────────────────
   function getFilteredProducts(): ScannedProduct[] {
     let list = [...(result?.products ?? [])]
     if (searchProd) list = list.filter(p => p.title.toLowerCase().includes(searchProd.toLowerCase()))
@@ -656,7 +588,6 @@ export default function CompetitorResearchPage() {
     return list
   }
 
-  // ── Inline tab chip ──────────────────────────────────────────
   function InlineTab({ value, label, current, onTap }: { value: string; label: string; current: string; onTap: (v: string) => void }) {
     const active = current === value
     return (
@@ -674,182 +605,168 @@ export default function CompetitorResearchPage() {
     )
   }
 
-  // ══════════════════════════════════════════════════════════
-  // IDLE VIEW
-  // ══════════════════════════════════════════════════════════
+  // ── IDLE VIEW ─────────────────────────────────────────────────
   if (pageState === 'idle') return (
-    <div className="flex flex-col h-full overflow-y-auto" style={{ backgroundColor: C.bg }}>
-      <div className="px-8 pt-10 pb-6">
-
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: C.accentDim }}>
-              <Radar size={21} style={{ color: C.accent }} />
+    <KillSwitchGate switchTitle="Competitor Research">
+      <div className="flex flex-col h-full overflow-y-auto" style={{ backgroundColor: C.bg }}>
+        <div className="px-8 pt-10 pb-6">
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: C.accentDim }}>
+                <Radar size={21} style={{ color: C.accent }} />
+              </div>
+              <div>
+                <h1 className="text-[22px] font-bold tracking-tight" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
+                  Competitor Research
+                </h1>
+                <p className="text-[13px]" style={{ color: C.textSec }}>
+                  Scan any eBay store. Find winning products instantly.
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-[22px] font-bold tracking-tight" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
-                Competitor Research
-              </h1>
-              <p className="text-[13px]" style={{ color: C.textSec }}>
-                Scan any eBay store. Find winning products instantly.
-              </p>
+            <div className="flex items-center gap-2">
+              <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[12px] font-medium"
+                      style={{ backgroundColor: C.white, borderColor: C.border, color: C.textSec }}>
+                <BookmarkPlus size={13} /> Listing Ideas
+              </button>
+              <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[12px] font-medium"
+                      style={{ backgroundColor: C.white, borderColor: C.border, color: C.textSec }}>
+                <Eye size={13} /> Watchlist
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[12px] font-medium"
-                    style={{ backgroundColor: C.white, borderColor: C.border, color: C.textSec }}>
-              <BookmarkPlus size={13} /> Listing Ideas
-            </button>
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[12px] font-medium"
-                    style={{ backgroundColor: C.white, borderColor: C.border, color: C.textSec }}>
-              <Eye size={13} /> Watchlist
-            </button>
+
+          <div className="mb-2.5">
+            <div className="flex items-center h-14 rounded-xl border transition-all"
+                 style={{
+                   backgroundColor: C.white,
+                   borderColor: errorMsg ? C.error : isFocused ? C.accent : C.border,
+                   borderWidth: isFocused ? 1.5 : 1,
+                   boxShadow: isFocused ? `0 0 0 3px rgba(92,184,0,0.12)` : 'none',
+                 }}>
+              <div className="pl-4 pr-3 shrink-0">
+                <Store size={17} style={{ color: isFocused ? C.accent : C.textSec }} />
+              </div>
+              <input ref={inputRef} value={searchVal}
+                onChange={e => { setSearchVal(e.target.value); setErrorMsg(null) }}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                onKeyDown={e => e.key === 'Enter' && startScan()}
+                placeholder="Enter eBay username (e.g. techdealsusa)"
+                className="flex-1 text-[14px] font-medium outline-none bg-transparent"
+                style={{ color: C.textPri }} />
+              <button onClick={() => startScan()}
+                className="flex items-center gap-1.5 m-1.5 px-4 py-2.5 rounded-lg text-[13px] font-bold"
+                style={{ backgroundColor: C.accent, color: '#000' }}>
+                <Radar size={14} /> Scan Store
+              </button>
+            </div>
+            {errorMsg && (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <Info size={11} style={{ color: C.error }} />
+                <p className="text-[12px]" style={{ color: C.error }}>{errorMsg}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 mb-8">
+            <Info size={11} style={{ color: C.textHint }} />
+            <p className="text-[11px]" style={{ color: C.textHint }}>
+              Enter an eBay username (e.g. "techdealsusa") — not a store URL
+            </p>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2.5 mb-9">
+            {[
+              { icon: Zap,        label: 'AI Score',      sub: 'Products scored 1-10' },
+              { icon: ScanSearch, label: 'Gap Finder',    sub: 'Auto-detect'           },
+              { icon: Key,        label: 'Keywords',      sub: 'From titles'           },
+              { icon: Bookmark,   label: 'Listing Ideas', sub: 'One-tap save'          },
+            ].map((f, i) => {
+              const Icon = f.icon
+              return (
+                <div key={i} className="flex items-center gap-2.5 p-3.5 rounded-xl border"
+                     style={{ backgroundColor: C.white, borderColor: C.border }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                       style={{ backgroundColor: C.accentDim }}>
+                    <Icon size={15} style={{ color: C.accent }} />
+                  </div>
+                  <div>
+                    <p className="text-[12px]" style={{ color: C.textSec }}>{f.label}</p>
+                    <p className="text-[13px] font-semibold" style={{ color: C.textPri }}>{f.sub}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[16px] font-semibold" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
+              Recent Scans
+            </p>
+            {history.length > 0 && (
+              <button onClick={loadHistory} className="text-[12px]" style={{ color: C.textSec }}>Refresh</button>
+            )}
           </div>
         </div>
 
-        {/* Search bar */}
-        <div className="mb-2.5">
-          <div className="flex items-center h-14 rounded-xl border transition-all"
-               style={{
-                 backgroundColor: C.white,
-                 borderColor: errorMsg ? C.error : isFocused ? C.accent : C.border,
-                 borderWidth: isFocused ? 1.5 : 1,
-                 boxShadow: isFocused ? `0 0 0 3px rgba(92,184,0,0.12)` : 'none',
-               }}>
-            <div className="pl-4 pr-3 shrink-0">
-              <Store size={17} style={{ color: isFocused ? C.accent : C.textSec }} />
+        {historyLoading ? (
+          <div className="flex justify-center py-10">
+            <div className="w-6 h-6 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.accent }} />
+          </div>
+        ) : history.length === 0 ? (
+          <div className="mx-8 mb-10 p-9 rounded-2xl border flex flex-col items-center"
+               style={{ backgroundColor: C.white, borderColor: C.border }}>
+            <div className="w-13 h-13 rounded-full flex items-center justify-center mb-3.5"
+                 style={{ width: 52, height: 52, backgroundColor: C.accentDim }}>
+              <Radar size={23} style={{ color: C.accent }} />
             </div>
-            <input ref={inputRef} value={searchVal}
-              onChange={e => { setSearchVal(e.target.value); setErrorMsg(null) }}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              onKeyDown={e => e.key === 'Enter' && startScan()}
-              placeholder="Enter eBay username (e.g. techdealsusa)"
-              className="flex-1 text-[14px] font-medium outline-none bg-transparent"
-              style={{ color: C.textPri }} />
-            <button onClick={() => startScan()}
-              className="flex items-center gap-1.5 m-1.5 px-4 py-2.5 rounded-lg text-[13px] font-bold"
-              style={{ backgroundColor: C.accent, color: '#000' }}>
-              <Radar size={14} /> Scan Store
+            <p className="text-[15px] font-semibold mb-1.5" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
+              No scans yet
+            </p>
+            <p className="text-[13px] text-center mb-4 leading-relaxed" style={{ color: C.textSec }}>
+              Scan your first competitor store above to find winning products instantly.
+            </p>
+            <button onClick={() => inputRef.current?.focus()}
+              className="px-4 py-2 rounded-lg border text-[13px] font-semibold"
+              style={{ backgroundColor: C.accentDim, borderColor: `${C.accent}66`, color: C.accent }}>
+              Start your first scan
             </button>
           </div>
-          {errorMsg && (
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <Info size={11} style={{ color: C.error }} />
-              <p className="text-[12px]" style={{ color: C.error }}>{errorMsg}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Hint */}
-        <div className="flex items-center gap-1.5 mb-8">
-          <Info size={11} style={{ color: C.textHint }} />
-          <p className="text-[11px]" style={{ color: C.textHint }}>
-            Enter an eBay username (e.g. "techdealsusa") — not a store URL
-          </p>
-        </div>
-
-        {/* Feature strip */}
-        <div className="grid grid-cols-4 gap-2.5 mb-9">
-          {[
-            { icon: Zap,        label: 'AI Score',      sub: 'Products scored 1–10'  },
-            { icon: ScanSearch, label: 'Gap Finder',    sub: 'Auto-detect'           },
-            { icon: Key,        label: 'Keywords',      sub: 'From titles'           },
-            { icon: Bookmark,   label: 'Listing Ideas', sub: 'One-tap save'          },
-          ].map((f, i) => {
-            const Icon = f.icon
-            return (
-              <div key={i} className="flex items-center gap-2.5 p-3.5 rounded-xl border"
-                   style={{ backgroundColor: C.white, borderColor: C.border }}>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        ) : (
+          <div className="px-8 pb-10 flex flex-col gap-2">
+            {history.map((scan, i) => (
+              <button key={i} onClick={() => startScan(scan.username)}
+                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left hover:opacity-80 transition-all"
+                style={{ backgroundColor: C.white, borderColor: C.border }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                      style={{ backgroundColor: C.accentDim }}>
-                  <Icon size={15} style={{ color: C.accent }} />
+                  <span className="text-[16px] font-extrabold" style={{ color: C.accent }}>
+                    {scan.username?.[0]?.toUpperCase() ?? '?'}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-[12px]" style={{ color: C.textSec }}>{f.label}</p>
-                  <p className="text-[13px] font-semibold" style={{ color: C.textPri }}>{f.sub}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-semibold" style={{ color: C.textPri }}>{scan.username}</p>
+                  <p className="text-[11px]" style={{ color: C.textSec }}>
+                    {scan.scanned_at ? timeAgo(new Date(scan.scanned_at)) : 'Recently'}
+                  </p>
                 </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* History header */}
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[16px] font-semibold" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
-            Recent Scans
-          </p>
-          {history.length > 0 && (
-            <button onClick={loadHistory} className="text-[12px]" style={{ color: C.textSec }}>
-              Refresh
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* History list */}
-      {historyLoading ? (
-        <div className="flex justify-center py-10">
-          <div className="w-6 h-6 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.accent }} />
-        </div>
-      ) : history.length === 0 ? (
-        <div className="mx-8 mb-10 p-9 rounded-2xl border flex flex-col items-center"
-             style={{ backgroundColor: C.white, borderColor: C.border }}>
-          <div className="w-13 h-13 rounded-full flex items-center justify-center mb-3.5"
-               style={{ width: 52, height: 52, backgroundColor: C.accentDim }}>
-            <Radar size={23} style={{ color: C.accent }} />
+                <div className="text-right">
+                  <p className="text-[14px] font-bold" style={{ color: C.accent }}>${fmt(scan.estimated_revenue ?? 0)}</p>
+                  <p className="text-[11px]" style={{ color: C.textSec }}>{scan.total_sold ?? 0} sold</p>
+                </div>
+                <Radar size={13} style={{ color: C.textHint }} />
+              </button>
+            ))}
           </div>
-          <p className="text-[15px] font-semibold mb-1.5" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
-            No scans yet
-          </p>
-          <p className="text-[13px] text-center mb-4 leading-relaxed" style={{ color: C.textSec }}>
-            Scan your first competitor store above<br />to find winning products instantly.
-          </p>
-          <button onClick={() => inputRef.current?.focus()}
-            className="px-4 py-2 rounded-lg border text-[13px] font-semibold"
-            style={{ backgroundColor: C.accentDim, borderColor: `${C.accent}66`, color: C.accent }}>
-            Start your first scan →
-          </button>
-        </div>
-      ) : (
-        <div className="px-8 pb-10 flex flex-col gap-2">
-          {history.map((scan, i) => (
-            <button key={i} onClick={() => startScan(scan.username)}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left hover:opacity-80 transition-all"
-              style={{ backgroundColor: C.white, borderColor: C.border }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                   style={{ backgroundColor: C.accentDim }}>
-                <span className="text-[16px] font-extrabold" style={{ color: C.accent }}>
-                  {scan.username?.[0]?.toUpperCase() ?? '?'}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-semibold" style={{ color: C.textPri }}>{scan.username}</p>
-                <p className="text-[11px]" style={{ color: C.textSec }}>
-                  {scan.scanned_at ? timeAgo(new Date(scan.scanned_at)) : 'Recently'}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-[14px] font-bold" style={{ color: C.accent }}>
-                  ${fmt(scan.estimated_revenue ?? 0)}
-                </p>
-                <p className="text-[11px]" style={{ color: C.textSec }}>{scan.total_sold ?? 0} sold</p>
-              </div>
-              <Radar size={13} style={{ color: C.textHint }} />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </KillSwitchGate>
   )
 
-  // ══════════════════════════════════════════════════════════
-  // SCANNING VIEW
-  // ══════════════════════════════════════════════════════════
+  // ── SCANNING VIEW ─────────────────────────────────────────────
   if (pageState === 'scanning') return (
     <div className="flex flex-col items-center justify-center h-full" style={{ backgroundColor: C.bg }}>
-      {/* Pulsing radar */}
       <div className="w-19 h-19 rounded-full flex items-center justify-center mb-6 animate-pulse"
            style={{ width: 76, height: 76, backgroundColor: C.accentDim, boxShadow: `0 0 28px 6px rgba(92,184,0,0.25)` }}>
         <Radar size={34} style={{ color: C.accent }} />
@@ -858,8 +775,6 @@ export default function CompetitorResearchPage() {
         Scanning "{searchVal}"
       </p>
       <p className="text-[13px] mb-7" style={{ color: C.textSec }}>{STAGES[scanStage]}</p>
-
-      {/* Progress bar */}
       <div className="w-64 h-1 rounded-full overflow-hidden mb-2.5" style={{ backgroundColor: C.border }}>
         <div className="h-full rounded-full transition-all duration-500"
              style={{ width: `${((scanStage + 1) / STAGES.length) * 100}%`, backgroundColor: C.accent }} />
@@ -867,22 +782,17 @@ export default function CompetitorResearchPage() {
       <p className="text-[12px] font-semibold mb-8" style={{ color: C.accent }}>
         {Math.round(((scanStage + 1) / STAGES.length) * 100)}%
       </p>
-      <button onClick={() => setPageState('idle')} className="text-[13px]" style={{ color: C.textSec }}>
-        Cancel
-      </button>
+      <button onClick={() => setPageState('idle')} className="text-[13px]" style={{ color: C.textSec }}>Cancel</button>
     </div>
   )
 
-  // ══════════════════════════════════════════════════════════
-  // RESULTS VIEW
-  // ══════════════════════════════════════════════════════════
+  // ── RESULTS VIEW ──────────────────────────────────────────────
   if (pageState === 'results' && result) {
     const o        = result.overview
     const products = getFilteredProducts()
 
     return (
       <div className="flex flex-col h-full" style={{ backgroundColor: C.bg }}>
-
         {/* Top bar */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b"
              style={{ backgroundColor: C.white, borderColor: C.border }}>
@@ -891,19 +801,14 @@ export default function CompetitorResearchPage() {
             style={{ backgroundColor: C.bg, borderColor: C.border }}>
             <ArrowLeft size={14} style={{ color: C.textSec }} />
           </button>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-               style={{ backgroundColor: C.accentDim }}>
-            <span className="text-[16px] font-extrabold" style={{ color: C.accent }}>
-              {o.username[0]?.toUpperCase()}
-            </span>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: C.accentDim }}>
+            <span className="text-[16px] font-extrabold" style={{ color: C.accent }}>{o.username[0]?.toUpperCase()}</span>
           </div>
           <div>
             <p className="text-[14px] font-bold" style={{ color: C.textPri, fontFamily: 'var(--font-space-grotesk)' }}>
               {o.storeName ?? o.username}
             </p>
-            <p className="text-[11px]" style={{ color: C.textSec }}>
-              eBay • {o.feedbackPercent.toFixed(1)}% feedback
-            </p>
+            <p className="text-[11px]" style={{ color: C.textSec }}>eBay - {o.feedbackPercent.toFixed(1)}% feedback</p>
           </div>
           <div className="flex-1" />
           <p className="text-[11px]" style={{ color: C.textHint }}>{timeAgo(result.scannedAt)}</p>
@@ -924,17 +829,17 @@ export default function CompetitorResearchPage() {
           </button>
         </div>
 
-        {/* Metrics strip — flex-1 so all 7 cards stretch full width */}
+        {/* Metrics strip */}
         <div className="flex gap-2 px-4 pb-3 pt-2 border-b w-full"
              style={{ backgroundColor: C.white, borderColor: C.border }}>
           {[
-            { label: 'Est. Revenue',        value: `$${fmt(o.estimatedRevenue)}`,       icon: DollarSign, color: C.accent   },
-            { label: 'Total Sold',          value: fmtInt(o.totalSold),                 icon: ShoppingBag,color: C.success  },
-            { label: 'Active Listings',     value: fmtInt(o.activeListings),            icon: List,       color: C.blue     },
-            { label: 'Avg Price',           value: `$${o.avgPrice.toFixed(2)}`,         icon: DollarSign, color: C.purple   },
-            { label: 'Sell-Through',        value: `${o.sellThroughRate.toFixed(1)}%`,  icon: TrendingUp, color: C.warning  },
-            { label: 'Feedback',            value: String(o.feedbackScore),             icon: Star,       color: C.orange   },
-            { label: 'Successful Listings', value: `${Math.round(result.products.filter(p => p.soldCount > 0).length / result.products.length * 100)}%`, icon: CheckCircle, color: C.success },
+            { label: 'Est. Revenue',    value: `$${fmt(o.estimatedRevenue)}`,       icon: DollarSign, color: C.accent   },
+            { label: 'Total Sold',      value: fmtInt(o.totalSold),                 icon: ShoppingBag,color: C.success  },
+            { label: 'Active Listings', value: fmtInt(o.activeListings),            icon: List,       color: C.blue     },
+            { label: 'Avg Price',       value: `$${o.avgPrice.toFixed(2)}`,         icon: DollarSign, color: C.purple   },
+            { label: 'Sell-Through',    value: `${o.sellThroughRate.toFixed(1)}%`,  icon: TrendingUp, color: C.warning  },
+            { label: 'Feedback',        value: String(o.feedbackScore),             icon: Star,       color: C.orange   },
+            { label: 'Success Rate',    value: `${Math.round(result.products.filter(p => p.soldCount > 0).length / result.products.length * 100)}%`, icon: CheckCircle, color: C.success },
           ].map((m, i) => {
             const Icon = m.icon
             return (
@@ -950,22 +855,19 @@ export default function CompetitorResearchPage() {
           })}
         </div>
 
-        {/* Tabs — flex-1 per tab so they stretch full width */}
+        {/* Tabs */}
         <div className="flex w-full border-b" style={{ backgroundColor: C.white, borderColor: C.border }}>
           {[
-            { label: `Products (${result.products.length})`,  icon: Package    },
-            { label: `Gap Finder (${result.gaps.length})`,    icon: ScanSearch },
-            { label: 'Keywords',                               icon: Key        },
-            { label: 'Price Analysis',                         icon: BarChart2  },
+            { label: `Products (${result.products.length})`, icon: Package    },
+            { label: `Gap Finder (${result.gaps.length})`,   icon: ScanSearch },
+            { label: 'Keywords',                              icon: Key        },
+            { label: 'Price Analysis',                        icon: BarChart2  },
           ].map((tab, i) => {
             const Icon = tab.icon; const active = activeTab === i
             return (
               <button key={i} onClick={() => setActiveTab(i)}
                 className="flex flex-1 items-center justify-center gap-1.5 py-3 text-[13px] font-semibold border-b-2 transition-all"
-                style={{
-                  borderBottomColor: active ? C.accent : 'transparent',
-                  color:             active ? C.accent : C.textSec,
-                }}>
+                style={{ borderBottomColor: active ? C.accent : 'transparent', color: active ? C.accent : C.textSec }}>
                 <Icon size={13} /> {tab.label}
               </button>
             )
@@ -974,11 +876,8 @@ export default function CompetitorResearchPage() {
 
         {/* Tab content */}
         <div className="flex-1 overflow-y-auto">
-
-          {/* Products tab */}
           {activeTab === 0 && (
             <div className="flex flex-col h-full">
-              {/* Filter bar — w-full */}
               <div className="px-4 py-2.5 border-b w-full" style={{ backgroundColor: C.white, borderColor: C.border }}>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex-1 flex items-center gap-2 h-9 px-2.5 rounded-lg border"
@@ -992,17 +891,16 @@ export default function CompetitorResearchPage() {
                 </div>
                 <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
                   <span className="text-[9px] font-bold tracking-[0.8px] shrink-0" style={{ color: C.textHint }}>SORT</span>
-                  {[['opportunity','⚡ AI Score'],['revenue','$ Revenue'],['sold','📦 Sold'],['price','💲 Price']].map(([v,l]) => (
+                  {[['opportunity','AI Score'],['revenue','Revenue'],['sold','Sold'],['price','Price']].map(([v,l]) => (
                     <InlineTab key={v} value={v} label={l} current={sortBy} onTap={setSortBy} />
                   ))}
                   <div className="h-5 w-px mx-1 shrink-0" style={{ backgroundColor: C.border }} />
                   <span className="text-[9px] font-bold tracking-[0.8px] shrink-0" style={{ color: C.textHint }}>TREND</span>
-                  {[['all','All'],['rising','📈 Rising'],['stable','➡️ Stable'],['fading','📉 Fading']].map(([v,l]) => (
+                  {[['all','All'],['rising','Rising'],['stable','Stable'],['fading','Fading']].map(([v,l]) => (
                     <InlineTab key={v} value={v} label={l} current={filterTrend} onTap={setFilterTrend} />
                   ))}
                 </div>
               </div>
-              {/* Table header */}
               <div className="flex items-center gap-2.5 px-4 py-2 border-b" style={{ backgroundColor: C.bg, borderColor: C.border }}>
                 <div className="w-9 shrink-0" />
                 <div className="w-14 shrink-0" />
@@ -1014,7 +912,6 @@ export default function CompetitorResearchPage() {
                 <div className="flex-[1] text-center"><p className="text-[9px] font-bold tracking-[0.7px]" style={{ color: C.textHint }}>SCORE</p></div>
                 <div className="flex-[3] text-center"><p className="text-[9px] font-bold tracking-[0.7px]" style={{ color: C.textHint }}>ACTIONS</p></div>
               </div>
-              {/* Rows */}
               <div className="overflow-y-auto">
                 {products.length === 0 ? (
                   <p className="text-center py-10 text-[14px]" style={{ color: C.textSec }}>No products match</p>
@@ -1023,7 +920,7 @@ export default function CompetitorResearchPage() {
                     isSaved={savedIds.has(p.itemId)}
                     onSave={() => toggleSave(p)}
                     onCopyTitle={() => {
-                      const kws = p.topKeywords.slice(0,4).join(' ')
+                      const kws  = p.topKeywords.slice(0,4).join(' ')
                       const full = `${p.title} ${kws}`.trim()
                       copyToClipboard(full.length > 80 ? full.slice(0,80) : full)
                     }}
@@ -1034,7 +931,6 @@ export default function CompetitorResearchPage() {
             </div>
           )}
 
-          {/* Gap tab */}
           {activeTab === 1 && (
             <div className="p-4">
               {result.gaps.length === 0 ? (
@@ -1047,7 +943,6 @@ export default function CompetitorResearchPage() {
             </div>
           )}
 
-          {/* Keywords tab */}
           {activeTab === 2 && (
             <div className="p-4">
               <div className="flex items-center gap-3 mb-5">
@@ -1064,15 +959,13 @@ export default function CompetitorResearchPage() {
                   <Copy size={12} /> Copy all
                 </button>
               </div>
-              {/* Keyword chips — opacity gradient matching Dart store_results_screen.dart */}
               <div className="flex flex-wrap gap-2.5 mb-6">
                 {result.topKeywords.map((kw, rank) => {
-                  const total   = result.topKeywords.length
-                  const opacity = Math.max(0.1, Math.min(1, 1 - rank * 0.035))
-                  const fontSize = rank < 3 ? 15 : rank < 8 ? 13 : 12
+                  const total      = result.topKeywords.length
+                  const opacity    = Math.max(0.1, Math.min(1, 1 - rank * 0.035))
+                  const fontSize   = rank < 3 ? 15 : rank < 8 ? 13 : 12
                   const fontWeight = rank < 5 ? 600 : 500
-                  // lerp accentDim → surface based on rank (matches Dart Color.lerp)
-                  const t = rank / total
+                  const t          = rank / total
                   return (
                     <button key={rank} onClick={() => copyToClipboard(kw)}
                       title={`Copy "${kw}"`}
@@ -1089,7 +982,7 @@ export default function CompetitorResearchPage() {
                   )
                 })}
               </div>
-              <div className="flex items-start gap-3.5 p-4.5 rounded-xl border"
+              <div className="flex items-start gap-3 p-4 rounded-xl border"
                    style={{ backgroundColor: C.accentDim, borderColor: `${C.accent}33`, padding: 18 }}>
                 <Zap size={19} style={{ color: C.accent, flexShrink: 0, marginTop: 1 }} />
                 <p className="text-[13px] leading-relaxed" style={{ color: C.textSec }}>
@@ -1100,9 +993,7 @@ export default function CompetitorResearchPage() {
             </div>
           )}
 
-          {/* Price tab */}
           {activeTab === 3 && <PriceTab products={result.products} />}
-
         </div>
 
         {/* Price calc sheet */}
