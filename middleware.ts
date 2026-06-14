@@ -1,5 +1,4 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -9,7 +8,7 @@ export async function middleware(request: NextRequest) {
 
   // ── Blocked IP enforcement ─────────────────────────────────
   // Runs FIRST — before auth checks — blocked IPs get 403 immediately
-  // Uses service role to query blocked_ips table directly
+  // Uses Supabase REST API directly (Edge-compatible, no Node.js SDK)
   const clientIp =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
@@ -17,26 +16,25 @@ export async function middleware(request: NextRequest) {
 
   if (clientIp) {
     try {
-      const adminClient = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        { auth: { autoRefreshToken: false, persistSession: false } }
-      )
-      const { data: blocked } = await adminClient
-        .from('blocked_ips')
-        .select('id, reason')
-        .eq('ip_address', clientIp)
-        .maybeSingle()
-
-      if (blocked) {
-        return NextResponse.json(
-          {
-            error:   'Access denied',
-            message: 'Your IP address has been blocked from accessing this service.',
-            code:    403,
-          },
-          { status: 403 }
-        )
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/blocked_ips?ip_address=eq.${encodeURIComponent(clientIp)}&select=id,reason&limit=1`
+      const res = await fetch(url, {
+        headers: {
+          'apikey':        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data) && data.length > 0) {
+          return NextResponse.json(
+            {
+              error:   'Access denied',
+              message: 'Your IP address has been blocked from accessing this service.',
+              code:    403,
+            },
+            { status: 403 }
+          )
+        }
       }
     } catch {
       // Non-critical — if blocked_ips check fails, allow request through
@@ -71,7 +69,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // ── Affiliate ref tracking ─────────────────────────────────
-  // Reads ?ref=CODE from URL → saves to cookie (Last Click Wins)
   const refCode = request.nextUrl.searchParams.get('ref')?.trim().toUpperCase()
 
   const isDashboardRoute = pathname.startsWith('/dashboard') ||
@@ -94,7 +91,6 @@ export async function middleware(request: NextRequest) {
     redirectUrl.searchParams.set('redirectedFrom', pathname)
     const redirectResponse = NextResponse.redirect(redirectUrl)
 
-    // Set affiliate cookie even on auth redirects
     if (refCode) {
       redirectResponse.cookies.set('riazify_ref', refCode, {
         maxAge: 60 * 60 * 24 * 30, path: '/', sameSite: 'lax',
@@ -111,7 +107,6 @@ export async function middleware(request: NextRequest) {
     redirectUrl.pathname = '/dashboard'
     const redirectResponse = NextResponse.redirect(redirectUrl)
 
-    // Set affiliate cookie even on auth redirects
     if (refCode) {
       redirectResponse.cookies.set('riazify_ref', refCode, {
         maxAge: 60 * 60 * 24 * 30, path: '/', sameSite: 'lax',
@@ -123,13 +118,10 @@ export async function middleware(request: NextRequest) {
     return redirectResponse
   }
 
-  // Set affiliate cookies on normal response
   if (refCode) {
-    // 30-day cookie — persists for signup attribution (Last Click Wins)
     response.cookies.set('riazify_ref', refCode, {
       maxAge: 60 * 60 * 24 * 30, path: '/', sameSite: 'lax',
     })
-    // 10-min cookie — signals a new click to AffiliateTracker component
     response.cookies.set('riazify_click', refCode, {
       maxAge: 60 * 10, path: '/', sameSite: 'lax',
     })
