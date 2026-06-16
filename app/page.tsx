@@ -8,6 +8,7 @@ import {
   Activity, AlertTriangle, Target, Package, Search,
   DollarSign, ShoppingBag, Users, Eye, Cpu, Plus, Minus
 } from 'lucide-react'
+import Pricing from '@/components/landing/Pricing'
 
 // ── Brand tokens ───────────────────────────────────────────────
 const T = {
@@ -371,7 +372,7 @@ function AntiLossBanner() {
           <span className="text-[11px] font-black tracking-wider" style={{ color: T.limeDeep }}>DEAD STOCK PREVENTION ENGINE</span>
         </div>
         <h2 className="text-[36px] lg:text-[48px] font-black leading-tight mb-6" style={{ color: T.limeDeep }}>
-          Riazify is currently under development..<br/><span style={{ color: T.carbon }}>Some features may be incomplete.</span>
+          Know Before You Buy.<br/><span style={{ color: T.carbon }}>Not After You're Stuck.</span>
         </h2>
         <p className="text-[17px] leading-relaxed max-w-2xl mx-auto mb-12" style={{ color: T.sage }}>
           Before you deploy capital, Riazify cross-references{' '}
@@ -762,64 +763,6 @@ function FAQ() {
                   <p className="text-[14px] leading-relaxed" style={{ color: T.sage }}>{faq.a}</p>
                 </div>
               )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ── Pricing ────────────────────────────────────────────────────
-function Pricing() {
-  const router = useRouter()
-  const plans = [
-    { name: 'Free',     price: '$0',  period: 'forever',  desc: 'Perfect for testing Riazify.',          features: ['5 niche scans/day','Basic trend chart','Saturation meter','Profit calculator','Email alerts'],                                                            cta: 'Start Free',       highlight: false },
-    { name: 'Pro',      price: '$29', period: '/month',   desc: 'For serious eBay scaling operators.',   features: ['Unlimited niche scans','AI forecast projections','MAP compliance tracker','Competitor X-Ray','Title Builder Pro','CSV exports','Priority support'],        cta: 'Start Pro Free →', highlight: true  },
-    { name: 'Business', price: '$79', period: '/month',   desc: 'For agencies and multi-account sellers.',features: ['Everything in Pro','5 user seats','API access','Custom webhooks','Dedicated success manager','White-label reports','SLA guarantee'],                     cta: 'Contact Sales',    highlight: false },
-  ]
-  return (
-    <section id="pricing" className="py-24" style={{ background: T.surface }}>
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-[36px] lg:text-[48px] font-black mb-4" style={{ color: T.limeDeep }}>
-            Simple Pricing.<br/><span style={{ color: T.carbon }}>No Surprises.</span>
-          </h2>
-          <p className="text-[17px]" style={{ color: T.sage }}>Cancel anytime. No lock-in. No fine print.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan, i) => (
-            <div key={i} className="rounded-3xl border p-8 flex flex-col gap-6 relative overflow-hidden"
-                 style={{ background: plan.highlight ? T.carbon : T.white, borderColor: plan.highlight ? T.lime : T.border,
-                          boxShadow: plan.highlight ? '0 20px 60px rgba(143,255,0,0.15)' : 'none' }}>
-              {plan.highlight && (
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-black"
-                     style={{ background: T.lime, color: T.black }}>MOST POPULAR</div>
-              )}
-              <div>
-                <p className="text-[13px] font-bold mb-2" style={{ color: plan.highlight ? T.lime : T.sage }}>{plan.name}</p>
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-[42px] font-black" style={{ color: plan.highlight ? T.white : T.limeDeep }}>{plan.price}</span>
-                  <span className="text-[14px]" style={{ color: T.sage }}>{plan.period}</span>
-                </div>
-                <p className="text-[13px]" style={{ color: plan.highlight ? '#94a3b8' : T.sage }}>{plan.desc}</p>
-              </div>
-              <div className="flex flex-col gap-3 flex-1">
-                {plan.features.map((f, j) => (
-                  <div key={j} className="flex items-center gap-2.5">
-                    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: T.limeTint }}>
-                      <Check size={10} style={{ color: T.limeDeep }} />
-                    </div>
-                    <span className="text-[13px]" style={{ color: plan.highlight ? '#cbd5e1' : T.sage }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-              <button onClick={() => router.push('/auth/signup')}
-                className="w-full py-3.5 rounded-xl font-black text-[14px] transition-all hover:scale-105"
-                style={{ background: plan.highlight ? T.lime : T.limeTint, color: plan.highlight ? T.black : T.limeDeep,
-                         border: plan.highlight ? 'none' : `1px solid ${T.accentBorder}` }}>
-                {plan.cta}
-              </button>
             </div>
           ))}
         </div>
