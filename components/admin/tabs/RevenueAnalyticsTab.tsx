@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/RevenueAnalyticsTab.tsx
 // Full rebuild — Option 2 design with real Supabase data
 
@@ -31,9 +31,9 @@ const C = {
 }
 
 const PLAN_COLORS: Record<string, string> = {
-  'Free Trial': C.blue,
-  'Pro Plan':   C.lime,
-  'Elite Plan': C.orange,
+  'Free': C.blue,
+  'Starter':   C.lime,
+  'Growth': C.orange,
   'trial':      C.blue,
   'active':     C.lime,
   'cancelled':  C.red,
@@ -332,9 +332,9 @@ export default function RevenueAnalyticsTab({
 
       // ── Plan distribution — from subscriptions (more accurate) ──
       const PLAN_DEFS = [
-        { name: 'Free Trial', color: '#111c0a', amount: 0  },
-        { name: 'Pro Plan',   color: '#8fff00', amount: 49 },
-        { name: 'Elite Plan', color: '#6bcc00', amount: 99 },
+        { name: 'Free', color: '#111c0a', amount: 0  },
+        { name: 'Starter',   color: '#8fff00', amount: 49 },
+        { name: 'Growth', color: '#6bcc00', amount: 99 },
       ]
       const planMap: Record<string, { count: number; revenue: number; color: string }> = {}
       // Init all plans so 0% ones still show
@@ -342,7 +342,7 @@ export default function RevenueAnalyticsTab({
         planMap[def.name] = { count: 0, revenue: 0, color: def.color }
       }
       for (const s of allSubs) {
-        const key = s.plan_name ?? 'Free Trial'
+        const key = s.plan_name ?? 'Free'
         if (!planMap[key]) planMap[key] = { count: 0, revenue: 0, color: C.purple }
         planMap[key].count   += 1
         planMap[key].revenue += Number(s.amount) ?? 0

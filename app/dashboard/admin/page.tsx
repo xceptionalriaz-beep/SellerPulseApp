@@ -336,7 +336,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
   const [name,         setName]         = useState('')
   const [email,        setEmail]        = useState('')
   const [gender,       setGender]       = useState('Unspecified')
-  const [plan,         setPlan]         = useState('Free Trial')
+  const [plan,         setPlan]         = useState('Free')
   const [role,         setRole]         = useState('user')
   const [sendWelcome,  setSendWelcome]  = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -526,9 +526,9 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
                 <CustomDropdown
                   value={plan}
                   options={[
-                    { value: 'Free Trial', label: 'Free Trial' },
-                    { value: 'Pro Plan',   label: 'Pro Plan'   },
-                    { value: 'Elite Plan', label: 'Elite Plan' },
+                    { value: 'Free', label: 'Free' },
+                    { value: 'Starter',   label: 'Starter'   },
+                    { value: 'Growth', label: 'Growth' },
                   ]}
                   onChange={setPlan}
                 />

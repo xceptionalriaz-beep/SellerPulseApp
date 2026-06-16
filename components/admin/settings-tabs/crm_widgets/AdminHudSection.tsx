@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/crm_widgets/AdminHudSection.tsx
 // Converted 1:1 from lib/pages/admin_settings_tabs/crm_widgets/admin_hud_section.dart
 
@@ -68,13 +68,13 @@ export default function AdminHudSection({ allUsers }: Props) {
   const totalUsers = allUsers.length
 
   // Active subscribers
-  const activeSubs = allUsers.filter(u => clean(u.account_status) === 'active' && clean(u.plan_name) !== 'free trial').length
+  const activeSubs = allUsers.filter(u => clean(u.account_status) === 'active' && clean(u.plan_name) !== 'Free').length
   const activeRatio = safeRatio(activeSubs, totalUsers)
 
   // Plan distribution
-  const freeCount  = allUsers.filter(u => clean(u.plan_name) === 'free trial').length
-  const proCount   = allUsers.filter(u => clean(u.plan_name) === 'pro plan').length
-  const eliteCount = allUsers.filter(u => clean(u.plan_name) === 'elite plan').length
+  const freeCount  = allUsers.filter(u => clean(u.plan_name) === 'Free').length
+  const proCount   = allUsers.filter(u => clean(u.plan_name) === 'Starter').length
+  const eliteCount = allUsers.filter(u => clean(u.plan_name) === 'Growth').length
 
   // Account health
   const pastDue    = allUsers.filter(u => clean(u.account_status) === 'past due')
@@ -85,8 +85,8 @@ export default function AdminHudSection({ allUsers }: Props) {
   let revenueAtRisk = 0
   for (const u of [...pastDue, ...expired]) {
     const p = clean(u.plan_name)
-    if (p === 'pro plan')   revenueAtRisk += 49
-    if (p === 'elite plan') revenueAtRisk += 99
+    if (p === 'Starter')   revenueAtRisk += 49
+    if (p === 'Growth') revenueAtRisk += 99
   }
   const healthSubtitle = riskTotal > 0 ? `$${revenueAtRisk.toFixed(0)} MRR at risk` : 'All accounts healthy'
   const riskColor = riskTotal > 0 ? '#FB923C' : '#16A34A'

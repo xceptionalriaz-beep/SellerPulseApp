@@ -1,9 +1,8 @@
 // app/api/admin/plan-limits/update/route.ts
-// ──────────────────────────────────────────────────────────────
-// Updates plan limits — admin only
-// Validates all numeric and boolean fields
-// Writes to admin_logs on every change
-// ──────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// Updates plan limits for a specific plan
+// Admin only — logs every change to admin_logs
+// ══════════════════════════════════════════════════════════════
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -20,85 +19,79 @@ export async function POST(req: NextRequest) {
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data: { user: caller } } = await adminClient.auth.getUser(token)
-    if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { user } } = await adminClient.auth.getUser(token)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: profile } = await adminClient
-      .from('profiles').select('role, name').eq('id', caller.id).single()
+      .from('profiles').select('role, name').eq('id', user.id).single()
     if ((profile as any)?.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── Parse body ─────────────────────────────────────────────
-    const {
-      id,
-      max_monthly_searches, max_vero_checks,
-      max_tracked_items,    max_orders_protected,
-      max_ebay_stores,
-      has_advanced_analytics, has_bulk_export,
-      has_title_builder,      has_competitor_research,
-      has_api_access,         has_priority_support,
-      price_monthly,          price_annual,
-    } = await req.json()
+    const body = await req.json()
+    const { id, ...updates } = body
 
-    if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
-
-    // ── Validate numeric fields ────────────────────────────────
-    const numericFields = {
-      max_monthly_searches, max_vero_checks,
-      max_tracked_items, max_orders_protected, max_ebay_stores,
-    }
-    for (const [key, val] of Object.entries(numericFields)) {
-      if (val !== undefined) {
-        const n = Number(val)
-        if (isNaN(n)) return NextResponse.json({ error: `${key} must be a number` }, { status: 400 })
-        if (n < -1)   return NextResponse.json({ error: `${key} must be -1 (unlimited) or a positive number` }, { status: 400 })
-      }
-    }
+    if (!id) return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 })
 
     // ── Fetch existing plan for audit log ──────────────────────
     const { data: existing } = await (adminClient.from('plan_limits') as any)
-      .select('tier, display_name').eq('id', id).single()
+      .select('*').eq('id', id).single()
 
-    // ── Update plan_limits ─────────────────────────────────────
+    if (!existing) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
+
+    // ── Validate numeric fields ────────────────────────────────
+    const numericFields = [
+      'max_monthly_searches', 'max_vero_checks', 'max_tracked_items',
+      'max_orders_protected', 'max_ebay_stores', 'max_competitor_scans',
+      'max_title_generations', 'max_profit_calcs', 'max_team_seats',
+      'max_message_templates', 'price_monthly', 'price_annual',
+    ]
+
+    for (const field of numericFields) {
+      if (updates[field] !== undefined) {
+        const val = Number(updates[field])
+        if (isNaN(val)) {
+          return NextResponse.json({ error: `${field} must be a number` }, { status: 400 })
+        }
+        if (field.startsWith('max_') && val < -1) {
+          return NextResponse.json({ error: `${field} must be -1 (unlimited) or a positive number` }, { status: 400 })
+        }
+        if (field.startsWith('price_') && val < 0) {
+          return NextResponse.json({ error: `${field} cannot be negative` }, { status: 400 })
+        }
+        updates[field] = val
+      }
+    }
+
+    // ── Update plan ────────────────────────────────────────────
     const { data: updated, error: updateErr } = await (adminClient.from('plan_limits') as any)
-      .update({
-        max_monthly_searches,
-        max_vero_checks,
-        max_tracked_items,
-        max_orders_protected,
-        max_ebay_stores,
-        has_advanced_analytics,
-        has_bulk_export,
-        has_title_builder,
-        has_competitor_research,
-        has_api_access,
-        has_priority_support,
-        price_monthly,
-        price_annual,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single()
 
-    if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 500 })
-    }
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
-    // ── Log to admin_logs ──────────────────────────────────────
+    // ── Audit log ──────────────────────────────────────────────
     try {
+      // Build diff — only log what changed
+      const changes: Record<string, { from: any; to: any }> = {}
+      for (const key of Object.keys(updates)) {
+        if ((existing as any)[key] !== updates[key]) {
+          changes[key] = { from: (existing as any)[key], to: updates[key] }
+        }
+      }
+
       await (adminClient.from('admin_logs') as any).insert({
-        admin_id:   caller.id,
+        admin_id:   user.id,
         action:     'update_plan_limits',
-        details:    `Updated plan limits for ${(existing as any)?.display_name ?? (existing as any)?.tier ?? id}`,
+        details:    `Updated plan limits: ${(existing as any).display_name ?? (existing as any).tier}`,
         metadata:   {
-          admin_name:  (profile as any)?.name ?? 'Admin',
-          plan_id:     id,
-          plan_name:   (existing as any)?.display_name ?? (existing as any)?.tier,
-          changes:     { max_monthly_searches, max_vero_checks, max_tracked_items, max_orders_protected, max_ebay_stores, has_advanced_analytics, has_bulk_export, has_api_access, has_priority_support, price_monthly, price_annual },
+          admin_name: (profile as any)?.name ?? 'Admin',
+          plan_id:    (existing as any).plan_id,
+          plan_name:  (existing as any).display_name ?? (existing as any).tier,
+          changes,
         },
-        ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
         created_at: new Date().toISOString(),
       })
     } catch { /* non-critical */ }

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/settings/TeamTab.tsx
 // ─────────────────────────────────────────────────────────────
 // Team management tab in user Settings page
@@ -60,9 +60,10 @@ const ROLES = [
 
 // ── Plan limits ───────────────────────────────────────────────
 const PLAN_LIMITS: Record<string, number> = {
-  'free trial': 0,
-  'pro plan':   3,
-  'elite plan': 10,
+  'free': 1,
+  'starter': 2,
+  'growth': 5,
+  'custom': -1,
 }
 
 function roleCfg(role: string) {
@@ -217,7 +218,7 @@ export default function TeamTab() {
   }
 
   // ── Plan info ─────────────────────────────────────────────
-  const plan      = ((profile?.plan_name ?? 'free trial') as string).toLowerCase()
+  const plan      = ((profile?.plan_name ?? 'Free') as string).toLowerCase()
   const limit     = PLAN_LIMITS[plan] ?? 0
   const used      = members.length
   const remaining = Math.max(0, limit - used)

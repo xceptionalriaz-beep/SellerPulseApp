@@ -1,4 +1,4 @@
-// app/api/team/invite/route.ts
+﻿// app/api/team/invite/route.ts
 // ─────────────────────────────────────────────────────────────
 // Owner sends an invite email to a team member
 // Checks plan limits before allowing invite
@@ -13,9 +13,10 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 
 // Max team members per plan
 const PLAN_LIMITS: Record<string, number> = {
-  'free trial': 0,
-  'pro plan':   3,
-  'elite plan': 10,
+  'free': 1,
+  'starter': 2,
+  'growth': 5,
+  'custom': -1,
 }
 
 export async function POST(req: NextRequest) {
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     const { data: owner } = await supabase
       .from('profiles').select('*').eq('id', caller.id).single()
 
-    const plan      = ((owner as any)?.plan_name ?? 'free trial').toLowerCase()
+    const plan      = ((owner as any)?.plan_name ?? 'Free').toLowerCase()
     const limit     = PLAN_LIMITS[plan] ?? 0
 
     if (limit === 0) {

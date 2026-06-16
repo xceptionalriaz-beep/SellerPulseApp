@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/AffiliateTab.tsx
 // User-facing affiliate dashboard — 3 tabs: Earnings · Referrals · Payments
 
@@ -460,7 +460,7 @@ export default function AffiliateTab() {
   const earnOnDisc      = settings?.earn_on_discounted ?? true
   const discPct         = affiliate.discount_percent ?? settings?.default_discount ?? 50
   const discMonths      = affiliate.discount_months  ?? settings?.default_discount_months ?? 1
-  const planPrice       = calcPlan  // uses $49 or $99 from earnings calculator
+  const planPrice       = calcPlan  // uses $19, $49 or $149 from earnings calculator
   const discountedPrice = planPrice * (1 - discPct / 100)
   const month1Earn      = earnOnDisc ? discountedPrice * commission : planPrice * commission
   const monthFullEarn   = planPrice * commission
@@ -978,7 +978,7 @@ export default function AffiliateTab() {
             <div className="flex flex-col gap-3">
               {[
                 { step: '1', text: `Someone clicks your link → cookie saved for ${settings?.cookie_days ?? 30} days`,                icon: MousePointer },
-                { step: '2', text: `They sign up and pay for a plan ($49 or $99/mo)`,                    icon: Users        },
+                { step: '2', text: `They sign up and pay for a plan ($19, $49 or $149/mo)`,                    icon: Users        },
                 { step: '3', text: `You earn ${(commission * 100).toFixed(0)}% of every payment they make`,   icon: DollarSign   },
                 { step: '4', text: `This continues for up to ${commMonths} months per user`,             icon: TrendingUp   },
               ].map((s, i) => (

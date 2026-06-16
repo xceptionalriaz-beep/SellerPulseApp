@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/UserCrmTab.tsx
 // Complete production User CRM — security fixed, N+1 eliminated, full UI overhaul
 
@@ -101,7 +101,7 @@ function timeAgo(iso: string) {
   if (m < 1) return 'Just now'; if (m < 60) return `${m}m ago`
   if (m < 1440) return `${Math.floor(m/60)}h ago`; return `${Math.floor(m/1440)}d ago`
 }
-function planOf(u: any)   { return u.subscriptions?.[0]?.plan_name ?? u.plan_name ?? 'Free Trial' }
+function planOf(u: any)   { return u.subscriptions?.[0]?.plan_name ?? u.plan_name ?? 'Free' }
 function statusOf(u: any): string {
   const as   = (u.account_status ?? '').trim().toLowerCase()
   // Suspension takes highest priority
@@ -756,9 +756,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
         {/* Filters */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <ChipRow label="PLAN" field="plans" options={[
-            { value:'Free Trial', label:'Free Trial' },
-            { value:'Pro Plan',   label:'Pro'        },
-            { value:'Elite Plan', label:'Elite'      },
+            { value:'Free', label:'Free' },
+            { value:'Starter',   label:'Pro'        },
+            { value:'Growth', label:'Elite'      },
           ]} />
           <ChipRow label="STATUS" field="statuses" options={[
             { value:'Active',    label:'Active'    },
@@ -945,7 +945,7 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
           </div>
           <div className="text-right">
             {isOwner && (() => {
-              const plan  = ((user.plan_name ?? 'free trial') as string).toLowerCase()
+              const plan  = ((user.plan_name ?? 'Free') as string).toLowerCase()
               const limit = plan.includes('elite') ? 10 : plan.includes('pro') ? 3 : 0
               const used  = teamMembers.length
               return limit > 0 ? (
@@ -1878,7 +1878,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
                 <div className="fixed inset-0 z-40" onClick={() => setShowPlanMenu(false)} />
                 <div className="absolute bottom-full mb-2 left-0 z-50 rounded-xl border overflow-hidden shadow-xl"
                      style={{ backgroundColor: '#1a2410', borderColor: 'rgba(143,255,0,0.2)', minWidth: 160 }}>
-                  {['Free Trial','Pro Plan','Elite Plan'].map(p => (
+                  {['Free','Starter','Growth'].map(p => (
                     <button key={p} onClick={() => bulkChangePlan(p)}
                       className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-white/10"
                       style={{ color: '#fff' }}>
@@ -2305,7 +2305,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
   const supabase = createClient()
   const [name,        setName]        = useState('')
   const [email,       setEmail]       = useState('')
-  const [plan,        setPlan]        = useState('Free Trial')
+  const [plan,        setPlan]        = useState('Free')
   const [role,        setRole]        = useState('user')
   const [sendWelcome, setSendWelcome] = useState(true)
   const [submitting,  setSubmitting]  = useState(false)
@@ -2406,7 +2406,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
                 <select value={plan} onChange={e => setPlan(e.target.value)}
                   className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                   style={{ borderColor:C.border, backgroundColor:C.bg, color:C.text }}>
-                  {['Free Trial','Pro Plan','Elite Plan'].map(p => <option key={p} value={p}>{p}</option>)}
+                  {['Free','Starter','Growth'].map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
@@ -3007,7 +3007,7 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
     setLoading(false)
   }
 
-  const plans = ['Free Trial','Pro Plan','Elite Plan'].filter(p => p !== plan)
+  const plans = ['Free','Starter','Growth'].filter(p => p !== plan)
 
   return (
     <div className="flex items-center justify-end gap-1.5 relative">

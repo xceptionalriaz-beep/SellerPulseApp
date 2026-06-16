@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/crm_widgets/UserDetailDrawer.tsx
 // Converted 1:1 from lib/pages/admin_settings_tabs/crm_widgets/user_detail_drawer.dart
 
@@ -162,7 +162,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
   const [stores,        setStores]        = useState<any[]>([])
   const [devices,       setDevices]       = useState<any[]>([])
   const [history,       setHistory]       = useState<any[]>([])
-  const [currentPlan,   setCurrentPlan]   = useState(safeStr(user.plan_name,       'Free Trial'))
+  const [currentPlan,   setCurrentPlan]   = useState(safeStr(user.plan_name,       'Free'))
   const [currentStatus, setCurrentStatus] = useState(safeStr(user.account_status,  'Active'))
   const [showDelete,    setShowDelete]    = useState(false)
 
@@ -297,7 +297,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
             {/* Plan + Status dropdowns */}
             <div className="flex items-center gap-2">
               <BadgeDropdown value={currentPlan} bgColor="#F1F5F9" textColor={C.dark}
-                options={[{value:'Free Trial'},{value:'Pro Plan'},{value:'Elite Plan'}]}
+                options={[{value:'Free'},{value:'Starter'},{value:'Growth'}]}
                 onSelect={changePlan} />
               <BadgeDropdown value={currentStatus} bgColor={statusBg} textColor={statusColor}
                 options={[{value:'Active',label:'Set to Active'},{value:'Past Due',label:'Set to Past Due'},{value:'Expired',label:'Set to Expired'}]}

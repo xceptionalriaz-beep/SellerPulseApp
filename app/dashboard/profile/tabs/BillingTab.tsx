@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/BillingTab.tsx
 // Converted from: lib/user_profile/tabs/billing_tab.dart
 //
@@ -29,9 +29,9 @@ export default function BillingTab() {
   }
 
   const invoices = [
-    { date: 'May 01, 2026', amount: '$29.99', status: 'Paid' },
-    { date: 'Apr 01, 2026', amount: '$29.99', status: 'Paid' },
-    { date: 'Mar 01, 2026', amount: '$29.99', status: 'Paid' },
+    { date: 'May 01, 2026', amount: '$19.00', status: 'Paid' },
+    { date: 'Apr 01, 2026', amount: '$19.00', status: 'Paid' },
+    { date: 'Mar 01, 2026', amount: '$19.00', status: 'Paid' },
   ]
 
   return (
@@ -62,7 +62,7 @@ export default function BillingTab() {
           </div>
           <span className="text-[22px] font-bold text-[#0F172A]"
                 style={{ fontFamily: 'var(--font-space-grotesk)' }}>
-            $29.99 / mo
+            $19.00 / mo
           </span>
         </div>
 

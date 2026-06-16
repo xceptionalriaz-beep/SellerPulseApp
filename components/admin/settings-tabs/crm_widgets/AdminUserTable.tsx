@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/crm_widgets/AdminUserTable.tsx
 // Converted 1:1 from lib/pages/admin_settings_tabs/crm_widgets/admin_user_table.dart
 
@@ -60,7 +60,7 @@ function formatUser(db: any) {
     name,
     initials:    getInitials(name),
     email,
-    plan:        db.plan_name    ?? 'Free Trial',
+    plan:        db.plan_name    ?? 'Free',
     status:      db.account_status ?? 'Active',
     joinDate, time,
     usage:       db.usage_score ? Number(db.usage_score) : 0.5,
@@ -223,7 +223,7 @@ function ActionButtons({ user, rawUser, onUserUpdated, onOpenDrawer }: {
     setShowMenu(false)
   }
 
-  const plans = ['Free Trial', 'Pro Plan', 'Elite Plan'].filter(p => p !== user.plan)
+  const plans = ['Free', 'Starter', 'Growth'].filter(p => p !== user.plan)
   const hasDispute = user.dispute && user.dispute.toString().trim() !== ''
 
   return (
@@ -259,7 +259,7 @@ function ActionButtons({ user, rawUser, onUserUpdated, onOpenDrawer }: {
               style={{ color: C.dark }}>Manage Devices</button>
             <div className="h-px" style={{ backgroundColor: C.border }} />
             {/* Conditional actions */}
-            {user.plan === 'Free Trial' && user.status !== 'Expired' && (
+            {user.plan === 'Free' && user.status !== 'Expired' && (
               <button onClick={() => updateStatus('Expired', 'Active')}
                 className="w-full px-4 py-2.5 text-left text-[13px] font-semibold hover:bg-gray-50"
                 style={{ color: '#F87171' }}>Force Expire Trial</button>
@@ -277,7 +277,7 @@ function ActionButtons({ user, rawUser, onUserUpdated, onOpenDrawer }: {
               <button onClick={() => updateStatus('Active', user.status)}
                 className="w-full px-4 py-2.5 text-left text-[13px] font-semibold hover:bg-gray-50"
                 style={{ color: '#60A5FA' }}>
-                {user.status === 'Expired' && user.plan === 'Free Trial' ? 'Extend Trial' : 'Reactivate User'}
+                {user.status === 'Expired' && user.plan === 'Free' ? 'Extend Trial' : 'Reactivate User'}
               </button>
             ) : (
               <button onClick={() => updateStatus('Past Due', 'Active')}
@@ -333,11 +333,11 @@ export default function AdminUserTable({ allUsers, isInvestorMode, searchQuery, 
   }
   if (selectedFilter !== 'All') {
     filtered = filtered.filter(u => {
-      const plan    = u.plan_name    ?? 'Free Trial'
+      const plan    = u.plan_name    ?? 'Free'
       const status  = u.account_status ?? 'Active'
       const dispute = u.dispute_note
-      if (selectedFilter === 'Active Tiers')    return status === 'Active' && plan !== 'Free Trial'
-      if (selectedFilter === 'Expired Trials')  return status === 'Expired' && plan === 'Free Trial'
+      if (selectedFilter === 'Active Tiers')    return status === 'Active' && plan !== 'Free'
+      if (selectedFilter === 'Expired Trials')  return status === 'Expired' && plan === 'Free'
       if (selectedFilter === 'Past Due')        return status === 'Past Due'
       if (selectedFilter === 'Support waiting') return dispute && dispute.toString().trim() !== ''
       return true

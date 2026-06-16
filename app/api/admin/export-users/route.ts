@@ -1,4 +1,4 @@
-// app/api/admin/export-users/route.ts
+﻿// app/api/admin/export-users/route.ts
 // Exports ALL users as CSV (no pagination limit)
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
   const rows = allProfiles.map(p => [
     escapeCSV(p.name),
     escapeCSV(p.email),
-    escapeCSV(p.plan_name ?? 'Free Trial'),
+    escapeCSV(p.plan_name ?? 'Free'),
     escapeCSV(p.account_status ?? 'Active'),
     escapeCSV(p.role ?? 'user'),
     escapeCSV(formatDate(p.created_at)),

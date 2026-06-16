@@ -1,4 +1,4 @@
-// app/api/admin/create-user/route.ts
+﻿// app/api/admin/create-user/route.ts
 // Server-side API route — uses service role key safely
 
 import { createClient } from '@supabase/supabase-js'
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       user_metadata: {
         full_name:    name.trim(),
         gender:       gender ?? 'Unspecified',
-        plan_name:    plan ?? 'Free Trial',
+        plan_name:    plan ?? 'Free',
         send_welcome: sendWelcome ?? true,
       },
     })
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     await supabase.from('profiles').update({
       name:           name.trim(),
       gender:         gender ?? 'Unspecified',
-      plan_name:      plan ?? 'Free Trial',
+      plan_name:      plan ?? 'Free',
       account_status: 'Active',
       role:           role ?? 'user',
     }).eq('id', newUserId)
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     await supabase.from('subscriptions').insert({
       user_id:         newUserId,
-      plan_name:       plan ?? 'Free Trial',
+      plan_name:       plan ?? 'Free',
       amount,
       status:          amount === 0 ? 'trial' : 'active',
       provider:        'manual',
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
           admin_name:   (callerProfile as any)?.name ?? 'Admin',
           target_name:  name.trim(),
           target_email: email.trim(),
-          plan:         plan ?? 'Free Trial',
+          plan:         plan ?? 'Free',
           role:         role ?? 'user',
         },
         ip_address: ipAddress,
@@ -137,9 +137,9 @@ export async function POST(req: NextRequest) {
         user_id:     newUserId,
         event_type:  'signup',
         event_title: 'Signed up for Riazify',
-        event_desc:  `${plan ?? 'Free Trial'} started · Created by admin`,
+        event_desc:  `${plan ?? 'Free'} started · Created by admin`,
         metadata:    {
-          plan:         plan ?? 'Free Trial',
+          plan:         plan ?? 'Free',
           role:         role ?? 'user',
           created_by:   caller.id,
           send_welcome: sendWelcome ?? true,

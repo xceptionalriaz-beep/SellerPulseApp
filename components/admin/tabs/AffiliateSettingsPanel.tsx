@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/AffiliateSettingsPanel.tsx
 // Commission settings panel — changes apply everywhere automatically
 
@@ -344,7 +344,7 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
                   <p className="text-[11px]" style={{ color: C.muted }}>
                     {earnOnDisc
                       ? `Affiliate earns ${rate}% of $${(49 * (1 - Number(discount)/100)).toFixed(2)} (discounted)`
-                      : `Affiliate earns ${rate}% of $49.00 (full price)`}
+                      : `Affiliate earns ${rate}% of plan price ($19/$49/$149)`}
                   </p>
                 </div>
                 <div onClick={() => setEarnOnDisc(v => !v)}
@@ -411,7 +411,7 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between">
                     <span className="text-[12px]" style={{ color: C.muted }}>Pro / Elite plan price</span>
-                    <span className="text-[12px] font-bold" style={{ color: C.text }}>$49 / $99</span>
+                    <span className="text-[12px] font-bold" style={{ color: C.text }}>$19 / $49 / $149</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[12px]" style={{ color: C.muted }}>

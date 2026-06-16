@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/PersistentSidebar.tsx
 // Updated: all 5 widgets wired to real Supabase data
 
@@ -24,7 +24,7 @@ const C = {
 }
 
 const BROADCAST_TARGETS = [
-  'All Users', 'Pro Plan', 'Free Trial', 'Elite Plan',
+  'All Users', 'Starter', 'Free', 'Growth',
   'Orders Tool Users', 'Profit Calc Users', 'Title Builder Users',
 ]
 
@@ -267,9 +267,9 @@ export default function PersistentSidebar({ investorMode }: Props) {
       const targets = allUsers.filter((u: any) => {
         if (broadcastTarget === 'All Users') return true
         const plan = (u.plan_name ?? '').toLowerCase()
-        if (broadcastTarget === 'Pro Plan')       return plan.includes('pro')
-        if (broadcastTarget === 'Free Trial')     return plan.includes('free')
-        if (broadcastTarget === 'Elite Plan')     return plan.includes('elite')
+        if (broadcastTarget === 'Starter')       return plan.includes('pro')
+        if (broadcastTarget === 'Free')     return plan.includes('free')
+        if (broadcastTarget === 'Growth')     return plan.includes('elite')
         return true
       })
 
