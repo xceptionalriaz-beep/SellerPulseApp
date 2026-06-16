@@ -1,8 +1,5 @@
 ﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@supabase/ssr'],
-  },
   images: {
     remotePatterns: [
       {
@@ -18,5 +15,4 @@ const nextConfig = {
     ],
   },
 }
-
 module.exports = nextConfig

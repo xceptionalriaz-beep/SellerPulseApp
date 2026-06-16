@@ -1,4 +1,4 @@
-// app/api/admin/kill-switches/kill-all/route.ts
+﻿// app/api/admin/kill-switches/kill-all/route.ts
 // ──────────────────────────────────────────────────────────────
 // Emergency: disables ALL kill switches at once
 // Founder only — logs single high-priority audit event
@@ -29,8 +29,9 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Validate reason ────────────────────────────────────────
-    const { change_note } = await req.json()
-    if (!change_note?.trim() || change_note.trim().length < 5) {
+    const { change_note, reason } = await req.json()
+    const killReason = change_note ?? reason
+    if (!killReason?.trim() || killReason.trim().length < 5) {
       return NextResponse.json({ error: 'Emergency reason of at least 5 characters is required' }, { status: 400 })
     }
 
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       .update({
         is_enabled:  false,
         changed_by:  caller.id,
-        change_note: change_note.trim(),
+        change_note: killReason.trim(),
         updated_at:  now,
       })
       .eq('is_enabled', true)
@@ -68,13 +69,34 @@ export async function POST(req: NextRequest) {
         details:    `EMERGENCY KILL ALL — disabled ${activeSwitches.length} switch${activeSwitches.length !== 1 ? 'es' : ''}: ${(activeSwitches as any[]).map((s: any) => s.title).join(', ')}`,
         metadata:   {
           admin_name:      (profile as any)?.name ?? 'Admin',
-          change_note:     change_note.trim(),
+          change_note:     killReason.trim(),
           switches_killed: (activeSwitches as any[]).map((s: any) => ({ id: s.id, title: s.title })),
           count:           activeSwitches.length,
           priority:        'HIGH',
         },
         ip_address: ipAddress,
         created_at: now,
+      })
+    } catch { /* non-critical */ }
+
+    // ── Send notification ──────────────────────────────────────
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${req.headers.get('host')}`
+      await fetch(`${appUrl}/api/admin/notify/kill-switch`, {
+        method:  'POST',
+        headers: {
+          'Content-Type':      'application/json',
+          'x-internal-secret': process.env.INTERNAL_API_SECRET ?? '',
+        },
+        body: JSON.stringify({
+          switchTitle:  'ALL SYSTEMS',
+          adminName:    (profile as any)?.name ?? 'Admin',
+          reason:       killReason.trim(),
+          userMessage:  null,
+          reEnableMins: null,
+          action:       'kill_all',
+          time:         new Date().toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' }),
+        }),
       })
     } catch { /* non-critical */ }
 

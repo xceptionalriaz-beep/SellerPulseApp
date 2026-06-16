@@ -108,8 +108,19 @@ export default function MaintenanceScheduleModal({ switchId, switchTitle, onClos
     custom_message: '',
   })
 
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 10)
+    return () => clearTimeout(t)
+  }, [])
+
+  function handleClose() {
+    setVisible(false)
+    setTimeout(onClose, 250)
+  }
+
   async function loadSchedules() {
-    setLoading(true)
     try {
       const { data } = await (supabase.from('maintenance_schedules') as any)
         .select('*')
@@ -170,9 +181,19 @@ export default function MaintenanceScheduleModal({ switchId, switchTitle, onClos
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+         style={{
+           backgroundColor: `rgba(0,0,0,${visible ? 0.5 : 0})`,
+           transition: 'background-color 0.25s ease',
+         }}
+         onClick={handleClose}>
       <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl"
-           style={{ backgroundColor: C.surface }}>
+           style={{
+             backgroundColor: C.surface,
+             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(16px)',
+             opacity: visible ? 1 : 0,
+             transition: 'transform 0.25s ease, opacity 0.25s ease',
+           }}
+           onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b"
@@ -182,7 +203,7 @@ export default function MaintenanceScheduleModal({ switchId, switchTitle, onClos
             <p className="text-[14px] font-black" style={{ color: C.dark }}>Maintenance Schedules</p>
             <p className="text-[11px]" style={{ color: C.muted }}>{switchTitle}</p>
           </div>
-          <button onClick={onClose} className="hover:opacity-70">
+          <button onClick={handleClose} className="hover:opacity-70">
             <X size={18} style={{ color: C.muted }} />
           </button>
         </div>

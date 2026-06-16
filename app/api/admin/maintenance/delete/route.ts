@@ -25,10 +25,32 @@ export async function POST(req: NextRequest) {
     const { id } = await req.json()
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
 
+    // ── Fetch schedule details before deleting ─────────────
+    const { data: schedule } = await (adminClient.from('maintenance_schedules') as any)
+      .select('label, switch_id, kill_switches(title)')
+      .eq('id', id).single()
+
     const { error } = await (adminClient.from('maintenance_schedules') as any)
       .delete().eq('id', id)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // ── Log to audit trail ─────────────────────────────────
+    try {
+      const { data: profile } = await adminClient.from('profiles').select('name').eq('id', user.id).single()
+      await (adminClient.from('admin_logs') as any).insert({
+        admin_id:   user.id,
+        action:     'schedule_deleted',
+        details:    `Deleted schedule: ${(schedule as any)?.kill_switches?.title ?? 'Unknown'} — ${(schedule as any)?.label ?? id}`,
+        metadata:   {
+          admin_name:   (profile as any)?.name ?? 'Admin',
+          schedule_id:  id,
+          switch_title: (schedule as any)?.kill_switches?.title ?? 'Unknown',
+          label:        (schedule as any)?.label ?? id,
+        },
+        created_at: new Date().toISOString(),
+      })
+    } catch { /* non-critical */ }
 
     return NextResponse.json({ success: true })
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/KillSwitchesTab.tsx
 // ══════════════════════════════════════════════════════════════
 // RIAZIFY — Kill Switches Tab
@@ -11,6 +11,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import MaintenanceScheduleModal from '@/components/admin/MaintenanceScheduleModal'
+import FullAuditLogModal from '@/components/admin/FullAuditLogModal'
 import {
   AlertTriangle, CheckCircle, X, RefreshCw,
   ShieldOff, Shield, Clock, User, Zap,
@@ -40,8 +41,11 @@ interface KillSwitch {
   description:  string | null
   is_enabled:   boolean
   is_visible:   boolean
+  is_read_only: boolean
   changed_by:   string | null
   change_note:  string | null
+  user_message: string | null
+  re_enable_at: string | null
   updated_at:   string
   changer_name?: string | null
 }
@@ -117,7 +121,26 @@ function SyncIndicator({ lastSync, isAutoRefresh }: { lastSync: number; isAutoRe
   )
 }
 
-// ── Toast ──────────────────────────────────────────────────────
+// ── Live countdown timer ───────────────────────────────────────
+function LiveCountdown({ iso }: { iso: string }) {
+  const [display, setDisplay] = useState('')
+
+  function calc() {
+    const diff = new Date(iso).getTime() - Date.now()
+    if (diff <= 0) return 'Re-enabling...'
+    const mins = Math.floor(diff / 60000)
+    const secs = Math.floor((diff % 60000) / 1000)
+    return `${mins}m ${secs}s`
+  }
+
+  useEffect(() => {
+    setDisplay(calc())
+    const tick = setInterval(() => setDisplay(calc()), 1000)
+    return () => clearInterval(tick)
+  }, [iso])
+
+  return <>{display}</>
+}
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
     success: { bg: C.dark,    border: C.lime,   color: C.lime },
@@ -139,6 +162,7 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
   const online     = switches.filter(s => s.is_enabled).length
   const offline    = switches.filter(s => !s.is_enabled).length
   const hidden     = switches.filter(s => !s.is_visible).length
+  const readOnly   = switches.filter(s => s.is_read_only && s.is_enabled).length
   const total      = switches.length
   const lastChange = switches.length > 0
     ? switches.reduce((a, b) => new Date(a.updated_at) > new Date(b.updated_at) ? a : b)
@@ -182,6 +206,14 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
       bg:    hidden > 0 ? 'rgba(217,119,6,0.08)' : C.bg,
     },
     {
+      title: 'Read-Only',
+      value: String(readOnly),
+      sub:   readOnly > 0 ? 'view only mode' : 'all full access',
+      icon:  Activity,
+      color: readOnly > 0 ? C.amber : C.muted,
+      bg:    readOnly > 0 ? 'rgba(217,119,6,0.08)' : C.bg,
+    },
+    {
       title: 'Platform Health',
       value: `${healthPct}%`,
       sub:   healthLabel,
@@ -200,7 +232,7 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
   ]
 
   return (
-    <div className="grid grid-cols-5 gap-3">
+    <div className="grid grid-cols-6 gap-3">
       {cards.map((card, i) => {
         const Icon = card.icon
         return (
@@ -231,16 +263,20 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
 
 // ── Kill Switch Row (table row) ───────────────────────────────
 function KillSwitchRow({
-  sw, onDisable, onEnable, onToggleVisibility, onSchedule, toggling, visibilityToggling, currentUserName,
+  sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount,
 }: {
   sw:                  KillSwitch
   onDisable:           (sw: KillSwitch) => void
   onEnable:            (sw: KillSwitch) => void
   onToggleVisibility:  (sw: KillSwitch) => void
+  onToggleReadOnly:    (sw: KillSwitch) => void
   onSchedule:          (sw: KillSwitch) => void
   toggling:            string | null
   visibilityToggling:  string | null
+  readOnlyToggling:    string | null
   currentUserName:     string
+  scheduleCount:       number
+  incidentCount:       number
 }) {
   const isOffline            = !sw.is_enabled
   const isHidden             = !sw.is_visible
@@ -298,10 +334,10 @@ function KillSwitchRow({
   return (
     <div className="grid items-center px-4 py-3 border-b last:border-b-0 transition-all hover:bg-[#fafcf8]"
          style={{
-           gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.8fr 1fr',
+           gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
            gap: 12,
            borderColor: C.border,
-           backgroundColor: isOffline ? 'rgba(185,28,28,0.02)' : 'transparent',
+           backgroundColor: isOffline ? 'rgba(185,28,28,0.02)' : sw.is_read_only ? 'rgba(217,119,6,0.02)' : 'transparent',
          }}>
 
       {/* TOOL NAME */}
@@ -315,6 +351,19 @@ function KillSwitchRow({
             <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0"
                   style={{ backgroundColor: 'rgba(100,116,139,0.1)', color: C.muted }}>
               HIDDEN
+            </span>
+          )}
+          {sw.is_read_only && !isOffline && (
+            <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0"
+                  style={{ backgroundColor: 'rgba(217,119,6,0.1)', color: C.amber }}>
+              READ-ONLY
+            </span>
+          )}
+          {incidentCount > 0 && (
+            <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0"
+                  style={{ backgroundColor: 'rgba(217,119,6,0.1)', color: C.amber }}
+                  title={`${incidentCount} incident${incidentCount > 1 ? 's' : ''} this month`}>
+              {incidentCount}x
             </span>
           )}
         </div>
@@ -336,11 +385,18 @@ function KillSwitchRow({
       {/* OFFLINE FOR */}
       <div>
         {isOffline && offlineDur ? (
-          <span className="flex items-center gap-1 text-[9px] font-bold"
-                style={{ color: offlineDays >= 1 ? C.amber : C.red }}>
-            <AlertTriangle size={9} />
-            {offlineDur}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="flex items-center gap-1 text-[9px] font-bold"
+                  style={{ color: offlineDays >= 1 ? C.amber : C.red }}>
+              <AlertTriangle size={9} />
+              {offlineDur}
+            </span>
+            {sw.re_enable_at && new Date(sw.re_enable_at) > new Date() && (
+              <span className="text-[9px] font-bold" style={{ color: C.amber }}>
+                ⏱ <LiveCountdown iso={sw.re_enable_at} />
+              </span>
+            )}
+          </div>
         ) : (
           <span className="text-[10px]" style={{ color: C.muted }}>—</span>
         )}
@@ -373,6 +429,29 @@ function KillSwitchRow({
         />
       </div>
 
+      {/* READ-ONLY toggle */}
+      <div className="flex flex-col items-start gap-0.5">
+        <p className="text-[7px] font-black tracking-wider" style={{ color: C.muted }}>READ ONLY</p>
+        {readOnlyToggling === sw.id ? (
+          <div className="w-11 h-6 flex items-center justify-center">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
+                 style={{ borderTopColor: C.amber }} />
+          </div>
+        ) : (
+          <div onClick={() => onToggleReadOnly(sw)}
+               className="relative w-11 h-6 rounded-full cursor-pointer"
+               style={{ backgroundColor: sw.is_read_only ? C.amber : 'rgba(100,116,139,0.35)', transition: 'background-color 0.25s ease' }}>
+            <div style={{
+              position: 'absolute', top: '2px', left: '2px',
+              width: '20px', height: '20px', borderRadius: '50%',
+              backgroundColor: sw.is_read_only ? '#fff' : '#ffffff',
+              transform: sw.is_read_only ? 'translateX(21px)' : 'translateX(0px)',
+              transition: 'transform 0.25s ease',
+            }} />
+          </div>
+        )}
+      </div>
+
       {/* LAST BY */}
       <div className="min-w-0">
         <div className="flex items-center gap-1">
@@ -386,8 +465,8 @@ function KillSwitchRow({
         </p>
       </div>
 
-      {/* REASON + SCHEDULE */}
-      <div className="min-w-0 flex flex-col gap-1.5">
+      {/* REASON */}
+      <div className="min-w-0">
         {sw.change_note ? (
           <p className="text-[10px] italic truncate" style={{ color: C.muted }}>
             "{sw.change_note}"
@@ -395,12 +474,16 @@ function KillSwitchRow({
         ) : (
           <span className="text-[10px]" style={{ color: C.muted }}>—</span>
         )}
+      </div>
+
+      {/* SCHEDULE */}
+      <div className="flex items-center gap-1.5">
         <button
           onClick={() => onSchedule(sw)}
-          className="flex items-center gap-1 self-start px-2 py-0.5 rounded-lg text-[9px] font-bold hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold hover:opacity-80 transition-opacity"
           style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
           <Calendar size={9} />
-          Schedule
+          {scheduleCount > 0 ? `${scheduleCount}` : '+'}
         </button>
       </div>
 
@@ -414,17 +497,29 @@ function DisableConfirmModal({
 }: {
   sw:        KillSwitch
   onClose:   () => void
-  onConfirm: (reason: string) => void
+  onConfirm: (reason: string, userMessage: string, reEnableMinutes: number) => void
 }) {
-  const [reason,     setReason]     = useState('')
-  const [confirming, setConfirming] = useState(false)
+  const [reason,          setReason]          = useState('')
+  const [userMessage,     setUserMessage]     = useState('')
+  const [reEnableMinutes, setReEnableMinutes] = useState(0)
+  const [confirming,      setConfirming]      = useState(false)
   const isValid = reason.trim().length >= 5
+
+  const RE_ENABLE_OPTIONS = [
+    { label: 'No auto re-enable', value: 0    },
+    { label: '15 minutes',        value: 15   },
+    { label: '30 minutes',        value: 30   },
+    { label: '1 hour',            value: 60   },
+    { label: '2 hours',           value: 120  },
+    { label: '4 hours',           value: 240  },
+    { label: '8 hours',           value: 480  },
+  ]
 
   async function handleConfirm() {
     if (!isValid) return
     setConfirming(true)
     try {
-      await onConfirm(reason.trim())
+      await onConfirm(reason.trim(), userMessage.trim(), reEnableMinutes)
     } catch {
       setConfirming(false)
     }
@@ -471,9 +566,11 @@ function DisableConfirmModal({
               </div>
             ))}
           </div>
+
+          {/* Internal reason */}
           <div>
             <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>
-              REASON FOR EMERGENCY SHUTDOWN <span style={{ color: C.red }}>*</span>
+              INTERNAL REASON <span style={{ color: C.red }}>*</span>
             </p>
             <input
               value={reason} onChange={e => setReason(e.target.value)}
@@ -487,9 +584,49 @@ function DisableConfirmModal({
                 transition:      'border-color 0.2s, box-shadow 0.2s',
               }} />
             <p className="text-[10px] mt-1" style={{ color: C.muted }}>
-              Minimum 5 characters — saved to admin logs
+              Admin only — never shown to users
             </p>
           </div>
+
+          {/* User-facing message */}
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>
+              USER MESSAGE <span style={{ color: C.muted, fontWeight: 400 }}>(optional — shown to users)</span>
+            </p>
+            <input
+              value={userMessage} onChange={e => setUserMessage(e.target.value)}
+              placeholder="e.g. We're upgrading our eBay connection. Back in 30 minutes."
+              className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
+              style={{
+                borderColor:     C.border,
+                backgroundColor: C.bg, color: C.text,
+              }} />
+            <p className="text-[10px] mt-1" style={{ color: C.muted }}>
+              Shown to users on the maintenance screen
+            </p>
+          </div>
+
+          {/* Auto re-enable timer */}
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>
+              AUTO RE-ENABLE <span style={{ color: C.muted, fontWeight: 400 }}>(optional)</span>
+            </p>
+            <select
+              value={reEnableMinutes}
+              onChange={e => setReEnableMinutes(Number(e.target.value))}
+              className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
+              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
+              {RE_ENABLE_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            {reEnableMinutes > 0 && (
+              <p className="text-[10px] mt-1" style={{ color: C.limeDeep }}>
+                Will automatically re-enable in {RE_ENABLE_OPTIONS.find(o => o.value === reEnableMinutes)?.label}
+              </p>
+            )}
+          </div>
+
           <div className="flex gap-3">
             <button onClick={onClose} disabled={confirming}
               className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold disabled:opacity-40"
@@ -615,11 +752,15 @@ function KillAllModal({
 }
 
 // ── Audit Trail Panel ──────────────────────────────────────────
-function AuditTrailPanel({ entries, loading }: { entries: AuditEntry[]; loading: boolean }) {
+function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEntry[]; loading: boolean; onViewHistory: () => void }) {
   function actionLabel(action: string): { label: string; color: string; bg: string } {
-    if (action === 'disable_kill_switch')  return { label: 'DISABLED',  color: C.red,      bg: 'rgba(185,28,28,0.08)'  }
-    if (action === 'enable_kill_switch')   return { label: 'ENABLED',   color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
-    if (action === 'kill_all_switches')    return { label: 'KILL ALL',  color: '#fff',     bg: C.red                   }
+    if (action === 'disable_kill_switch')  return { label: 'DISABLED',    color: C.red,      bg: 'rgba(185,28,28,0.08)'  }
+    if (action === 'enable_kill_switch')   return { label: 'ENABLED',     color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
+    if (action === 'kill_all_switches')    return { label: 'KILL ALL',    color: '#fff',     bg: C.red                   }
+    if (action === 'schedule_created')     return { label: 'SCHEDULED',   color: C.limeDeep, bg: C.limeTint              }
+    if (action === 'schedule_deleted')     return { label: 'UNSCHEDULED', color: C.amber,    bg: 'rgba(217,119,6,0.08)'  }
+    if (action === 'set_read_only')        return { label: 'READ-ONLY',   color: C.amber,    bg: 'rgba(217,119,6,0.08)'  }
+    if (action === 'unset_read_only')      return { label: 'FULL ACCESS', color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
     return { label: action.toUpperCase(), color: C.muted, bg: C.bg }
   }
 
@@ -638,6 +779,11 @@ function AuditTrailPanel({ entries, loading }: { entries: AuditEntry[]; loading:
               style={{ backgroundColor: C.surface, color: C.muted, border: `1px solid ${C.border}` }}>
           Last 10 events
         </span>
+        <button onClick={onViewHistory}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:opacity-80"
+          style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
+          View Full History →
+        </button>
       </div>
 
       {loading && entries.length === 0 ? (
@@ -692,7 +838,15 @@ function AuditTrailPanel({ entries, loading }: { entries: AuditEntry[]; loading:
             const hasBefore = typeof prevVal === 'boolean' && typeof newVal === 'boolean'
             const ipRaw     = entry.ip_address
             const ip        = ipRaw ? ipRaw : '—'
-            const reason    = entry.metadata?.change_note ?? null
+            const reason    = entry.metadata?.change_note ?? entry.metadata?.label ?? null
+            const reEnableMinutes = entry.metadata?.re_enable_minutes ?? null
+            const reasonDisplay = reason
+              ? reEnableMinutes
+                ? `${reason} · ⏱ ${reEnableMinutes >= 60 ? `${reEnableMinutes/60}h` : `${reEnableMinutes}m`} timer`
+                : reason
+              : reEnableMinutes
+                ? `⏱ ${reEnableMinutes >= 60 ? `${reEnableMinutes/60}h` : `${reEnableMinutes}m`} auto-timer`
+                : null
             const switchTitle = entry.metadata?.switch_title ?? (entry.details ?? '—')
 
             return (
@@ -763,9 +917,9 @@ function AuditTrailPanel({ entries, loading }: { entries: AuditEntry[]; loading:
 
                 {/* REASON */}
                 <div className="min-w-0">
-                  {reason ? (
+                  {reasonDisplay ? (
                     <p className="text-[10px] italic truncate" style={{ color: C.muted }}>
-                      "{reason}"
+                      "{reasonDisplay}"
                     </p>
                   ) : (
                     <span className="text-[10px]" style={{ color: C.muted }}>—</span>
@@ -800,6 +954,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
   const [auditLoading,   setAuditLoading]   = useState(true)
   const [toggling,       setToggling]       = useState<string | null>(null)
   const [visibilityToggling, setVisibilityToggling] = useState<string | null>(null)
+  const [readOnlyToggling,   setReadOnlyToggling]   = useState<string | null>(null)
   const [killingAll,     setKillingAll]     = useState(false)
   const [disableTarget,  setDisableTarget]  = useState<KillSwitch | null>(null)
   const [showKillAll,    setShowKillAll]    = useState(false)
@@ -844,6 +999,34 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
           ...s,
           changer_name: s.changed_by ? (nameMap[s.changed_by] ?? 'Unknown') : null,
         })) as KillSwitch[])
+
+        // ── Load schedule counts per switch ──────────────────
+        try {
+          const { data: schedData } = await (supabase.from('maintenance_schedules') as any)
+            .select('switch_id').eq('is_active', true)
+          const counts: Record<string, number> = {}
+          for (const s of schedData ?? []) {
+            counts[s.switch_id] = (counts[s.switch_id] ?? 0) + 1
+          }
+          setScheduleCounts(counts)
+        } catch { /* non-critical */ }
+
+        // ── Load incident counts this month per switch ────────
+        try {
+          const monthStart = new Date()
+          monthStart.setDate(1)
+          monthStart.setHours(0, 0, 0, 0)
+          const { data: incData } = await (supabase.from('admin_logs') as any)
+            .select('metadata')
+            .eq('action', 'disable_kill_switch')
+            .gte('created_at', monthStart.toISOString())
+          const iCounts: Record<string, number> = {}
+          for (const e of incData ?? []) {
+            const title = e.metadata?.switch_title
+            if (title) iCounts[title] = (iCounts[title] ?? 0) + 1
+          }
+          setIncidentCounts(iCounts)
+        } catch { /* non-critical */ }
       }
       setLastSync(Date.now())
     } catch (e) {
@@ -860,7 +1043,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     try {
       const { data: auditData } = await (supabase.from('admin_logs') as any)
         .select('*')
-        .in('action', ['disable_kill_switch', 'enable_kill_switch', 'kill_all_switches'])
+        .in('action', ['disable_kill_switch', 'enable_kill_switch', 'kill_all_switches', 'schedule_created', 'schedule_deleted', 'set_read_only', 'unset_read_only'])
         .order('created_at', { ascending: false })
         .limit(10)
 
@@ -922,7 +1105,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
   }, [loadSwitches, loadAudit])
 
   // ── Disable single switch ──────────────────────────────────
-  async function handleDisable(reason: string) {
+  async function handleDisable(reason: string, userMessage: string, reEnableMinutes: number) {
     if (!disableTarget) return
     const sw = disableTarget
     setToggling(sw.id)
@@ -932,7 +1115,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
       const res = await fetch('/api/admin/kill-switches/toggle', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: sw.id, is_enabled: false, change_note: reason }),
+        body:    JSON.stringify({ id: sw.id, is_enabled: false, change_note: reason, user_message: userMessage || null, re_enable_minutes: reEnableMinutes || null }),
       })
       if (res.ok) {
         const json = await res.json()
@@ -941,11 +1124,13 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
             ...s,
             is_enabled:   false,
             change_note:  reason,
+            user_message: userMessage || null,
+            re_enable_at: reEnableMinutes > 0 ? new Date(Date.now() + reEnableMinutes * 60000).toISOString() : null,
             changer_name: currentUserName,
             updated_at:   json.switch?.updated_at ?? new Date().toISOString(),
           } : s
         ))
-        showToast(`${sw.title} disabled`, 'error')
+        showToast(`${sw.title} disabled${reEnableMinutes > 0 ? ` · auto-enables in ${reEnableMinutes}m` : ''}`, 'error')
         loadAudit()
       } else {
         const json = await res.json()
@@ -1019,30 +1204,67 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     setVisibilityToggling(null)
   }
 
+  async function handleToggleReadOnly(sw: KillSwitch) {
+    setReadOnlyToggling(sw.id)
+    const newReadOnly = !sw.is_read_only
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/kill-switches/toggle', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body:    JSON.stringify({ id: sw.id, is_read_only: newReadOnly }),
+      })
+      if (res.ok) {
+        setSwitches(prev => prev.map(s =>
+          s.id === sw.id ? { ...s, is_read_only: newReadOnly } : s
+        ))
+        showToast(
+          `${sw.title} ${newReadOnly ? 'set to read-only' : 'restored to full access'}`,
+          newReadOnly ? 'info' : 'success'
+        )
+      } else {
+        const json = await res.json()
+        showToast(json.error ?? 'Failed to update read-only mode', 'error')
+      }
+    } catch {
+      showToast('Network error — read-only not updated', 'error')
+    }
+    setReadOnlyToggling(null)
+  }
+
   // ── Kill All ───────────────────────────────────────────────
+  const [pendingApproval, setPendingApproval] = useState<{ id: string; expiresAt: string; notified: number } | null>(null)
+
   async function handleKillAll(reason: string) {
     setKillingAll(true)
     setShowKillAll(false)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch('/api/admin/kill-switches/kill-all', {
+      const res = await fetch('/api/admin/kill-switches/request-kill-all', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ change_note: reason }),
+        body:    JSON.stringify({ reason }),
       })
+      const json = await res.json()
       if (res.ok) {
-        setSwitches(prev => prev.map(s => ({
-          ...s,
-          is_enabled:   false,
-          change_note:  reason,
-          changer_name: currentUserName,
-          updated_at:   new Date().toISOString(),
-        })))
-        showToast('All systems killed — platform in emergency mode', 'error')
-        loadAudit()
+        if (json.mode === 'direct') {
+          // Single admin — executed immediately
+          setSwitches(prev => prev.map(s => ({
+            ...s,
+            is_enabled:   false,
+            change_note:  reason,
+            changer_name: currentUserName,
+            updated_at:   new Date().toISOString(),
+          })))
+          showToast('All systems killed — platform in emergency mode', 'error')
+          loadAudit()
+        } else {
+          // Multiple admins — waiting for approval
+          setPendingApproval({ id: json.approvalId, expiresAt: json.expiresAt, notified: json.notified })
+          showToast(`Approval request sent to ${json.notified} admin${json.notified > 1 ? 's' : ''}`, 'error')
+        }
       } else {
-        const json = await res.json()
-        showToast(json.error ?? 'Failed to kill all switches', 'error')
+        showToast(json.error ?? 'Failed to request kill all', 'error')
       }
     } catch {
       showToast('Network error — kill all failed', 'error')
@@ -1052,6 +1274,9 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
 
   const [showEmergency,  setShowEmergency]  = useState(false)
   const [scheduleTarget, setScheduleTarget] = useState<KillSwitch | null>(null)
+  const [scheduleCounts, setScheduleCounts] = useState<Record<string, number>>({})
+  const [incidentCounts, setIncidentCounts] = useState<Record<string, number>>({})
+  const [showFullHistory, setShowFullHistory] = useState(false)
   const activeCount = switches.filter(s => s.is_enabled).length
 
   return (
@@ -1081,6 +1306,25 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
       </div>
 
       {/* HUD Cards */}
+      {/* Pending approval banner */}
+      {pendingApproval && (
+        <div className="flex items-center gap-3 px-5 py-4 rounded-2xl border"
+             style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.3)' }}>
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.red }} />
+          <div className="flex-1">
+            <p className="text-[13px] font-black" style={{ color: C.red }}>Kill All — Awaiting Approval</p>
+            <p className="text-[11px]" style={{ color: C.muted }}>
+              Approval request sent to {pendingApproval.notified} admin{pendingApproval.notified > 1 ? 's' : ''} · Expires at {new Date(pendingApproval.expiresAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+          <button onClick={() => setPendingApproval(null)}
+            className="text-[11px] font-semibold hover:opacity-70"
+            style={{ color: C.muted }}>
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <HudCards switches={switches} loading={loading} />
 
       {/* Kill Switch Matrix */}
@@ -1118,12 +1362,12 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
             {/* Table header */}
             <div className="grid px-4 py-2 border-b"
                  style={{
-                   gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.8fr 1fr',
+                   gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
                    gap: 12,
                    borderColor: C.border,
                    backgroundColor: C.bg,
                  }}>
-              {['TOOL NAME', 'STATUS', 'OFFLINE FOR', 'DESCRIPTION', 'MAINTENANCE', 'VISIBLE', 'LAST BY', 'REASON / SCHEDULE'].map(h => (
+              {['TOOL NAME', 'STATUS', 'OFFLINE FOR', 'DESCRIPTION', 'MAINTENANCE', 'VISIBLE', 'READ ONLY', 'LAST BY', 'REASON', 'SCHEDULE'].map(h => (
                 <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
                   {h}
                 </span>
@@ -1137,10 +1381,14 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
                 onDisable={s => setDisableTarget(s)}
                 onEnable={handleEnable}
                 onToggleVisibility={handleToggleVisibility}
+                onToggleReadOnly={handleToggleReadOnly}
                 onSchedule={s => setScheduleTarget(s)}
                 toggling={toggling}
                 visibilityToggling={visibilityToggling}
+                readOnlyToggling={readOnlyToggling}
                 currentUserName={currentUserName}
+                scheduleCount={scheduleCounts[sw.id] ?? 0}
+                incidentCount={incidentCounts[sw.title] ?? 0}
               />
             ))}
           </div>
@@ -1148,7 +1396,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
       </div>
 
       {/* Audit Trail */}
-      <AuditTrailPanel entries={auditEntries} loading={auditLoading} />
+      <AuditTrailPanel entries={auditEntries} loading={auditLoading} onViewHistory={() => setShowFullHistory(true)} />
 
       {/* Emergency Actions — collapsed by default to prevent accidental clicks */}
       <div className="rounded-2xl border overflow-hidden"
@@ -1205,12 +1453,20 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
         )}
       </div>
 
+      {/* Full History Modal */}
+      {showFullHistory && (
+        <FullAuditLogModal
+          tools={switches.map(s => s.title)}
+          onClose={() => setShowFullHistory(false)}
+        />
+      )}
+
       {/* Modals */}
       {scheduleTarget && (
         <MaintenanceScheduleModal
           switchId={scheduleTarget.id}
           switchTitle={scheduleTarget.title}
-          onClose={() => setScheduleTarget(null)}
+          onClose={() => { setScheduleTarget(null); loadSwitches(true) }}
         />
       )}
       {disableTarget && (

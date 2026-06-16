@@ -62,6 +62,28 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    // ── Log to audit trail ─────────────────────────────────
+    try {
+      const { data: profile } = await adminClient.from('profiles').select('name').eq('id', user.id).single()
+      const { data: sw } = await (adminClient.from('kill_switches') as any).select('title').eq('id', switch_id).single()
+      await (adminClient.from('admin_logs') as any).insert({
+        admin_id:   user.id,
+        action:     'schedule_created',
+        details:    `Scheduled maintenance: ${sw?.title ?? switch_id} — ${label.trim()}`,
+        metadata:   {
+          admin_name:   (profile as any)?.name ?? 'Admin',
+          switch_id,
+          switch_title: sw?.title ?? switch_id,
+          label:        label.trim(),
+          frequency,
+          start_time,
+          end_time,
+          timezone,
+        },
+        created_at: new Date().toISOString(),
+      })
+    } catch { /* non-critical */ }
+
     return NextResponse.json({ success: true, schedule: data })
 
   } catch (err: any) {
