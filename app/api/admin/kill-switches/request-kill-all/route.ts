@@ -1,4 +1,4 @@
-// app/api/admin/kill-switches/request-kill-all/route.ts
+﻿// app/api/admin/kill-switches/request-kill-all/route.ts
 // ══════════════════════════════════════════════════════════════
 // Creates a Kill All approval request
 // → If only 1 admin exists → executes immediately with warning
@@ -66,6 +66,24 @@ export async function POST(req: NextRequest) {
         metadata:   { admin_name: (profile as any)?.name, change_note: reason.trim(), count: activeSwitches.length, single_admin: true },
         created_at: now.toISOString(),
       })
+
+      // ── Send notification ──────────────────────────────────
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${req.headers.get('host')}`
+        await fetch(`${appUrl}/api/admin/notify/kill-switch`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.INTERNAL_API_SECRET ?? '' },
+          body: JSON.stringify({
+            switchTitle:  'ALL SYSTEMS',
+            adminName:    (profile as any)?.name ?? 'Admin',
+            reason:       reason.trim(),
+            userMessage:  null,
+            reEnableMins: null,
+            action:       'kill_all',
+            time:         new Date().toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' }),
+          }),
+        })
+      } catch { /* non-critical */ }
 
       return NextResponse.json({ success: true, mode: 'direct', killed: activeSwitches.length })
     }
