@@ -145,17 +145,19 @@ export default function SignupPage() {
         },
       })
 
-      if (error) { toast.error(error.message); return }
+     if (error) { toast.error(error.message); return }
 
-      if (data.user ?? data.session === null) {
-        // Track session metadata
-        try {
-          await supabase.from('profiles').update({
-            last_login_ip:   metadata.last_login_ip,
-            device_platform: metadata.device_platform,
-            browser_agent:   metadata.browser_agent,
-          } as never).eq('id', data.user?.id ?? '')
-        } catch { /* non-critical */ }
+      // Auto sign in immediately after signup
+      await supabase.auth.signInWithPassword({ email, password })
+
+      // Track session metadata
+      try {
+        await supabase.from('profiles').update({
+          last_login_ip:   metadata.last_login_ip,
+          device_platform: metadata.device_platform,
+          browser_agent:   metadata.browser_agent,
+        } as never).eq('id', data.user?.id ?? '')
+      } catch { /* non-critical */ }
 
         // ── NEW: Capture referral source ──────────────────────
         // Reads UTM params stored by ReferralCapture component
@@ -207,7 +209,6 @@ export default function SignupPage() {
         } catch (e) { /* non-critical */ }
 
         router.push('/onboarding')
-      }
     } catch {
       toast.error('Something went wrong. Please try again.')
     } finally {
