@@ -367,6 +367,79 @@ function FulfillModal({ item, onClose, onFulfilled }: {
   )
 }
 
+// ── Badge Manager Section with Pagination ─────────────────────
+function BadgeManagerSection({ badges }: { badges: any[] }) {
+  const PAGE_SIZE = 6
+  const [page, setPage] = useState(0)
+  const totalPages = Math.ceil(badges.length / PAGE_SIZE)
+  const paginated  = badges.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
+  return (
+    <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b"
+           style={{ borderColor: C.border, backgroundColor: C.bg }}>
+        <Award size={13} style={{ color: C.limeDeep }} />
+        <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>BADGE MANAGER</p>
+        <p className="text-[10px]" style={{ color: C.muted }}>{badges.length} badges total</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {paginated.map(badge => {
+          const BIcon      = getIcon(badge.icon)
+          const earnedCount = badge.user_badges?.length ?? 0
+          return (
+            <div key={badge.id} className="flex items-center gap-3 p-3 rounded-xl border"
+                 style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                   style={{ backgroundColor: C.limeTint }}>
+                <BIcon size={18} style={{ color: C.limeDeep }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-black truncate" style={{ color: C.dark }}>{badge.name}</p>
+                <p className="text-[10px] truncate" style={{ color: C.muted }}>{badge.description}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg"
+                        style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                    +{badge.xp_reward} XP
+                  </span>
+                  <span className="text-[9px]" style={{ color: earnedCount > 0 ? C.limeDeep : C.muted }}>
+                    {earnedCount.toLocaleString()} earned
+                  </span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t"
+             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          <p className="text-[10px]" style={{ color: C.muted }}>
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, badges.length)} of {badges.length}
+          </p>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80 disabled:opacity-30"
+              style={{ border: `1px solid ${C.border}`, color: C.muted }}>
+              <ChevronDown size={11} style={{ transform: 'rotate(90deg)' }} /> Prev
+            </button>
+            <span className="text-[11px] font-bold" style={{ color: C.text }}>
+              {page + 1} / {totalPages}
+            </span>
+            <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80 disabled:opacity-30"
+              style={{ border: `1px solid ${C.border}`, color: C.muted }}>
+              Next <ChevronDown size={11} style={{ transform: 'rotate(-90deg)' }} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
@@ -528,10 +601,10 @@ export default function GamificationTab() {
       </div>
 
       {/* Section tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 pt-1">
         {SECTION_TABS.map(tab => (
           <button key={tab.key} onClick={() => setActiveSection(tab.key as any)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-bold transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all h-9"
             style={{
               backgroundColor: activeSection === tab.key ? C.dark : C.surface,
               color:           activeSection === tab.key ? C.lime : C.muted,
@@ -569,7 +642,11 @@ export default function GamificationTab() {
             const catStyle = categoryColor(quest.category)
             const rwdStyle = rewardColor(quest.reward_type)
             const QIcon    = getIcon(quest.icon)
-            const completedCount = quest.quest_progress?.length ?? 0
+            const completedCount  = (quest.quest_progress ?? []).filter((p: any) => p.completed).length
+            const totalUsers      = (quest.quest_progress ?? []).length
+            const avgProgress     = totalUsers > 0
+              ? Math.round((quest.quest_progress ?? []).reduce((sum: number, p: any) => sum + (p.current_count ?? 0), 0) / totalUsers)
+              : 0
 
             return (
               <div key={quest.id}
@@ -607,10 +684,18 @@ export default function GamificationTab() {
                   {quest.target_count}x
                 </span>
 
-                {/* Completed */}
-                <span className="text-[12px] font-bold" style={{ color: completedCount > 0 ? C.limeDeep : C.muted }}>
-                  {completedCount}
-                </span>
+                {/* Completed — fractional ratio */}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[12px] font-bold" style={{ color: completedCount > 0 ? C.limeDeep : C.muted }}>
+                    {completedCount}
+                    <span className="text-[10px] font-normal" style={{ color: C.muted }}> done</span>
+                  </span>
+                  {quest.target_count > 1 && totalUsers > 0 && (
+                    <span className="text-[9px]" style={{ color: C.muted }}>
+                      avg {avgProgress}/{quest.target_count}
+                    </span>
+                  )}
+                </div>
 
                 {/* XP */}
                 <span className="text-[12px] font-bold" style={{ color: C.amber }}>
@@ -773,43 +858,8 @@ export default function GamificationTab() {
         </div>
       )}
 
-      {/* ── BADGE MANAGER ─────────────────────────────────────── */}
       {activeSection === 'badges' && (
-        <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
-            <Award size={13} style={{ color: C.limeDeep }} />
-            <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>BADGE MANAGER</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 p-4">
-            {badges.map(badge => {
-              const BIcon      = getIcon(badge.icon)
-              const earnedCount = badge.user_badges?.length ?? 0
-              return (
-                <div key={badge.id} className="flex items-center gap-3 p-3 rounded-xl border"
-                     style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                       style={{ backgroundColor: C.limeTint }}>
-                    <BIcon size={18} style={{ color: C.limeDeep }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-black truncate" style={{ color: C.dark }}>{badge.name}</p>
-                    <p className="text-[10px] truncate" style={{ color: C.muted }}>{badge.description}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg"
-                            style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                        +{badge.xp_reward} XP
-                      </span>
-                      <span className="text-[9px]" style={{ color: C.muted }}>
-                        {earnedCount} earned
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <BadgeManagerSection badges={badges} />
       )}
 
       {/* Modals */}

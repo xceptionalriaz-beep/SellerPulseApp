@@ -1,7 +1,5 @@
 'use client'
 // lib/login-history.ts
-// Converted from: lib/services/login_history_service.dart
-
 import { createClient } from '@/lib/supabase'
 import { SessionTracker } from '@/lib/session-tracker'
 
@@ -9,21 +7,19 @@ export async function logLogin(): Promise<void> {
   try {
     const supabase = createClient()
 
-    // Get current user
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Collect metadata (IP, platform, browser)
     const metadata = await SessionTracker.getLoginMetadata()
 
-    // 1. Update profiles table
-    await supabase
-      .from('profiles')
+    // 1. Update profiles — include last_active_date for streak tracking
+    await (supabase.from('profiles') as any)
       .update({
-        last_login_ip:   metadata.last_login_ip,
-        device_platform: metadata.device_platform,
-        browser_agent:   metadata.browser_agent,
-      } as never)
+        last_login_ip:    metadata.last_login_ip,
+        device_platform:  metadata.device_platform,
+        browser_agent:    metadata.browser_agent,
+        last_active_date: new Date().toISOString().slice(0, 10),
+      })
       .eq('id', user.id)
 
     // 2. Insert into login_history table
@@ -63,10 +59,9 @@ export async function logLogin(): Promise<void> {
           }),
         })
       }
-    } catch { /* non-critical — never block login */ }
+    } catch { /* non-critical */ }
 
   } catch (err) {
-    // Non-critical — never block the user if this fails
     console.error('logLogin failed:', err)
   }
 }

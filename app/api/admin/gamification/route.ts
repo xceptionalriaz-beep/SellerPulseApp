@@ -31,7 +31,14 @@ export async function GET(req: NextRequest) {
       { data: levelStats },
     ] = await Promise.all([
       (adminClient.from('quests') as any)
-        .select('*, quest_progress(count)')
+        .select(`
+          *,
+          quest_progress(
+            id,
+            completed,
+            current_count
+          )
+        `)
         .order('sort_order'),
       (adminClient.from('badges') as any)
         .select('*, user_badges(count)')
