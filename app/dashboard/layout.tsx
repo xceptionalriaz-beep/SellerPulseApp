@@ -255,6 +255,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // ── Kill switch visibility state ───────────────────────────────
   const [disabledTools,  setDisabledTools]  = useState<Set<string>>(new Set())
+  const [emailUnverified, setEmailUnverified] = useState(false)
 
   const isAdmin = profile?.role === 'admin'
 
@@ -275,6 +276,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .single()
 
       if (data) setProfile(data as Profile)
+      if (user && !user.email_confirmed_at) setEmailUnverified(true)
 
       // ── Fetch kill switches to hide disabled tools from sidebar ──
       try {
@@ -468,6 +470,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* ── PAGE CONTENT ── */}
           <main className="flex-1 overflow-auto min-h-0">
+            {emailUnverified && (
+              <div className="flex items-center justify-between px-4 py-2.5"
+                   style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
+                <span style={{ color: '#92400e', fontSize: 13 }}>
+                  ⚠️ Please verify your email to unlock all features
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (user?.email) {
+                        await supabase.auth.resend({ type: 'signup', email: user.email })
+                        alert('Verification email sent! Check your inbox.')
+                      }
+                    }}
+                    className="text-[12px] font-bold px-3 py-1 rounded-lg"
+                    style={{ backgroundColor: '#fbbf24', color: '#92400e' }}>
+                    Resend Email
+                  </button>
+                  <button
+                    onClick={() => setEmailUnverified(false)}
+                    className="text-[12px] px-2"
+                    style={{ color: '#92400e' }}>
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
             <div>{children}</div>
           </main>
         </div>

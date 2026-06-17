@@ -28,9 +28,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Shield, Eye, EyeOff, Mail, Lock, User, ChevronDown,
-  Star, BadgeCheck, ArrowLeft, MailOpen, CheckCircle,
-  ShieldCheck, Calculator, Type, BarChart2, PartyPopper,
-  LayoutDashboard,
+  Star, BadgeCheck, ArrowLeft,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { sendWelcomeEmail } from '@/lib/email'
@@ -47,48 +45,6 @@ function GoogleLogo() {
       <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
       <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
     </svg>
-  )
-}
-
-// ── Progress Pill (converted from AnimatedProgressPill widget) ─
-function ProgressPill({ currentStep, onStepTap }: {
-  currentStep: number
-  onStepTap: (step: number) => void
-}) {
-  const steps = ['Create Account', 'Verify Email', 'Start Trial']
-  return (
-    <div className="flex items-center gap-2">
-      {steps.map((label, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <button
-            onClick={() => i < currentStep && onStepTap(i)}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300',
-              i === currentStep
-                ? 'bg-lime text-dark shadow-lime'
-                : i < currentStep
-                  ? 'bg-lime/20 text-lime cursor-pointer hover:bg-lime/30'
-                  : 'bg-white/10 text-white/40 cursor-default'
-            )}
-          >
-            <span className={cn(
-              'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold',
-              i === currentStep ? 'bg-dark text-lime' :
-              i < currentStep  ? 'bg-lime text-dark'  : 'bg-white/20 text-white/40'
-            )}>
-              {i < currentStep ? '✓' : i + 1}
-            </span>
-            {label}
-          </button>
-          {i < steps.length - 1 && (
-            <div className={cn(
-              'h-px w-6 transition-all duration-300',
-              i < currentStep ? 'bg-lime/50' : 'bg-white/20'
-            )} />
-          )}
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -140,7 +96,6 @@ export default function SignupPage() {
   const supabase = createClient()
 
   // ── State ──────────────────────────────────────────────────
-  const [currentStep,     setCurrentStep]     = useState(0)
   const [name,            setName]            = useState('')
   const [email,           setEmail]           = useState('')
   const [password,        setPassword]        = useState('')
@@ -149,7 +104,6 @@ export default function SignupPage() {
   const [termsAccepted,   setTermsAccepted]   = useState(false)
   const [loading,         setLoading]         = useState(false)
   const [googleLoading,   setGoogleLoading]   = useState(false)
-  const [resending,       setResending]       = useState(false)
   const [errors,          setErrors]          = useState<Record<string, string>>({})
 
   const pwStrength = password ? getPasswordStrength(password) : null
@@ -252,7 +206,7 @@ export default function SignupPage() {
           })
         } catch (e) { /* non-critical */ }
 
-        setCurrentStep(1)
+        router.push('/onboarding')
       }
     } catch {
       toast.error('Something went wrong. Please try again.')
@@ -277,78 +231,7 @@ export default function SignupPage() {
       setGoogleLoading(false)
     }
   }
-
-  // ── Resend Email ───────────────────────────────────────────
-  async function handleResendEmail() {
-    if (!email) { toast.error('No email address found.'); return }
-    setResending(true)
-    try {
-      const { error } = await supabase.auth.resend({ type: 'signup', email })
-      if (error) toast.error('Failed to resend. Try again.')
-      else toast.show('Verification email resent!')
-    } catch {
-      toast.error('Failed to resend. Try again.')
-    } finally {
-      setResending(false)
-    }
-  }
-
-  // ── Check Email Verified ───────────────────────────────────
-  async function handleCheckVerified() {
-    setLoading(true)
-    try {
-      await supabase.auth.refreshSession()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user?.email_confirmed_at) {
-
-        // ── Affiliate signup tracking ─────────────────────────
-        // Reads riazify_ref cookie → credits affiliate +1 signup
-        // Last Click Wins: whoever's link they clicked last gets credit
-        try {
-          await fetch('/api/affiliate/signup', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ newUserId: user.id, newUserEmail: user.email }),
-          })
-        } catch { /* non-critical — don't block signup flow */ }
-
-        // Log verified event
-        try {
-          await (supabase.from('user_events') as any).insert({
-            user_id:     user.id,
-            event_type:  'email_verified',
-            event_title: 'Email Address Verified',
-            event_desc:  'Account fully activated',
-            created_at:  new Date().toISOString(),
-          })
-        } catch { /* non-critical */ }
-
-        // Check onboarding status → redirect
-        try {
-          const { data: profile } = await (supabase.from('profiles') as any)
-            .select('onboarding_completed')
-            .eq('id', user.id)
-            .single()
-
-          if (!(profile as any)?.onboarding_completed) {
-            router.push('/onboarding')
-          } else {
-            router.push('/dashboard')
-          }
-        } catch {
-          router.push('/onboarding')
-        }
-
-      } else {
-        toast.warning('Email not verified yet. Please check your inbox and click the verification link.')
-      }
-    } catch {
-      router.push('/onboarding')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  
   // ── Input field shared style ───────────────────────────────
   function inputClass(field: string) {
     return cn(
@@ -519,132 +402,6 @@ export default function SignupPage() {
       </div>
     )
   }
-
-  // ════════════════════════════════════════════════════════════
-  // STEP 2 — VERIFY EMAIL
-  // ════════════════════════════════════════════════════════════
-  function Step2() {
-    return (
-      <div className="flex flex-col">
-        <button
-          onClick={() => setCurrentStep(0)}
-          className="flex items-center gap-1 text-[#64748B] hover:text-dark transition-colors mb-4 w-fit"
-        >
-          <ArrowLeft size={18} /> Back
-        </button>
-
-        {/* Email icon */}
-        <div className="w-16 h-16 rounded-[16px] bg-lime/10 flex items-center justify-center mb-5">
-          <MailOpen size={32} className="text-lime" />
-        </div>
-
-        <h1 className="text-[26px] font-bold text-[#1E293B] mb-2">Verify your email</h1>
-        <p className="text-[#64748B] text-[13px] leading-relaxed mb-6">
-          We sent a verification link to{' '}
-          <span className="font-bold text-[#1E293B]">{email}</span>.
-          {' '}Click the link in the email to continue.
-        </p>
-
-        {/* Tips box */}
-        <div className="p-3.5 rounded-xl border border-lime/20 bg-lime/5 mb-6">
-          <p className="text-[12px] font-bold text-[#1E293B] mb-2">Didn&apos;t get it? Check:</p>
-          {[
-            'Your spam or junk folder',
-            'The email is from noreply@mail.app.supabase.io',
-            'Wait a minute and check again',
-          ].map((tip, i) => (
-            <div key={i} className="flex items-center gap-1.5 mt-1">
-              <CheckCircle size={12} className="text-lime shrink-0" />
-              <span className="text-[11px] text-[#64748B]">{tip}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Verified Button */}
-        <button
-          onClick={handleCheckVerified}
-          disabled={loading}
-          className="w-full h-[50px] bg-lime text-dark font-bold text-base rounded-xl hover:shadow-lime transition-all duration-200 disabled:opacity-50 flex items-center justify-center mb-3"
-        >
-          {loading ? (
-            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-            </svg>
-          ) : 'I have verified my email'}
-        </button>
-
-        {/* Resend */}
-        <div className="flex justify-center">
-          {resending ? (
-            <svg className="animate-spin w-4 h-4 text-lime" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-            </svg>
-          ) : (
-            <button
-              onClick={handleResendEmail}
-              className="text-[13px] font-bold text-black hover:text-lime transition-colors"
-            >
-              Resend verification email
-            </button>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  // ════════════════════════════════════════════════════════════
-  // STEP 3 — SUCCESS
-  // ════════════════════════════════════════════════════════════
-  function Step3() {
-    const features = [
-      { icon: ShieldCheck,  title: 'Order Protection',      sub: 'Protect orders from risky buyers'  },
-      { icon: Calculator,   title: 'Profit Calculator',     sub: 'Calculate real eBay profit'         },
-      { icon: Type,         title: 'Title Builder',         sub: 'AI-powered listing optimizer'       },
-      { icon: BarChart2,    title: 'Analytics Dashboard',   sub: 'Full platform insights'             },
-    ]
-
-    return (
-      <div className="flex flex-col items-center text-center">
-        <div className="mt-5 mb-5 w-20 h-20 rounded-full bg-lime/10 flex items-center justify-center">
-          <PartyPopper size={42} className="text-lime" />
-        </div>
-
-        <h1 className="text-[28px] font-bold text-[#1E293B]">You&apos;re all set! 🎉</h1>
-        <p className="text-[#64748B] text-sm mt-2 mb-6 leading-relaxed">
-          Your Riazify account is active.<br/>Your 7-day free trial has started.
-        </p>
-
-        {/* Trial features */}
-        <div className="w-full text-left p-4 rounded-[14px] border border-[#E2E8F0] bg-[#F8FAFC] mb-6">
-          <p className="text-[13px] font-bold text-[#1E293B] mb-3">What&apos;s included in your trial:</p>
-          {features.map(({ icon: Icon, title, sub }, i) => (
-            <div key={i} className="flex items-center gap-2.5 mb-2.5">
-              <div className="w-8 h-8 rounded-lg bg-lime/10 flex items-center justify-center shrink-0">
-                <Icon size={16} className="text-limeDeep" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[12px] font-bold text-[#1E293B]">{title}</p>
-                <p className="text-[10px] text-[#64748B]">{sub}</p>
-              </div>
-              <CheckCircle size={16} className="text-lime shrink-0" />
-            </div>
-          ))}
-        </div>
-
-        {/* Go to Dashboard */}
-        <button
-          onClick={() => { router.push('/dashboard'); router.refresh() }}
-          className="w-full h-[50px] bg-lime text-dark font-bold text-base rounded-xl hover:shadow-lime transition-all duration-200 flex items-center justify-center gap-2"
-        >
-          <LayoutDashboard size={20} />
-          Go to Dashboard
-        </button>
-      </div>
-    )
-  }
-
   // ════════════════════════════════════════════════════════════
   // TESTIMONIAL PANEL (same as login page)
   // ════════════════════════════════════════════════════════════
@@ -701,11 +458,6 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Progress Pill */}
-      <div className="mb-8">
-        <ProgressPill currentStep={currentStep} onStepTap={setCurrentStep} />
-      </div>
-
       {/* Main Card */}
       <div
         className="w-full max-w-[1100px] rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.1)] overflow-hidden"
@@ -716,9 +468,7 @@ export default function SignupPage() {
           {/* Left: Form */}
           <div className="flex-[5] p-6">
             <div className="bg-white rounded-[24px] px-10 py-8 h-full">
-              {currentStep === 0 && Step1()}
-              {currentStep === 1 && Step2()}
-              {currentStep === 2 && Step3()}
+            {Step1()}
             </div>
           </div>
 

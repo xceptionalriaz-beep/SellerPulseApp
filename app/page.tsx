@@ -1125,17 +1125,6 @@ function Footer() {
 
 // ── Main Page ──────────────────────────────────────────────────
 export default function LandingPage() {
-  const router = useRouter()
-
-  // Intercept Supabase auth code redirect
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const code   = params.get('code')
-    if (code) {
-      window.location.href = `/auth/callback?code=${code}`
-    }
-  }, [])
-
   return (
     <main style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
       <ScrollProgress />
