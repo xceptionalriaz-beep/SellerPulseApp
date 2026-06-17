@@ -198,13 +198,20 @@ export default function SignupPage() {
           })
         } catch { /* non-critical — don't block signup */ }
 
-        // Trigger Welcome Sequence email flow
+        // Fire webhook — new signup
         try {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
-          await fetch(appUrl + '/api/email/enqueue', {
-            method: 'POST',
+          await fetch(appUrl + '/api/admin/webhooks', {
+            method:  'POST',
             headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '' },
-            body: JSON.stringify({ trigger_event: 'user.signup', user_id: data.user?.id, to_email: email, to_name: name.trim() || 'Seller' }),
+            body:    JSON.stringify({
+              event_type: 'user.signup',
+              data: {
+                email: email,
+                name:  name.trim() || 'New User',
+                plan:  'Free',
+              }
+            }),
           })
         } catch (e) { /* non-critical */ }
 

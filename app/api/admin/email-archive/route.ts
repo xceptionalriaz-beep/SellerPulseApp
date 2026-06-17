@@ -150,13 +150,67 @@ async function runArchive() {
       .update({ last_archived_at: new Date().toISOString() })
       .eq('id', (settings as any).id)
 
+    // ── Step 5: Webhook delivery log cleanup ──────────────────
+    let webhookDeleted = 0
+    try {
+      const webhookCutoff = new Date()
+      webhookCutoff.setDate(webhookCutoff.getDate() - 30) // always 30 days
+      const webhookCutoffISO = webhookCutoff.toISOString()
+
+      // Get all destinations for archiving
+      const { data: destinations } = await (adminClient.from('webhook_destinations') as any)
+        .select('id, name')
+
+      for (const dest of destinations ?? []) {
+        const { data: oldLogs } = await (adminClient.from('webhook_delivery_log') as any)
+          .select('status, duration_ms')
+          .eq('destination_id', (dest as any).id)
+          .lte('created_at', webhookCutoffISO)
+
+        if (!oldLogs || oldLogs.length === 0) continue
+
+        const total       = oldLogs.length
+        const delivered   = oldLogs.filter((l: any) => l.status === 'delivered').length
+        const failed      = oldLogs.filter((l: any) => l.status === 'failed').length
+        const speeds      = oldLogs.filter((l: any) => l.duration_ms).map((l: any) => l.duration_ms as number)
+        const avgSpeed    = speeds.length > 0 ? Math.round(speeds.reduce((a: number, b: number) => a + b, 0) / speeds.length) : 0
+        const successRate = total > 0 ? Number(((delivered / total) * 100).toFixed(2)) : 0
+
+        // Check if archive exists for this month
+        const { data: existing } = await (adminClient.from('webhook_stats_archive') as any)
+          .select('id')
+          .eq('destination_id', (dest as any).id)
+          .eq('period_month', periodMonth)
+          .maybeSingle()
+
+        if (existing) {
+          await (adminClient.from('webhook_stats_archive') as any)
+            .update({ total_fired: total, total_delivered: delivered, total_failed: failed, success_rate: successRate, avg_speed_ms: avgSpeed, archived_at: new Date().toISOString() })
+            .eq('id', (existing as any).id)
+        } else {
+          await (adminClient.from('webhook_stats_archive') as any)
+            .insert({ destination_id: (dest as any).id, dest_name: (dest as any).name, period_month: periodMonth, total_fired: total, total_delivered: delivered, total_failed: failed, success_rate: successRate, avg_speed_ms: avgSpeed })
+        }
+      }
+
+      // Delete old delivery logs
+      const { count: wDeleted } = await (adminClient.from('webhook_delivery_log') as any)
+        .delete({ count: 'exact' })
+        .lte('created_at', webhookCutoffISO)
+
+      webhookDeleted = wDeleted ?? 0
+    } catch (err) {
+      console.error('[archive] Webhook cleanup error:', err)
+    }
+
     return NextResponse.json({
-      success:          true,
-      archived_flows:   archived,
-      telemetry_deleted: telemetryDeleted ?? 0,
-      queue_deleted:    queueDeleted ?? 0,
-      retention_days:   retentionDays,
-      cutoff_date:      cutoffISO,
+      success:            true,
+      archived_flows:     archived,
+      telemetry_deleted:  telemetryDeleted ?? 0,
+      queue_deleted:      queueDeleted ?? 0,
+      webhook_deleted:    webhookDeleted,
+      retention_days:     retentionDays,
+      cutoff_date:        cutoffISO,
     })
 
   } catch (err: any) {
