@@ -4,21 +4,43 @@
 //   2. Google OAuth callback          → redirects to dashboard (or redirect param)
 //   3. Email verification             → redirects to /onboarding (new users)
 
-import { createClient } from '@/lib/supabase'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
-  const code     = searchParams.get('code')
-  const type     = searchParams.get('type')
-  const next     = searchParams.get('next') ?? searchParams.get('redirect') ?? '/dashboard'
+  const code = searchParams.get('code')
+  const type = searchParams.get('type')
+  const next = searchParams.get('next') ?? searchParams.get('redirect') ?? '/dashboard'
 
   if (code) {
-    const supabase = createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const cookieStore = cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll()             { return cookieStore.getAll() },
+          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options?: any }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch { /* server component */ }
+          },
+        },
+      }
+    )
 
-    // ── Affiliate signup tracking (Google OAuth) ──────────────
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) {
+      console.error('[callback] exchangeCodeForSession error:', error.message)
+      return NextResponse.redirect(`${origin}/auth/login?error=callback_failed`)
+    }
+
+    // ── Affiliate signup tracking ─────────────────────────────
     if (type !== 'recovery') {
       try {
         const refCode = request.cookies.get('riazify_ref')?.value
@@ -49,21 +71,20 @@ export async function GET(request: NextRequest) {
     // ── Check if new user needs onboarding ───────────────────
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user && type !== 'recovery') {
+      if (user) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('onboarding_completed')
           .eq('id', user.id)
           .single()
 
-        // New user → onboarding, returning user → intended route
         if (!(profile as any)?.onboarding_completed) {
           return NextResponse.redirect(`${origin}/onboarding`)
         }
       }
-    } catch { /* non-critical — fallback to next */ }
+    } catch { /* non-critical — fallback */ }
 
-    // Returning user → go to intended route
+    // Returning user → intended route
     return NextResponse.redirect(`${origin}${next}`)
   }
 
