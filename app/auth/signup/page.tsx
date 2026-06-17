@@ -310,9 +310,8 @@ export default function SignupPage() {
             body:    JSON.stringify({ newUserId: user.id, newUserEmail: user.email }),
           })
         } catch { /* non-critical — don't block signup flow */ }
-        // ─────────────────────────────────────────────────────
 
-        // ── NEW: Log email verified event to journey timeline ─
+        // Log verified event
         try {
           await (supabase.from('user_events') as any).insert({
             user_id:     user.id,
@@ -322,15 +321,28 @@ export default function SignupPage() {
             created_at:  new Date().toISOString(),
           })
         } catch { /* non-critical */ }
-        // ─────────────────────────────────────────────────────
 
-        setCurrentStep(2)
+        // Check onboarding status → redirect
+        try {
+          const { data: profile } = await (supabase.from('profiles') as any)
+            .select('onboarding_completed')
+            .eq('id', user.id)
+            .single()
+
+          if (!(profile as any)?.onboarding_completed) {
+            router.push('/onboarding')
+          } else {
+            router.push('/dashboard')
+          }
+        } catch {
+          router.push('/onboarding')
+        }
+
       } else {
-        toast.warning('Email not verified yet. Please check your inbox.')
+        toast.warning('Email not verified yet. Please check your inbox and click the verification link.')
       }
     } catch {
-      // Allow proceeding — verification check is best effort
-      setCurrentStep(2)
+      router.push('/onboarding')
     } finally {
       setLoading(false)
     }

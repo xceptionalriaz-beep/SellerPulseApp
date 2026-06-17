@@ -1,10 +1,10 @@
 // app/auth/callback/route.ts
 // Handles:
 //   1. Password recovery link clicks  → redirects to /auth/reset-password
-//   2. Google OAuth callback          → redirects to dashboard (or redirect param)
+//   2. Google OAuth callback          → redirects to dashboard
 //   3. Email verification             → redirects to /onboarding (new users)
 
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -22,21 +22,23 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll()             { return cookieStore.getAll() },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options?: any }) =>
-                cookieStore.set(name, value, options)
-              )
-            } catch { /* server component */ }
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            try { cookieStore.set({ name, value, ...options }) } catch {}
+          },
+          remove(name: string, options: CookieOptions) {
+            try { cookieStore.set({ name, value: '', ...options }) } catch {}
           },
         },
       }
     )
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
+
     if (error) {
-      console.error('[callback] exchangeCodeForSession error:', error.message)
+      console.error('[callback] error:', error.message)
       return NextResponse.redirect(`${origin}/auth/login?error=callback_failed`)
     }
 
@@ -53,10 +55,7 @@ export async function GET(request: NextRequest) {
                 'Content-Type': 'application/json',
                 'Cookie':       request.headers.get('cookie') ?? '',
               },
-              body: JSON.stringify({
-                newUserId:    user.id,
-                newUserEmail: user.email,
-              }),
+              body: JSON.stringify({ newUserId: user.id, newUserEmail: user.email }),
             })
           }
         }
@@ -82,9 +81,8 @@ export async function GET(request: NextRequest) {
           return NextResponse.redirect(`${origin}/onboarding`)
         }
       }
-    } catch { /* non-critical — fallback */ }
+    } catch { /* non-critical */ }
 
-    // Returning user → intended route
     return NextResponse.redirect(`${origin}${next}`)
   }
 
