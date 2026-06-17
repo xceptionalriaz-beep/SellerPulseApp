@@ -29,7 +29,9 @@ const C = {
 
 // ── Constants ──────────────────────────────────────────────────
 const LEVEL_NAMES = ['', 'Beginner', 'Rising', 'Smart', 'Pro', 'Elite']
-const LEVEL_ICONS = ['', '🌱', '⭐', '🔥', '💎', '👑']
+const LEVEL_COLORS  = ['', C.muted, C.blue, C.amber, C.purple, C.limeDeep]
+const LEVEL_BG      = ['', C.bg, 'rgba(29,78,216,0.08)', 'rgba(217,119,6,0.08)', 'rgba(124,58,237,0.08)', C.limeTint]
+const LEVEL_LUCIDE  = ['', Star, Star, Flame, Crown, Crown]
 const LEVEL_XP    = [0, 0, 100, 300, 600, 1000]
 
 const CATEGORIES = ['onboarding', 'engagement', 'revenue']
@@ -506,16 +508,22 @@ export default function GamificationTab() {
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>SELLER LEVELS</p>
         </div>
         <div className="grid grid-cols-5 gap-0">
-          {[1,2,3,4,5].map(level => (
-            <div key={level} className="flex flex-col items-center gap-1 p-3 border-r last:border-r-0"
-                 style={{ borderColor: C.border }}>
-              <span className="text-[20px]">{LEVEL_ICONS[level]}</span>
-              <p className="text-[11px] font-black" style={{ color: C.dark }}>{LEVEL_NAMES[level]}</p>
-              <p className="text-[10px]" style={{ color: C.muted }}>
-                {LEVEL_XP[level]}+ XP
-              </p>
-            </div>
-          ))}
+          {[1,2,3,4,5].map(level => {
+            const LIcon = LEVEL_LUCIDE[level] as React.ElementType
+            return (
+              <div key={level} className="flex flex-col items-center gap-1 p-3 border-r last:border-r-0"
+                   style={{ borderColor: C.border }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                     style={{ backgroundColor: LEVEL_BG[level] }}>
+                  <LIcon size={16} style={{ color: LEVEL_COLORS[level] }} />
+                </div>
+                <p className="text-[11px] font-black" style={{ color: C.dark }}>{LEVEL_NAMES[level]}</p>
+                <p className="text-[10px]" style={{ color: C.muted }}>
+                  {LEVEL_XP[level]}+ XP
+                </p>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -730,9 +738,15 @@ export default function GamificationTab() {
             <div key={entry.id}
                  className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8]"
                  style={{ borderColor: C.border }}>
-              <span className="text-[16px] font-black w-8 text-center" style={{ color: idx < 3 ? C.amber : C.muted }}>
-                {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${entry.rank}`}
-              </span>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                   style={{
+                     backgroundColor: idx === 0 ? 'rgba(251,191,36,0.15)' : idx === 1 ? 'rgba(148,163,184,0.15)' : idx === 2 ? 'rgba(180,83,9,0.15)' : C.bg,
+                   }}>
+                <span className="text-[13px] font-black"
+                      style={{ color: idx === 0 ? '#F59E0B' : idx === 1 ? '#94A3B8' : idx === 2 ? '#B45309' : C.muted }}>
+                  {idx < 3 ? `#${idx + 1}` : `#${entry.rank}`}
+                </span>
+              </div>
               <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[12px] font-black"
                    style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
                 {(entry.display_name ?? '?')[0].toUpperCase()}
@@ -741,9 +755,15 @@ export default function GamificationTab() {
                 <p className="text-[13px] font-black truncate" style={{ color: C.dark }}>
                   {entry.display_name}
                 </p>
-                <p className="text-[10px]" style={{ color: C.muted }}>
-                  {LEVEL_NAMES[entry.seller_level]} {LEVEL_ICONS[entry.seller_level]}
-                </p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {(() => {
+                    const LIcon = LEVEL_LUCIDE[entry.seller_level ?? 1] as React.ElementType
+                    return <LIcon size={10} style={{ color: LEVEL_COLORS[entry.seller_level ?? 1] }} />
+                  })()}
+                  <p className="text-[10px]" style={{ color: LEVEL_COLORS[entry.seller_level ?? 1] }}>
+                    {LEVEL_NAMES[entry.seller_level ?? 1]}
+                  </p>
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-[14px] font-black" style={{ color: C.limeDeep }}>{entry.total_xp} XP</p>
