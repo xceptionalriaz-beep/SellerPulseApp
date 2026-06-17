@@ -284,9 +284,24 @@ function StepEditorModal({
         {/* Footer */}
         <div className="flex gap-3 px-6 py-4 border-t shrink-0" style={{ borderColor: C.border }}>
           <button onClick={handleClose}
-            className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
+            className="py-2.5 px-4 rounded-xl border text-[13px] font-semibold"
             style={{ borderColor: C.border, color: C.muted }}>
             Cancel
+          </button>
+          <button onClick={async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session?.user?.email) return
+            const res = await fetch('/api/admin/email-queue/process', {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '' },
+              body:    JSON.stringify({ to_email: session.user.email, subject, html_body: body }),
+            })
+            if (res.ok) alert(`Test email sent to ${session.user.email}`)
+            else alert('Failed to send test email')
+          }}
+            className="flex items-center gap-1.5 py-2.5 px-3 rounded-xl border text-[13px] font-semibold hover:opacity-80"
+            style={{ borderColor: C.border, color: C.muted, backgroundColor: C.bg }}>
+            <Mail size={13} /> Send Test
           </button>
           <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
