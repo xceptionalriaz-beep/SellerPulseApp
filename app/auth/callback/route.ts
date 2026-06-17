@@ -38,9 +38,11 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (error) {
-      console.error('[callback] error:', error.message)
-      return NextResponse.redirect(`${origin}/auth/login?error=callback_failed`)
+      console.error('[callback] exchangeCodeForSession error:', error.message, error.status)
+      return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(error.message)}`)
     }
+
+    console.log('[callback] session exchanged successfully')
 
     // ── Affiliate signup tracking ─────────────────────────────
     if (type !== 'recovery') {
@@ -69,20 +71,27 @@ export async function GET(request: NextRequest) {
 
     // ── Check if new user needs onboarding ───────────────────
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      console.log('[callback] getUser result:', user?.id, userError?.message)
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('onboarding_completed')
           .eq('id', user.id)
           .single()
 
+        console.log('[callback] profile:', profile, profileError?.message)
+
         if (!(profile as any)?.onboarding_completed) {
+          console.log('[callback] redirecting to /onboarding')
           return NextResponse.redirect(`${origin}/onboarding`)
         }
       }
-    } catch { /* non-critical */ }
+    } catch (e: any) {
+      console.error('[callback] onboarding check error:', e.message)
+    }
 
+    console.log('[callback] redirecting to', next)
     return NextResponse.redirect(`${origin}${next}`)
   }
 
