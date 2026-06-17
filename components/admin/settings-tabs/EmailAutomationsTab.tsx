@@ -316,19 +316,23 @@ function StepEditorModal({
 
 // ── Flow Row ───────────────────────────────────────────────────
 function FlowRow({
-  flow, isExpanded, onToggle, onToggleActive, onEditStep, toggling,
+  flow, isExpanded, onToggle, onToggleActive, onEditStep,
+  onDeleteFlow, onAddStep, onDeleteStep, toggling,
 }: {
   flow:           EmailFlow
   isExpanded:     boolean
   onToggle:       () => void
   onToggleActive: (flow: EmailFlow) => void
   onEditStep:     (step: EmailStep, flowName: string) => void
+  onDeleteFlow:   (flow: EmailFlow) => void
+  onAddStep:      (flowId: string) => void
+  onDeleteStep:   (stepId: string, flowId: string) => void
   toggling:       string | null
 }) {
   return (
     <div>
-      <div className="grid items-center px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors cursor-pointer"
-           style={{ gridTemplateColumns: '1.6fr 1fr 0.6fr 0.5fr 0.4fr', gap: 12, borderColor: C.border }}
+      <div className="grid items-center px-4 py-3 border-b hover:bg-[#fafcf8] transition-colors cursor-pointer"
+           style={{ gridTemplateColumns: '1.6fr 1fr 0.6fr 0.5fr 0.3fr 0.3fr', gap: 12, borderColor: C.border }}
            onClick={onToggle}>
 
         {/* Flow name */}
@@ -375,6 +379,14 @@ function FlowRow({
           )}
         </div>
 
+        {/* Delete flow */}
+        <div className="flex justify-center" onClick={e => { e.stopPropagation(); onDeleteFlow(flow) }}>
+          <div className="w-7 h-7 flex items-center justify-center rounded-xl cursor-pointer hover:opacity-80"
+               style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+            <Trash2 size={13} style={{ color: C.red }} />
+          </div>
+        </div>
+
         {/* Expand */}
         <div className="flex justify-end">
           <div className="w-7 h-7 flex items-center justify-center rounded-xl border"
@@ -405,27 +417,45 @@ function FlowRow({
             </p>
           </div>
 
-          <p className="text-[10px] font-black tracking-wider mb-3" style={{ color: C.muted }}>EMAIL STEPS</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>EMAIL STEPS</p>
+            <button onClick={() => onAddStep(flow.id)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:opacity-80"
+              style={{ backgroundColor: C.dark, color: C.lime }}>
+              <Plus size={11} /> Add Step
+            </button>
+          </div>
+
           <div className="flex flex-col gap-2">
+            {flow.steps.length === 0 && (
+              <p className="text-[11px] text-center py-3" style={{ color: C.muted }}>
+                No steps yet — click "Add Step" to create one
+              </p>
+            )}
             {flow.steps.map(step => (
               <div key={step.id}
-                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-white cursor-pointer hover:opacity-80"
-                   style={{ borderColor: C.border }}
-                   onClick={() => onEditStep(step, flow.name)}>
+                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-white"
+                   style={{ borderColor: C.border }}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-black"
                      style={{ backgroundColor: C.dark, color: C.lime }}>
                   {step.step_order}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEditStep(step, flow.name)}>
                   <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>{step.subject_line}</p>
                   <p className="text-[10px]" style={{ color: C.muted }}>
                     {step.delay_days === 0 ? 'Sends immediately' : `Sends after ${step.delay_days} day${step.delay_days > 1 ? 's' : ''}`}
                   </p>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0"
-                      style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 cursor-pointer hover:opacity-80"
+                      style={{ backgroundColor: C.limeTint, color: C.limeDeep }}
+                      onClick={() => onEditStep(step, flow.name)}>
                   Edit →
                 </span>
+                <button onClick={() => onDeleteStep(step.id, flow.id)}
+                  className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 shrink-0"
+                  style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+                  <Trash2 size={11} style={{ color: C.red }} />
+                </button>
               </div>
             ))}
           </div>
@@ -435,8 +465,245 @@ function FlowRow({
   )
 }
 
-// ══════════════════════════════════════════════════════════════
-// MAIN COMPONENT
+// ── New Flow Modal ─────────────────────────────────────────────
+function NewFlowModal({
+  onClose, onCreated,
+}: {
+  onClose:   () => void
+  onCreated: (flow: EmailFlow) => void
+}) {
+  const supabase = createClient()
+  const [name,          setName]          = useState('')
+  const [triggerEvent,  setTriggerEvent]  = useState('user.signup')
+  const [description,   setDescription]  = useState('')
+  const [saving,        setSaving]        = useState(false)
+  const [visible,       setVisible]       = useState(false)
+
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
+
+  function handleClose() { setVisible(false); setTimeout(onClose, 250) }
+
+  const TRIGGER_OPTIONS = [
+    { value: 'user.signup',    label: 'New Signup'         },
+    { value: 'usage.limit_80', label: '80% Limit Hit'      },
+    { value: 'payment.failed', label: 'Payment Failed'     },
+    { value: 'user.inactive',  label: '14 Days Inactive'   },
+    { value: 'plan.upgraded',  label: 'Plan Upgraded'      },
+    { value: 'plan.cancelled', label: 'Plan Cancelled'     },
+  ]
+
+  async function handleCreate() {
+    if (!name.trim()) return
+    setSaving(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/email-flows/create', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body:    JSON.stringify({ name: name.trim(), trigger_event: triggerEvent, description: description.trim() || null }),
+      })
+      const json = await res.json()
+      if (res.ok) {
+        onCreated({ ...json.flow, steps: [] })
+        handleClose()
+      }
+    } catch { /* silent */ }
+    setSaving(false)
+  }
+
+  return (
+    <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
+         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+         onClick={handleClose}>
+      <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+           style={{
+             backgroundColor: C.surface,
+             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+             opacity:   visible ? 1 : 0,
+             transition: 'transform 0.25s ease, opacity 0.25s ease',
+           }}
+           onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b"
+             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          <Mail size={16} style={{ color: C.limeDeep }} />
+          <p className="text-[15px] font-black flex-1" style={{ color: C.dark }}>New Email Flow</p>
+          <button onClick={handleClose}
+            className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
+            style={{ border: `1px solid ${C.border}` }}>
+            <X size={15} style={{ color: C.muted }} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="flex flex-col gap-4 p-5">
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>FLOW NAME</p>
+            <input value={name} onChange={e => setName(e.target.value)}
+              placeholder="e.g. Win-back Campaign"
+              className="w-full h-9 px-3 rounded-xl border text-[13px] outline-none"
+              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }} />
+          </div>
+
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>TRIGGER EVENT</p>
+            <select value={triggerEvent} onChange={e => setTriggerEvent(e.target.value)}
+              className="w-full h-9 px-3 rounded-xl border text-[13px] outline-none"
+              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
+              {TRIGGER_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>DESCRIPTION (optional)</p>
+            <input value={description} onChange={e => setDescription(e.target.value)}
+              placeholder="What does this flow do?"
+              className="w-full h-9 px-3 rounded-xl border text-[13px] outline-none"
+              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }} />
+          </div>
+
+          <p className="text-[11px]" style={{ color: C.muted }}>
+            Flow starts inactive — add steps then activate it.
+          </p>
+
+          <div className="flex gap-3">
+            <button onClick={handleClose}
+              className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
+              style={{ borderColor: C.border, color: C.muted }}>
+              Cancel
+            </button>
+            <button onClick={handleCreate} disabled={saving || !name.trim()}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+              style={{ backgroundColor: C.dark, color: C.lime }}>
+              {saving
+                ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
+                : <><Plus size={14} /> Create Flow</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Add Step Modal ─────────────────────────────────────────────
+function AddStepModal({
+  flowId, flowName, onClose, onAdded,
+}: {
+  flowId:   string
+  flowName: string
+  onClose:  () => void
+  onAdded:  (step: EmailStep) => void
+}) {
+  const supabase = createClient()
+  const [subject,  setSubject]  = useState('')
+  const [body,     setBody]     = useState('<h2>Hello {{name}},</h2>\n<p>Your message here...</p>')
+  const [delay,    setDelay]    = useState('0')
+  const [saving,   setSaving]   = useState(false)
+  const [visible,  setVisible]  = useState(false)
+
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
+
+  function handleClose() { setVisible(false); setTimeout(onClose, 250) }
+
+  async function handleSave() {
+    if (!subject.trim() || !body.trim()) return
+    setSaving(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/email-flows/add-step', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body:    JSON.stringify({ flow_id: flowId, delay_days: Number(delay), subject_line: subject, email_body: body }),
+      })
+      const json = await res.json()
+      if (res.ok) { onAdded(json.step as EmailStep); handleClose() }
+    } catch { /* silent */ }
+    setSaving(false)
+  }
+
+  return (
+    <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
+         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+         onClick={handleClose}>
+      <div className="w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+           style={{
+             backgroundColor: C.surface, maxHeight: '90vh',
+             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+             opacity:   visible ? 1 : 0,
+             transition: 'transform 0.25s ease, opacity 0.25s ease',
+           }}
+           onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b shrink-0"
+             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          <Plus size={16} style={{ color: C.limeDeep }} />
+          <div className="flex-1">
+            <p className="text-[15px] font-black" style={{ color: C.dark }}>Add Step — {flowName}</p>
+            <p className="text-[11px]" style={{ color: C.muted }}>New email step added to end of sequence</p>
+          </div>
+          <button onClick={handleClose}
+            className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
+            style={{ border: `1px solid ${C.border}` }}>
+            <X size={15} style={{ color: C.muted }} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>SEND DELAY</p>
+            <div className="flex items-center gap-2">
+              <input value={delay} onChange={e => setDelay(e.target.value.replace(/[^0-9]/g, ''))}
+                className="w-20 h-9 px-3 rounded-xl border text-[13px] font-bold outline-none text-center"
+                style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }} />
+              <p className="text-[13px]" style={{ color: C.muted }}>
+                {delay === '0' ? 'days — sends immediately' : `days after trigger`}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>SUBJECT LINE</p>
+            <input value={subject} onChange={e => setSubject(e.target.value)}
+              placeholder="e.g. Welcome to Riazify!"
+              className="w-full h-9 px-3 rounded-xl border text-[13px] outline-none"
+              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }} />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>EMAIL BODY (HTML)</p>
+              <p className="text-[10px]" style={{ color: C.muted }}>Use {'{{name}}'} for personalization</p>
+            </div>
+            <textarea value={body} onChange={e => setBody(e.target.value)} rows={10}
+              className="w-full px-3 py-2 rounded-xl border text-[12px] font-mono outline-none resize-none"
+              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }} />
+          </div>
+        </div>
+
+        <div className="flex gap-3 px-5 py-4 border-t shrink-0" style={{ borderColor: C.border }}>
+          <button onClick={handleClose}
+            className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
+            style={{ borderColor: C.border, color: C.muted }}>
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving || !subject.trim()}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+            style={{ backgroundColor: C.dark, color: C.lime }}>
+            {saving
+              ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
+              : <><Save size={14} /> Save Step</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ══════════════════════════════════════════════════════════════
 export default function EmailAutomationsTab() {
   const supabase = createClient()
@@ -448,7 +715,9 @@ export default function EmailAutomationsTab() {
   const [loading,     setLoading]     = useState(true)
   const [expandedId,  setExpandedId]  = useState<string | null>(null)
   const [toggling,    setToggling]    = useState<string | null>(null)
-  const [editingStep, setEditingStep] = useState<{ step: EmailStep; flowName: string } | null>(null)
+  const [editingStep,    setEditingStep]    = useState<{ step: EmailStep; flowName: string } | null>(null)
+  const [showNewFlow,    setShowNewFlow]    = useState(false)
+  const [addingStep,     setAddingStep]     = useState<{ flowId: string; flowName: string } | null>(null)
   const [toast,       setToast]       = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [refreshing,  setRefreshing]  = useState(false)
 
@@ -564,6 +833,55 @@ export default function EmailAutomationsTab() {
     showToast('Step saved successfully', 'success')
   }
 
+  function handleFlowCreated(flow: EmailFlow) {
+    setFlows(prev => [...prev, flow])
+    showToast(`${flow.name} created`, 'success')
+    setHudStats(prev => ({ ...prev, activeFlows: prev.activeFlows }))
+  }
+
+  function handleStepAdded(flowId: string, step: EmailStep) {
+    setFlows(prev => prev.map(f => {
+      if (f.id !== flowId) return f
+      return { ...f, steps: [...(f.steps ?? []), step] }
+    }))
+    showToast('Step added successfully', 'success')
+  }
+
+  async function handleDeleteFlow(flow: EmailFlow) {
+    if (!confirm(`Delete "${flow.name}"? This cannot be undone.`)) return
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/email-flows/delete', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body:    JSON.stringify({ id: flow.id }),
+      })
+      if (res.ok) {
+        setFlows(prev => prev.filter(f => f.id !== flow.id))
+        showToast(`${flow.name} deleted`, 'info')
+      }
+    } catch { showToast('Failed to delete flow', 'error') }
+  }
+
+  async function handleDeleteStep(stepId: string, flowId: string) {
+    if (!confirm('Delete this step? This cannot be undone.')) return
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/email-flows/delete-step', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body:    JSON.stringify({ id: stepId }),
+      })
+      if (res.ok) {
+        setFlows(prev => prev.map(f => {
+          if (f.id !== flowId) return f
+          return { ...f, steps: f.steps?.filter(s => s.id !== stepId) }
+        }))
+        showToast('Step deleted', 'info')
+      }
+    } catch { showToast('Failed to delete step', 'error') }
+  }
+
   return (
     <div className="flex flex-col gap-5">
 
@@ -577,12 +895,19 @@ export default function EmailAutomationsTab() {
             Automated email sequences — set once, runs forever
           </p>
         </div>
-        <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
-          className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-          style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-          <RefreshCw size={13} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowNewFlow(true)}
+            className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
+            style={{ backgroundColor: C.dark, color: C.lime }}>
+            <Plus size={13} /> New Flow
+          </button>
+          <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
+            className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
+            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+            <RefreshCw size={13} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* HUD Cards */}
@@ -592,8 +917,8 @@ export default function EmailAutomationsTab() {
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
         {/* Header */}
         <div className="grid px-4 py-2.5 border-b"
-             style={{ gridTemplateColumns: '1.6fr 1fr 0.6fr 0.5fr 0.4fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
-          {['FLOW NAME', 'TRIGGER', 'STEPS', 'ACTIVE', ''].map((h, i) => (
+             style={{ gridTemplateColumns: '1.6fr 1fr 0.6fr 0.5fr 0.3fr 0.3fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+          {['FLOW NAME', 'TRIGGER', 'STEPS', 'ACTIVE', '', ''].map((h, i) => (
             <span key={i} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
           ))}
         </div>
@@ -616,6 +941,9 @@ export default function EmailAutomationsTab() {
               onToggle={() => setExpandedId(prev => prev === flow.id ? null : flow.id)}
               onToggleActive={handleToggleActive}
               onEditStep={(step, flowName) => setEditingStep({ step, flowName })}
+              onDeleteFlow={handleDeleteFlow}
+              onAddStep={(flowId) => setAddingStep({ flowId, flowName: flow.name })}
+              onDeleteStep={handleDeleteStep}
               toggling={toggling}
             />
           ))
@@ -679,6 +1007,24 @@ export default function EmailAutomationsTab() {
           })
         )}
       </div>
+
+      {/* New Flow Modal */}
+      {showNewFlow && (
+        <NewFlowModal
+          onClose={() => setShowNewFlow(false)}
+          onCreated={handleFlowCreated}
+        />
+      )}
+
+      {/* Add Step Modal */}
+      {addingStep && (
+        <AddStepModal
+          flowId={addingStep.flowId}
+          flowName={addingStep.flowName}
+          onClose={() => setAddingStep(null)}
+          onAdded={(step) => { handleStepAdded(addingStep.flowId, step); setAddingStep(null) }}
+        />
+      )}
 
       {/* Step Editor Modal */}
       {editingStep && (

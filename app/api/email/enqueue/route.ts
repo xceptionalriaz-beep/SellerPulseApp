@@ -46,6 +46,38 @@ export async function POST(req: NextRequest) {
     // Normalize flow name
     const flowName = flow.name ?? flow.title ?? 'Email Flow'
 
+    // ── Suppression list check ────────────────────────────────
+    // Never queue emails for unsubscribed users
+    const { count: suppressed } = await (adminClient.from('email_suppressions') as any)
+      .select('id', { count: 'exact', head: true })
+      .eq('email', to_email.toLowerCase())
+
+    if ((suppressed ?? 0) > 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'Email suppressed — user unsubscribed',
+        queued:  0,
+      })
+    }
+
+    // ── Duplicate prevention ──────────────────────────────────
+    // Check if user already has pending/sent emails for this flow
+    if (user_id) {
+      const { count } = await (adminClient.from('email_queue') as any)
+        .select('id', { count: 'exact', head: true })
+        .eq('flow_id', flow.id)
+        .eq('user_id', user_id)
+        .in('status', ['pending', 'sent', 'delivered'])
+
+      if ((count ?? 0) > 0) {
+        return NextResponse.json({
+          success: true,
+          message: 'User already in this flow — skipping duplicate',
+          queued:  0,
+        })
+      }
+    }
+
     // Get all steps for this flow
     const { data: steps } = await (adminClient.from('email_flow_steps') as any)
       .select('*').eq('flow_id', flow.id).order('step_order', { ascending: true })
