@@ -1003,7 +1003,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
     try {
       const { data } = await (supabase.from('admin_logs') as any)
         .select('*')
-        .eq('action', 'update_plan_limits')
+        .in('action', ['update_plan_limits', 'update_pricing'])
         .order('created_at', { ascending: false })
         .limit(showAllHistory ? 50 : 5)
       setPlanHistory(data ?? [])
@@ -1224,11 +1224,17 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
                    style={{ gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr', gap: 12, borderColor: C.border }}>
 
                 {/* PLAN */}
-                <div>
+                <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-black px-2 py-0.5 rounded-lg"
                         style={{ backgroundColor: planColor.bg, color: planColor.color }}>
                     {planName}
                   </span>
+                  {entry.action === 'update_pricing' && (
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full w-fit"
+                          style={{ backgroundColor: 'rgba(29,78,216,0.08)', color: C.blue }}>
+                      PRICING PAGE
+                    </span>
+                  )}
                 </div>
 
                 {/* CHANGES */}

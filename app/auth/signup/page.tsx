@@ -241,6 +241,16 @@ export default function SignupPage() {
           })
         } catch { /* non-critical — don't block signup */ }
 
+        // Trigger Welcome Sequence email flow
+        try {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+          await fetch(appUrl + '/api/email/enqueue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '' },
+            body: JSON.stringify({ trigger_event: 'user.signup', user_id: data.user.id, to_email: email, to_name: name.trim() || 'Seller' }),
+          })
+        } catch (e) { /* non-critical */ }
+
         setCurrentStep(1)
       }
     } catch {

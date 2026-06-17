@@ -108,6 +108,19 @@ export default function PricingEditorModal({ onClose }: Props) {
     }))
   }
 
+  function moveFeature(planId: string, fromIdx: number, toIdx: number) {
+    setPlans(prev => prev.map(p => {
+      if (p.id !== planId) return p
+      const features = [...p.features]
+      const [moved]  = features.splice(fromIdx, 1)
+      features.splice(toIdx, 0, moved)
+      return { ...p, features }
+    }))
+  }
+
+  const [dragIdx,  setDragIdx]  = useState<number | null>(null)
+  const [dragOver, setDragOver] = useState<number | null>(null)
+
   async function savePlan(plan: PricingPlan) {
     setSaving(plan.id)
     try {
@@ -297,9 +310,26 @@ export default function PricingEditorModal({ onClose }: Props) {
                   </div>
                   <div className="flex flex-col gap-2">
                     {currentPlan.features.map((f, idx) => (
-                      <div key={idx} className="flex items-center gap-2 p-2 rounded-xl border"
-                           style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                        <GripVertical size={13} style={{ color: C.muted, flexShrink: 0 }} />
+                      <div key={idx}
+                           draggable
+                           onDragStart={() => setDragIdx(idx)}
+                           onDragOver={e => { e.preventDefault(); setDragOver(idx) }}
+                           onDrop={() => {
+                             if (dragIdx !== null && dragIdx !== idx) {
+                               moveFeature(currentPlan.id, dragIdx, idx)
+                             }
+                             setDragIdx(null)
+                             setDragOver(null)
+                           }}
+                           onDragEnd={() => { setDragIdx(null); setDragOver(null) }}
+                           className="flex items-center gap-2 p-2 rounded-xl border transition-all"
+                           style={{
+                             borderColor:     dragOver === idx ? C.limeDeep : C.border,
+                             backgroundColor: dragOver === idx ? C.limeTint : C.bg,
+                             opacity:         dragIdx  === idx ? 0.4 : 1,
+                             cursor:          'grab',
+                           }}>
+                        <GripVertical size={13} style={{ color: C.muted, flexShrink: 0, cursor: 'grab' }} />
                         {/* Included toggle */}
                         <div onClick={() => updateFeature(currentPlan.id, idx, 'included', !f.included)}
                              className="relative w-8 h-4 rounded-full cursor-pointer shrink-0"
@@ -315,7 +345,8 @@ export default function PricingEditorModal({ onClose }: Props) {
                         <input value={f.text}
                           onChange={e => updateFeature(currentPlan.id, idx, 'text', e.target.value)}
                           className="flex-1 h-7 px-2 rounded-lg border text-[12px] outline-none"
-                          style={{ borderColor: C.border, backgroundColor: C.surface, color: C.text }} />
+                          style={{ borderColor: C.border, backgroundColor: C.surface, color: C.text }}
+                          onClick={e => e.stopPropagation()} />
                         <button onClick={() => removeFeature(currentPlan.id, idx)}
                           className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 shrink-0"
                           style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
