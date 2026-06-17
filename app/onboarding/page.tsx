@@ -70,9 +70,11 @@ export default function OnboardingPage() {
   useEffect(() => {
     async function loadUser() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth/login'); return }
-      const name = user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'there'
-      setUserName(name.split(' ')[0])
+      if (user) {
+        const name = user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'there'
+        setUserName(name.split(' ')[0])
+      }
+      // No session yet is fine — user just signed up with email confirmation
     }
     loadUser()
   }, [])
@@ -124,7 +126,7 @@ export default function OnboardingPage() {
       }
     } catch { /* non-critical */ }
     setSaving(false)
-    router.push('/dashboard')
+    router.push('/auth/login?message=account_created')
   }
 
   // ── Progress bar ───────────────────────────────────────────
