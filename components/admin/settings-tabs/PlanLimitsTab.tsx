@@ -12,8 +12,9 @@ import {
   Users, Lock, Check, X, Edit3,
   ChevronDown, ChevronUp, Save, RefreshCw,
   Zap, BarChart2, Download, Globe, Star,
-  AlertTriangle, Shield,
+  AlertTriangle, Shield, Layout,
 } from 'lucide-react'
+import PricingEditorModal from '@/components/admin/PricingEditorModal'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -920,6 +921,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
   const [plans,      setPlans]      = useState<PlanLimit[]>([])
   const [hudStats,   setHudStats]   = useState<HudStats>({ freeUsers: 0, premiumSubs: 0, gatingTunnels: 0, mrr: 0, starterCount: 0, growthCount: 0, customCount: 0 })
   const [loading,    setLoading]    = useState(true)
+  const [showPricingEditor, setShowPricingEditor] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [toast,      setToast]      = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [refreshing, setRefreshing] = useState(false)
@@ -1099,6 +1101,12 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button onClick={() => setShowPricingEditor(true)}
+            className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
+            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
+            title="Edit Landing Page Pricing">
+            <Layout size={13} />
+          </button>
           <button onClick={exportPlansCSV}
             className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
@@ -1262,6 +1270,11 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
           })
         )}
       </div>
+
+      {/* Pricing Editor Modal */}
+      {showPricingEditor && (
+        <PricingEditorModal onClose={() => setShowPricingEditor(false)} />
+      )}
 
       {/* Toast */}
       {toast && <Toast msg={toast.msg} type={toast.type} />}
