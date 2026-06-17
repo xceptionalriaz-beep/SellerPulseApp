@@ -126,7 +126,7 @@ export default function OnboardingPage() {
       }
     } catch { /* non-critical */ }
     setSaving(false)
-    router.push('/auth/login?message=account_created')
+    router.push('/dashboard')
   }
 
   // ── Progress bar ───────────────────────────────────────────
