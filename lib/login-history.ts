@@ -35,6 +35,36 @@ export async function logLogin(): Promise<void> {
         device_info: `${metadata.device_platform} — ${metadata.browser_agent}`,
       } as never)
 
+    // 3. Fire webhook if admin login
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, name, email')
+        .eq('id', user.id)
+        .single()
+
+      if ((profile as any)?.role === 'admin') {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+        await fetch(`${appUrl}/api/admin/webhooks`, {
+          method:  'POST',
+          headers: {
+            'Content-Type':      'application/json',
+            'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '',
+          },
+          body: JSON.stringify({
+            event_type: 'admin.login',
+            data: {
+              name:    (profile as any)?.name    ?? 'Admin',
+              email:   (profile as any)?.email   ?? user.email ?? '—',
+              ip:      metadata.last_login_ip    ?? '—',
+              device:  metadata.device_platform  ?? '—',
+              time:    new Date().toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' }),
+            }
+          }),
+        })
+      }
+    } catch { /* non-critical — never block login */ }
+
   } catch (err) {
     // Non-critical — never block the user if this fails
     console.error('logLogin failed:', err)
