@@ -41,13 +41,8 @@ export async function middleware(request: NextRequest) {
   // Refresh session — keeps cookies alive
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Protect dashboard routes
+  // Protect dashboard routes only
   if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
-  }
-
-  // Protect onboarding route
-  if (request.nextUrl.pathname.startsWith('/onboarding') && !user) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
