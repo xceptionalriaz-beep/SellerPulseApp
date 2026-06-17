@@ -2,7 +2,7 @@
 // Handles:
 //   1. Password recovery link clicks  → redirects to /auth/reset-password
 //   2. Google OAuth callback          → redirects to dashboard (or redirect param)
-//   3. Email verification             → redirects to dashboard (or redirect param)
+//   3. Email verification             → redirects to /onboarding (new users)
 
 import { createClient } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code     = searchParams.get('code')
   const type     = searchParams.get('type')
-  // Support both 'next' and 'redirect' params — roadmap uses 'redirect'
   const next     = searchParams.get('next') ?? searchParams.get('redirect') ?? '/dashboard'
 
   if (code) {
@@ -47,7 +46,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/auth/reset-password`)
     }
 
-    // OAuth or email confirm → go to intended route
+    // ── Check if new user needs onboarding ───────────────────
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user && type !== 'recovery') {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single()
+
+        // New user → onboarding, returning user → intended route
+        if (!(profile as any)?.onboarding_completed) {
+          return NextResponse.redirect(`${origin}/onboarding`)
+        }
+      }
+    } catch { /* non-critical — fallback to next */ }
+
+    // Returning user → go to intended route
     return NextResponse.redirect(`${origin}${next}`)
   }
 
