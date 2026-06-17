@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/auth/signup/page.tsx
 // ═══════════════════════════════════════════════════════════════
 // Converted from: lib/pages/signup_page.dart
@@ -192,14 +192,14 @@ export default function SignupPage() {
 
       if (error) { toast.error(error.message); return }
 
-      if (data.user) {
+      if (data.user ?? data.session === null) {
         // Track session metadata
         try {
           await supabase.from('profiles').update({
             last_login_ip:   metadata.last_login_ip,
             device_platform: metadata.device_platform,
             browser_agent:   metadata.browser_agent,
-          } as never).eq('id', data.user.id)
+          } as never).eq('id', data.user?.id ?? '')
         } catch { /* non-critical */ }
 
         // ── NEW: Capture referral source ──────────────────────
@@ -211,11 +211,11 @@ export default function SignupPage() {
           // Save referral_source to profiles table
           await (supabase.from('profiles') as any)
             .update({ referral_source: referral })
-            .eq('id', data.user.id)
+            .eq('id', data.user?.id)
 
           // Log signup event to user journey timeline
           await (supabase.from('user_events') as any).insert({
-            user_id:     data.user.id,
+            user_id:     data.user?.id,
             event_type:  'signup',
             event_title: 'Signed up for Riazify',
             event_desc:  `${referral.source ?? 'Direct'} · Free Trial started`,
@@ -247,7 +247,7 @@ export default function SignupPage() {
           await fetch(appUrl + '/api/email/enqueue', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '' },
-            body: JSON.stringify({ trigger_event: 'user.signup', user_id: data.user.id, to_email: email, to_name: name.trim() || 'Seller' }),
+            body: JSON.stringify({ trigger_event: 'user.signup', user_id: data.user?.id, to_email: email, to_name: name.trim() || 'Seller' }),
           })
         } catch (e) { /* non-critical */ }
 
