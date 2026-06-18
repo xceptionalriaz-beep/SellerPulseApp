@@ -16,9 +16,9 @@ interface Props {
   charCount:      number
   veroCount:      number
   duplicateCount: number
+  onCopy?:        () => void
 }
-
-export default function TbStudio({ value, onChange, charCount, veroCount, duplicateCount }: Props) {
+export default function TbStudio({ value, onChange, charCount, veroCount, duplicateCount, onCopy }: Props) {
 
   // 🚀 Clean trigger — matches Dart _cleanTitle()
   function cleanTitle() {
@@ -78,7 +78,7 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
           <textarea value={value} onChange={e => onChange(e.target.value)} rows={2}
             className="flex-1 text-[18px] font-semibold outline-none resize-none bg-transparent py-1"
             style={{ color: C.text }} />
-          <button onClick={() => navigator.clipboard.writeText(value)}
+          <button onClick={() => { navigator.clipboard.writeText(value); onCopy?.() }}
             title="Copy Title"
             className="p-2 hover:opacity-70 shrink-0">
             <Copy size={18} style={{ color: '#3B82F6' }} />

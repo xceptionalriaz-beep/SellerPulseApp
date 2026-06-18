@@ -164,7 +164,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
       })
   }, [id])
 
-  // Load evidence
+// Load evidence
   const loadEvidence = useCallback(async () => {
     if (!id) return
     const { data } = await supabase.from('order_evidence').select('*').eq('order_id', id).order('uploaded_at', { ascending: false })
@@ -194,10 +194,31 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
       [key]: { completed: !current, timestamp: !current ? new Date().toISOString() : null }
     }
     setChecklist(updated)
+    const allCompleted = Object.values(updated).every((s: any) => s.completed)
     await (supabase.from('protected_orders') as any).update({
       protection_checklist: updated,
-      checklist_completed: Object.values(updated).every((s: any) => s.completed),
+      checklist_completed:  allCompleted,
     } as any).eq('id', id)
+
+    // ── Award XP when order fully protected ──────────────────
+    if (allCompleted) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await (supabase.from('profiles') as any)
+            .select('orders_count, total_xp')
+            .eq('id', user.id)
+            .single()
+
+          await (supabase.from('profiles') as any)
+            .update({
+              orders_count: ((profile as any)?.orders_count ?? 0) + 1,
+              total_xp:     ((profile as any)?.total_xp     ?? 0) + 10,
+            } as any)
+            .eq('id', user.id)
+        }
+      } catch { /* non-critical — never block order protection */ }
+    }
   }
 
   if (loading) return (

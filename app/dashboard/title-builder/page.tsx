@@ -135,6 +135,24 @@ export default function TitleBuilderPage() {
     setTitle(newText)
   }
 
+  // ── Award XP when title is copied ─────────────────────────────
+  async function handleTitleCopy() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await (supabase.from('profiles') as any)
+        .select('titles_count, total_xp')
+        .eq('id', user.id)
+        .single()
+      await (supabase.from('profiles') as any)
+        .update({
+          titles_count: ((profile as any)?.titles_count ?? 0) + 1,
+          total_xp:     ((profile as any)?.total_xp     ?? 0) + 3,
+        } as any)
+        .eq('id', user.id)
+    } catch { /* non-critical */ }
+  }
+
   // ── Title change handler with auto-capitalize ─────────────────
   function handleTitleChange(val: string) {
     // Auto-capitalize if setting is on (matches Dart autoCapitalize)
@@ -175,6 +193,7 @@ export default function TitleBuilderPage() {
                 charCount={charCount}
                 veroCount={flaggedVero.length}
                 duplicateCount={flaggedDups.length}
+                onCopy={handleTitleCopy}
               />
             </div>
             <div style={{ flex: 35 }}>

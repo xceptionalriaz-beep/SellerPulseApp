@@ -19,7 +19,7 @@
 //   ✅ Responsive (desktop side-by-side / mobile stacked)
 // ═══════════════════════════════════════════════════════════════
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { BarChart2, AlertTriangle, Flame, ImageIcon, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import CommandCenter   from '@/components/profit/CommandCenter'
@@ -313,6 +313,34 @@ export default function ProfitCalculatorPage() {
     const lowerTitle = ` ${title.toLowerCase()} ` // Pad with spaces to match whole words
     return VERO_KEYWORDS.some(brand => lowerTitle.includes(` ${brand} `))
   }
+
+  // ── Award XP when profit is calculated ────────────────────
+  const calcTrackedRef = useRef(false)
+  useEffect(() => {
+    if (salePrice <= 0 || itemCost <= 0) return
+    if (calcTrackedRef.current) return
+    calcTrackedRef.current = true
+
+    const timer = setTimeout(async () => {
+      try {
+        const supabase = (await import('@/lib/supabase')).createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { data: profile } = await (supabase.from('profiles') as any)
+          .select('titles_count, total_xp')
+          .eq('id', user.id)
+          .single()
+        await (supabase.from('profiles') as any)
+          .update({
+            titles_count: ((profile as any)?.titles_count ?? 0) + 1,
+            total_xp:     ((profile as any)?.total_xp     ?? 0) + 2,
+          } as any)
+          .eq('id', user.id)
+      } catch { /* non-critical */ }
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [salePrice, itemCost])
 
   const currency = getCurrency(country)
 
