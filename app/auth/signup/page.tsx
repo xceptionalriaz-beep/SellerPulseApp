@@ -165,6 +165,28 @@ export default function SignupPage() {
         try {
           const referral = readReferral() ?? { source: 'direct' }
 
+          // If referred by someone → increment their referral_count
+          if (referral.ref) {
+            const { data: referrer } = await (supabase.from('profiles') as any)
+              .select('id, referral_count')
+              .eq('referral_code', referral.ref)
+              .single()
+
+            if (referrer) {
+              await (supabase.from('profiles') as any)
+                .update({
+                  referral_count: ((referrer as any).referral_count ?? 0) + 1,
+                  updated_at:     new Date().toISOString(),
+                })
+                .eq('id', (referrer as any).id)
+
+              // Save referred_by to new user's profile
+              await (supabase.from('profiles') as any)
+                .update({ referred_by: (referrer as any).id })
+                .eq('id', data.user?.id)
+            }
+          }
+
           // Save referral_source to profiles table
           await (supabase.from('profiles') as any)
             .update({ referral_source: referral })
