@@ -28,6 +28,7 @@ import {
 import { createClient } from '@/lib/supabase'
 import { cn, timeAgo, formatCurrency } from '@/lib/utils'
 import type { Profile } from '@/types/database'
+import QuestWidget from '@/components/QuestWidget'
 
 // ── Design tokens (matches Dart _C class exactly) ──────────────
 const C = {
@@ -379,6 +380,9 @@ export default function DashboardHomePage() {
             sub="From dispute prevention"
             color={C.riskLow} bg={C.riskLowBg} />
         </div>
+
+        {/* ── QUEST WIDGET ── */}
+        <QuestWidget />
 
         {/* ── CHARTS ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
