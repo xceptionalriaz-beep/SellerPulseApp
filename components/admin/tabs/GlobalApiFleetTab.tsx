@@ -10,6 +10,7 @@ import {
   BarChart2, PieChart, History, Zap,
   RefreshCw, RotateCcw, Wifi, TrendingUp,
   CheckCircle, XCircle, ChevronRight, AlertTriangle,
+  Mail, CreditCard,
 } from 'lucide-react'
 
 // ── Brand color tokens (from Riazify design PDF) ─────────────
@@ -33,10 +34,13 @@ const C = {
 }
 
 const PLATFORMS = [
-  { id: 'ebay',             label: 'eBay Network',  icon: ShoppingCart },
-  { id: 'aliexpress',       label: 'AliExpress',    icon: ShoppingBag  },
-  { id: 'openai',           label: 'OpenAI Engine', icon: Brain        },
-  { id: 'amazon_affiliate', label: 'Amazon SP-API', icon: Lock         },
+  { id: 'ebay',         label: 'eBay Network',    icon: ShoppingCart },
+  { id: 'resend',       label: 'Resend Email',     icon: Mail         },
+  { id: 'openai',       label: 'OpenAI Engine',    icon: Brain        },
+  { id: 'aliexpress',   label: 'AliExpress',       icon: ShoppingBag  },
+  { id: 'lemonsqueezy', label: 'LemonSqueezy',     icon: CreditCard   },
+  { id: 'stripe',       label: 'Stripe',           icon: CreditCard   },
+  { id: 'amazon_spapi', label: 'Amazon SP-API',    icon: Lock         },
 ]
 
 const TOOL_COLORS: Record<string, string> = {
@@ -382,7 +386,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
       const status = c.status              ?? 'not_configured'
 
       totalToday += today; totalMonth += month
-      if (status === 'connected' && name !== 'amazon_affiliate') connected++
+if (status === 'connected' && name !== 'amazon_spapi') connected++
 
       let daysLeft = 999
       if (c.expires_at) daysLeft = Math.ceil((new Date(c.expires_at).getTime()-Date.now())/86400000)
@@ -407,7 +411,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
     setPlatformMap(map)
     setTotalRequestsToday(totalToday)
     setTotalRequestsMonth(totalMonth)
-    setConnectedCount(Math.min(connected, 3))
+    setConnectedCount(connected)
   }
 
   // ── FIX 2: Recent activity — admin-wide (no user_id filter) ─
@@ -582,7 +586,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
   const mins = Math.floor((Date.now()-lastRefreshed.getTime())/60000)
   const refreshText = mins < 1 ? 'Just now' : `${mins}m ago`
 
-  const scorable  = PLATFORMS.filter(p => p.id !== 'amazon_affiliate').map(p => platformMap[p.id]?.healthScore ?? 0)
+  const scorable  = PLATFORMS.filter(p => p.id !== 'amazon_spapi').map(p => platformMap[p.id]?.healthScore ?? 0)
   const avgHealth = scorable.length ? Math.round(scorable.reduce((a,b) => a+b, 0)/scorable.length) : 0
   const toolTotal = Object.values(toolBreakdown).reduce((a,b) => a+b, 0)
   const projections = Object.entries(platformMap)
@@ -614,7 +618,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
       {/* Summary cards */}
       <div className={`flex gap-4 ${isMobile ? 'flex-col' : ''}`}>
         <SummaryCard icon={Activity}   iconColor={C.blue}   iconBg={C.blue+'1A'}   label="Requests Today" value={String(totalRequestsToday)} subtitle={`${totalRequestsMonth} this month`} />
-        <SummaryCard icon={Link}       iconColor={connectedCount===3?C.green:C.orange} iconBg={(connectedCount===3?C.green:C.orange)+'1A'} label="Connected Platforms" value={`${connectedCount}/3`} subtitle="Active integrations" />
+        <SummaryCard icon={Link}       iconColor={connectedCount===PLATFORMS.filter(p => p.id !== 'amazon_spapi').length?C.green:C.orange} iconBg={(connectedCount===PLATFORMS.filter(p => p.id !== 'amazon_spapi').length?C.green:C.orange)+'1A'} label="Connected Platforms" value={`${connectedCount}/${PLATFORMS.filter(p => p.id !== 'amazon_spapi').length}`} subtitle="Active integrations" />
         <SummaryCard icon={HeartPulse} iconColor={avgHealth>=80?C.green:avgHealth>=60?C.orange:C.red} iconBg={(avgHealth>=80?C.green:avgHealth>=60?C.orange:C.red)+'1A'} label="Avg Health Score" value={`${avgHealth}/100`} subtitle={avgHealth>=80?'All systems healthy':avgHealth>=60?'Needs attention':'Critical issues'} />
         <SummaryCard icon={Bell}       iconColor={activeNotifications>0?C.red:C.green} iconBg={(activeNotifications>0?C.red:C.green)+'1A'} label="Active Alerts" value={String(activeNotifications)} subtitle={activeNotifications>0?'Require attention':'All clear!'} />
       </div>

@@ -110,6 +110,21 @@ export async function GET(req: NextRequest) {
             metadata:    { to_email: email.to_email, subject: email.subject },
           })
 
+          // Missing 6: Track Resend monthly email quota
+          try {
+            const { data: curr } = await (adminClient.from('api_fleet_config') as any)
+              .select('monthly_used')
+              .eq('platform_name', 'resend')
+              .single()
+            await (adminClient.from('api_fleet_config') as any)
+              .update({
+                monthly_used:    ((curr as any)?.monthly_used ?? 0) + 1,
+                last_used_at:    now,
+                last_request_at: now,
+              })
+              .eq('platform_name', 'resend')
+          } catch {}
+
           results.sent++
         } else {
           const err = await res.text()

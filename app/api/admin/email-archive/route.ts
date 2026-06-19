@@ -213,6 +213,19 @@ async function runArchive() {
       console.error('[archive] API counter reset error:', err)
     }
 
+    // ── Missing 6: Reset Resend monthly quota on 1st of month ─
+    try {
+      const today = new Date()
+      if (today.getDate() === 1) {
+        await (adminClient.from('api_fleet_config') as any)
+          .update({ monthly_used: 0 })
+          .eq('platform_name', 'resend')
+        console.log('[archive] Resend monthly quota reset')
+      }
+    } catch (err) {
+      console.error('[archive] Monthly reset error:', err)
+    }
+
     return NextResponse.json({
       success:            true,
       archived_flows:     archived,

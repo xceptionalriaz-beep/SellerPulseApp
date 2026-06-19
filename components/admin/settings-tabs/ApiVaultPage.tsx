@@ -79,6 +79,7 @@ function getHealthScore(api: any): number {
 
 function fingerprint(key: string): string {
   if (!key || key === 'EMPTY' || key === '') return '—'
+  if (key.startsWith('env:')) return key.replace('env:', '').replace(/_/g, ' ')
   if (key.length < 12) return key
   return `${key.slice(0, 8)}…${key.slice(-4)}`
 }
@@ -202,6 +203,115 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
 }
 
 // ── Configuration Tab ──────────────────────────────────────────
+// ── Tool Usage Breakdown (Missing 3) ──────────────────────────
+function ToolUsageBreakdown({ platformName }: { platformName: string }) {
+  const [breakdown, setBreakdown] = useState<any[]>([])
+  const [total,     setTotal]     = useState(0)
+  const [loading,   setLoading]   = useState(true)
+
+  useEffect(() => {
+    const client = createClient()
+    async function load() {
+      try {
+        // Get today's usage grouped by tool
+        const today = new Date().toISOString().slice(0, 10)
+        const { data } = await (client.from('api_usage_logs') as any)
+          .select('tool_name, success_count, error_count, response_time_ms')
+          .eq('platform_name', platformName)
+          .gte('logged_at', today)
+
+        if (data && data.length > 0) {
+          // Group by tool
+          const grouped: Record<string, { calls: number; errors: number; totalMs: number }> = {}
+          data.forEach((row: any) => {
+            const tool = row.tool_name ?? 'other'
+            if (!grouped[tool]) grouped[tool] = { calls: 0, errors: 0, totalMs: 0 }
+            grouped[tool].calls  += (row.success_count ?? 0) + (row.error_count ?? 0)
+            grouped[tool].errors += row.error_count ?? 0
+            grouped[tool].totalMs += row.response_time_ms ?? 0
+          })
+
+          const totalCalls = Object.values(grouped).reduce((s, v) => s + v.calls, 0)
+          setTotal(totalCalls)
+
+          const TOOL_COLORS: Record<string, string> = {
+            orders:              C.blue,
+            title_builder:       C.purple,
+            profit_calculator:   '#ec4899',
+            competitor_research: C.amber,
+            product_research:    C.limeDeep,
+            other:               C.muted,
+          }
+
+          setBreakdown(
+            Object.entries(grouped)
+              .sort(([,a], [,b]) => b.calls - a.calls)
+              .map(([tool, stats]) => ({
+                tool,
+                label:   tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                calls:   stats.calls,
+                errors:  stats.errors,
+                avgMs:   stats.calls > 0 ? Math.round(stats.totalMs / stats.calls) : 0,
+                pct:     totalCalls > 0 ? Math.round((stats.calls / totalCalls) * 100) : 0,
+                color:   TOOL_COLORS[tool] ?? C.muted,
+              }))
+          )
+        }
+      } catch {}
+      setLoading(false)
+    }
+    load()
+  }, [platformName])
+
+  if (loading) return (
+    <div className="h-20 rounded-xl animate-pulse" style={{ backgroundColor: C.border }} />
+  )
+
+  if (breakdown.length === 0) return (
+    <div className="p-3 rounded-xl border" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+      <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>TOOL USAGE TODAY</p>
+      <p className="text-[11px]" style={{ color: C.muted }}>No API calls yet today</p>
+    </div>
+  )
+
+  return (
+    <div className="p-3 rounded-xl border flex flex-col gap-3" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>TOOL USAGE TODAY</p>
+        <p className="text-[11px] font-bold" style={{ color: C.text }}>{total} total calls</p>
+      </div>
+
+      {/* Stacked bar */}
+      <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
+        {breakdown.map((b, i) => (
+          <div key={i} className="h-full rounded-full transition-all"
+               style={{ width: `${b.pct}%`, backgroundColor: b.color, minWidth: b.pct > 0 ? 4 : 0 }} />
+        ))}
+      </div>
+
+      {/* Breakdown list */}
+      <div className="flex flex-col gap-1.5">
+        {breakdown.map((b, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
+            <p className="text-[11px] flex-1" style={{ color: C.text }}>{b.label}</p>
+            <p className="text-[11px] font-bold" style={{ color: C.muted }}>{b.calls} calls</p>
+            {b.errors > 0 && (
+              <p className="text-[10px] font-bold px-1.5 py-0.5 rounded-lg"
+                 style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                {b.errors} err
+              </p>
+            )}
+            <p className="text-[10px]" style={{ color: C.muted }}>{b.avgMs}ms</p>
+            <p className="text-[10px] font-bold w-8 text-right" style={{ color: b.color }}>{b.pct}%</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── ConfigTab ──────────────────────────────────────────────────
 function ConfigTab({ api, onSaved, showToast }: {
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
@@ -214,9 +324,22 @@ function ConfigTab({ api, onSaved, showToast }: {
   const [b2,      setB2]      = useState(api.backup_key_2  === 'EMPTY' ? '' : api.backup_key_2  ?? '')
   const [showP2,  setShowP2]  = useState(false)
   const [showB2,  setShowB2]  = useState(false)
-  const [saving,  setSaving]  = useState(false)
-  const [testing, setTesting] = useState(false)
-  const [env,     setEnv]     = useState<'production' | 'sandbox'>('production')
+  const [saving,       setSaving]       = useState(false)
+  const [testing,      setTesting]      = useState(false)
+  const [confirmRevoke,setConfirmRevoke] = useState(false)
+  const [env,          setEnv]          = useState<'production' | 'sandbox'>(api.environment ?? 'production')
+
+  // Save environment to DB when changed
+  async function handleEnvChange(newEnv: 'production' | 'sandbox') {
+    setEnv(newEnv)
+    try {
+      await (supabase.from('api_fleet_config') as any)
+        .update({ environment: newEnv, updated_at: new Date().toISOString() })
+        .eq('platform_name', api.platform_name)
+      showToast(`Switched to ${newEnv}`, 'info')
+      onSaved()
+    } catch { showToast('Failed to switch environment', 'error') }
+  }
 
   const scopes = api.scopes ?? [
     { name: 'Read Catalog',    granted: true  },
@@ -275,11 +398,20 @@ function ConfigTab({ api, onSaved, showToast }: {
         ms      = Date.now() - start
         success = (result.data as any)?.success === true
       } else if (api.platform_name === 'resend') {
-        const res = await fetch('https://api.resend.com/domains', {
-          headers: { Authorization: `Bearer ${p1.trim()}` }
+        // For env: keys — test via server-side route
+        const res  = await fetch('/api/admin/test-connection', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ platform: 'resend' }),
         })
+        const json = await res.json()
         ms      = Date.now() - start
-        success = res.ok
+        success = json.success === true
+        if (!success) {
+          showToast(json.message ?? 'Connection failed', 'error')
+          setTesting(false)
+          return
+        }
       } else if (api.platform_name === 'lemonsqueezy') {
         // Fix 11: Real LemonSqueezy test — fetch store info
         const res = await fetch('https://api.lemonsqueezy.com/v1/stores', {
@@ -337,7 +469,7 @@ function ConfigTab({ api, onSaved, showToast }: {
     setTesting(false)
   }
 
-  const [confirmRevoke, setConfirmRevoke] = useState(false)
+  const isEnvKey = p1.startsWith('env:') || api.primary_key_1?.startsWith('env:')
 
   async function handleRevoke() {
     if (!confirmRevoke) { setConfirmRevoke(true); setTimeout(() => setConfirmRevoke(false), 3000); return }
@@ -373,42 +505,64 @@ function ConfigTab({ api, onSaved, showToast }: {
       {/* Primary keys */}
       <div className="flex flex-col gap-3">
         <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>PRIMARY KEYS</p>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-bold" style={{ color: C.muted }}>Key 1 / App ID</p>
-              <button onClick={() => copyFP(p1, 'Key 1')}
-                className="flex items-center gap-1 text-[10px] hover:opacity-70"
-                style={{ color: C.muted }}>
-                <Copy size={9} /> {fingerprint(p1)}
-              </button>
+
+        {isEnvKey ? (
+          <div className="flex items-start gap-3 p-3 rounded-xl border"
+               style={{ backgroundColor: C.limeTint, borderColor: C.limeDeep + '40' }}>
+            <Shield size={14} style={{ color: C.limeDeep, marginTop: 1, flexShrink: 0 }} />
+            <div>
+              <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>
+                Key stored in environment variables
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>
+                {api.primary_key_1?.replace('env:', '')} is set in Vercel → Settings → Environment Variables.
+                This is the most secure way to store API keys.
+              </p>
+              <a href="https://vercel.com/dashboard" target="_blank" rel="noreferrer"
+                 className="text-[11px] font-bold mt-1 inline-flex items-center gap-1 hover:opacity-70"
+                 style={{ color: C.limeDeep }}>
+                <ExternalLink size={10} /> Manage in Vercel
+              </a>
             </div>
-            <input value={p1} onChange={e => setP1(e.target.value)}
-              placeholder="Paste key 1..."
-              className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
-              style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
           </div>
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-bold" style={{ color: C.muted }}>Key 2 / Secret</p>
-              <div className="flex items-center gap-2">
-                <button onClick={() => copyFP(p2, 'Key 2')}
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] font-bold" style={{ color: C.muted }}>Key 1 / App ID</p>
+                <button onClick={() => copyFP(p1, 'Key 1')}
                   className="flex items-center gap-1 text-[10px] hover:opacity-70"
                   style={{ color: C.muted }}>
-                  <Copy size={9} /> {fingerprint(p2)}
-                </button>
-                <button onClick={() => setShowP2(s => !s)} className="hover:opacity-70">
-                  {showP2 ? <EyeOff size={11} style={{ color: C.muted }} /> : <Eye size={11} style={{ color: C.muted }} />}
+                  <Copy size={9} /> {fingerprint(p1)}
                 </button>
               </div>
+              <input value={p1} onChange={e => setP1(e.target.value)}
+                placeholder="Paste key 1..."
+                className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
+                style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
             </div>
-            <input value={p2} onChange={e => setP2(e.target.value)}
-              type={showP2 ? 'text' : 'password'}
-              placeholder="Paste key 2..."
-              className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
-              style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[10px] font-bold" style={{ color: C.muted }}>Key 2 / Secret</p>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => copyFP(p2, 'Key 2')}
+                    className="flex items-center gap-1 text-[10px] hover:opacity-70"
+                    style={{ color: C.muted }}>
+                    <Copy size={9} /> {fingerprint(p2)}
+                  </button>
+                  <button onClick={() => setShowP2(s => !s)} className="hover:opacity-70">
+                    {showP2 ? <EyeOff size={11} style={{ color: C.muted }} /> : <Eye size={11} style={{ color: C.muted }} />}
+                  </button>
+                </div>
+              </div>
+              <input value={p2} onChange={e => setP2(e.target.value)}
+                type={showP2 ? 'text' : 'password'}
+                placeholder="Paste key 2..."
+                className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
+                style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Fallback keys */}
@@ -437,22 +591,36 @@ function ConfigTab({ api, onSaved, showToast }: {
         </div>
       </div>
 
-      {/* Environment */}
+      {/* Missing 4: Environment — wired to DB */}
       <div>
         <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>ENVIRONMENT</p>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {(['production', 'sandbox'] as const).map(e => (
-            <button key={e} onClick={() => setEnv(e)}
+            <button key={e} onClick={() => handleEnvChange(e)}
               className="px-3 py-2 rounded-xl border text-[12px] font-bold capitalize transition-all"
               style={{
-                backgroundColor: env === e ? C.dark : C.surface,
-                borderColor:     env === e ? C.dark : C.border,
-                color:           env === e ? C.lime : C.muted,
+                backgroundColor: env === e ? C.dark    : C.surface,
+                borderColor:     env === e ? C.dark    : C.border,
+                color:           env === e ? C.lime    : C.muted,
               }}>
               {e}
             </button>
           ))}
+          {env === 'sandbox' && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+                 style={{ backgroundColor: 'rgba(217,119,6,0.08)', border: `1px solid rgba(217,119,6,0.2)` }}>
+              <AlertTriangle size={11} style={{ color: C.amber }} />
+              <span className="text-[10px] font-bold" style={{ color: C.amber }}>
+                Sandbox mode — fake data only
+              </span>
+            </div>
+          )}
         </div>
+        {env === 'sandbox' && api.platform_name === 'ebay' && (
+          <p className="text-[10px] mt-1.5" style={{ color: C.muted }}>
+            eBay sandbox uses separate keys from developer.ebay.com sandbox environment
+          </p>
+        )}
       </div>
 
       {/* Rate limit */}
@@ -474,7 +642,41 @@ function ConfigTab({ api, onSaved, showToast }: {
           </div>
           <p className="text-[10px]" style={{ color: C.muted }}>
             {Math.round(((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) * 100)}% used today
+            — resets at midnight UTC
           </p>
+        </div>
+      )}
+
+      {/* Missing 6: Resend monthly email quota */}
+      {api.platform_name === 'resend' && (api.monthly_limit ?? 0) > 0 && (
+        <div className="p-3 rounded-xl border" style={{
+          borderColor: ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.85 ? 'rgba(185,28,28,0.3)' : C.border,
+          backgroundColor: ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.85 ? 'rgba(185,28,28,0.04)' : C.surface,
+        }}>
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>MONTHLY EMAIL QUOTA</p>
+            <p className="text-[11px] font-bold" style={{ color: C.text }}>
+              {(api.monthly_used ?? 0).toLocaleString()} / {(api.monthly_limit ?? 0).toLocaleString()} emails
+            </p>
+          </div>
+          <div className="h-2 rounded-full overflow-hidden mb-1" style={{ backgroundColor: C.border }}>
+            <div className="h-full rounded-full transition-all"
+                 style={{
+                   width: `${Math.min(((api.monthly_used ?? 0) / Math.max(api.monthly_limit ?? 1, 1)) * 100, 100)}%`,
+                   backgroundColor: ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.85 ? C.red :
+                                    ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.7  ? C.amber : C.lime,
+                 }} />
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px]" style={{ color: C.muted }}>
+              {Math.round(((api.monthly_used ?? 0) / Math.max(api.monthly_limit ?? 1, 1)) * 100)}% used this month
+            </p>
+            {((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.8 && (
+              <p className="text-[10px] font-bold" style={{ color: C.amber }}>
+                Consider upgrading Resend plan
+              </p>
+            )}
+          </div>
         </div>
       )}
 
@@ -513,6 +715,9 @@ function ConfigTab({ api, onSaved, showToast }: {
         </div>
       )}
 
+      {/* Missing 3: Per-tool usage breakdown */}
+      <ToolUsageBreakdown platformName={api.platform_name} />
+
       {/* Action buttons */}
       <div className="flex items-center gap-3 flex-wrap">
         <button onClick={handleSave} disabled={saving || !p1.trim()}
@@ -529,6 +734,24 @@ function ConfigTab({ api, onSaved, showToast }: {
             ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.text }} />
             : <><Wifi size={13} /> Test Connection</>}
         </button>
+
+        {/* Missing 7: Quick reconnect — opens docs/portal */}
+        {api.docs_url && (
+          <a href={
+            api.platform_name === 'ebay'         ? 'https://developer.ebay.com/my/keys' :
+            api.platform_name === 'resend'        ? 'https://resend.com/api-keys' :
+            api.platform_name === 'openai'        ? 'https://platform.openai.com/api-keys' :
+            api.platform_name === 'lemonsqueezy'  ? 'https://app.lemonsqueezy.com/settings/api' :
+            api.platform_name === 'stripe'        ? 'https://dashboard.stripe.com/apikeys' :
+            api.platform_name === 'aliexpress'    ? 'https://portals.aliexpress.com/developer/index.htm' :
+            api.docs_url
+          } target="_blank" rel="noreferrer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-bold hover:opacity-80 transition-all"
+            style={{ borderColor: C.limeDeep + '40', backgroundColor: C.limeTint, color: C.limeDeep }}>
+            <RefreshCw size={13} /> Get New Keys
+          </a>
+        )}
+
         {api.docs_url && (
           <a href={api.docs_url} target="_blank" rel="noreferrer"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-bold hover:opacity-80"
@@ -540,8 +763,8 @@ function ConfigTab({ api, onSaved, showToast }: {
         <button onClick={handleRevoke}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all"
           style={{
-            backgroundColor: confirmRevoke ? C.red                    : 'rgba(185,28,28,0.08)',
-            color:           confirmRevoke ? '#ffffff'                 : C.red,
+            backgroundColor: confirmRevoke ? C.red                   : 'rgba(185,28,28,0.08)',
+            color:           confirmRevoke ? '#ffffff'                : C.red,
           }}>
           <Trash2 size={13} />
           {confirmRevoke ? 'Click again to confirm revoke' : 'Revoke Keys'}
@@ -561,19 +784,44 @@ function ConfigTab({ api, onSaved, showToast }: {
 
 // ── Activity Tab ───────────────────────────────────────────────
 function ActivityTab({ api }: { api: any }) {
-  const [history, setHistory] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [history,   setHistory]   = useState<any[]>([])
+  const [errors,    setErrors]    = useState<any[]>([])
+  const [usageLogs, setUsageLogs] = useState<any[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [activeTab, setActiveTab] = useState<'keys' | 'errors' | 'calls'>('keys')
 
   useEffect(() => {
     const client = createClient()
     async function load() {
       try {
-        const { data } = await (client.from('api_key_history') as any)
-          .select('*')
-          .eq('platform_name', api.platform_name)
-          .order('created_at', { ascending: false })
-          .limit(20)
-        setHistory(data ?? [])
+        const [
+          { data: keyHistory },
+          { data: errorLogs },
+          { data: apiCalls },
+        ] = await Promise.all([
+          // Key history
+          (client.from('api_key_history') as any)
+            .select('*')
+            .eq('platform_name', api.platform_name)
+            .order('created_at', { ascending: false })
+            .limit(20),
+          // Missing 5: Error logs from api_usage_logs
+          (client.from('api_usage_logs') as any)
+            .select('*')
+            .eq('platform_name', api.platform_name)
+            .gt('error_count', 0)
+            .order('logged_at', { ascending: false })
+            .limit(20),
+          // Recent API calls
+          (client.from('api_usage_logs') as any)
+            .select('*')
+            .eq('platform_name', api.platform_name)
+            .order('logged_at', { ascending: false })
+            .limit(20),
+        ])
+        setHistory(keyHistory   ?? [])
+        setErrors(errorLogs     ?? [])
+        setUsageLogs(apiCalls   ?? [])
       } catch {}
       setLoading(false)
     }
@@ -588,45 +836,159 @@ function ActivityTab({ api }: { api: any }) {
     return { color: C.muted, bg: C.bg }
   }
 
+  const SUBTABS = [
+    { key: 'keys',   label: 'Key History',  count: history.length                              },
+    { key: 'errors', label: 'Error Log',    count: errors.length,  warn: errors.length > 0    },
+    { key: 'calls',  label: 'API Calls',    count: usageLogs.length                            },
+  ]
+
   return (
-    <div className="p-5" style={{ backgroundColor: C.bg }}>
-      <p className="text-[10px] font-black tracking-wider mb-3" style={{ color: C.muted }}>KEY ACTIVITY LOG</p>
+    <div className="p-5 flex flex-col gap-4" style={{ backgroundColor: C.bg }}>
+
+      {/* Sub tabs */}
+      <div className="flex gap-1.5">
+        {SUBTABS.map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key as any)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+            style={{
+              backgroundColor: activeTab === t.key ? C.dark    : C.surface,
+              color:           activeTab === t.key ? C.lime    : C.muted,
+              border:          `1px solid ${activeTab === t.key ? C.dark : C.border}`,
+            }}>
+            {t.label}
+            {t.count > 0 && (
+              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-lg"
+                    style={{
+                      backgroundColor: (t as any).warn ? C.red : activeTab === t.key ? C.lime : C.bg,
+                      color:           (t as any).warn ? '#fff' : activeTab === t.key ? C.dark : C.muted,
+                    }}>
+                {t.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="flex flex-col gap-2">
           {[0,1,2].map(i => <div key={i} className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: C.border }} />)}
         </div>
-      ) : history.length === 0 ? (
-        <div className="flex flex-col items-center py-8 gap-2">
-          <Clock size={24} style={{ color: C.border }} />
-          <p className="text-[12px]" style={{ color: C.muted }}>No activity recorded yet</p>
-        </div>
       ) : (
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-          <div className="grid px-4 py-2 border-b"
-               style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
-            {['DATE', 'ACTION', 'BY', 'FINGERPRINT', 'NOTES'].map(h => (
-              <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
-            ))}
-          </div>
-          {history.map((h: any, i: number) => {
-            const ac = actionColor(h.action)
-            return (
-              <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
-                   style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border }}>
-                <span className="text-[11px]" style={{ color: C.muted }}>
-                  {new Date(h.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </span>
-                <span className="text-[9px] font-black px-2 py-0.5 rounded-lg w-fit capitalize"
-                      style={{ backgroundColor: ac.bg, color: ac.color }}>{h.action}</span>
-                <span className="text-[11px] truncate" style={{ color: C.text }}>{h.changed_by ?? '—'}</span>
-                <span className="text-[11px] font-mono" style={{ color: C.muted }}>
-                  {h.key_fingerprint ? `${h.key_fingerprint}…` : '—'}
-                </span>
-                <span className="text-[11px] truncate" style={{ color: C.muted }}>{h.notes ?? '—'}</span>
+        <>
+          {/* Key History */}
+          {activeTab === 'keys' && (
+            history.length === 0 ? (
+              <div className="flex flex-col items-center py-8 gap-2">
+                <Clock size={24} style={{ color: C.border }} />
+                <p className="text-[12px]" style={{ color: C.muted }}>No key activity recorded yet</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                <div className="grid px-4 py-2 border-b"
+                     style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  {['DATE', 'ACTION', 'BY', 'FINGERPRINT', 'NOTES'].map(h => (
+                    <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+                  ))}
+                </div>
+                {history.map((h: any, i: number) => {
+                  const ac = actionColor(h.action)
+                  return (
+                    <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
+                         style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border }}>
+                      <span className="text-[11px]" style={{ color: C.muted }}>
+                        {new Date(h.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-lg w-fit capitalize"
+                            style={{ backgroundColor: ac.bg, color: ac.color }}>{h.action}</span>
+                      <span className="text-[11px] truncate" style={{ color: C.text }}>{h.changed_by ?? '—'}</span>
+                      <span className="text-[11px] font-mono" style={{ color: C.muted }}>
+                        {h.key_fingerprint ? `${h.key_fingerprint}…` : '—'}
+                      </span>
+                      <span className="text-[11px] truncate" style={{ color: C.muted }}>{h.notes ?? '—'}</span>
+                    </div>
+                  )
+                })}
               </div>
             )
-          })}
-        </div>
+          )}
+
+          {/* Missing 5: Error Log */}
+          {activeTab === 'errors' && (
+            errors.length === 0 ? (
+              <div className="flex flex-col items-center py-8 gap-2">
+                <CheckCircle size={24} style={{ color: C.limeDeep }} />
+                <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>No errors recorded</p>
+                <p className="text-[11px]" style={{ color: C.muted }}>All API calls succeeded</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                <div className="grid px-4 py-2 border-b"
+                     style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.6fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  {['DATE', 'TOOL', 'CALL', 'ERRORS', 'MESSAGE'].map(h => (
+                    <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+                  ))}
+                </div>
+                {errors.map((e: any, i: number) => (
+                  <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
+                       style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.6fr 1.5fr', gap: 12, borderColor: C.border }}>
+                    <span className="text-[11px]" style={{ color: C.muted }}>
+                      {new Date(e.logged_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                      {' '}{new Date(e.logged_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="text-[11px] capitalize truncate" style={{ color: C.text }}>
+                      {e.tool_name?.replace('_', ' ') ?? '—'}
+                    </span>
+                    <span className="text-[11px] truncate" style={{ color: C.muted }}>{e.call_name ?? '—'}</span>
+                    <span className="text-[11px] font-bold" style={{ color: C.red }}>{e.error_count}</span>
+                    <span className="text-[11px] truncate" style={{ color: C.red }}>
+                      {e.error_message ?? 'Unknown error'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+
+          {/* API Calls log */}
+          {activeTab === 'calls' && (
+            usageLogs.length === 0 ? (
+              <div className="flex flex-col items-center py-8 gap-2">
+                <Clock size={24} style={{ color: C.border }} />
+                <p className="text-[12px]" style={{ color: C.muted }}>No API calls recorded yet</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                <div className="grid px-4 py-2 border-b"
+                     style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.5fr 0.5fr 0.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  {['DATE', 'TOOL', 'CALL', 'SUCCESS', 'ERRORS', 'MS'].map(h => (
+                    <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+                  ))}
+                </div>
+                {usageLogs.map((log: any, i: number) => (
+                  <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
+                       style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.5fr 0.5fr 0.5fr', gap: 12, borderColor: C.border }}>
+                    <span className="text-[11px]" style={{ color: C.muted }}>
+                      {new Date(log.logged_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                    </span>
+                    <span className="text-[11px] capitalize truncate" style={{ color: C.text }}>
+                      {log.tool_name?.replace('_', ' ') ?? '—'}
+                    </span>
+                    <span className="text-[11px] truncate" style={{ color: C.muted }}>{log.call_name ?? '—'}</span>
+                    <span className="text-[11px] font-bold" style={{ color: log.success_count > 0 ? C.limeDeep : C.muted }}>
+                      {log.success_count}
+                    </span>
+                    <span className="text-[11px] font-bold" style={{ color: log.error_count > 0 ? C.red : C.muted }}>
+                      {log.error_count}
+                    </span>
+                    <span className="text-[11px]" style={{ color: log.response_time_ms > 2000 ? C.amber : C.muted }}>
+                      {log.response_time_ms}ms
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </>
       )}
     </div>
   )
@@ -1014,14 +1376,14 @@ export default function ApiVaultPage() {
           success   = (result.data as any)?.success === true
           newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'resend') {
-          const p1 = api.primary_key_1
-          if (p1 && p1 !== 'EMPTY') {
-            const res = await fetch('https://api.resend.com/domains', {
-              headers: { Authorization: `Bearer ${p1}` }
-            })
-            success   = res.ok
-            newStatus = success ? 'connected' : 'error'
-          }
+          // Test via server-side route (key is in env var)
+          const res = await fetch('/api/admin/test-connection', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ platform: 'resend' }),
+          })
+          success   = res.ok && (await res.json()).success === true
+          newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'lemonsqueezy') {
           // Fix 11: Real LemonSqueezy test
           const p1 = api.primary_key_1
@@ -1116,8 +1478,9 @@ export default function ApiVaultPage() {
   const avgHealth      = activeApis > 0
     ? Math.round(apis.filter(a => !a.is_locked && a.status === 'connected').reduce((s, a) => s + getHealthScore(a), 0) / activeApis)
     : 0
-  const totalRateUsed  = apis.reduce((s, a) => s + (a.rate_limit_used ?? 0), 0)
-  const totalRateLimit = apis.reduce((s, a) => s + (a.rate_limit_total ?? 0), 0)
+  const ebayApi        = apis.find(a => a.platform_name === 'ebay')
+  const totalRateUsed  = ebayApi?.rate_limit_used  ?? 0
+  const totalRateLimit = ebayApi?.rate_limit_total  ?? 5000
   const ratePct        = totalRateLimit > 0 ? Math.round((totalRateUsed / totalRateLimit) * 100) : 0
   const expiringSoon   = apis.filter(a => { const d = getDaysUntilExpiry(a.expires_at); return d > 0 && d <= 30 }).length
   const notifCount     = apis.filter(a => {
@@ -1182,7 +1545,7 @@ export default function ApiVaultPage() {
         {[
           { title: 'APIs Active',     value: `${activeApis}/${totalApis}`,  icon: Server,        color: C.limeDeep, bg: C.limeTint              },
           { title: 'Health Score',    value: `${avgHealth}/100`,             icon: Activity,      color: avgHealth >= 80 ? C.green : avgHealth >= 50 ? C.amber : C.red, bg: avgHealth >= 80 ? 'rgba(22,163,74,0.08)' : avgHealth >= 50 ? 'rgba(217,119,6,0.08)' : 'rgba(185,28,28,0.08)' },
-          { title: 'Rate Limit Used', value: `${ratePct}%`,                  icon: Zap,           color: ratePct > 85 ? C.red : ratePct > 70 ? C.amber : C.blue, bg: 'rgba(29,78,216,0.08)' },
+          { title: 'Rate Limit Used', value: `${ratePct}%`, icon: Zap, color: ratePct > 85 ? C.red : ratePct > 70 ? C.amber : C.blue, bg: 'rgba(29,78,216,0.08)', sub: `${totalRateUsed.toLocaleString()}/${totalRateLimit.toLocaleString()} eBay calls today` },
           { title: 'Expiring Soon',   value: String(expiringSoon),           icon: AlertTriangle, color: expiringSoon > 0 ? C.amber : C.muted, bg: expiringSoon > 0 ? 'rgba(217,119,6,0.08)' : C.bg },
         ].map((card, i) => {
           const Icon = card.icon
@@ -1201,6 +1564,9 @@ export default function ApiVaultPage() {
               {loading
                 ? <div className="h-8 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
                 : <p className="text-[28px] font-black" style={{ color: C.dark }}>{card.value}</p>}
+              {(card as any).sub && (
+                <p className="text-[10px]" style={{ color: C.muted }}>{(card as any).sub}</p>
+              )}
             </div>
           )
         })}
@@ -1330,6 +1696,12 @@ export default function ApiVaultPage() {
                         <span className="text-[10px] font-bold" style={{ color: sm.color }}>
                           {sm.label}
                         </span>
+                        {api.environment === 'sandbox' && (
+                          <span className="text-[8px] font-black px-1 py-0.5 rounded"
+                                style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: C.amber }}>
+                            SBX
+                          </span>
+                        )}
                       </div>
 
                       {/* Health bar */}
