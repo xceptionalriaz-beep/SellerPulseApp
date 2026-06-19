@@ -213,30 +213,68 @@ export default function EbayManagerTab() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       await (supabase.from('profiles') as any).update({
-        ebay_marketplace: selectedMp.id,
-        currency_code: selectedMp.currencyCode,
-        currency_symbol: selectedMp.currencySymbol,
+        ebay_marketplace:  selectedMp.id,
+        currency_code:     selectedMp.currencyCode,
+        currency_symbol:   selectedMp.currencySymbol,
       } as any).eq('id', user.id)
 
-      // Open eBay OAuth (real implementation would open popup)
-      const oauthUrl = `https://auth.ebay.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_EBAY_CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/ebay/callback')}&response_type=code&scope=https://api.ebay.com/oauth/api_scope`
-      window.open(oauthUrl, '_blank', 'width=600,height=700')
+      // Build OAuth URL with user_id as state
+      const clientId    = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID
+      const redirectUri = encodeURIComponent(
+        (process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin) + '/auth/ebay/callback'
+      )
+      const scope = encodeURIComponent([
+        'https://api.ebay.com/oauth/api_scope',
+        'https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly',
+        'https://api.ebay.com/oauth/api_scope/sell.account.readonly',
+      ].join(' '))
+      const state = user.id
 
-      // Poll for connection (simplified)
-      await new Promise(r => setTimeout(r, 3000))
-      await loadAll()
-      toast.show('🎉 eBay Store Connected!')
-    } catch (e: any) { toast.error(e.message || 'Connection failed') }
-    finally { setIsConnecting(false) }
+      const oauthUrl =
+        `https://auth.ebay.com/oauth2/authorize` +
+        `?client_id=${clientId}` +
+        `&redirect_uri=${redirectUri}` +
+        `&response_type=code` +
+        `&scope=${scope}` +
+        `&state=${state}`
+
+      // Open OAuth popup
+      const popup = window.open(oauthUrl, 'ebay_oauth', 'width=600,height=700')
+
+      // Poll for popup close → reload profile
+      const pollTimer = setInterval(async () => {
+        if (popup?.closed) {
+          clearInterval(pollTimer)
+          await loadAll()
+          setIsConnecting(false)
+        }
+      }, 1000)
+
+    } catch (e: any) {
+      toast.error(e.message || 'Connection failed')
+      setIsConnecting(false)
+    }
   }
 
   // ── Sync ─────────────────────────────────────────────────────
   async function handleSync() {
     setIsSyncing(true)
     try {
-      await new Promise(r => setTimeout(r, 2000))
-      await loadAll()
-      toast.show('✅ Sync completed!')
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/ebay/sync-orders', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+      })
+      const json = await res.json()
+      if (res.ok) {
+        await loadAll()
+        toast.show(`Synced! ${json.inserted} new, ${json.updated} updated`)
+      } else {
+        toast.error(json.error ?? 'Sync failed')
+      }
     } catch (e: any) { toast.error(`Sync failed: ${e.message}`) }
     finally { setIsSyncing(false) }
   }

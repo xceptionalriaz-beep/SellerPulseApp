@@ -203,6 +203,16 @@ async function runArchive() {
       console.error('[archive] Webhook cleanup error:', err)
     }
 
+    // ── Fix 12: Reset daily API rate limit counters ───────────
+    try {
+      await (adminClient.from('api_fleet_config') as any)
+        .update({ requests_today: 0, rate_limit_used: 0 })
+        .not('platform_name', 'like', '%affiliate%')
+      console.log('[archive] API daily counters reset')
+    } catch (err) {
+      console.error('[archive] API counter reset error:', err)
+    }
+
     return NextResponse.json({
       success:            true,
       archived_flows:     archived,

@@ -89,42 +89,48 @@ export default function TitleBuilderPage() {
     }
   }, [title, veroDb, autoCopy])
 
-  // ── Extract item ID (matches Dart _handleExtract) ────────────
+  // ── Extract item ID — real eBay API ──────────────────────────
   async function handleExtract(itemId: string) {
     if (!itemId) return
     setIsFetching(true)
-    await new Promise(r => setTimeout(r, 2000)) // simulate API
-    setTitle(`Extracted Title for Item ${itemId}`)
+    try {
+      const res  = await fetch(`/api/ebay/item?id=${encodeURIComponent(itemId)}&purpose=title`)
+      const data = await res.json()
+      if (res.ok && data.title) {
+        setTitle(data.title)
+      } else {
+        console.error('[title-builder] Extract failed:', data.error)
+      }
+    } catch (e) { console.error('[title-builder] Extract error:', e) }
     setIsFetching(false)
   }
 
-  // ── Search keyword (matches Dart _handleSearch + MarketProvider.updateSearch) ──
+  // ── Search keyword — real eBay API ────────────────────────────
   async function handleSearch(keyword: string) {
     if (!keyword) return
-
-    // Update MarketProvider equivalent — simulate market data
     setMarketLoading(true)
     setIsFetching(true)
+    try {
+      const marketplace = activeMarket === 'eBay UK' ? 'EBAY_GB'
+        : activeMarket === 'eBay AU' ? 'EBAY_AU'
+        : activeMarket === 'eBay DE' ? 'EBAY_DE'
+        : 'EBAY_US'
 
-    await new Promise(r => setTimeout(r, 2000)) // simulate API
+      const res  = await fetch(
+        `/api/ebay/search?keyword=${encodeURIComponent(keyword)}&marketplace=${marketplace}&limit=20`
+      )
+      const data = await res.json()
 
-    // Mock trend data + saturation score
-    setTrendData([12,18,15,22,19,25,20,28,24,30,27,35])
-    setSaturScore(Math.random() * 0.8 + 0.1)
+      if (res.ok) {
+        setTrendData(data.trendData ?? [])
+        setSaturScore(data.saturScore ?? 0)
+        setLongTailKeywords(data.longTailKeywords ?? [])
+        setGenericKeywords(data.genericKeywords ?? [])
+      } else {
+        console.error('[title-builder] Search failed:', data.error)
+      }
+    } catch (e) { console.error('[title-builder] Search error:', e) }
     setMarketLoading(false)
-
-    // Keyword tables data (matches Dart mock data)
-    setLongTailKeywords([
-      { kw: `${keyword} pro max`,       search: '25,400', comp: '120', sales: '890'   },
-      { kw: `Genuine ${keyword} oem`,   search: '18,200', comp: '80',  sales: '450'   },
-      { kw: `${keyword} black edition`, search: '12,100', comp: '45',  sales: '210'   },
-      { kw: `Fast ${keyword} usb-c`,    search: '9,800',  comp: '30',  sales: '195'   },
-    ])
-    setGenericKeywords([
-      { kw: keyword,    search: '45,000', comp: '500', sales: '1,200' },
-      { kw: 'Adapter',  search: '30,000', comp: '200', sales: '600'   },
-      { kw: 'Premium',  search: '15,000', comp: '100', sales: '300'   },
-    ])
     setIsFetching(false)
   }
 
