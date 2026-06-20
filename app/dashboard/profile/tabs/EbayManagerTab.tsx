@@ -163,9 +163,9 @@ export default function EbayManagerTab() {
       if (!user) return
 
       const { data: profile } = await supabase
-        .from('profiles').select('ebay_marketplace, ebay_username').eq('id', user.id).single() as any
+        .from('profiles').select('ebay_marketplace, ebay_username, ebay_access_token').eq('id', user.id).single() as any
 
-      if (profile?.ebay_marketplace) {
+      if (profile?.ebay_marketplace && profile?.ebay_access_token) {
         const mp = MARKETPLACES.find(m => m.id === profile.ebay_marketplace) || MARKETPLACES[0]
         setSelectedMp(mp)
         setConnected(true)
@@ -212,11 +212,11 @@ export default function EbayManagerTab() {
       // Save selected marketplace to profile
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      await (supabase.from('profiles') as any).update({
-        ebay_marketplace:  selectedMp.id,
-        currency_code:     selectedMp.currencyCode,
-        currency_symbol:   selectedMp.currencySymbol,
-      } as any).eq('id', user.id)
+      // Store marketplace selection temporarily in localStorage
+      // Only saved to DB after OAuth completes successfully
+      localStorage.setItem('riazify_pending_marketplace', selectedMp.id)
+      localStorage.setItem('riazify_pending_currency_code', selectedMp.currencyCode)
+      localStorage.setItem('riazify_pending_currency_symbol', selectedMp.currencySymbol)
 
       // Build OAuth URL with user_id as state
       const clientId    = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID
