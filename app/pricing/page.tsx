@@ -100,11 +100,59 @@ export default function PricingPage() {
     load()
   }, [])
 
-  function handleCta(plan: DBPlan) {
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+
+  async function handleCta(plan: DBPlan) {
     if (plan.plan_id === 'custom')    { router.push('/contact'); return }
     if (currentPlan === plan.plan_id) return
     if (plan.plan_id === 'free')      { router.push('/auth/signup'); return }
-    router.push(`/auth/signup?plan=${plan.plan_id}&billing=${billing}`)
+
+    // Check if user is logged in
+    const { createClient: createSb } = await import('@supabase/supabase-js')
+    const sb = createSb(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data: { user } } = await sb.auth.getUser()
+
+    // Not logged in → go to signup first
+    if (!user) {
+      router.push(`/auth/signup?plan=${plan.plan_id}&billing=${billing}`)
+      return
+    }
+
+    // Logged in → create checkout
+    setCheckoutLoading(plan.plan_id)
+    try {
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .single()
+
+      const res = await fetch('/api/payments/checkout', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          plan:      plan.plan_id,
+          billing,
+          userId:    user.id,
+          userEmail: user.email,
+          userName:  (profile as any)?.full_name ?? '',
+        }),
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Failed to create checkout. Please try again.')
+      }
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setCheckoutLoading(null)
+    }
   }
 
   if (!loaded) return (
@@ -271,7 +319,7 @@ export default function PricingPage() {
                   </div>
 
                   <button onClick={() => handleCta(plan)}
-                    disabled={isCurrent}
+                    disabled={isCurrent || checkoutLoading === plan.plan_id}
                     className="w-full py-3.5 rounded-2xl font-black text-[13px] transition-all hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-default mt-2"
                     style={{
                       backgroundColor: isCurrent      ? T.limeTint :
@@ -283,8 +331,18 @@ export default function PricingPage() {
                                        isCustom       ? '#fff'     :
                                        plan.plan_id === 'free' ? T.lime : T.limeDeep,
                     }}>
-                    {isCurrent ? 'Current Plan' : plan.cta_text}
-                    {!isCurrent && <ArrowRight size={14} />}
+                    {checkoutLoading === plan.plan_id ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
+                             style={{ borderTopColor: plan.highlight ? T.dark : T.limeDeep }} />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        {isCurrent ? 'Current Plan' : plan.cta_text}
+                        {!isCurrent && <ArrowRight size={14} />}
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

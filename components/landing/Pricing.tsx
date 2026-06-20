@@ -69,10 +69,55 @@ export default function Pricing() {
     load()
   }, [])
 
-  function handleCta(plan: DBPlan) {
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+
+  async function handleCta(plan: DBPlan) {
     if (plan.plan_id === 'custom') { router.push('/contact'); return }
     if (plan.plan_id === 'free')   { router.push('/auth/signup'); return }
-    router.push(`/auth/signup?plan=${plan.plan_id}`)
+
+    const { createClient: createSb } = await import('@supabase/supabase-js')
+    const sb = createSb(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data: { user } } = await sb.auth.getUser()
+
+    if (!user) {
+      router.push(`/auth/signup?plan=${plan.plan_id}&billing=${billing}`)
+      return
+    }
+
+    setCheckoutLoading(plan.plan_id)
+    try {
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+
+      const res = await fetch('/api/payments/checkout', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          plan:      plan.plan_id,
+          billing,
+          userId:    user.id,
+          userEmail: user.email,
+          userName:  (profile as any)?.full_name ?? '',
+        }),
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Failed to create checkout. Please try again.')
+      }
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setCheckoutLoading(null)
+    }
   }
 
   if (!loaded) return null
@@ -221,7 +266,8 @@ export default function Pricing() {
                   </div>
 
                   <button onClick={() => handleCta(plan)}
-                    className="w-full py-3.5 rounded-2xl font-black text-[13px] transition-all hover:opacity-90 flex items-center justify-center gap-2 mt-2"
+                    disabled={checkoutLoading === plan.plan_id}
+                    className="w-full py-3.5 rounded-2xl font-black text-[13px] transition-all hover:opacity-90 flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
                     style={{
                       backgroundColor: plan.highlight ? T.lime     :
                                        isCustom       ? '#6366f1'  :
@@ -230,7 +276,15 @@ export default function Pricing() {
                                        isCustom       ? '#fff'     :
                                        plan.plan_id === 'free' ? T.lime : T.limeDeep,
                     }}>
-                    {plan.cta_text} <ArrowRight size={14} />
+                    {checkoutLoading === plan.plan_id ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
+                             style={{ borderTopColor: plan.highlight ? T.dark : T.limeDeep }} />
+                        Processing...
+                      </>
+                    ) : (
+                      <>{plan.cta_text} <ArrowRight size={14} /></>
+                    )}
                   </button>
                 </div>
               </div>

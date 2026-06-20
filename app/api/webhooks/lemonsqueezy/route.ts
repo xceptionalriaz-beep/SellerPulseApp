@@ -1,10 +1,5 @@
 // app/api/webhooks/lemonsqueezy/route.ts
-// ══════════════════════════════════════════════════════════════
-// LemonSqueezy webhook handler
-// Listens for LemonSqueezy events and fires internal webhooks
-// Pre-wired and ready — just add LEMONSQUEEZY_WEBHOOK_SECRET
-// to your env when you connect LemonSqueezy
-// ══════════════════════════════════════════════════════════════
+// LemonSqueezy webhook handler — merged complete version
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -16,37 +11,38 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Verify LemonSqueezy signature ──────────────────────────────
+// ── Verify signature ───────────────────────────────────────────
 function verifySignature(payload: string, signature: string, secret: string): boolean {
   try {
-    const expected = crypto
-      .createHmac('sha256', secret)
-      .update(payload)
-      .digest('hex')
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, 'hex'),
-      Buffer.from(expected,  'hex'),
-    )
+    const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+    return crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'))
   } catch { return false }
 }
 
-// ── Map LemonSqueezy variant to plan name ──────────────────────
-function getPlanName(variantName: string | null, productName: string | null): string {
-  const name = (variantName ?? productName ?? '').toLowerCase()
-  if (name.includes('growth'))  return 'Growth'
-  if (name.includes('starter')) return 'Starter'
-  if (name.includes('custom'))  return 'Custom'
-  if (name.includes('pro'))     return 'Starter'
-  if (name.includes('elite'))   return 'Growth'
-  return variantName ?? productName ?? 'Paid Plan'
+// ── Map variant ID to plan name ────────────────────────────────
+function getPlanFromVariantId(variantId: string): string {
+  const map: Record<string, string> = {
+    '1816372': 'starter',
+    '1816460': 'starter',
+    '1816599': 'growth',
+    '1816810': 'growth',
+    '1816827': 'custom',
+    '1816837': 'custom',
+  }
+  return map[variantId] ?? 'free'
 }
 
-// ── Fire internal webhook to Discord ──────────────────────────
-async function fireWebhook(
-  req:        NextRequest,
-  event_type: string,
-  data:       Record<string, any>,
-) {
+// ── Map variant/product name to plan ──────────────────────────
+function getPlanFromName(variantName: string | null, productName: string | null): string {
+  const name = (variantName ?? productName ?? '').toLowerCase()
+  if (name.includes('growth'))  return 'growth'
+  if (name.includes('starter')) return 'starter'
+  if (name.includes('custom'))  return 'custom'
+  return 'starter'
+}
+
+// ── Fire internal webhook (Discord notifications) ─────────────
+async function fireWebhook(req: NextRequest, event_type: string, data: Record<string, any>) {
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${req.headers.get('host')}`
     await fetch(`${appUrl}/api/admin/webhooks`, {
@@ -57,199 +53,219 @@ async function fireWebhook(
       },
       body: JSON.stringify({ event_type, data }),
     })
-  } catch { /* non-critical */ }
+  } catch {}
 }
 
-// ── Update profile plan in Supabase ───────────────────────────
-async function updateUserPlan(email: string, planName: string, lsCustomerId: string) {
+// ── Update profile by user_id (preferred) or email ────────────
+async function updateProfile(
+  userId:  string | null,
+  email:   string | null,
+  updates: Record<string, any>
+) {
   try {
-    await (adminClient.from('profiles') as any)
-      .update({
-        plan_name:              planName,
-        lemonsqueezy_customer_id: lsCustomerId,
-        updated_at:             new Date().toISOString(),
-      })
-      .eq('email', email)
-  } catch { /* non-critical */ }
+    const q = (adminClient.from('profiles') as any).update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    if (userId) {
+      await q.eq('id', userId)
+    } else if (email) {
+      await q.eq('email', email)
+    }
+  } catch (e) {
+    console.error('[webhook] Profile update error:', e)
+  }
 }
 
-// ── Main webhook handler ───────────────────────────────────────
+// ── Main handler ───────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const payload   = await req.text()
   const signature = req.headers.get('x-signature') ?? ''
   const secret    = process.env.LEMONSQUEEZY_WEBHOOK_SECRET ?? ''
 
-  // ── Verify signature if secret configured ─────────────────────
+  // Verify signature
   if (secret) {
-    const valid = verifySignature(payload, signature, secret)
-    if (!valid) {
-      console.error('[lemonsqueezy-webhook] Invalid signature')
+    if (!verifySignature(payload, signature, secret)) {
+      console.error('[webhook] Invalid signature')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
-  } else {
-    console.log('[lemonsqueezy-webhook] LEMONSQUEEZY_WEBHOOK_SECRET not set — skipping verification')
   }
 
   let event: any
-  try {
-    event = JSON.parse(payload)
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
-  }
+  try { event = JSON.parse(payload) }
+  catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-  const eventName = event.meta?.event_name ?? ''
-  const obj       = event.data?.attributes ?? {}
-  const userEmail = obj.user_email ?? obj.customer_email ?? '—'
-  const lsCustomerId = String(event.data?.id ?? '')
+  const eventName    = event.meta?.event_name ?? ''
+  const obj          = event.data?.attributes ?? {}
+  const custom       = event.meta?.custom_data ?? {}
+  const userId       = custom?.user_id ?? null
+  const userEmail    = obj.user_email ?? obj.customer_email ?? null
+  const lsSubId      = String(event.data?.id ?? '')
+  const lsCustomerId = String(obj.customer_id ?? '')
+  const variantId    = String(obj.first_subscription_item?.variant_id ?? obj.variant_id ?? '')
+  const periodEnd    = obj.renews_at ?? obj.ends_at ?? null
+  const cancelAtEnd  = obj.cancelled ?? false
 
-  console.log(`[lemonsqueezy-webhook] Event: ${eventName}`)
+  console.log(`[webhook] ${eventName} | user: ${userId ?? userEmail} | variant: ${variantId}`)
 
   try {
     switch (eventName) {
 
-      // ── New order (one-time purchase) ─────────────────────────
       case 'order_created': {
-        const productName  = obj.first_order_item?.product_name ?? null
-        const variantName  = obj.first_order_item?.variant_name ?? null
-        const planName     = getPlanName(variantName, productName)
-        const total        = obj.total ? `$${(obj.total / 100).toFixed(2)}` : '—'
-        const currency     = (obj.currency ?? 'USD').toUpperCase()
+        const plan = variantId
+          ? getPlanFromVariantId(variantId)
+          : getPlanFromName(obj.first_order_item?.variant_name, obj.first_order_item?.product_name)
+        const amount = obj.total ? `$${(obj.total / 100).toFixed(2)}` : '—'
 
-        await updateUserPlan(userEmail, planName, lsCustomerId)
-
+        await updateProfile(userId, userEmail, {
+          plan_name:           plan,
+          subscription_status: 'active',
+          ls_customer_id:      lsCustomerId,
+        })
         await fireWebhook(req, 'plan.upgraded', {
-          email:   userEmail,
-          plan:    planName,
-          amount:  `${total} ${currency}`,
-          status:  'Order completed',
-          type:    'One-time purchase',
+          email: userEmail, plan, amount, status: 'Order completed',
         })
         break
       }
 
-      // ── Subscription created ───────────────────────────────────
       case 'subscription_created': {
-        const productName = obj.product_name ?? null
-        const variantName = obj.variant_name ?? null
-        const planName    = getPlanName(variantName, productName)
-        const interval    = obj.billing_anchor ? 'month' : 'month'
-        const amount      = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
+        const plan = variantId
+          ? getPlanFromVariantId(variantId)
+          : getPlanFromName(obj.variant_name, obj.product_name)
+        const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
 
-        await updateUserPlan(userEmail, planName, lsCustomerId)
-
+        await updateProfile(userId, userEmail, {
+          plan_name:            plan,
+          subscription_status:  'active',
+          ls_customer_id:       lsCustomerId,
+          ls_subscription_id:   lsSubId,
+          current_period_end:   periodEnd,
+          cancel_at_period_end: false,
+        })
         await fireWebhook(req, 'plan.upgraded', {
-          email:   userEmail,
-          plan:    planName,
-          amount:  `${amount}/${interval}`,
-          status:  'Subscription started',
-          type:    'Subscription',
+          email: userEmail, plan, amount: `${amount}/mo`, status: 'Subscription started',
         })
         break
       }
 
-      // ── Subscription updated/upgraded ──────────────────────────
-      case 'subscription_updated': {
-        const productName = obj.product_name ?? null
-        const variantName = obj.variant_name ?? null
-        const planName    = getPlanName(variantName, productName)
-        const amount      = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
-        const status      = obj.status ?? 'active'
+      case 'subscription_updated':
+      case 'subscription_plan_changed': {
+        const plan = variantId
+          ? getPlanFromVariantId(variantId)
+          : getPlanFromName(obj.variant_name, obj.product_name)
+        const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
 
-        if (status === 'active') {
-          await updateUserPlan(userEmail, planName, lsCustomerId)
+        if (obj.status === 'active') {
+          await updateProfile(userId, userEmail, {
+            plan_name:            plan,
+            subscription_status:  'active',
+            current_period_end:   periodEnd,
+            cancel_at_period_end: cancelAtEnd,
+          })
           await fireWebhook(req, 'plan.upgraded', {
-            email:  userEmail,
-            plan:   planName,
-            amount: `${amount}/month`,
-            status: 'Subscription updated',
+            email: userEmail, plan, amount: `${amount}/mo`, status: 'Subscription updated',
           })
         }
         break
       }
 
-      // ── Subscription cancelled ─────────────────────────────────
-      case 'subscription_cancelled':
-      case 'subscription_expired': {
-        const productName = obj.product_name ?? null
-        const variantName = obj.variant_name ?? null
-        const planName    = getPlanName(variantName, productName)
-        const endsAt      = obj.ends_at
-          ? new Date(obj.ends_at).toLocaleDateString()
-          : '—'
-
-        // Downgrade to Free when expired
-        if (eventName === 'subscription_expired') {
-          await updateUserPlan(userEmail, 'Free', lsCustomerId)
-        }
-
+      case 'subscription_cancelled': {
+        await updateProfile(userId, userEmail, {
+          subscription_status:  'cancelled',
+          cancel_at_period_end: true,
+        })
         await fireWebhook(req, 'plan.cancelled', {
-          email:    userEmail,
-          plan:     planName,
-          ends_at:  endsAt,
-          reason:   eventName === 'subscription_expired' ? 'Subscription expired' : 'Cancelled by user',
+          email: userEmail, ends_at: periodEnd, reason: 'Cancelled by user',
         })
         break
       }
 
-      // ── Payment failed ─────────────────────────────────────────
-      case 'subscription_payment_failed': {
-        const productName  = obj.product_name ?? null
-        const variantName  = obj.variant_name ?? null
-        const planName     = getPlanName(variantName, productName)
-        const amount       = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
-        const attemptCount = obj.billing_reason ?? 'Retry scheduled'
-        const retryAt      = obj.next_billing_date
-          ? new Date(obj.next_billing_date).toLocaleDateString()
-          : 'No retry scheduled'
-
-        await fireWebhook(req, 'payment.failed', {
-          email:        userEmail,
-          plan:         planName,
-          amount,
-          attempt:      attemptCount,
-          next_attempt: retryAt,
+      case 'subscription_expired': {
+        await updateProfile(userId, userEmail, {
+          plan_name:           'free',
+          subscription_status: 'expired',
+        })
+        await fireWebhook(req, 'plan.cancelled', {
+          email: userEmail, reason: 'Subscription expired',
         })
         break
       }
 
-      // ── Payment succeeded ──────────────────────────────────────
-      case 'subscription_payment_success': {
-        const amount   = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
-        const planName = getPlanName(obj.variant_name ?? null, obj.product_name ?? null)
-
-        await fireWebhook(req, 'payment.recovered', {
-          email:  userEmail,
-          plan:   planName,
-          amount,
-          status: 'Payment succeeded',
-        })
-        break
-      }
-
-      // ── Subscription resumed (after pause) ─────────────────────
       case 'subscription_resumed': {
-        const planName = getPlanName(obj.variant_name ?? null, obj.product_name ?? null)
-        const amount   = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
+        const plan = variantId
+          ? getPlanFromVariantId(variantId)
+          : getPlanFromName(obj.variant_name, obj.product_name)
 
-        await updateUserPlan(userEmail, planName, lsCustomerId)
-
+        await updateProfile(userId, userEmail, {
+          plan_name:            plan,
+          subscription_status:  'active',
+          cancel_at_period_end: false,
+          current_period_end:   periodEnd,
+        })
         await fireWebhook(req, 'plan.upgraded', {
-          email:  userEmail,
-          plan:   planName,
-          amount: `${amount}/month`,
-          status: 'Subscription resumed',
+          email: userEmail, plan, status: 'Subscription resumed',
+        })
+        break
+      }
+
+      case 'subscription_payment_failed': {
+        await updateProfile(userId, userEmail, {
+          subscription_status: 'past_due',
+        })
+        const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
+        await fireWebhook(req, 'payment.failed', {
+          email: userEmail, amount,
+          next_attempt: obj.next_billing_date ?? 'Unknown',
+        })
+        break
+      }
+
+      case 'subscription_payment_success':
+      case 'subscription_payment_recovered': {
+        await updateProfile(userId, userEmail, {
+          subscription_status: 'active',
+          current_period_end:  periodEnd,
+        })
+        const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
+        await fireWebhook(req, 'payment.recovered', {
+          email: userEmail, amount, status: 'Payment succeeded',
+        })
+        break
+      }
+
+      case 'order_refunded': {
+        await updateProfile(userId, userEmail, {
+          plan_name:           'free',
+          subscription_status: 'refunded',
+        })
+        await fireWebhook(req, 'plan.cancelled', {
+          email: userEmail, reason: 'Order refunded',
         })
         break
       }
 
       default:
-        console.log(`[lemonsqueezy-webhook] Unhandled event: ${eventName}`)
+        console.log(`[webhook] Unhandled event: ${eventName}`)
     }
 
-    return NextResponse.json({ received: true })
+    // Log to api_usage_logs
+    try {
+      await (adminClient.from('api_usage_logs') as any).insert({
+        platform_name:    'lemonsqueezy',
+        tool_name:        'payments',
+        call_name:        eventName,
+        endpoint:         'webhooks',
+        success_count:    1,
+        error_count:      0,
+        response_time_ms: 0,
+        logged_at:        new Date().toISOString(),
+      })
+    } catch {}
+
+    return NextResponse.json({ received: true, event: eventName })
 
   } catch (err: any) {
-    console.error('[lemonsqueezy-webhook]', err)
+    console.error('[webhook] Error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
