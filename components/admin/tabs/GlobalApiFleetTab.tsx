@@ -223,7 +223,8 @@ function PlatformCard({ label, icon: Icon, health }: {
     connected:      'Connected',
     error:          'Error',
     expired:        'Expired',
-    not_configured: 'Not Set',
+    not_configured: 'Empty',
+    disconnected:   'Empty',
   }
 
   return (
@@ -371,7 +372,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
     const { data: rawConfigs } = await supabase
       .from('api_fleet_config')
       .select('*')
-      .in('platform_name', ['ebay', 'aliexpress', 'openai', 'amazon_affiliate'])
+      .in('platform_name', ['ebay', 'aliexpress', 'openai', 'amazon_spapi', 'resend', 'lemonsqueezy', 'stripe'])
     const configs = (rawConfigs ?? []) as any[]
     const map: Record<string, PlatformHealth> = {}
     let totalToday = 0, totalMonth = 0, connected = 0
@@ -405,7 +406,7 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
     }
 
     for (const p of PLATFORMS) {
-      if (!map[p.id]) map[p.id] = { name: p.id, status: 'not_configured', usagePercent: 0, rateLimitUsed: 0, rateLimitTotal: 5000, requestsToday: 0, requestsMonth: 0, healthScore: 0, daysUntilExpiry: 999, lastRequestAt: null }
+      if (!map[p.id]) map[p.id] = { name: p.id, status: 'not_configured', usagePercent: 0, rateLimitUsed: 0, rateLimitTotal: 0, requestsToday: 0, requestsMonth: 0, healthScore: 0, daysUntilExpiry: 999, lastRequestAt: null }
     }
 
     setPlatformMap(map)
@@ -632,7 +633,7 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
         <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
           {PLATFORMS.map(p => (
             <PlatformCard key={p.id} label={p.label} icon={p.icon}
-              health={platformMap[p.id] ?? { name: p.id, status: 'not_configured', usagePercent: 0, rateLimitUsed: 0, rateLimitTotal: 5000, requestsToday: 0, requestsMonth: 0, healthScore: 0, daysUntilExpiry: 999, lastRequestAt: null }} />
+              health={platformMap[p.id] ?? { name: p.id, status: 'not_configured', usagePercent: 0, rateLimitUsed: 0, rateLimitTotal: 0, requestsToday: 0, requestsMonth: 0, healthScore: 0, daysUntilExpiry: 999, lastRequestAt: null }} />
           ))}
         </div>
       </div>

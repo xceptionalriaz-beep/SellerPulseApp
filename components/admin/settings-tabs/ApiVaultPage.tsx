@@ -374,6 +374,7 @@ function ConfigTab({ api, onSaved, showToast }: {
             key_type:        'primary',
             changed_by:      user.email ?? 'admin',
             notes:           `Keys updated — expires ${new Date(newExpiry).toLocaleDateString()}`,
+            changed_at:      new Date().toISOString(),
           })
         } catch {}
       }
@@ -459,6 +460,7 @@ function ConfigTab({ api, onSaved, showToast }: {
             key_type:      'primary',
             changed_by:    user.email ?? 'admin',
             notes:         `Test ${success ? 'passed' : 'failed'} — ${ms}ms`,
+            changed_at:    new Date().toISOString(),
           })
         } catch {}
       }
@@ -799,11 +801,11 @@ function ActivityTab({ api }: { api: any }) {
           { data: errorLogs },
           { data: apiCalls },
         ] = await Promise.all([
-          // Key history
+          // Key history — uses changed_at column
           (client.from('api_key_history') as any)
             .select('*')
             .eq('platform_name', api.platform_name)
-            .order('created_at', { ascending: false })
+            .order('changed_at', { ascending: false })
             .limit(20),
           // Missing 5: Error logs from api_usage_logs
           (client.from('api_usage_logs') as any)
@@ -896,7 +898,7 @@ function ActivityTab({ api }: { api: any }) {
                     <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
                          style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border }}>
                       <span className="text-[11px]" style={{ color: C.muted }}>
-                        {new Date(h.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(h.changed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                       <span className="text-[9px] font-black px-2 py-0.5 rounded-lg w-fit capitalize"
                             style={{ backgroundColor: ac.bg, color: ac.color }}>{h.action}</span>
@@ -1444,6 +1446,7 @@ export default function ApiVaultPage() {
             key_type:      'primary',
             changed_by:    user.email ?? 'admin',
             notes:         `Test ${success ? 'passed' : 'failed'} — ${Date.now() - start}ms`,
+            changed_at:    new Date().toISOString(),
           })
         }
       } catch {}
