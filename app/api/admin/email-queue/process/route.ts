@@ -125,6 +125,20 @@ export async function GET(req: NextRequest) {
               .eq('platform_name', 'resend')
           } catch {}
 
+          // Track in api_usage_logs for GlobalApiFleetTab activity feed
+          try {
+            await (adminClient.from('api_usage_logs') as any).insert({
+              platform_name:    'resend',
+              tool_name:        'email_automations',
+              call_name:        'SendEmail',
+              endpoint:         'emails',
+              success_count:    1,
+              error_count:      0,
+              response_time_ms: Date.now() - new Date(now).getTime(),
+              logged_at:        now,
+            })
+          } catch {}
+
           results.sent++
         } else {
           const err = await res.text()
