@@ -961,19 +961,19 @@ function ActivityTab({ api }: { api: any }) {
             ) : (
               <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
                 <div className="grid px-4 py-2 border-b"
-                     style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.5fr 0.5fr 0.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
-                  {['DATE', 'TOOL', 'CALL', 'SUCCESS', 'ERRORS', 'MS'].map(h => (
+                     style={{ gridTemplateColumns: '1fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr 1.2fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  {['DATE', 'TOOL', 'CALL', 'OK', 'ERR', 'MS', 'TO'].map(h => (
                     <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
                   ))}
                 </div>
                 {usageLogs.map((log: any, i: number) => (
                   <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
-                       style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.5fr 0.5fr 0.5fr', gap: 12, borderColor: C.border }}>
+                       style={{ gridTemplateColumns: '1fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr 1.2fr', gap: 12, borderColor: C.border }}>
                     <span className="text-[11px]" style={{ color: C.muted }}>
                       {new Date(log.logged_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                     </span>
                     <span className="text-[11px] capitalize truncate" style={{ color: C.text }}>
-                      {log.tool_name?.replace('_', ' ') ?? '—'}
+                      {log.tool_name?.replace(/_/g, ' ') ?? '—'}
                     </span>
                     <span className="text-[11px] truncate" style={{ color: C.muted }}>{log.call_name ?? '—'}</span>
                     <span className="text-[11px] font-bold" style={{ color: log.success_count > 0 ? C.limeDeep : C.muted }}>
@@ -984,6 +984,10 @@ function ActivityTab({ api }: { api: any }) {
                     </span>
                     <span className="text-[11px]" style={{ color: log.response_time_ms > 2000 ? C.amber : C.muted }}>
                       {log.response_time_ms}ms
+                    </span>
+                    <span className="text-[10px] font-mono truncate" style={{ color: C.muted }}
+                          title={log.to_email ?? ''}>
+                      {log.to_email ? log.to_email.replace(/(.{3}).*(@.*)/, '$1…$2') : '—'}
                     </span>
                   </div>
                 ))}

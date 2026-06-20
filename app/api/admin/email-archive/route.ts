@@ -203,6 +203,17 @@ async function runArchive() {
       console.error('[archive] Webhook cleanup error:', err)
     }
 
+    // ── Clean old api_usage_logs (keep 90 days) ───────────────
+    try {
+      const cutoff90 = new Date(Date.now() - 90 * 86400000).toISOString()
+      await (adminClient.from('api_usage_logs') as any)
+        .delete()
+        .lt('logged_at', cutoff90)
+      console.log('[archive] Old api_usage_logs cleaned')
+    } catch (err) {
+      console.error('[archive] api_usage_logs cleanup error:', err)
+    }
+    
     // ── Fix 12: Reset daily API rate limit counters ───────────
     try {
       await (adminClient.from('api_fleet_config') as any)

@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { render } from '@react-email/render'
 import { WelcomeEmail }      from '@/emails/WelcomeEmail'
 import { ConfirmationEmail } from '@/emails/ConfirmationEmail'
 import { ResetPasswordEmail } from '@/emails/ResetPasswordEmail'
@@ -10,7 +11,7 @@ import { AlertEmail }        from '@/emails/AlertEmail'
 
 // ── Init Resend ───────────────────────────────────────────────
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM   = 'Riazify <noreply@riazify.com>'
+const FROM   = 'Riazify <notifications@dropnrest.com>'
 
 // ── Email types ───────────────────────────────────────────────
 type EmailType = 'welcome' | 'confirmation' | 'reset_password' | 'alert'
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest) {
 
   // 3. Build email based on type
   try {
+    const start = Date.now()
     let subject: string
     let react:   React.ReactElement
 
@@ -115,17 +117,51 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Send via Resend
+    const html = await render(react)
     const { data, error } = await resend.emails.send({
       from:    FROM,
       to:      [to],
       subject,
-      react,
+      html,
     })
 
     if (error) {
       console.error('[Resend error]', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    // Track in api_fleet_config + api_usage_logs
+    try {
+      const { createClient } = await import('@supabase/supabase-js')
+      const adminClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      )
+      const { data: curr } = await (adminClient.from('api_fleet_config') as any)
+        .select('monthly_used, requests_today')
+        .eq('platform_name', 'resend')
+        .single()
+      await (adminClient.from('api_fleet_config') as any)
+        .update({
+          monthly_used:    ((curr as any)?.monthly_used   ?? 0) + 1,
+          requests_today:  ((curr as any)?.requests_today ?? 0) + 1,
+          last_used_at:    new Date().toISOString(),
+          last_request_at: new Date().toISOString(),
+        })
+        .eq('platform_name', 'resend')
+      await (adminClient.from('api_usage_logs') as any).insert({
+        platform_name:    'resend',
+        tool_name:        type,
+        call_name:        'SendEmail',
+        endpoint:         'emails',
+        success_count:    1,
+        error_count:      0,
+        response_time_ms: Date.now() - start,
+        logged_at:        new Date().toISOString(),
+        to_email:         to,
+      })
+    } catch {}
 
     return NextResponse.json({
       success: true,
