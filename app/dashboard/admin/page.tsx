@@ -3,12 +3,13 @@
 // Updated: stat cards, tool stats, quick stats bar — all real Supabase data
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import {
   Shield, BarChart2, Settings, ArrowLeft, Search,
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
   Wrench, Trophy, Zap, UserPlus, Key, FileText,
-  Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail,
+  Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail, CreditCard,
 } from 'lucide-react'
 import PersistentSidebar   from '@/components/admin/PersistentSidebar'
 import AnalyticsHub        from '@/components/admin/AnalyticsHub'
@@ -25,6 +26,7 @@ import ApiVaultPage        from '@/components/admin/settings-tabs/ApiVaultPage'
 import AffiliateVaultTab   from '@/components/admin/settings-tabs/AffiliateVaultTab'
 import FounderOpsTab       from '@/components/admin/settings-tabs/FounderOpsTab'
 import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
+import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -52,6 +54,7 @@ const SETTINGS_MENU = [
   { title: 'Affiliate Vault', icon: DollarSign   },
   { title: 'Founder Ops',     icon: BarChart2    },
   { title: 'Marketing',       icon: Mail         },
+  { title: 'Payments',        icon: CreditCard   },
 ]
 
 // ── Tool definitions (static metadata only — no dummy stats) ──
@@ -802,13 +805,23 @@ function KillSwitchDialog({ onClose }: { onClose: () => void }) {
 // MAIN PAGE
 // ══════════════════════════════════════════════════════════════
 export default function AdminPage() {
-  const supabase = createClient()
+  const supabase     = createClient()
+  const searchParams = useSearchParams()
 
   const [authorized,        setAuthorized]        = useState(false)
   const [checking,          setChecking]          = useState(true)
-  const [isSettingsMode,    setIsSettingsMode]    = useState(false)
+  const [isSettingsMode,    setIsSettingsMode]    = useState(() => !!searchParams.get('settings'))
   const [isAnalyticsMode,   setIsAnalyticsMode]   = useState(false)
-  const [activeSettingsTab, setActiveSettingsTab] = useState(0)
+  const [activeSettingsTab, setActiveSettingsTab] = useState(() => {
+    const tab = searchParams.get('settings')
+    const tabMap: Record<string, number> = {
+      'user-crm': 0, 'role-builder': 1, 'security': 2, 'promos': 3,
+      'kill-switches': 4, 'plan-limits': 5, 'emails': 6, 'webhooks': 7,
+      'gamification': 8, 'api-vault': 9, 'affiliate': 10, 'founder-ops': 11,
+      'marketing': 12, 'payments': 13,
+    }
+    return tab ? (tabMap[tab] ?? 0) : 0
+  })
   const [investorMode,      setInvestorMode]      = useState(false)
   const [showCmdPalette,    setShowCmdPalette]    = useState(false)
   const [showAddUser,       setShowAddUser]       = useState(false)
@@ -820,7 +833,6 @@ export default function AdminPage() {
   const [isMobile,          setIsMobile]          = useState(
     () => typeof window !== 'undefined' ? window.innerWidth < 950 : false
   )
-
   // ── Real stats state ───────────────────────────────────────
   const [stats, setStats] = useState<AdminStats>(DEFAULT_STATS)
 
@@ -1084,6 +1096,7 @@ export default function AdminPage() {
       case 10: return <AffiliateVaultTab />
       case 11: return <FounderOpsTab />
       case 12: return <MarketingTab initialUsers={marketingUsers} />
+      case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
       default: return null
     }
   }

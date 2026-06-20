@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 // components/admin/PricingEditorModal.tsx
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Edit landing page pricing cards from admin panel
-// No code changes needed — saves directly to DB
-// ══════════════════════════════════════════════════════════════
+// No code changes needed â€” saves directly to DB
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -170,9 +170,9 @@ export default function PricingEditorModal({ onClose }: Props) {
           <Eye size={16} style={{ color: C.limeDeep }} />
           <div className="flex-1">
             <p className="text-[15px] font-black" style={{ color: C.dark }}>Pricing Page Editor</p>
-            <p className="text-[11px]" style={{ color: C.muted }}>Edit landing page pricing cards — changes go live instantly</p>
+            <p className="text-[11px]" style={{ color: C.muted }}>Edit landing page pricing cards â€” changes go live instantly</p>
           </div>
-          <a href="/" target="_blank"
+          <a href="/pricing" target="_blank"
              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold hover:opacity-80"
              style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
             <Eye size={12} /> Preview Page
@@ -186,7 +186,7 @@ export default function PricingEditorModal({ onClose }: Props) {
 
         <div className="flex flex-1 overflow-hidden">
 
-          {/* Left — Plan selector */}
+          {/* Left â€” Plan selector */}
           <div className="w-48 border-r flex flex-col shrink-0"
                style={{ borderColor: C.border, backgroundColor: C.bg }}>
             <p className="text-[9px] font-black tracking-wider px-4 py-3" style={{ color: C.muted }}>PLANS</p>
@@ -210,14 +210,14 @@ export default function PricingEditorModal({ onClose }: Props) {
                   </div>
                   {plan.highlight && (
                     <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
-                          style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>★</span>
+                          style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>â˜…</span>
                   )}
                 </button>
               ))
             )}
           </div>
 
-          {/* Right — Edit panel */}
+          {/* Right â€” Edit panel */}
           <div className="flex-1 overflow-y-auto p-6">
             {!currentPlan ? (
               <div className="flex items-center justify-center h-full">
@@ -366,7 +366,7 @@ export default function PricingEditorModal({ onClose }: Props) {
                   ) : saved === currentPlan.id ? (
                     <><Check size={16} /> Saved!</>
                   ) : (
-                    <><Save size={16} /> Save Changes — Goes Live Instantly</>
+                    <><Save size={16} /> Save Changes â€” Goes Live Instantly</>
                   )}
                 </button>
 

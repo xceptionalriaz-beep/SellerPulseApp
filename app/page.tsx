@@ -153,7 +153,7 @@ function Navbar() {
             )}
           </div>
           {['Pricing', 'How It Works', 'Blog'].map(item => (
-            <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`}
+            <a key={item} href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase().replace(' ', '-')}`}
                className="text-[14px] font-medium hover:opacity-70 transition-opacity"
                style={{ color: T.carbon }}>{item}</a>
           ))}
@@ -179,7 +179,7 @@ function Navbar() {
         <div className="md:hidden px-6 pb-6 flex flex-col gap-4 border-t"
              style={{ background: T.white, borderColor: T.border }}>
           {['Tools', 'Pricing', 'How It Works', 'Blog'].map(item => (
-            <a key={item} href="#" className="text-[15px] font-medium py-1" style={{ color: T.carbon }}>{item}</a>
+            <a key={item} href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase().replace(' ', '-')}`} className="text-[15px] font-medium py-1" style={{ color: T.carbon }}>{item}</a>
           ))}
           <button onClick={() => router.push('/auth/signup')}
             className="mt-2 py-3 rounded-xl font-black text-[15px]"
@@ -1074,7 +1074,7 @@ function Footer() {
           {[
             { title: "Product", links: [
                 { label: "Features",         href: "#features"  },
-                { label: "Pricing",          href: "#pricing"   },
+                { label: "Pricing",          href: "/pricing"   },
                 { label: "Changelog",        href: "#"          },
                 { label: "Roadmap",          href: "/roadmap"   },
                 { label: "Status",           href: "/status"    },
@@ -1099,7 +1099,7 @@ function Footer() {
                 {col.links.map(l => (
                   <a key={l.label} href={l.href}
                      className="text-[13px] transition-opacity hover:opacity-100 opacity-60"
-                     style={{ color: l.label === 'Roadmap' || l.label === 'Status' ? T.lime : T.sage }}>
+                     style={{ color: l.label === "Roadmap" || l.label === "Status" || l.label === "Pricing" ? T.lime : T.sage }}>
                     {l.label}
                   </a>
                 ))}
