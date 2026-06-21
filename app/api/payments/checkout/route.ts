@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
           attributes: {
             checkout_data: {
               email:  userEmail,
-              name:   userName ?? '',
+              name:   userName || userEmail.split('@')[0] || 'Riazify User',
               custom: {
                 user_id:  userId,
                 plan:     plan,
@@ -119,6 +119,9 @@ export async function POST(req: NextRequest) {
 
     const lsData = await lsRes.json()
     const checkoutUrl = lsData?.data?.attributes?.url
+
+    console.log('[checkout] LS Response:', JSON.stringify(lsData?.data?.attributes))
+    console.log('[checkout] Checkout URL:', checkoutUrl)
 
     if (!checkoutUrl) {
       return NextResponse.json({ error: 'No checkout URL returned' }, { status: 500 })
