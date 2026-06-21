@@ -50,11 +50,22 @@ export async function POST(req: NextRequest) {
       .single()
     const storeId = (storeData as any)?.value
 
+    // Get API key from DB (fallback to env var)
+    const { data: lsKeyData } = await (adminClient.from('api_fleet_config') as any)
+      .select('primary_key_1')
+      .eq('platform_name', 'lemonsqueezy')
+      .single()
+    const lsApiKey = (lsKeyData as any)?.primary_key_1 ?? process.env.LEMONSQUEEZY_API_KEY
+
+    if (!lsApiKey) {
+      return NextResponse.json({ error: 'LemonSqueezy not configured' }, { status: 500 })
+    }
+
     // Build checkout via LemonSqueezy API
     const lsRes = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.LEMONSQUEEZY_API_KEY}`,
+        'Authorization': `Bearer ${lsApiKey}`,
         'Content-Type':  'application/vnd.api+json',
         'Accept':        'application/vnd.api+json',
       },

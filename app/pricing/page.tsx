@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 import {
   Check, X, Zap, TrendingUp, Users,
   ArrowRight, Star, ChevronDown, ChevronUp, Shield
@@ -63,7 +64,8 @@ const PLAN_STYLE: Record<string, { bg: string; border: string; badge?: string }>
 }
 
 export default function PricingPage() {
-  const router = useRouter()
+  const router   = useRouter()
+  const supabase = createClient()
   const [plans,       setPlans]       = useState<DBPlan[]>([])
   const [loaded,      setLoaded]      = useState(false)
   const [billing,     setBilling]     = useState<'monthly' | 'annual'>('monthly')
@@ -73,26 +75,29 @@ export default function PricingPage() {
   useEffect(() => {
     async function load() {
       try {
-        const { createClient } = await import('@supabase/supabase-js')
-        const sb = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        )
-        const { data } = await sb
+        const { data } = await supabase
           .from('landing_pricing')
           .select('*')
           .eq('is_active', true)
           .order('sort_order', { ascending: true })
         if (data) setPlans(data as DBPlan[])
 
-        const { data: { user } } = await sb.auth.getUser()
+        const { data: { user } } = await supabase.auth.getUser()
         if (user) {
-          const { data: profile } = await sb
+          const { data: profile } = await supabase
             .from('profiles')
             .select('plan_name')
             .eq('id', user.id)
             .single()
           if (profile) setCurrentPlan((profile as any).plan_name ?? 'free')
+        }
+
+        // Auto-set billing if redirected from signup
+        const urlParams = new URLSearchParams(window.location.search)
+        const checkout  = urlParams.get('checkout')
+        if (checkout && user) {
+          const [, billingCycle] = checkout.split('_')
+          if (billingCycle) setBilling(billingCycle as 'monthly' | 'annual')
         }
       } catch {}
       setLoaded(true)
@@ -108,23 +113,18 @@ export default function PricingPage() {
     if (plan.plan_id === 'free')      { router.push('/auth/signup'); return }
 
     // Check if user is logged in
-    const { createClient: createSb } = await import('@supabase/supabase-js')
-    const sb = createSb(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const { data: { user } } = await sb.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Not logged in → go to signup first
     if (!user) {
-      router.push(`/auth/signup?plan=${plan.plan_id}&billing=${billing}`)
+      router.push(`/auth/signup?plan=${plan.plan_id}&billing=${billing}&next=/pricing?checkout=${plan.plan_id}_${billing}`)
       return
     }
 
     // Logged in → create checkout
     setCheckoutLoading(plan.plan_id)
     try {
-      const { data: profile } = await sb
+      const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, email')
         .eq('id', user.id)
