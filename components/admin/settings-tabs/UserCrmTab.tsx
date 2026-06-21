@@ -531,8 +531,8 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
             <MiniBar fill={total>0?starter/total:0} color={C.lime}     />
             <MiniBar fill={total>0?growth/total:0}  color={C.limeDeep} />
             <MiniBar fill={total>0?custom/total:0}  color={C.dark}     />
+          </div>
         </HudCard>
-        <HudCard
           title="Live Right Now"
           value={liveCount > 0 ? `${liveCount} Online` : 'Nobody Online'}
           sub={liveCount > 0 ? `Using Riazify right now` : 'Check back soon'}>
