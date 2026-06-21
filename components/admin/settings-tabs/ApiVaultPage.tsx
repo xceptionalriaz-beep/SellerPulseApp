@@ -414,15 +414,15 @@ function ConfigTab({ api, onSaved, showToast }: {
           return
         }
       } else if (api.platform_name === 'lemonsqueezy') {
-        // Fix 11: Real LemonSqueezy test — fetch store info
-        const res = await fetch('https://api.lemonsqueezy.com/v1/stores', {
-          headers: {
-            Authorization: `Bearer ${p1.trim()}`,
-            Accept:        'application/vnd.api+json',
-          }
+        // Use server-side route — key too long for client
+        const lsRes = await fetch('/api/admin/test-connection', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ platform: 'lemonsqueezy' }),
         })
+        const lsData = await lsRes.json()
         ms      = Date.now() - start
-        success = res.ok
+        success = lsData.success
       } else if (api.platform_name === 'stripe') {
         // Fix 11: Real Stripe test — fetch balance
         const res = await fetch('https://api.stripe.com/v1/balance', {
@@ -1455,15 +1455,15 @@ export default function ApiVaultPage() {
           success   = res.ok && (await res.json()).success === true
           newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'lemonsqueezy') {
-          // Fix 11: Real LemonSqueezy test
-          const p1 = api.primary_key_1
-          if (p1 && p1 !== 'EMPTY') {
-            const res = await fetch('https://api.lemonsqueezy.com/v1/stores', {
-              headers: { Authorization: `Bearer ${p1}`, Accept: 'application/vnd.api+json' }
-            })
-            success   = res.ok
-            newStatus = success ? 'connected' : 'error'
-          }
+          // Use server-side route — key too long for client
+          const lsRes2 = await fetch('/api/admin/test-connection', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ platform: 'lemonsqueezy' }),
+          })
+          const lsData2 = await lsRes2.json()
+          success   = lsData2.success
+          newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'stripe') {
           // Fix 11: Real Stripe test
           const p1 = api.primary_key_1
