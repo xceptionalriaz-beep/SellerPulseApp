@@ -56,6 +56,59 @@ async function fireWebhook(req: NextRequest, event_type: string, data: Record<st
   } catch {}
 }
 
+// ── Save transaction to DB ─────────────────────────────────────
+async function saveTransaction(data: {
+  userId?:        string | null
+  userEmail?:     string | null
+  plan:           string
+  amount:         number
+  status:         string
+  billing?:       string
+  lsSubId?:       string
+  lsOrderId?:     string
+  paymentMethod?: string
+  coupon?:        string
+  country?:       string
+  nextBilling?:   string
+  trialEnd?:      string
+}) {
+  try {
+    // Get existing LTV
+    const { data: existing } = await (adminClient.from('transactions') as any)
+      .select('ltv')
+      .eq('user_email', data.userEmail)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    const prevLtv = (existing as any)?.ltv ?? 0
+    const newLtv  = prevLtv + (data.amount ?? 0)
+
+    await (adminClient.from('transactions') as any).insert({
+      user_id:        data.userId,
+      user_email:     data.userEmail,
+      invoice:        `INV-${Date.now()}`,
+      plan:           data.plan,
+      amount:         data.amount,
+      status:         data.status,
+      billing:        data.billing ?? 'monthly',
+      payment_method: data.paymentMethod ?? '—',
+      sub_id:         data.lsSubId,
+      ls_sub_id:      data.lsSubId,
+      ls_order_id:    data.lsOrderId,
+      ltv:            newLtv,
+      coupon:         data.coupon ?? null,
+      country:        data.country ?? null,
+      next_billing:   data.nextBilling ?? null,
+      trial_end:      data.trialEnd ?? null,
+      created_at:     new Date().toISOString(),
+      updated_at:     new Date().toISOString(),
+    })
+  } catch (e) {
+    console.error('[webhook] saveTransaction error:', e)
+  }
+}
+
 // ── Update profile by user_id (preferred) or email ────────────
 async function updateProfile(
   userId:  string | null,
@@ -122,6 +175,13 @@ export async function POST(req: NextRequest) {
           subscription_status: 'active',
           ls_customer_id:      lsCustomerId,
         })
+        await saveTransaction({
+          userId, userEmail, plan,
+          amount:    obj.total ? obj.total / 100 : 0,
+          status:    'paid',
+          billing:   'monthly',
+          lsOrderId: lsSubId,
+        })
         await fireWebhook(req, 'plan.upgraded', {
           email: userEmail, plan, amount, status: 'Order completed',
         })
@@ -141,6 +201,14 @@ export async function POST(req: NextRequest) {
           ls_subscription_id:   lsSubId,
           current_period_end:   periodEnd,
           cancel_at_period_end: false,
+        })
+        await saveTransaction({
+          userId, userEmail, plan,
+          amount:      obj.unit_price ? obj.unit_price / 100 : 0,
+          status:      'paid',
+          billing:     obj.billing_anchor ? 'annual' : 'monthly',
+          lsSubId,
+          nextBilling: periodEnd,
         })
         await fireWebhook(req, 'plan.upgraded', {
           email: userEmail, plan, amount: `${amount}/mo`, status: 'Subscription started',

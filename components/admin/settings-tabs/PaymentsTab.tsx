@@ -139,7 +139,38 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
         .select('status, primary_key_1')
         .eq('platform_name', 'lemonsqueezy')
         .single()
-      setIsLSConnected((ls as any)?.status === 'connected' && (ls as any)?.primary_key_1 !== 'EMPTY')
+      const connected = (ls as any)?.status === 'connected' && (ls as any)?.primary_key_1 !== 'EMPTY'
+      setIsLSConnected(connected)
+
+      // Load real transactions if LS connected
+      if (connected) {
+        const { data: txnData } = await (supabase.from('transactions') as any)
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50)
+
+        if (txnData && txnData.length > 0) {
+          const mapped = txnData.map((t: any, i: number) => ({
+            id:            t.id,
+            invoice:       t.invoice ?? `INV-${String(i+1).padStart(3,'0')}`,
+            user:          t.user_email ?? '—',
+            plan:          t.plan ?? 'free',
+            amount:        parseFloat(t.amount ?? 0),
+            status:        t.status ?? 'paid',
+            date:          t.created_at,
+            billing:       t.billing ?? 'monthly',
+            country:       t.country ?? '—',
+            renewsIn:      0,
+            nextBilling:   t.next_billing ?? '—',
+            paymentMethod: t.payment_method ?? '—',
+            subId:         t.sub_id ?? '—',
+            ltv:           parseFloat(t.ltv ?? 0),
+            trialEnd:      t.trial_end ?? null,
+            coupon:        t.coupon ?? null,
+          }))
+          setTransactions(mapped)
+        }
+      }
 
     } catch {}
     setLoading(false)
