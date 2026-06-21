@@ -90,6 +90,34 @@ export async function POST(req: NextRequest) {
           .eq('platform_name', 'ebay')
       }
 
+     } else if (platform === 'lemonsqueezy') {
+      const { data } = await (adminClient.from('api_fleet_config') as any)
+        .select('primary_key_1')
+        .eq('platform_name', 'lemonsqueezy')
+        .single()
+      if (!data?.primary_key_1) {
+        return NextResponse.json({ success: false, message: 'LemonSqueezy key not configured' })
+      }
+      const res = await fetch('https://api.lemonsqueezy.com/v1/stores', {
+        headers: {
+          'Authorization': `Bearer ${data.primary_key_1}`,
+          'Accept':        'application/vnd.api+json',
+        }
+      })
+      success = res.ok
+      message = success
+        ? `LemonSqueezy connected — ${Date.now() - start}ms`
+        : `LemonSqueezy error — ${res.status}`
+      if (success) {
+        await (adminClient.from('api_fleet_config') as any)
+          .update({
+            status:          'connected',
+            last_tested_at:  new Date().toISOString(),
+            last_used_at:    new Date().toISOString(),
+            last_request_at: new Date().toISOString(),
+          })
+          .eq('platform_name', 'lemonsqueezy')
+      }
     } else {
       return NextResponse.json({ success: false, message: 'Unknown platform' })
     }

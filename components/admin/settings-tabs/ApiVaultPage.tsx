@@ -531,7 +531,12 @@ function ConfigTab({ api, onSaved, showToast }: {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <p className="text-[10px] font-bold" style={{ color: C.muted }}>Key 1 / App ID</p>
+                <p className="text-[10px] font-bold" style={{ color: C.muted }}>
+                  {api.platform_name === 'lemonsqueezy' ? 'API Key' :
+                   api.platform_name === 'stripe'       ? 'Secret Key' :
+                   api.platform_name === 'openai'       ? 'API Key' :
+                   'Key 1 / App ID'}
+                </p>
                 <button onClick={() => copyFP(p1, 'Key 1')}
                   className="flex items-center gap-1 text-[10px] hover:opacity-70"
                   style={{ color: C.muted }}>
@@ -539,13 +544,22 @@ function ConfigTab({ api, onSaved, showToast }: {
                 </button>
               </div>
               <input value={p1} onChange={e => setP1(e.target.value)}
-                placeholder="Paste key 1..."
+                placeholder={
+                  api.platform_name === 'lemonsqueezy' ? 'Paste LemonSqueezy API key...' :
+                  api.platform_name === 'stripe'       ? 'sk_live_...' :
+                  api.platform_name === 'openai'       ? 'sk-...' :
+                  'Paste key 1...'
+                }
                 className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
                 style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
             </div>
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <p className="text-[10px] font-bold" style={{ color: C.muted }}>Key 2 / Secret</p>
+                <p className="text-[10px] font-bold" style={{ color: C.muted }}>
+                  {api.platform_name === 'lemonsqueezy' ? 'Webhook Secret' :
+                   api.platform_name === 'stripe'       ? 'Webhook Secret' :
+                   'Key 2 / Secret'}
+                </p>
                 <div className="flex items-center gap-2">
                   <button onClick={() => copyFP(p2, 'Key 2')}
                     className="flex items-center gap-1 text-[10px] hover:opacity-70"
@@ -559,7 +573,11 @@ function ConfigTab({ api, onSaved, showToast }: {
               </div>
               <input value={p2} onChange={e => setP2(e.target.value)}
                 type={showP2 ? 'text' : 'password'}
-                placeholder="Paste key 2..."
+                placeholder={
+                  api.platform_name === 'lemonsqueezy' ? 'Paste webhook signing secret...' :
+                  api.platform_name === 'stripe'       ? 'whsec_...' :
+                  'Paste key 2...'
+                }
                 className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
                 style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
             </div>
@@ -592,6 +610,52 @@ function ConfigTab({ api, onSaved, showToast }: {
           </div>
         </div>
       </div>
+
+      {/* LemonSqueezy specific info */}
+      {api.platform_name === 'lemonsqueezy' && (
+        <div className="p-4 rounded-xl border flex flex-col gap-3"
+             style={{ borderColor: 'rgba(99,102,241,0.2)', backgroundColor: 'rgba(99,102,241,0.04)' }}>
+          <p className="text-[10px] font-black tracking-wider" style={{ color: '#6366f1' }}>
+            LEMONSQUEEZY SETUP
+          </p>
+          <div className="grid grid-cols-2 gap-3 text-[11px]">
+            <div>
+              <p className="font-bold mb-0.5" style={{ color: C.muted }}>Store ID</p>
+              <p className="font-mono font-bold" style={{ color: C.text }}>402187</p>
+            </div>
+            <div>
+              <p className="font-bold mb-0.5" style={{ color: C.muted }}>Webhook URL</p>
+              <p className="font-mono text-[10px] truncate" style={{ color: C.text }}>
+                /api/webhooks/lemonsqueezy
+              </p>
+            </div>
+            <div>
+              <p className="font-bold mb-0.5" style={{ color: C.muted }}>Key 1</p>
+              <p style={{ color: C.muted }}>API Key (from LS Settings → API)</p>
+            </div>
+            <div>
+              <p className="font-bold mb-0.5" style={{ color: C.muted }}>Key 2</p>
+              <p style={{ color: C.muted }}>Webhook Signing Secret</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: 'Starter Monthly', value: '1816372' },
+              { label: 'Starter Annual',  value: '1816460' },
+              { label: 'Growth Monthly',  value: '1816599' },
+              { label: 'Growth Annual',   value: '1816810' },
+              { label: 'Custom Monthly',  value: '1816827' },
+              { label: 'Custom Annual',   value: '1816837' },
+            ].map((v, i) => (
+              <div key={i} className="px-2.5 py-1.5 rounded-lg border text-[10px]"
+                   style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                <span style={{ color: C.muted }}>{v.label}: </span>
+                <span className="font-mono font-bold" style={{ color: C.text }}>{v.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Missing 4: Environment — wired to DB */}
       <div>
