@@ -1513,7 +1513,7 @@ function AdminPage() {
     </div>
   )
 }
-function AdminPageWrapper() {
+export default function AdminPageWrapper() {
   return (
     <Suspense fallback={null}>
       <AdminPage />
