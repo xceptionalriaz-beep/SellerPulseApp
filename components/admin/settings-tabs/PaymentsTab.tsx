@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase'
 import {
   DollarSign, TrendingUp, Users, AlertTriangle,
   RefreshCw, Download, CheckCircle, XCircle,
-  Clock, ChevronRight, ExternalLink, Zap, X,
+  ChevronRight, ExternalLink, Zap, X,
   Search, RotateCcw,
 } from 'lucide-react'
 
@@ -1483,17 +1483,6 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
             {/* Body */}
             <div className="p-5 flex flex-col gap-4 flex-1 overflow-y-auto">
 
-              {/* Preview warning */}
-              {!subTxn!.subId.startsWith('LS-SUB-00') && !subTxn!.lsOrderId && (
-                <div className="flex items-start gap-3 p-3 rounded-xl border"
-                     style={{ backgroundColor: 'rgba(217,119,6,0.06)', borderColor: 'rgba(217,119,6,0.2)' }}>
-                  <AlertTriangle size={14} style={{ color: C.amber, marginTop: 1 }} />
-                  <p className="text-[11px]" style={{ color: C.amber }}>
-                    Real subscription management only works with live LemonSqueezy data.
-                  </p>
-                </div>
-              )}
-
               {/* Subscription details */}
               <div className="p-4 rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
                 <div className="grid grid-cols-2 gap-3">
@@ -1513,7 +1502,7 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                 </div>
               </div>
 
-              {/* Success message */}
+              {/* Success */}
               {subSuccess && (
                 <div className="flex items-center gap-2 p-3 rounded-xl border"
                      style={{ backgroundColor: C.limeTint, borderColor: C.limeDeep + '40' }}>
@@ -1522,7 +1511,7 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                 </div>
               )}
 
-              {/* Error message */}
+              {/* Error */}
               {subError && (
                 <div className="flex items-center gap-2 p-3 rounded-xl border"
                      style={{ backgroundColor: 'rgba(185,28,28,0.06)', borderColor: 'rgba(185,28,28,0.2)' }}>
@@ -1531,20 +1520,16 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                 </div>
               )}
 
-              {/* Action selector */}
+              {/* Action menu */}
               {!subAction && !subSuccess && (
                 <div className="flex flex-col gap-2">
-                  <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
-                    SUBSCRIPTION ACTIONS
-                  </p>
+                  <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>SUBSCRIPTION ACTIONS</p>
 
-                  {/* Change plan */}
                   <button onClick={() => { setSubAction('change_plan'); setSubNewPlan(subTxn!.plan); setSubNewBilling(subTxn!.billing as any) }}
                     className="flex items-center justify-between p-3.5 rounded-2xl border hover:opacity-80 transition-all"
                     style={{ borderColor: C.border, backgroundColor: C.bg }}>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                           style={{ backgroundColor: C.limeTint }}>
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: C.limeTint }}>
                         <TrendingUp size={14} style={{ color: C.limeDeep }} />
                       </div>
                       <div className="text-left">
@@ -1555,14 +1540,12 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                     <ChevronRight size={14} style={{ color: C.muted }} />
                   </button>
 
-                  {/* Resume (if cancelled) */}
-                  {(subTxn!.status === 'cancelled') && (
+                  {subTxn!.status === 'cancelled' && (
                     <button onClick={() => setSubAction('resume')}
                       className="flex items-center justify-between p-3.5 rounded-2xl border hover:opacity-80 transition-all"
                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                             style={{ backgroundColor: 'rgba(22,163,74,0.1)' }}>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(22,163,74,0.1)' }}>
                           <RefreshCw size={14} style={{ color: C.green }} />
                         </div>
                         <div className="text-left">
@@ -1574,14 +1557,12 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                     </button>
                   )}
 
-                  {/* Cancel */}
                   {subTxn!.status !== 'cancelled' && subTxn!.status !== 'expired' && (
                     <button onClick={() => setSubAction('cancel')}
                       className="flex items-center justify-between p-3.5 rounded-2xl border hover:opacity-80 transition-all"
                       style={{ borderColor: 'rgba(185,28,28,0.2)', backgroundColor: 'rgba(185,28,28,0.03)' }}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                             style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
                           <XCircle size={14} style={{ color: C.red }} />
                         </div>
                         <div className="text-left">
@@ -1595,12 +1576,10 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                 </div>
               )}
 
-              {/* Change Plan UI */}
+              {/* Change Plan */}
               {subAction === 'change_plan' && (
                 <div className="flex flex-col gap-3">
-                  <button onClick={() => setSubAction(null)}
-                    className="flex items-center gap-1.5 text-[11px] font-bold hover:opacity-70"
-                    style={{ color: C.muted }}>
+                  <button onClick={() => setSubAction(null)} className="flex items-center gap-1.5 text-[11px] font-bold hover:opacity-70" style={{ color: C.muted }}>
                     <ChevronRight size={11} style={{ transform: 'rotate(180deg)' }} /> Back
                   </button>
                   <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>SELECT NEW PLAN</p>
@@ -1612,56 +1591,34 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                     ].map(p => (
                       <button key={p.plan} onClick={() => setSubNewPlan(p.plan)}
                         className="flex items-center justify-between p-3 rounded-xl border transition-all"
-                        style={{
-                          borderColor:     subNewPlan === p.plan ? C.limeDeep : C.border,
-                          backgroundColor: subNewPlan === p.plan ? C.limeTint  : C.bg,
-                        }}>
+                        style={{ borderColor: subNewPlan === p.plan ? C.limeDeep : C.border, backgroundColor: subNewPlan === p.plan ? C.limeTint : C.bg }}>
                         <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                               style={{ borderColor: subNewPlan === p.plan ? C.limeDeep : C.border }}>
-                            {subNewPlan === p.plan && (
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.limeDeep }} />
-                            )}
+                          <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center" style={{ borderColor: subNewPlan === p.plan ? C.limeDeep : C.border }}>
+                            {subNewPlan === p.plan && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.limeDeep }} />}
                           </div>
                           <span className="text-[12px] font-bold" style={{ color: C.dark }}>{p.label}</span>
                         </div>
-                        <span className="text-[11px]" style={{ color: C.muted }}>
-                          {subNewBilling === 'monthly' ? p.monthly : p.annual}
-                        </span>
+                        <span className="text-[11px]" style={{ color: C.muted }}>{subNewBilling === 'monthly' ? p.monthly : p.annual}</span>
                       </button>
                     ))}
                   </div>
-
-                  {/* Billing toggle */}
-                  <div className="flex items-center rounded-lg p-0.5"
-                       style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                  <div className="flex items-center rounded-lg p-0.5" style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
                     {(['monthly', 'annual'] as const).map(b => (
                       <button key={b} onClick={() => setSubNewBilling(b)}
                         className="flex-1 py-1.5 rounded-md text-[11px] font-bold capitalize transition-all"
-                        style={{
-                          backgroundColor: subNewBilling === b ? C.dark  : 'transparent',
-                          color:           subNewBilling === b ? C.lime  : C.muted,
-                        }}>
+                        style={{ backgroundColor: subNewBilling === b ? C.dark : 'transparent', color: subNewBilling === b ? C.lime : C.muted }}>
                         {b}
                       </button>
                     ))}
                   </div>
-
-                  <button
-                    disabled={subLoading || !subNewPlan || subNewPlan === subTxn!.plan}
+                  <button disabled={subLoading || !subNewPlan || subNewPlan === subTxn!.plan}
                     onClick={async () => {
                       setSubLoading(true); setSubError(null)
                       try {
-                        const res = await fetch('/api/admin/subscription', {
-                          method: 'POST', headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'change_plan', lsSubId: subTxn!.subId, userId: subTxn!.userId, plan: subNewPlan, billing: subNewBilling }),
-                        })
+                        const res = await fetch('/api/admin/subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'change_plan', lsSubId: subTxn!.subId, userId: subTxn!.userId, plan: subNewPlan, billing: subNewBilling }) })
                         const data = await res.json()
-                        if (data.success) {
-                          setTransactions(prev => prev.map(t => t.id === subTxn!.id ? { ...t, plan: subNewPlan } : t))
-                          setSubSuccess(`Plan changed to ${subNewPlan.charAt(0).toUpperCase() + subNewPlan.slice(1)}!`)
-                          setSubAction(null)
-                        } else { setSubError(data.error ?? 'Failed') }
+                        if (data.success) { setTransactions(prev => prev.map(t => t.id === subTxn!.id ? { ...t, plan: subNewPlan } : t)); setSubSuccess(`Plan changed to ${subNewPlan.charAt(0).toUpperCase() + subNewPlan.slice(1)}!`); setSubAction(null) }
+                        else { setSubError(data.error ?? 'Failed') }
                       } catch { setSubError('Network error') }
                       setSubLoading(false)
                     }}
@@ -1672,12 +1629,10 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                 </div>
               )}
 
-              {/* Cancel UI */}
+              {/* Cancel */}
               {subAction === 'cancel' && (
                 <div className="flex flex-col gap-3">
-                  <button onClick={() => setSubAction(null)}
-                    className="flex items-center gap-1.5 text-[11px] font-bold hover:opacity-70"
-                    style={{ color: C.muted }}>
+                  <button onClick={() => setSubAction(null)} className="flex items-center gap-1.5 text-[11px] font-bold hover:opacity-70" style={{ color: C.muted }}>
                     <ChevronRight size={11} style={{ transform: 'rotate(180deg)' }} /> Back
                   </button>
                   <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>CANCEL MODE</p>
@@ -1688,16 +1643,9 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                     ].map(m => (
                       <button key={m.mode} onClick={() => setCancelMode(m.mode)}
                         className="flex items-center gap-3 p-3 rounded-xl border transition-all text-left"
-                        style={{
-                          borderColor:     cancelMode === m.mode ? (m.mode === 'now' ? C.red : C.limeDeep) : C.border,
-                          backgroundColor: cancelMode === m.mode ? (m.mode === 'now' ? 'rgba(185,28,28,0.04)' : C.limeTint) : C.bg,
-                        }}>
-                        <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
-                             style={{ borderColor: cancelMode === m.mode ? (m.mode === 'now' ? C.red : C.limeDeep) : C.border }}>
-                          {cancelMode === m.mode && (
-                            <div className="w-2 h-2 rounded-full"
-                                 style={{ backgroundColor: m.mode === 'now' ? C.red : C.limeDeep }} />
-                          )}
+                        style={{ borderColor: cancelMode === m.mode ? (m.mode === 'now' ? C.red : C.limeDeep) : C.border, backgroundColor: cancelMode === m.mode ? (m.mode === 'now' ? 'rgba(185,28,28,0.04)' : C.limeTint) : C.bg }}>
+                        <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: cancelMode === m.mode ? (m.mode === 'now' ? C.red : C.limeDeep) : C.border }}>
+                          {cancelMode === m.mode && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: m.mode === 'now' ? C.red : C.limeDeep }} />}
                         </div>
                         <div>
                           <p className="text-[12px] font-bold" style={{ color: C.dark }}>{m.label}</p>
@@ -1706,22 +1654,14 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                       </button>
                     ))}
                   </div>
-
-                  <button
-                    disabled={subLoading}
+                  <button disabled={subLoading}
                     onClick={async () => {
                       setSubLoading(true); setSubError(null)
                       try {
-                        const res = await fetch('/api/admin/subscription', {
-                          method: 'POST', headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'cancel', lsSubId: subTxn!.subId, userId: subTxn!.userId, cancelAtPeriodEnd: cancelMode === 'end' }),
-                        })
+                        const res = await fetch('/api/admin/subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cancel', lsSubId: subTxn!.subId, userId: subTxn!.userId, cancelAtPeriodEnd: cancelMode === 'end' }) })
                         const data = await res.json()
-                        if (data.success) {
-                          setTransactions(prev => prev.map(t => t.id === subTxn!.id ? { ...t, status: 'cancelled' } : t))
-                          setSubSuccess('Subscription cancelled successfully')
-                          setSubAction(null)
-                        } else { setSubError(data.error ?? 'Failed') }
+                        if (data.success) { setTransactions(prev => prev.map(t => t.id === subTxn!.id ? { ...t, status: 'cancelled' } : t)); setSubSuccess('Subscription cancelled successfully'); setSubAction(null) }
+                        else { setSubError(data.error ?? 'Failed') }
                       } catch { setSubError('Network error') }
                       setSubLoading(false)
                     }}
@@ -1732,35 +1672,24 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                 </div>
               )}
 
-              {/* Resume UI */}
+              {/* Resume */}
               {subAction === 'resume' && (
                 <div className="flex flex-col gap-3">
-                  <button onClick={() => setSubAction(null)}
-                    className="flex items-center gap-1.5 text-[11px] font-bold hover:opacity-70"
-                    style={{ color: C.muted }}>
+                  <button onClick={() => setSubAction(null)} className="flex items-center gap-1.5 text-[11px] font-bold hover:opacity-70" style={{ color: C.muted }}>
                     <ChevronRight size={11} style={{ transform: 'rotate(180deg)' }} /> Back
                   </button>
                   <div className="p-4 rounded-xl border" style={{ backgroundColor: C.limeTint, borderColor: C.limeDeep + '40' }}>
                     <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>Resume subscription</p>
-                    <p className="text-[11px] mt-1" style={{ color: C.muted }}>
-                      This will reactivate the subscription and resume billing on the next cycle.
-                    </p>
+                    <p className="text-[11px] mt-1" style={{ color: C.muted }}>This will reactivate the subscription and resume billing on the next cycle.</p>
                   </div>
-                  <button
-                    disabled={subLoading}
+                  <button disabled={subLoading}
                     onClick={async () => {
                       setSubLoading(true); setSubError(null)
                       try {
-                        const res = await fetch('/api/admin/subscription', {
-                          method: 'POST', headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ action: 'resume', lsSubId: subTxn!.subId, userId: subTxn!.userId }),
-                        })
+                        const res = await fetch('/api/admin/subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'resume', lsSubId: subTxn!.subId, userId: subTxn!.userId }) })
                         const data = await res.json()
-                        if (data.success) {
-                          setTransactions(prev => prev.map(t => t.id === subTxn!.id ? { ...t, status: 'active' } : t))
-                          setSubSuccess('Subscription resumed successfully!')
-                          setSubAction(null)
-                        } else { setSubError(data.error ?? 'Failed') }
+                        if (data.success) { setTransactions(prev => prev.map(t => t.id === subTxn!.id ? { ...t, status: 'active' } : t)); setSubSuccess('Subscription resumed successfully!'); setSubAction(null) }
+                        else { setSubError(data.error ?? 'Failed') }
                       } catch { setSubError('Network error') }
                       setSubLoading(false)
                     }}

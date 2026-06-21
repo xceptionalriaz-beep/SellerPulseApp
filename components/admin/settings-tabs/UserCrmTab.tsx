@@ -63,7 +63,7 @@ const PAGE_SIZES = [25, 50, 100]
 // ── Badge helpers ──────────────────────────────────────────────
 function planBadge(plan: string) {
   const p = (plan ?? '').toLowerCase()
-  if (p.includes('elite') || p.includes('pro')) return { bg: C.lime,    text: C.dark  }
+  if (p.includes('growth') || p.includes('custom')) return { bg: C.lime, text: C.dark }
   return                                                { bg: C.bg,      text: C.muted }
 }
 function statusBadge(status: string) {
@@ -154,7 +154,7 @@ function calcHealthScore(u: any): number {
   }
   // Plan tier (0-10 pts)
   const p = planOf(u).toLowerCase()
-  score += p.includes('elite') ? 10 : p.includes('pro') ? 7 : 3
+  score += p.includes('custom') ? 10 : p.includes('growth') ? 7 : p.includes('starter') ? 5 : 3
   return Math.min(Math.round(score), 100)
 }
 
@@ -365,10 +365,10 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
   const activeRatio= total > 0 ? activeSubs / total : 0
 
   const free  = users.filter(u => planOf(u).toLowerCase().includes('free')).length
-  const pro   = users.filter(u => planOf(u).toLowerCase().includes('pro')).length
-  const elite = users.filter(u => planOf(u).toLowerCase().includes('elite')).length
-
-  const highRisk   = users.filter(u => calcHealthScore(u) < 40).length
+  const free    = users.filter(u => planOf(u).toLowerCase().includes('free')).length
+  const starter = users.filter(u => planOf(u).toLowerCase().includes('starter')).length
+  const growth  = users.filter(u => planOf(u).toLowerCase().includes('growth')).length
+  const custom  = users.filter(u => planOf(u).toLowerCase().includes('custom')).length
   const mediumRisk = users.filter(u => { const s = calcHealthScore(u); return s >= 40 && s < 70 }).length
 
   const ebayDisconnected = users.filter(u => {
@@ -526,12 +526,12 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
         <HudCard title="Active Subscribers" value={`${activeSubs}`} sub={`${total} total accounts`}>
           <CircleProgress value={activeRatio} color={C.lime} />
         </HudCard>
-        <HudCard title="Plan Distribution" value={`Pro: ${pro}`} sub={`Free: ${free} · Elite: ${elite}`}>
+        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} · Growth: ${growth} · Custom: ${custom}`}>
           <div className="flex items-end gap-1">
             <MiniBar fill={total>0?free/total:0}  color={C.muted}    />
-            <MiniBar fill={total>0?pro/total:0}   color={C.lime}     />
-            <MiniBar fill={total>0?elite/total:0} color={C.limeDeep} />
-          </div>
+            <MiniBar fill={total>0?starter/total:0} color={C.lime}     />
+            <MiniBar fill={total>0?growth/total:0}  color={C.limeDeep} />
+            <MiniBar fill={total>0?custom/total:0}  color={C.dark}     />
         </HudCard>
         <HudCard
           title="Live Right Now"
@@ -757,9 +757,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <ChipRow label="PLAN" field="plans" options={[
             { value:'Free', label:'Free' },
-            { value:'Starter',   label:'Pro'        },
-            { value:'Growth', label:'Elite'      },
-          ]} />
+                { value:'Starter', label:'Starter' },
+                { value:'Growth',  label:'Growth'  },
+                { value:'Custom',  label:'Custom'  },
           <ChipRow label="STATUS" field="statuses" options={[
             { value:'Active',    label:'Active'    },
             { value:'Expired',   label:'Expired'   },
@@ -946,7 +946,7 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
           <div className="text-right">
             {isOwner && (() => {
               const plan  = ((user.plan_name ?? 'Free') as string).toLowerCase()
-              const limit = plan.includes('elite') ? 10 : plan.includes('pro') ? 3 : 0
+              const limit = plan.includes('custom') ? 10 : plan.includes('growth') ? 5 : plan.includes('starter') ? 3 : 0
               const used  = teamMembers.length
               return limit > 0 ? (
                 <p className="text-[10px] font-bold" style={{ color: used >= limit ? C.red : C.muted }}>
@@ -1878,7 +1878,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
                 <div className="fixed inset-0 z-40" onClick={() => setShowPlanMenu(false)} />
                 <div className="absolute bottom-full mb-2 left-0 z-50 rounded-xl border overflow-hidden shadow-xl"
                      style={{ backgroundColor: '#1a2410', borderColor: 'rgba(143,255,0,0.2)', minWidth: 160 }}>
-                  {['Free','Starter','Growth'].map(p => (
+                   {['Free','Starter','Growth','Custom'].map(p => (
                     <button key={p} onClick={() => bulkChangePlan(p)}
                       className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-white/10"
                       style={{ color: '#fff' }}>
@@ -3007,7 +3007,7 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
     setLoading(false)
   }
 
-  const plans = ['Free','Starter','Growth'].filter(p => p !== plan)
+  const plans = ['Free','Starter','Growth','Custom'].filter(p => p !== plan)
 
   return (
     <div className="flex items-center justify-end gap-1.5 relative">
