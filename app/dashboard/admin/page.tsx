@@ -2,7 +2,7 @@
 // app/dashboard/admin/page.tsx
 // Updated: stat cards, tool stats, quick stats bar — all real Supabase data
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import {
@@ -804,7 +804,7 @@ function KillSwitchDialog({ onClose }: { onClose: () => void }) {
 // ══════════════════════════════════════════════════════════════
 // MAIN PAGE
 // ══════════════════════════════════════════════════════════════
-export default function AdminPage() {
+function AdminPage() {
   const supabase     = createClient()
   const searchParams = useSearchParams()
 
@@ -1511,5 +1511,12 @@ export default function AdminPage() {
       {showKillSwitch  && <KillSwitchDialog onClose={() => setShowKillSwitch(false)} />}
       <MobileDrawer />
     </div>
+  )
+}
+function AdminPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <AdminPage />
+    </Suspense>
   )
 }
