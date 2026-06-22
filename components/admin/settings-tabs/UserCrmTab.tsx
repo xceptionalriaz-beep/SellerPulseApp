@@ -525,7 +525,7 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
         <HudCard title="Active Subscribers" value={`${activeSubs}`} sub={`${total} total accounts`}>
           <CircleProgress value={activeRatio} color={C.lime} />
         </HudCard>
-        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} · Trial: ${freeTrial} · Growth: ${growth} · Custom: ${custom}`}>
+        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} - Trial: ${freeTrial} - Growth: ${growth} - Custom: ${custom}`}>
           <div className="flex items-end gap-1">
             <MiniBar fill={total>0?free/total:0}  color={C.muted}    />
             <MiniBar fill={total>0?starter/total:0} color={C.lime}     />
