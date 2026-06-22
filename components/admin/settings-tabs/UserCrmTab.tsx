@@ -364,11 +364,12 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
   const activeSubs = users.filter(u => mrrOf(u) > 0).length
   const activeRatio= total > 0 ? activeSubs / total : 0
 
-  const free      = users.filter(u => planOf(u).toLowerCase() === 'free').length
-  const freeTrial = users.filter(u => planOf(u).toLowerCase() === 'free trial').length
-  const starter   = users.filter(u => planOf(u).toLowerCase() === 'starter').length
-  const growth    = users.filter(u => planOf(u).toLowerCase() === 'growth').length
-  const custom    = users.filter(u => planOf(u).toLowerCase() === 'custom').length
+  const free  = users.filter(u => planOf(u).toLowerCase().includes('free')).length
+  const free    = users.filter(u => planOf(u).toLowerCase().includes('free')).length
+  const starter = users.filter(u => planOf(u).toLowerCase().includes('starter')).length
+  const growth  = users.filter(u => planOf(u).toLowerCase().includes('growth')).length
+  const custom  = users.filter(u => planOf(u).toLowerCase().includes('custom')).length
+  const mediumRisk = users.filter(u => { const s = calcHealthScore(u); return s >= 40 && s < 70 }).length
 
   const ebayDisconnected = users.filter(u => {
     const s = ebayStatus(u); return s === 'disconnected' || s === 'expiring'
@@ -525,14 +526,14 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
         <HudCard title="Active Subscribers" value={`${activeSubs}`} sub={`${total} total accounts`}>
           <CircleProgress value={activeRatio} color={C.lime} />
         </HudCard>
-        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} - Trial: ${freeTrial} - Growth: ${growth} - Custom: ${custom}`}>
+        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} · Growth: ${growth} · Custom: ${custom}`}>
           <div className="flex items-end gap-1">
             <MiniBar fill={total>0?free/total:0}  color={C.muted}    />
             <MiniBar fill={total>0?starter/total:0} color={C.lime}     />
             <MiniBar fill={total>0?growth/total:0}  color={C.limeDeep} />
             <MiniBar fill={total>0?custom/total:0}  color={C.dark}     />
-          </div>
         </HudCard>
+        <HudCard
           title="Live Right Now"
           value={liveCount > 0 ? `${liveCount} Online` : 'Nobody Online'}
           sub={liveCount > 0 ? `Using Riazify right now` : 'Check back soon'}>
