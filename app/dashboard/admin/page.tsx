@@ -861,37 +861,41 @@ function AdminPage() {
       const all   = (profiles ?? []) as any[]
       const total = all.length
 
-      // 2. MRR — from subscriptions table (payment-provider ready)
-      const { data: subs } = await supabase
-        .from('subscriptions')
-        .select('amount, status, plan_name, paid_at')
+      // 2. MRR — from transactions table (real payments)
+      const { data: txns } = await supabase
+        .from('transactions')
+        .select('amount, status, plan, billing, created_at, user_id')
 
-      const allSubs = (subs ?? []) as any[]
+      const allTxns = (txns ?? []) as any[]
 
-      // Active MRR = sum of active subscriptions
-      const mrr = allSubs
-        .filter((s: any) => s.status === 'active')
-        .reduce((sum: number, s: any) => sum + (Number(s.amount) ?? 0), 0)
+      // Active MRR = sum of paid transactions
+      const mrr = Math.round(
+        allTxns
+          .filter((t: any) => t.status === 'paid')
+          .reduce((sum: number, t: any) => {
+            const amount = Number(t.amount ?? 0)
+            return sum + (t.billing === 'annual' ? amount / 12 : amount)
+          }, 0)
+      )
 
-      // Active subscribers = active paid subscriptions
-      const activeSubs = allSubs.filter((s: any) =>
-        s.status === 'active' &&
-        !(s.plan_name ?? '').toLowerCase().includes('free')
+      // Active subscribers = paid users from profiles
+      const activeSubs = all.filter((p: any) =>
+        ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase()) &&
+        p.subscription_status === 'active'
       ).length
 
-      // Cancelled/churned this month
-      const monthStart = new Date()
-      monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0)
-      const churned = allSubs.filter((s: any) =>
-        s.status === 'cancelled' || s.status === 'past_due'
+      // Cancelled/churned
+      const churned = all.filter((p: any) =>
+        p.subscription_status === 'cancelled' ||
+        p.subscription_status === 'past_due'
       ).length
 
-      // Conversion rate — from subscriptions (more accurate)
-      const everPaid  = allSubs.filter((s: any) =>
-        s.amount > 0 && ['active', 'cancelled', 'past_due'].includes(s.status)
+      // Conversion rate
+      const everPaid = all.filter((p: any) =>
+        ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase())
       ).length
-      const convRate  = total > 0 ? (everPaid  / total) * 100 : 0
-      const churnRate = total > 0 ? (churned   / total) * 100 : 0
+      const convRate  = total > 0 ? (everPaid / total) * 100 : 0
+      const churnRate = total > 0 ? (churned  / total) * 100 : 0
 
       // Online now — last_seen within 5 minutes
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
@@ -909,11 +913,11 @@ function AdminPage() {
       // Rev today — real payments where paid_at >= today midnight
       const todayMidnight = new Date()
       todayMidnight.setHours(0, 0, 0, 0)
-      const revToday = allSubs
-        .filter((s: any) =>
-          s.paid_at && new Date(s.paid_at) >= todayMidnight
+      const revToday = allTxns
+        .filter((t: any) =>
+          t.created_at && new Date(t.created_at) >= todayMidnight
         )
-        .reduce((sum: number, s: any) => sum + (Number(s.amount) ?? 0), 0)
+        .reduce((sum: number, t: any) => sum + (Number(t.amount) ?? 0), 0)
 
       // 2. Fetch tool usage from user_tool_usage
       const { data: usageRows } = await supabase
@@ -946,26 +950,42 @@ function AdminPage() {
         }
       }
 
-      // 3. Country stats from profiles
-      const { data: profilesGeo } = await supabase
+      // 3. Country stats — from transactions + profiles
+      const { data: txCountries } = await supabase
+        .from('transactions')
+        .select('country')
+        .eq('status', 'paid')
+        .not('country', 'is', null)
+
+      const { data: profileCountries } = await supabase
         .from('profiles')
         .select('country')
+        .not('country', 'is', null)
 
       const countryMap: Record<string, number> = {}
-      for (const p of (profilesGeo ?? []) as any[]) {
-        const c = (p.country ?? '').trim()
+
+      // Count from transactions first
+      for (const t of (txCountries ?? []) as any[]) {
+        const c = (t.country ?? '').trim()
         if (c) countryMap[c] = (countryMap[c] ?? 0) + 1
       }
+
+      // Add profile countries (avoid double counting)
+      for (const p of (profileCountries ?? []) as any[]) {
+        const c = (p.country ?? '').trim()
+        if (c && !countryMap[c]) countryMap[c] = 1
+      }
+
       const countryStats = Object.entries(countryMap)
         .map(([country, count]) => ({ country, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 8)
 
-      // 4. Recent transactions from subscriptions
+      // 4. Recent transactions from transactions table
       const { data: txData } = await supabase
-        .from('subscriptions')
-        .select('user_id, plan_name, amount, status, paid_at')
-        .order('paid_at', { ascending: false })
+        .from('transactions')
+        .select('user_id, user_email, plan, amount, status, billing, created_at')
+        .order('created_at', { ascending: false })
         .limit(5)
       const recentTx = (txData ?? []) as any[]
 
@@ -1310,12 +1330,12 @@ function AdminPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-1 h-4 rounded-full" style={{ backgroundColor: C.lime }} />
-                <div>
-                  <p className="text-[14px] font-bold" style={{ color: C.text }}>Live Transactions</p>
-                  <p className="text-[11px]" style={{ color: C.muted }}>Recent payment activity</p>
-                </div>
+                <p className="text-[14px] font-bold" style={{ color: C.text }}>Live Transactions</p>
               </div>
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.lime }} />
+              <div className="flex items-center gap-2">
+                <p className="text-[11px]" style={{ color: C.muted }}>Recent payment activity</p>
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.lime }} />
+              </div>
             </div>
             {stats.recentTx.length === 0 ? (
               <div className="flex flex-col items-center py-8 gap-2">
@@ -1324,34 +1344,73 @@ function AdminPage() {
                 <p className="text-[11px]" style={{ color: C.hint }}>Payments will appear here</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
-                {stats.recentTx.map((tx: any, i: number) => {
-                  const isActive = tx.status === 'active'
-                  const isTrial  = tx.status === 'trial'
-                  const color    = isActive ? '#16A34A' : isTrial ? '#60A5FA' : '#F87171'
-                  const bg       = isActive ? 'rgba(22,163,74,0.08)' : isTrial ? 'rgba(96,165,250,0.08)' : 'rgba(248,113,113,0.08)'
-                  return (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl"
-                         style={{ backgroundColor: C.bg }}>
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                           style={{ backgroundColor: bg }}>
-                        <DollarSign size={14} style={{ color }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>
-                          {(tx.user_id?.slice(0, 8) ?? 'Unknown') + '...'}
-                        </p>
-                        <p className="text-[10px]" style={{ color: C.muted }}>
-                          {tx.plan_name} · {tx.paid_at ? new Date(tx.paid_at).toLocaleDateString() : '—'}
-                        </p>
-                      </div>
-                      <span className="text-[13px] font-extrabold shrink-0"
-                            style={{ color: Number(tx.amount) > 0 ? '#16A34A' : C.muted }}>
-                        {Number(tx.amount) > 0 ? `+$${Number(tx.amount).toFixed(2)}` : '$0'}
-                      </span>
-                    </div>
-                  )
-                })}
+              <div className="overflow-x-auto">
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                      {['USER', 'PLAN', 'AMOUNT', 'STATUS', 'BILLING', 'DATE'].map(h => (
+                        <th key={h} className="text-left px-3 py-2 text-[9px] font-black tracking-wider"
+                            style={{ color: C.muted }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.recentTx.map((tx: any, i: number) => {
+                      const isPaid     = tx.status === 'paid'
+                      const isFailed   = tx.status === 'failed'
+                      const statusColor = isPaid ? '#16A34A' : isFailed ? '#EF4444' : '#F59E0B'
+                      const statusDot   = isPaid ? '#16A34A' : isFailed ? '#EF4444' : '#F59E0B'
+                      const planColor   = tx.plan === 'growth' ? { bg: 'rgba(143,255,0,0.1)', color: '#4a8f00' }
+                                        : tx.plan === 'starter' ? { bg: 'rgba(99,102,241,0.1)', color: '#6366f1' }
+                                        : tx.plan === 'custom'  ? { bg: 'rgba(217,119,6,0.1)', color: '#d97706' }
+                                        : { bg: C.bg, color: C.muted }
+                      return (
+                        <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}
+                            className="hover:opacity-80 transition-opacity">
+                          {/* User */}
+                          <td className="px-3 py-3">
+                            <p className="text-[12px] font-semibold truncate" style={{ color: C.text, maxWidth: 160 }}>
+                              {tx.user_email ?? (tx.user_id?.slice(0, 8) + '...')}
+                            </p>
+                            {tx.invoice && (
+                              <p className="text-[10px] font-mono" style={{ color: C.muted }}>{tx.invoice}</p>
+                            )}
+                          </td>
+                          {/* Plan */}
+                          <td className="px-3 py-3">
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-lg capitalize"
+                                  style={{ backgroundColor: planColor.bg, color: planColor.color }}>
+                              {tx.plan ?? '—'}
+                            </span>
+                          </td>
+                          {/* Amount */}
+                          <td className="px-3 py-3 text-[13px] font-black"
+                              style={{ color: Number(tx.amount) > 0 ? '#16A34A' : C.muted }}>
+                            {Number(tx.amount) > 0 ? `+$${Number(tx.amount).toFixed(2)}` : '$0'}
+                          </td>
+                          {/* Status */}
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusDot }} />
+                              <span className="text-[11px] font-bold capitalize" style={{ color: statusColor }}>
+                                {tx.status ?? '—'}
+                              </span>
+                            </div>
+                          </td>
+                          {/* Billing */}
+                          <td className="px-3 py-3 text-[11px] font-semibold capitalize"
+                              style={{ color: C.muted }}>
+                            {tx.billing ?? '—'}
+                          </td>
+                          {/* Date */}
+                          <td className="px-3 py-3 text-[11px]" style={{ color: C.muted }}>
+                            {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '—'}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -1359,12 +1418,18 @@ function AdminPage() {
           {/* Geographic Heatmap */}
           <div className="p-5 rounded-2xl border"
                style={{ backgroundColor: '#fff', borderColor: C.border }}>
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-1 h-4 rounded-full" style={{ backgroundColor: '#60A5FA' }} />
-              <div>
-                <p className="text-[14px] font-bold" style={{ color: C.text }}>Geographic Overview</p>
-                <p className="text-[11px]" style={{ color: C.muted }}>Users by country</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-1 h-4 rounded-full" style={{ backgroundColor: '#60A5FA' }} />
+                <div>
+                  <p className="text-[14px] font-bold" style={{ color: C.text }}>Geographic Overview</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>Users by country</p>
+                </div>
               </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                    style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}>
+                {stats.countryStats.length} {stats.countryStats.length === 1 ? 'country' : 'countries'}
+              </span>
             </div>
             {stats.countryStats.length === 0 ? (
               <div className="flex flex-col items-center py-8 gap-2">
@@ -1380,8 +1445,7 @@ function AdminPage() {
                   const pct = stats.totalUsers > 0
                     ? Math.round((c.count / stats.totalUsers) * 100)
                     : 0
-                  const colors = ['#8FFF00','#60A5FA','#FB923C','#A78BFA','#F472B6','#34D399','#FBBF24','#F87171']
-                  const barColor = colors[i % colors.length]
+                  const barColor = i === 0 ? C.lime : i === 1 ? '#60A5FA' : i === 2 ? '#FB923C' : i === 3 ? '#A78BFA' : C.border
                   return (
                     <div key={i}>
                       <div className="flex items-center justify-between mb-1">

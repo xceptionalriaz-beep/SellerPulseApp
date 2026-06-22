@@ -146,6 +146,34 @@ async function updateProfile(
   }
 }
 
+// ── Enqueue email flow ─────────────────────────────────────────
+async function enqueueEmail(
+  req:           NextRequest,
+  trigger_event: string,
+  userId:        string | null,
+  userEmail:     string | null,
+  variables?:    Record<string, any>
+) {
+  try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${req.headers.get('host')}`
+    await fetch(`${appUrl}/api/email/enqueue`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':      'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET ?? '',
+      },
+      body: JSON.stringify({
+        trigger_event,
+        user_id:   userId,
+        to_email:  userEmail,
+        variables: variables ?? {},
+      }),
+    })
+  } catch (e) {
+    console.error('[webhook] enqueueEmail error:', e)
+  }
+}
+
 // ── Main handler ───────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const payload   = await req.text()
@@ -231,6 +259,7 @@ export async function POST(req: NextRequest) {
           coupon:      coupon ?? undefined,
         })
         if (coupon) await updatePromoUsage(coupon)
+        await enqueueEmail(req, 'plan.upgraded', userId, userEmail, { plan })
         await fireWebhook(req, 'plan.upgraded', {
           email: userEmail, plan, amount: `${amount}/mo`, status: 'Subscription started',
         })
@@ -263,6 +292,7 @@ export async function POST(req: NextRequest) {
           subscription_status:  'cancelled',
           cancel_at_period_end: true,
         })
+        await enqueueEmail(req, 'plan.cancelled', userId, userEmail)
         await fireWebhook(req, 'plan.cancelled', {
           email: userEmail, ends_at: periodEnd, reason: 'Cancelled by user',
         })
@@ -301,6 +331,7 @@ export async function POST(req: NextRequest) {
         await updateProfile(userId, userEmail, {
           subscription_status: 'past_due',
         })
+        await enqueueEmail(req, 'payment.failed', userId, userEmail)
         const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
         await fireWebhook(req, 'payment.failed', {
           email: userEmail, amount,
