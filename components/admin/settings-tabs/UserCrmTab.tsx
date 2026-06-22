@@ -63,7 +63,7 @@ const PAGE_SIZES = [25, 50, 100]
 // ── Badge helpers ──────────────────────────────────────────────
 function planBadge(plan: string) {
   const p = (plan ?? '').toLowerCase()
-  if (p.includes('growth') || p.includes('custom')) return { bg: C.lime, text: C.dark }
+  if (p.includes('growth') || p.includes('custom') || p.includes('starter')) return { bg: C.lime,    text: C.dark  }
   return                                                { bg: C.bg,      text: C.muted }
 }
 function statusBadge(status: string) {
@@ -101,7 +101,7 @@ function timeAgo(iso: string) {
   if (m < 1) return 'Just now'; if (m < 60) return `${m}m ago`
   if (m < 1440) return `${Math.floor(m/60)}h ago`; return `${Math.floor(m/1440)}d ago`
 }
-function planOf(u: any)   { return u.subscriptions?.[0]?.plan_name ?? u.plan_name ?? 'Free' }
+function planOf(u: any)   { return u.subscriptions?.[0]?.plan_name ?? u.plan_name ?? 'Free Trial' }
 function statusOf(u: any): string {
   const as   = (u.account_status ?? '').trim().toLowerCase()
   // Suspension takes highest priority
@@ -364,11 +364,13 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
   const activeSubs = users.filter(u => mrrOf(u) > 0).length
   const activeRatio= total > 0 ? activeSubs / total : 0
 
-  const free  = users.filter(u => planOf(u).toLowerCase().includes('free')).length
-  const free    = users.filter(u => planOf(u).toLowerCase().includes('free')).length
-  const starter = users.filter(u => planOf(u).toLowerCase().includes('starter')).length
-  const growth  = users.filter(u => planOf(u).toLowerCase().includes('growth')).length
-  const custom  = users.filter(u => planOf(u).toLowerCase().includes('custom')).length
+  const free      = users.filter(u => planOf(u).toLowerCase() === 'free').length
+  const freeTrial = users.filter(u => planOf(u).toLowerCase() === 'free trial').length
+  const starter   = users.filter(u => planOf(u).toLowerCase() === 'starter').length
+  const growth    = users.filter(u => planOf(u).toLowerCase() === 'growth').length
+  const custom    = users.filter(u => planOf(u).toLowerCase() === 'custom').length
+
+  const highRisk   = users.filter(u => calcHealthScore(u) < 40).length
   const mediumRisk = users.filter(u => { const s = calcHealthScore(u); return s >= 40 && s < 70 }).length
 
   const ebayDisconnected = users.filter(u => {
@@ -526,12 +528,13 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
         <HudCard title="Active Subscribers" value={`${activeSubs}`} sub={`${total} total accounts`}>
           <CircleProgress value={activeRatio} color={C.lime} />
         </HudCard>
-        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} · Growth: ${growth} · Custom: ${custom}`}>
+        <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} - Trial: ${freeTrial} - Growth: ${growth} - Custom: ${custom}`}>
           <div className="flex items-end gap-1">
-            <MiniBar fill={total>0?free/total:0}  color={C.muted}    />
-            <MiniBar fill={total>0?starter/total:0} color={C.lime}     />
-            <MiniBar fill={total>0?growth/total:0}  color={C.limeDeep} />
-            <MiniBar fill={total>0?custom/total:0}  color={C.dark}     />
+            <MiniBar fill={total>0?free/total:0}     color={C.muted}    />
+            <MiniBar fill={total>0?starter/total:0}  color={C.lime}     />
+            <MiniBar fill={total>0?growth/total:0}   color={C.limeDeep} />
+            <MiniBar fill={total>0?custom/total:0}   color={C.dark}     />
+          </div>
         </HudCard>
         <HudCard
           title="Live Right Now"
@@ -756,10 +759,10 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
         {/* Filters */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <ChipRow label="PLAN" field="plans" options={[
-            { value:'Free', label:'Free' },
-                { value:'Starter', label:'Starter' },
-                { value:'Growth',  label:'Growth'  },
-                { value:'Custom',  label:'Custom'  },
+            { value:'Free Trial', label:'Free Trial' },
+            { value:'Pro Plan',   label:'Pro'        },
+            { value:'Elite Plan', label:'Elite'      },
+          ]} />
           <ChipRow label="STATUS" field="statuses" options={[
             { value:'Active',    label:'Active'    },
             { value:'Expired',   label:'Expired'   },
@@ -945,8 +948,8 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
           </div>
           <div className="text-right">
             {isOwner && (() => {
-              const plan  = ((user.plan_name ?? 'Free') as string).toLowerCase()
-              const limit = plan.includes('custom') ? 10 : plan.includes('growth') ? 5 : plan.includes('starter') ? 3 : 0
+              const plan  = ((user.plan_name ?? 'free trial') as string).toLowerCase()
+              const limit = plan.includes('elite') ? 10 : plan.includes('pro') ? 3 : 0
               const used  = teamMembers.length
               return limit > 0 ? (
                 <p className="text-[10px] font-bold" style={{ color: used >= limit ? C.red : C.muted }}>
@@ -1878,7 +1881,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
                 <div className="fixed inset-0 z-40" onClick={() => setShowPlanMenu(false)} />
                 <div className="absolute bottom-full mb-2 left-0 z-50 rounded-xl border overflow-hidden shadow-xl"
                      style={{ backgroundColor: '#1a2410', borderColor: 'rgba(143,255,0,0.2)', minWidth: 160 }}>
-                   {['Free','Starter','Growth','Custom'].map(p => (
+                  {['Free Trial','Pro Plan','Elite Plan'].map(p => (
                     <button key={p} onClick={() => bulkChangePlan(p)}
                       className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-white/10"
                       style={{ color: '#fff' }}>
@@ -2305,7 +2308,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
   const supabase = createClient()
   const [name,        setName]        = useState('')
   const [email,       setEmail]       = useState('')
-  const [plan,        setPlan]        = useState('Free')
+  const [plan,        setPlan]        = useState('Free Trial')
   const [role,        setRole]        = useState('user')
   const [sendWelcome, setSendWelcome] = useState(true)
   const [submitting,  setSubmitting]  = useState(false)
@@ -2406,7 +2409,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
                 <select value={plan} onChange={e => setPlan(e.target.value)}
                   className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                   style={{ borderColor:C.border, backgroundColor:C.bg, color:C.text }}>
-                  {['Free','Starter','Growth'].map(p => <option key={p} value={p}>{p}</option>)}
+                  {['Free Trial','Pro Plan','Elite Plan'].map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
@@ -3007,7 +3010,7 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
     setLoading(false)
   }
 
-  const plans = ['Free','Starter','Growth','Custom'].filter(p => p !== plan)
+  const plans = ['Free Trial','Pro Plan','Elite Plan'].filter(p => p !== plan)
 
   return (
     <div className="flex items-center justify-end gap-1.5 relative">
