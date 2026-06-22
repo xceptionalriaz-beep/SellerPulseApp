@@ -940,6 +940,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
         { count: starterCount },
         { count: growthCount },
         { count: customCount },
+        { data: mrrData },
       ] = await Promise.all([
         (supabase.from('plan_limits') as any)
           .select('*')
@@ -960,6 +961,10 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
         supabase.from('profiles')
           .select('*', { count: 'exact', head: true })
           .eq('plan_name', 'Custom'),
+
+        (supabase.from('transactions') as any)
+          .select('amount, billing')
+          .eq('status', 'paid'),
       ])
 
       const loadedPlans = (plansData ?? []) as PlanLimit[]
@@ -969,13 +974,13 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
         loadedPlans.map((p: PlanLimit) => [p.display_name, p.price_monthly])
       )
 
-      // Calculate MRR
+      // Calculate real MRR from transactions
       const mrr = Math.round(
-        (starterCount ?? 0) * (planPrices['Starter'] ?? 19) +
-        (growthCount  ?? 0) * (planPrices['Growth']  ?? 49) +
-        (customCount  ?? 0) * (planPrices['Custom']  ?? 149)
+        (mrrData ?? []).reduce((sum: number, t: any) => {
+          const amount = parseFloat(t.amount ?? 0)
+          return sum + (t.billing === 'annual' ? amount / 12 : amount)
+        }, 0)
       )
-
       setPlans(loadedPlans)
       setHudStats({
         freeUsers:     freeCount    ?? 0,
