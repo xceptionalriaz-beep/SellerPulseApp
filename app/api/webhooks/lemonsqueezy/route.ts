@@ -174,6 +174,21 @@ async function enqueueEmail(
   }
 }
 
+// ── Insert admin notification ──────────────────────────────────
+async function notifyAdmin(type: string, title: string, message: string) {
+  try {
+    await (adminClient.from('admin_notifications') as any).insert({
+      type,
+      title,
+      message,
+      is_read:    false,
+      created_at: new Date().toISOString(),
+    })
+  } catch (e) {
+    console.error('[webhook] notifyAdmin error:', e)
+  }
+}
+
 // ── Main handler ───────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const payload   = await req.text()
@@ -260,6 +275,7 @@ export async function POST(req: NextRequest) {
         })
         if (coupon) await updatePromoUsage(coupon)
         await enqueueEmail(req, 'plan.upgraded', userId, userEmail, { plan })
+        await notifyAdmin('new_subscriber', 'New Subscriber', `${userEmail} upgraded to ${plan}`)
         await fireWebhook(req, 'plan.upgraded', {
           email: userEmail, plan, amount: `${amount}/mo`, status: 'Subscription started',
         })
@@ -293,6 +309,7 @@ export async function POST(req: NextRequest) {
           cancel_at_period_end: true,
         })
         await enqueueEmail(req, 'plan.cancelled', userId, userEmail)
+        await notifyAdmin('cancellation', 'Subscription Cancelled', `${userEmail} cancelled their subscription`)
         await fireWebhook(req, 'plan.cancelled', {
           email: userEmail, ends_at: periodEnd, reason: 'Cancelled by user',
         })
@@ -332,6 +349,7 @@ export async function POST(req: NextRequest) {
           subscription_status: 'past_due',
         })
         await enqueueEmail(req, 'payment.failed', userId, userEmail)
+        await notifyAdmin('payment_failed', 'Payment Failed', `Payment failed for ${userEmail}`)
         const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
         await fireWebhook(req, 'payment.failed', {
           email: userEmail, amount,
@@ -358,6 +376,7 @@ export async function POST(req: NextRequest) {
           plan_name:           'free',
           subscription_status: 'refunded',
         })
+        await notifyAdmin('refund', 'Refund Issued', `Refund issued for ${userEmail}`)
         await fireWebhook(req, 'plan.cancelled', {
           email: userEmail, reason: 'Order refunded',
         })

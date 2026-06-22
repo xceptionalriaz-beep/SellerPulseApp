@@ -856,7 +856,7 @@ function AdminPage() {
       // 1. Fetch all profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('plan_name, account_status, created_at, last_seen')
+        .select('plan_name, account_status, subscription_status, created_at, last_seen, country')
 
       const all   = (profiles ?? []) as any[]
       const total = all.length
@@ -919,16 +919,17 @@ function AdminPage() {
         )
         .reduce((sum: number, t: any) => sum + (Number(t.amount) ?? 0), 0)
 
-      // 2. Fetch tool usage from user_tool_usage
+      // 2. Fetch tool usage from tool_usage (today only)
       const { data: usageRows } = await supabase
-        .from('user_tool_usage')
-        .select('tool_name, usage_count, user_id')
+        .from('tool_usage')
+        .select('tool_name, user_id, used_at')
+        .gte('used_at', todayStart.toISOString())
 
       const toolMap: Record<string, { sessions: number; users: Set<string> }> = {}
       for (const row of (usageRows ?? []) as any[]) {
         const key = (row.tool_name ?? 'unknown').toLowerCase()
         if (!toolMap[key]) toolMap[key] = { sessions: 0, users: new Set() }
-        toolMap[key].sessions += row.usage_count ?? 1
+        toolMap[key].sessions += row.count ?? 1
         if (row.user_id) toolMap[key].users.add(row.user_id)
       }
 

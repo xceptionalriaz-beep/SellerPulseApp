@@ -35,7 +35,7 @@ import Link from 'next/link'
 import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
-  ShieldAlert, LogOut, Bell, Menu, X,
+  ShieldAlert, LogOut, Bell, Menu, X, MessageCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -47,6 +47,7 @@ import type { Profile } from '@/types/database'
 import { useHeartbeat } from '@/hooks/useHeartbeat'
 import { usePresence }  from '@/hooks/usePresence'
 import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
+import SupportModal from '@/components/dashboard/SupportModal'
 
 // ── Nav items (mirrors Dart sidebar exactly) ───────────────────
 const NAV_ITEMS = [
@@ -255,6 +256,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // ── Kill switch visibility state ───────────────────────────────
   const [disabledTools,  setDisabledTools]  = useState<Set<string>>(new Set())
+  const [showSupport,    setShowSupport]    = useState(false)
   const [emailUnverified, setEmailUnverified] = useState(false)
 
   const isAdmin = profile?.role === 'admin'
@@ -407,8 +409,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
           </div>
 
-          {/* Logout */}
-          <div className="pb-6 flex justify-center">
+          {/* Support + Logout */}
+          <div className="pb-6 flex flex-col items-center gap-2">
+            <button
+              onClick={() => setShowSupport(true)}
+              title="Help & Support"
+              className="p-2 text-white/40 hover:text-white/70 transition-colors"
+            >
+              <MessageCircle size={20} />
+            </button>
             <button
               onClick={handleLogout}
               title="Log Out"
@@ -554,6 +563,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </nav>
 
             <button
+              onClick={() => { setShowSupport(true); setMobileOpen(false) }}
+              className="flex items-center gap-3 mx-4 px-3 py-2.5 text-white/40 hover:text-white/60 transition-colors"
+            >
+              <MessageCircle size={20} />
+              <span className="text-sm font-semibold">Help & Support</span>
+            </button>
+            <button
               onClick={handleLogout}
               className="flex items-center gap-3 mx-4 mb-8 px-3 py-2.5 text-white/40 hover:text-white/60 transition-colors"
             >
@@ -563,6 +579,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       )}
+
+      {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
 
       {/* ── BOTTOM-RIGHT TOASTS ── */}
       {toasts.map((t, i) => (
