@@ -47,7 +47,8 @@ import type { Profile } from '@/types/database'
 import { useHeartbeat } from '@/hooks/useHeartbeat'
 import { usePresence }  from '@/hooks/usePresence'
 import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
-import SupportModal from '@/components/dashboard/SupportModal'
+import SupportModal          from '@/components/dashboard/SupportModal'
+import AnnouncementBanner    from '@/components/dashboard/AnnouncementBanner'
 
 // ── Nav items (mirrors Dart sidebar exactly) ───────────────────
 const NAV_ITEMS = [
@@ -507,7 +508,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
               </div>
             )}
-            <div>{children}</div>
+            <div>
+              <AnnouncementBanner />
+              {children}
+            </div>
           </main>
         </div>
       </div>

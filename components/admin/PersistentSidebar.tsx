@@ -255,44 +255,27 @@ export default function PersistentSidebar({ investorMode }: Props) {
     if (!broadcastMsg.trim()) return
     setIsSending(true)
     setSendSuccess(false)
-
     try {
-      // Get all target users
-      let query = supabase.from('profiles').select('id, plan_name')
-
-      const { data: users } = await query
-      const allUsers = (users ?? []) as any[]
-
-      // Filter by target segment
-      const targets = allUsers.filter((u: any) => {
-        if (broadcastTarget === 'All Users') return true
-        const plan = (u.plan_name ?? '').toLowerCase()
-        if (broadcastTarget === 'Starter')       return plan.includes('pro')
-        if (broadcastTarget === 'Free')     return plan.includes('free')
-        if (broadcastTarget === 'Growth')     return plan.includes('elite')
-        return true
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/broadcast', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          message: broadcastMsg.trim(),
+          target:  broadcastTarget === 'All Users' ? 'all'
+                 : broadcastTarget.toLowerCase().replace(' ', '_'),
+        }),
       })
-
-      if (targets.length === 0) {
-        setIsSending(false)
-        return
+      const data = await res.json()
+      if (data.success) {
+        setBroadcastMsg('')
+        setSendSuccess(true)
+        setTimeout(() => setSendSuccess(false), 3000)
+        await loadActivity()
       }
-
-      // Insert notification for each target user
-      const inserts = targets.map((u: any) => ({
-        user_id:  u.id,
-        type:     'broadcast',
-        title:    `📢 Admin Broadcast`,
-        message:  broadcastMsg.trim(),
-        is_read:  false,
-      }))
-
-      await (supabase.from('admin_notifications') as any).insert(inserts)
-
-      setBroadcastMsg('')
-      setSendSuccess(true)
-      setTimeout(() => setSendSuccess(false), 3000)
-      await loadActivity()
     } catch (e) {
       console.error('Broadcast error:', e)
     }

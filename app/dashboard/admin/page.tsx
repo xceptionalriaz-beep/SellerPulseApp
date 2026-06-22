@@ -57,7 +57,7 @@ const SETTINGS_MENU = [
   { title: 'Founder Ops',     icon: BarChart2    },
   { title: 'Marketing',       icon: Mail         },
   { title: 'Payments',        icon: CreditCard   },
-  { title: 'Tickets',         icon: MessageCircle },
+  { title: 'Tickets',         icon: MessageCircle, badge: 0 },
 ]
 
 // ── Tool definitions (static metadata only — no dummy stats) ──
@@ -833,6 +833,7 @@ function AdminPage() {
   const [showKillSwitch,    setShowKillSwitch]    = useState(false)
   const [mobileDrawerOpen,  setMobileDrawerOpen]  = useState(false)
   const [marketingUsers,    setMarketingUsers]    = useState<any[]>([])
+  const [openTickets,       setOpenTickets]       = useState(0)
   const [isMobile,          setIsMobile]          = useState(
     () => typeof window !== 'undefined' ? window.innerWidth < 950 : false
   )
@@ -1121,7 +1122,7 @@ function AdminPage() {
       case 11: return <FounderOpsTab />
       case 12: return <MarketingTab initialUsers={marketingUsers} />
       case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
-      case 14: return <TicketManagerTab />
+      case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />
       default: return null
     }
   }
@@ -1234,6 +1235,7 @@ function AdminPage() {
   // ── Settings sidebar item ──────────────────────────────────
   function SidebarItem({ index }: { index: number }) {
     const item     = SETTINGS_MENU[index]
+    const badge    = index === 14 ? openTickets : (item.badge ?? 0)
     const Icon     = item.icon
     const isActive = activeSettingsTab === index
     return (
@@ -1245,10 +1247,16 @@ function AdminPage() {
           width: 'calc(100% - 24px)',
         }}>
         <Icon size={17} style={{ color: isActive ? '#4A8F00' : C.muted }} />
-        <span className="text-[13px]"
+        <span className="text-[13px] flex-1"
               style={{ color: isActive ? C.text : C.muted, fontWeight: isActive ? 700 : 600 }}>
           {item.title}
         </span>
+        {badge > 0 && (
+          <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                style={{ backgroundColor: '#b91c1c', color: '#fff' }}>
+            {badge}
+          </span>
+        )}
       </button>
     )
   }

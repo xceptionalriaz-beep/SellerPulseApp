@@ -8,7 +8,7 @@ import {
   MessageCircle, Bug, HelpCircle, Lightbulb,
   CheckCircle, Clock, AlertTriangle, XCircle,
   Search, RefreshCw, ChevronRight, X, Send,
-  User, Calendar, Tag, Flag, FileText,
+  User, Calendar, Tag, Flag, FileText, Trash2, Download,
 } from 'lucide-react'
 
 // ── Design tokens ──────────────────────────────────────────────
@@ -67,7 +67,7 @@ function priorityConfig(priority: string) {
 }
 
 // ── Main component ─────────────────────────────────────────────
-export default function TicketManagerTab() {
+export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count: number) => void }) {
   const supabase = createClient()
 
   const [tickets,       setTickets]       = useState<any[]>([])
@@ -79,6 +79,8 @@ export default function TicketManagerTab() {
   const [searchQuery,   setSearchQuery]   = useState('')
   const [replyText,     setReplyText]     = useState('')
   const [adminNote,     setAdminNote]     = useState('')
+  const [confirmClean,  setConfirmClean]  = useState(false)
+  const [cleaning,      setCleaning]      = useState(false)
   const [sending,       setSending]       = useState(false)
   const [saving,        setSaving]        = useState(false)
   const [toast,         setToast]         = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
@@ -93,9 +95,10 @@ export default function TicketManagerTab() {
     setLoading(true)
     try {
       const { data } = await (supabase.from('tickets') as any)
-        .select('*, profiles(full_name, email, plan_name)')
+        .select('*, profiles(name, email, plan_name)')
         .order('created_at', { ascending: false })
       setTickets((data ?? []) as any[])
+      onOpenCount?.((data ?? []).filter((t: any) => t.status === 'open').length)
     } catch (e) {
       console.error('[TicketManagerTab]', e)
     }
@@ -143,6 +146,9 @@ export default function TicketManagerTab() {
     setSending(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      // Save reply to DB
       await (supabase.from('ticket_replies') as any).insert({
         ticket_id:   selected.id,
         author_id:   user?.id,
@@ -150,10 +156,31 @@ export default function TicketManagerTab() {
         message:     replyText.trim(),
         created_at:  new Date().toISOString(),
       })
+
       // Update ticket status to in_progress if open
       if (selected.status === 'open') {
         await updateTicket(selected.id, { status: 'in_progress' })
       }
+
+      // Send email notification to user
+      const userEmail = selected.profiles?.email ?? selected.user_email
+      if (userEmail && session?.access_token) {
+        try {
+          await fetch('/api/admin/send-email', {
+            method:  'POST',
+            headers: {
+              'Content-Type':  'application/json',
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              to:      userEmail,
+              subject: `Re: ${selected.title} — Riazify Support`,
+              html:    `<p>Hi,</p><p>Our support team has replied to your ticket:</p><blockquote>${replyText.trim()}</blockquote><p>You can view your ticket by logging into your Riazify dashboard.</p><p>— Riazify Support</p>`,
+            }),
+          })
+        } catch { /* non-critical — reply still saved */ }
+      }
+
       setReplyText('')
       await loadReplies(selected.id)
       showToast('Reply sent!')
@@ -167,6 +194,44 @@ export default function TicketManagerTab() {
   async function saveNote() {
     if (!selected) return
     await updateTicket(selected.id, { admin_note: adminNote })
+  }
+
+  // ── Delete ticket ──────────────────────────────────────────
+  async function deleteTicket(id: string) {
+    if (!confirm('Delete this ticket? This cannot be undone.')) return
+    try {
+      await (supabase.from('tickets') as any).delete().eq('id', id)
+      setTickets(prev => prev.filter(t => t.id !== id))
+      if (selected?.id === id) setSelected(null)
+      showToast('Ticket deleted')
+    } catch {
+      showToast('Failed to delete', 'error')
+    }
+  }
+
+  // ── Export tickets as CSV ──────────────────────────────────
+  function exportCSV() {
+    const rows = [
+      ['ID', 'Title', 'Type', 'Status', 'Priority', 'User Email', 'Plan', 'Created'],
+      ...filtered.map(t => [
+        t.id,
+        t.title,
+        t.type,
+        t.status,
+        t.priority ?? 'medium',
+        t.profiles?.email ?? t.user_email ?? '',
+        t.profiles?.plan_name ?? '',
+        new Date(t.created_at).toLocaleDateString(),
+      ])
+    ]
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `tickets-${new Date().toISOString().slice(0,10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   // ── Filtered tickets ───────────────────────────────────────
@@ -211,11 +276,23 @@ export default function TicketManagerTab() {
             Manage user support requests and bug reports
           </p>
         </div>
-        <button onClick={loadTickets}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
-          style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-          <RefreshCw size={13} /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setConfirmClean(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
+            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+            <Trash2 size={13} /> Clean Old
+          </button>
+          <button onClick={exportCSV}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
+            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+            <Download size={13} /> Export
+          </button>
+          <button onClick={loadTickets}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
+            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+            <RefreshCw size={13} /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* HUD Cards */}
@@ -248,42 +325,57 @@ export default function TicketManagerTab() {
              style={{ backgroundColor: C.surface, borderColor: C.border, width: selected ? '40%' : '100%', transition: 'width 0.2s' }}>
 
           {/* List header */}
-          <div className="p-4 border-b" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-            {/* Search */}
-            <div className="relative mb-3">
+          <div className="px-4 py-3 border-b flex items-center gap-2 flex-wrap"
+               style={{ borderColor: C.border, backgroundColor: C.bg }}>
+
+            {/* Status filters */}
+            {['all','open','in_progress','resolved','closed'].map(s => (
+              <button key={s} onClick={() => setFilterStatus(s)}
+                className="px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all"
+                style={{
+                  backgroundColor: filterStatus === s ? C.dark    : C.surface,
+                  color:           filterStatus === s ? C.lime    : C.muted,
+                  border:          `1px solid ${filterStatus === s ? C.dark : C.border}`,
+                }}>
+                {s.replace('_', ' ')}
+              </button>
+            ))}
+
+            <div style={{ width: 1, height: 16, backgroundColor: C.border }} />
+
+            {/* Type filters */}
+            {['all','bug','question','feature'].map(t => (
+              <button key={t} onClick={() => setFilterType(t)}
+                className="px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all"
+                style={{
+                  backgroundColor: filterType === t ? C.dark    : C.surface,
+                  color:           filterType === t ? C.lime    : C.muted,
+                  border:          `1px solid ${filterType === t ? C.dark : C.border}`,
+                }}>
+                {t}
+              </button>
+            ))}
+
+            {/* Search — pushed to right */}
+            <div className="relative ml-auto" style={{ minWidth: 180 }}>
               <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: C.muted }} />
               <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search by title or email..."
-                className="w-full h-8 pl-8 pr-3 rounded-xl border text-[11px] outline-none"
+                placeholder="Search..."
+                className="h-7 pl-8 pr-3 rounded-xl border text-[11px] outline-none w-full"
                 style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
             </div>
+          </div>
 
-            {/* Filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {['all','open','in_progress','resolved','closed'].map(s => (
-                <button key={s} onClick={() => setFilterStatus(s)}
-                  className="px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all"
-                  style={{
-                    backgroundColor: filterStatus === s ? C.dark    : C.surface,
-                    color:           filterStatus === s ? C.lime    : C.muted,
-                    border:          `1px solid ${filterStatus === s ? C.dark : C.border}`,
-                  }}>
-                  {s.replace('_', ' ')}
-                </button>
-              ))}
-              <div style={{ width: 1, height: 16, backgroundColor: C.border }} />
-              {['all','bug','question','feature'].map(t => (
-                <button key={t} onClick={() => setFilterType(t)}
-                  className="px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all"
-                  style={{
-                    backgroundColor: filterType === t ? C.dark    : C.surface,
-                    color:           filterType === t ? C.lime    : C.muted,
-                    border:          `1px solid ${filterType === t ? C.dark : C.border}`,
-                  }}>
-                  {t}
-                </button>
-              ))}
-            </div>
+          {/* Column headers */}
+          <div className="grid px-4 py-2 border-b text-[9px] font-black tracking-wider"
+               style={{ borderColor: C.border, backgroundColor: C.bg, color: C.muted,
+                        gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 80px' }}>
+            <span>TICKET</span>
+            <span>TYPE</span>
+            <span>STATUS</span>
+            <span>PRIORITY</span>
+            <span>PLAN</span>
+            <span className="text-right">DATE</span>
           </div>
 
           {/* Ticket rows */}
@@ -306,56 +398,66 @@ export default function TicketManagerTab() {
                 return (
                   <div key={ticket.id}
                     onClick={() => selectTicket(ticket)}
-                    className="flex items-start gap-3 px-4 py-3 border-b cursor-pointer hover:opacity-80 transition-all"
+                    className="grid items-center px-4 py-3 border-b cursor-pointer hover:opacity-80 transition-all"
                     style={{
                       borderColor:     C.border,
                       backgroundColor: isSelected ? C.limeTint : 'transparent',
+                      gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 80px',
                     }}>
-                    {/* Type icon */}
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                         style={{ backgroundColor: tc.bg }}>
-                      <tc.Icon size={14} style={{ color: tc.color }} />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
+                    {/* Ticket title + email */}
+                    <div className="flex items-center gap-2 min-w-0 pr-2">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                           style={{ backgroundColor: tc.bg }}>
+                        <tc.Icon size={12} style={{ color: tc.color }} />
+                      </div>
+                      <div className="min-w-0">
                         <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>
                           {ticket.title}
                         </p>
-                        <span className="text-[9px] font-bold shrink-0" style={{ color: C.muted }}>
-                          {timeAgo(ticket.created_at)}
-                        </span>
-                      </div>
-                      <p className="text-[11px] truncate mb-1.5" style={{ color: C.muted }}>
-                        {ticket.profiles?.email ?? ticket.user_email ?? 'Unknown user'}
-                      </p>
-                      <div className="flex items-center gap-1.5">
-                        {/* Status */}
-                        <div className="flex items-center gap-1">
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sc.dot }} />
-                          <span className="text-[9px] font-bold capitalize" style={{ color: sc.color }}>
-                            {sc.label}
-                          </span>
-                        </div>
-                        {/* Priority */}
-                        {ticket.priority && ticket.priority !== 'medium' && (
-                          <span className="text-[9px] font-bold"
-                                style={{ color: priorityConfig(ticket.priority).color }}>
-                            · {priorityConfig(ticket.priority).label}
-                          </span>
-                        )}
-                        {/* Plan */}
-                        {ticket.profiles?.plan_name && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold ml-auto"
-                                style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                            {ticket.profiles.plan_name}
-                          </span>
-                        )}
+                        <p className="text-[10px] truncate" style={{ color: C.muted }}>
+                          {ticket.profiles?.email ?? ticket.user_email ?? 'Unknown'}
+                        </p>
                       </div>
                     </div>
 
-                    <ChevronRight size={12} style={{ color: C.muted, marginTop: 4 }} />
+                    {/* Type */}
+                    <div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg capitalize"
+                            style={{ backgroundColor: tc.bg, color: tc.color }}>
+                        {tc.label}
+                      </span>
+                    </div>
+
+                    {/* Status */}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: sc.dot }} />
+                      <span className="text-[10px] font-bold" style={{ color: sc.color }}>{sc.label}</span>
+                    </div>
+
+                    {/* Priority */}
+                    <div>
+                      <span className="text-[10px] font-bold capitalize"
+                            style={{ color: priorityConfig(ticket.priority ?? 'medium').color }}>
+                        {priorityConfig(ticket.priority ?? 'medium').label}
+                      </span>
+                    </div>
+
+                    {/* Plan */}
+                    <div>
+                      {ticket.profiles?.plan_name && (
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md"
+                              style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                          {ticket.profiles.plan_name}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Date */}
+                    <div className="text-right">
+                      <span className="text-[10px]" style={{ color: C.muted }}>
+                        {timeAgo(ticket.created_at)}
+                      </span>
+                    </div>
                   </div>
                 )
               })
@@ -393,11 +495,18 @@ export default function TicketManagerTab() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setSelected(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
-                style={{ border: `1px solid ${C.border}` }}>
-                <X size={14} style={{ color: C.muted }} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => deleteTicket(selected.id)}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
+                  style={{ border: `1px solid rgba(185,28,28,0.3)`, backgroundColor: 'rgba(185,28,28,0.05)' }}>
+                  <Trash2 size={13} style={{ color: C.red }} />
+                </button>
+                <button onClick={() => setSelected(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
+                  style={{ border: `1px solid ${C.border}` }}>
+                  <X size={14} style={{ color: C.muted }} />
+                </button>
+              </div>
             </div>
 
             {/* Detail body */}
@@ -408,7 +517,7 @@ export default function TicketManagerTab() {
                 <p className="text-[10px] font-black tracking-wider mb-3" style={{ color: C.muted }}>USER INFO</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Name',    value: selected.profiles?.full_name ?? '—',          icon: User     },
+                    { label: 'Name',    value: selected.profiles?.name ?? '—',          icon: User     },
                     { label: 'Email',   value: selected.profiles?.email ?? selected.user_email ?? '—', icon: MessageCircle },
                     { label: 'Plan',    value: selected.profiles?.plan_name ?? '—',           icon: Tag      },
                     { label: 'Submitted', value: timeAgo(selected.created_at),               icon: Calendar },
@@ -539,6 +648,69 @@ export default function TicketManagerTab() {
           </div>
         )}
       </div>
+      {/* Clean Old Tickets Confirmation Modal */}
+      {confirmClean && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center"
+             style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+             onClick={() => setConfirmClean(false)}>
+          <div className="w-full max-w-sm mx-4 p-6 rounded-2xl shadow-2xl"
+               style={{ backgroundColor: C.surface }}
+               onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                 style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+              <Trash2 size={22} style={{ color: C.red }} />
+            </div>
+            <p className="text-[16px] font-black text-center mb-2" style={{ color: C.dark }}>
+              Clean Old Tickets?
+            </p>
+            <p className="text-[12px] text-center mb-6" style={{ color: C.muted }}>
+              This will permanently delete:
+              <br />
+              <strong>Resolved/Closed</strong> tickets older than 30 days
+              <br />
+              <strong>Abandoned open</strong> tickets older than 90 days
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmClean(false)}
+                className="flex-1 py-2.5 rounded-2xl text-[13px] font-bold border hover:opacity-70"
+                style={{ borderColor: C.border, color: C.muted }}>
+                Cancel
+              </button>
+              <button
+                disabled={cleaning}
+                onClick={async () => {
+                  setCleaning(true)
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession()
+                    const res = await fetch('/api/admin/cleanup-tickets', {
+                      method:  'POST',
+                      headers: { 'Authorization': `Bearer ${session?.access_token}` },
+                    })
+                    const data = await res.json()
+                    if (data.success) {
+                      showToast(`Cleaned ${data.deleted} old tickets`)
+                      loadTickets()
+                    } else {
+                      showToast('Cleanup failed', 'error')
+                    }
+                  } catch {
+                    showToast('Cleanup failed', 'error')
+                  }
+                  setCleaning(false)
+                  setConfirmClean(false)
+                }}
+                className="flex-1 py-2.5 rounded-2xl text-[13px] font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ backgroundColor: C.red, color: '#fff' }}>
+                {cleaning
+                  ? <><div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} /> Cleaning...</>
+                  : <><Trash2 size={14} /> Yes, Clean</>
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
