@@ -1,6 +1,5 @@
 'use client'
 // components/dashboard/AnnouncementBanner.tsx
-// Shows admin broadcast announcements at top of dashboard
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -19,22 +18,53 @@ export default function AnnouncementBanner() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [current,       setCurrent]       = useState(0)
   const [visible,       setVisible]       = useState(true)
-  const [loaded,        setLoaded]        = useState(false)
 
   useEffect(() => {
     async function load() {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session) return
+        // Wait for auth to be ready
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
 
-        const res = await fetch('/api/admin/broadcast', {
-          headers: { 'Authorization': `Bearer ${session.access_token}` },
+        // Get user plan
+        const { data: profile } = await (supabase.from('profiles') as any)
+          .select('plan_name')
+          .eq('id', user.id)
+          .single()
+
+        const plan = ((profile as any)?.plan_name ?? '').toLowerCase()
+
+        // Get active non-expired announcements
+        const now = new Date().toISOString()
+        const { data: all } = await (supabase.from('announcements') as any)
+          .select('*')
+          .eq('is_active', true)
+          .gt('expires_at', now)
+          .order('created_at', { ascending: false })
+
+        if (!all || all.length === 0) return
+
+        // Get dismissed announcements
+        const { data: dismissed } = await (supabase.from('announcement_dismissals') as any)
+          .select('announcement_id')
+          .eq('user_id', user.id)
+
+        const dismissedIds = new Set((dismissed ?? []).map((d: any) => d.announcement_id))
+
+        // Filter by target and not dismissed
+        const filtered = all.filter((a: any) => {
+          if (dismissedIds.has(a.id)) return false
+          if (a.target === 'all')     return true
+          if (a.target === 'starter') return plan === 'starter'
+          if (a.target === 'growth')  return plan === 'growth'
+          if (a.target === 'custom')  return plan === 'custom'
+          if (a.target === 'free')    return plan === 'free' || plan === 'free trial'
+          return true
         })
-        const data = await res.json()
-        setAnnouncements(data.announcements ?? [])
-        setLoaded(true)
-      } catch {
-        setLoaded(true)
+
+        setAnnouncements(filtered)
+      } catch (e) {
+        console.error('[AnnouncementBanner]', e)
       }
     }
     load()
@@ -51,7 +81,6 @@ export default function AnnouncementBanner() {
       setVisible(true)
     }, 300)
 
-    // Save dismissal to DB
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -63,7 +92,7 @@ export default function AnnouncementBanner() {
     } catch { /* non-critical */ }
   }
 
-  if (!loaded || announcements.length === 0) return null
+  if (announcements.length === 0) return null
 
   const ann = announcements[current]
 
@@ -71,22 +100,22 @@ export default function AnnouncementBanner() {
     <div
       className="w-full transition-all duration-300"
       style={{
-        opacity:    visible ? 1 : 0,
-        transform:  visible ? 'translateY(0)' : 'translateY(-10px)',
+        opacity:   visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(-10px)',
       }}>
-      <div className="flex items-center gap-3 px-4 py-3"
+      <div className="flex items-center gap-3 px-4 py-2.5"
            style={{
              backgroundColor: '#0a0d08',
-             borderBottom:    '1px solid rgba(143,255,0,0.2)',
+             borderBottom:    '2px solid #8fff00',
            }}>
         {/* Icon */}
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+        <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
              style={{ backgroundColor: 'rgba(143,255,0,0.15)' }}>
-          <Megaphone size={14} style={{ color: '#8fff00' }} />
+          <Megaphone size={12} style={{ color: '#8fff00' }} />
         </div>
 
         {/* Message */}
-        <p className="flex-1 text-[13px] font-semibold min-w-0 truncate"
+        <p className="flex-1 text-[13px] font-semibold min-w-0"
            style={{ color: '#ffffff' }}>
           {ann.message}
         </p>
@@ -94,14 +123,14 @@ export default function AnnouncementBanner() {
         {/* Action link */}
         {ann.action_url && ann.action_text && (
           <a href={ann.action_url}
-             className="flex items-center gap-1 px-3 py-1 rounded-lg text-[12px] font-bold shrink-0 hover:opacity-80 transition-opacity"
+             className="flex items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:opacity-80"
              style={{ backgroundColor: '#8fff00', color: '#0a0d08' }}>
             {ann.action_text}
-            <ArrowRight size={12} />
+            <ArrowRight size={11} />
           </a>
         )}
 
-        {/* Multiple announcements indicator */}
+        {/* Multiple indicators */}
         {announcements.length > 1 && (
           <div className="flex items-center gap-1 shrink-0">
             {announcements.map((_, i) => (
@@ -114,9 +143,9 @@ export default function AnnouncementBanner() {
 
         {/* Dismiss */}
         <button onClick={() => dismiss(ann.id)}
-          className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70 transition-opacity shrink-0"
+          className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 shrink-0"
           style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-          <X size={13} style={{ color: 'rgba(255,255,255,0.7)' }} />
+          <X size={12} style={{ color: 'rgba(255,255,255,0.7)' }} />
         </button>
       </div>
     </div>
