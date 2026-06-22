@@ -40,6 +40,59 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Sync to LemonSqueezy
+    try {
+      const { data: lsKey } = await (adminClient.from('api_fleet_config') as any)
+        .select('primary_key_1, status')
+        .eq('platform_name', 'lemonsqueezy')
+        .single()
+
+      if (lsKey?.status === 'connected' && lsKey?.primary_key_1) {
+        const { data: storeConfig } = await (adminClient.from('ls_config') as any)
+          .select('value')
+          .eq('key', 'store_id')
+          .single()
+
+        const storeId = storeConfig?.value
+
+        if (storeId) {
+          const lsBody: any = {
+            data: {
+              type: 'discount-codes',
+              attributes: {
+                code:           code.trim().toUpperCase(),
+                amount:         discount_type === 'percentage'
+                                  ? Number(discount_value)
+                                  : Number(discount_value) * 100,
+                amount_type:    discount_type === 'percentage' ? 'percent' : 'fixed',
+                status:         status === 'active' ? 'published' : 'draft',
+                max_redemptions: max_uses ?? null,
+                expires_at:     expires_at ?? null,
+              },
+              relationships: {
+                store: {
+                  data: { type: 'stores', id: String(storeId) }
+                }
+              }
+            }
+          }
+
+          await fetch('https://api.lemonsqueezy.com/v1/discount-codes', {
+            method:  'POST',
+            headers: {
+              'Authorization': `Bearer ${lsKey.primary_key_1}`,
+              'Content-Type':  'application/vnd.api+json',
+              'Accept':        'application/vnd.api+json',
+            },
+            body: JSON.stringify(lsBody),
+          })
+        }
+      }
+    } catch (lsErr) {
+      console.error('[promo/create] LS sync error:', lsErr)
+      // Non-critical — promo saved in DB regardless
+    }
+    
     try {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,

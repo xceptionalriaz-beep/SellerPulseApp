@@ -482,6 +482,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
   const [history,       setHistory]       = useState<any[]>([])
   const [journey,       setJourney]       = useState<any[]>([])
   const [notes,         setNotes]         = useState<any[]>([])
+  const [transactions,  setTransactions]  = useState<any[]>([])
   const [noteContent,   setNoteContent]   = useState('')
   const [noteCategory,  setNoteCategory]  = useState('general')
   const [addingNote,    setAddingNote]    = useState(false)
@@ -524,7 +525,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
   useEffect(() => {
     async function load() {
       try {
-        const [sr, dr, hr, jr, nr] = await Promise.all([
+        const [sr, dr, hr, jr, nr, tr] = await Promise.all([
           supabase.from('user_stores').select('*').eq('user_id', user.id),
           supabase.from('user_devices').select('*').eq('user_id', user.id),
           supabase.from('login_history').select('*').eq('user_id', user.id)
@@ -534,12 +535,18 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
           (supabase.from('user_notes') as any).select('*').eq('user_id', user.id)
             .order('is_pinned', { ascending: false })
             .order('created_at', { ascending: false }),
+          (supabase.from('transactions') as any)
+            .select('amount, status, plan, billing, invoice, created_at, coupon')
+            .eq('user_id', user.id)
+            .eq('status', 'paid')
+            .order('created_at', { ascending: false }),
         ])
         setStores(sr.data ?? [])
         setDevices(dr.data ?? [])
         setHistory(hr.data ?? [])
         setJourney(jr.data ?? [])
         setNotes(nr.data ?? [])
+        setTransactions(tr.data ?? [])
       } catch {}
       setLoadingData(false)
     }
@@ -1008,13 +1015,8 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
           {activeTab === 'overview' && (<>
           {/* LTV + Payment History */}
           {(() => {
-            const ltv      = ltvOf(user)
-            const payments = (user.subscriptions ?? [])
-              .filter((s: any) => Number(s.amount ?? 0) > 0)
-              .sort((a: any, b: any) =>
-                new Date(b.paid_at ?? b.created_at ?? 0).getTime() -
-                new Date(a.paid_at ?? a.created_at ?? 0).getTime()
-              )
+            const ltv          = transactions.reduce((sum, t) => sum + parseFloat(t.amount ?? 0), 0)
+            const paymentCount = transactions.length
             return (
               <div className="rounded-xl border mb-6 overflow-hidden"
                    style={{ borderColor: ltv > 0 ? C.lime : C.border }}>
@@ -1031,49 +1033,59 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
                   <div className="text-right">
                     <p className="text-[18px] font-black"
                        style={{ color: ltv > 0 ? C.limeDeep : C.muted }}>
-                      ${ltv.toFixed(0)}
+                      ${ltv.toFixed(2)}
                     </p>
                     <p className="text-[10px]" style={{ color: C.muted }}>
-                      {payments.length} payment{payments.length !== 1 ? 's' : ''}
+                      {paymentCount} payment{paymentCount !== 1 ? 's' : ''}
                     </p>
                   </div>
                 </div>
                 {/* Payment rows */}
-                {payments.length > 0 ? (
+                {paymentCount > 0 ? (
                   <div className="flex flex-col divide-y" style={{ borderColor: C.border }}>
-                    {payments.slice(0, 5).map((s: any, i: number) => {
-                      const active = s.status === 'active'
-                      return (
-                        <div key={i}
-                             className="flex items-center justify-between px-4 py-2.5"
-                             style={{ backgroundColor: C.surface }}>
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-1.5 h-1.5 rounded-full shrink-0"
-                                 style={{ backgroundColor: active ? C.green : C.muted }} />
-                            <div>
-                              <p className="text-[12px] font-semibold" style={{ color: C.text }}>
-                                {s.plan_name ?? 'Subscription'}
-                              </p>
-                              <p className="text-[10px]" style={{ color: C.muted }}>
-                                {fmtDate(s.paid_at ?? s.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[13px] font-bold" style={{ color: C.green }}>
-                              +${Number(s.amount).toFixed(0)}
+                    {transactions.slice(0, 5).map((t: any, i: number) => (
+                      <div key={i}
+                           className="flex items-center justify-between px-4 py-2.5"
+                           style={{ backgroundColor: C.surface }}>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0"
+                               style={{ backgroundColor: C.green }} />
+                          <div>
+                            <p className="text-[12px] font-semibold" style={{ color: C.text }}>
+                              {t.plan ?? 'Payment'}
+                              {t.billing && (
+                                <span className="ml-1.5 text-[10px] font-normal capitalize"
+                                      style={{ color: C.muted }}>
+                                  ({t.billing})
+                                </span>
+                              )}
                             </p>
-                            <p className="text-[9px] font-semibold capitalize"
-                               style={{ color: active ? C.green : C.muted }}>
-                              {s.status}
+                            <p className="text-[10px]" style={{ color: C.muted }}>
+                              {t.invoice && <span className="mr-1">{t.invoice} ·</span>}
+                              {fmtDate(t.created_at)}
                             </p>
+                            {t.coupon && (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md mt-0.5 inline-block"
+                                    style={{ backgroundColor: '#f4ffe6', color: '#4a8f00', border: '1px solid rgba(143,255,0,0.3)' }}>
+                                {t.coupon}
+                              </span>
+                            )}
                           </div>
                         </div>
-                      )
-                    })}
-                    {payments.length > 5 && (
+                        <div className="text-right">
+                          <p className="text-[13px] font-bold" style={{ color: C.green }}>
+                            +${parseFloat(t.amount ?? 0).toFixed(2)}
+                          </p>
+                          <p className="text-[9px] font-semibold capitalize"
+                             style={{ color: C.green }}>
+                            paid
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {paymentCount > 5 && (
                       <p className="text-center text-[10px] py-2" style={{ color: C.muted }}>
-                        +{payments.length - 5} more payments
+                        +{paymentCount - 5} more payment{paymentCount - 5 !== 1 ? 's' : ''}
                       </p>
                     )}
                   </div>

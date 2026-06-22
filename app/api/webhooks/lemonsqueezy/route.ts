@@ -109,6 +109,22 @@ async function saveTransaction(data: {
   }
 }
 
+// ── Update promo code usage count ─────────────────────────────
+async function updatePromoUsage(couponCode: string) {
+  try {
+    const { count } = await (adminClient.from('transactions') as any)
+      .select('*', { count: 'exact', head: true })
+      .eq('coupon', couponCode.toUpperCase())
+      .eq('status', 'paid')
+
+    await (adminClient.from('promo_codes') as any)
+      .update({ uses_count: count ?? 0 })
+      .eq('code', couponCode.toUpperCase())
+  } catch (e) {
+    console.error('[webhook] promo count update error:', e)
+  }
+}
+
 // ── Update profile by user_id (preferred) or email ────────────
 async function updateProfile(
   userId:  string | null,
@@ -158,6 +174,7 @@ export async function POST(req: NextRequest) {
   const variantId    = String(obj.first_subscription_item?.variant_id ?? obj.variant_id ?? '')
   const periodEnd    = obj.renews_at ?? obj.ends_at ?? null
   const cancelAtEnd  = obj.cancelled ?? false
+  const coupon       = obj.discount_code ?? custom?.coupon ?? null
 
   console.log(`[webhook] ${eventName} | user: ${userId ?? userEmail} | variant: ${variantId}`)
 
@@ -181,7 +198,9 @@ export async function POST(req: NextRequest) {
           status:    'paid',
           billing:   'monthly',
           lsOrderId: lsSubId,
+          coupon:    coupon ?? undefined,
         })
+        if (coupon) await updatePromoUsage(coupon)
         await fireWebhook(req, 'plan.upgraded', {
           email: userEmail, plan, amount, status: 'Order completed',
         })
@@ -209,7 +228,9 @@ export async function POST(req: NextRequest) {
           billing:     obj.billing_anchor ? 'annual' : 'monthly',
           lsSubId,
           nextBilling: periodEnd,
+          coupon:      coupon ?? undefined,
         })
+        if (coupon) await updatePromoUsage(coupon)
         await fireWebhook(req, 'plan.upgraded', {
           email: userEmail, plan, amount: `${amount}/mo`, status: 'Subscription started',
         })
