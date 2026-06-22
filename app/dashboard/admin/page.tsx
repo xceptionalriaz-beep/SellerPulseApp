@@ -10,6 +10,7 @@ import {
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
   Wrench, Trophy, Zap, UserPlus, Key, FileText,
   Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail, CreditCard,
+  MessageCircle,
 } from 'lucide-react'
 import PersistentSidebar   from '@/components/admin/PersistentSidebar'
 import AnalyticsHub        from '@/components/admin/AnalyticsHub'
@@ -27,6 +28,7 @@ import AffiliateVaultTab   from '@/components/admin/settings-tabs/AffiliateVault
 import FounderOpsTab       from '@/components/admin/settings-tabs/FounderOpsTab'
 import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
+import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -55,6 +57,7 @@ const SETTINGS_MENU = [
   { title: 'Founder Ops',     icon: BarChart2    },
   { title: 'Marketing',       icon: Mail         },
   { title: 'Payments',        icon: CreditCard   },
+  { title: 'Tickets',         icon: MessageCircle },
 ]
 
 // ── Tool definitions (static metadata only — no dummy stats) ──
@@ -818,7 +821,7 @@ function AdminPage() {
       'user-crm': 0, 'role-builder': 1, 'security': 2, 'promos': 3,
       'kill-switches': 4, 'plan-limits': 5, 'emails': 6, 'webhooks': 7,
       'gamification': 8, 'api-vault': 9, 'affiliate': 10, 'founder-ops': 11,
-      'marketing': 12, 'payments': 13,
+      'marketing': 12, 'payments': 13, 'tickets': 14,
     }
     return tab ? (tabMap[tab] ?? 0) : 0
   })
@@ -1118,6 +1121,7 @@ function AdminPage() {
       case 11: return <FounderOpsTab />
       case 12: return <MarketingTab initialUsers={marketingUsers} />
       case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
+      case 14: return <TicketManagerTab />
       default: return null
     }
   }
