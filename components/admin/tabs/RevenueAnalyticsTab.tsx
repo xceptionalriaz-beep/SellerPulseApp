@@ -210,19 +210,16 @@ export default function RevenueAnalyticsTab({
       const churnRate = totalUsers > 0 ? (churned   / totalUsers) * 100 : 0
 
       // ── ARPU + ARR ────────────────────────────────────────────
-      const paidUserCount = allSubs.filter(s =>
-        s.status === 'active' && Number(s.amount) > 0
-      ).length
+      const paidUserCount = activeSubs
       const arpu = paidUserCount > 0 ? mrr / paidUserCount : 0
       const arr  = mrr * 12
 
       // ── New subs this month ───────────────────────────────────
       const thisMonthStart = new Date()
       thisMonthStart.setDate(1); thisMonthStart.setHours(0,0,0,0)
-      const newSubsThisMonth = allSubs.filter(s =>
-        Number(s.amount) > 0 &&
-        s.paid_at &&
-        new Date(s.paid_at) >= thisMonthStart
+      const newSubsThisMonth = allProfiles.filter((p: any) =>
+        ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase()) &&
+        p.created_at && new Date(p.created_at) >= thisMonthStart
       ).length
 
       // ── ARPU last month ───────────────────────────────────────
