@@ -159,6 +159,7 @@ export default function RevenueAnalyticsTab({
     setTimeout(() => setToastMsg(null), 3000)
   }
   const [goalsEdit,      setGoalsEdit]     = useState(false)
+  const [refreshing,     setRefreshing]    = useState(false)
   const [goalTargets,    setGoalTargets]   = useState({ monthly: 500, quarterly: 1500, annual: 6000 })
   const [hoveredRow,   setHoveredRow]  = useState<number | null>(null)
   const [copiedEmail,  setCopiedEmail] = useState<string | null>(null)
@@ -166,6 +167,7 @@ export default function RevenueAnalyticsTab({
   const TX_PER_PAGE = 6
 
   const load = useCallback(async () => {
+    setRefreshing(true)
     try {
       // ── Fetch transactions (real payment data) ────────────────
       const { data: txns } = await (supabase.from('transactions') as any)
@@ -457,6 +459,7 @@ export default function RevenueAnalyticsTab({
       console.error('Revenue analytics error:', e)
       setStats(s => ({ ...s, loading: false }))
     }
+    setRefreshing(false)
   }, [])
 
   useEffect(() => { load() }, [load])
@@ -621,10 +624,10 @@ export default function RevenueAnalyticsTab({
                   </span>
                 </div>
               )}
-              <button onClick={load}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold"
+              <button onClick={load} disabled={refreshing}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold hover:opacity-70 transition-all disabled:opacity-50"
                 style={{ borderColor: C.border, color: C.muted }}>
-                <RefreshCw size={11} />
+                <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
               </button>
             </div>
           </div>
