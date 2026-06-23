@@ -105,18 +105,18 @@ export default function AnnouncementBanner() {
       }}>
       <div className="flex items-center gap-3 px-4 py-2.5"
            style={{
-             backgroundColor: '#0a0d08',
-             borderBottom:    '2px solid #8fff00',
+             backgroundColor: '#8fff00',
+             borderBottom:    '2px solid #4a8f00',
            }}>
         {/* Icon */}
         <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-             style={{ backgroundColor: 'rgba(143,255,0,0.15)' }}>
-          <Megaphone size={12} style={{ color: '#8fff00' }} />
+             style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
+          <Megaphone size={12} style={{ color: '#0a0d08' }} />
         </div>
 
         {/* Message */}
-        <p className="flex-1 text-[13px] font-semibold min-w-0"
-           style={{ color: '#ffffff' }}>
+        <p className="flex-1 text-[13px] font-semibold min-w-0 text-center"
+           style={{ color: '#0a0d08' }}>
           {ann.message}
         </p>
 
@@ -124,7 +124,7 @@ export default function AnnouncementBanner() {
         {ann.action_url && ann.action_text && (
           <a href={ann.action_url}
              className="flex items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:opacity-80"
-             style={{ backgroundColor: '#8fff00', color: '#0a0d08' }}>
+             style={{ backgroundColor: '#0a0d08', color: '#8fff00' }}>
             {ann.action_text}
             <ArrowRight size={11} />
           </a>
@@ -136,7 +136,7 @@ export default function AnnouncementBanner() {
             {announcements.map((_, i) => (
               <button key={i} onClick={() => setCurrent(i)}
                 className="w-1.5 h-1.5 rounded-full transition-all"
-                style={{ backgroundColor: i === current ? '#8fff00' : 'rgba(143,255,0,0.3)' }} />
+                style={{ backgroundColor: i === current ? '#0a0d08' : 'rgba(0,0,0,0.3)' }} />
             ))}
           </div>
         )}
@@ -144,8 +144,8 @@ export default function AnnouncementBanner() {
         {/* Dismiss */}
         <button onClick={() => dismiss(ann.id)}
           className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 shrink-0"
-          style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-          <X size={12} style={{ color: 'rgba(255,255,255,0.7)' }} />
+          style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
+          <X size={12} style={{ color: '#0a0d08' }} />
         </button>
       </div>
     </div>

@@ -13,6 +13,7 @@ import {
 import {
   TrendingUp, TrendingDown, DollarSign,
   Users, RefreshCw, ArrowUpRight, ArrowDownRight, Shield,
+  Pencil, Check,
 } from 'lucide-react'
 
 const C = {
@@ -156,18 +157,27 @@ export default function RevenueAnalyticsTab({
 
   const load = useCallback(async () => {
     try {
-      // ── Fetch subscriptions ──────────────────────────────────
-      const { data: subs } = await supabase
-        .from('subscriptions')
+      // ── Fetch transactions (real payment data) ────────────────
+      const { data: txns } = await (supabase.from('transactions') as any)
         .select('*')
-        .order('paid_at', { ascending: false })
+        .order('created_at', { ascending: false })
 
-      const allSubs = (subs ?? []) as any[]
+      // Map transactions to subscriptions format for compatibility
+      const allSubs = (txns ?? []).map((t: any) => ({
+        ...t,
+        amount:          parseFloat(t.amount ?? 0),
+        status:          t.status === 'paid' ? 'active' : t.status,
+        plan_name:       t.plan,
+        paid_at:         t.created_at,
+        next_billing_at: t.next_billing ?? null,
+        user_email:      t.user_email,
+        user_id:         t.user_id,
+      })) as any[]
 
       // ── Fetch profiles ───────────────────────────────────────
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, name, email, plan_name, account_status')
+        .select('id, name, email, plan_name, account_status, subscription_status, country')
 
       const allProfiles = (profiles ?? []) as any[]
       const totalUsers  = allProfiles.length
@@ -183,14 +193,19 @@ export default function RevenueAnalyticsTab({
         .filter(s => s.paid_at && new Date(s.paid_at) >= todayMidnight)
         .reduce((sum, s) => sum + (Number(s.amount) ?? 0), 0)
 
-      // ── Active subs ───────────────────────────────────────────
-      const activeSubs = allSubs.filter(s =>
-        s.status === 'active' && Number(s.amount) > 0
+      // ── Active subs — from profiles (more accurate) ───────────
+      const activeSubs = allProfiles.filter((p: any) =>
+        ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase()) &&
+        p.subscription_status === 'active'
       ).length
 
-      // ── Conversion + Churn ────────────────────────────────────
-      const everPaid  = allSubs.filter(s => Number(s.amount) > 0).length
-      const churned   = allSubs.filter(s => s.status === 'cancelled' || s.status === 'past_due').length
+      // ── Conversion + Churn — from profiles (accurate) ─────────
+      const everPaid  = allProfiles.filter((p: any) =>
+        ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase())
+      ).length
+      const churned   = allProfiles.filter((p: any) =>
+        p.subscription_status === 'cancelled' || p.subscription_status === 'past_due'
+      ).length
       const convRate  = totalUsers > 0 ? (everPaid  / totalUsers) * 100 : 0
       const churnRate = totalUsers > 0 ? (churned   / totalUsers) * 100 : 0
 
@@ -330,21 +345,31 @@ export default function RevenueAnalyticsTab({
         projected: true,
       })
 
-      // ── Plan distribution — from subscriptions (more accurate) ──
+      // ── Plan distribution — from profiles (most accurate) ──────
       const PLAN_DEFS = [
-        { name: 'Free', color: '#111c0a', amount: 0  },
-        { name: 'Starter',   color: '#8fff00', amount: 49 },
-        { name: 'Growth', color: '#6bcc00', amount: 99 },
+        { name: 'Free',    color: '#111c0a', key: 'free'    },
+        { name: 'Starter', color: '#8fff00', key: 'starter' },
+        { name: 'Growth',  color: '#6bcc00', key: 'growth'  },
+        { name: 'Custom',  color: '#4a8f00', key: 'custom'  },
       ]
       const planMap: Record<string, { count: number; revenue: number; color: string }> = {}
-      // Init all plans so 0% ones still show
       for (const def of PLAN_DEFS) {
         planMap[def.name] = { count: 0, revenue: 0, color: def.color }
       }
+      // Count users per plan from profiles
+      for (const p of allProfiles) {
+        const planKey = (p.plan_name ?? 'free').toLowerCase()
+        const def = PLAN_DEFS.find(d => d.key === planKey || planKey.includes(d.key))
+        const key = def?.name ?? 'Free'
+        if (!planMap[key]) planMap[key] = { count: 0, revenue: 0, color: '#8a9e78' }
+        planMap[key].count += 1
+      }
+      // Add revenue from transactions
       for (const s of allSubs) {
-        const key = s.plan_name ?? 'Free'
-        if (!planMap[key]) planMap[key] = { count: 0, revenue: 0, color: C.purple }
-        planMap[key].count   += 1
+        const planKey = (s.plan_name ?? 'free').toLowerCase()
+        const def = PLAN_DEFS.find(d => d.key === planKey || planKey.includes(d.key))
+        const key = def?.name ?? 'Free'
+        if (!planMap[key]) planMap[key] = { count: 0, revenue: 0, color: '#8a9e78' }
         planMap[key].revenue += Number(s.amount) ?? 0
       }
       const planDist = Object.entries(planMap).map(([name, data]) => ({
@@ -355,10 +380,9 @@ export default function RevenueAnalyticsTab({
       }))
 
       // ── Transactions with user info ───────────────────────────
-      const { data: txData } = await supabase
-        .from('subscriptions')
+      const { data: txData } = await (supabase.from('transactions') as any)
         .select('*')
-        .order('paid_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(50)
 
       // Build user lookup from already-fetched profiles
@@ -490,9 +514,9 @@ export default function RevenueAnalyticsTab({
 
   // ── P&L ─────────────────────────────────────────────────────
   const txCount      = stats.transactions.filter(tx => Number(tx.amount) > 0).length
-  const stripeFee    = stats.mrr * 0.029 + (0.30 * Math.max(txCount, 1))
+  const lsFee        = txCount === 0 ? 0 : stats.mrr * 0.05 + (0.50 * txCount)
   const serverCosts  = serverCostVal
-  const totalCosts   = stripeFee + serverCosts
+  const totalCosts   = lsFee + serverCosts
   const netProfit    = stats.mrr - totalCosts
   const marginPct    = stats.mrr > 0 ? (netProfit / stats.mrr) * 100 : 0
 
@@ -979,7 +1003,7 @@ export default function RevenueAnalyticsTab({
                         const ltv = stats.ltvMap[tx.user_id] ?? 0
 
                         // Feature 5 — Payment icon
-                        const providerIcon = tx.provider === 'stripe' ? '💳' : tx.provider === 'paypal' ? '🅿️' : '🔧'
+                        const providerIcon = tx.provider === 'stripe' ? 'stripe' : tx.provider === 'paypal' ? 'paypal' : 'manual'
 
                         // Feature 6 — New vs Renewal
                         const isNew     = tx.paid_at && new Date(tx.paid_at) >= thisMonthStart
@@ -1036,7 +1060,10 @@ export default function RevenueAnalyticsTab({
                             {/* Feature 5 — Provider icon */}
                             <td className="py-2.5 px-1">
                               <div className="flex items-center gap-1">
-                                <span style={{ fontSize: 12 }}>{providerIcon}</span>
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                                      style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                                  {providerIcon}
+                                </span>
                                 <span className="text-[10px] capitalize" style={{ color: C.muted }}>
                                   {tx.provider ?? 'manual'}
                                 </span>
@@ -1315,10 +1342,10 @@ export default function RevenueAnalyticsTab({
                 <span className="font-bold" style={{ color: '#fff' }}>${stats.mrr.toFixed(2)}</span>
               </div>
 
-              {/* Stripe Fees with tooltip */}
+              {/* LemonSqueezy Fees with tooltip */}
               <div className="flex justify-between text-[12px]">
                 <div className="flex items-center gap-1">
-                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>Stripe Fees</span>
+                  <span style={{ color: 'rgba(255,255,255,0.45)' }}>LS Fees</span>
                   <div className="relative group">
                     <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, cursor: 'help' }}>ⓘ</span>
                     <div className="absolute left-0 bottom-5 hidden group-hover:block z-50"
@@ -1329,11 +1356,11 @@ export default function RevenueAnalyticsTab({
                            fontSize: 10, whiteSpace: 'nowrap',
                            color: 'rgba(255,255,255,0.7)',
                          }}>
-                      2.9% of MRR + $0.30 × {txCount} transaction{txCount !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                </div>
-                <span className="font-bold" style={{ color: C.red }}>-${stripeFee.toFixed(2)}</span>
+                      5% of MRR + $0.50 × {txCount} transaction{txCount !== 1 ? 's' : ''}
+                     </div>
+                   </div>
+                 </div>
+                 <span className="font-bold" style={{ color: C.red }}>-${lsFee.toFixed(2)}</span>
               </div>
 
               {/* Server Costs — editable */}
@@ -1344,7 +1371,7 @@ export default function RevenueAnalyticsTab({
                     onClick={() => setServerCostEdit(e => !e)}
                     style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, cursor: 'pointer', background: 'none', border: 'none' }}
                     title="Edit server costs">
-                    ✏️
+                    <Pencil size={10} />
                   </button>
                 </div>
                 {serverCostEdit ? (
@@ -1414,7 +1441,7 @@ export default function RevenueAnalyticsTab({
               color:       goalsEdit ? '#4A8F00' : C.muted,
               backgroundColor: goalsEdit ? 'rgba(143,255,0,0.08)' : 'transparent',
             }}>
-            ✏️ {goalsEdit ? 'Done' : 'Edit Targets'}
+            {goalsEdit ? <><Check size={12} /> Done</> : <><Pencil size={12} /> Edit Targets</>}
           </button>
         </div>
 

@@ -7,8 +7,78 @@ import { createClient } from '@/lib/supabase'
 import {
   TrendingUp, TrendingDown, AlertTriangle, CreditCard,
   Settings, UserPlus, Send, Minus, RefreshCw,
-  ArrowUpCircle, Shield, Zap, Bug,
+  ArrowUpCircle, Shield, Zap, Bug, Trash2, Megaphone, History,
 } from 'lucide-react'
+
+// ── Recent Broadcasts ──────────────────────────────────────────
+function RecentBroadcasts() {
+  const supabase = createClient()
+  const [broadcasts, setBroadcasts] = useState<any[]>([])
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await (supabase.from('announcements') as any)
+        .select('id, message, target, created_at, is_active')
+        .order('created_at', { ascending: false })
+        .limit(3)
+      setBroadcasts(data ?? [])
+    }
+    load()
+  }, [])
+
+  async function deleteBroadcast(id: string) {
+    await (supabase.from('announcements') as any).delete().eq('id', id)
+    setBroadcasts(prev => prev.filter(b => b.id !== id))
+  }
+
+  async function toggleActive(id: string, current: boolean) {
+    await (supabase.from('announcements') as any)
+      .update({ is_active: !current })
+      .eq('id', id)
+    setBroadcasts(prev => prev.map(b => b.id === id ? { ...b, is_active: !current } : b))
+  }
+
+  if (broadcasts.length === 0) return null
+
+  return (
+    <div className="mt-3 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+      <p className="text-[9px] font-black tracking-wider mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+        RECENT BROADCASTS
+      </p>
+      <div className="flex flex-col gap-1.5">
+        {broadcasts.map(b => (
+          <div key={b.id} className="flex items-start gap-2 p-2 rounded-lg"
+               style={{ backgroundColor: b.is_active ? 'rgba(143,255,0,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${b.is_active ? 'rgba(143,255,0,0.25)' : 'transparent'}` }}>
+            <Megaphone size={10} style={{ color: b.is_active ? C.lime : 'rgba(255,255,255,0.3)', marginTop: 2 }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold truncate"
+                 style={{ color: b.is_active ? '#fff' : 'rgba(255,255,255,0.4)' }}>
+                {b.message}
+              </p>
+              <p className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {b.target} · {new Date(b.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={() => toggleActive(b.id, b.is_active)}
+                className="w-4 h-4 rounded flex items-center justify-center hover:opacity-70"
+                style={{ backgroundColor: b.is_active ? 'rgba(143,255,0,0.2)' : 'rgba(255,255,255,0.1)' }}
+                title={b.is_active ? 'Deactivate' : 'Activate'}>
+                <div className="w-1.5 h-1.5 rounded-full"
+                     style={{ backgroundColor: b.is_active ? C.lime : 'rgba(255,255,255,0.3)' }} />
+              </button>
+              <button onClick={() => deleteBroadcast(b.id)}
+                className="w-4 h-4 rounded flex items-center justify-center hover:opacity-70"
+                style={{ backgroundColor: 'rgba(185,28,28,0.2)' }}>
+                <Trash2 size={8} style={{ color: '#f87171' }} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 interface Props { investorMode: boolean }
 
@@ -127,6 +197,9 @@ export default function PersistentSidebar({ investorMode }: Props) {
 
   // Activity feed
   const [activityFeed, setActivityFeed] = useState<any[]>([])
+
+  // Broadcast history
+  const [showBroadcastHistory, setShowBroadcastHistory] = useState(false)
 
   // Loading
   const [loading, setLoading] = useState(true)
@@ -328,7 +401,15 @@ export default function PersistentSidebar({ investorMode }: Props) {
       {/* ── 2. GLOBAL BROADCAST ── */}
       <div className="p-3.5 rounded-2xl border"
            style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.2)' }}>
-        <SidebarTitle title="Global Broadcast" color={C.lime} dark />
+        <div className="flex items-center justify-between">
+          <SidebarTitle title="Global Broadcast" color={C.lime} dark />
+          <button onClick={() => setShowBroadcastHistory(s => !s)}
+            className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 transition-all"
+            style={{ backgroundColor: showBroadcastHistory ? 'rgba(143,255,0,0.2)' : 'rgba(255,255,255,0.08)' }}
+            title="Broadcast history">
+            <History size={12} style={{ color: showBroadcastHistory ? C.lime : 'rgba(255,255,255,0.5)' }} />
+          </button>
+        </div>
         <div className="flex flex-col gap-2 mt-2.5">
           {/* Target dropdown */}
           <div className="px-2.5 py-1 rounded-lg border"
@@ -373,6 +454,9 @@ export default function PersistentSidebar({ investorMode }: Props) {
               </>
             )}
           </button>
+
+          {/* Recent broadcasts */}
+          {showBroadcastHistory && <RecentBroadcasts />}
         </div>
       </div>
 
