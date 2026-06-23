@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { UserDetailDrawer } from '@/components/admin/settings-tabs/UserDetailDrawer'
 import {
   LineChart, Line, BarChart, Bar,
   PieChart, Pie, Cell,
@@ -13,7 +14,9 @@ import {
 import {
   TrendingUp, TrendingDown, DollarSign,
   Users, RefreshCw, ArrowUpRight, ArrowDownRight, Shield,
-  Pencil, Check,
+  Pencil, Check, Copy, Trophy, Download,
+  ChevronsUpDown, ChevronUp, ChevronDown, CheckCircle,
+  FileText, Zap, BarChart2,
 } from 'lucide-react'
 
 const C = {
@@ -146,8 +149,15 @@ export default function RevenueAnalyticsTab({
   const [txSort,        setTxSort]      = useState<{ col: string; dir: 'asc' | 'desc' }>({ col: 'paid_at', dir: 'desc' })
   const [txDateRange,   setTxDateRange] = useState<'all' | 'today' | 'week' | 'month' | 'last_month' | 'year'>('all')
   const [planTooltip,    setPlanTooltip]   = useState<{ x: number; y: number; name: string; users: number; revenue: number; pct: number; color: string } | null>(null)
-  const [serverCostEdit, setServerCostEdit]= useState(false)
-  const [serverCostVal,  setServerCostVal] = useState(45)
+  const [serverCostEdit, setServerCostEdit] = useState(false)
+  const [serverCostVal,  setServerCostVal]  = useState(45)
+  const [drawerUser,     setDrawerUser]     = useState<any | null>(null)
+  const [toastMsg,       setToastMsg]       = useState<{ msg: string; type: 'success'|'error'|'info' } | null>(null)
+
+  function showToast(msg: string, type: 'success'|'error'|'info' = 'success') {
+    setToastMsg({ msg, type })
+    setTimeout(() => setToastMsg(null), 3000)
+  }
   const [goalsEdit,      setGoalsEdit]     = useState(false)
   const [goalTargets,    setGoalTargets]   = useState({ monthly: 500, quarterly: 1500, annual: 6000 })
   const [hoveredRow,   setHoveredRow]  = useState<number | null>(null)
@@ -784,7 +794,7 @@ export default function RevenueAnalyticsTab({
               <button onClick={() => exportCSV(stats.transactions)}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-bold"
                 style={{ borderColor: C.border, color: C.text, backgroundColor: C.bg }}>
-                📥 Export
+                <Download size={12} /> Export
               </button>
             </div>
           </div>
@@ -855,7 +865,7 @@ export default function RevenueAnalyticsTab({
           <div className="flex gap-2 mb-4 flex-wrap">
             <input
               value={txSearch} onChange={e => { setTxSearch(e.target.value); setTxPage(1) }}
-              placeholder="🔍 Search by email or plan..."
+              placeholder="Search by email or plan..."
               className="flex-1 h-8 px-3 rounded-lg border text-[11px] outline-none"
               style={{ borderColor: C.border, color: C.text, backgroundColor: C.bg, minWidth: 160 }}
             />
@@ -964,6 +974,7 @@ export default function RevenueAnalyticsTab({
                           { label: 'Status',       col: '',          align: 'left'  },
                           { label: 'Paid',         col: 'paid_at',   align: 'left'  },
                           { label: 'Next Billing', col: '',          align: 'left'  },
+                          { label: 'LTV',          col: 'ltv',       align: 'right' },
                           { label: 'Amount',       col: 'amount',    align: 'right' },
                         ].map(h => (
                           <th key={h.label}
@@ -982,14 +993,15 @@ export default function RevenueAnalyticsTab({
                     </thead>
                     <tbody>
                       {paged.length === 0 ? (
-                        <tr><td colSpan={7} className="py-8 text-center text-[12px]"
+                        <tr><td colSpan={8} className="py-8 text-center text-[12px]"
                                 style={{ color: C.muted }}>No results found</td></tr>
                       ) : paged.map((tx: any, i: number) => {
-                        const isActive    = tx.status === 'active'
+                        const isActive    = tx.status === 'active' || tx.status === 'paid'
                         const isTrial     = tx.status === 'trial'
                         const isRefunded  = tx.status === 'refunded'
-                        const statusColor = isActive ? C.green : isTrial ? C.blue : isRefunded ? '#F87171' : C.red
-                        const statusBg    = isActive ? 'rgba(22,163,74,0.1)' : isTrial ? 'rgba(55,138,221,0.1)' : 'rgba(248,113,113,0.1)'
+                        const isCancelled = tx.status === 'cancelled'
+                        const statusColor = isActive ? C.green : isTrial ? '#60A5FA' : isRefunded ? '#F87171' : isCancelled ? C.muted : C.red
+                        const statusBg    = isActive ? 'rgba(22,163,74,0.1)' : isTrial ? 'rgba(96,165,250,0.1)' : 'rgba(248,113,113,0.1)'
 
                         // Feature 1 — Churn alert
                         const dueDate   = tx.next_billing_at ? new Date(tx.next_billing_at) : null
@@ -1004,7 +1016,7 @@ export default function RevenueAnalyticsTab({
 
                         // Feature 6 — New vs Renewal
                         const isNew     = tx.paid_at && new Date(tx.paid_at) >= thisMonthStart
-                        const badgeText = isNew ? '🆕' : '🔄'
+                        const badgeText = isNew ? 'New' : 'Renewal'
 
                         return (
                           <tr key={i}
@@ -1026,12 +1038,6 @@ export default function RevenueAnalyticsTab({
                                      style={{ color: C.text, maxWidth: 110 }}>
                                     {obscure(tx.userLabel ?? '—')}
                                   </p>
-                                  {ltv > 0 && (
-                                    <p className="text-[9px] font-bold"
-                                       style={{ color: '#A78BFA' }}>
-                                      LTV: ${ltv.toFixed(0)}
-                                    </p>
-                                  )}
                                 </div>
                                 {!isInvestorMode && tx.userLabel && (
                                   <button
@@ -1043,7 +1049,7 @@ export default function RevenueAnalyticsTab({
                                     className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                                     title="Copy email">
                                     <span style={{ fontSize: 10 }}>
-                                      {copiedEmail === tx.userLabel ? '✅' : '📋'}
+                                      {copiedEmail === tx.userLabel ? <Check size={10} /> : <Copy size={10} />}
                                     </span>
                                   </button>
                                 )}
@@ -1051,20 +1057,15 @@ export default function RevenueAnalyticsTab({
                             </td>
                             <td className="py-2.5 px-1">
                               <span className="text-[11px]" style={{ color: C.muted }}>
-                                {tx.plan_name ?? '—'}
+                                {tx.plan ?? tx.plan_name ?? '—'}
                               </span>
                             </td>
                             {/* Feature 5 — Provider icon */}
                             <td className="py-2.5 px-1">
-                              <div className="flex items-center gap-1">
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                                      style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-                                  {providerIcon}
-                                </span>
-                                <span className="text-[10px] capitalize" style={{ color: C.muted }}>
-                                  {tx.provider ?? 'manual'}
-                                </span>
-                              </div>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg capitalize"
+                                    style={{ backgroundColor: 'rgba(143,255,0,0.1)', color: '#4a8f00', border: '1px solid rgba(143,255,0,0.2)' }}>
+                                {tx.provider ?? 'manual'}
+                              </span>
                             </td>
                             <td className="py-2.5 px-1">
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold capitalize"
@@ -1087,7 +1088,7 @@ export default function RevenueAnalyticsTab({
                                   </span>
                                   {isChurnRisk && (
                                     <p className="text-[9px] font-bold" style={{ color: '#FB923C' }}>
-                                      ⚠️ Due in {daysUntil}d
+                                      Due in {daysUntil}d
                                     </p>
                                   )}
                                 </div>
@@ -1095,15 +1096,22 @@ export default function RevenueAnalyticsTab({
                                 <span style={{ color: C.hint, fontSize: 11 }}>—</span>
                               )}
                             </td>
+                            {/* LTV */}
+                            <td className="py-2.5 px-1 text-right">
+                              <span className="text-[11px] font-black"
+                                    style={{ color: ltv > 0 ? '#4a8f00' : C.muted }}>
+                                {ltv > 0 ? `$${ltv.toFixed(0)}` : '—'}
+                              </span>
+                            </td>
                             {/* Amount + badge + quick actions */}
                             <td className="py-2.5 px-1 text-right">
                               {actionRow === i ? (
                                 <div className="flex items-center justify-end gap-1">
                                   <button
+                                    onClick={() => setDrawerUser(tx)}
                                     className="px-1.5 py-0.5 rounded text-[10px] font-bold border transition-all hover:opacity-80"
-                                    style={{ borderColor: C.lime, color: '#4A8F00', backgroundColor: 'rgba(143,255,0,0.08)' }}
-                                    title="View profile (coming soon)">
-                                    👤 View Profile
+                                    style={{ borderColor: C.lime, color: '#4A8F00', backgroundColor: 'rgba(143,255,0,0.08)' }}>
+                                    View Profile
                                   </button>
                                 </div>
                               ) : (
@@ -1126,7 +1134,7 @@ export default function RevenueAnalyticsTab({
                     </tbody>
                     <tfoot>
                       <tr style={{ borderTop: `1px solid ${C.border}` }}>
-                        <td colSpan={6} className="py-2 px-1">
+                        <td colSpan={7} className="py-2 px-1">
                           <span className="text-[11px] font-bold" style={{ color: C.muted }}>
                             {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}
                           </span>
@@ -1431,7 +1439,24 @@ export default function RevenueAnalyticsTab({
             <p className="text-[11px]" style={{ color: C.muted }}>Track progress toward targets</p>
           </div>
           <button
-            onClick={() => setGoalsEdit(e => !e)}
+            onClick={async () => {
+              if (goalsEdit) {
+                // Save to DB when clicking Done
+                try {
+                  const supabase = createClient()
+                  await Promise.all([
+                    (supabase.from('revenue_goals') as any)
+                      .upsert({ period: 'monthly',   target: goalTargets.monthly,   updated_at: new Date().toISOString() }, { onConflict: 'period' }),
+                    (supabase.from('revenue_goals') as any)
+                      .upsert({ period: 'quarterly', target: goalTargets.quarterly, updated_at: new Date().toISOString() }, { onConflict: 'period' }),
+                    (supabase.from('revenue_goals') as any)
+                      .upsert({ period: 'annual',    target: goalTargets.annual,    updated_at: new Date().toISOString() }, { onConflict: 'period' }),
+                  ])
+                  showToast('Revenue goals saved!')
+                } catch { showToast('Failed to save goals', 'error') }
+              }
+              setGoalsEdit(e => !e)
+            }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-bold transition-all"
             style={{
               borderColor: goalsEdit ? C.lime : C.border,
@@ -1590,13 +1615,16 @@ export default function RevenueAnalyticsTab({
         </div>
         <div className={`grid gap-3 ${isDesktop ? 'grid-cols-3' : 'grid-cols-1'}`}>
           {[
-            { icon: '📋', title: 'Auto Evidence PDF',  desc: 'Generate dispute evidence from order data automatically' },
-            { icon: '⚡', title: 'One-Click Submit',   desc: 'Submit directly to Stripe from your admin dashboard'     },
-            { icon: '📊', title: 'Win Rate Tracking',  desc: 'Track dispute outcomes and identify patterns'            },
+            { icon: FileText, title: 'Auto Evidence PDF',  desc: 'Generate dispute evidence from order data automatically' },
+            { icon: Zap,      title: 'One-Click Submit',   desc: 'Submit directly to LemonSqueezy from your admin dashboard' },
+            { icon: BarChart2, title: 'Win Rate Tracking', desc: 'Track dispute outcomes and identify patterns'            },
           ].map((f, i) => (
             <div key={i} className="p-3.5 rounded-xl"
                  style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-[18px] mb-1.5">{f.icon}</p>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-1.5"
+                   style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
+                <f.icon size={16} style={{ color: '#8fff00' }} />
+              </div>
               <p className="text-[12px] font-bold text-white mb-1">{f.title}</p>
               <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{f.desc}</p>
             </div>
@@ -1604,9 +1632,29 @@ export default function RevenueAnalyticsTab({
         </div>
         <p className="text-[11px] mt-3 text-center"
            style={{ color: 'rgba(255,255,255,0.25)' }}>
-          Available after Stripe integration is connected
+          Available after LemonSqueezy integration is approved
         </p>
       </div>
+
+    {/* User Detail Drawer */}
+      {drawerUser && (
+        <UserDetailDrawer
+          user={drawerUser}
+          onClose={() => setDrawerUser(null)}
+          onUpdated={(id, field, val) => {
+            setDrawerUser((u: any) => ({ ...u, [field]: val }))
+          }}
+          showToast={showToast}
+        />
+      )}
+
+      {/* Toast */}
+      {toastMsg && (
+        <div className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-lg text-[13px] font-bold"
+             style={{ backgroundColor: toastMsg.type === 'success' ? '#0a0d08' : '#b91c1c', color: toastMsg.type === 'success' ? '#8fff00' : '#fff' }}>
+          {toastMsg.msg}
+        </div>
+      )}
 
     </div>
   )
