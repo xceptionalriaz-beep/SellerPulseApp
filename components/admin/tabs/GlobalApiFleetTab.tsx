@@ -587,7 +587,10 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
   const mins = Math.floor((Date.now()-lastRefreshed.getTime())/60000)
   const refreshText = mins < 1 ? 'Just now' : `${mins}m ago`
 
-  const scorable  = PLATFORMS.filter(p => p.id !== 'amazon_spapi').map(p => platformMap[p.id]?.healthScore ?? 0)
+  const scorable  = PLATFORMS
+    .filter(p => p.id !== 'amazon_spapi')
+    .filter(p => platformMap[p.id]?.status === 'connected')
+    .map(p => platformMap[p.id]?.healthScore ?? 0)
   const avgHealth = scorable.length ? Math.round(scorable.reduce((a,b) => a+b, 0)/scorable.length) : 0
   const toolTotal = Object.values(toolBreakdown).reduce((a,b) => a+b, 0)
   const projections = Object.entries(platformMap)
