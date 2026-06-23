@@ -10,7 +10,7 @@ import {
   BarChart2, PieChart, History, Zap,
   RefreshCw, RotateCcw, Wifi, TrendingUp,
   CheckCircle, XCircle, ChevronRight, AlertTriangle,
-  Mail, CreditCard,
+  Mail, CreditCard, Plus,
 } from 'lucide-react'
 
 // ── Brand color tokens (from Riazify design PDF) ─────────────
@@ -41,6 +41,7 @@ const PLATFORMS = [
   { id: 'lemonsqueezy', label: 'LemonSqueezy',     icon: CreditCard   },
   { id: 'stripe',       label: 'Stripe',           icon: CreditCard   },
   { id: 'amazon_spapi', label: 'Amazon SP-API',    icon: Lock         },
+  { id: 'custom_api',   label: 'Custom API',       icon: Plus         },
 ]
 
 const TOOL_COLORS: Record<string, string> = {
@@ -692,6 +693,18 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
               ? <EmptyState icon={History} msg="No activity yet" sub="API calls appear here in real-time" />
               : (
                 <div className="flex flex-col gap-2">
+                  {/* Column headers */}
+                  <div className="grid gap-2 px-3 py-1.5 mb-1 text-[9px] font-black tracking-wider"
+                       style={{ color: C.txt3, gridTemplateColumns: '16px 2fr 1fr 1fr 1fr 1fr 70px' }}>
+                    <span></span>
+                    <span>ENDPOINT</span>
+                    <span>PLATFORM</span>
+                    <span>TOOL</span>
+                    <span>STATUS</span>
+                    <span>RESPONSE</span>
+                    <span className="text-right">TIME</span>
+                  </div>
+
                   {recentActivity.map((log, i) => {
                     const success  = (log.success_count ?? 0) > 0
                     const ms       = log.response_time_ms as number | null
@@ -711,29 +724,60 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
                     const rowBorder = isSlow ? C.orange+'33' : success ? C.green+'33' : C.red+'33'
                     const RowIcon   = isSlow ? AlertTriangle : success ? CheckCircle : XCircle
                     return (
-                      <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border"
-                           style={{ backgroundColor: rowBg, borderColor: rowBorder }}>
+                      <div key={i}
+                           className="grid items-center gap-2 py-2.5 px-3 rounded-lg border"
+                           style={{
+                             backgroundColor: rowBg,
+                             borderColor: rowBorder,
+                             gridTemplateColumns: '16px 2fr 1fr 1fr 1fr 1fr 70px',
+                           }}>
+                        {/* Status icon */}
                         <RowIcon size={13} style={{ color: rowColor }} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[12px] font-semibold truncate" style={{ color: C.txt1 }}>{endpoint}</span>
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold"
-                                  style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>{platform}</span>
-                            {isSlow && (
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold"
-                                    style={{ backgroundColor: C.orange+'20', color: C.orange }}>
-                                Slow
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px]" style={{ color: C.txt3 }}>
-                            {tool.replace(/_/g,' ')} ·{' '}
-                            <span style={{ color: isSlow ? C.orange : C.txt3, fontWeight: isSlow ? 700 : 400 }}>
-                              {ms ? `${ms}ms` : '—'}
-                            </span>
+
+                        {/* Endpoint */}
+                        <div className="min-w-0">
+                          <p className="text-[12px] font-semibold truncate" style={{ color: C.txt1 }}>
+                            {endpoint}
                           </p>
                         </div>
-                        <span className="text-[10px] shrink-0" style={{ color: C.txt3 }}>{timeAgo}</span>
+
+                        {/* Platform */}
+                        <div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg"
+                                style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                            {platform}
+                          </span>
+                        </div>
+
+                        {/* Tool */}
+                        <div>
+                          <span className="text-[10px] capitalize" style={{ color: C.txt3 }}>
+                            {tool.replace(/_/g,' ')}
+                          </span>
+                        </div>
+
+                        {/* Status */}
+                        <div>
+                          <span className="text-[10px] font-bold capitalize"
+                                style={{ color: rowColor }}>
+                            {isSlow ? 'Slow' : success ? 'Success' : 'Error'}
+                          </span>
+                        </div>
+
+                        {/* Response time */}
+                        <div>
+                          <span className="text-[10px] font-semibold"
+                                style={{ color: isSlow ? C.orange : C.txt3 }}>
+                            {ms ? `${ms}ms` : '—'}
+                          </span>
+                        </div>
+
+                        {/* Time ago */}
+                        <div className="text-right">
+                          <span className="text-[10px] shrink-0" style={{ color: C.txt3 }}>
+                            {timeAgo}
+                          </span>
+                        </div>
                       </div>
                     )
                   })}
