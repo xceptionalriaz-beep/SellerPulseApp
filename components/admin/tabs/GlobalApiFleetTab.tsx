@@ -722,12 +722,12 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
                             {isSlow && (
                               <span className="px-1.5 py-0.5 rounded text-[9px] font-bold"
                                     style={{ backgroundColor: C.orange+'20', color: C.orange }}>
-                                ⚠️ Slow
+                                Slow
                               </span>
                             )}
                           </div>
                           <p className="text-[10px]" style={{ color: C.txt3 }}>
-                            {tool.replace(/_/g,' ')} •{' '}
+                            {tool.replace(/_/g,' ')} ·{' '}
                             <span style={{ color: isSlow ? C.orange : C.txt3, fontWeight: isSlow ? 700 : 400 }}>
                               {ms ? `${ms}ms` : '—'}
                             </span>
