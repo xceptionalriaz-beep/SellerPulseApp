@@ -42,24 +42,36 @@ export async function GET() {
     vercel_deployments:      0,
     vercel_last_deployed_at: null as number | null,
     vercel_last_deploy_state:null as string | null,
+    // Query stats
+    query_total_calls:       0,
+    query_count:             0,
+    query_avg_ms:            0,
     // Meta
     fetched_at:              new Date().toISOString(),
     error:                   null as string | null,
   }
 
-  // ── Supabase metrics ───────────────────────────────────────
+  // ── Supabase metrics ──────────────────────────────────────────
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    const { data, error } = await supabase.rpc('get_db_metrics')
+    const [{ data, error }, { data: queryData }] = await Promise.all([
+      supabase.rpc('get_db_metrics'),
+      supabase.rpc('get_query_stats'),
+    ])
     if (!error && data) {
       result.db_size_bytes      = data.db_size_bytes ?? 0
       result.db_size_pretty     = formatBytes(data.db_size_bytes ?? 0)
       result.active_connections = data.active_connections ?? 0
       result.db_percent         = Math.min((result.db_size_bytes / DB_LIMIT_BYTES), 1)
       result.connection_percent = Math.min((result.active_connections / CONN_LIMIT), 1)
+    }
+    if (queryData) {
+      result.query_total_calls = queryData.total_calls ?? 0
+      result.query_count       = queryData.query_count ?? 0
+      result.query_avg_ms      = queryData.avg_time_ms ?? 0
     }
   } catch (e) {
     console.error('[metrics] Supabase error:', e)
@@ -81,6 +93,12 @@ export async function GET() {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])
+
+      console.log('[vercel] projectRes status:', projectRes.status)
+      if (!projectRes.ok) {
+        const err = await projectRes.text()
+        console.log('[vercel] projectRes error:', err)
+      }
 
       if (projectRes.ok) {
         const project       = await projectRes.json()

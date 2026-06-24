@@ -71,6 +71,9 @@ interface Metrics {
   vercel_deployments:      number
   vercel_last_deployed_at: number | null
   vercel_last_deploy_state:string | null
+  query_total_calls:       number
+  query_count:             number
+  query_avg_ms:            number
   fetched_at:              string
 }
 
@@ -717,6 +720,16 @@ export default function InfrastructureMonitorTab(_props: Props) {
             isWarning={false}
             icon={Globe}
             color="#8B5CF6"
+          />
+          <Gauge
+            label="Supabase Queries"
+            subtitle={metrics?.query_total_calls
+              ? `${(metrics.query_total_calls ?? 0).toLocaleString()} total · ${metrics.query_count ?? 0} unique · avg ${metrics.query_avg_ms ?? 0}ms`
+              : 'No query data yet'}
+            percent={Math.min((metrics?.query_total_calls ?? 0) / 100000, 1)}
+            isWarning={(metrics?.query_total_calls ?? 0) > 80000}
+            icon={Database}
+            color="#10b981"
           />
         </>)}
       </div>
