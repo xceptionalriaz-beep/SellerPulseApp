@@ -53,6 +53,16 @@ const TOOL_COLORS: Record<string, string> = {
   other:               C.txt3,
 }
 
+const PLATFORM_COLORS: Record<string, string> = {
+  ebay:         '#4a8f00',
+  resend:       '#60a5fa',
+  lemonsqueezy: '#f59e0b',
+  openai:       '#10b981',
+  stripe:       '#6366f1',
+  aliexpress:   '#ef4444',
+  other:        '#8a9e78',
+}
+
 interface PlatformHealth {
   name:            string
   status:          string
@@ -144,8 +154,15 @@ function BarChart({ data }: { data: DayUsage[] }) {
 }
 
 // ── Donut chart ───────────────────────────────────────────────
-function DonutChart({ data, total }: { data: Record<string, number>; total: number }) {
+function DonutChart({ data, total, colorMap }: { 
+  data: Record<string, number>
+  total: number
+  colorMap?: Record<string, string>
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [tooltip, setTooltip] = useState<{ key: string; val: number; pct: number; color: string; x: number; y: number } | null>(null)
+  const colors = colorMap ?? TOOL_COLORS
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || total === 0) return
@@ -153,23 +170,69 @@ function DonutChart({ data, total }: { data: Record<string, number>; total: numb
     if (!ctx) return
     const sz = canvas.width, cx = sz/2, cy = sz/2, r = sz/2-10
     ctx.clearRect(0, 0, sz, sz)
-    let angle = -Math.PI/2
+    let angle = 0
     for (const [key, val] of Object.entries(data)) {
       const sweep = (val/total)*2*Math.PI
       ctx.beginPath()
-      ctx.arc(cx, cy, r, angle, angle+sweep-0.05)
-      ctx.strokeStyle = TOOL_COLORS[key] ?? C.txt3
+      ctx.arc(cx, cy, r, angle - Math.PI/2, angle + sweep - Math.PI/2 - 0.05)
+      ctx.strokeStyle = colors[key] ?? C.txt3
       ctx.lineWidth = 18; ctx.lineCap = 'butt'; ctx.stroke()
       angle += sweep
     }
-  }, [data, total])
+  }, [data, total, colors])
+
+  function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current
+    if (!canvas || total === 0) return
+    const rect = canvas.getBoundingClientRect()
+    const x    = e.clientX - rect.left - 60
+    const y    = e.clientY - rect.top  - 60
+    const dist = Math.sqrt(x*x + y*y)
+    if (dist < 38 || dist > 58) { setTooltip(null); return }
+
+    let mouseAngle = Math.atan2(y, x) + Math.PI/2
+    if (mouseAngle < 0) mouseAngle += 2*Math.PI
+
+    let angle = 0
+    for (const [key, val] of Object.entries(data)) {
+      const sweep = (val/total)*2*Math.PI
+      if (mouseAngle >= angle && mouseAngle <= angle + sweep) {
+        const pct = Math.round((val/total)*100)
+        setTooltip({ key, val, pct, color: colors[key] ?? C.txt3, x: e.clientX - rect.left, y: e.clientY - rect.top })
+        return
+      }
+      angle += sweep
+    }
+    setTooltip(null)
+  }
+
   return (
     <div className="relative mx-auto" style={{ width: 120, height: 120 }}>
-      <canvas ref={canvasRef} width={120} height={120} />
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <canvas ref={canvasRef} width={120} height={120}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setTooltip(null)}
+              style={{ cursor: 'crosshair' }} />
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
         <span className="text-[18px] font-bold" style={{ color: C.txt1 }}>{total}</span>
         <span className="text-[10px]" style={{ color: C.txt3 }}>calls</span>
       </div>
+      {tooltip && (
+        <div className="absolute z-50 px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none"
+             style={{
+               left: tooltip.x + 8,
+               top:  tooltip.y - 30,
+               backgroundColor: C.dark,
+               border: `1px solid ${tooltip.color}40`,
+               minWidth: 100,
+             }}>
+          <p className="text-[11px] font-bold capitalize" style={{ color: tooltip.color }}>
+            {tooltip.key.replace(/_/g,' ')}
+          </p>
+          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            {tooltip.val} calls · {tooltip.pct}%
+          </p>
+        </div>
+      )}
     </div>
   )
 }
@@ -340,6 +403,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
   const [activeNotifications, setActiveNotifications]= useState(0)
   const [recentActivity,      setRecentActivity]     = useState<any[]>([])
   const [toolBreakdown,       setToolBreakdown]      = useState<Record<string, number>>({})
+  const [platformBreakdown,   setPlatformBreakdown]  = useState<Record<string, number>>({})
   const [dailyUsage,          setDailyUsage]         = useState<DayUsage[]>([])
   const [showResetDialog,     setShowResetDialog]    = useState(false)
   const [testingApis,         setTestingApis]        = useState(false)
@@ -373,7 +437,7 @@ export default function GlobalApiFleetTab({ isInvestorMode, isMobile }: Props) {
     const { data: rawConfigs } = await supabase
       .from('api_fleet_config')
       .select('*')
-      .in('platform_name', ['ebay', 'aliexpress', 'openai', 'amazon_spapi', 'resend', 'lemonsqueezy', 'stripe'])
+      .in('platform_name', ['ebay', 'aliexpress', 'openai', 'amazon_spapi', 'resend', 'lemonsqueezy', 'stripe', 'custom_api'])
     const configs = (rawConfigs ?? []) as any[]
     const map: Record<string, PlatformHealth> = {}
     let totalToday = 0, totalMonth = 0, connected = 0
@@ -431,14 +495,18 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
     const since = new Date(Date.now()-7*86400000).toISOString()
     const { data } = await supabase
       .from('api_usage_logs')
-      .select('tool_name, success_count')
+      .select('tool_name, platform_name, success_count')
       .gte('logged_at', since)
     const breakdown: Record<string, number> = {}
+    const platBreakdown: Record<string, number> = {}
     for (const row of (data ?? []) as any[]) {
       const tool = row.tool_name ?? 'other'
-      breakdown[tool] = (breakdown[tool] ?? 0) + (row.success_count ?? 0)
+      const plat = row.platform_name ?? 'other'
+      breakdown[tool]     = (breakdown[tool]     ?? 0) + (row.success_count ?? 0)
+      platBreakdown[plat] = (platBreakdown[plat] ?? 0) + (row.success_count ?? 0)
     }
     setToolBreakdown(breakdown)
+    setPlatformBreakdown(platBreakdown)
   }
 
   // ── FIX 1: Daily usage — single query instead of 7 loops ───
@@ -536,18 +604,18 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
         }
         setTestResult(
           pingSuccess
-            ? `✅ eBay API live — ${pingMs}ms response`
-            : `⚠️ eBay ping failed — ${pingMs}ms — check keys`
+            ? `eBay API live — ${pingMs}ms response`
+            : `eBay ping failed — ${pingMs}ms — check keys`
         )
       } else {
         // No keys — just check DB status
         const connected = (configs ?? []).filter((c: any) => c.status === 'connected').length
-        setTestResult(`✅ Checked ${(configs ?? []).length} platforms — ${connected} connected`)
+        setTestResult(`Checked ${(configs ?? []).length} platforms — ${connected} connected`)
       }
 
       await loadAll()
     } catch (e) {
-      setTestResult('❌ Test failed — check console')
+      setTestResult('Test failed — check console')
       console.error(e)
     }
     setTestingApis(false)
@@ -617,6 +685,36 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
           {activeNotifications > 0 && (
             <StatusPill dot={C.red} label={`${activeNotifications} Alert${activeNotifications > 1 ? 's' : ''}`} />
           )}
+          {/* Compact horizontal quick action buttons */}
+          {[
+            { icon: Wifi,      label: 'Test All APIs',        color: C.blue,     onTap: testAllApis,                    loading: testingApis },
+            { icon: RotateCcw, label: 'Reset Daily Counters', color: C.orange,   onTap: () => setShowResetDialog(true), loading: resetting   },
+            { icon: RefreshCw, label: 'Refresh Dashboard',    color: C.limeDeep, onTap: handleRefresh,                  loading: refreshing  },
+          ].map((btn, i) => (
+            <button key={i} onClick={btn.onTap} disabled={btn.loading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold hover:opacity-80 transition-all disabled:opacity-50"
+              style={{ backgroundColor: btn.color+'0F', borderColor: btn.color+'33', color: btn.color }}>
+              {btn.loading
+                ? <RefreshCw size={12} style={{ color: btn.color, animation: 'spin 1s linear infinite' }} />
+                : <btn.icon size={12} style={{ color: btn.color }} />}
+              {btn.label}
+            </button>
+          ))}
+          {testResult && (
+            <span className="text-[11px] font-semibold px-2 py-1 rounded-lg"
+                  style={{
+                    backgroundColor: testResult.startsWith('eBay API live') ? C.green+'15' : C.orange+'15',
+                    color:           testResult.startsWith('eBay API live') ? C.green      : C.orange,
+                  }}>
+              {testResult}
+            </span>
+          )}
+          {resetSuccess && (
+            <span className="text-[11px] font-semibold px-2 py-1 rounded-lg"
+                  style={{ backgroundColor: C.green+'15', color: C.green }}>
+              Counters reset!
+            </span>
+          )}
         </div>
       </div>
 
@@ -644,7 +742,7 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
 
       {/* Charts row */}
       <div className={`flex gap-4 ${isMobile ? 'flex-col' : ''}`}>
-        <div style={{ flex: 3 }}>
+        <div style={{ flex: 1 }}>
           <ChartCard title="API Calls — Last 7 Days" icon={BarChart2}
             trailing={
               <div className="flex items-center gap-3">
@@ -657,14 +755,36 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
               : <BarChart data={dailyUsage} />}
           </ChartCard>
         </div>
-        <div style={{ flex: 2 }}>
+        <div style={{ flex: 1 }}>
           <ChartCard title="Usage by Tool (7 days)" icon={PieChart}>
             {toolTotal === 0
               ? <EmptyState icon={PieChart} msg="No tool data yet" />
               : (
-                <div className="flex flex-col gap-4">
-                  <DonutChart data={toolBreakdown} total={toolTotal} />
-                  <div className="flex flex-col gap-2">
+                <div className="flex items-start gap-4">
+                  <div className="flex flex-col items-center gap-1">
+                    <DonutChart data={toolBreakdown} total={toolTotal} />
+                    <span className="text-[9px] font-bold tracking-wider" style={{ color: C.txt3 }}>BY TOOL</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <DonutChart data={platformBreakdown} total={Object.values(platformBreakdown).reduce((a,b)=>a+b,0)} colorMap={PLATFORM_COLORS} />
+                    <span className="text-[9px] font-bold tracking-wider" style={{ color: C.txt3 }}>BY PLATFORM</span>
+                    <div className="flex items-center gap-2 flex-wrap justify-center">
+                      {Object.entries(platformBreakdown).sort((a,b)=>b[1]-a[1]).map(([key, val]) => {
+                        const total = Object.values(platformBreakdown).reduce((a,b)=>a+b,0)
+                        const pct = Math.round((val/total)*100)
+                        return (
+                          <div key={key} className="flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0"
+                                 style={{ backgroundColor: PLATFORM_COLORS[key] ?? C.txt3 }} />
+                            <span className="text-[9px] capitalize" style={{ color: C.txt3 }}>
+                              {key} {pct}%
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 flex-1 min-w-0">
                     {Object.entries(toolBreakdown).map(([key, val]) => {
                       const pct   = toolTotal > 0 ? Math.round(val/toolTotal*100) : 0
                       const color = TOOL_COLORS[key] ?? C.txt3
@@ -786,55 +906,7 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
           </ChartCard>
         </div>
 
-        <div style={{ flex: 2 }}>
-          <ChartCard title="Quick Actions" icon={Zap}>
-            <div className="flex flex-col gap-3">
-              <QuickActionButton icon={Wifi}      label="Test All APIs"        subtitle="Ping all connected platforms"  color={C.blue}     onTap={testAllApis}                    loading={testingApis} />
-              <QuickActionButton icon={RotateCcw} label="Reset Daily Counters" subtitle="Clear today's request counts"  color={C.orange}   onTap={() => setShowResetDialog(true)} loading={resetting}  />
-              <QuickActionButton icon={RefreshCw} label="Refresh Dashboard"    subtitle="Reload all real-time data"     color={C.limeDeep} onTap={handleRefresh}                  loading={refreshing} />
-
-              {/* Test result feedback */}
-              {testResult && (
-                <div className="px-3 py-2 rounded-lg text-[11px] font-semibold"
-                     style={{
-                       backgroundColor: testResult.startsWith('✅') ? C.green+'15' : testResult.startsWith('⚠️') ? C.orange+'15' : C.red+'15',
-                       color:           testResult.startsWith('✅') ? C.green      : testResult.startsWith('⚠️') ? C.orange      : C.red,
-                     }}>
-                  {testResult}
-                </div>
-              )}
-
-              {/* Issue 2 Fix: Reset success feedback */}
-              {resetSuccess && (
-                <div className="px-3 py-2 rounded-lg text-[11px] font-semibold"
-                     style={{ backgroundColor: C.green+'15', color: C.green }}>
-                  ✅ Daily counters reset — all platforms back to 0
-                </div>
-              )}
-
-              {/* Usage projection */}
-              {projections.length > 0 && (
-                <div className="p-3 rounded-xl border mt-1"
-                     style={{ backgroundColor: C.limeTint2, borderColor: C.lime+'66' }}>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <TrendingUp size={12} style={{ color: C.limeDeep }} />
-                    <span className="text-[11px] font-bold" style={{ color: C.limeDeep }}>Usage Projection</span>
-                  </div>
-                  {projections.map(p => (
-                    <div key={p.name} className="flex items-center gap-1.5 mb-1">
-                      <div className="w-1.5 h-1.5 rounded-full"
-                           style={{ backgroundColor: p.daysLeft < 3 ? C.red : p.daysLeft < 7 ? C.orange : C.green }} />
-                      <span className="text-[11px]" style={{ color: C.txt1 }}>
-                        {p.name.toUpperCase()}: limit in ~{p.daysLeft}d
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </ChartCard>
         </div>
-      </div>
 
       {/* Reset dialog */}
       {showResetDialog && (
