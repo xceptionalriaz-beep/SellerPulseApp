@@ -27,6 +27,7 @@ interface NetworkConfig {
   key:         string
   title:       string
   icon:        React.ElementType
+  logoUrl?:    string
   previewBase: string
   apiKeyLabel: string
   signupUrl:   string
@@ -39,20 +40,20 @@ interface VaultValues {
 }
 
 const NETWORKS: NetworkConfig[] = [
-  { key: 'amazon',    title: 'Amazon Associates',    icon: ShoppingCart, previewBase: 'https://amazon.com/s?tag=',              apiKeyLabel: 'PA API Key',    signupUrl: 'https://affiliate-program.amazon.com',      idFormat: 'Format: storename-20 (e.g. riazify-20)'               },
-  { key: 'ebay',      title: 'eBay Partner Network', icon: Store,        previewBase: 'https://ebay.com?campid=',               apiKeyLabel: 'Campaign ID',   signupUrl: 'https://partnernetwork.ebay.com',            idFormat: 'Format: 10-digit numeric Campaign ID'                  },
-  { key: 'aliexpress',title: 'AliExpress Portal',    icon: Rocket,       previewBase: 'https://s.click.aliexpress.com/e/',      apiKeyLabel: 'App Key',       signupUrl: 'https://portals.aliexpress.com',             idFormat: 'Format: alphanumeric App Key from portal'              },
-  { key: 'walmart',   title: 'Walmart Affiliates',   icon: ShoppingBag,  previewBase: 'https://walmart.com?affid=',             apiKeyLabel: 'Publisher ID',  signupUrl: 'https://affiliates.walmart.com',             idFormat: 'Format: numeric Impact Publisher ID'                   },
-  { key: 'cj',        title: 'CJ Dropshipping',      icon: Network,      previewBase: 'https://cjdropshipping.com?token=',      apiKeyLabel: 'API Token',     signupUrl: 'https://cjdropshipping.com',                 idFormat: 'Format: long alphanumeric token from CJ dashboard'     },
-  { key: 'target',    title: 'Target Partners',      icon: Target,       previewBase: 'https://target.com?ref=',                apiKeyLabel: 'Partner ID',    signupUrl: 'https://partners.target.com',                idFormat: 'Format: numeric Impact partner ID'                     },
-  { key: 'homedepot', title: 'Home Depot',           icon: Home,         previewBase: 'https://homedepot.com?tag=',             apiKeyLabel: 'Affiliate ID',  signupUrl: 'https://www.homedepot.com/c/SF_Affiliate',   idFormat: 'Format: AvantLink numeric affiliate ID'                },
-  { key: 'temu',      title: 'Temu Global',          icon: Package,      previewBase: 'https://temu.com/affid=',                apiKeyLabel: 'Affiliate ID',  signupUrl: 'https://www.temu.com/affiliate',             idFormat: 'Format: numeric affiliate ID from Temu portal'         },
-  { key: 'banggood',  title: 'Banggood',             icon: Globe,        previewBase: 'https://banggood.com?p=',                apiKeyLabel: 'Partner Code',  signupUrl: 'https://www.banggood.com/affiliate',         idFormat: 'Format: alphanumeric partner code from Banggood'       },
-  { key: 'dhgate',    title: 'DHgate',               icon: Globe,        previewBase: 'https://dhgate.com?ref=',                apiKeyLabel: 'Affiliate ID',  signupUrl: 'https://www.dhgate.com/affiliate',           idFormat: 'Format: numeric affiliate ID from DHgate dashboard'    },
-  { key: 'alibaba',   title: 'Alibaba Sourcing',     icon: Globe,        previewBase: 'https://alibaba.com?spm=',               apiKeyLabel: 'Partner ID',    signupUrl: 'https://portals.alibaba.com',                idFormat: 'Format: Alibaba partner/SPM tracking code'             },
-  { key: 'etsy',      title: 'Etsy Affiliates',      icon: Globe,        previewBase: 'https://etsy.com?utm_source=',           apiKeyLabel: 'Publisher ID',  signupUrl: 'https://www.awin.com/us/advertiser/etsy',    idFormat: 'Format: AWIN numeric publisher ID'                     },
-  { key: 'shein',     title: 'Shein / Sheglam',      icon: Globe,        previewBase: 'https://shein.com/?ref=',                apiKeyLabel: 'Referral ID',   signupUrl: 'https://affiliate.shein.com',                idFormat: 'Format: alphanumeric referral code from Shein portal'  },
-  { key: 'autods',    title: 'AutoDS Integration',   icon: Zap,          previewBase: 'https://autods.com/register?ref=',       apiKeyLabel: 'Partner Key',   signupUrl: 'https://autods.com/partners',                idFormat: 'Format: alphanumeric partner key from AutoDS'          },
+  { key: 'amazon',    title: 'Amazon Associates',    icon: ShoppingCart, logoUrl: 'https://www.google.com/s2/favicons?domain=amazon.com&sz=32',        previewBase: 'https://amazon.com/s?tag=',              apiKeyLabel: 'PA API Key',    signupUrl: 'https://affiliate-program.amazon.com',      idFormat: 'Format: storename-20 (e.g. riazify-20)'               },
+  { key: 'ebay',      title: 'eBay Partner Network', icon: Store,        logoUrl: 'https://www.google.com/s2/favicons?domain=ebay.com&sz=32',          previewBase: 'https://ebay.com?campid=',               apiKeyLabel: 'Campaign ID',   signupUrl: 'https://partnernetwork.ebay.com',            idFormat: 'Format: 10-digit numeric Campaign ID'                  },
+  { key: 'aliexpress',title: 'AliExpress Portal',    icon: Rocket,       logoUrl: 'https://www.google.com/s2/favicons?domain=aliexpress.com&sz=32',    previewBase: 'https://s.click.aliexpress.com/e/',      apiKeyLabel: 'App Key',       signupUrl: 'https://portals.aliexpress.com',             idFormat: 'Format: alphanumeric App Key from portal'              },
+  { key: 'walmart',   title: 'Walmart Affiliates',   icon: ShoppingBag,  logoUrl: 'https://www.google.com/s2/favicons?domain=walmart.com&sz=32',       previewBase: 'https://walmart.com?affid=',             apiKeyLabel: 'Publisher ID',  signupUrl: 'https://affiliates.walmart.com',             idFormat: 'Format: numeric Impact Publisher ID'                   },
+  { key: 'cj',        title: 'CJ Dropshipping',      icon: Network,      logoUrl: 'https://www.google.com/s2/favicons?domain=cjdropshipping.com&sz=32',previewBase: 'https://cjdropshipping.com?token=',      apiKeyLabel: 'API Token',     signupUrl: 'https://cjdropshipping.com',                 idFormat: 'Format: long alphanumeric token from CJ dashboard'     },
+  { key: 'target',    title: 'Target Partners',      icon: Target,       logoUrl: 'https://www.google.com/s2/favicons?domain=target.com&sz=32',        previewBase: 'https://target.com?ref=',                apiKeyLabel: 'Partner ID',    signupUrl: 'https://partners.target.com',                idFormat: 'Format: numeric Impact partner ID'                     },
+  { key: 'homedepot', title: 'Home Depot',           icon: Home,         logoUrl: 'https://www.google.com/s2/favicons?domain=homedepot.com&sz=32',     previewBase: 'https://homedepot.com?tag=',             apiKeyLabel: 'Affiliate ID',  signupUrl: 'https://www.homedepot.com/c/SF_Affiliate',   idFormat: 'Format: AvantLink numeric affiliate ID'                },
+  { key: 'temu',      title: 'Temu Global',          icon: Package,      logoUrl: 'https://www.google.com/s2/favicons?domain=temu.com&sz=32',          previewBase: 'https://temu.com/affid=',                apiKeyLabel: 'Affiliate ID',  signupUrl: 'https://www.temu.com/affiliate',             idFormat: 'Format: numeric affiliate ID from Temu portal'         },
+  { key: 'banggood',  title: 'Banggood',             icon: Globe,        logoUrl: 'https://www.google.com/s2/favicons?domain=banggood.com&sz=32',      previewBase: 'https://banggood.com?p=',                apiKeyLabel: 'Partner Code',  signupUrl: 'https://www.banggood.com/affiliate',         idFormat: 'Format: alphanumeric partner code from Banggood'       },
+  { key: 'dhgate',    title: 'DHgate',               icon: Globe,        logoUrl: 'https://www.google.com/s2/favicons?domain=dhgate.com&sz=32',        previewBase: 'https://dhgate.com?ref=',                apiKeyLabel: 'Affiliate ID',  signupUrl: 'https://www.dhgate.com/affiliate',           idFormat: 'Format: numeric affiliate ID from DHgate dashboard'    },
+  { key: 'alibaba',   title: 'Alibaba Sourcing',     icon: Globe,        logoUrl: 'https://www.google.com/s2/favicons?domain=alibaba.com&sz=32',       previewBase: 'https://alibaba.com?spm=',               apiKeyLabel: 'Partner ID',    signupUrl: 'https://portals.alibaba.com',                idFormat: 'Format: Alibaba partner/SPM tracking code'             },
+  { key: 'etsy',      title: 'Etsy Affiliates',      icon: Globe,        logoUrl: 'https://www.google.com/s2/favicons?domain=etsy.com&sz=32',          previewBase: 'https://etsy.com?utm_source=',           apiKeyLabel: 'Publisher ID',  signupUrl: 'https://www.awin.com/us/advertiser/etsy',    idFormat: 'Format: AWIN numeric publisher ID'                     },
+  { key: 'shein',     title: 'Shein / Sheglam',      icon: Globe,        logoUrl: 'https://www.google.com/s2/favicons?domain=shein.com&sz=32',         previewBase: 'https://shein.com/?ref=',                apiKeyLabel: 'Referral ID',   signupUrl: 'https://affiliate.shein.com',                idFormat: 'Format: alphanumeric referral code from Shein portal'  },
+  { key: 'autods',    title: 'AutoDS Integration',   icon: Zap,          logoUrl: 'https://www.google.com/s2/favicons?domain=autods.com&sz=32',        previewBase: 'https://autods.com/register?ref=',       apiKeyLabel: 'Partner Key',   signupUrl: 'https://autods.com/partners',                idFormat: 'Format: alphanumeric partner key from AutoDS'          },
 ]
 
 // ── Deployment banner ──────────────────────────────────────────
@@ -134,11 +135,11 @@ function TableRow({
   const [testLoading, setTestLoading] = useState(false)
 
   const Icon           = network.icon
-  const effectiveTag   = trackingId.trim() && trackingId.trim().toLowerCase() !== 'empty'
-                          ? trackingId.trim()
-                          : fallbackTag.trim() || null
+  const cleanTracking  = (trackingId.trim().toLowerCase() === 'empty' || !trackingId.trim()) ? '' : trackingId.trim()
+  const cleanFallback  = (fallbackTag.trim().toLowerCase() === 'empty' || !fallbackTag.trim()) ? '' : fallbackTag.trim()
+  const effectiveTag   = cleanTracking || cleanFallback || null
   const isConnected    = !!effectiveTag
-  const isUsingFallback = isConnected && (!trackingId.trim() || trackingId.trim().toLowerCase() === 'empty') && !!fallbackTag.trim()
+  const isUsingFallback = isConnected && !cleanTracking && !!cleanFallback
   const livePreview    = effectiveTag
                           ? `${network.previewBase}${effectiveTag}${testMode ? '&rztest=1' : ''}`
                           : null
@@ -176,8 +177,12 @@ function TableRow({
       {/* Network */}
       <td style={tdStyle}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: C.dark }}>
-            <Icon size={15} style={{ color: C.lime }} />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
+            {network.logoUrl ? (
+              <img src={network.logoUrl} alt="" className="w-5 h-5 object-contain" />
+            ) : (
+              <Icon size={15} style={{ color: C.lime }} />
+            )}
           </div>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: C.dark, whiteSpace: 'nowrap' }}>
             {network.title}
@@ -269,18 +274,18 @@ function TableRow({
       <td style={tdStyle}>
         <div
           className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ backgroundColor: C.dark, border: '1px solid rgba(143,255,0,0.15)', minWidth: 220 }}
+          style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, minWidth: 220 }}
         >
           <span
             className="flex-1 truncate"
-            style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500, color: livePreview ? C.lime : 'rgba(255,255,255,0.25)' }}
+            style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 500, color: livePreview ? C.limeDeep : C.muted }}
           >
             {livePreview ?? `${network.previewBase}...`}
           </span>
           <button onClick={handleCopy} className="shrink-0 hover:opacity-70 transition-opacity">
             {copied
-              ? <Check size={12} style={{ color: C.lime }} />
-              : <Copy  size={12} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              ? <Check size={12} style={{ color: C.limeDeep }} />
+              : <Copy  size={12} style={{ color: C.muted }} />
             }
           </button>
         </div>
@@ -332,9 +337,7 @@ function TableRow({
               <RefreshCw size={12} className="animate-spin" />
             ) : saveSuccess ? (
               <Check size={12} />
-            ) : (
-              <Save size={12} />
-            )}
+            ) : null}
             {isSaving ? 'Saving...' : saveSuccess ? 'Saved' : 'Save'}
           </button>
         </div>
@@ -359,6 +362,9 @@ export default function AffiliateVaultTab() {
   const [testMode,       setTestMode]       = useState(false)
   const [savingFallback, setSavingFallback] = useState(false)
   const [fallbackSaved,  setFallbackSaved]  = useState(false)
+  const [refreshing,     setRefreshing]     = useState(false)
+  const [savingAll,      setSavingAll]      = useState(false)
+  const [saveAllSuccess, setSaveAllSuccess] = useState(false)
 
   // Mock click stats — replace with real DB query when click tracking is built
   const totalClicks   = 1420
@@ -367,6 +373,7 @@ export default function AffiliateVaultTab() {
   useEffect(() => { loadVault() }, [])
 
   async function loadVault() {
+    setRefreshing(true)
     try {
       const affiliateKeys = [
         ...NETWORKS.map(n => `${n.key}_affiliate`),
@@ -380,19 +387,27 @@ export default function AffiliateVaultTab() {
         const newVals: Record<string, VaultValues> = Object.fromEntries(NETWORKS.map(n => [n.key, { trackingId: '', apiKey: '' }]))
         for (const row of rows) {
           if (row.platform_name === 'affiliate_fallback') {
-            setFallbackTag(row.primary_key_1 ?? '')
+            setFallbackTag(row.primary_key_1 === 'EMPTY' ? '' : (row.primary_key_1 ?? ''))
           } else {
             const key = row.platform_name.replace('_affiliate', '')
             if (newVals[key] !== undefined) {
-              newVals[key] = { trackingId: row.primary_key_1 ?? '', apiKey: row.primary_key_2 ?? '' }
+              newVals[key] = {
+                trackingId: row.primary_key_1 === 'EMPTY' ? '' : (row.primary_key_1 ?? ''),
+                apiKey:     row.primary_key_2 === 'EMPTY' ? '' : (row.primary_key_2 ?? ''),
+              }
             }
           }
         }
         setValues(newVals)
-        setConnectedCount(Object.values(newVals).filter(v => v.trackingId.trim().length > 0 && v.trackingId.trim().toLowerCase() !== 'empty').length)
+        const cleanFb = (fallbackTag.trim().toLowerCase() === 'empty' || !fallbackTag.trim()) ? '' : fallbackTag.trim()
+      setConnectedCount(Object.values(newVals).filter(v => {
+        const clean = (v.trackingId.trim().toLowerCase() === 'empty' || !v.trackingId.trim()) ? '' : v.trackingId.trim()
+        return clean.length > 0 || cleanFb.length > 0
+      }).length)
       }
       setLastSync(new Date().toLocaleTimeString())
     } catch (e) { console.error('[AffiliateVault] Load error:', e) }
+    setRefreshing(false)
   }
 
   async function saveNetwork(key: string) {
@@ -405,7 +420,11 @@ export default function AffiliateVaultTab() {
         status:        values[key].trackingId.trim() ? 'connected' : 'disconnected',
       }, { onConflict: 'platform_name' })
       setLastSync(new Date().toLocaleTimeString())
-      setConnectedCount(Object.values({ ...values, [key]: values[key] }).filter(v => v.trackingId.trim().length > 0 && v.trackingId.trim().toLowerCase() !== 'empty').length)
+      const cleanFb = (fallbackTag.trim().toLowerCase() === 'empty' || !fallbackTag.trim()) ? '' : fallbackTag.trim()
+      setConnectedCount(Object.values({ ...values, [key]: values[key] }).filter(v => {
+        const clean = (v.trackingId.trim().toLowerCase() === 'empty' || !v.trackingId.trim()) ? '' : v.trackingId.trim()
+        return clean.length > 0 || cleanFb.length > 0
+      }).length)
       setSaveSuccess(s => ({ ...s, [key]: true }))
       setTimeout(() => setSaveSuccess(s => ({ ...s, [key]: false })), 2500)
     } catch (e) { console.error('[AffiliateVault] Save error:', e) }
@@ -424,6 +443,16 @@ export default function AffiliateVaultTab() {
       setTimeout(() => setFallbackSaved(false), 2500)
     } catch (e) { console.error('[AffiliateVault] Fallback save error:', e) }
     setSavingFallback(false)
+  }
+
+  async function saveAll() {
+    setSavingAll(true)
+    try {
+      await Promise.all(NETWORKS.map(n => saveNetwork(n.key)))
+      setSaveAllSuccess(true)
+      setTimeout(() => setSaveAllSuccess(false), 2500)
+    } catch (e) { console.error('[AffiliateVault] Save all error:', e) }
+    setSavingAll(false)
   }
 
   function setTrackingId(key: string, val: string) { setValues(v => ({ ...v, [key]: { ...v[key], trackingId: val } })) }
@@ -483,6 +512,24 @@ export default function AffiliateVaultTab() {
               : <ToggleLeft  size={16} style={{ color: C.muted }} />
             }
             Test Links Mode
+          </button>
+
+          {/* Save All button */}
+          <button onClick={saveAll} disabled={savingAll}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-50"
+            style={{ backgroundColor: saveAllSuccess ? C.limeDeep : C.lime, fontSize: 12, fontWeight: 700, color: C.dark }}>
+            {savingAll
+              ? <RefreshCw size={13} className="animate-spin" />
+              : saveAllSuccess ? <Check size={13} /> : <Save size={13} />}
+            {savingAll ? 'Saving...' : saveAllSuccess ? 'All Saved!' : 'Save All'}
+          </button>
+
+          {/* Refresh button */}
+          <button onClick={loadVault} disabled={refreshing}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:opacity-70 transition-all disabled:opacity-50"
+            style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, fontSize: 12, fontWeight: 600, color: C.muted }}>
+            <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
+            Refresh
           </button>
 
           {/* Vault last sync badge */}
@@ -591,7 +638,11 @@ export default function AffiliateVaultTab() {
               </tr>
             </thead>
             <tbody>
-              {NETWORKS.map((network, index) => (
+              {[...NETWORKS].sort((a, b) => {
+                const aConnected = values[a.key]?.trackingId.trim().toLowerCase() !== 'empty' && values[a.key]?.trackingId.trim().length > 0 ? 1 : 0
+                const bConnected = values[b.key]?.trackingId.trim().toLowerCase() !== 'empty' && values[b.key]?.trackingId.trim().length > 0 ? 1 : 0
+                return bConnected - aConnected
+              }).map((network, index) => (
                 <TableRow
                   key={network.key}
                   network={network}

@@ -1119,7 +1119,7 @@ function AdminPage() {
       case 8:  return <GamificationTab />
       case 9:  return <ApiVaultPage />
       case 10: return <AffiliateVaultTab />
-      case 11: return <FounderOpsTab />
+      case 11: return <FounderOpsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
       case 12: return <MarketingTab initialUsers={marketingUsers} />
       case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
       case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />

@@ -54,6 +54,9 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+      </head>
       <body className="font-body antialiased bg-bg text-dark min-h-screen">
         {/* Affiliate click tracker — reads cookie set by middleware */}
         <AffiliateTracker />
