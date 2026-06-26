@@ -10,6 +10,7 @@ import {
 import { PageSpinner } from '@/components/ui/Spinner'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
+import UserAvatar from '@/components/ui/UserAvatar'
 
 const C = {
   lime:    '#8fff00',
@@ -65,6 +66,8 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
   const [userGender,      setUserGender]      = useState('Unspecified')
   const [joinedDate,      setJoinedDate]      = useState('')
   const [avatarUrl,       setAvatarUrl]       = useState<string | null>(null)
+  const [userId,          setUserId]          = useState('')
+  const [avatarStyle,     setAvatarStyle]     = useState('avataaars')
   const [isEditing,       setIsEditing]       = useState(false)
   const [isSaving,        setIsSaving]        = useState(false)
   const [isLoading,       setIsLoading]       = useState(true)
@@ -100,13 +103,6 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
     } catch { return '' }
   }
 
-  function buildAvatarUrl(email: string, gender: string) {
-    const seed = email || 'default'
-    if (gender === 'Male')   return `https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${seed}male&backgroundColor=b6e3f4`
-    if (gender === 'Female') return `https://api.dicebear.com/9.x/lorelei/png?seed=${seed}female&backgroundColor=ffdfbf`
-    return null
-  }
-
   const healthColor = healthScore >= 80 ? C.lime : healthScore >= 60 ? C.orange : C.red
   const healthLabel = healthScore >= 80 ? 'Excellent' : healthScore >= 60 ? 'Good' : healthScore >= 40 ? 'Fair' : 'Needs Attention'
 
@@ -116,21 +112,23 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      setUserId(user.id)
       const name   = user.user_metadata?.full_name || 'Seller'
       const email  = user.email || ''
       const gender = user.user_metadata?.gender || 'Unspecified'
       const biz    = user.user_metadata?.business_name || ''
       setUserName(name); setUserEmail(email); setUserGender(gender)
       setJoinedDate(formatJoinDate(user.created_at))
-      setAvatarUrl(user.user_metadata?.picture || buildAvatarUrl(email, gender))
+      setAvatarUrl(user.user_metadata?.picture ?? null)
       setEditName(name); setEditBusiness(biz); setEditGender(gender)
 
       const { data: profile } = await (supabase.from('profiles') as any)
-        .select('ebay_marketplace, plan_name, subscription_status, ebay_username, ebay_access_token')
+        .select('ebay_marketplace, plan_name, subscription_status, ebay_username, ebay_access_token, avatar_url')
         .eq('id', user.id).single()
       const connected = !!(profile as any)?.ebay_marketplace && !!(profile as any)?.ebay_access_token
       setEbayConnected(connected)
       setEbayUsername((profile as any)?.ebay_username || name)
+      if ((profile as any)?.avatar_url) setAvatarStyle((profile as any).avatar_url)
       setPlanName((profile as any)?.plan_name ?? 'Free')
       setSubStatus((profile as any)?.subscription_status ?? 'inactive')
 
@@ -191,9 +189,9 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
       await supabase.auth.updateUser({ data: { full_name: editName, business_name: editBusiness, gender: editGender } })
-      await supabase.from('profiles').update({ name: editName, gender: editGender } as never).eq('id', user.id)
+      await (supabase.from('profiles') as any).update({ name: editName, gender: editGender, avatar_url: avatarStyle }).eq('id', user.id)
       setUserName(editName); setUserGender(editGender)
-      setAvatarUrl(user.user_metadata?.picture || buildAvatarUrl(userEmail, editGender))
+      setAvatarUrl(user.user_metadata?.picture ?? null)
       setIsEditing(false); toast.saved()
     } catch { toast.error('Failed to save profile') }
     finally { setIsSaving(false) }
@@ -231,15 +229,15 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
         {/* Header row */}
         <div className="flex items-center gap-4 px-6 py-5" style={{ backgroundColor:C.bg, borderBottom:`1px solid ${C.border}` }}>
           {/* Avatar */}
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
-            style={{ backgroundColor:C.dark, border:`2px solid ${C.lime}` }}
-          >
-            {avatarUrl
-              ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
-              : <span style={{ fontSize:16, fontWeight:700, color:C.lime, fontFamily:'Inter,sans-serif' }}>{userInitials}</span>
-            }
-          </div>
+          <UserAvatar
+            name={userName}
+            userId={userId}
+            email={userEmail}
+            gender={userGender}
+            photoUrl={avatarUrl}
+            avatarStyle={avatarStyle}
+            size={48}
+          />
 
           {/* Name + meta */}
           <div className="flex-1 min-w-0">
@@ -339,7 +337,37 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
         {/* Edit mode */}
         {isEditing && (
           <div className="px-6 py-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+
+            {/* Avatar style picker */}
+            <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, color:'#0a0d08', marginBottom:10 }}>Choose Avatar</p>
+            <div className="flex gap-3 overflow-x-auto pb-3 mb-5">
+              {[
+                { key:'avataaars',   label:'Classic',   bg:'b6e3f4' },
+                { key:'big-smile',   label:'Smile',     bg:'ffd5dc' },
+                { key:'adventurer',  label:'Adventure', bg:'c0aede' },
+                { key:'notionists',  label:'Notion',    bg:'d1fae5' },
+                { key:'lorelei',     label:'Lorelei',   bg:'ffdfbf' },
+                { key:'micah',       label:'Micah',     bg:'dbeafe' },
+                { key:'open-peeps',  label:'Peeps',     bg:'fde68a' },
+                { key:'personas',    label:'Persona',   bg:'e0e7ff' },
+              ].map(s => (
+                <button
+                  key={s.key}
+                  onClick={() => setAvatarStyle(s.key)}
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl transition-all"
+                  style={{ flexShrink:0, minWidth:84, border:`2px solid ${avatarStyle===s.key?'#8fff00':'#e8ede2'}`, backgroundColor:avatarStyle===s.key?'#f4ffe6':'#ffffff' }}
+                >
+                  <img
+                    src={`https://api.dicebear.com/9.x/${s.key}/svg?seed=${encodeURIComponent(userId||userEmail||userName)}&backgroundColor=${s.bg}&backgroundType=solid`}
+                    alt={s.label}
+                    style={{ width:52, height:52, borderRadius:'50%' }}
+                  />
+                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:600, color:avatarStyle===s.key?'#4a8f00':'#8a9e78' }}>{s.label}</span>
+                </button>
+              ))}
+            </div>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
               <Field label="Full Name"     value={editName}     onChange={setEditName}     icon={User}      />
               <Field label="Email Address" value={userEmail}                               icon={Mail}      readOnly />
               <Field label="Business Name" value={editBusiness} onChange={setEditBusiness} icon={Building2} />
