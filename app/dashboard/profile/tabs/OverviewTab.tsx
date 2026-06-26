@@ -3,14 +3,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  ShoppingBag, Search, Store, Shield, BarChart2, History,
+  ShoppingBag, FileText, TrendingUp, Shield,
   RefreshCw, CheckCircle, AlertTriangle, Edit, User, Mail,
-  Building2, ChevronDown, X,
+  Building2, ChevronDown, X, Check,
 } from 'lucide-react'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
-import { cn, timeAgo } from '@/lib/utils'
 
 const C = {
   lime:    '#8fff00',
@@ -55,10 +54,6 @@ function Field({ label, value, onChange, icon: Icon, readOnly }: {
   )
 }
 
-interface ActivityItem {
-  icon: React.ElementType; color: string; title: string
-  timeAgoStr: string; tag?: string; tagColor?: string
-}
 interface HealthCheckItem { label: string; passed: boolean; pts: string }
 
 export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number) => void }) {
@@ -78,16 +73,14 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
   const [editBusiness,    setEditBusiness]    = useState('')
   const [editGender,      setEditGender]      = useState('Unspecified')
   const [ordersCount,     setOrdersCount]     = useState(0)
-  const [productScans,    setProductScans]    = useState(0)
-  const [productLimit,    setProductLimit]    = useState(100)
-  const [competitorCount, setCompetitorCount] = useState(0)
-  const [competitorLimit, setCompetitorLimit] = useState(50)
+  const [titlesCount,     setTitlesCount]     = useState(0)
+  const [titlesLimit,     setTitlesLimit]     = useState(10)
+  const [profitsCount,    setProfitsCount]    = useState(0)
+  const [profitsLimit,    setProfitsLimit]    = useState(10)
   const [ebayConnected,   setEbayConnected]   = useState(false)
   const [ebayUsername,    setEbayUsername]    = useState('')
-  const [activity,        setActivity]        = useState<ActivityItem[]>([])
   const [healthScore,     setHealthScore]     = useState(0)
   const [healthChecks,    setHealthChecks]    = useState<HealthCheckItem[]>([])
-  const [toolUsage,       setToolUsage]       = useState<any[]>([])
   const [planName,        setPlanName]        = useState('Free')
   const [subStatus,       setSubStatus]       = useState('inactive')
 
@@ -133,9 +126,9 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
       setEditName(name); setEditBusiness(biz); setEditGender(gender)
 
       const { data: profile } = await (supabase.from('profiles') as any)
-        .select('ebay_marketplace, plan_name, subscription_status, ebay_username')
+        .select('ebay_marketplace, plan_name, subscription_status, ebay_username, ebay_access_token')
         .eq('id', user.id).single()
-      const connected = !!(profile as any)?.ebay_marketplace
+      const connected = !!(profile as any)?.ebay_marketplace && !!(profile as any)?.ebay_access_token
       setEbayConnected(connected)
       setEbayUsername((profile as any)?.ebay_username || name)
       setPlanName((profile as any)?.plan_name ?? 'Free')
@@ -146,25 +139,24 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
       const ordersCnt = oCount || 0
       setOrdersCount(ordersCnt)
 
-      const { data: orders } = await supabase.from('protected_orders')
-        .select('item_title, created_at, risk_level').eq('user_id', user.id)
-        .order('created_at', { ascending: false }).limit(6)
-      setActivity((orders || []).map((o: any) => ({
-        icon: ShoppingBag, color: C.blue,
-        title: `New order: ${(o.item_title || 'Item').substring(0, 40)}${(o.item_title || '').length > 40 ? '...' : ''}`,
-        timeAgoStr: o.created_at ? timeAgo(o.created_at) : '—',
-        tag: (o.risk_level || '').toUpperCase() === 'HIGH' ? 'HIGH RISK' : undefined,
-        tagColor: C.red,
-      })))
-
       const { data: rawToolData } = await (supabase.from('user_tool_usage') as any)
         .select('*').eq('user_id', user.id)
       const toolData = (rawToolData || []) as any[]
       for (const t of toolData) {
-        if (t.tool_name === 'product_research')   { setProductScans(t.usage_count || 0); setProductLimit(t.usage_limit || 100) }
-        if (t.tool_name === 'competitor_research') { setCompetitorCount(t.usage_count || 0); setCompetitorLimit(t.usage_limit || 50) }
+        if (t.tool_name === 'title_builder')     { setTitlesCount(t.usage_count || 0) }
+        if (t.tool_name === 'profit_calculator') { setProfitsCount(t.usage_count || 0) }
       }
-      setToolUsage(toolData)
+
+      // Load real limits from plan_limits table
+      const pNameForLimits = ((profile as any)?.plan_name ?? 'Free').toLowerCase()
+      const { data: planLimits } = await (supabase.from('plan_limits') as any)
+        .select('max_title_generations, max_profit_calcs, max_orders_protected')
+        .eq('tier', pNameForLimits)
+        .maybeSingle()
+      if (planLimits) {
+        setTitlesLimit((planLimits as any).max_title_generations ?? 10)
+        setProfitsLimit((planLimits as any).max_profit_calcs ?? 10)
+      }
 
       const { count: apiCount } = await (supabase.from('api_fleet_config') as any)
         .select('*', { count: 'exact', head: true }).eq('status', 'connected')
@@ -207,13 +199,6 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
     finally { setIsSaving(false) }
   }
 
-  const toolConfig: Record<string, { label: string; color: string }> = {
-    product_research:    { label: 'Product Research',   color: C.blue   },
-    competitor_research: { label: 'Competitor Research', color: C.orange },
-    deep_dive_analysis:  { label: 'Deep Dive Analysis',  color: C.purple },
-    title_builder:       { label: 'Title Builder',       color: C.green  },
-  }
-
   const planBadge: Record<string, { text: string; bg: string; color: string }> = {
     'Free':       { text: 'Free Plan',  bg: C.bg,                       color: C.muted   },
     'Free Trial': { text: 'Free Trial', bg: 'rgba(99,102,241,0.1)',      color: '#6366f1' },
@@ -237,69 +222,153 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
   return (
     <div className="flex flex-col gap-5" style={{ fontFamily:'Inter,sans-serif' }}>
 
-      {/* ── EDIT PROFILE MODAL ── */}
-      {isEditing && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor:'rgba(0,0,0,0.5)' }}
-          onClick={(e) => { if (e.target === e.currentTarget) setIsEditing(false) }}
-        >
+      {/* ── TWO COLUMN LAYOUT ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
+
+      {/* ── PROFILE CARD — left (3 cols) ── */}
+      <div className="lg:col-span-3 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+
+        {/* Header row */}
+        <div className="flex items-center gap-4 px-6 py-5" style={{ backgroundColor:C.bg, borderBottom:`1px solid ${C.border}` }}>
+          {/* Avatar */}
           <div
-            className="w-full max-w-lg rounded-2xl shadow-2xl"
-            style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden"
+            style={{ backgroundColor:C.dark, border:`2px solid ${C.lime}` }}
           >
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
-              <div className="flex items-center gap-2">
-                <User size={16} style={{ color:C.dark }} />
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:15, fontWeight:700, color:C.dark }}>Edit Profile</span>
-              </div>
-              <button onClick={() => setIsEditing(false)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                <X size={16} style={{ color:C.muted }} />
-              </button>
-            </div>
+            {avatarUrl
+              ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display='none' }} />
+              : <span style={{ fontSize:16, fontWeight:700, color:C.lime, fontFamily:'Inter,sans-serif' }}>{userInitials}</span>
+            }
+          </div>
 
-            {/* Modal body */}
-            <div className="px-6 py-5">
-              <div className="flex justify-center mb-5">
-                <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor:C.lime }}>
-                  {avatarUrl
-                    ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                    : <span style={{ fontSize:22, fontWeight:800, color:C.dark, fontFamily:'Inter,sans-serif' }}>{userInitials}</span>
-                  }
-                </div>
+          {/* Name + meta */}
+          <div className="flex-1 min-w-0">
+            <p style={{ fontFamily:'Inter,sans-serif', fontSize:16, fontWeight:700, color:C.dark, marginBottom:3 }}>{userName}</p>
+            <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted }}>{joinedDate}</p>
+          </div>
+
+          {/* Badges */}
+          <div className="flex items-center gap-2">
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:700, backgroundColor:C.lime, color:C.dark, padding:'3px 12px', borderRadius:20 }}>
+              {planName}
+            </span>
+            {subStatus === 'active' && (
+              <span className="flex items-center gap-1.5" style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:600, backgroundColor:'rgba(143,255,0,0.1)', color:C.limeD, padding:'3px 10px', borderRadius:20, border:`1px solid rgba(143,255,0,0.3)` }}>
+                <span style={{ width:5, height:5, borderRadius:'50%', backgroundColor:C.lime, display:'inline-block' }} />
+                Active
+              </span>
+            )}
+          </div>
+
+          {/* Edit button */}
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl hover:opacity-80 transition-opacity"
+              style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark, backgroundColor:C.surface, border:`1px solid ${C.border}` }}
+            >
+              <Edit size={13} />
+              Edit profile
+            </button>
+          )}
+        </div>
+
+        {/* Profile fields — view mode */}
+        {!isEditing && (
+          <>
+            <div className="flex items-center px-6 py-3.5" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <div className="flex items-center gap-2" style={{ width:160, flexShrink:0 }}>
+                <User size={14} style={{ color:C.muted }} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted }}>Full name</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="Full Name"     value={editName}     onChange={setEditName}     icon={User}      />
-                <Field label="Email Address" value={userEmail}                               icon={Mail}      readOnly />
-                <Field label="Business Name" value={editBusiness} onChange={setEditBusiness} icon={Building2} />
-                <div className="flex flex-col gap-2">
-                  <label style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, color:C.dark }}>Gender</label>
-                  <div className="relative">
-                    <button onClick={() => setShowGender(!showGender)}
-                      className="w-full h-[48px] px-4 rounded-xl border text-[14px] flex items-center justify-between"
-                      style={{ fontFamily:'Inter,sans-serif', backgroundColor:C.bg, borderColor:C.border, color:C.dark }}>
-                      <span>{editGender === 'Male' ? 'Male' : editGender === 'Female' ? 'Female' : 'Prefer not to say'}</span>
-                      <ChevronDown size={16} style={{ color:C.muted }} />
+              <span style={{ fontFamily:'Inter,sans-serif', fontSize:13, color:C.dark }}>{userName}</span>
+            </div>
+            <div className="flex items-center px-6 py-3.5" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <div className="flex items-center gap-2" style={{ width:160, flexShrink:0 }}>
+                <Mail size={14} style={{ color:C.muted }} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted }}>Email</span>
+              </div>
+              <span style={{ fontFamily:'Inter,sans-serif', fontSize:13, color:C.dark }}>{userEmail}</span>
+            </div>
+            <div className="flex items-center px-6 py-3.5" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <div className="flex items-center gap-2" style={{ width:160, flexShrink:0 }}>
+                <Building2 size={14} style={{ color:C.muted }} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted }}>Business name</span>
+              </div>
+              <span style={{ fontFamily:'Inter,sans-serif', fontSize:13, color: editBusiness ? C.dark : C.muted }}>
+                {editBusiness || 'Not set'}
+              </span>
+            </div>
+            <div className="flex items-center px-6 py-3.5" style={{ borderBottom:`1px solid ${C.border}` }}>
+              <div className="flex items-center gap-2" style={{ width:160, flexShrink:0 }}>
+                <Shield size={14} style={{ color:C.muted }} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted }}>eBay store</span>
+              </div>
+              {ebayConnected
+                ? <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, color:C.dark, backgroundColor:C.lime }}>
+                    <span style={{ width:18, height:18, borderRadius:'50%', backgroundColor:C.dark, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <Check size={11} strokeWidth={3} style={{ color:C.lime }} />
+                    </span>
+                    Connected
+                  </span>
+                : <div className="flex items-center gap-3">
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:'#92400E', backgroundColor:'#FFF9E6', border:'1px solid #FCD34D', padding:'3px 10px', borderRadius:20 }}>
+                      Not connected
+                    </span>
+                    <button
+                      onClick={() => onTabChange?.(1)}
+                      style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.blue }}
+                    >
+                      Connect store →
                     </button>
-                    {showGender && (
-                      <div className="absolute top-[52px] left-0 right-0 z-20 rounded-xl border overflow-hidden" style={{ backgroundColor:C.surface, borderColor:C.border }}>
-                        {[['Unspecified','Prefer not to say'],['Male','Male'],['Female','Female']].map(([v,l]) => (
-                          <button key={v} onClick={() => { setEditGender(v); setShowGender(false) }}
-                            className="w-full px-4 py-3 text-left text-[13px] transition-colors"
-                            style={{ fontFamily:'Inter,sans-serif', backgroundColor: editGender === v ? C.lime : 'transparent', color:C.dark, fontWeight: editGender === v ? 700 : 500 }}>
-                            {l}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
+              }
+            </div>
+            <div className="flex items-center px-6 py-3.5">
+              <div className="flex items-center gap-2" style={{ width:160, flexShrink:0 }}>
+                <RefreshCw size={14} style={{ color:C.muted }} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted }}>Subscription</span>
+              </div>
+              <span style={{ fontFamily:'Inter,sans-serif', fontSize:13, color:C.dark }}>
+                {planName} &middot; {subStatus === 'active' ? 'Active' : subStatus}
+              </span>
+            </div>
+          </>
+        )}
+
+        {/* Edit mode */}
+        {isEditing && (
+          <div className="px-6 py-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+              <Field label="Full Name"     value={editName}     onChange={setEditName}     icon={User}      />
+              <Field label="Email Address" value={userEmail}                               icon={Mail}      readOnly />
+              <Field label="Business Name" value={editBusiness} onChange={setEditBusiness} icon={Building2} />
+              <div className="flex flex-col gap-2">
+                <label style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, color:C.dark }}>Gender</label>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowGender(!showGender)}
+                    className="w-full h-[48px] px-4 rounded-xl border text-[14px] flex items-center justify-between"
+                    style={{ fontFamily:'Inter,sans-serif', backgroundColor:C.bg, borderColor:C.border, color:C.dark }}
+                  >
+                    <span>{editGender === 'Male' ? 'Male' : editGender === 'Female' ? 'Female' : 'Prefer not to say'}</span>
+                    <ChevronDown size={16} style={{ color:C.muted }} />
+                  </button>
+                  {showGender && (
+                    <div className="absolute top-[52px] left-0 z-20 rounded-xl border shadow-md" style={{ backgroundColor:C.surface, borderColor:C.border, minWidth:160 }}>
+                      {[['Unspecified','Prefer not to say'],['Male','Male'],['Female','Female']].map(([v,l]) => (
+                        <button key={v} onClick={() => { setEditGender(v); setShowGender(false) }}
+                          className="w-full px-3 py-2 text-left transition-colors"
+                          style={{ fontFamily:'Inter,sans-serif', fontSize:12, backgroundColor: editGender === v ? C.lime : 'transparent', color:C.dark, fontWeight: editGender === v ? 700 : 400 }}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-
-            {/* Modal footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4" style={{ borderTop:`1px solid ${C.border}` }}>
+            <div className="flex items-center justify-end gap-3">
               <button
                 onClick={() => setIsEditing(false)}
                 style={{ fontFamily:'Inter,sans-serif', fontSize:13, fontWeight:600, color:C.muted }}
@@ -313,234 +382,104 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
                 style={{ fontFamily:'Inter,sans-serif', fontSize:13, fontWeight:700, backgroundColor:C.dark, color:C.lime }}
               >
                 {isSaving && <RefreshCw size={13} className="animate-spin" />}
-                Save Changes
+                Save changes
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── PROFILE HEADER — Lime accent ── */}
-      <div
-        className="w-full p-6 rounded-2xl"
-        style={{ backgroundColor: C.limeTint, border: `1.5px solid rgba(143,255,0,0.4)` }}
-      >
-        <div className="flex items-center gap-4 flex-wrap">
-          {/* Avatar */}
-          <div
-            className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0"
-            style={{ backgroundColor: C.dark, border: `2px solid ${C.lime}` }}
-          >
-            {avatarUrl
-              ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-              : <span style={{ fontSize:20, fontWeight:800, color:C.lime, fontFamily:'Inter,sans-serif' }}>{userInitials}</span>
-            }
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h2 style={{ fontFamily:'Inter,sans-serif', fontSize:18, fontWeight:800, color:C.dark, marginBottom:4 }}>
-              {userName}
-            </h2>
-            <div style={{ fontFamily:'Inter,sans-serif', fontSize:12, color:C.muted, marginBottom:8 }}>
-              {userEmail}
-              {joinedDate && ` · ${joinedDate}`}
-              {ebayConnected && ` · eBay Connected`}
-            </div>
-            {/* Badges */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span
-                style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:700, backgroundColor:C.lime, color:C.dark, padding:'3px 12px', borderRadius:20 }}
-              >
-                {pb.text}
-              </span>
-              {subBadge && (
-                <span
-                  className="flex items-center gap-1.5"
-                  style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:700, backgroundColor:subBadge.bg, color:subBadge.color, padding:'3px 10px', borderRadius:20, border:`1px solid ${subBadge.dot}40` }}
-                >
-                  <span style={{ width:6, height:6, borderRadius:'50%', backgroundColor:subBadge.dot, display:'inline-block' }} />
-                  {subBadge.text}
-                </span>
-              )}
-              {ebayConnected && (
-                <span
-                  style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:600, backgroundColor:C.bg, color:C.muted, padding:'3px 10px', borderRadius:20, border:`1px solid ${C.border}` }}
-                >
-                  eBay Connected
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Edit button */}
-          <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all hover:opacity-80 shrink-0"
-            style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, backgroundColor:C.dark, color:C.lime }}
-          >
-            <Edit size={13} />
-            Edit Profile
-          </button>
-        </div>
-
-        {/* eBay not connected warning */}
-        {!ebayConnected && (
-          <div
-            className="flex items-center gap-3 px-4 py-3 rounded-xl mt-4"
-            style={{ backgroundColor:'#FFF9E6', border:'1px solid #FCD34D' }}
-          >
-            <AlertTriangle size={15} style={{ color:'#F59E0B', flexShrink:0 }} />
-            <p style={{ fontFamily:'Inter,sans-serif', fontSize:13, fontWeight:500, color:'#92400E', flex:1 }}>
-              Connect your eBay store to unlock full features
-            </p>
-            <button
-              onClick={() => onTabChange?.(1)}
-              style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, color:'#F59E0B' }}
-            >
-              Connect →
-            </button>
           </div>
         )}
+
       </div>
 
-      {/* ── STATS ROW — Icon cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { icon: ShoppingBag, iconColor: C.blue,   iconBg: 'rgba(29,112,245,0.1)',  value: ordersCount.toString(),                   label: 'Orders Tracked',    sub: ebayConnected ? 'Auto-syncing' : 'Connect eBay', bar: null },
-          { icon: Search,      iconColor: C.green,  iconBg: 'rgba(0,196,140,0.1)',   value: `${productScans}/${productLimit}`,         label: 'Product Research',  sub: 'Searches used',  bar: { val: productScans / (productLimit || 1), color: productScans / (productLimit || 1) > 0.8 ? C.red : C.green } },
-          { icon: Store,       iconColor: C.orange, iconBg: 'rgba(255,184,0,0.1)',   value: `${competitorCount}/${competitorLimit}`,   label: 'Competitor Scans',  sub: 'Stores analyzed', bar: { val: competitorCount / (competitorLimit || 1), color: competitorCount / (competitorLimit || 1) > 0.8 ? C.red : C.orange } },
-          { icon: Shield,      iconColor: C.purple, iconBg: 'rgba(139,92,246,0.1)',  value: '—',                                      label: 'Safe Sourcing',     sub: 'Low-risk buyers', bar: null },
-        ].map((s, i) => (
-          <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor:s.iconBg }}>
-                <s.icon size={18} style={{ color:s.iconColor }} />
-              </div>
-              <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:C.dark }}>{s.value}</span>
+      {/* ── STATS — right (2 cols) ── */}
+      <div className="lg:col-span-2 grid grid-cols-2 gap-3" style={{ gridTemplateRows:'1fr 1fr' }}>
+        <div className="p-4 rounded-2xl flex flex-col justify-between" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor:'rgba(29,112,245,0.1)' }}>
+              <ShoppingBag size={18} style={{ color:C.blue }} />
             </div>
-            {s.bar && (
-              <div className="h-1 rounded-full mb-2" style={{ backgroundColor:C.border }}>
-                <div className="h-full rounded-full" style={{ width:`${Math.min(100, s.bar.val * 100)}%`, backgroundColor:s.bar.color, transition:'width 0.5s ease' }} />
-              </div>
-            )}
-            <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>{s.label}</p>
-            <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted, marginTop:2 }}>{s.sub}</p>
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:C.dark }}>{ordersCount}</span>
           </div>
-        ))}
-      </div>
-
-      {/* ── ACTIVITY + USAGE ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-
-        {/* Recent Activity */}
-        <div className="lg:col-span-3 p-5 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <History size={15} style={{ color:C.muted }} />
-              <h3 style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:700, color:C.dark }}>Recent Activity</h3>
-            </div>
-            <button onClick={loadAll} className="hover:opacity-70 transition-opacity">
-              <RefreshCw size={14} style={{ color:C.muted }} />
-            </button>
+          <div>
+            <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>Orders Tracked</p>
+            <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted, marginTop:2 }}>{ebayConnected ? 'Auto-syncing' : 'Connect eBay'}</p>
           </div>
-          {activity.length === 0 ? (
-            <div className="flex flex-col items-center py-8 gap-2">
-              <History size={36} style={{ color:C.border }} />
-              <p style={{ fontFamily:'Inter,sans-serif', fontSize:13, color:C.muted }}>No activity yet</p>
-              <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted }}>Start using your tools to see activity</p>
+        </div>
+        <div className="p-4 rounded-2xl flex flex-col" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor:'rgba(0,196,140,0.1)' }}>
+              <FileText size={18} style={{ color:C.green }} />
             </div>
-          ) : (
-            <div className="flex flex-col gap-0">
-              {activity.map((item, i) => (
-                <div key={i} className="flex items-center gap-3 py-3" style={{ borderBottom: i < activity.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: item.color + '1A' }}>
-                    <item.icon size={15} style={{ color: item.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate" style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>{item.title}</p>
-                    {item.tag && (
-                      <span style={{ fontFamily:'Inter,sans-serif', fontSize:9, fontWeight:700, backgroundColor:(item.tagColor||C.red)+'1A', color:item.tagColor||C.red, padding:'2px 6px', borderRadius:4, display:'inline-block', marginTop:2 }}>
-                        {item.tag}
-                      </span>
-                    )}
-                  </div>
-                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, color:C.muted, flexShrink:0 }}>{item.timeAgoStr}</span>
-                </div>
-              ))}
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:C.dark }}>
+              {titlesLimit === -1 ? titlesCount : `${titlesCount}/${titlesLimit}`}
+            </span>
+          </div>
+          {titlesLimit !== -1 && (
+            <div className="h-1 rounded-full mb-2" style={{ backgroundColor:C.border }}>
+              <div className="h-full rounded-full" style={{ width:`${Math.min(100,(titlesCount/(titlesLimit||1))*100)}%`, backgroundColor:titlesCount/(titlesLimit||1)>0.8?C.red:C.green, transition:'width 0.5s ease' }} />
             </div>
           )}
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>Titles Built</p>
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:titlesLimit===-1?C.limeD:C.muted, marginTop:2 }}>{titlesLimit===-1?'Unlimited':'Title builder usage'}</p>
         </div>
-
-        {/* Right column — Health + Usage */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-
-          {/* Account Health */}
-          <div className="p-5 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Shield size={15} style={{ color:C.muted }} />
-                <h3 style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:700, color:C.dark }}>Account Health</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:22, fontWeight:800, color:healthScore >= 80 ? C.limeD : healthScore >= 60 ? C.orange : C.red }}>{healthScore}</span>
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted }}>/100</span>
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:700, backgroundColor: healthScore >= 80 ? 'rgba(143,255,0,0.12)' : 'rgba(255,184,0,0.12)', color: healthScore >= 80 ? C.limeD : C.orange, padding:'2px 8px', borderRadius:20 }}>
-                  {healthLabel}
-                </span>
-              </div>
+        <div className="p-4 rounded-2xl flex flex-col" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor:'rgba(255,184,0,0.1)' }}>
+              <TrendingUp size={18} style={{ color:C.orange }} />
             </div>
-            <div className="flex flex-col gap-2.5">
-              {healthChecks.map((check, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  {check.passed
-                    ? <CheckCircle size={13} style={{ color:C.lime, flexShrink:0 }} />
-                    : <AlertTriangle size={13} style={{ color:C.orange, flexShrink:0 }} />
-                  }
-                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, color: check.passed ? C.muted : C.dark, fontWeight: check.passed ? 400 : 600, flex:1 }}>{check.label}</span>
-                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color: check.passed ? C.limeD : C.orange }}>{check.pts}</span>
-                </div>
-              ))}
-            </div>
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:C.dark }}>
+              {profitsLimit === -1 ? profitsCount : `${profitsCount}/${profitsLimit}`}
+            </span>
           </div>
-
-          {/* This Month's Usage */}
-          <div className="p-5 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <BarChart2 size={15} style={{ color:C.muted }} />
-                <h3 style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:700, color:C.dark }}>This Month's Usage</h3>
-              </div>
-              <button onClick={() => onTabChange?.(2)} style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:600, color:C.blue }}>
-                Details →
-              </button>
+          {profitsLimit !== -1 && (
+            <div className="h-1 rounded-full mb-2" style={{ backgroundColor:C.border }}>
+              <div className="h-full rounded-full" style={{ width:`${Math.min(100,(profitsCount/(profitsLimit||1))*100)}%`, backgroundColor:profitsCount/(profitsLimit||1)>0.8?C.red:C.orange, transition:'width 0.5s ease' }} />
             </div>
-            {toolUsage.filter(t => toolConfig[t.tool_name]).length === 0 ? (
-              <p style={{ fontFamily:'Inter,sans-serif', fontSize:13, color:C.muted, textAlign:'center', padding:'16px 0' }}>Start using tools to see stats</p>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {toolUsage.filter(t => toolConfig[t.tool_name]).map((tool, i) => {
-                  const config = toolConfig[tool.tool_name]
-                  const used   = tool.usage_count || 0
-                  const limit  = tool.usage_limit || 100
-                  const pct    = Math.min(1, used / (limit || 1))
-                  const color  = pct > 0.8 ? C.red : config.color
-                  return (
-                    <div key={i}>
-                      <div className="flex justify-between mb-1.5">
-                        <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500, color:C.muted }}>{config.label}</span>
-                        <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:700, color:C.dark }}>{used}/{limit}</span>
-                      </div>
-                      <div className="h-1.5 rounded-full" style={{ backgroundColor:C.border }}>
-                        <div className="h-full rounded-full" style={{ width:`${pct*100}%`, backgroundColor:color, transition:'width 0.5s ease' }} />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+          )}
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>Profit Calcs</p>
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:profitsLimit===-1?C.limeD:C.muted, marginTop:2 }}>{profitsLimit===-1?'Unlimited':'Calculator usage'}</p>
+        </div>
+        <div className="p-4 rounded-2xl flex flex-col" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor:'rgba(143,255,0,0.1)' }}>
+              <Shield size={18} style={{ color:C.limeD }} />
+            </div>
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:healthScore>=80?C.limeD:healthScore>=60?C.orange:C.red }}>{healthScore}</span>
           </div>
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>Account Score</p>
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:healthScore>=80?C.limeD:C.orange, marginTop:2 }}>{healthLabel}</p>
+        </div>
+      </div>
 
+      </div>{/* end two-column grid */}
+
+      {/* ── ACCOUNT HEALTH ── */}
+      <div className="w-full p-5 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Shield size={15} style={{ color:C.muted }} />
+            <h3 style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:700, color:C.dark }}>Account Health</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:22, fontWeight:800, color:healthScore>=80?C.limeD:healthScore>=60?C.orange:C.red }}>{healthScore}</span>
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted }}>/100</span>
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:700, backgroundColor:healthScore>=80?'rgba(143,255,0,0.12)':'rgba(255,184,0,0.12)', color:healthScore>=80?C.limeD:C.orange, padding:'2px 8px', borderRadius:20 }}>
+              {healthLabel}
+            </span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+          {healthChecks.map((check, i) => (
+            <div key={i} className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl" style={{ backgroundColor:check.passed?'rgba(143,255,0,0.06)':'rgba(255,184,0,0.06)', border:`1px solid ${check.passed?'rgba(143,255,0,0.2)':'rgba(255,184,0,0.2)'}` }}>
+              {check.passed
+                ? <span style={{ width:18, height:18, borderRadius:'50%', backgroundColor:C.lime, display:'inline-flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <Check size={11} strokeWidth={3} style={{ color:C.dark }} />
+                  </span>
+                : <AlertTriangle size={16} style={{ color:C.orange }} />
+              }
+              <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:600, color:check.passed?C.dark:C.dark, textAlign:'center', lineHeight:1.3 }}>{check.label}</span>
+              <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:check.passed?C.limeD:C.orange }}>{check.pts}</span>
+            </div>
+          ))}
         </div>
       </div>
 
