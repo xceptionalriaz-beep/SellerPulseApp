@@ -71,6 +71,7 @@ async function saveTransaction(data: {
   country?:       string
   nextBilling?:   string
   trialEnd?:      string
+  invoiceUrl?:    string
 }) {
   try {
     // Get existing LTV
@@ -87,7 +88,7 @@ async function saveTransaction(data: {
     await (adminClient.from('transactions') as any).insert({
       user_id:        data.userId,
       user_email:     data.userEmail,
-      invoice:        `INV-${Date.now()}`,
+      invoice:        data.invoiceUrl ?? `INV-${Date.now()}`,
       plan:           data.plan,
       amount:         data.amount,
       status:         data.status,
@@ -255,14 +256,19 @@ export async function POST(req: NextRequest) {
           ? getPlanFromVariantId(variantId)
           : getPlanFromName(obj.variant_name, obj.product_name)
         const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
+        const cardBrand    = obj.card_brand     ?? obj.payment_method_brand     ?? null
+        const cardLastFour = obj.card_last_four ?? obj.payment_method_last_four ?? null
 
         await updateProfile(userId, userEmail, {
           plan_name:            plan,
           subscription_status:  'active',
           ls_customer_id:       lsCustomerId,
           ls_subscription_id:   lsSubId,
+          subscription_id:      lsSubId,
           current_period_end:   periodEnd,
           cancel_at_period_end: false,
+          card_brand:           cardBrand,
+          card_last_four:       cardLastFour,
         })
         await saveTransaction({
           userId, userEmail, plan,
@@ -272,6 +278,7 @@ export async function POST(req: NextRequest) {
           lsSubId,
           nextBilling: periodEnd,
           coupon:      coupon ?? undefined,
+          invoiceUrl:  obj.urls?.invoice_url ?? obj.receipt_url ?? null,
         })
         if (coupon) await updatePromoUsage(coupon)
         await enqueueEmail(req, 'plan.upgraded', userId, userEmail, { plan })

@@ -1,5 +1,4 @@
 'use client'
-'use client'
 // app/dashboard/profile/tabs/EbayManagerTab.tsx
 // Converted from: lib/user_profile/tabs/ebay_manager_tab.dart
 //
@@ -21,10 +20,23 @@ import { useToast } from '@/components/ui/AppToast'
 
 // ── Color tokens ───────────────────────────────────────────────
 const C = {
-  bg: '#F4F7FA', surface: '#FFFFFF', navy: '#0F172A',
-  accent: '#8FFF00', txt1: '#0F172A', txt2: '#64748B',
-  txt3: '#94A3B8', border: '#E2E8F0', green: '#00C48C',
-  orange: '#FFB800', red: '#FF4D6A', blue: '#1D70F5',
+  lime:    '#8fff00',
+  limeD:   '#4a8f00',
+  limeTint:'#f4ffe6',
+  dark:    '#0a0d08',
+  border:  '#e8ede2',
+  muted:   '#8a9e78',
+  surface: '#ffffff',
+  bg:      '#f9fdf4',
+  navy:    '#0a0d08',
+  accent:  '#8fff00',
+  txt1:    '#0a0d08',
+  txt2:    '#8a9e78',
+  txt3:    '#8a9e78',
+  green:   '#00C48C',
+  orange:  '#FFB800',
+  red:     '#FF4D6A',
+  blue:    '#1D70F5',
 }
 
 // ── Marketplaces (matches Dart kEbayMarketplaces) ──────────────
@@ -101,7 +113,7 @@ function DarkStat({ label, value, icon: Icon, color }: { label: string; value: s
   return (
     <div className="flex-1 p-3 rounded-xl border" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
       <Icon size={13} style={{ color }} />
-      <p className="text-[14px] font-bold text-white mt-1.5 truncate" style={{ fontFamily: 'var(--font-space-grotesk)' }}>{value}</p>
+      <p className="text-[14px] font-bold text-white mt-1.5 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{value}</p>
       <p className="text-[9px] text-gray-400 mt-0.5 truncate">{label}</p>
     </div>
   )
@@ -271,7 +283,7 @@ export default function EbayManagerTab() {
       const json = await res.json()
       if (res.ok) {
         await loadAll()
-        toast.show(`Synced! ${json.inserted} new, ${json.updated} updated`)
+        toast.info(`Synced! ${json.inserted} new, ${json.updated} updated`)
       } else {
         toast.error(json.error ?? 'Sync failed')
       }
@@ -287,7 +299,7 @@ export default function EbayManagerTab() {
       if (!user) return
       await (supabase.from('profiles') as any).update({ ebay_marketplace: null, ebay_username: null } as any).eq('id', user.id)
       await loadAll()
-      toast.show('Disconnected from eBay')
+      toast.info('Disconnected from eBay')
     } catch (e: any) { toast.error(e.message) }
   }
 
@@ -305,7 +317,7 @@ export default function EbayManagerTab() {
   // ── Skeleton ─────────────────────────────────────────────────
   if (isLoading) return (
     <div>
-      <h1 className="text-[24px] font-bold mb-1.5" style={{ color: C.txt1, fontFamily: 'var(--font-space-grotesk)' }}>Marketplace Integrations</h1>
+      <h1 className="text-[24px] font-bold mb-1.5" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Marketplace Integrations</h1>
       <p className="text-[14px] mb-7" style={{ color: C.txt2 }}>Connect your eBay store and select your marketplace.</p>
       <div className="h-[420px] rounded-2xl border flex items-center justify-center" style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <PageSpinner />
@@ -316,7 +328,7 @@ export default function EbayManagerTab() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-[24px] font-bold mb-1.5" style={{ color: C.txt1, fontFamily: 'var(--font-space-grotesk)' }}>Marketplace Integrations</h1>
+        <h1 className="text-[24px] font-bold mb-1.5" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Marketplace Integrations</h1>
         <p className="text-[14px]" style={{ color: C.txt2 }}>Connect your eBay store and select your marketplace.</p>
       </div>
 
@@ -334,7 +346,7 @@ export default function EbayManagerTab() {
                 <ShoppingBag size={24} style={{ color: C.txt1 }} />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-[18px] font-bold mb-1" style={{ color: C.txt1, fontFamily: 'var(--font-space-grotesk)' }}>eBay Seller Account</h2>
+                <h2 className="text-[18px] font-bold mb-1" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>eBay Seller Account</h2>
                 <p className="text-[12px]" style={{ color: C.txt2 }}>
                   Connect your <FlagImg code={selectedMp.code} /> {selectedMp.label} eBay store to unlock full features
                 </p>
@@ -396,7 +408,7 @@ export default function EbayManagerTab() {
                   ['Revenue', `${selectedMp.currencySymbol}—`],
                 ].map(([label, value]) => (
                   <div key={label} className="text-center">
-                    <p className="text-[18px] font-bold" style={{ color: C.txt3, fontFamily: 'var(--font-space-grotesk)' }}>{value}</p>
+                    <p className="text-[18px] font-bold" style={{ color: C.txt3, fontFamily: 'Inter, sans-serif' }}>{value}</p>
                     <p className="text-[10px] mt-1" style={{ color: C.txt3 }}>{label}</p>
                   </div>
                 ))}
@@ -440,7 +452,7 @@ export default function EbayManagerTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-[20px] font-bold text-white" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+                  <h2 className="text-[20px] font-bold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
                     {connData?.ebayUsername || 'eBay Seller'}
                   </h2>
                   <CheckCircle size={15} className="text-blue-400 shrink-0" />
@@ -555,7 +567,7 @@ export default function EbayManagerTab() {
       {/* ── COMING SOON SECTION ── */}
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <h2 className="text-[16px] font-bold" style={{ color: C.txt1, fontFamily: 'var(--font-space-grotesk)' }}>Coming Soon</h2>
+          <h2 className="text-[16px] font-bold" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Coming Soon</h2>
           <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold" style={{ backgroundColor: C.navy, color: C.accent }}>
             4 Platforms
           </span>
@@ -572,7 +584,7 @@ export default function EbayManagerTab() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
              onClick={e => e.target === e.currentTarget && setShowDisconnect(false)}>
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
-            <h3 className="text-[17px] font-bold mb-2" style={{ color: C.txt1, fontFamily: 'var(--font-space-grotesk)' }}>Disconnect eBay?</h3>
+            <h3 className="text-[17px] font-bold mb-2" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Disconnect eBay?</h3>
             <p className="text-[13px] mb-5" style={{ color: C.txt2 }}>Your synced orders and data will remain. You can reconnect anytime.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowDisconnect(false)}
