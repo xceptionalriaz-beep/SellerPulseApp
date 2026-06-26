@@ -2,12 +2,12 @@
 // app/dashboard/profile/page.tsx
 
 import { useState } from 'react'
-import { Shield, User, Globe, Bookmark, CreditCard, Lock, DollarSign, Users } from 'lucide-react'
+import { Shield, User, Globe, CreditCard, Lock, DollarSign, Users } from 'lucide-react'
 import OverviewTab    from './tabs/OverviewTab'
 import EbayManagerTab from './tabs/EbayManagerTab'
-import VaultTab       from './tabs/VaultTab'
+// import VaultTab    from './tabs/VaultTab' // hidden until Product Research launches
 import BillingTab     from './tabs/BillingTab'
-import SecurityTab    from './tabs/SecurityTab'
+// import SecurityTab from './tabs/SecurityTab' // moved to Settings modal
 import AffiliateTab   from './tabs/AffiliateTab'
 import TeamTab        from '@/components/admin/settings-tabs/TeamTab'
 
@@ -18,9 +18,9 @@ const accent    = '#8FFF00'
 const TABS = [
   { icon: User,       label: 'Overview'    },
   { icon: Globe,      label: 'Marketplace' },
-  { icon: Bookmark,   label: 'Vault'       },
+  // { icon: Bookmark, label: 'Vault' }, // hidden until Product Research launches
   { icon: CreditCard, label: 'Billing'     },
-  { icon: Lock,       label: 'Security'    },
+  // { icon: Lock, label: 'Security' }, // moved to Settings modal
   { icon: DollarSign, label: 'Affiliate'   },
   { icon: Users,      label: 'Team'        },
 ]
@@ -32,11 +32,9 @@ export default function UserProfilePage() {
     switch (selectedTab) {
       case 0: return <OverviewTab    onTabChange={setSelectedTab} />
       case 1: return <EbayManagerTab />
-      case 2: return <VaultTab       />
-      case 3: return <BillingTab     />
-      case 4: return <SecurityTab    />
-      case 5: return <AffiliateTab   />
-      case 6: return <TeamTab        />
+      case 2: return <BillingTab     />
+      case 3: return <AffiliateTab   />
+      case 4: return <TeamTab        />
       default: return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <p className="text-[18px] font-bold text-gray-400">Coming Soon</p>

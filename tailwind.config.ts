@@ -16,7 +16,7 @@ const config: Config = {
         limeMuted: '#D4FF80',
 
         // Base
-        dark:      '#0A0D08',
+        dark:      '#0F172A',
         surface:   '#FFFFFF',
         bg:        '#F7F9F5',
         border:    '#E8EDE2',

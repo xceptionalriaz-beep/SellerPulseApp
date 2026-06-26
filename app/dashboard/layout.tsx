@@ -48,6 +48,7 @@ import { useHeartbeat } from '@/hooks/useHeartbeat'
 import { usePresence }  from '@/hooks/usePresence'
 import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
 import SupportModal          from '@/components/dashboard/SupportModal'
+import SecurityTab           from '@/app/dashboard/profile/tabs/SecurityTab'
 import AnnouncementBanner    from '@/components/dashboard/AnnouncementBanner'
 
 // ── Nav items (mirrors Dart sidebar exactly) ───────────────────
@@ -59,7 +60,6 @@ const NAV_ITEMS = [
   { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'                 },
   { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research'       },
   { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                    },
-  { icon: Settings,        label: 'Settings',            href: '/dashboard/profile'                   },
 ]
 
 // ── Kill switch → nav label mapping ───────────────────────────
@@ -102,7 +102,7 @@ function SidebarItem({
       )}>
         <Icon
           size={isActive ? 20 : 19}
-          className={cn(isActive ? 'text-dark' : 'text-white/40 group-hover:text-white/70')}
+          className={cn(isActive ? 'text-dark' : 'text-white group-hover:text-white')}
         />
       </div>
     </Link>
@@ -272,6 +272,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // ── Kill switch visibility state ───────────────────────────────
   const [disabledTools,  setDisabledTools]  = useState<Set<string>>(new Set())
   const [showSupport,    setShowSupport]    = useState(false)
+  const [showSettings,   setShowSettings]   = useState(false)
   const [emailUnverified, setEmailUnverified] = useState(false)
 
   const isAdmin = profile?.role === 'admin'
@@ -424,19 +425,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
           </div>
 
-          {/* Support + Logout */}
+          {/* Settings + Support + Logout */}
           <div className="pb-6 flex flex-col items-center gap-2">
+            <button
+              onClick={() => setShowSettings(true)}
+              title="Security Settings"
+              className="p-2 text-white hover:text-white/80 transition-colors"
+            >
+              <Settings size={20} />
+            </button>
             <button
               onClick={() => setShowSupport(true)}
               title="Help & Support"
-              className="p-2 text-white/40 hover:text-white/70 transition-colors"
+              className="p-2 text-white hover:text-white/80 transition-colors"
             >
               <MessageCircle size={20} />
             </button>
             <button
               onClick={handleLogout}
               title="Log Out"
-              className="p-2 text-white/40 hover:text-white/70 transition-colors"
+              className="p-2 text-white hover:text-white/80 transition-colors"
             >
               <LogOut size={20} />
             </button>
@@ -554,7 +562,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
-                      isActive ? 'bg-lime text-dark' : 'text-white/50 hover:bg-white/10'
+                      isActive ? 'bg-lime text-dark' : 'text-white hover:bg-white/10'
                     )}
                   >
                     <Icon size={20} />
@@ -571,7 +579,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
-                    pathname.startsWith('/dashboard/admin') ? 'bg-lime text-dark' : 'text-white/50 hover:bg-white/10'
+                    pathname.startsWith('/dashboard/admin') ? 'bg-lime text-dark' : 'text-white hover:bg-white/10'
                   )}
                 >
                   <Settings size={20} />
@@ -582,7 +590,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <button
               onClick={() => { setShowSupport(true); setMobileOpen(false) }}
-              className="flex items-center gap-3 mx-4 px-3 py-2.5 text-white/40 hover:text-white/60 transition-colors"
+              className="flex items-center gap-3 mx-4 px-3 py-2.5 text-white hover:text-white/80 transition-colors"
             >
               <MessageCircle size={20} />
               <span className="text-sm font-semibold">Help & Support</span>
@@ -599,6 +607,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
+
+      {showSettings && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowSettings(false) }}
+        >
+          <div
+            className="w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col"
+            style={{ backgroundColor: '#F4F7FA', maxHeight: '90vh' }}
+          >
+            <div
+              className="flex items-center justify-between px-6 py-4 shrink-0"
+              style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #E2E8F0', borderRadius: '16px 16px 0 0' }}
+            >
+              <div className="flex items-center gap-2">
+                <Shield size={16} style={{ color: '#0F172A' }} />
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 700, color: '#0F172A' }}>Security Settings</span>
+              </div>
+              <button onClick={() => setShowSettings(false)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                <X size={16} style={{ color: '#94A3B8' }} />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-6">
+              <SecurityTab />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── BOTTOM-RIGHT TOASTS ── */}
       {toasts.map((t, i) => (
