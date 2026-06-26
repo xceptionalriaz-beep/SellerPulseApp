@@ -1,13 +1,10 @@
 'use client'
 // app/dashboard/profile/page.tsx
-// Converted from: lib/user_profile/user_profile_page.dart
-// SHELL ONLY — tab content comes from separate files in /tabs/
 
 import { useState } from 'react'
-import { Shield, User, Globe, BarChart2, Bookmark, CreditCard, Lock, DollarSign, Users } from 'lucide-react'
+import { Shield, User, Globe, Bookmark, CreditCard, Lock, DollarSign, Users } from 'lucide-react'
 import OverviewTab    from './tabs/OverviewTab'
 import EbayManagerTab from './tabs/EbayManagerTab'
-import ToolUsageTab   from './tabs/ToolUsageTab'
 import VaultTab       from './tabs/VaultTab'
 import BillingTab     from './tabs/BillingTab'
 import SecurityTab    from './tabs/SecurityTab'
@@ -19,14 +16,13 @@ const sidebarBg = '#0F172A'
 const accent    = '#8FFF00'
 
 const TABS = [
-  { icon: User,        label: 'Overview'    },
-  { icon: Globe,       label: 'Marketplace' },
-  { icon: BarChart2,   label: 'Tool Usage'  },
-  { icon: Bookmark,    label: 'Vault'       },
-  { icon: CreditCard,  label: 'Billing'     },
-  { icon: Lock,        label: 'Security'    },
-  { icon: DollarSign,  label: 'Affiliate'   },
-  { icon: Users,       label: 'Team'        },
+  { icon: User,       label: 'Overview'    },
+  { icon: Globe,      label: 'Marketplace' },
+  { icon: Bookmark,   label: 'Vault'       },
+  { icon: CreditCard, label: 'Billing'     },
+  { icon: Lock,       label: 'Security'    },
+  { icon: DollarSign, label: 'Affiliate'   },
+  { icon: Users,      label: 'Team'        },
 ]
 
 export default function UserProfilePage() {
@@ -36,15 +32,13 @@ export default function UserProfilePage() {
     switch (selectedTab) {
       case 0: return <OverviewTab    onTabChange={setSelectedTab} />
       case 1: return <EbayManagerTab />
-      case 2: return <ToolUsageTab   />
-      case 3: return <VaultTab       />
-      case 4: return <BillingTab     />
-      case 5: return <SecurityTab    />
-      case 6: return <AffiliateTab   />
-      case 7: return <TeamTab        />
+      case 2: return <VaultTab       />
+      case 3: return <BillingTab     />
+      case 4: return <SecurityTab    />
+      case 5: return <AffiliateTab   />
+      case 6: return <TeamTab        />
       default: return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="text-[48px]">🚧</div>
           <p className="text-[18px] font-bold text-gray-400">Coming Soon</p>
         </div>
       )
@@ -63,7 +57,7 @@ export default function UserProfilePage() {
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: accent }}>
             <Shield size={16} className="text-black" />
           </div>
-          <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+          <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
             Settings
           </span>
         </div>
@@ -75,27 +69,23 @@ export default function UserProfilePage() {
           const isPrevActive = selectedTab === i - 1
           return (
             <div key={i} onClick={() => setSelectedTab(i)} className="relative cursor-pointer">
-              {/* Active pill */}
               {isActive && (
                 <div className="absolute" style={{ left: 10, right: 0, top: 0, bottom: 0, backgroundColor: pageBg, borderTopLeftRadius: 24, borderBottomLeftRadius: 24 }} />
               )}
-              {/* Top inverted corner */}
               {isPrevActive && (
                 <div className="absolute" style={{ top: 0, right: 0, width: 16, height: 16, backgroundColor: pageBg }}>
                   <div style={{ width: '100%', height: '100%', backgroundColor: sidebarBg, borderTopRightRadius: 16 }} />
                 </div>
               )}
-              {/* Bottom inverted corner */}
               {isNextActive && (
                 <div className="absolute" style={{ bottom: 0, right: 0, width: 16, height: 16, backgroundColor: pageBg }}>
                   <div style={{ width: '100%', height: '100%', backgroundColor: sidebarBg, borderBottomRightRadius: 16 }} />
                 </div>
               )}
-              {/* Content */}
               <div className="relative flex items-center" style={{ padding: '10px 18px' }}>
                 <tab.icon size={19} style={{ color: isActive ? sidebarBg : 'rgba(255,255,255,0.5)' }} />
                 <span className="ml-3 text-[13px]"
-                      style={{ fontWeight: isActive ? 700 : 500, color: isActive ? sidebarBg : 'rgba(255,255,255,0.6)' }}>
+                      style={{ fontFamily: 'Inter, sans-serif', fontWeight: isActive ? 700 : 500, color: isActive ? sidebarBg : 'rgba(255,255,255,0.6)' }}>
                   {tab.label}
                 </span>
                 {isActive && (

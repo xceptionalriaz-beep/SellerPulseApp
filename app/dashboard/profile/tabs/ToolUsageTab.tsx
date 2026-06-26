@@ -1,118 +1,38 @@
 'use client'
-'use client'
 // app/dashboard/profile/tabs/ToolUsageTab.tsx
-// Converted from: lib/user_profile/tabs/tool_usage_tab.dart
-//
-// Sections (same as Dart):
-//   - Header
-//   - Plan Summary Card (dark gradient, plan badge, eBay connection status)
-//   - Tool Cards (6 tools with progress bars, near-limit warnings)
 
 import { useState, useEffect, useCallback } from 'react'
-import {
-  Search, Store, BarChart2, Type, Calculator,
-  ShoppingBag, RefreshCw,
-} from 'lucide-react'
+import { FileText, TrendingUp, ShoppingBag, RefreshCw, Infinity } from 'lucide-react'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { createClient } from '@/lib/supabase'
 
-// ── Tool config (matches Dart _toolConfig exactly) ──────────────
-const TOOL_CONFIG = [
-  { key: 'product_research',    label: 'Product Research',   icon: Search,     color: '#1D70F5' },
-  { key: 'competitor_research', label: 'Competitor Research', icon: Store,      color: '#FFB800' },
-  { key: 'deep_dive_analysis',  label: 'Deep Dive Analysis', icon: BarChart2,  color: '#8B5CF6' },
-  { key: 'title_builder',       label: 'Title Builder',      icon: Type,       color: '#00C48C' },
-  { key: 'profit_calculator',   label: 'Profit Calculator',  icon: Calculator, color: '#EC4899' },
-  { key: 'ebay_orders',         label: 'eBay Orders Sync',   icon: ShoppingBag,color: '#8FFF00' },
-]
-
-// ── Tool card (matches Dart _buildToolCard) ────────────────────
-function ToolCard({ label, icon: Icon, color, used, limit, resetDate }: {
-  label: string; icon: React.ElementType; color: string
-  used: number; limit: number; resetDate?: string
-}) {
-  const isUnlimited = limit >= 999999
-  const pct         = isUnlimited ? 0 : Math.min(1, used / (limit || 1))
-  const isAtLimit   = pct >= 1.0
-  const isNearLimit = pct > 0.8 && !isAtLimit
-
-  const barColor = isAtLimit ? '#FF4D6A' : isNearLimit ? '#FFB800' : color
-
-  let resetText = ''
-  if (resetDate) {
-    try {
-      const days = Math.ceil((new Date(resetDate).getTime() - Date.now()) / 86400000)
-      if (days > 0) resetText = `Resets in ${days} days`
-    } catch {}
-  }
-
-  const borderColor = isAtLimit   ? '#FF4D6A4D'
-                    : isNearLimit ? '#FFB8004D'
-                    : '#E2E8F0'
-
-  return (
-    <div className="p-5 rounded-xl bg-white border shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
-         style={{ borderColor }}>
-      <div className="flex items-center gap-4">
-        {/* Icon */}
-        <div className="w-11 h-11 rounded-[10px] flex items-center justify-center shrink-0"
-             style={{ backgroundColor: color + '1A' }}>
-          <Icon size={22} style={{ color }} />
-        </div>
-
-        {/* Label + reset */}
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-bold text-[#0F172A]">{label}</p>
-          {resetText && (
-            <p className="text-[11px] mt-0.5 text-[#94A3B8]">{resetText}</p>
-          )}
-        </div>
-
-        {/* Usage count */}
-        <div className="text-right shrink-0">
-          <p className="text-[16px] font-bold" style={{ color: isAtLimit ? '#FF4D6A' : '#0F172A', fontFamily: 'var(--font-space-grotesk)' }}>
-            {isUnlimited ? `${used}` : `${used} / ${limit}`}
-          </p>
-          <p className="text-[10px] text-[#94A3B8]">{isUnlimited ? 'unlimited' : 'uses'}</p>
-        </div>
-      </div>
-
-      {/* Progress bar (hidden for unlimited) */}
-      {!isUnlimited && (
-        <div className="mt-3.5">
-          <div className="h-[5px] rounded-full bg-[#F1F5F9] overflow-hidden mb-1.5">
-            <div className="h-full rounded-full transition-all duration-500"
-                 style={{ width: `${pct * 100}%`, backgroundColor: barColor }} />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#94A3B8]">{(pct * 100).toFixed(0)}% used</span>
-            {isAtLimit && (
-              <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold"
-                    style={{ backgroundColor: '#FF4D6A1A', color: '#FF4D6A' }}>
-                Limit reached — upgrade plan
-              </span>
-            )}
-            {isNearLimit && (
-              <span className="text-[10px] font-semibold" style={{ color: '#FFB800' }}>Near limit</span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  )
+const C = {
+  lime:    '#8fff00',
+  limeD:   '#4a8f00',
+  limeTint:'#f4ffe6',
+  dark:    '#0a0d08',
+  border:  '#e8ede2',
+  muted:   '#8a9e78',
+  surface: '#ffffff',
+  bg:      '#f9fdf4',
+  green:   '#00C48C',
+  orange:  '#FFB800',
+  red:     '#FF4D6A',
+  blue:    '#1D70F5',
 }
 
-// ══════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
 export default function ToolUsageTab() {
   const supabase = createClient()
 
   const [isLoading,     setIsLoading]     = useState(true)
-  const [toolUsage,     setToolUsage]     = useState<any[]>([])
+  const [planName,      setPlanName]      = useState('Free')
+  const [resetDate,     setResetDate]     = useState<string | null>(null)
+  const [titlesUsed,    setTitlesUsed]    = useState(0)
+  const [titlesLimit,   setTitlesLimit]   = useState(10)
+  const [profitsUsed,   setProfitsUsed]   = useState(0)
+  const [profitsLimit,  setProfitsLimit]  = useState(10)
+  const [ordersCount,   setOrdersCount]   = useState(0)
   const [ebayConnected, setEbayConnected] = useState(false)
-  const [ebayUsername,  setEbayUsername]  = useState('')
-  const [planName,      setPlanName]      = useState('Pro')
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
@@ -120,94 +40,171 @@ export default function ToolUsageTab() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const plan = user.user_metadata?.plan || 'Pro'
-      setPlanName(plan)
+      // Profile
+      const { data: profile } = await (supabase.from('profiles') as any)
+        .select('plan_name, ebay_marketplace, ebay_access_token')
+        .eq('id', user.id).single()
+      const pName = (profile as any)?.plan_name ?? 'Free'
+      setPlanName(pName)
+      setEbayConnected(!!(profile as any)?.ebay_marketplace && !!(profile as any)?.ebay_access_token)
+
+      // Plan limits
+      const { data: limits } = await (supabase.from('plan_limits') as any)
+        .select('max_title_generations, max_profit_calcs')
+        .eq('tier', pName.toLowerCase()).maybeSingle()
+      if (limits) {
+        setTitlesLimit((limits as any).max_title_generations ?? 10)
+        setProfitsLimit((limits as any).max_profit_calcs ?? 10)
+      }
 
       // Tool usage
-      const { data: usage } = await supabase
-        .from('user_tool_usage').select('*').eq('user_id', user.id)
-      setToolUsage(usage || [])
-
-      // eBay connection
-      const { data: profile } = await supabase
-        .from('profiles').select('ebay_marketplace, ebay_username').eq('id', user.id).single() as any
-      if (profile?.ebay_marketplace) {
-        setEbayConnected(true)
-        setEbayUsername(profile.ebay_username || user.email?.split('@')[0] || '')
+      const { data: usage } = await (supabase.from('user_tool_usage') as any)
+        .select('*').eq('user_id', user.id)
+      for (const t of (usage || [])) {
+        if (t.tool_name === 'title_builder')     { setTitlesUsed(t.usage_count || 0); if (t.reset_date) setResetDate(t.reset_date) }
+        if (t.tool_name === 'profit_calculator') { setProfitsUsed(t.usage_count || 0) }
       }
+
+      // Orders count
+      const { count } = await supabase.from('protected_orders')
+        .select('*', { count: 'exact', head: true }).eq('user_id', user.id)
+      setOrdersCount(count || 0)
+
     } catch (e) { console.error('Tool usage load error:', e) }
     finally { setIsLoading(false) }
   }, [])
 
   useEffect(() => { loadData() }, [loadData])
 
-  if (isLoading) return (
-    <PageSpinner />
-  )
+  // Reset date text
+  const resetText = resetDate
+    ? (() => {
+        const days = Math.ceil((new Date(resetDate).getTime() - Date.now()) / 86400000)
+        return days > 0 ? `Resets in ${days} days` : 'Resets soon'
+      })()
+    : null
+
+  if (isLoading) return <PageSpinner />
+
+  const tools = [
+    {
+      icon:    FileText,
+      color:   C.green,
+      iconBg:  'rgba(0,196,140,0.1)',
+      label:   'Title Builder',
+      desc:    'AI-powered eBay title generator',
+      used:    titlesUsed,
+      limit:   titlesLimit,
+    },
+    {
+      icon:    TrendingUp,
+      color:   C.orange,
+      iconBg:  'rgba(255,184,0,0.1)',
+      label:   'Profit Calculator',
+      desc:    'eBay fee and profit calculator',
+      used:    profitsUsed,
+      limit:   profitsLimit,
+    },
+    {
+      icon:    ShoppingBag,
+      color:   C.blue,
+      iconBg:  'rgba(29,112,245,0.1)',
+      label:   'eBay Orders',
+      desc:    ebayConnected ? 'Auto-syncing from your eBay store' : 'Connect eBay to start syncing',
+      used:    ordersCount,
+      limit:   -1,
+    },
+  ]
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4" style={{ fontFamily:'Inter,sans-serif' }}>
 
       {/* Header */}
-      <div>
-        <h1 className="text-[24px] font-bold text-[#0F172A]"
-            style={{ fontFamily: 'var(--font-space-grotesk)' }}>
-          Tool Usage &amp; Limits
-        </h1>
-        <p className="text-[14px] text-gray-400 mt-2">
-          Track your usage across all SellerPulse tools.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:700, color:C.dark }}>Tool Usage</h1>
+          <p style={{ fontFamily:'Inter,sans-serif', fontSize:13, color:C.muted, marginTop:3 }}>
+            Your usage this month
+            {resetText && <span style={{ marginLeft:6, fontSize:11, fontWeight:600, color:C.limeD, backgroundColor:C.limeTint, padding:'2px 8px', borderRadius:20 }}>{resetText}</span>}
+          </p>
+        </div>
+        <button onClick={loadData} className="hover:opacity-70 transition-opacity">
+          <RefreshCw size={15} style={{ color:C.muted }} />
+        </button>
       </div>
 
-      {/* ── Plan Summary Card (dark gradient, matches Dart) ── */}
-      <div className="flex items-center gap-4 p-5 rounded-2xl"
-           style={{
-             background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-             boxShadow: '0 8px 20px rgba(143,255,0,0.1)',
-           }}>
-        {/* Plan badge */}
-        <div className="px-4 py-2 rounded-full border shrink-0"
-             style={{ backgroundColor: 'rgba(143,255,0,0.15)', borderColor: 'rgba(143,255,0,0.4)' }}>
-          <span className="text-[13px] font-extrabold" style={{ color: '#8FFF00' }}>
-            {planName.toUpperCase()}
-          </span>
-        </div>
+      {/* Tool cards */}
+      {tools.map((tool, i) => {
+        const isUnlimited = tool.limit === -1
+        const pct         = isUnlimited ? 0 : Math.min(1, tool.used / (tool.limit || 1))
+        const isAtLimit   = !isUnlimited && pct >= 1
+        const isNear      = !isUnlimited && pct > 0.8 && !isAtLimit
+        const barColor    = isAtLimit ? C.red : isNear ? C.orange : tool.color
 
-        {/* Plan info */}
-        <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-bold text-white">{planName} Plan Active</p>
-          <p className="text-[12px] text-gray-400 mt-0.5">Limits reset monthly. Upgrade for higher limits.</p>
-        </div>
-
-        {/* eBay status */}
-        <div className="text-right shrink-0">
-          <div className="flex items-center gap-1.5 justify-end">
-            <div className="w-2 h-2 rounded-full"
-                 style={{ backgroundColor: ebayConnected ? '#8FFF00' : '#64748B' }} />
-            <span className="text-[11px] font-semibold"
-                  style={{ color: ebayConnected ? '#8FFF00' : '#64748B' }}>
-              {ebayConnected ? 'eBay Connected' : 'eBay Not Connected'}
-            </span>
-          </div>
-          {ebayConnected && ebayUsername && (
-            <p className="text-[10px] text-gray-500 mt-1">{ebayUsername}</p>
-          )}
-        </div>
-      </div>
-
-      {/* ── Tool Cards ── */}
-      {TOOL_CONFIG.map(({ key, label, icon, color }) => {
-        const usage = toolUsage.find(t => t.tool_name === key) || { usage_count: 0, usage_limit: 100, reset_date: null }
         return (
-          <ToolCard
-            key={key}
-            label={label}
-            icon={icon}
-            color={color}
-            used={usage.usage_count || 0}
-            limit={usage.usage_limit || 100}
-            resetDate={usage.reset_date}
-          />
+          <div
+            key={i}
+            className="p-5 rounded-2xl"
+            style={{
+              backgroundColor: C.surface,
+              border: `1px solid ${isAtLimit ? '#FF4D6A4D' : isNear ? '#FFB8004D' : C.border}`,
+            }}
+          >
+            <div className="flex items-center gap-4">
+              {/* Icon */}
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor:tool.iconBg }}>
+                <tool.icon size={20} style={{ color:tool.color }} />
+              </div>
+
+              {/* Label */}
+              <div className="flex-1 min-w-0">
+                <p style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:700, color:C.dark }}>{tool.label}</p>
+                <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted, marginTop:2 }}>{tool.desc}</p>
+              </div>
+
+              {/* Usage */}
+              <div className="text-right shrink-0">
+                {isUnlimited ? (
+                  <>
+                    <p style={{ fontFamily:'Inter,sans-serif', fontSize:18, fontWeight:800, color:C.dark }}>{tool.used}</p>
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.limeD, backgroundColor:C.limeTint, padding:'1px 7px', borderRadius:20 }}>Unlimited</span>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontFamily:'Inter,sans-serif', fontSize:18, fontWeight:800, color: isAtLimit ? C.red : C.dark }}>
+                      {tool.used}<span style={{ fontSize:12, fontWeight:500, color:C.muted }}>/{tool.limit}</span>
+                    </p>
+                    <p style={{ fontFamily:'Inter,sans-serif', fontSize:10, color:C.muted }}>uses this month</p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Progress bar — only for limited tools */}
+            {!isUnlimited && (
+              <div className="mt-4">
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor:C.border }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width:`${pct*100}%`, backgroundColor:barColor }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, color:C.muted }}>{(pct*100).toFixed(0)}% used</span>
+                  {isAtLimit && (
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.red, backgroundColor:'rgba(255,77,106,0.1)', padding:'1px 8px', borderRadius:20 }}>
+                      Limit reached — upgrade plan
+                    </span>
+                  )}
+                  {isNear && (
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:600, color:C.orange }}>
+                      Near limit
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         )
       })}
 

@@ -156,29 +156,43 @@ function UserAvatar({
   profile: Profile | null
   onClick: () => void
 }) {
-  const avatarUrl = profile?.avatar_url ||
-    (profile?.gender === 'Male'
-      ? `https://api.dicebear.com/9.x/adventurer-neutral/png?seed=${profile?.email}male&backgroundColor=b6e3f4`
-      : profile?.gender === 'Female'
-        ? `https://api.dicebear.com/9.x/lorelei/png?seed=${profile?.email}female&backgroundColor=ffdfbf`
-        : null)
-
-  const userInitials = initials(profile?.name || profile?.email || 'U')
+  const STYLE_BG: Record<string, string> = {
+    'avataaars':  'b6e3f4', 'big-smile':  'ffd5dc',
+    'adventurer': 'c0aede', 'notionists': 'd1fae5',
+    'lorelei':    'ffdfbf', 'micah':      'dbeafe',
+    'open-peeps': 'fde68a', 'personas':   'e0e7ff',
+  }
+  const AVATAR_COLORS = [
+    { bg: '#8fff00', text: '#0a0d08' }, { bg: '#0ea5e9', text: '#ffffff' },
+    { bg: '#8b5cf6', text: '#ffffff' }, { bg: '#f97316', text: '#ffffff' },
+    { bg: '#ec4899', text: '#ffffff' }, { bg: '#14b8a6', text: '#ffffff' },
+    { bg: '#ef4444', text: '#ffffff' }, { bg: '#6366f1', text: '#ffffff' },
+  ]
+  const name        = profile?.name || profile?.email || 'U'
+  const seed        = encodeURIComponent(profile?.id || profile?.email || 'default')
+  const styleKey    = STYLE_BG[profile?.avatar_url || ''] ? (profile?.avatar_url || 'avataaars') : 'avataaars'
+  const bg          = STYLE_BG[styleKey] ?? 'b6e3f4'
+  const dicebearUrl = `https://api.dicebear.com/9.x/${styleKey}/svg?seed=${seed}&backgroundColor=${bg}&backgroundType=solid`
+  const hash        = Math.abs(name.split('').reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0)) % 8
+  const colors      = AVATAR_COLORS[hash]
+  const ini         = initials(name)
+  const [imgError, setImgError] = useState(false)
 
   return (
     <button
       onClick={onClick}
-      className="w-8 h-8 rounded-2xl bg-lime overflow-hidden flex items-center justify-center hover:opacity-90 transition-opacity"
+      className="w-8 h-8 rounded-2xl overflow-hidden flex items-center justify-center hover:opacity-90 transition-opacity"
+      style={{ backgroundColor: colors.bg }}
     >
-      {avatarUrl ? (
+      {!imgError ? (
         <img
-          src={avatarUrl}
+          src={dicebearUrl}
           alt="avatar"
           className="w-full h-full object-cover"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          onError={() => setImgError(true)}
         />
       ) : (
-        <span className="text-dark font-black text-[13px] tracking-wide">{userInitials}</span>
+        <span style={{ color: colors.text, fontWeight: 700, fontSize: 13 }}>{ini}</span>
       )}
     </button>
   )

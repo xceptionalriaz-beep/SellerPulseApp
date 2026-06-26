@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  ShoppingBag, FileText, TrendingUp, Shield,
+  ShoppingBag, FileText, TrendingUp, Shield, BarChart2,
   RefreshCw, CheckCircle, AlertTriangle, Edit, User, Mail,
   Building2, ChevronDown, X, Check,
 } from 'lucide-react'
@@ -76,6 +76,8 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
   const [editBusiness,    setEditBusiness]    = useState('')
   const [editGender,      setEditGender]      = useState('Unspecified')
   const [ordersCount,     setOrdersCount]     = useState(0)
+  const [ordersLimit,     setOrdersLimit]     = useState(-1)
+  const [resetDate,       setResetDate]       = useState<string | null>(null)
   const [titlesCount,     setTitlesCount]     = useState(0)
   const [titlesLimit,     setTitlesLimit]     = useState(10)
   const [profitsCount,    setProfitsCount]    = useState(0)
@@ -141,7 +143,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
         .select('*').eq('user_id', user.id)
       const toolData = (rawToolData || []) as any[]
       for (const t of toolData) {
-        if (t.tool_name === 'title_builder')     { setTitlesCount(t.usage_count || 0) }
+        if (t.tool_name === 'title_builder')     { setTitlesCount(t.usage_count || 0); if (t.reset_date) setResetDate(t.reset_date) }
         if (t.tool_name === 'profit_calculator') { setProfitsCount(t.usage_count || 0) }
       }
 
@@ -425,11 +427,18 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
             <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor:'rgba(29,112,245,0.1)' }}>
               <ShoppingBag size={18} style={{ color:C.blue }} />
             </div>
-            <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:C.dark }}>{ordersCount}</span>
+            <span style={{ fontFamily:'Inter,sans-serif', fontSize:20, fontWeight:800, color:C.dark }}>
+              {ordersLimit === -1 ? ordersCount : `${ordersCount}/${ordersLimit}`}
+            </span>
           </div>
+          {ordersLimit !== -1 && (
+            <div className="h-1 rounded-full mb-2" style={{ backgroundColor:C.border }}>
+              <div className="h-full rounded-full" style={{ width:`${Math.min(100,(ordersCount/(ordersLimit||1))*100)}%`, backgroundColor:ordersCount/(ordersLimit||1)>0.8?C.red:C.blue, transition:'width 0.5s ease' }} />
+            </div>
+          )}
           <div>
             <p style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.dark }}>Orders Tracked</p>
-            <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:C.muted, marginTop:2 }}>{ebayConnected ? 'Auto-syncing' : 'Connect eBay'}</p>
+            <p style={{ fontFamily:'Inter,sans-serif', fontSize:11, color:ordersLimit===-1?C.limeD:C.muted, marginTop:2 }}>{ordersLimit===-1?'Unlimited':ebayConnected?'Auto-syncing':'Connect eBay'}</p>
           </div>
         </div>
         <div className="p-4 rounded-2xl flex flex-col" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
@@ -479,6 +488,101 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
       </div>
 
       </div>{/* end two-column grid */}
+
+      {/* ── TOOL USAGE ── */}
+      <div className="w-full rounded-2xl overflow-hidden" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
+          <div className="flex items-center gap-2">
+            <BarChart2 size={15} style={{ color:C.muted }} />
+            <h3 style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:700, color:C.dark }}>Tool Usage</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            {resetDate && (() => {
+              const days = Math.ceil((new Date(resetDate).getTime() - Date.now()) / 86400000)
+              return days > 0 ? (
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:600, color:C.limeD, backgroundColor:C.limeTint, padding:'2px 8px', borderRadius:20 }}>
+                  Resets in {days}d
+                </span>
+              ) : null
+            })()}
+          </div>
+        </div>
+
+        {/* Column headers */}
+        <div className="grid grid-cols-5 px-5 py-2" style={{ borderBottom:`1px solid ${C.border}`, backgroundColor:C.bg }}>
+          <div className="col-span-2" style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.muted, letterSpacing:'.06em' }}>TOOL</div>
+          <div className="text-center" style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.muted, letterSpacing:'.06em' }}>USED</div>
+          <div className="text-center" style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.muted, letterSpacing:'.06em' }}>LIMIT</div>
+          <div className="text-center" style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.muted, letterSpacing:'.06em' }}>STATUS</div>
+        </div>
+
+        {/* Tool rows */}
+        {[
+          { icon: FileText,    color: C.green,  iconBg: 'rgba(0,196,140,0.1)',  label: 'Title Builder',     used: titlesCount,  limit: titlesLimit  },
+          { icon: TrendingUp,  color: C.orange, iconBg: 'rgba(255,184,0,0.1)', label: 'Profit Calculator', used: profitsCount, limit: profitsLimit },
+          { icon: ShoppingBag, color: C.blue,   iconBg: 'rgba(29,112,245,0.1)',label: 'eBay Orders',       used: ordersCount,  limit: ordersLimit  },
+        ].map((tool, i) => {
+          const isUnlimited = tool.limit === -1
+          const remaining   = isUnlimited ? null : Math.max(0, tool.limit - tool.used)
+          const pct         = isUnlimited ? 0 : Math.min(1, tool.used / (tool.limit || 1))
+          const isAtLimit   = !isUnlimited && pct >= 1
+          const isNear      = !isUnlimited && pct >= 0.8 && !isAtLimit
+          const barColor    = isAtLimit ? C.red : isNear ? C.orange : tool.color
+
+          return (
+            <div key={i} style={{ borderBottom: i < 2 ? `1px solid ${C.border}` : 'none', backgroundColor: isAtLimit ? 'rgba(255,77,106,0.02)' : isNear ? 'rgba(255,184,0,0.02)' : 'transparent' }}>
+              {/* Main row */}
+              <div className="grid grid-cols-5 items-center px-5 py-3.5">
+                {/* Tool name */}
+                <div className="col-span-2 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor:tool.iconBg }}>
+                    <tool.icon size={15} style={{ color:tool.color }} />
+                  </div>
+                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:13, fontWeight:600, color:C.dark }}>{tool.label}</span>
+                </div>
+                {/* Used */}
+                <div className="text-center">
+                  <span style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:800, color:isAtLimit?C.red:C.dark }}>{tool.used}</span>
+                </div>
+                {/* Limit */}
+                <div className="text-center">
+                  {isUnlimited
+                    ? <span style={{ fontFamily:'Inter,sans-serif', fontSize:11, fontWeight:700, color:C.limeD, backgroundColor:C.limeTint, padding:'2px 8px', borderRadius:20 }}>Unlimited</span>
+                    : <span style={{ fontFamily:'Inter,sans-serif', fontSize:14, fontWeight:600, color:C.muted }}>{tool.limit}</span>
+                  }
+                </div>
+                {/* Status */}
+                <div className="flex justify-center">
+                  {isUnlimited ? (
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:600, color:C.limeD }}>No limit</span>
+                  ) : isAtLimit ? (
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.red, backgroundColor:'rgba(255,77,106,0.1)', padding:'2px 8px', borderRadius:20 }}>Limit hit</span>
+                  ) : isNear ? (
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.orange, backgroundColor:'rgba(255,184,0,0.1)', padding:'2px 8px', borderRadius:20 }}>{remaining} left</span>
+                  ) : (
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:600, color:C.muted }}>{remaining} left</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress bar row — only for limited tools */}
+              {!isUnlimited && (
+                <div className="px-5 pb-3">
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor:C.border }}>
+                    <div className="h-full rounded-full transition-all duration-500" style={{ width:`${pct*100}%`, backgroundColor:barColor }} />
+                  </div>
+                  {(isAtLimit || isNear) && (
+                    <p style={{ fontFamily:'Inter,sans-serif', fontSize:10, color:isAtLimit?C.red:C.orange, marginTop:4, fontWeight:600 }}>
+                      {isAtLimit ? 'You have reached your limit — upgrade your plan to continue.' : `You are ${(pct*100).toFixed(0)}% through your monthly limit.`}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
 
       {/* ── ACCOUNT HEALTH ── */}
       <div className="w-full p-5 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
