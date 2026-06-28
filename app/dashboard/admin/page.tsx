@@ -814,7 +814,7 @@ function AdminPage() {
   const [authorized,        setAuthorized]        = useState(false)
   const [checking,          setChecking]          = useState(true)
   const [isSettingsMode,    setIsSettingsMode]    = useState(() => !!searchParams.get('settings'))
-  const [isAnalyticsMode,   setIsAnalyticsMode]   = useState(false)
+  const [isAnalyticsMode, setIsAnalyticsMode] = useState(() => !!searchParams.get('analytics'))
   const [activeSettingsTab, setActiveSettingsTab] = useState(() => {
     const tab = searchParams.get('settings')
     const tabMap: Record<string, number> = {
@@ -829,7 +829,14 @@ function AdminPage() {
   const [showCmdPalette,    setShowCmdPalette]    = useState(false)
   const [showAddUser,       setShowAddUser]       = useState(false)
   const [showResetApi,      setShowResetApi]      = useState(false)
-  const [analyticsTab,      setAnalyticsTab]      = useState(0)
+  const [analyticsTab, setAnalyticsTab] = useState(() => {
+    const tab = searchParams.get('analytics')
+    const analyticsMap: Record<string, number> = {
+      'revenue': 0, 'api': 1, 'vero': 2, 'affiliate': 3,
+      'roadmap': 4, 'infra': 5, 'competitor': 6, 'chrome': 7,
+    }
+    return tab ? (analyticsMap[tab] ?? 0) : 0
+  })
   const [showKillSwitch,    setShowKillSwitch]    = useState(false)
   const [mobileDrawerOpen,  setMobileDrawerOpen]  = useState(false)
   const [marketingUsers,    setMarketingUsers]    = useState<any[]>([])
@@ -839,6 +846,48 @@ function AdminPage() {
   )
   // ── Real stats state ───────────────────────────────────────
   const [stats, setStats] = useState<AdminStats>(DEFAULT_STATS)
+
+  useEffect(() => {
+    function handleSettingsTab(e: Event) {
+      const tab = (e as CustomEvent).detail
+      setActiveSettingsTab(tab)
+      setIsSettingsMode(true)
+      setIsAnalyticsMode(false)
+    }
+    function handleAnalyticsTab(e: Event) {
+      const tab = (e as CustomEvent).detail
+      setAnalyticsTab(tab)
+      setIsAnalyticsMode(true)
+      setIsSettingsMode(false)
+    }
+    window.addEventListener('admin-settings-tab', handleSettingsTab)
+    window.addEventListener('admin-analytics-tab', handleAnalyticsTab)
+    return () => {
+      window.removeEventListener('admin-settings-tab', handleSettingsTab)
+      window.removeEventListener('admin-analytics-tab', handleAnalyticsTab)
+    }
+  }, [])
+
+  useEffect(() => {
+    const settingsParam  = searchParams.get('settings')
+    const analyticsParam = searchParams.get('analytics')
+    const analyticsMap: Record<string, number> = {
+      'revenue': 0, 'api': 1, 'vero': 2, 'affiliate': 3,
+      'roadmap': 4, 'infra': 5, 'competitor': 6, 'chrome': 7,
+    }
+    if (analyticsParam !== null) {
+      setAnalyticsTab(analyticsMap[analyticsParam] ?? 0)
+      setIsAnalyticsMode(true)
+      setIsSettingsMode(false)
+    } else if (settingsParam !== null) {
+      setActiveSettingsTab(Number(settingsParam))
+      setIsSettingsMode(true)
+      setIsAnalyticsMode(false)
+    } else {
+      setIsSettingsMode(false)
+      setIsAnalyticsMode(false)
+    }
+  }, [searchParams])
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -1208,26 +1257,7 @@ function AdminPage() {
           </div>
         </button>
 
-        {/* Analytics Hub */}
-        <AnalyticsHubButton
-          isActive={isAnalyticsMode}
-          onTap={() => { setIsAnalyticsMode(m => !m); setIsSettingsMode(false); setAnalyticsTab(0) }}
-        />
-
-        {/* Settings / Back */}
-        {(isSettingsMode || isAnalyticsMode) ? (
-          <button onClick={() => { setIsSettingsMode(false); setIsAnalyticsMode(false) }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-[13px] font-bold"
-            style={{ backgroundColor: '#fff', borderColor: C.border, color: C.text }}>
-            <ArrowLeft size={14} /> Back to Dashboard
-          </button>
-        ) : (
-          <button onClick={() => { setIsSettingsMode(true); setIsAnalyticsMode(false) }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-bold"
-            style={{ backgroundColor: C.lime, color: C.dark }}>
-            <Settings size={14} /> Admin Settings
-          </button>
-        )}
+        {/* Buttons moved to sidebar */}
       </div>
     )
   }
@@ -1494,17 +1524,10 @@ function AdminPage() {
 
   // ── Settings Layout ────────────────────────────────────────
   function SettingsLayout() {
-    if (isMobile) return <div>{getSettingsContent()}</div>
     return (
-      <div className="flex gap-6 items-start">
-        <div className="w-[250px] shrink-0 py-4 rounded-2xl border"
-             style={{ backgroundColor: '#fff', borderColor: C.border }}>
-          {SETTINGS_MENU.map((_, i) => <SidebarItem key={i} index={i} />)}
-        </div>
-        <div className="flex-1 min-w-0 p-6 rounded-2xl border"
-             style={{ backgroundColor: '#fff', borderColor: C.border }}>
-          {getSettingsContent()}
-        </div>
+      <div className="flex-1 min-w-0 p-6 rounded-2xl border"
+           style={{ backgroundColor: '#fff', borderColor: C.border }}>
+        {getSettingsContent()}
       </div>
     )
   }

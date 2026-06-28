@@ -114,37 +114,8 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
   }
 
   if (!isMobile) return (
-    <div className="flex items-start gap-5">
-      <div className="w-[240px] shrink-0 rounded-2xl border overflow-hidden"
-           style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.15)' }}>
-        <div className="px-4 pt-4 pb-3.5 border-b" style={{ borderColor: 'rgba(143,255,0,0.12)' }}>
-          <button onClick={onBack}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border mb-3.5 hover:opacity-80"
-            style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.08)' }}>
-            <ArrowLeft size={12} style={{ color: 'rgba(255,255,255,0.5)' }} />
-            <span className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>Back to Dashboard</span>
-          </button>
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg" style={{ backgroundColor: C.limeTint }}>
-              <BarChart2 size={14} style={{ color: C.lime }} />
-            </div>
-            <span className="text-[14px] font-extrabold text-white">Analytics Hub</span>
-          </div>
-          {alertCount > 0 && (
-            <div className="inline-flex items-center mt-2 px-2 py-0.5 rounded-full border text-[9px] font-bold"
-                 style={{ backgroundColor: 'rgba(248,113,113,0.15)', borderColor: 'rgba(248,113,113,0.3)', color: '#F87171' }}>
-              {alertCount} tabs need attention
-            </div>
-          )}
-        </div>
-        <div className="p-2.5">
-          {TABS.map((t, i) => <SidebarItem key={i} t={t} index={i} />)}
-        </div>
-      </div>
-      {/* TabHeader removed — content renders directly */}
-      <div className="flex-1 min-w-0">
-        <div key={activeTab}>{getTabContent()}</div>
-      </div>
+    <div className="flex-1 min-w-0">
+      <div key={activeTab}>{getTabContent()}</div>
     </div>
   )
 

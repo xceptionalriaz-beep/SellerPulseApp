@@ -1,41 +1,42 @@
 ﻿'use client'
 // app/dashboard/layout.tsx
-// ═══════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------
 // Converted from: lib/pages/dashboard_page.dart
 //
 // What the Dart version had:
-//   ✅ 60px slim dark sidebar rail (desktop)
-//   ✅ Lime active state with left border indicator + scale animation
-//   ✅ Shield logo at top of sidebar
-//   ✅ Tooltip on each sidebar icon
-//   ✅ Top navbar — "Riazify" brand text + notification bell + avatar
-//   ✅ Avatar — Google photo OR DiceBear OR initials fallback
-//   ✅ Notification bell — hover lime, pulse animation, red badge
-//   ✅ Bottom-right Windows-style toast (4s, progress bar)
-//   ✅ Mobile drawer (hamburger menu)
-//   ✅ Logout button
-//   ✅ Admin nav item (only for admin role)
-//   ✅ Polls notifications every 60 seconds
-//   ✅ Location verification prompt
-//   ✅ Role-based routing
+//   ? 60px slim dark sidebar rail (desktop)
+//   ? Lime active state with left border indicator + scale animation
+//   ? Shield logo at top of sidebar
+//   ? Tooltip on each sidebar icon
+//   ? Top navbar � "Riazify" brand text + notification bell + avatar
+//   ? Avatar � Google photo OR DiceBear OR initials fallback
+//   ? Notification bell � hover lime, pulse animation, red badge
+//   ? Bottom-right Windows-style toast (4s, progress bar)
+//   ? Mobile drawer (hamburger menu)
+//   ? Logout button
+//   ? Admin nav item (only for admin role)
+//   ? Polls notifications every 60 seconds
+//   ? Location verification prompt
+//   ? Role-based routing
 //
 // NEW (presence system):
-//   ✅ useHeartbeat — updates last_seen every 2 min (invisible)
-//   ✅ usePresence  — joins Supabase Realtime channel so admin
+//   ? useHeartbeat � updates last_seen every 2 min (invisible)
+//   ? usePresence  � joins Supabase Realtime channel so admin
 //                    CRM shows who is online right now
 //
 // NEW (kill switch visibility):
-//   ✅ Tools hidden from sidebar when kill switch is OFF
-//   ✅ Re-appear when kill switch is turned back ON
-// ═══════════════════════════════════════════════════════════════
+//   ? Tools hidden from sidebar when kill switch is OFF
+//   ? Re-appear when kill switch is turned back ON
+// ---------------------------------------------------------------
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
-  ShieldAlert, LogOut, Bell, Menu, X, MessageCircle,
+  ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -43,7 +44,7 @@ import { useToast } from '@/components/ui/AppToast'
 import { cn, initials } from '@/lib/utils'
 import type { Profile } from '@/types/database'
 
-// ── Presence system ────────────────────────────────────────────
+// -- Presence system --------------------------------------------
 import { useHeartbeat } from '@/hooks/useHeartbeat'
 import { usePresence }  from '@/hooks/usePresence'
 import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
@@ -51,7 +52,7 @@ import SupportModal          from '@/components/dashboard/SupportModal'
 import SecurityTab           from '@/app/dashboard/profile/tabs/SecurityTab'
 import AnnouncementBanner    from '@/components/dashboard/AnnouncementBanner'
 
-// ── Nav items (mirrors Dart sidebar exactly) ───────────────────
+// -- Nav items (mirrors Dart sidebar exactly) -------------------
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',           href: '/dashboard'                           },
   { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'          },
@@ -62,9 +63,9 @@ const NAV_ITEMS = [
   { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                    },
 ]
 
-// ── Kill switch → nav label mapping ───────────────────────────
-// Maps kill_switches.title → NAV_ITEMS label
-// When a switch is OFF → that nav item is hidden from sidebar
+// -- Kill switch ? nav label mapping ---------------------------
+// Maps kill_switches.title ? NAV_ITEMS label
+// When a switch is OFF ? that nav item is hidden from sidebar
 const KILL_SWITCH_MAP: Record<string, string> = {
   'Title Builder':       'Title Builder',
   'Product Research':    'eBay Product Research Tool',
@@ -74,7 +75,7 @@ const KILL_SWITCH_MAP: Record<string, string> = {
   'Orders':              'Orders Management',
 }
 
-// ── Sidebar Item ───────────────────────────────────────────────
+// -- Sidebar Item -----------------------------------------------
 function SidebarItem({
   icon: Icon, label, href, isActive, onClick
 }: {
@@ -109,7 +110,7 @@ function SidebarItem({
   )
 }
 
-// ── Notification Bell ──────────────────────────────────────────
+// -- Notification Bell ------------------------------------------
 function NotificationBell({
   count, isPulsing, onClick
 }: {
@@ -149,7 +150,7 @@ function NotificationBell({
   )
 }
 
-// ── Avatar ─────────────────────────────────────────────────────
+// -- Avatar -----------------------------------------------------
 function UserAvatar({
   profile, onClick
 }: {
@@ -198,7 +199,7 @@ function UserAvatar({
   )
 }
 
-// ── Live Notification Toast (bottom-right, Windows-style) ──────
+// -- Live Notification Toast (bottom-right, Windows-style) ------
 function NotifToast({
   title, message, onTap, onDismiss, bottomOffset
 }: {
@@ -252,12 +253,13 @@ function NotifToast({
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // DASHBOARD LAYOUT
-// ══════════════════════════════════════════════════════════════
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router   = useRouter()
-  const pathname = usePathname()
+// --------------------------------------------------------------
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
+  const router       = useRouter()
+  const pathname     = usePathname()
+  const searchParams = useSearchParams()
   const toast    = useToast()
   const supabase = createClient()
 
@@ -269,19 +271,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showNotifPanel, setShowNotifPanel] = useState(false)
   const [toasts,         setToasts]         = useState<Array<{id: string; title: string; message: string}>>([])
 
-  // ── Kill switch visibility state ───────────────────────────────
+  // -- Kill switch visibility state -------------------------------
   const [disabledTools,  setDisabledTools]  = useState<Set<string>>(new Set())
   const [showSupport,    setShowSupport]    = useState(false)
-  const [showSettings,   setShowSettings]   = useState(false)
+  const [showSettings,      setShowSettings]      = useState(false)
+  const [showAffiliateMenu,  setShowAffiliateMenu]  = useState(false)
+  const [showMoreAnalytics,  setShowMoreAnalytics]  = useState(false)
+  const [activeAdminTab,     setActiveAdminTab]     = useState<string | null>(searchParams.get('settings'))
+  const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<string | null>(searchParams.get('analytics'))
   const [emailUnverified, setEmailUnverified] = useState(false)
 
   const isAdmin = profile?.role === 'admin'
 
-  // ── Presence system ────────────────────────────────────────────
+  // -- Presence system --------------------------------------------
   useHeartbeat()
   usePresence()
 
-  // ── Load profile + kill switches ──────────────────────────────
+  // -- Load profile + kill switches ------------------------------
   useEffect(() => {
     async function loadProfile() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -296,7 +302,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (data) setProfile(data as Profile)
       if (user && !user.email_confirmed_at) setEmailUnverified(true)
 
-      // ── Fetch kill switches to hide disabled tools from sidebar ──
+      // -- Fetch kill switches to hide disabled tools from sidebar --
       try {
         const { data: switches } = await (supabase.from('kill_switches') as any)
           .select('title, is_enabled, is_visible')
@@ -306,12 +312,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             .map((s: any) => s.title as string)
         )
         setDisabledTools(disabled)
-      } catch { /* non-critical — show all tools if check fails */ }
+      } catch { /* non-critical � show all tools if check fails */ }
     }
     loadProfile()
   }, [])
 
-  // ── Reload kill switches every 60 seconds ──────────────────────
+  // -- Reload kill switches every 60 seconds ----------------------
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -328,14 +334,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearInterval(interval)
   }, [supabase])
 
-  // ── Filter nav items based on kill switches ────────────────────
+  // -- Filter nav items based on kill switches --------------------
   const visibleNavItems = NAV_ITEMS.filter(item => {
     const switchTitle = KILL_SWITCH_MAP[item.label]
     if (!switchTitle) return true // no kill switch = always show (Dashboard, Settings)
     return !disabledTools.has(switchTitle)
   })
 
-  // ── Load notification count ────────────────────────────────────
+  // -- Load notification count ------------------------------------
   const loadNotifCount = useCallback(async () => {
     if (!profile) return
     try {
@@ -372,7 +378,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearInterval(timer)
   }, [loadNotifCount])
 
-  // ── Logout ─────────────────────────────────────────────────────
+  // -- Logout -----------------------------------------------------
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/auth/login')
@@ -389,72 +395,171 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
       <div className="flex gap-0 h-screen">
 
-        {/* ── DESKTOP SIDEBAR RAIL (60px dark) ── */}
-        <aside className="hidden lg:flex w-[60px] shrink-0 flex-col bg-dark rounded-[30px] m-3">
-          {/* Shield logo */}
-          <div className="flex justify-center pt-[30px] pb-[35px]">
-            <button
-              onClick={() => router.push('/dashboard')}
-              title="Home"
-              className="hover:opacity-80 transition-opacity"
-            >
-              <Shield size={24} className="text-lime" />
-            </button>
-          </div>
+        {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
+        {isAdmin ? (
+          /* -- ADMIN SIDEBAR -- */
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col bg-dark" style={{ minHeight:'100vh' }}>
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 px-5 pt-6 pb-4" style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#8FFF00' }}>
+                <ShieldAlert size={16} className="text-dark" />
+              </div>
+              <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
+            </div>
 
-          {/* Nav items — filtered by kill switches */}
-          <div className="flex flex-col flex-1">
-            {visibleNavItems.map((item) => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                href={item.href}
-                isActive={pathname === item.href}
-              />
-            ))}
+            <div className="flex flex-col flex-1 px-2 py-3 gap-0.5 overflow-y-auto scrollbar-none" style={{ scrollbarWidth:'none' }}>
+              {/* Dashboard */}
+              <Link href="/dashboard/admin" scroll={false}
+                onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null) }}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-transparent group"
+                style={{ color: pathname === '/dashboard/admin' && !searchParams.has('settings') && !searchParams.has('analytics') && !activeAdminTab && !activeAnalyticsTab ? '#8FFF00' : 'rgba(255,255,255,1)' }}>
+                <LayoutDashboard size={16} className="group-hover:!text-lime transition-colors" style={{ color: 'inherit' }} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500 }} className="group-hover:!text-lime transition-colors">Dashboard</span>
+              </Link>
 
-            {/* Admin item — only for admin role */}
-            {isAdmin && (
-              <SidebarItem
-                icon={ShieldAlert as React.ElementType}
-                label="Admin Center"
-                href="/dashboard/admin"
-                isActive={pathname.startsWith('/dashboard/admin')}
-              />
-            )}
-          </div>
+              {/* Admin Settings */}
+              <div style={{ height:8 }} />
+              {[
+                { icon: Users,         label: 'User CRM',         tab: 0                                                          },
+                { icon: BarChart2,     label: 'Revenue',          tab: 0, key: 'revenue', isAnalytics: true                       },
+                { icon: MessageCircle, label: 'Tickets',          tab: 14                                                         },
+                { icon: CreditCard,    label: 'Payments',         tab: 13                                                         },
+                { icon: DollarSign,    label: 'Promos & Codes',   tab: 3                                                          },
+                { icon: Power,         label: 'Kill Switches',    tab: 4                                                          },
+                { icon: Settings,      label: 'Plan Limits',      tab: 5                                                          },
+                { icon: FileText,      label: 'Emails',           tab: 6                                                          },
+                { icon: Zap,           label: 'Webhooks',         tab: 7                                                          },
+                { icon: Shield,        label: 'Role Builder',     tab: 1                                                          },
+                { icon: Key,           label: 'Security Logs',    tab: 2                                                          },
+                { icon: Trophy,        label: 'Gamification',     tab: 8                                                          },
+                { icon: Key,           label: 'API Vault',        tab: 9                                                          },
+                { icon: DollarSign,    label: 'Affiliate Center', tab: 3, key: 'affiliate', hasChild: true, isAnalytics: true     },
+                { icon: DollarSign,    label: 'Affiliate Vault',  tab: 10, isChild: true                                         },
+                { icon: BarChart2,     label: 'Founder Ops',      tab: 11                                                         },
+                { icon: Mail,          label: 'Marketing',        tab: 12                                                         },
+              ].map((item) => {
+                const isActive = (item as any).isAnalytics
+                  ? activeAnalyticsTab === (item as any).key
+                  : (item as any).isChild
+                    ? activeAdminTab === String(item.tab) + '-child'
+                    : activeAdminTab === String(item.tab)
+                if ((item as any).isChild && !showAffiliateMenu) return null
+                return (
+                  <button key={item.label}
+                    onClick={() => {
+                      if ((item as any).isAnalytics) {
+                        setActiveAnalyticsTab((item as any).key)
+                        setActiveAdminTab(null)
+                        router.push(`/dashboard/admin?analytics=${(item as any).key}`, { scroll: false })
+                        window.dispatchEvent(new CustomEvent('admin-analytics-tab', { detail: item.tab }))
+                      } else {
+                        setActiveAdminTab(String(item.tab) + ((item as any).isChild ? '-child' : ''))
+                        setActiveAnalyticsTab(null)
+                        router.push(`/dashboard/admin?settings=${item.tab}`, { scroll: false })
+                        window.dispatchEvent(new CustomEvent('admin-settings-tab', { detail: item.tab }))
+                      }
+                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left group"
+                    style={{ backgroundColor: 'transparent', paddingLeft: (item as any).isChild ? 24 : 12 }}>
+                    <item.icon size={15} style={{ color: isActive ? '#8FFF00' : 'rgba(255,255,255,1)', flexShrink:0, transition:'color 0.15s' }} className="group-hover:!text-lime" />
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isActive ? '#8FFF00' : 'rgba(255,255,255,1)', transition:'color 0.15s' }} className="group-hover:!text-lime">{item.label}</span>
+                    {(item as any).hasChild && (
+                      <ChevronDown size={13} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAffiliateMenu(v => !v) }}
+                        style={{ color:'rgba(255,255,255,0.4)', transform: showAffiliateMenu ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }} />
+                    )}
+                    {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
+                  </button>
+                )
+              })}
 
-          {/* Settings + Support + Logout */}
-          <div className="pb-6 flex flex-col items-center gap-2">
-            <button
-              onClick={() => setShowSettings(true)}
-              title="Security Settings"
-              className="p-2 text-white hover:text-white/80 transition-colors"
-            >
-              <Settings size={20} />
-            </button>
-            <button
-              onClick={() => setShowSupport(true)}
-              title="Help & Support"
-              className="p-2 text-white hover:text-white/80 transition-colors"
-            >
-              <MessageCircle size={20} />
-            </button>
-            <button
-              onClick={handleLogout}
-              title="Log Out"
-              className="p-2 text-white hover:text-white/80 transition-colors"
-            >
-              <LogOut size={20} />
-            </button>
-          </div>
-        </aside>
+              {/* Analytics Hub */}
+              {[
+                { icon: Zap,        label: 'API Fleet',       tab: 1, key: 'api'      },
+                { icon: Trophy,     label: 'Feature Roadmap', tab: 4, key: 'roadmap'  },
+                { icon: ChevronDown,label: 'More Analytics',        tab: -1, key: 'more', isMoreBtn: true },
+                { icon: Shield,     label: 'VeRO Command Center',   tab: 2, key: 'vero',        isMoreChild: true },
+                { icon: BarChart2,  label: 'Infrastructure Monitor',tab: 5, key: 'infra',       isMoreChild: true },
+                { icon: Search,     label: 'Competitor X-Ray',      tab: 6, key: 'competitor',  isMoreChild: true },
+                { icon: Package,    label: 'Chrome Extension',      tab: 7, key: 'chrome',      isMoreChild: true },
+              ].map((item) => {
+                const isActive = activeAnalyticsTab === item.key
+                if ((item as any).isMoreChild && !showMoreAnalytics) return null
+                if ((item as any).isMoreBtn) return (
+                  <button key={item.key}
+                    onClick={() => setShowMoreAnalytics(v => !v)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-white/10 w-full"
+                    style={{ color:'rgba(255,255,255,0.4)' }}>
+                    <ChevronDown size={15} style={{ transform: showMoreAnalytics ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }} />
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500, flex:1 }}>More Analytics</span>
+                  </button>
+                )
+                return (
+                  <button key={item.key}
+                      onClick={() => {
+                        setActiveAnalyticsTab(item.key)
+                        setActiveAdminTab(null)
+                        router.push(`/dashboard/admin?analytics=${item.key}`, { scroll: false })
+                        window.dispatchEvent(new CustomEvent('admin-analytics-tab', { detail: item.tab }))
+                      }}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 hover:text-white w-full text-left"
+                      style={{ backgroundColor: 'transparent', color: isActive ? '#8FFF00' : 'rgba(255,255,255,1)', paddingLeft: (item as any).isMoreChild ? 28 : undefined }}>
+                      <item.icon size={15} />
+                      <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1 }}>{item.label}</span>
+                      {isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
+                    </button>
+                )
+              })}
+            </div>
 
-        {/* ── MAIN CONTENT ── */}
+            {/* Settings + Logout */}
+            <div className="px-2 pb-6" style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:12 }}>
+              <button
+                title="Admin Settings � Coming Soon"
+                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
+                style={{ color:'rgba(255,255,255,0.5)' }}>
+                <Settings size={15} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500 }}>Settings</span>
+              </button>
+              <button onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
+                style={{ color:'rgba(255,255,255,0.5)' }}>
+                <LogOut size={15} />
+                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500 }}>Log Out</span>
+              </button>
+            </div>
+          </aside>
+        ) : (
+          /* -- USER SIDEBAR -- */
+          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col bg-dark rounded-[30px] m-3">
+            <div className="flex justify-center pt-[30px] pb-[35px]">
+              <button onClick={() => router.push('/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
+                <Shield size={24} className="text-lime" />
+              </button>
+            </div>
+            <div className="flex flex-col flex-1">
+              {visibleNavItems.map((item) => (
+                <SidebarItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={pathname === item.href} />
+              ))}
+              {/* Admin uses separate sidebar */}
+            </div>
+            <div className="pb-6 flex flex-col items-center gap-2">
+              <button onClick={() => setShowSettings(true)} title="Security Settings" className="p-2 text-white hover:text-white/80 transition-colors">
+                <Settings size={20} />
+              </button>
+              <button onClick={() => setShowSupport(true)} title="Help & Support" className="p-2 text-white hover:text-white/80 transition-colors">
+                <MessageCircle size={20} />
+              </button>
+              <button onClick={handleLogout} title="Log Out" className="p-2 text-white hover:text-white/80 transition-colors">
+                <LogOut size={20} />
+              </button>
+            </div>
+          </aside>
+        )}
+
+        {/* -- MAIN CONTENT -- */}
         <div className="flex-1 flex flex-col min-w-0">
 
-          {/* ── TOP NAVBAR ── */}
+          {/* -- TOP NAVBAR -- */}
           <header className="h-[60px] flex items-center px-6 shrink-0">
             <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
               <Menu size={28} />
@@ -497,16 +602,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
           </header>
 
-          {/* ── TEAM SWITCHER BANNER ── */}
+          {/* -- TEAM SWITCHER BANNER -- */}
           <TeamSwitcherBanner />
 
-          {/* ── PAGE CONTENT ── */}
+          {/* -- PAGE CONTENT -- */}
           <main className="flex-1 overflow-auto min-h-0">
             {emailUnverified && (
               <div className="flex items-center justify-between px-4 py-2.5"
                    style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
                 <span style={{ color: '#92400e', fontSize: 13 }}>
-                  ⚠️ Please verify your email to unlock all features
+                  ?? Please verify your email to unlock all features
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -525,7 +630,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     onClick={() => setEmailUnverified(false)}
                     className="text-[12px] px-2"
                     style={{ color: '#92400e' }}>
-                    ✕
+                    ?
                   </button>
                 </div>
               </div>
@@ -538,7 +643,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      {/* ── MOBILE DRAWER ── */}
+      {/* -- MOBILE DRAWER -- */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
@@ -573,19 +678,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )
               })}
 
-              {isAdmin && (
-                <Link
-                  href="/dashboard/admin"
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
-                    pathname.startsWith('/dashboard/admin') ? 'bg-lime text-dark' : 'text-white hover:bg-white/10'
-                  )}
-                >
-                  <Settings size={20} />
-                  <span className="text-sm">Admin Center</span>
-                </Link>
-              )}
+              {/* Admin uses separate sidebar */}
             </nav>
 
             <button
@@ -637,7 +730,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       )}
 
-      {/* ── BOTTOM-RIGHT TOASTS ── */}
+      {/* -- BOTTOM-RIGHT TOASTS -- */}
       {toasts.map((t, i) => (
         <NotifToast
           key={t.id}
@@ -649,5 +742,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       ))}
     </div>
+  )
+}
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </Suspense>
   )
 }
