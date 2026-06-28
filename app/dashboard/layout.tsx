@@ -282,6 +282,20 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [emailUnverified, setEmailUnverified] = useState(false)
 
   const isAdmin = profile?.role === 'admin'
+  const profileLoaded = profile !== null
+  const [cachedIsAdmin, setCachedIsAdmin] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('riazify_role='))
+    const role = cookie ? cookie.split('=')[1].trim() : localStorage.getItem('riazify_role')
+    const isAdminCached = role === 'admin'
+    setCachedIsAdmin(isAdminCached)
+    if (isAdminCached && !window.location.pathname.startsWith('/dashboard/admin')) {
+      router.push('/dashboard/admin')
+    }
+  }, [])
 
   // -- Presence system --------------------------------------------
   useHeartbeat()
@@ -299,7 +313,15 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         .eq('id', user.id)
         .single()
 
-      if (data) setProfile(data as Profile)
+      if (data) {
+        setProfile(data as Profile)
+        localStorage.setItem('riazify_role', (data as any).role || 'user')
+        document.cookie = `riazify_role=${(data as any).role || 'user'};path=/;max-age=86400`
+        setCachedIsAdmin((data as any).role === 'admin')
+        if ((data as any).role === 'admin' && !window.location.pathname.startsWith('/dashboard/admin')) {
+          router.push('/dashboard/admin')
+        }
+      }
       if (user && !user.email_confirmed_at) setEmailUnverified(true)
 
       // -- Fetch kill switches to hide disabled tools from sidebar --
@@ -396,16 +418,21 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       <div className="flex gap-0 h-screen">
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
-        {isAdmin ? (
+        {!mounted ? (
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col bg-dark" style={{ minHeight:'100vh' }} />
+        ) : (cachedIsAdmin || isAdmin) ? (
           /* -- ADMIN SIDEBAR -- */
           <aside className="hidden lg:flex w-[220px] shrink-0 flex-col bg-dark" style={{ minHeight:'100vh' }}>
             {/* Logo */}
-            <div className="flex items-center gap-2.5 px-5 pt-6 pb-4" style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#8FFF00' }}>
+            <button
+              onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null); router.push('/dashboard/admin') }}
+              className="flex items-center gap-2.5 px-5 pt-6 pb-4 hover:opacity-80 transition-opacity w-full text-left"
+              style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#8FFF00' }}>
                 <ShieldAlert size={16} className="text-dark" />
               </div>
               <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
-            </div>
+            </button>
 
             <div className="flex flex-col flex-1 px-2 py-3 gap-0.5 overflow-y-auto scrollbar-none" style={{ scrollbarWidth:'none' }}>
               {/* Dashboard */}

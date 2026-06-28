@@ -894,6 +894,13 @@ function AdminPage() {
   // ── Role check ─────────────────────────────────────────────
   useEffect(() => {
     async function check() {
+      const cookie = document.cookie.split(';').find(c => c.trim().startsWith('riazify_role='))
+      const role = cookie ? cookie.split('=')[1].trim() : null
+      if (role === 'admin') {
+        setAuthorized(true)
+        setChecking(false)
+        return
+      }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setChecking(false); return }
       const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
@@ -1129,12 +1136,7 @@ function AdminPage() {
     return { ...t, sessions: data.sessions, users: data.users }
   })
 
-  if (checking) return (
-    <div className="flex items-center justify-center h-full min-h-[400px]">
-      <div className="w-8 h-8 rounded-full border-2 border-transparent animate-spin"
-           style={{ borderTopColor: C.lime }} />
-    </div>
-  )
+  if (checking) return null
 
   if (!authorized) return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">

@@ -51,7 +51,20 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/auth/login') ||
     request.nextUrl.pathname.startsWith('/auth/signup')
   )) {
+    // Check if admin and redirect accordingly
+    const riazifyRole = request.cookies.get('riazify_role')?.value
+    if (riazifyRole === 'admin') {
+      return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+    }
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Redirect admin users from /dashboard to /dashboard/admin
+  if (user && request.nextUrl.pathname === '/dashboard') {
+    const riazifyRole = request.cookies.get('riazify_role')?.value
+    if (riazifyRole === 'admin') {
+      return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+    }
   }
 
   return response
