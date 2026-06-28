@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/page.tsx
 
 import { useState } from 'react'

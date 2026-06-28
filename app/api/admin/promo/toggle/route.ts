@@ -1,4 +1,4 @@
-// app/api/admin/promo/toggle/route.ts
+﻿// app/api/admin/promo/toggle/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 

@@ -1,11 +1,11 @@
-// app/api/admin/roles/invite/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/roles/invite/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Invites a user to become an admin team member
 // Completely separate from /api/team/invite (user eBay team)
-// No plan limits — founder only action
-// If email exists → assign role_id directly (no email needed)
-// If email doesn't exist → create team_invite + send email
-// ──────────────────────────────────────────────────────────────
+// No plan limits â€” founder only action
+// If email exists â†’ assign role_id directly (no email needed)
+// If email doesn't exist â†’ create team_invite + send email
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { Resend }       from 'resend'
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller is founder ────────────────────────────
+    // â”€â”€ 1. Verify caller is founder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Founder access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { email, adminRoleId } = await req.json()
 
     if (!email || typeof email !== 'string') {
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin role is required' }, { status: 400 })
     }
 
-    // ── 3. Verify the role exists ──────────────────────────────
+    // â”€â”€ 3. Verify the role exists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: role } = await adminClient
       .from('admin_roles')
       .select('id, role_name')
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     if (!role) return NextResponse.json({ error: 'Role not found' }, { status: 404 })
 
-    // ── 4. Check if email already has a Riazify account ───────
+    // â”€â”€ 4. Check if email already has a Riazify account â”€â”€â”€â”€â”€â”€â”€
     const { data: existingProfile } = await adminClient
       .from('profiles')
       .select('id, name, email, role_id')
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (existingProfile) {
-      // ── User exists — assign role_id directly ───────────────
+      // â”€â”€ User exists â€” assign role_id directly â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const p = existingProfile as any
 
       // Cannot assign to another admin/founder
@@ -100,11 +100,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success:  true,
         assigned: true,
-        message:  `Role assigned directly to ${p.name ?? email} — they already have an account`,
+        message:  `Role assigned directly to ${p.name ?? email} â€” they already have an account`,
       })
     }
 
-    // ── 5. User doesn't exist — create pending invite ──────────
+    // â”€â”€ 5. User doesn't exist â€” create pending invite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Cancel any existing pending admin invite for this email
     await (adminClient.from('team_invites') as any)
       .update({ status: 'expired' })
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       .insert({
         owner_id:      caller.id,
         email:         email.trim().toLowerCase(),
-        role:          'viewer', // legacy field — not used for admin invites
+        role:          'viewer', // legacy field â€” not used for admin invites
         admin_role_id: adminRoleId,
         status:        'pending',
       })
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: inviteErr?.message ?? 'Failed to create invite' }, { status: 500 })
     }
 
-    // ── 6. Send invite email ───────────────────────────────────
+    // â”€â”€ 6. Send invite email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const origin      = process.env.NEXT_PUBLIC_SITE_URL ?? ''
     const acceptLink  = `${origin}/team/accept?token=${(invite as any).token}`
     const founderName = (callerProfile as any)?.name ?? 'The Riazify Team'
@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
              style="display:inline-block;margin-top:20px;padding:14px 32px;
                     background:#8fff00;color:#0a0d08;font-weight:700;
                     border-radius:12px;text-decoration:none;font-size:15px;">
-            Accept Invitation →
+            Accept Invitation â†’
           </a>
           <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
             This invite expires in 7 days.
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success:  true,
       assigned: false,
-      message:  `Invite sent to ${email.trim()} — they'll get access when they create an account`,
+      message:  `Invite sent to ${email.trim()} â€” they'll get access when they create an account`,
     })
 
   } catch (err: any) {

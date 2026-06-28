@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/ToolUsageTab.tsx
 
 import { useState, useEffect, useCallback } from 'react'
@@ -180,7 +180,7 @@ export default function ToolUsageTab() {
               </div>
             </div>
 
-            {/* Progress bar — only for limited tools */}
+            {/* Progress bar â€” only for limited tools */}
             {!isUnlimited && (
               <div className="mt-4">
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor:C.border }}>
@@ -193,7 +193,7 @@ export default function ToolUsageTab() {
                   <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, color:C.muted }}>{(pct*100).toFixed(0)}% used</span>
                   {isAtLimit && (
                     <span style={{ fontFamily:'Inter,sans-serif', fontSize:10, fontWeight:700, color:C.red, backgroundColor:'rgba(255,77,106,0.1)', padding:'1px 8px', borderRadius:20 }}>
-                      Limit reached — upgrade plan
+                      Limit reached â€” upgrade plan
                     </span>
                   )}
                   {isNear && (

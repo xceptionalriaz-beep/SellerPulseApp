@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 // components/profit/ProfitReceipt.tsx
 // Converted 1:1 from lib/pages/profit_receipt.dart
 
 import { useState, useEffect, useRef } from 'react'
 
-// ── Props ──────────────────────────────────────────────────────
+// â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ProfitReceiptCardProps {
   currency:         string
   totalRevenue:     number
@@ -22,7 +22,7 @@ interface ProfitReceiptCardProps {
   salePrice:        number
 }
 
-// ── Badge helpers (matches Dart _getBadge* methods) ────────────
+// â”€â”€ Badge helpers (matches Dart _getBadge* methods) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getBadgeBorderColor(margin: number) {
   return margin > 30 ? '#8FFF00' : margin >= 15 ? '#FB923C' : '#F87171'
 }
@@ -33,10 +33,10 @@ function getBadgeTextColor(margin: number) {
   return margin > 30 ? '#000000' : margin >= 15 ? '#FB923C' : '#F87171'
 }
 function getBadgeText(margin: number) {
-  return margin > 30 ? '🔥 HIGH POTENTIAL' : margin >= 15 ? '⚖️ BALANCED' : '⚠️ RISKY MARGIN'
+  return margin > 30 ? 'ðŸ”¥ HIGH POTENTIAL' : margin >= 15 ? 'âš–ï¸ BALANCED' : 'âš ï¸ RISKY MARGIN'
 }
 
-// ── Donut Chart (matches Dart DonutChartPainter) ───────────────
+// â”€â”€ Donut Chart (matches Dart DonutChartPainter) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DonutChart({ revenue, profit, costs, fees }: { revenue: number; profit: number; costs: number; fees: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -83,7 +83,7 @@ function DonutChart({ revenue, profit, costs, fees }: { revenue: number; profit:
   )
 }
 
-// ── Best Offer Curve (matches Dart BestOfferLineChartPainter) ──
+// â”€â”€ Best Offer Curve (matches Dart BestOfferLineChartPainter) â”€â”€
 function BestOfferCurve({ breakEvenPrice, currentPrice, currentProfit, currency }: { breakEvenPrice: number; currentPrice: number; currentProfit: number; currency: string }) {
   if (currentPrice <= 0 || breakEvenPrice <= 0 || currentPrice <= breakEvenPrice) return null
 
@@ -116,7 +116,7 @@ function BestOfferCurve({ breakEvenPrice, currentPrice, currentProfit, currency 
   )
 }
 
-// ── Volume Card (matches Dart _buildVolumeCard) ────────────────
+// â”€â”€ Volume Card (matches Dart _buildVolumeCard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function VolumeCard({ label, projectedProfit, currency }: { label: string; projectedProfit: number; currency: string }) {
   const isPositive = projectedProfit >= 0
   return (
@@ -133,7 +133,7 @@ function VolumeCard({ label, projectedProfit, currency }: { label: string; proje
   )
 }
 
-// ── Stat Block (matches Dart _buildStatBlock) ──────────────────
+// â”€â”€ Stat Block (matches Dart _buildStatBlock) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col items-center">
@@ -143,7 +143,7 @@ function StatBlock({ label, value }: { label: string; value: string }) {
   )
 }
 
-// ── Receipt Row (matches Dart _buildReceiptRow) ────────────────
+// â”€â”€ Receipt Row (matches Dart _buildReceiptRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ReceiptRow({ label, amount, currency, isPositive = false, color }: { label: string; amount: number; currency: string; isPositive?: boolean; color?: string }) {
   const displayColor = color ?? (isPositive ? '#16A34A' : '#1E293B')
   return (
@@ -156,7 +156,7 @@ function ReceiptRow({ label, amount, currency, isPositive = false, color }: { la
   )
 }
 
-// ── Main Component ─────────────────────────────────────────────
+// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ProfitReceiptCard({
   currency, totalRevenue, totalCosts, calculatedEbayFee, adFeeAmount,
   taxRate, taxAmount, totalFeeNoStore, totalFeeStore,
@@ -294,7 +294,7 @@ export default function ProfitReceiptCard({
   )
 }
 
-// ── Donut SVG (replaces Canvas — same visual output) ──────────
+// â”€â”€ Donut SVG (replaces Canvas â€” same visual output) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DonutChartSVG({ revenue, profit, costs, fees }: { revenue: number; profit: number; costs: number; fees: number }) {
   if (revenue <= 0) return <svg width="100" height="100" />
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/KeywordSearchScreen.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/keyword_search_screen.dart
 
@@ -17,7 +17,7 @@ import { SearchFilters, defaultFilters } from '../../models/searchFilters'
 const supabase = createClient()
 
 const C = {
-  dark:   '#0F172A', lime: '#8FFF00', text: '#1E293B',
+  dark:   '#1a2410', lime: '#8FFF00', text: '#1E293B',
   muted:  '#64748B', border: '#E5E7EB', bg: '#F8FAFC', white: '#FFFFFF',
 }
 
@@ -26,7 +26,7 @@ interface Props {
   onSearch:    (v: string) => void
 }
 
-// ── Quick filter checkbox (matches Dart _buildQuickFilter) ────
+// â”€â”€ Quick filter checkbox (matches Dart _buildQuickFilter) â”€â”€â”€â”€
 function QuickFilter({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer">
@@ -37,7 +37,7 @@ function QuickFilter({ label, value, onChange }: { label: string; value: boolean
   )
 }
 
-// ── Top button (matches Dart _buildTopButton) ─────────────────
+// â”€â”€ Top button (matches Dart _buildTopButton) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TopButton({ icon: Icon, label, highlight = false, onTap }: {
   icon: React.ElementType; label: string; highlight?: boolean; onTap: () => void
 }) {
@@ -56,7 +56,7 @@ function TopButton({ icon: Icon, label, highlight = false, onTap }: {
   )
 }
 
-// ── Fee row for deep dive panel ───────────────────────────────
+// â”€â”€ Fee row for deep dive panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FeeRow({ label, amount, positive = false, negative = false, bold = false }: {
   label: string; amount: string; positive?: boolean; negative?: boolean; bold?: boolean
 }) {
@@ -71,7 +71,7 @@ function FeeRow({ label, amount, positive = false, negative = false, bold = fals
   )
 }
 
-// ── Sticky table header (matches Dart _StickyTableHeaderDelegate) ──
+// â”€â”€ Sticky table header (matches Dart _StickyTableHeaderDelegate) â”€â”€
 function TableHeader() {
   const cols = [
     { label: 'PRODUCT',    flex: 8 },
@@ -145,7 +145,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
 
   const totalPotentialProfit = Array.from(selectedIds).reduce((sum, id) => sum + (itemProfits[id] ?? 0), 0)
 
-  // ── Fetch live data (matches Dart _fetchLiveData via MarketBrainService) ──
+  // â”€â”€ Fetch live data (matches Dart _fetchLiveData via MarketBrainService) â”€â”€
   async function fetchLiveData(query: string) {
     if (!query) return
     setIsLoading(true); setProducts([]); setErrorMsg('')
@@ -166,7 +166,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
       setNicheTotalActive(data?.nicheTotalActive ?? '312')
       setNicheSuccessColor(data?.nicheSuccessColor ?? '#8FFF00')
       setNicheSaturationScore(data?.nicheSaturationScore ?? 42)
-      setNicheAdInsight(data?.nicheAdInsight   ?? 'Moderate competition — good entry opportunity')
+      setNicheAdInsight(data?.nicheAdInsight   ?? 'Moderate competition â€” good entry opportunity')
       // market-brain returns Dart MarketResearchResult fields exactly
       const prods = data?.liveProducts ?? mockProducts(query)
 
@@ -196,7 +196,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
       }
       setProducts(prods)
 
-      // Build chart data from real products totalSold — 30 day timeline
+      // Build chart data from real products totalSold â€” 30 day timeline
       const today = new Date()
       const generated = Array.from({ length: 30 }, (_, i) => {
         const d = new Date(today)
@@ -221,7 +221,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
       setNicheMarketVol('$45,200'); setNicheAvgPrice('$24.57')
       setNicheSuccessRate('48.2% (BULLISH)'); setNicheTotalActive('312')
       setNicheSuccessColor('#8FFF00'); setNicheSaturationScore(42)
-      setNicheAdInsight('Moderate competition — good entry opportunity')
+      setNicheAdInsight('Moderate competition â€” good entry opportunity')
       const prods = mockProducts(query)
       setProducts(prods)
       const today2 = new Date()
@@ -238,7 +238,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
   }
 
   function mockProducts(query: string): any[] {
-    // Placeholder images — replaced by real eBay images when edge function deployed
+    // Placeholder images â€” replaced by real eBay images when edge function deployed
     const placeholderImages = [
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop',
       'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=100&h=100&fit=crop',
@@ -272,7 +272,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
     }))
   }
 
-  // ── Add tag (matches Dart _addTag) ───────────────────────────
+  // â”€â”€ Add tag (matches Dart _addTag) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function addTag(value: string) {
     const clean = value.replace(/,/g, '').trim()
     if (clean && !tags.includes(clean)) {
@@ -285,7 +285,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
     }
   }
 
-  // ── Select all (matches Dart _toggleSelectAll) ────────────────
+  // â”€â”€ Select all (matches Dart _toggleSelectAll) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function toggleSelectAll(val: boolean) {
     setSelectAll(val)
     if (val) {
@@ -296,7 +296,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
     }
   }
 
-  // ── Save to watchlist (matches Dart _saveToWatchlist) ─────────
+  // â”€â”€ Save to watchlist (matches Dart _saveToWatchlist) â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function saveToWatchlist() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { alert('Please log in to save items.'); return }
@@ -321,7 +321,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
     setIsLoading(false)
   }
 
-  // ── CSV export (matches Dart _downloadCSV) ────────────────────
+  // â”€â”€ CSV export (matches Dart _downloadCSV) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function downloadCSV() {
     const headers = ['Product Title','eBay Item ID','eBay Price','Buy Cost','Est. Net Profit','Total Sold','Watchers','Category','eBay Link','Sourcing Link (Lens)']
     const rows = Array.from(selectedIds).map(id => {
@@ -352,7 +352,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
     <div className="relative flex flex-col h-full overflow-y-auto" style={{ backgroundColor: C.bg }}>
       <div className="px-8 pt-8 pb-4 flex flex-col gap-5">
 
-        {/* Top row — title + search bar + buttons */}
+        {/* Top row â€” title + search bar + buttons */}
         <div className="flex items-center gap-3 flex-wrap">
           <NeonIcon icon={require('lucide-react').List} />
           <p className="text-[22px] font-bold truncate max-w-[300px]" style={{ color: C.text }}>{displayTitle}</p>
@@ -394,7 +394,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
 
           <TopButton icon={SlidersHorizontal} label="Advanced Filters" highlight={showFilters}
             onTap={() => setShowFilters(s => !s)} />
-          <TopButton icon={ArrowDownUp} label="Sort: Opp Score 🔥" onTap={() => {}} />
+          <TopButton icon={ArrowDownUp} label="Sort: Opp Score ðŸ”¥" onTap={() => {}} />
           <button onClick={() => setShowProfitDlg(true)} title="Global Profit Settings"
             className="p-2 rounded-lg hover:opacity-70">
             <Settings size={18} style={{ color: C.muted }} />
@@ -420,7 +420,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
           </div>
         </div>
 
-        {/* Filter hub — animated show/hide */}
+        {/* Filter hub â€” animated show/hide */}
         {showFilters && (
           <div className="transition-all">
             <FilterHub filters={activeFilters} onChange={setActiveFilters} />
@@ -429,7 +429,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
 
         {/* Quick filters row */}
         <div className="flex items-center gap-4 flex-wrap overflow-x-auto pb-1">
-          <p className="text-[13px] font-bold shrink-0" style={{ color: C.muted }}>⚡ QUICK FILTERS:</p>
+          <p className="text-[13px] font-bold shrink-0" style={{ color: C.muted }}>âš¡ QUICK FILTERS:</p>
           <QuickFilter label="Hide VERO"       value={hideVero}     onChange={setHideVero}     />
           <QuickFilter label="Min 30% Margin"  value={minMargin}    onChange={setMinMargin}    />
           <QuickFilter label="US Shippers"     value={usOnly}       onChange={setUsOnly}       />
@@ -609,7 +609,7 @@ export default function KeywordSearchScreen({ searchQuery, onSearch }: Props) {
 
               {/* Truth equation */}
               <div className="p-5 border-b overflow-y-auto" style={{ borderColor: C.border }}>
-                <p className="text-[14px] font-bold mb-4" style={{ color: C.muted }}>💰 The Truth Equation</p>
+                <p className="text-[14px] font-bold mb-4" style={{ color: C.muted }}>ðŸ’° The Truth Equation</p>
                 <FeeRow label="Selling Price"                amount={`$${ep.toFixed(2)}`}                positive />
                 <FeeRow label="True Sourcing Cost (Inc. Tax)" amount={`-$${buyCost.toFixed(2)}`}         negative />
                 <FeeRow label="Total eBay Fees"              amount={`-$${(fee+adFee).toFixed(2)}`}      negative />

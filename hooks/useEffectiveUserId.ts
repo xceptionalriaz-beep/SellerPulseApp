@@ -1,8 +1,8 @@
-// hooks/useEffectiveUserId.ts
-// ─────────────────────────────────────────────────────────────
+﻿// hooks/useEffectiveUserId.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Returns the "effective" user ID for data queries.
-// If member is viewing an owner's account → returns owner's ID
-// Otherwise → returns their own ID
+// If member is viewing an owner's account â†’ returns owner's ID
+// Otherwise â†’ returns their own ID
 //
 // Usage in ANY dashboard component:
 //   const effectiveId = useEffectiveUserId()
@@ -10,7 +10,7 @@
 //
 // This makes ALL tools automatically show the owner's data
 // when a team member has switched to their account
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useState, useEffect } from 'react'
 import { createClient }        from '@/lib/supabase'
@@ -71,7 +71,7 @@ export function useEffectiveUserId(): EffectiveUser {
               loading:       false,
             })
           } else {
-            // Membership revoked — clear active_team_owner_id and use own ID
+            // Membership revoked â€” clear active_team_owner_id and use own ID
             await (supabase.from('profiles') as any)
               .update({ active_team_owner_id: null })
               .eq('id', user.id)
@@ -86,7 +86,7 @@ export function useEffectiveUserId(): EffectiveUser {
             })
           }
         } else {
-          // Normal — viewing own account
+          // Normal â€” viewing own account
           setState({
             effectiveId:   user.id,
             ownId:         user.id,

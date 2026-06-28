@@ -1,8 +1,8 @@
-// app/api/admin/webhooks/route.ts
-// ══════════════════════════════════════════════════════════════
-// Global Webhook Engine — handles dispatch, retry, and logging
+﻿// app/api/admin/webhooks/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// Global Webhook Engine â€” handles dispatch, retry, and logging
 // Supports Slack, Discord, and Custom endpoints
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -14,23 +14,23 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Event label map ────────────────────────────────────────────
+// â”€â”€ Event label map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const EVENT_LABELS: Record<string, { label: string; emoji: string; color: number }> = {
-  'user.signup':           { label: 'New Signup',           emoji: '👤', color: 0x3B82F6 },
-  'plan.upgraded':         { label: 'Plan Upgraded',         emoji: '💰', color: 0x8FFF00 },
-  'plan.cancelled':        { label: 'Plan Cancelled',        emoji: '❌', color: 0xEF4444 },
-  'payment.failed':        { label: 'Payment Failed',        emoji: '⚠️', color: 0xF59E0B },
-  'payment.recovered':     { label: 'Payment Recovered',     emoji: '✅', color: 0x22C55E },
-  'kill_switch.activated': { label: 'Kill Switch Activated', emoji: '🔴', color: 0xEF4444 },
-  'high_risk_order':       { label: 'High Risk Order',       emoji: '🛡️', color: 0xF97316 },
-  'api.failure':           { label: 'API Failure',           emoji: '🔧', color: 0xEF4444 },
-  'user.limit_hit':        { label: 'User Hit Limit',        emoji: '📊', color: 0x8B5CF6 },
-  'admin.login':           { label: 'Admin Login',           emoji: '🔐', color: 0x6B7280 },
+  'user.signup':           { label: 'New Signup',           emoji: 'ðŸ‘¤', color: 0x3B82F6 },
+  'plan.upgraded':         { label: 'Plan Upgraded',         emoji: 'ðŸ’°', color: 0x8FFF00 },
+  'plan.cancelled':        { label: 'Plan Cancelled',        emoji: 'âŒ', color: 0xEF4444 },
+  'payment.failed':        { label: 'Payment Failed',        emoji: 'âš ï¸', color: 0xF59E0B },
+  'payment.recovered':     { label: 'Payment Recovered',     emoji: 'âœ…', color: 0x22C55E },
+  'kill_switch.activated': { label: 'Kill Switch Activated', emoji: 'ðŸ”´', color: 0xEF4444 },
+  'high_risk_order':       { label: 'High Risk Order',       emoji: 'ðŸ›¡ï¸', color: 0xF97316 },
+  'api.failure':           { label: 'API Failure',           emoji: 'ðŸ”§', color: 0xEF4444 },
+  'user.limit_hit':        { label: 'User Hit Limit',        emoji: 'ðŸ“Š', color: 0x8B5CF6 },
+  'admin.login':           { label: 'Admin Login',           emoji: 'ðŸ”', color: 0x6B7280 },
 }
 
-// ── Format payload for Slack ───────────────────────────────────
+// â”€â”€ Format payload for Slack â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function formatSlack(event_type: string, data: Record<string, any>) {
-  const ev = EVENT_LABELS[event_type] ?? { label: event_type, emoji: '📡', color: 0x8FFF00 }
+  const ev = EVENT_LABELS[event_type] ?? { label: event_type, emoji: 'ðŸ“¡', color: 0x8FFF00 }
   const fields = Object.entries(data)
     .filter(([k]) => !['timestamp'].includes(k))
     .map(([k, v]) => ({
@@ -47,7 +47,7 @@ function formatSlack(event_type: string, data: Record<string, any>) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `${ev.emoji} *${ev.label}* — Riazify`,
+            text: `${ev.emoji} *${ev.label}* â€” Riazify`,
           },
         },
         {
@@ -58,7 +58,7 @@ function formatSlack(event_type: string, data: Record<string, any>) {
           type: 'context',
           elements: [{
             type: 'mrkdwn',
-            text: `🕐 ${new Date(data.timestamp ?? Date.now()).toUTCString()}`,
+            text: `ðŸ• ${new Date(data.timestamp ?? Date.now()).toUTCString()}`,
           }],
         },
       ],
@@ -66,14 +66,14 @@ function formatSlack(event_type: string, data: Record<string, any>) {
   }
 }
 
-// ── Format payload for Discord ─────────────────────────────────
+// â”€â”€ Format payload for Discord â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function formatDiscord(event_type: string, data: Record<string, any>) {
-  const ev = EVENT_LABELS[event_type] ?? { label: event_type, emoji: '📡', color: 0x8FFF00 }
+  const ev = EVENT_LABELS[event_type] ?? { label: event_type, emoji: 'ðŸ“¡', color: 0x8FFF00 }
   const fields = Object.entries(data)
     .filter(([k]) => !['timestamp'].includes(k))
     .map(([k, v]) => ({
       name:   k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      value:  String(v) || '—',
+      value:  String(v) || 'â€”',
       inline: true,
     }))
 
@@ -89,7 +89,7 @@ function formatDiscord(event_type: string, data: Record<string, any>) {
   }
 }
 
-// ── Dispatch single webhook ────────────────────────────────────
+// â”€â”€ Dispatch single webhook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function dispatchWebhook(
   destination: any,
   event_type:  string,
@@ -157,7 +157,7 @@ async function dispatchWebhook(
   }
 }
 
-// ── POST /api/admin/webhooks — Trigger event ──────────────────
+// â”€â”€ POST /api/admin/webhooks â€” Trigger event â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
   try {
     const secret = req.headers.get('x-internal-secret')
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
       }, logRow?.id, 1)
 
       if (result.success) {
-        // Update log — success
+        // Update log â€” success
         await (adminClient.from('webhook_delivery_log') as any)
           .update({
             status:        'delivered',
@@ -249,7 +249,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ── GET /api/admin/webhooks — Fetch data (admin only) ─────────
+// â”€â”€ GET /api/admin/webhooks â€” Fetch data (admin only) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function GET(req: NextRequest) {
   try {
     const token = req.headers.get('authorization')?.replace('Bearer ', '')

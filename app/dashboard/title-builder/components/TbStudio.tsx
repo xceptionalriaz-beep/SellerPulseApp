@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/components/TbStudio.tsx
 // Converted 1:1 from lib/pages/title_builder/tb_studio.dart
 
@@ -20,31 +20,31 @@ interface Props {
 }
 export default function TbStudio({ value, onChange, charCount, veroCount, duplicateCount, onCopy }: Props) {
 
-  // 🚀 Clean trigger — matches Dart _cleanTitle()
+  // ðŸš€ Clean trigger â€” matches Dart _cleanTitle()
   function cleanTitle() {
     if (!value) return
     onChange(TitleCleanerEngine.clean(value))
   }
 
-  // 🚀 Spin trigger — matches Dart _spinTitle()
+  // ðŸš€ Spin trigger â€” matches Dart _spinTitle()
   function spinTitle() {
     if (!value) return
     onChange(TitleSpinnerEngine.spin(value, 3))
   }
 
-  // 🚀 AI Optimize simulator — matches Dart _runAIOptimize()
+  // ðŸš€ AI Optimize simulator â€” matches Dart _runAIOptimize()
   function runAIOptimize() {
     // Ready for real API connection
-    alert('🚀 AI Engine warming up... (Ready for API connection!)')
+    alert('ðŸš€ AI Engine warming up... (Ready for API connection!)')
   }
 
-  // Strength meter — matches Dart progress + strengthColor logic
+  // Strength meter â€” matches Dart progress + strengthColor logic
   const progress      = Math.min(charCount / 80, 1)
   const strengthColor = charCount > 80
     ? '#EF4444'
     : charCount >= 65 ? '#10B981' : '#F97316'
 
-  // Pill badge helper — matches Dart _pillBadge()
+  // Pill badge helper â€” matches Dart _pillBadge()
   function PillBadge({ text, textColor, bgColor }: { text: string; textColor: string; bgColor: string }) {
     return (
       <div className="px-2.5 py-1 rounded-full border text-[12px] font-bold"
@@ -54,7 +54,7 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
     )
   }
 
-  // Action button helper — matches Dart _actionBtn()
+  // Action button helper â€” matches Dart _actionBtn()
   function ActionBtn({ text, textColor, bgColor, onTap }: { text: string; textColor: string; bgColor: string; onTap: () => void }) {
     return (
       <button onClick={onTap}
@@ -72,7 +72,7 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
       {/* Section label */}
       <p className="text-[13px] font-bold mb-4" style={{ color: C.muted }}>THE AUTO TITLE BUILDER</p>
 
-      {/* Text box area — matches Dart Container with blue border */}
+      {/* Text box area â€” matches Dart Container with blue border */}
       <div className="rounded-xl border mb-5" style={{ borderColor: '#93C5FD', borderWidth: 1.5 }}>
         <div className="flex items-start gap-2 pl-4 pr-1 pt-1.5">
           <textarea value={value} onChange={e => onChange(e.target.value)} rows={2}
@@ -85,7 +85,7 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
           </button>
         </div>
 
-        {/* Mobile Cutoff line — matches Dart Stack visual */}
+        {/* Mobile Cutoff line â€” matches Dart Stack visual */}
         <div className="relative flex items-center mx-2.5 my-1">
           <div className="flex-1 h-px" style={{ backgroundColor: '#BFDBFE' }} />
           <div className="px-2 text-[10px] font-bold absolute left-1/2 -translate-x-1/2 bg-white"
@@ -96,7 +96,7 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
         <div className="pb-2" />
       </div>
 
-      {/* Alerts row — matches Dart Row with pill badges */}
+      {/* Alerts row â€” matches Dart Row with pill badges */}
       <div className="flex items-center gap-2 flex-wrap mb-4">
         <p className="text-[13px] font-bold" style={{ color: C.muted }}>Alerts:</p>
         <PillBadge
@@ -111,7 +111,7 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
         />
       </div>
 
-      {/* Strength meter — matches Dart LinearProgressIndicator */}
+      {/* Strength meter â€” matches Dart LinearProgressIndicator */}
       <div className="flex items-center gap-2 mb-6">
         <p className="text-[13px] font-bold shrink-0" style={{ color: C.muted }}>Strength:</p>
         <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: '#E5E7EB' }}>
@@ -123,12 +123,12 @@ export default function TbStudio({ value, onChange, charCount, veroCount, duplic
         </p>
       </div>
 
-      {/* Action buttons — matches Dart Row */}
+      {/* Action buttons â€” matches Dart Row */}
       <div className="flex items-center gap-2.5 flex-wrap">
         <p className="text-[13px] font-bold" style={{ color: C.muted }}>Actions:</p>
-        <ActionBtn text="✨ AI Optimize" textColor="#7C3AED" bgColor="#F5F3FF" onTap={runAIOptimize} />
-        <ActionBtn text="🧹 Clean"       textColor="#1D4ED8" bgColor="#EFF6FF" onTap={cleanTitle}    />
-        <ActionBtn text="🔄 Spin"        textColor="#0F766E" bgColor="#F0FDFA" onTap={spinTitle}     />
+        <ActionBtn text="âœ¨ AI Optimize" textColor="#7C3AED" bgColor="#F5F3FF" onTap={runAIOptimize} />
+        <ActionBtn text="ðŸ§¹ Clean"       textColor="#1D4ED8" bgColor="#EFF6FF" onTap={cleanTitle}    />
+        <ActionBtn text="ðŸ”„ Spin"        textColor="#0F766E" bgColor="#F0FDFA" onTap={spinTitle}     />
       </div>
 
     </div>

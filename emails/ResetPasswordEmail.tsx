@@ -1,4 +1,4 @@
-// emails/ResetPasswordEmail.tsx
+﻿// emails/ResetPasswordEmail.tsx
 // Password reset email
 
 import {
@@ -18,16 +18,16 @@ export function ResetPasswordEmail({
   return (
     <Html>
       <Head />
-      <Preview>Reset your Riazify password — link expires in 1 hour</Preview>
+      <Preview>Reset your Riazify password â€” link expires in 1 hour</Preview>
       <Body style={main}>
         <Container style={container}>
 
           <Section style={header}>
-            <Text style={logoText}>⚡ Riazify</Text>
+            <Text style={logoText}>âš¡ Riazify</Text>
           </Section>
 
           <Section style={body}>
-            <div style={iconWrap}>🔑</div>
+            <div style={iconWrap}>ðŸ”‘</div>
             <Heading style={h1}>Reset your password</Heading>
             <Text style={bodyText}>
               Hey {userName}, we received a request to reset your Riazify password.
@@ -36,25 +36,25 @@ export function ResetPasswordEmail({
 
             <Section style={warningCard}>
               <Text style={warningText}>
-                ⏰ This link expires in <strong>1 hour</strong> for your security.
+                â° This link expires in <strong>1 hour</strong> for your security.
               </Text>
             </Section>
 
             <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
               <Button style={ctaButton} href={resetUrl}>
-                Reset My Password →
+                Reset My Password â†’
               </Button>
             </Section>
 
             <Text style={disclaimer}>
-              If you didn't request a password reset, ignore this email — your
+              If you didn't request a password reset, ignore this email â€” your
               account is safe and your password hasn't changed.
             </Text>
           </Section>
 
           <Hr style={divider} />
           <Section style={footer}>
-            <Text style={footerText}>© 2026 Riazify — Built for eBay operators.</Text>
+            <Text style={footerText}>Â© 2026 Riazify â€” Built for eBay operators.</Text>
           </Section>
 
         </Container>

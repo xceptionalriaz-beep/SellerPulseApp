@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 // components/dashboard/PlanCards.tsx
-// Reusable plan cards — used in BillingTab
+// Reusable plan cards â€” used in BillingTab
 // Reads from landing_pricing table, highlights current plan
 
 import { useEffect, useState } from 'react'
@@ -71,11 +71,11 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
   }
 
   async function handleCta(plan: DBPlan) {
-    // Current plan — do nothing
+    // Current plan â€” do nothing
     if (currentPlan?.toLowerCase() === plan.plan_id) return
-    // Custom — contact sales
+    // Custom â€” contact sales
     if (plan.plan_id === 'custom') { window.open('/contact', '_blank'); return }
-    // Free — no action needed from billing tab
+    // Free â€” no action needed from billing tab
     if (plan.plan_id === 'free') return
 
     setCheckoutLoading(plan.plan_id)
@@ -308,7 +308,7 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
                   })}
                 </div>
 
-                {/* Hover tooltip — current plan only */}
+                {/* Hover tooltip â€” current plan only */}
                 {isCurrent && isHovered && (
                   <div
                     className="rounded-xl px-3 py-2 flex items-center gap-2"
@@ -316,7 +316,7 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
                   >
                     <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: T.lime, flexShrink: 0, boxShadow: `0 0 6px ${T.lime}` }} />
                     <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600, color: T.limeDeep }}>
-                      Active — renewing automatically
+                      Active â€” renewing automatically
                     </span>
                   </div>
                 )}

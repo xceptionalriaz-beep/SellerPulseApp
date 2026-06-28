@@ -1,4 +1,4 @@
-// app/api/ebay/search/route.ts
+﻿// app/api/ebay/search/route.ts
 // Real eBay keyword search for Title Builder
 // Uses Finding API to get real keyword data
 
@@ -11,7 +11,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Get eBay OAuth token using App ID + Cert ID ─────────────────
+// â”€â”€ Get eBay OAuth token using App ID + Cert ID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function getAppToken(): Promise<string | null> {
   try {
     const clientId     = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
@@ -44,11 +44,11 @@ export async function GET(req: NextRequest) {
   const start = Date.now()
 
   try {
-    // ── Get app-level token ─────────────────────────────────
+    // â”€â”€ Get app-level token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = await getAppToken()
     if (!token) return NextResponse.json({ error: 'Failed to get eBay token' }, { status: 500 })
 
-    // ── Search eBay using Browse API ────────────────────────
+    // â”€â”€ Search eBay using Browse API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const searchRes = await fetch(
       `https://api.ebay.com/buy/browse/v1/item_summary/search` +
       `?q=${encodeURIComponent(keyword)}` +
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
     const data  = await searchRes.json()
     const items = data.itemSummaries ?? []
 
-    // ── Process results into keyword tables format ──────────
+    // â”€â”€ Process results into keyword tables format â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Extract unique keywords from titles
     const titleWords: Record<string, number> = {}
     items.forEach((item: any) => {
@@ -116,11 +116,11 @@ export async function GET(req: NextRequest) {
       sales:  (count * 89).toString(),
     }))
 
-    // ── Saturation score (based on result count) ─────────────
+    // â”€â”€ Saturation score (based on result count) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const total         = data.total ?? 0
     const saturScore    = Math.min(total / 100000, 1)
 
-    // ── Trend data (mock based on real search volume) ─────────
+    // â”€â”€ Trend data (mock based on real search volume) â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const trendBase  = Math.max(10, Math.min(total / 1000, 100))
     const trendData  = Array.from({ length: 12 }, (_, i) =>
       Math.round(trendBase * (0.7 + Math.random() * 0.6))
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
 
     const responseTime = Date.now() - start
 
-    // ── Log API usage ───────────────────────────────────────
+    // â”€â”€ Log API usage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       const { data: curr } = await (adminClient.from('api_fleet_config') as any)
         .select('rate_limit_used, requests_today')

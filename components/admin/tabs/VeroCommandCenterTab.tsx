@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/VeroCommandCenterTab.tsx
 // Fixed: confirm delete, CORS proxy, success feedback, click-outside, loading states, brand colors, CSV errors
 
@@ -10,7 +10,7 @@ import {
   AlertTriangle, Trash2, ChevronDown,
 } from 'lucide-react'
 
-// ── Brand colors (from Riazify design PDF) ─────────────────────
+// â”€â”€ Brand colors (from Riazify design PDF) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   dark:     '#0a0d08',
   lime:     '#8fff00',
@@ -25,9 +25,9 @@ const C = {
 }
 
 function getRiskColor(risk: string) {
-  if (risk === 'Critical Ban') return '#b91c1c'  // red text   — brand PDF
-  if (risk === 'High Risk')    return '#92400e'  // amber text — brand PDF
-  return '#2d6a00'                               // lime text  — brand PDF
+  if (risk === 'Critical Ban') return '#b91c1c'  // red text   â€” brand PDF
+  if (risk === 'High Risk')    return '#92400e'  // amber text â€” brand PDF
+  return '#2d6a00'                               // lime text  â€” brand PDF
 }
 function getRiskBg(risk: string) {
   if (risk === 'Critical Ban') return '#fff0f0'  // red tint
@@ -46,7 +46,7 @@ interface Props {
   startChartAnimation?: boolean
 }
 
-// ── Confirm delete dialog ─────────────────────────────────────
+// â”€â”€ Confirm delete dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ConfirmDialog({ brand, onClose, onConfirm }: {
   brand: string; onClose: () => void; onConfirm: () => void
 }) {
@@ -82,7 +82,7 @@ function ConfirmDialog({ brand, onClose, onConfirm }: {
   )
 }
 
-// ── Reusable FocusInput — lime border outside on focus ────────
+// â”€â”€ Reusable FocusInput â€” lime border outside on focus â”€â”€â”€â”€â”€â”€â”€â”€
 function FocusInput({ value, onChange, placeholder, onKeyDown, className, type }: {
   value: string
   onChange: (v: string) => void
@@ -114,7 +114,7 @@ function FocusInput({ value, onChange, placeholder, onKeyDown, className, type }
   )
 }
 
-// ── Search bar — smooth lime border outside on focus ──────────
+// â”€â”€ Search bar â€” smooth lime border outside on focus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SearchBar({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (v: string) => void }) {
   const [focused, setFocused] = useState(false)
   return (
@@ -143,7 +143,7 @@ function SearchBar({ searchQuery, setSearchQuery }: { searchQuery: string; setSe
   )
 }
 
-// ── Risk Dropdown — pill style matching admin page design ─────
+// â”€â”€ Risk Dropdown â€” pill style matching admin page design â”€â”€â”€â”€â”€
 function RiskDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false)
   const options = ['Critical Ban', 'High Risk', 'Caution']
@@ -252,7 +252,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
   const [removingBrand,  setRemovingBrand]  = useState<string | null>(null)
   const [confirmBrand,   setConfirmBrand]   = useState<string | null>(null)  // Fix 1
 
-  // Fix 3 — success/error feedback states
+  // Fix 3 â€” success/error feedback states
   const [addSuccess,     setAddSuccess]     = useState(false)
   const [syncFeedback,   setSyncFeedback]   = useState<{ ok: boolean; msg: string } | null>(null)
   const [csvError,       setCsvError]       = useState<string | null>(null)  // Fix 7
@@ -270,7 +270,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
   const fileRef      = useRef<HTMLInputElement>(null)
   const filterRef    = useRef<HTMLDivElement>(null)  // Fix 4
 
-  // Fix 4 — close filter on outside click
+  // Fix 4 â€” close filter on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
@@ -309,7 +309,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
         alert('This brand is already in the database!')
       } else {
         setBrandName(''); setEvidenceUrl('')
-        // Fix 3 — success feedback
+        // Fix 3 â€” success feedback
         setAddSuccess(true)
         setTimeout(() => setAddSuccess(false), 3000)
         await fetchLiveDatabase()
@@ -318,7 +318,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
     setIsAdding(false)
   }
 
-  // Fix 7 — CSV error feedback + validation
+  // Fix 7 â€” CSV error feedback + validation
   async function processCSVData(csv: string, source: string) {
     setCsvError(null)
     const lines = csv.split('\n')
@@ -344,18 +344,18 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
     }
 
     if (toUpload.length === 0) {
-      setCsvError('❌ No valid brands found in file. Check CSV format: Brand Name, Risk Level, Evidence URL')
+      setCsvError('âŒ No valid brands found in file. Check CSV format: Brand Name, Risk Level, Evidence URL')
       setIsSyncing(false)
       return
     }
 
     try {
       await (supabase.from('vero_brands') as any).upsert(toUpload, { onConflict: 'brand_name' })
-      setSyncFeedback({ ok: true, msg: `✅ ${toUpload.length} brands synced successfully!` })
+      setSyncFeedback({ ok: true, msg: `âœ… ${toUpload.length} brands synced successfully!` })
       setTimeout(() => setSyncFeedback(null), 4000)
       await fetchLiveDatabase()
     } catch (e) {
-      setSyncFeedback({ ok: false, msg: '❌ Sync failed — check Supabase connection' })
+      setSyncFeedback({ ok: false, msg: 'âŒ Sync failed â€” check Supabase connection' })
       setTimeout(() => setSyncFeedback(null), 4000)
       console.error(e)
     }
@@ -377,7 +377,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
     await fetchLiveDatabase()
   }
 
-  // Fix 1 + 5 — confirm dialog + loading state on remove
+  // Fix 1 + 5 â€” confirm dialog + loading state on remove
   async function removeBrand(name: string) {
     setRemovingBrand(name)
     try {
@@ -394,7 +394,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
     return url
   }
 
-  // Fix 2 — Google Sheets CORS: use Supabase Edge Function as proxy
+  // Fix 2 â€” Google Sheets CORS: use Supabase Edge Function as proxy
   async function syncGoogleSheet(url: string) {
     setIsSyncing(true)
     setCsvError(null)
@@ -418,13 +418,13 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
         if (!res.ok) throw new Error('Failed to load sheet')
         text = await res.text()
         if (text.toLowerCase().includes('<!doctype html')) {
-          throw new Error('HTML returned — make sure sheet is public')
+          throw new Error('HTML returned â€” make sure sheet is public')
         }
       }
 
       await processCSVData(text, 'Google Sheets')
     } catch (e: any) {
-      setSyncFeedback({ ok: false, msg: `❌ ${e.message ?? 'Sync failed — make sheet public first'}` })
+      setSyncFeedback({ ok: false, msg: `âŒ ${e.message ?? 'Sync failed â€” make sheet public first'}` })
       setTimeout(() => setSyncFeedback(null), 5000)
       setIsSyncing(false)
     }
@@ -434,7 +434,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.name.endsWith('.csv')) {
-      setCsvError('❌ Only CSV files are supported')
+      setCsvError('âŒ Only CSV files are supported')
       return
     }
     setIsSyncing(true)
@@ -521,13 +521,13 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
           Add restricted brands here. Changes apply globally to all users instantly.
         </p>
 
-        {/* Fix 3 — Add success banner */}
+        {/* Fix 3 â€” Add success banner */}
         {addSuccess && (
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border mb-4"
                style={{ backgroundColor: C.limeTint, borderColor: C.lime+'50' }}>
             <CheckCircle size={14} style={{ color: C.limeDeep }} />
             <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>
-              ✅ Brand added successfully! All users are now protected.
+              âœ… Brand added successfully! All users are now protected.
             </p>
           </div>
         )}
@@ -568,7 +568,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
           <div className="flex-1 h-px" style={{ backgroundColor: C.border }} />
         </div>
 
-        {/* Fix 7 — CSV error banner */}
+        {/* Fix 7 â€” CSV error banner */}
         {csvError && (
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border mb-4"
                style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
@@ -620,7 +620,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
             <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
           </div>
 
-          {/* Fix 2 — Google Sheets with proxy info */}
+          {/* Fix 2 â€” Google Sheets with proxy info */}
           <div className={isMobile ? 'w-full' : 'flex-1'}
                onClick={() => !isSyncing && setShowGSheet(true)}
                style={{
@@ -640,7 +640,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
       <div className="flex gap-3">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-        {/* Fix 4 — click-outside ref on filter */}
+        {/* Fix 4 â€” click-outside ref on filter */}
         <div className="relative" ref={filterRef}>
           <button onClick={() => setShowFilter(s => !s)}
             className="h-11 w-11 flex items-center justify-center rounded-xl border transition-all"
@@ -726,7 +726,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
                   {b.brand_name}
                 </span>
                 {b.evidence_url && <Link size={11} style={{ color: C.hint }} />}
-                {/* Fix 1 — confirm before delete */}
+                {/* Fix 1 â€” confirm before delete */}
                 <button
                   onClick={() => setConfirmBrand(b.brand_name)}
                   disabled={isRemoving}
@@ -743,7 +743,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
         </div>
       )}
 
-      {/* Fix 1 — confirm delete dialog */}
+      {/* Fix 1 â€” confirm delete dialog */}
       {confirmBrand && (
         <ConfirmDialog
           brand={confirmBrand}

@@ -1,10 +1,10 @@
-// app/api/webhooks/stripe/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/webhooks/stripe/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Stripe webhook handler
 // Listens for Stripe events and fires internal webhooks
-// Pre-wired and ready — just add STRIPE_WEBHOOK_SECRET when
+// Pre-wired and ready â€” just add STRIPE_WEBHOOK_SECRET when
 // you connect Stripe and it works automatically
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -16,7 +16,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Verify Stripe signature ────────────────────────────────────
+// â”€â”€ Verify Stripe signature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function verifyStripeSignature(
   payload:   string,
   signature: string,
@@ -41,7 +41,7 @@ function verifyStripeSignature(
   } catch { return false }
 }
 
-// ── Get plan name from Stripe price ───────────────────────────
+// â”€â”€ Get plan name from Stripe price â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getPlanName(priceId: string | null): string {
   // Map your Stripe price IDs to plan names
   // Update these when you create prices in Stripe
@@ -56,7 +56,7 @@ function getPlanName(priceId: string | null): string {
   return priceId ? (PRICE_MAP[priceId] ?? 'Paid Plan') : 'Paid Plan'
 }
 
-// ── Fire internal webhook ──────────────────────────────────────
+// â”€â”€ Fire internal webhook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function fireWebhook(
   req:        NextRequest,
   event_type: string,
@@ -75,7 +75,7 @@ async function fireWebhook(
   } catch { /* non-critical */ }
 }
 
-// ── Update profile plan in Supabase ───────────────────────────
+// â”€â”€ Update profile plan in Supabase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function updateUserPlan(
   stripeCustomerId: string,
   planName:         string,
@@ -92,13 +92,13 @@ async function updateUserPlan(
   } catch { /* non-critical */ }
 }
 
-// ── Main webhook handler ───────────────────────────────────────
+// â”€â”€ Main webhook handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
   const payload   = await req.text()
   const signature = req.headers.get('stripe-signature') ?? ''
   const secret    = process.env.STRIPE_WEBHOOK_SECRET ?? ''
 
-  // ── Verify signature if secret is configured ─────────────────
+  // â”€â”€ Verify signature if secret is configured â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (secret) {
     const valid = verifyStripeSignature(payload, signature, secret)
     if (!valid) {
@@ -106,9 +106,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
   } else {
-    // Secret not configured yet — log and continue
+    // Secret not configured yet â€” log and continue
     // This is fine during development/pre-Stripe setup
-    console.log('[stripe-webhook] STRIPE_WEBHOOK_SECRET not set — skipping verification')
+    console.log('[stripe-webhook] STRIPE_WEBHOOK_SECRET not set â€” skipping verification')
   }
 
   let event: any
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (event.type) {
 
-      // ── Subscription created or upgraded ─────────────────────
+      // â”€â”€ Subscription created or upgraded â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const customerId = obj.customer
@@ -133,12 +133,12 @@ export async function POST(req: NextRequest) {
         const planName   = getPlanName(priceId)
         const amount     = obj.items?.data?.[0]?.price?.unit_amount
           ? `$${(obj.items.data[0].price.unit_amount / 100).toFixed(2)}`
-          : '—'
+          : 'â€”'
         const interval   = obj.items?.data?.[0]?.price?.recurring?.interval ?? 'month'
         const status     = obj.status
 
         // Get user email from Stripe customer
-        let userEmail = obj.customer_email ?? '—'
+        let userEmail = obj.customer_email ?? 'â€”'
         try {
           const { data: profile } = await (adminClient.from('profiles') as any)
             .select('email, name').eq('stripe_customer_id', customerId).single()
@@ -158,14 +158,14 @@ export async function POST(req: NextRequest) {
         break
       }
 
-      // ── Payment succeeded ─────────────────────────────────────
+      // â”€â”€ Payment succeeded â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'invoice.payment_succeeded': {
         const customerId = obj.customer
         const amount     = obj.amount_paid
           ? `$${(obj.amount_paid / 100).toFixed(2)}`
-          : '—'
+          : 'â€”'
 
-        let userEmail = obj.customer_email ?? '—'
+        let userEmail = obj.customer_email ?? 'â€”'
         try {
           const { data: profile } = await (adminClient.from('profiles') as any)
             .select('email, plan_name').eq('stripe_customer_id', customerId).single()
@@ -180,19 +180,19 @@ export async function POST(req: NextRequest) {
         break
       }
 
-      // ── Payment failed ────────────────────────────────────────
+      // â”€â”€ Payment failed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'invoice.payment_failed': {
         const customerId  = obj.customer
         const amount      = obj.amount_due
           ? `$${(obj.amount_due / 100).toFixed(2)}`
-          : '—'
+          : 'â€”'
         const attemptCount = obj.attempt_count ?? 1
         const nextAttempt  = obj.next_payment_attempt
           ? new Date(obj.next_payment_attempt * 1000).toLocaleDateString()
           : 'No retry scheduled'
 
-        let userEmail = obj.customer_email ?? '—'
-        let planName  = '—'
+        let userEmail = obj.customer_email ?? 'â€”'
+        let planName  = 'â€”'
         try {
           const { data: profile } = await (adminClient.from('profiles') as any)
             .select('email, plan_name').eq('stripe_customer_id', customerId).single()
@@ -212,13 +212,13 @@ export async function POST(req: NextRequest) {
         break
       }
 
-      // ── Subscription cancelled ────────────────────────────────
+      // â”€â”€ Subscription cancelled â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'customer.subscription.deleted': {
         const customerId = obj.customer
         const priceId    = obj.items?.data?.[0]?.price?.id ?? null
         const planName   = getPlanName(priceId)
 
-        let userEmail = '—'
+        let userEmail = 'â€”'
         try {
           const { data: profile } = await (adminClient.from('profiles') as any)
             .select('email').eq('stripe_customer_id', customerId).single()
@@ -236,16 +236,16 @@ export async function POST(req: NextRequest) {
         break
       }
 
-      // ── Checkout completed ────────────────────────────────────
+      // â”€â”€ Checkout completed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'checkout.session.completed': {
         const customerId = obj.customer
-        const userEmail  = obj.customer_email ?? obj.customer_details?.email ?? '—'
+        const userEmail  = obj.customer_email ?? obj.customer_details?.email ?? 'â€”'
         const amount     = obj.amount_total
           ? `$${(obj.amount_total / 100).toFixed(2)}`
-          : '—'
+          : 'â€”'
 
         // Save stripe_customer_id to profile by email
-        if (userEmail && userEmail !== '—') {
+        if (userEmail && userEmail !== 'â€”') {
           try {
             await (adminClient.from('profiles') as any)
               .update({ stripe_customer_id: customerId })

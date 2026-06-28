@@ -1,12 +1,12 @@
-'use client'
+﻿'use client'
 // components/admin/FullAuditLogModal.tsx
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Full Kill Switch Audit Log
-// → Paginated (25 per page)
-// → Filter by tool, action, date range
-// → Stats summary
-// → CSV export
-// ══════════════════════════════════════════════════════════════
+// â†’ Paginated (25 per page)
+// â†’ Filter by tool, action, date range
+// â†’ Stats summary
+// â†’ CSV export
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -237,7 +237,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
       }
       const mostAffected = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
 
-      // Calculate total offline duration by pairing DISABLED → ENABLED
+      // Calculate total offline duration by pairing DISABLED â†’ ENABLED
       let totalOfflineMs = 0
       for (const dis of disabled) {
         const title    = dis.metadata?.switch_title
@@ -248,7 +248,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
         if (nextEnable) {
           totalOfflineMs += new Date(nextEnable.created_at).getTime() - disTime
         } else {
-          // Still offline — count until now
+          // Still offline â€” count until now
           totalOfflineMs += Date.now() - disTime
         }
       }
@@ -259,7 +259,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
       const mins       = totalMins % 60
       const offlineStr = totalMins < 1 ? '< 1m' : hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
 
-      // SLA % — based on date range
+      // SLA % â€” based on date range
       const rangeDays = filterDate === 'today' ? 1 : filterDate === 'week' ? 7 : filterDate === 'month' ? 30 : filterDate === 'last_month' ? 30 : 365
       const rangeMs   = rangeDays * 24 * 60 * 60 * 1000
       const sla       = Math.max(0, ((rangeMs - totalOfflineMs) / rangeMs) * 100).toFixed(2)
@@ -294,8 +294,8 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
       ...entries.map(e => [
         actionLabel(e.action).label,
         e.metadata?.switch_title ?? (e.details ?? ''),
-        e.metadata?.previous === true ? 'ON' : e.metadata?.previous === false ? 'OFF' : '—',
-        e.metadata?.new_value === true ? 'ON' : e.metadata?.new_value === false ? 'OFF' : '—',
+        e.metadata?.previous === true ? 'ON' : e.metadata?.previous === false ? 'OFF' : 'â€”',
+        e.metadata?.new_value === true ? 'ON' : e.metadata?.new_value === false ? 'OFF' : 'â€”',
         e.admin_name ?? e.metadata?.admin_name ?? 'Unknown',
         e.metadata?.change_note ?? e.metadata?.label ?? '',
         e.metadata?.user_message ?? '',
@@ -337,7 +337,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
           <div className="flex-1">
             <p className="text-[15px] font-black" style={{ color: C.dark }}>Kill Switch Full History</p>
             <p className="text-[11px]" style={{ color: C.muted }}>
-              {totalCount} events · filtered view
+              {totalCount} events Â· filtered view
             </p>
           </div>
           <button onClick={exportCSV}
@@ -363,7 +363,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
               { label: 'Kill Alls',      value: stats.killAlls,                 color: C.red      },
               { label: 'Total Offline',  value: stats.totalOffline,             color: C.amber    },
               { label: 'SLA Uptime',     value: `${stats.sla}%`,               color: Number(stats.sla) >= 99 ? C.green : Number(stats.sla) >= 95 ? C.amber : C.red },
-              { label: 'Most Affected',  value: stats.mostAffected ?? '—',      color: C.amber    },
+              { label: 'Most Affected',  value: stats.mostAffected ?? 'â€”',      color: C.amber    },
             ].map((s, i) => (
               <div key={i} className="flex flex-col px-3 py-1.5 rounded-xl border"
                    style={{ backgroundColor: C.surface, borderColor: C.border }}>
@@ -408,7 +408,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
           </button>
 
           <p className="ml-auto text-[11px]" style={{ color: C.muted }}>
-            {totalCount} results · Page {page} of {totalPages || 1}
+            {totalCount} results Â· Page {page} of {totalPages || 1}
           </p>
         </div>
 
@@ -422,7 +422,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
                  borderColor: C.border,
                  backgroundColor: C.bg,
                }}>
-            {['ACTION', 'SWITCH NAME', 'BEFORE→AFTER', 'ADMIN', 'REASON', 'TIME'].map(h => (
+            {['ACTION', 'SWITCH NAME', 'BEFOREâ†’AFTER', 'ADMIN', 'REASON', 'TIME'].map(h => (
               <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
             ))}
           </div>
@@ -454,7 +454,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
               const newVal      = entry.metadata?.new_value
               const hasBefore   = typeof prevVal === 'boolean' && typeof newVal === 'boolean'
               const reason      = entry.metadata?.change_note ?? entry.metadata?.label ?? null
-              const switchTitle = entry.metadata?.switch_title ?? (entry.details ?? '—')
+              const switchTitle = entry.metadata?.switch_title ?? (entry.details ?? 'â€”')
 
               return (
                 <div key={entry.id}
@@ -489,7 +489,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
                     )}
                   </div>
 
-                  {/* BEFORE→AFTER */}
+                  {/* BEFOREâ†’AFTER */}
                   <div>
                     {hasBefore ? (
                       <div className="flex items-center gap-1">
@@ -497,7 +497,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
                               style={{ backgroundColor: prevVal ? C.limeTint : 'rgba(185,28,28,0.08)', color: prevVal ? C.limeDeep : C.red }}>
                           {prevVal ? 'ON' : 'OFF'}
                         </span>
-                        <span className="text-[9px]" style={{ color: C.muted }}>→</span>
+                        <span className="text-[9px]" style={{ color: C.muted }}>â†’</span>
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
                               style={{ backgroundColor: newVal ? C.limeTint : 'rgba(185,28,28,0.08)', color: newVal ? C.limeDeep : C.red }}>
                           {newVal ? 'ON' : 'OFF'}
@@ -506,11 +506,11 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
                     ) : isKillAll ? (
                       <div className="flex items-center gap-1">
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>ON</span>
-                        <span className="text-[9px]" style={{ color: C.muted }}>→</span>
+                        <span className="text-[9px]" style={{ color: C.muted }}>â†’</span>
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>OFF</span>
                       </div>
                     ) : (
-                      <span className="text-[10px]" style={{ color: C.muted }}>—</span>
+                      <span className="text-[10px]" style={{ color: C.muted }}>â€”</span>
                     )}
                   </div>
 
@@ -529,7 +529,7 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
                         "{reason}"
                       </p>
                     ) : (
-                      <span className="text-[10px]" style={{ color: C.muted }}>—</span>
+                      <span className="text-[10px]" style={{ color: C.muted }}>â€”</span>
                     )}
                   </div>
 

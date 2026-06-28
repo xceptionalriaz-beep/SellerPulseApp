@@ -1,8 +1,8 @@
-// app/api/admin/plan-limits/update/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/admin/plan-limits/update/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Updates plan limits for a specific plan
-// Admin only — logs every change to admin_logs
-// ══════════════════════════════════════════════════════════════
+// Admin only â€” logs every change to admin_logs
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── Verify admin ───────────────────────────────────────────
+    // â”€â”€ Verify admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -33,13 +33,13 @@ export async function POST(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 })
 
-    // ── Fetch existing plan for audit log ──────────────────────
+    // â”€â”€ Fetch existing plan for audit log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: existing } = await (adminClient.from('plan_limits') as any)
       .select('*').eq('id', id).single()
 
     if (!existing) return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
 
-    // ── Validate numeric fields ────────────────────────────────
+    // â”€â”€ Validate numeric fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const numericFields = [
       'max_monthly_searches', 'max_vero_checks', 'max_tracked_items',
       'max_orders_protected', 'max_ebay_stores', 'max_competitor_scans',
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Update plan ────────────────────────────────────────────
+    // â”€â”€ Update plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: updated, error: updateErr } = await (adminClient.from('plan_limits') as any)
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
@@ -72,9 +72,9 @@ export async function POST(req: NextRequest) {
 
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
-    // ── Audit log ──────────────────────────────────────────────
+    // â”€â”€ Audit log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
-      // Build diff — only log what changed
+      // Build diff â€” only log what changed
       const changes: Record<string, { from: any; to: any }> = {}
       for (const key of Object.keys(updates)) {
         if ((existing as any)[key] !== updates[key]) {

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/AffiliateTracker.tsx
 // Add to root layout: <AffiliateTracker />
 // Silently fires click tracking when riazify_click cookie is detected
@@ -25,13 +25,13 @@ export default function AffiliateTracker() {
       })
         .then(() => {
           // Clear the click cookie so we don't double count
-          // (riazify_ref stays — needed for signup attribution)
+          // (riazify_ref stays â€” needed for signup attribution)
           document.cookie = 'riazify_click=; max-age=0; path=/'
         })
         .catch(err => console.error('[AffiliateTracker]', err))
     }
   }, [])
 
-  // Renders nothing — invisible tracker
+  // Renders nothing â€” invisible tracker
   return null
 }

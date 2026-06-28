@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/GlobalApiFleetTab.tsx
 // Fixed: performance, activity scope, testAllApis, mobile layout, brand colors
 
@@ -924,7 +924,7 @@ if (status === 'connected' && name !== 'amazon_spapi') connected++
                 style={{ borderColor: C.border, color: C.txt2 }}>Cancel</button>
               <button onClick={resetCounters}
                 className="flex-1 py-2 rounded-lg text-[13px] font-bold"
-                style={{ backgroundColor: C.dark, color: C.lime }}>Reset</button>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>Reset</button>
             </div>
           </div>
         </div>

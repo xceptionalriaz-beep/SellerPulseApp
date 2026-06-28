@@ -1,4 +1,4 @@
-// emails/AlertEmail.tsx
+﻿// emails/AlertEmail.tsx
 // Market alert / niche intelligence notification email
 
 import {
@@ -16,10 +16,10 @@ interface AlertEmailProps {
 }
 
 const ALERT_CONFIG = {
-  saturation_spike: { emoji: '📈', color: '#ef4444', label: 'Saturation Spike Detected'  },
-  price_drop:       { emoji: '📉', color: '#f59e0b', label: '$5 Price Drop Event'         },
-  trend_surge:      { emoji: '🚀', color: '#4a8f00', label: 'Demand Surge Detected'       },
-  dead_stock_risk:  { emoji: '⚠️', color: '#ef4444', label: 'Dead Stock Risk Alert'       },
+  saturation_spike: { emoji: 'ðŸ“ˆ', color: '#ef4444', label: 'Saturation Spike Detected'  },
+  price_drop:       { emoji: 'ðŸ“‰', color: '#f59e0b', label: '$5 Price Drop Event'         },
+  trend_surge:      { emoji: 'ðŸš€', color: '#4a8f00', label: 'Demand Surge Detected'       },
+  dead_stock_risk:  { emoji: 'âš ï¸', color: '#ef4444', label: 'Dead Stock Risk Alert'       },
 }
 
 export function AlertEmail({
@@ -35,12 +35,12 @@ export function AlertEmail({
   return (
     <Html>
       <Head />
-      <Preview>{cfg.emoji} {cfg.label} — {nicheKeyword} | Riazify Intelligence</Preview>
+      <Preview>{cfg.emoji} {cfg.label} â€” {nicheKeyword} | Riazify Intelligence</Preview>
       <Body style={main}>
         <Container style={container}>
 
           <Section style={header}>
-            <Text style={logoText}>⚡ Riazify</Text>
+            <Text style={logoText}>âš¡ Riazify</Text>
             <Text style={headerSub}>Market Intelligence Alert</Text>
           </Section>
 
@@ -81,13 +81,13 @@ export function AlertEmail({
                 <div style={{ ...meterFill, width: alertType === 'saturation_spike' ? '72%' : '24%' }} />
               </div>
               <Text style={meterNote}>
-                {alertType === 'saturation_spike' ? '⚠️ High — review before sourcing' : '✅ Low (Ideal) — good entry point'}
+                {alertType === 'saturation_spike' ? 'âš ï¸ High â€” review before sourcing' : 'âœ… Low (Ideal) â€” good entry point'}
               </Text>
             </Section>
 
             <Section style={{ textAlign: 'center' as const, margin: '24px 0' }}>
               <Button style={ctaButton} href={loginUrl}>
-                View Full Analysis →
+                View Full Analysis â†’
               </Button>
             </Section>
           </Section>
@@ -97,7 +97,7 @@ export function AlertEmail({
             <Text style={footerText}>
               You're receiving this because you have market alerts enabled on Riazify.
             </Text>
-            <Text style={footerText}>© 2026 Riazify — Built for eBay operators.</Text>
+            <Text style={footerText}>Â© 2026 Riazify â€” Built for eBay operators.</Text>
           </Section>
 
         </Container>

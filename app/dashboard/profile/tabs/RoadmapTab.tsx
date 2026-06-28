@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/RoadmapTab.tsx
 // Roadmap tab inside user profile — logged-in users vote + submit requests
 
@@ -146,7 +146,7 @@ export default function RoadmapUserTab() {
           </a>
           <button onClick={() => setShowSubmit(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14} /> Request Feature
           </button>
         </div>
@@ -304,7 +304,7 @@ export default function RoadmapUserTab() {
                   style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
                 <button onClick={handleSubmit} disabled={!title.trim() || submitting}
                   className="flex-1 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {submitting ? 'Submitting...' : 'Submit'}
                 </button>
               </div>

@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 // components/admin/AdminLayoutGuard.tsx
-// ══════════════════════════════════════════════════════════════
-// RIAZIFY — Admin Layout Guard
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// RIAZIFY â€” Admin Layout Guard
 // Renders a hard 403 block BEFORE the tab content mounts.
 // Prevents URL tampering, data flash, and escape-key exploits.
 // Wrap each tab content in SettingsLayout with this component.
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { Shield, Lock } from 'lucide-react'
 import { AdminPermissions } from '@/hooks/useAdminPermissions'
@@ -35,7 +35,7 @@ export default function AdminLayoutGuard({
   children,
 }: AdminLayoutGuardProps) {
 
-  // ── Still loading permissions — show neutral blocker ────────
+  // â”€â”€ Still loading permissions â€” show neutral blocker â”€â”€â”€â”€â”€â”€â”€â”€
   // This prevents ANY flash of content before we know the user's scopes
   if (permissions.loading) {
     return (
@@ -49,7 +49,7 @@ export default function AdminLayoutGuard({
     )
   }
 
-  // ── Not an admin at all ──────────────────────────────────────
+  // â”€â”€ Not an admin at all â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (!permissions.isAdmin && !permissions.isFounder) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
@@ -63,7 +63,7 @@ export default function AdminLayoutGuard({
     )
   }
 
-  // ── Check tab-level permission ───────────────────────────────
+  // â”€â”€ Check tab-level permission â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // canAccessTab returns false BEFORE children ever mount
   if (!permissions.canAccessTab(tabIndex)) {
     return (
@@ -108,6 +108,6 @@ export default function AdminLayoutGuard({
     )
   }
 
-  // ── Authorized — render content ──────────────────────────────
+  // â”€â”€ Authorized â€” render content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return <>{children}</>
 }

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/OverviewTab.tsx
 
 import { useState, useEffect, useCallback } from 'react'
@@ -218,14 +218,14 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
 
   if (isLoading) return <PageSpinner />
 
-  // ── MAIN VIEW ──────────────────────────────────────────────
+  // â”€â”€ MAIN VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="flex flex-col gap-5" style={{ fontFamily:'Inter,sans-serif' }}>
 
-      {/* ── TWO COLUMN LAYOUT ── */}
+      {/* â”€â”€ TWO COLUMN LAYOUT â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
 
-      {/* ── PROFILE CARD — left (3 cols) ── */}
+      {/* â”€â”€ PROFILE CARD â€” left (3 cols) â”€â”€ */}
       <div className="lg:col-span-3 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
 
         {/* Header row */}
@@ -273,7 +273,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
           )}
         </div>
 
-        {/* Profile fields — view mode */}
+        {/* Profile fields â€” view mode */}
         {!isEditing && (
           <>
             <div className="flex items-center px-6 py-3.5" style={{ borderBottom:`1px solid ${C.border}` }}>
@@ -319,7 +319,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
                       onClick={() => onTabChange?.(1)}
                       style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:600, color:C.blue }}
                     >
-                      Connect store →
+                      Connect store â†’
                     </button>
                   </div>
               }
@@ -420,7 +420,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
 
       </div>
 
-      {/* ── STATS — right (2 cols) ── */}
+      {/* â”€â”€ STATS â€” right (2 cols) â”€â”€ */}
       <div className="lg:col-span-2 grid grid-cols-2 gap-3" style={{ gridTemplateRows:'1fr 1fr' }}>
         <div className="p-4 rounded-2xl flex flex-col justify-between" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
           <div className="flex items-center justify-between mb-3">
@@ -489,7 +489,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
 
       </div>{/* end two-column grid */}
 
-      {/* ── TOOL USAGE ── */}
+      {/* â”€â”€ TOOL USAGE â”€â”€ */}
       <div className="w-full rounded-2xl overflow-hidden" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom:`1px solid ${C.border}` }}>
@@ -566,7 +566,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
                 </div>
               </div>
 
-              {/* Progress bar row — only for limited tools */}
+              {/* Progress bar row â€” only for limited tools */}
               {!isUnlimited && (
                 <div className="px-5 pb-3">
                   <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor:C.border }}>
@@ -574,7 +574,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
                   </div>
                   {(isAtLimit || isNear) && (
                     <p style={{ fontFamily:'Inter,sans-serif', fontSize:10, color:isAtLimit?C.red:C.orange, marginTop:4, fontWeight:600 }}>
-                      {isAtLimit ? 'You have reached your limit — upgrade your plan to continue.' : `You are ${(pct*100).toFixed(0)}% through your monthly limit.`}
+                      {isAtLimit ? 'You have reached your limit â€” upgrade your plan to continue.' : `You are ${(pct*100).toFixed(0)}% through your monthly limit.`}
                     </p>
                   )}
                 </div>
@@ -584,7 +584,7 @@ export default function OverviewTab({ onTabChange }: { onTabChange?: (i: number)
         })}
       </div>
 
-      {/* ── ACCOUNT HEALTH ── */}
+      {/* â”€â”€ ACCOUNT HEALTH â”€â”€ */}
       <div className="w-full p-5 rounded-2xl" style={{ backgroundColor:C.surface, border:`1px solid ${C.border}` }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

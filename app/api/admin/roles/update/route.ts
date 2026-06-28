@@ -1,10 +1,10 @@
-// app/api/admin/roles/update/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/roles/update/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Updates name, description and scopes of a custom role
-// Bumps updated_at timestamp → triggers stale session detection
+// Bumps updated_at timestamp â†’ triggers stale session detection
 // Requires admin Bearer token
 // Cannot modify system roles
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller is admin ──────────────────────────────
+    // â”€â”€ 1. Verify caller is admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { roleId, roleName, description, scopes } = await req.json()
 
     if (!roleId) return NextResponse.json({ error: 'roleId is required' }, { status: 400 })
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Scopes must be an array' }, { status: 400 })
     }
 
-    // ── 3. Check role exists and is not a system role ──────────
+    // â”€â”€ 3. Check role exists and is not a system role â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: existing } = await adminClient
       .from('admin_roles')
       .select('is_system_role, role_name')
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'System roles cannot be modified' }, { status: 403 })
     }
 
-    // ── 4. Update role — bump updated_at for stale session check
+    // â”€â”€ 4. Update role â€” bump updated_at for stale session check
     const now = new Date().toISOString()
     const { data, error } = await adminClient
       .from('admin_roles')
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // ── 5. Log to user_events ──────────────────────────────────
+    // â”€â”€ 5. Log to user_events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await adminClient.from('user_events').insert({
         user_id:     caller.id,

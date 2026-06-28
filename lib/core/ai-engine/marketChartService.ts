@@ -1,21 +1,21 @@
-// lib/core/ai-engine/marketChartService.ts
+﻿// lib/core/ai-engine/marketChartService.ts
 // Converted 1:1 from lib/core/services/market_chart_service.dart
 
 import { VolatilitySensor, MarketState, DataPoint } from './volatilitySensor'
 import { HybridRegressor }   from './hybridRegressor'
 import { ConfidenceScorer, ForecastSafetyMetrics } from './confidenceScorer'
 
-// ── ChartPackage (matches Dart ChartPackage class) ────────────
+// â”€â”€ ChartPackage (matches Dart ChartPackage class) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export interface ChartPackage {
   currentData:    DataPoint[]           // filtered + normalized
   forecastData:   DataPoint[]           // AI predicted future
   safety:         ForecastSafetyMetrics // confidence shadow band
-  percentChange:  number                // % change first → last
+  percentChange:  number                // % change first â†’ last
   marketState:    MarketState           // stable | momentum | uncertain
   predictionDays: number                // 3 | 7 | 15
 }
 
-// ── MarketChartService (matches Dart MarketChartService) ──────
+// â”€â”€ MarketChartService (matches Dart MarketChartService) â”€â”€â”€â”€â”€â”€
 export class MarketChartService {
 
   static prepareData({
@@ -31,7 +31,7 @@ export class MarketChartService {
     const daysToShow      = timeFrame === '7D' ? 7  : timeFrame === '90D' ? 90 : 30
     const predictionDays  = timeFrame === '7D' ? 3  : timeFrame === '90D' ? 15 : 7
 
-    // Safely slice — matches Dart: math.max(0, fullData.length - daysToShow - 1)
+    // Safely slice â€” matches Dart: math.max(0, fullData.length - daysToShow - 1)
     const startIndex  = Math.max(0, fullData.length - daysToShow - 1)
     const slicedData  = fullData.slice(startIndex)
 
@@ -62,7 +62,7 @@ export class MarketChartService {
       volatilityIndex: cv,
     })
 
-    // 4. Header stats — % change
+    // 4. Header stats â€” % change
     // matches Dart: (last - first) / first * 100
     let percentChange = 0
     if (currentData.length >= 2 && currentData[0].y !== 0) {
@@ -81,7 +81,7 @@ export class MarketChartService {
     }
   }
 
-  // ── _calculateCV (matches Dart _calculateCV) ─────────────────
+  // â”€â”€ _calculateCV (matches Dart _calculateCV) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private static _calculateCV(spots: DataPoint[]): number {
     if (spots.length === 0) return 0
     const mean = spots.reduce((a, b) => a + b.y, 0) / spots.length

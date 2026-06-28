@@ -1,8 +1,8 @@
-// app/api/admin/promo/delete-ab-test/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/promo/delete-ab-test/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Deletes an A/B test permanently
 // Founder only OR admin with manage_ab_tests scope
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -15,14 +15,14 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── Verify auth ────────────────────────────────────────────
+    // â”€â”€ Verify auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: { user: caller } } = await adminClient.auth.getUser(token)
     if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // ── Check founder or manage_ab_tests scope ─────────────────
+    // â”€â”€ Check founder or manage_ab_tests scope â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: profile } = await adminClient
       .from('profiles').select('role, name').eq('id', caller.id).single()
     const isFounder = (profile as any)?.role === 'admin'
@@ -42,21 +42,21 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Parse body ─────────────────────────────────────────────
+    // â”€â”€ Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { testId } = await req.json()
     if (!testId) return NextResponse.json({ error: 'testId is required' }, { status: 400 })
 
-    // ── Fetch test for logging ─────────────────────────────────
+    // â”€â”€ Fetch test for logging â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: test } = await (adminClient.from('ab_tests') as any)
       .select('name, status').eq('id', testId).single()
     if (!test) return NextResponse.json({ error: 'Test not found' }, { status: 404 })
 
-    // ── Delete test ────────────────────────────────────────────
+    // â”€â”€ Delete test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: deleteErr } = await (adminClient.from('ab_tests') as any)
       .delete().eq('id', testId)
     if (deleteErr) return NextResponse.json({ error: deleteErr.message }, { status: 500 })
 
-    // ── Log to admin_logs ──────────────────────────────────────
+    // â”€â”€ Log to admin_logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,

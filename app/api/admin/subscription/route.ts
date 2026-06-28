@@ -1,4 +1,4 @@
-// app/api/admin/subscription/route.ts
+﻿// app/api/admin/subscription/route.ts
 // Manages subscriptions via LemonSqueezy API
 // Actions: cancel, resume, change_plan
 
@@ -11,7 +11,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Get LS API key from DB ─────────────────────────────────────
+// â”€â”€ Get LS API key from DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function getLSKey(): Promise<string | null> {
   const { data } = await (adminClient.from('api_fleet_config') as any)
     .select('primary_key_1, status')
@@ -21,7 +21,7 @@ async function getLSKey(): Promise<string | null> {
   return (data as any)?.primary_key_1 ?? null
 }
 
-// ── Get variant ID for plan change ────────────────────────────
+// â”€â”€ Get variant ID for plan change â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function getVariantId(plan: string, billing: string): Promise<string | null> {
   const { data } = await (adminClient.from('ls_config') as any)
     .select('value')
@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Preview data check
-    if (!lsSubId || lsSubId === '—') {
-      return NextResponse.json({ error: 'No LemonSqueezy subscription ID — preview data only' }, { status: 400 })
+    if (!lsSubId || lsSubId === 'â€”') {
+      return NextResponse.json({ error: 'No LemonSqueezy subscription ID â€” preview data only' }, { status: 400 })
     }
 
     const lsKey = await getLSKey()
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     switch (action) {
 
-      // ── Cancel subscription ──────────────────────────────────
+      // â”€â”€ Cancel subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'cancel': {
         const res = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${lsSubId}`, {
           method:  'DELETE',
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: 'Subscription cancelled' })
       }
 
-      // ── Change plan (upgrade/downgrade) ──────────────────────
+      // â”€â”€ Change plan (upgrade/downgrade) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'change_plan': {
         if (!plan || !billing) {
           return NextResponse.json({ error: 'Missing plan or billing' }, { status: 400 })
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, message: `Plan changed to ${plan}` })
       }
 
-      // ── Resume cancelled subscription ────────────────────────
+      // â”€â”€ Resume cancelled subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       case 'resume': {
         const res = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${lsSubId}`, {
           method:  'PATCH',

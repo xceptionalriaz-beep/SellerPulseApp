@@ -816,7 +816,7 @@ function EditPanel({
           </button>
           <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Save size={14} /> Save Limits</>}

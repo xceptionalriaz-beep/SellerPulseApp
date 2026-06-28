@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/profit/CommandCenter.tsx
 // Converted 1:1 from lib/pages/command_center.dart
 
@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Info, Search, X, ChevronUp, ChevronDown } from 'lucide-react'
 import { createPortal } from 'react-dom'
 
-// ── Design tokens (matches Dart _C) ───────────────────────────
+// â”€â”€ Design tokens (matches Dart _C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   dark:        '#0F172A',
   lime:        '#8FFF00',
@@ -18,7 +18,7 @@ const C = {
   labelColor:  '#64748B',
 }
 
-// ── Props ──────────────────────────────────────────────────────
+// â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CommandCenterProps {
   currency:              string
   categoryFees:          string[]
@@ -45,7 +45,7 @@ interface CommandCenterProps {
   onInternationalChanged:(v: boolean) => void
 }
 
-// ── Speech bubble tooltip (matches Dart _TooltipSpeechBubbleShape) ──
+// â”€â”€ Speech bubble tooltip (matches Dart _TooltipSpeechBubbleShape) â”€â”€
 function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
   const [show, setShow] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -87,7 +87,7 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
   )
 }
 
-// ── Label with help icon (matches Dart _buildLabelWithHelp) ───
+// â”€â”€ Label with help icon (matches Dart _buildLabelWithHelp) â”€â”€â”€
 function LabelWithHelp({ label, tooltip }: { label: string; tooltip: string }) {
   return (
     <div className="flex items-center gap-1.5 min-w-0">
@@ -99,7 +99,7 @@ function LabelWithHelp({ label, tooltip }: { label: string; tooltip: string }) {
   )
 }
 
-// ── Input field (matches Dart _buildInput) ─────────────────────
+// â”€â”€ Input field (matches Dart _buildInput) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Input({
   label, tooltip, symbol, isSuffix = false, value, onChange
 }: {
@@ -147,7 +147,7 @@ function Input({
   )
 }
 
-// ── Dropdown (matches Dart _buildDropdown) ─────────────────────
+// â”€â”€ Dropdown (matches Dart _buildDropdown) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Dropdown({
   label, tooltip, value, items, onChange
 }: {
@@ -177,7 +177,7 @@ function Dropdown({
   )
 }
 
-// ── Searchable Category Dialog (matches Dart _showSearchDialog) ──
+// â”€â”€ Searchable Category Dialog (matches Dart _showSearchDialog) â”€â”€
 function SearchableCategoryDialog({
   currentValue, items, onSelect, onClose
 }: {
@@ -227,7 +227,7 @@ function SearchableCategoryDialog({
             style={{ color: C.textPrimary }}
             placeholder="Search (e.g., 'Watches', 'Shoes')" />
         </div>
-        {/* List — BouncingScrollPhysics = native scroll */}
+        {/* List â€” BouncingScrollPhysics = native scroll */}
         <div className="flex-1 overflow-y-auto space-y-1">
           {filtered.map(item => {
             const isSel = item === currentValue
@@ -250,7 +250,7 @@ function SearchableCategoryDialog({
   )
 }
 
-// ── Searchable Category trigger (matches Dart _buildSearchableCategory) ──
+// â”€â”€ Searchable Category trigger (matches Dart _buildSearchableCategory) â”€â”€
 function SearchableCategory({
   label, tooltip, currentValue, items, onChange
 }: {
@@ -282,7 +282,7 @@ function SearchableCategory({
   )
 }
 
-// ── Main Component ─────────────────────────────────────────────
+// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function CommandCenter({
   currency, categoryFees, storeTiers, sellerLevels, processors,
   isInternational, selectedCategory, selectedStoreTier, selectedSellerLevel, selectedProcessor,
@@ -321,7 +321,7 @@ export default function CommandCenter({
         {/* Divider */}
         <div className="h-px" style={{ backgroundColor: C.border }} />
 
-        {/* eBay Category — searchable */}
+        {/* eBay Category â€” searchable */}
         <SearchableCategory
           label="eBay Category"
           tooltip="What category does your product belong to? Search to find it faster."

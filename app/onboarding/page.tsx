@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/onboarding/page.tsx
 // ══════════════════════════════════════════════════════════════
 // Post-signup onboarding flow
@@ -189,7 +189,7 @@ export default function OnboardingPage() {
 
         <button onClick={goNext}
           className="w-full max-w-sm py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           Let's get started <ChevronRight size={18} />
         </button>
       </div>
@@ -242,7 +242,7 @@ export default function OnboardingPage() {
           </button>
           <button onClick={goNext} disabled={!source}
             className="flex-1 py-3 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Continue <ChevronRight size={16} />
           </button>
         </div>
@@ -299,7 +299,7 @@ export default function OnboardingPage() {
           </button>
           <button onClick={goNext} disabled={goals.length === 0}
             className="flex-1 py-3 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Almost done <ChevronRight size={16} />
           </button>
         </div>
@@ -348,7 +348,7 @@ export default function OnboardingPage() {
 
         <button onClick={handleFinish} disabled={saving}
           className="w-full max-w-sm py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2 disabled:opacity-40"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           {saving ? (
             <div className="w-5 h-5 rounded-full border-2 border-transparent animate-spin"
                  style={{ borderTopColor: C.lime }} />

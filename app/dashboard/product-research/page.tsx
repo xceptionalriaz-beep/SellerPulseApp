@@ -11,7 +11,7 @@ const C = {
   bg:     '#F8FAFC',
   white:  '#FFFFFF',
   lime:   '#8FFF00',
-  dark:   '#0F172A',
+  dark:   '#1a2410',
   muted:  '#94A3B8',
   border: '#E5E7EB',
 }

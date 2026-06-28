@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/roadmap/RoadmapClient.tsx
 
 import { useState, useEffect } from 'react'
@@ -421,7 +421,7 @@ export default function RoadmapClient() {
             {user && !search && (
               <button onClick={() => setShowSubmit(true)}
                 className="mt-4 px-5 py-2.5 rounded-xl text-[13px] font-bold"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 Request a Feature
               </button>
             )}
@@ -516,7 +516,7 @@ export default function RoadmapClient() {
                 </button>
                 <button onClick={handleSubmit} disabled={!title.trim() || submitting}
                   className="flex-1 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {submitting
                     ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                     : 'Submit Request'}

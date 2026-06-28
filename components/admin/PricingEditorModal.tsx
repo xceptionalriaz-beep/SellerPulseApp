@@ -360,7 +360,7 @@ export default function PricingEditorModal({ onClose }: Props) {
                 {/* Save button */}
                 <button onClick={() => savePlan(currentPlan)} disabled={!!saving}
                   className="flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-[14px] disabled:opacity-40"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {saving === currentPlan.id ? (
                     <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                   ) : saved === currentPlan.id ? (

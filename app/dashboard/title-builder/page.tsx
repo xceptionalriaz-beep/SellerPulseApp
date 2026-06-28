@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/page.tsx
 // Converted 1:1 from lib/pages/title_builder/title_builder_main.dart
 
@@ -15,35 +15,35 @@ const supabase = createClient()
 
 export default function TitleBuilderPage() {
 
-  // ── Title state ──────────────────────────────────────────────
+  // â”€â”€ Title state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [title,       setTitle]       = useState('')
   const [charCount,   setCharCount]   = useState(0)
   const [flaggedVero, setFlaggedVero] = useState<string[]>([])
   const [flaggedDups, setFlaggedDups] = useState<string[]>([])
   const [veroDb,      setVeroDb]      = useState<any[]>([])
 
-  // ── Master filters ───────────────────────────────────────────
+  // â”€â”€ Master filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [activeTimeframe, setActiveTimeframe] = useState('30D')
   const [activeMarket,    setActiveMarket]    = useState('eBay')
   const [activeLocation,  setActiveLocation]  = useState('US')
 
-  // ── Settings ─────────────────────────────────────────────────
+  // â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [autoCapitalize, setAutoCapitalize] = useState(true)
   const [autoCopy,       setAutoCopy]       = useState(false)
   const [veroMode,       setVeroMode]       = useState('Strict')
   const [showSettings,   setShowSettings]   = useState(false)
 
-  // ── Keyword data ─────────────────────────────────────────────
+  // â”€â”€ Keyword data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [isFetching,       setIsFetching]       = useState(false)
   const [longTailKeywords, setLongTailKeywords] = useState<any[]>([])
   const [genericKeywords,  setGenericKeywords]  = useState<any[]>([])
 
-  // ── MarketProvider data (replaces Dart Consumer<MarketProvider>) ──
+  // â”€â”€ MarketProvider data (replaces Dart Consumer<MarketProvider>) â”€â”€
   const [saturScore, setSaturScore] = useState(0)
   const [trendData,  setTrendData]  = useState<number[]>([])
   const [marketLoading, setMarketLoading] = useState(false)
 
-  // ── Load VeRO database on mount ───────────────────────────────
+  // â”€â”€ Load VeRO database on mount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     async function loadVeroDb() {
       try {
@@ -54,7 +54,7 @@ export default function TitleBuilderPage() {
     loadVeroDb()
   }, [])
 
-  // ── Analyze title on change (matches Dart _analyzeTitle) ─────
+  // â”€â”€ Analyze title on change (matches Dart _analyzeTitle) â”€â”€â”€â”€â”€
   useEffect(() => {
     const text  = title
     const words = text.toLowerCase().split(/\s+/).filter(Boolean)
@@ -89,7 +89,7 @@ export default function TitleBuilderPage() {
     }
   }, [title, veroDb, autoCopy])
 
-  // ── Extract item ID — real eBay API ──────────────────────────
+  // â”€â”€ Extract item ID â€” real eBay API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleExtract(itemId: string) {
     if (!itemId) return
     setIsFetching(true)
@@ -105,7 +105,7 @@ export default function TitleBuilderPage() {
     setIsFetching(false)
   }
 
-  // ── Search keyword — real eBay API ────────────────────────────
+  // â”€â”€ Search keyword â€” real eBay API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleSearch(keyword: string) {
     if (!keyword) return
     setMarketLoading(true)
@@ -134,14 +134,14 @@ export default function TitleBuilderPage() {
     setIsFetching(false)
   }
 
-  // ── Inject keyword (matches Dart injectKeyword) ───────────────
+  // â”€â”€ Inject keyword (matches Dart injectKeyword) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function injectKeyword(kw: string) {
     const separator = (!title || title.endsWith(' ')) ? '' : ' '
     const newText   = `${title}${separator}${kw} `
     setTitle(newText)
   }
 
-  // ── Award XP when title is copied ─────────────────────────────
+  // â”€â”€ Award XP when title is copied â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleTitleCopy() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -159,7 +159,7 @@ export default function TitleBuilderPage() {
     } catch { /* non-critical */ }
   }
 
-  // ── Title change handler with auto-capitalize ─────────────────
+  // â”€â”€ Title change handler with auto-capitalize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function handleTitleChange(val: string) {
     // Auto-capitalize if setting is on (matches Dart autoCapitalize)
     if (autoCapitalize) {

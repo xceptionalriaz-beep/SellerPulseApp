@@ -1,8 +1,8 @@
-// app/api/team/remove/route.ts
-// ─────────────────────────────────────────────────────────────
+﻿// app/api/team/remove/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Owner removes a team member OR member leaves a team
 // Both cases handled in one route
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { Resend }       from 'resend'
@@ -18,14 +18,14 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller ──────────────────────────────────────
+    // â”€â”€ 1. Verify caller â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: { user: caller } } = await supabase.auth.getUser(token)
     if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // ── 2. Parse body ─────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // ownerId + memberId: owner removing a member
     // ownerId only (caller is member): member leaving
     const { ownerId, memberId } = await req.json()
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const targetMemberId = memberId ?? caller.id
 
-    // ── 3. Permission check ───────────────────────────────────
+    // â”€â”€ 3. Permission check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Only owner OR the member themselves can remove
     const isOwner  = caller.id === ownerId
     const isMember = caller.id === targetMemberId
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
     }
 
-    // ── 4. Remove team member ─────────────────────────────────
+    // â”€â”€ 4. Remove team member â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: removeErr } = await supabase
       .from('team_members')
       .update({ status: 'removed' })
@@ -61,14 +61,14 @@ export async function POST(req: NextRequest) {
 
     if (removeErr) throw removeErr
 
-    // ── 5. Clear active_team_owner_id if member was switched ──
+    // â”€â”€ 5. Clear active_team_owner_id if member was switched â”€â”€
     await supabase
       .from('profiles')
       .update({ active_team_owner_id: null })
       .eq('id', targetMemberId)
       .eq('active_team_owner_id', ownerId)
 
-    // ── 6. Send email notification to removed member ─────────
+    // â”€â”€ 6. Send email notification to removed member â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (isOwner) {
       try {
         const { data: memberAuth } = await supabase.auth.admin.getUserById(targetMemberId)
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
             `,
           })
         }
-      } catch { /* non-critical — don't fail the removal */ }
+      } catch { /* non-critical â€” don't fail the removal */ }
     }
 
     return NextResponse.json({

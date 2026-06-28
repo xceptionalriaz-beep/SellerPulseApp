@@ -1,7 +1,7 @@
-// app/api/admin/metrics/route.ts
+﻿// app/api/admin/metrics/route.ts
 // Fetches real server metrics:
-// → Supabase DB size + active connections (via RPC)
-// → Vercel bandwidth (via Vercel API)
+// â†’ Supabase DB size + active connections (via RPC)
+// â†’ Vercel bandwidth (via Vercel API)
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
@@ -51,7 +51,7 @@ export async function GET() {
     error:                   null as string | null,
   }
 
-  // ── Supabase metrics ──────────────────────────────────────────
+  // â”€â”€ Supabase metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -78,7 +78,7 @@ export async function GET() {
     result.error = 'Supabase metrics unavailable'
   }
 
-  // ── Vercel metrics ─────────────────────────────────────────
+  // â”€â”€ Vercel metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   try {
     const token     = process.env.VERCEL_TOKEN
     const projectId = process.env.VERCEL_PROJECT_ID

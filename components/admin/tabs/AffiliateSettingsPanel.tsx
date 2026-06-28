@@ -506,7 +506,7 @@ export default function AffiliateSettingsPanel({ onClose, onSaved, settings: ini
           </button>
           <button onClick={save} disabled={saving}
             className="flex-1 py-3 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all hover:opacity-90"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving
               ? <><div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                        style={{ borderTopColor: C.lime }}></div> Saving...</>

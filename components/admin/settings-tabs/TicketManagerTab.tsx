@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/TicketManagerTab.tsx
 // Full ticket management tab for admin panel
 
@@ -11,7 +11,7 @@ import {
   User, Calendar, Tag, Flag, FileText, Trash2, Download,
 } from 'lucide-react'
 
-// ── Design tokens ──────────────────────────────────────────────
+// -- Design tokens ----------------------------------------------
 const C = {
   lime:     '#8fff00',
   limeDeep: '#4a8f00',
@@ -28,7 +28,7 @@ const C = {
   blue:     '#2563eb',
 }
 
-// ── Helpers ────────────────────────────────────────────────────
+// -- Helpers ----------------------------------------------------
 function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime()
   const m = Math.floor(diff / 60000)
@@ -66,7 +66,7 @@ function priorityConfig(priority: string) {
   }
 }
 
-// ── Main component ─────────────────────────────────────────────
+// -- Main component ---------------------------------------------
 export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count: number) => void }) {
   const supabase = createClient()
 
@@ -90,7 +90,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     setTimeout(() => setToast(null), 3000)
   }
 
-  // ── Load tickets ───────────────────────────────────────────
+  // -- Load tickets -------------------------------------------
   const loadTickets = useCallback(async () => {
     setLoading(true)
     try {
@@ -107,7 +107,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
 
   useEffect(() => { loadTickets() }, [loadTickets])
 
-  // ── Load replies for selected ticket ──────────────────────
+  // -- Load replies for selected ticket ----------------------
   async function loadReplies(ticketId: string) {
     const { data } = await (supabase.from('ticket_replies') as any)
       .select('*, profiles(full_name, email)')
@@ -116,7 +116,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     setReplies((data ?? []) as any[])
   }
 
-  // ── Select ticket ──────────────────────────────────────────
+  // -- Select ticket ------------------------------------------
   function selectTicket(ticket: any) {
     setSelected(ticket)
     setReplyText('')
@@ -124,7 +124,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     loadReplies(ticket.id)
   }
 
-  // ── Update ticket status/priority ─────────────────────────
+  // -- Update ticket status/priority -------------------------
   async function updateTicket(id: string, updates: Record<string, any>) {
     setSaving(true)
     try {
@@ -140,7 +140,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     setSaving(false)
   }
 
-  // ── Send reply ─────────────────────────────────────────────
+  // -- Send reply ---------------------------------------------
   async function sendReply() {
     if (!replyText.trim() || !selected) return
     setSending(true)
@@ -190,13 +190,13 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     setSending(false)
   }
 
-  // ── Save admin note ────────────────────────────────────────
+  // -- Save admin note ----------------------------------------
   async function saveNote() {
     if (!selected) return
     await updateTicket(selected.id, { admin_note: adminNote })
   }
 
-  // ── Delete ticket ──────────────────────────────────────────
+  // -- Delete ticket ------------------------------------------
   async function deleteTicket(id: string) {
     if (!confirm('Delete this ticket? This cannot be undone.')) return
     try {
@@ -209,7 +209,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     }
   }
 
-  // ── Export tickets as CSV ──────────────────────────────────
+  // -- Export tickets as CSV ----------------------------------
   function exportCSV() {
     const rows = [
       ['ID', 'Title', 'Type', 'Status', 'Priority', 'User Email', 'Plan', 'Created'],
@@ -234,7 +234,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
     URL.revokeObjectURL(url)
   }
 
-  // ── Filtered tickets ───────────────────────────────────────
+  // -- Filtered tickets ---------------------------------------
   const filtered = tickets
     .filter(t => filterStatus === 'all' || t.status === filterStatus)
     .filter(t => filterType   === 'all' || t.type   === filterType)
@@ -248,7 +248,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
       )
     })
 
-  // ── HUD stats ─────────────────────────────────────────────
+  // -- HUD stats ---------------------------------------------
   const openCount     = tickets.filter(t => t.status === 'open').length
   const bugCount      = tickets.filter(t => t.type === 'bug').length
   const resolvedToday = tickets.filter(t => {
@@ -263,7 +263,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
       {/* Toast */}
       {toast && (
         <div className="fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-lg text-[13px] font-bold"
-             style={{ backgroundColor: toast.type === 'success' ? C.dark : C.red, color: toast.type === 'success' ? C.lime : '#fff' }}>
+             style={{ backgroundColor: toast.type === 'success' ? '#8fff00' : C.red, color: toast.type === 'success' ? '#1a2410' : '#fff' }}>
           {toast.msg}
         </div>
       )}
@@ -333,9 +333,9 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
               <button key={s} onClick={() => setFilterStatus(s)}
                 className="px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all"
                 style={{
-                  backgroundColor: filterStatus === s ? C.dark    : C.surface,
-                  color:           filterStatus === s ? C.lime    : C.muted,
-                  border:          `1px solid ${filterStatus === s ? C.dark : C.border}`,
+                  backgroundColor: filterStatus === s ? '#8fff00' : C.surface,
+                  color: filterStatus === s ? '#1a2410' : C.muted,
+                  border:          `1px solid ${filterStatus === s ? '#8fff00' : C.border}`,
                 }}>
                 {s.replace('_', ' ')}
               </button>
@@ -348,9 +348,9 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
               <button key={t} onClick={() => setFilterType(t)}
                 className="px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition-all"
                 style={{
-                  backgroundColor: filterType === t ? C.dark    : C.surface,
-                  color:           filterType === t ? C.lime    : C.muted,
-                  border:          `1px solid ${filterType === t ? C.dark : C.border}`,
+                  backgroundColor: filterType === t ? '#8fff00' : C.surface,
+                  color:           filterType === t ? '#1a2410' : C.muted,
+                  border:          `1px solid ${filterType === t ? '#8fff00' : C.border}`,
                 }}>
                 {t}
               </button>
@@ -597,7 +597,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
                       <div key={i} className={`flex ${r.author_type === 'admin' ? 'justify-end' : 'justify-start'}`}>
                         <div className="px-3 py-2 rounded-2xl max-w-[80%]"
                              style={{
-                               backgroundColor: r.author_type === 'admin' ? C.dark : C.bg,
+                               backgroundColor: r.author_type === 'admin' ? '#1a2410' : C.bg,
                                color:           r.author_type === 'admin' ? '#fff'  : C.text,
                                border:          r.author_type === 'admin' ? 'none'  : `1px solid ${C.border}`,
                              }}>
@@ -635,7 +635,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
                   style={{ backgroundColor: C.bg, borderColor: C.border, color: C.text }} />
                 <button onClick={sendReply} disabled={sending || !replyText.trim()}
                   className="px-3 rounded-xl font-bold text-[12px] flex flex-col items-center justify-center gap-1 disabled:opacity-50"
-                  style={{ backgroundColor: C.dark, color: C.lime, minWidth: 60 }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410', minWidth: 60 }}>
                   {sending ? (
                     <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                          style={{ borderTopColor: C.lime }} />

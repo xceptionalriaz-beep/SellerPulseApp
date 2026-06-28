@@ -1,10 +1,10 @@
-// app/api/admin/roles/assign/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/roles/assign/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Assigns or revokes a role from a user (updates profiles.role_id)
 // Pass roleId: null to revoke access
 // Requires admin Bearer token
 // Cannot modify the founder account (role = 'admin')
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller is admin ──────────────────────────────
+    // â”€â”€ 1. Verify caller is admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -31,13 +31,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
-    // roleId can be null → revokes access
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // roleId can be null â†’ revokes access
     const { userId, roleId } = await req.json()
 
     if (!userId) return NextResponse.json({ error: 'userId is required' }, { status: 400 })
 
-    // ── 3. Verify target user exists and is not founder ────────
+    // â”€â”€ 3. Verify target user exists and is not founder â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: targetProfile } = await adminClient
       .from('profiles')
       .select('role, name, email')
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Cannot modify the founder account role' }, { status: 403 })
     }
 
-    // ── 4. If roleId provided, verify it exists ────────────────
+    // â”€â”€ 4. If roleId provided, verify it exists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (roleId) {
       const { data: role } = await adminClient
         .from('admin_roles')
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       if (!role) return NextResponse.json({ error: 'Role not found' }, { status: 404 })
     }
 
-    // ── 5. Update profiles.role_id ─────────────────────────────
+    // â”€â”€ 5. Update profiles.role_id â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: updateError } = await adminClient
       .from('profiles')
       .update({ role_id: roleId ?? null })
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
-    // ── 6. Log to user_events ──────────────────────────────────
+    // â”€â”€ 6. Log to user_events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       const action = roleId ? 'Role Assigned' : 'Role Revoked'
       const roleName = roleId

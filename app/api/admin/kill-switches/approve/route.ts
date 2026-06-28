@@ -1,8 +1,8 @@
-// app/api/admin/kill-switches/approve/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/admin/kill-switches/approve/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Handles approval or rejection of a Kill All request
 // Called when admin clicks Approve/Reject in email or UI
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Token required' }, { status: 400 })
     if (!['approve', 'reject'].includes(action)) return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 
-    // ── Get approver identity (optional auth) ──────────────
+    // â”€â”€ Get approver identity (optional auth) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let approverId:   string | null = null
     let approverName: string | null = null
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const now = new Date().toISOString()
 
-    // ── Fetch the approval request ─────────────────────────
+    // â”€â”€ Fetch the approval request â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: approval } = await (adminClient.from('kill_switch_approvals') as any)
       .select('*').eq('token', token).single()
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'reject') {
-      // ── Reject ─────────────────────────────────────────
+      // â”€â”€ Reject â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       await (adminClient.from('kill_switch_approvals') as any).update({
         status:       'rejected',
         approved_by:  approverId,
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify({
               from:    'notifications@dropnrest.com',
               to:      [(requester as any).email],
-              subject: '[Riazify] Kill All Request — REJECTED',
+              subject: '[Riazify] Kill All Request â€” REJECTED',
               html: `<div style="font-family:sans-serif;max-width:500px;margin:40px auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #e8ede2;">
                 <h2 style="color:#b91c1c;">Kill All Request Rejected</h2>
                 <p>Your Kill All request was <strong>rejected</strong> by ${approverName ?? 'an admin'}.</p>
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, status: 'rejected' })
     }
 
-    // ── Approve — execute Kill All ─────────────────────────
+    // â”€â”€ Approve â€” execute Kill All â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: activeSwitches } = await (adminClient.from('kill_switches') as any)
       .select('id, title').eq('is_enabled', true)
 
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     await (adminClient.from('admin_logs') as any).insert({
       admin_id:   approverId,
       action:     'kill_all_switches',
-      details:    `EMERGENCY KILL ALL approved by ${approverName ?? 'Admin'} — requested by ${(approval as any).requester_name}`,
+      details:    `EMERGENCY KILL ALL approved by ${approverName ?? 'Admin'} â€” requested by ${(approval as any).requester_name}`,
       metadata:   {
         admin_name:      approverName ?? 'Admin',
         requester_name:  (approval as any).requester_name,
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             from:    'notifications@dropnrest.com',
             to:      [(requester as any).email],
-            subject: `[Riazify] Kill All APPROVED — ${activeSwitches.length} switches offline`,
+            subject: `[Riazify] Kill All APPROVED â€” ${activeSwitches.length} switches offline`,
             html: `<div style="font-family:sans-serif;max-width:500px;margin:40px auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #e8ede2;">
               <h2 style="color:#16a34a;">Kill All Approved</h2>
               <p>Your Kill All request was <strong>approved</strong> by ${approverName ?? 'an admin'}.</p>

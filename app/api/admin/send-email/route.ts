@@ -1,9 +1,9 @@
-// app/api/admin/send-email/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/send-email/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Sends a templated email to a user via Resend.
-// Admin picks a template → fills with user's name → sends.
+// Admin picks a template â†’ fills with user's name â†’ sends.
 // Logs to user_events timeline and admin_logs automatically.
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { Resend }       from 'resend'
@@ -11,21 +11,21 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY!)
 
-// ── Email templates ────────────────────────────────────────────
+// â”€â”€ Email templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const TEMPLATES: Record<string, {
   label:   string
   subject: (name: string) => string
   html:    (name: string, customNote?: string) => string
 }> = {
   nudge_inactive: {
-    label: 'Nudge — Inactive User',
+    label: 'Nudge â€” Inactive User',
     subject: (name) => `We miss you on Riazify, ${name}!`,
     html: (name, note) => `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
-        <h2 style="color:#0a0d08;font-size:22px;margin-bottom:8px;">Hey ${name} 👋</h2>
+        <h2 style="color:#0a0d08;font-size:22px;margin-bottom:8px;">Hey ${name} ðŸ‘‹</h2>
         <p style="color:#4a5568;font-size:15px;line-height:1.6;">
           We noticed you haven't logged into Riazify in a while.
-          Your eBay business doesn't stop — and neither should your protection.
+          Your eBay business doesn't stop â€” and neither should your protection.
         </p>
         <p style="color:#4a5568;font-size:15px;line-height:1.6;">
           Log back in to check your orders, run a VeRO scan, and see what's changed since your last visit.
@@ -33,7 +33,7 @@ const TEMPLATES: Record<string, {
         ${note ? `<p style="color:#4a5568;font-size:15px;line-height:1.6;padding:12px 16px;background:#f7f9f5;border-left:3px solid #8fff00;border-radius:4px;">${note}</p>` : ''}
         <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard"
            style="display:inline-block;margin-top:20px;padding:12px 28px;background:#8fff00;color:#0a0d08;font-weight:700;border-radius:12px;text-decoration:none;font-size:14px;">
-          Log Back In →
+          Log Back In â†’
         </a>
         <p style="color:#9ca3af;font-size:12px;margin-top:32px;">The Riazify Team</p>
       </div>
@@ -49,15 +49,15 @@ const TEMPLATES: Record<string, {
           Your free trial is coming to an end. Don't lose access to the tools that protect your eBay business.
         </p>
         <ul style="color:#4a5568;font-size:15px;line-height:1.8;padding-left:20px;">
-          <li>Order Protection — keep your buyers safe</li>
-          <li>VeRO Scanner — avoid listing bans</li>
-          <li>Profit Calculator — know your real margins</li>
-          <li>Title Builder — get found on eBay</li>
+          <li>Order Protection â€” keep your buyers safe</li>
+          <li>VeRO Scanner â€” avoid listing bans</li>
+          <li>Profit Calculator â€” know your real margins</li>
+          <li>Title Builder â€” get found on eBay</li>
         </ul>
         ${note ? `<p style="color:#4a5568;font-size:15px;line-height:1.6;padding:12px 16px;background:#f7f9f5;border-left:3px solid #8fff00;border-radius:4px;">${note}</p>` : ''}
         <a href="${process.env.NEXT_PUBLIC_SITE_URL}/pricing"
            style="display:inline-block;margin-top:20px;padding:12px 28px;background:#8fff00;color:#0a0d08;font-weight:700;border-radius:12px;text-decoration:none;font-size:14px;">
-          Upgrade Now →
+          Upgrade Now â†’
         </a>
         <p style="color:#9ca3af;font-size:12px;margin-top:32px;">The Riazify Team</p>
       </div>
@@ -75,7 +75,7 @@ const TEMPLATES: Record<string, {
         ${note ? `<p style="color:#4a5568;font-size:15px;line-height:1.6;padding:12px 16px;background:#f7f9f5;border-left:3px solid #8fff00;border-radius:4px;">${note}</p>` : ''}
         <a href="${process.env.NEXT_PUBLIC_SITE_URL}/pricing"
            style="display:inline-block;margin-top:20px;padding:12px 28px;background:#8fff00;color:#0a0d08;font-weight:700;border-radius:12px;text-decoration:none;font-size:14px;">
-          See Your Offer →
+          See Your Offer â†’
         </a>
         <p style="color:#9ca3af;font-size:12px;margin-top:32px;">The Riazify Team</p>
       </div>
@@ -93,7 +93,7 @@ const TEMPLATES: Record<string, {
         ${note ? `<p style="color:#4a5568;font-size:15px;line-height:1.6;padding:12px 16px;background:#fff7ed;border-left:3px solid #f97316;border-radius:4px;">${note}</p>` : ''}
         <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/settings"
            style="display:inline-block;margin-top:20px;padding:12px 28px;background:#8fff00;color:#0a0d08;font-weight:700;border-radius:12px;text-decoration:none;font-size:14px;">
-          Reconnect eBay →
+          Reconnect eBay â†’
         </a>
         <p style="color:#9ca3af;font-size:12px;margin-top:32px;">The Riazify Team</p>
       </div>
@@ -106,12 +106,12 @@ const TEMPLATES: Record<string, {
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
         <h2 style="color:#0a0d08;font-size:22px;margin-bottom:8px;">Welcome back, ${name}</h2>
         <p style="color:#4a5568;font-size:15px;line-height:1.6;">
-          It's been a while and we want you to know — your account is still here, your data is safe, and we'd love to have you back protecting your eBay business.
+          It's been a while and we want you to know â€” your account is still here, your data is safe, and we'd love to have you back protecting your eBay business.
         </p>
         ${note ? `<p style="color:#4a5568;font-size:15px;line-height:1.6;padding:12px 16px;background:#f7f9f5;border-left:3px solid #8fff00;border-radius:4px;">${note}</p>` : ''}
         <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard"
            style="display:inline-block;margin-top:20px;padding:12px 28px;background:#8fff00;color:#0a0d08;font-weight:700;border-radius:12px;text-decoration:none;font-size:14px;">
-          Come Back →
+          Come Back â†’
         </a>
         <p style="color:#9ca3af;font-size:12px;margin-top:32px;">The Riazify Team</p>
       </div>
@@ -119,7 +119,7 @@ const TEMPLATES: Record<string, {
   },
 }
 
-// ── Route handler ──────────────────────────────────────────────
+// â”€â”€ Route handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
   try {
     const adminClient = createClient(
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify admin ────────────────────────────────────────
+    // â”€â”€ 1. Verify admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { userId, templateKey, customNote } = await req.json()
     if (!userId || !templateKey) {
       return NextResponse.json({ error: 'userId and templateKey required' }, { status: 400 })
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Unknown template: ${templateKey}` }, { status: 400 })
     }
 
-    // ── 3. Get target user details ─────────────────────────────
+    // â”€â”€ 3. Get target user details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: targetProfile } = await adminClient
       .from('profiles').select('name, email, account_status').eq('id', userId).single()
 
@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No email found for this user' }, { status: 400 })
     }
 
-    // ── 4. Send via Resend ─────────────────────────────────────
+    // â”€â”€ 4. Send via Resend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const fromAddress = process.env.RESEND_FROM_EMAIL ?? 'Riazify <support@riazify.com>'
 
     const { data: emailData, error: emailErr } = await resend.emails.send({
@@ -179,13 +179,13 @@ export async function POST(req: NextRequest) {
 
     if (emailErr) throw new Error(emailErr.message)
 
-    // ── 5. Get caller IP ───────────────────────────────────────
+    // â”€â”€ 5. Get caller IP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const ipAddress =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       req.headers.get('x-real-ip') ||
       null
 
-    // ── 6. Log to admin_logs ───────────────────────────────────
+    // â”€â”€ 6. Log to admin_logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
       })
     } catch { /* non-critical */ }
 
-    // ── 7. Log to user journey timeline ───────────────────────
+    // â”€â”€ 7. Log to user journey timeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await adminClient.from('user_events').insert({
         user_id:     userId,

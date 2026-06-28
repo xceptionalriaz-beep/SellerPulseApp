@@ -13,7 +13,7 @@ import {
   AlertTriangle, Wrench, Info, X, ChevronDown, RefreshCw,
 } from 'lucide-react'
 
-// ── Brand tokens ──────────────────────────────────────────────
+// -- Brand tokens ----------------------------------------------
 const C = {
   dark:     '#0a0d08',
   lime:     '#8fff00',
@@ -29,7 +29,7 @@ const C = {
   red:      '#b91c1c',
 }
 
-// ── Interfaces ────────────────────────────────────────────────
+// -- Interfaces ------------------------------------------------
 interface AffiliateData {
   id:               string
   name:             string
@@ -81,7 +81,7 @@ interface Settings {
   is_program_active:       boolean
 }
 
-// ── Helpers ───────────────────────────────────────────────────
+// -- Helpers ---------------------------------------------------
 function getCommission(affiliate: AffiliateData, settings: Settings | null): number {
   return affiliate.custom_commission ?? settings?.commission_rate ?? 0.25
 }
@@ -105,7 +105,7 @@ function getPaymentPlaceholder(method: string): string {
   return 'Payment details'
 }
 
-// ── FocusInput ────────────────────────────────────────────────
+// -- FocusInput ------------------------------------------------
 function FocusInput({ value, onChange, placeholder }: {
   value: string; onChange: (v: string) => void; placeholder?: string
 }) {
@@ -124,7 +124,7 @@ function FocusInput({ value, onChange, placeholder }: {
   )
 }
 
-// ── Method Selector ───────────────────────────────────────────
+// -- Method Selector -------------------------------------------
 function MethodSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex gap-2 flex-wrap">
@@ -147,7 +147,7 @@ function MethodSelector({ value, onChange }: { value: string; onChange: (v: stri
   )
 }
 
-// ── Tab Button ────────────────────────────────────────────────
+// -- Tab Button ------------------------------------------------
 const TAB_ICONS: Record<string, ReactNode> = {
   Earnings:  <BarChart2  size={14} />,
   Referrals: <Users      size={14} />,
@@ -159,7 +159,7 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
     <button onClick={onClick}
       className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all"
       style={{
-        backgroundColor: active ? C.dark    : 'transparent',
+        backgroundColor: active ? '#8fff00' : 'transparent',
         color:           active ? C.lime    : C.muted,
         border:          `1.5px solid ${active ? C.dark : C.border}`,
       }}>
@@ -169,9 +169,9 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
   )
 }
 
-// ════════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 // MAIN COMPONENT
-// ════════════════════════════════════════════════════════════
+// ------------------------------------------------------------
 export default function AffiliateTab() {
   const supabase = createClient()
 
@@ -312,7 +312,7 @@ export default function AffiliateTab() {
 
 
 
-  // ── Loading ───────────────────────────────────────────────
+  // -- Loading -----------------------------------------------
   if (loading) return (
     <div className="flex items-center justify-center py-20">
       <div className="w-8 h-8 rounded-full border-2 border-transparent animate-spin"
@@ -320,7 +320,7 @@ export default function AffiliateTab() {
     </div>
   )
 
-  // ── Program paused ────────────────────────────────────────
+  // -- Program paused ----------------------------------------
   if (settings?.is_program_active === false) return (
     <div className="rounded-2xl overflow-hidden"
          style={{ backgroundColor: C.surface, border: `0.5px solid ${C.border}` }}>
@@ -370,7 +370,7 @@ export default function AffiliateTab() {
     </div>
   )
 
-  // ── Not an affiliate ──────────────────────────────────────
+  // -- Not an affiliate --------------------------------------
   if (notAffiliate) return (
     <div className="flex flex-col items-center py-16 px-6 text-center">
 
@@ -412,7 +412,7 @@ export default function AffiliateTab() {
           </p>
           <a href="/affiliate/apply"
              className="flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-bold transition-all hover:opacity-90"
-             style={{ backgroundColor: C.dark, color: C.lime }}>
+             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Apply Again <ArrowRight size={16} />
           </a>
         </>
@@ -431,7 +431,7 @@ export default function AffiliateTab() {
           </p>
           <a href="/affiliate/apply"
              className="flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-bold transition-all hover:opacity-90"
-             style={{ backgroundColor: C.dark, color: C.lime }}>
+             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Apply Now <ArrowRight size={16} />
           </a>
         </>
@@ -493,7 +493,7 @@ export default function AffiliateTab() {
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── Hero — Option C: Ultra slim bar ── */}
+      {/* -- Hero — Option C: Ultra slim bar -- */}
       <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
            style={{ backgroundColor: C.dark }}>
         <p className="text-[18px] font-extrabold shrink-0" style={{ color: '#fff' }}>
@@ -536,7 +536,7 @@ export default function AffiliateTab() {
         </div>
       </div>
 
-      {/* ── Tabs ── */}
+      {/* -- Tabs -- */}
       <div className="flex gap-2">
         {[
           { label: 'Earnings',  icon: BarChart2,  key: 'earnings'  },
@@ -547,8 +547,8 @@ export default function AffiliateTab() {
             onClick={() => setTab(t.key as typeof tab)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
             style={{
-              backgroundColor: tab === t.key ? C.dark : 'transparent',
-              color:           tab === t.key ? C.lime : C.muted,
+              backgroundColor: tab === t.key ? '#8fff00' : 'transparent',
+              color: tab === t.key ? '#1a2410' : C.muted,
               border:          `1.5px solid ${tab === t.key ? C.dark : C.border}`,
             }}>
             <t.icon size={13} />
@@ -557,13 +557,13 @@ export default function AffiliateTab() {
         ))}
       </div>
 
-      {/* ══════════════════════════════════════════
+      {/* ------------------------------------------
           TAB 1 — EARNINGS
-      ══════════════════════════════════════════ */}
+      ------------------------------------------ */}
       {tab === 'earnings' && (
         <div className="flex flex-col gap-5">
 
-          {/* ── Option A: Two-column layout ── */}
+          {/* -- Option A: Two-column layout -- */}
           <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
 
             {/* LEFT COLUMN — Stats + Breakdown */}
@@ -574,7 +574,7 @@ export default function AffiliateTab() {
                 {[
                   { icon: MousePointer, label: 'Clicks',      value: affiliate.clicks.toLocaleString(), sub: 'all time',          color: C.text     },
                   { icon: Users,        label: 'Signups',      value: affiliate.signups.toString(),      sub: 'from your link',    color: C.limeDeep },
-                  { icon: TrendingUp,   label: 'Conv. rate',   value: `${convRate}%`,                    sub: 'clicks → signups',  color: C.text     },
+                  { icon: TrendingUp,   label: 'Conv. rate',   value: `${convRate}%`,                    sub: 'clicks ? signups',  color: C.text     },
                   { icon: DollarSign,   label: 'Total earned', value: `$${totalEarned.toFixed(2)}`,      sub: `$${totalPaid.toFixed(2)} paid · $${hasPending ? pendingAmt.toFixed(2) : affiliate.payout.toFixed(2)} ${hasPending ? 'under review' : 'available'}${hasPending && availableAmt > 0 ? ' · $' + availableAmt.toFixed(2) + ' free' : ''}`, color: C.green },
                 ].map((s, i) => (
                   <div key={i} className="p-3 rounded-2xl border"
@@ -713,7 +713,7 @@ export default function AffiliateTab() {
                     style={{ backgroundColor: '#000', color: '#fff' }}>
                     X (Twitter)
                   </button>
-                  <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Get ${affiliate.discount_percent ?? settings?.default_discount ?? 50}% off Riazify with code ${affiliate.code} → ${referralLink}`)}`, '_blank')}
+                  <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Get ${affiliate.discount_percent ?? settings?.default_discount ?? 50}% off Riazify with code ${affiliate.code} ? ${referralLink}`)}`, '_blank')}
                     className="flex-1 py-2 rounded-xl text-[11px] font-bold"
                     style={{ backgroundColor: '#25D366', color: '#fff' }}>
                     WhatsApp
@@ -764,8 +764,8 @@ export default function AffiliateTab() {
                    style={{ backgroundColor: C.surface, borderColor: C.border }}>
                 <p className="text-[11px] font-bold mb-2" style={{ color: C.muted }}>Ready-made promo copy</p>
                 {[
-                  { label: 'Short (Twitter/X)', text: `Get ${affiliate.discount_percent ?? settings?.default_discount ?? 50}% off your first month on Riazify — the best eBay product research tool! Use code: ${affiliate.code} → riazify.com?ref=${affiliate.code}` },
-                  { label: 'Long (YouTube/Blog)', text: `If you sell on eBay, you need Riazify. I use it for product research, title building, and profit calculation. Use my code ${affiliate.code} for ${affiliate.discount_percent ?? settings?.default_discount ?? 50}% off your first ${discMonths > 1 ? discMonths + ' months' : 'month'} → riazify.com?ref=${affiliate.code}` },
+                  { label: 'Short (Twitter/X)', text: `Get ${affiliate.discount_percent ?? settings?.default_discount ?? 50}% off your first month on Riazify — the best eBay product research tool! Use code: ${affiliate.code} ? riazify.com?ref=${affiliate.code}` },
+                  { label: 'Long (YouTube/Blog)', text: `If you sell on eBay, you need Riazify. I use it for product research, title building, and profit calculation. Use my code ${affiliate.code} for ${affiliate.discount_percent ?? settings?.default_discount ?? 50}% off your first ${discMonths > 1 ? discMonths + ' months' : 'month'} ? riazify.com?ref=${affiliate.code}` },
                 ].map((item, i) => (
                   <div key={i} className="mb-2">
                     <p className="text-[10px] font-bold mb-1 uppercase tracking-wide" style={{ color: C.muted }}>{item.label}</p>
@@ -847,9 +847,9 @@ export default function AffiliateTab() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════
+      {/* ------------------------------------------
           TAB 2 — REFERRALS
-      ══════════════════════════════════════════ */}
+      ------------------------------------------ */}
       {tab === 'referrals' && (
         <div className="flex flex-col gap-5">
 
@@ -898,7 +898,7 @@ export default function AffiliateTab() {
                 </p>
                 <button onClick={() => setTab('earnings')}
                   className="mt-4 flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   Get your link <ArrowRight size={14} />
                 </button>
               </div>
@@ -977,7 +977,7 @@ export default function AffiliateTab() {
             <p className="text-[13px] font-bold mb-4" style={{ color: C.text }}>How commissions work</p>
             <div className="flex flex-col gap-3">
               {[
-                { step: '1', text: `Someone clicks your link → cookie saved for ${settings?.cookie_days ?? 30} days`,                icon: MousePointer },
+                { step: '1', text: `Someone clicks your link ? cookie saved for ${settings?.cookie_days ?? 30} days`,                icon: MousePointer },
                 { step: '2', text: `They sign up and pay for a plan ($19, $49 or $149/mo)`,                    icon: Users        },
                 { step: '3', text: `You earn ${(commission * 100).toFixed(0)}% of every payment they make`,   icon: DollarSign   },
                 { step: '4', text: `This continues for up to ${commMonths} months per user`,             icon: TrendingUp   },
@@ -995,13 +995,13 @@ export default function AffiliateTab() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════
+      {/* ------------------------------------------
           TAB 3 — PAYMENTS
-      ══════════════════════════════════════════ */}
+      ------------------------------------------ */}
       {tab === 'payments' && (
         <div className="flex flex-col gap-5">
 
-          {/* ── Rejected notice — FIRST thing they see ── */}
+          {/* -- Rejected notice — FIRST thing they see -- */}
           {showRejected && latestRequest && (
             <div className="p-4 rounded-2xl"
                  style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
@@ -1031,7 +1031,7 @@ export default function AffiliateTab() {
             </div>
           )}
 
-          {/* ── Refresh button — so user can check latest status ── */}
+          {/* -- Refresh button — so user can check latest status -- */}
           <div className="flex items-center justify-between">
             <p className="text-[11px]" style={{ color: C.muted }}>
               Payment status may take a moment to update
@@ -1173,7 +1173,7 @@ export default function AffiliateTab() {
               {affiliate.payout >= minPayout && (
                 <button onClick={() => { setWithdrawAmount(affiliate.payout.toFixed(2)); setWithdrawStep(1); setWithdrawPopupError(''); setShowWithdrawPopup(true) }}
                   className="flex items-center gap-2 px-5 py-3 rounded-xl text-[14px] font-bold transition-all hover:opacity-90"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   Request Withdrawal <ArrowRight size={16} />
                 </button>
               )}
@@ -1271,7 +1271,7 @@ export default function AffiliateTab() {
                 disabled={savingPay || !payDetails.trim() || hasPending}
                 className="self-start px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all hover:opacity-90 flex items-center gap-2"
                 style={{
-                  backgroundColor: C.dark, color: C.lime,
+                  backgroundColor: '#8fff00', color: '#1a2410',
                   opacity: !payDetails.trim() || hasPending ? 0.5 : 1,
                 }}>
                 {savingPay
@@ -1282,7 +1282,7 @@ export default function AffiliateTab() {
             </div>
           </div>
 
-          {/* ── Payment History — slim table layout ── */}
+          {/* -- Payment History — slim table layout -- */}
           <div className="rounded-2xl border overflow-hidden"
                style={{ backgroundColor: C.surface, borderColor: C.border }}>
 
@@ -1340,7 +1340,7 @@ export default function AffiliateTab() {
                     </p>
                     {w.status === 'rejected' && w.rejection_reason?.trim() && (
                       <p className="text-[10px] truncate" style={{ color: C.red }}>
-                        ↳ {w.rejection_reason}
+                        ? {w.rejection_reason}
                       </p>
                     )}
                   </div>
@@ -1382,7 +1382,7 @@ export default function AffiliateTab() {
             </div>
           </div>
 
-          {/* ── Withdrawal Popup ── */}
+          {/* -- Withdrawal Popup -- */}
           {showWithdrawPopup && affiliate && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6"
                  style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
@@ -1453,7 +1453,7 @@ export default function AffiliateTab() {
                         </div>
                         <button onClick={() => setWithdrawAmount(affiliate.payout.toFixed(2))}
                           className="px-3 rounded-xl text-[11px] font-bold transition-all hover:opacity-80"
-                          style={{ backgroundColor: C.dark, color: C.lime }}>
+                          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                           All
                         </button>
                       </div>
@@ -1554,7 +1554,7 @@ export default function AffiliateTab() {
                           setWithdrawStep(2)
                         }}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold"
-                        style={{ backgroundColor: C.dark, color: C.lime }}>
+                        style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                         Review <ArrowRight size={14} />
                       </button>
                     </div>
@@ -1613,7 +1613,7 @@ export default function AffiliateTab() {
                       <button onClick={() => { setWithdrawStep(1); setWithdrawConfirmed(false); setWithdrawPopupError('') }}
                         className="flex-1 py-2.5 rounded-xl text-[13px] font-bold border"
                         style={{ borderColor: C.border, color: C.muted }}>
-                        ← Back
+                        ? Back
                       </button>
                       <button onClick={async () => {
                         setRequesting(true)
@@ -1640,7 +1640,7 @@ export default function AffiliateTab() {
                         }
                       }} disabled={requesting || !withdrawConfirmed}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold transition-all"
-                        style={{ backgroundColor: C.dark, color: C.lime, opacity: !withdrawConfirmed ? 0.4 : 1 }}>
+                        style={{ backgroundColor: '#8fff00', color: '#1a2410', opacity: !withdrawConfirmed ? 0.4 : 1 }}>
                         {requesting
                           ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                                  style={{ borderTopColor: C.lime }} />
@@ -1666,7 +1666,7 @@ export default function AffiliateTab() {
             </div>
             <a href="mailto:support@riazify.com"
                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all hover:opacity-80 shrink-0"
-               style={{ backgroundColor: C.dark, color: C.lime }}>
+               style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Info size={13} />
               Contact Support
             </a>

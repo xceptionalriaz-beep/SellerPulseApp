@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/EbayManagerTab.tsx
 // Converted from: lib/user_profile/tabs/ebay_manager_tab.dart
 //
@@ -18,7 +18,7 @@ import Spinner, { PageSpinner } from '@/components/ui/Spinner'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
 
-// ── Color tokens ───────────────────────────────────────────────
+// â”€â”€ Color tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   lime:    '#8fff00',
   limeD:   '#4a8f00',
@@ -39,27 +39,27 @@ const C = {
   blue:    '#1D70F5',
 }
 
-// ── Marketplaces (matches Dart kEbayMarketplaces) ──────────────
+// â”€â”€ Marketplaces (matches Dart kEbayMarketplaces) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MARKETPLACES = [
   { id: 'EBAY_US', code: 'us', label: 'United States',  currencyCode: 'USD', currencySymbol: '$',   signatureThreshold: 750,   siteId: 0   },
-  { id: 'EBAY_UK', code: 'gb', label: 'United Kingdom', currencyCode: 'GBP', currencySymbol: '£',   signatureThreshold: 450,   siteId: 3   },
-  { id: 'EBAY_DE', code: 'de', label: 'Germany',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 77  },
+  { id: 'EBAY_UK', code: 'gb', label: 'United Kingdom', currencyCode: 'GBP', currencySymbol: 'Â£',   signatureThreshold: 450,   siteId: 3   },
+  { id: 'EBAY_DE', code: 'de', label: 'Germany',        currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 77  },
   { id: 'EBAY_AU', code: 'au', label: 'Australia',      currencyCode: 'AUD', currencySymbol: 'A$',  signatureThreshold: 900,   siteId: 15  },
   { id: 'EBAY_CA', code: 'ca', label: 'Canada',         currencyCode: 'CAD', currencySymbol: 'C$',  signatureThreshold: 800,   siteId: 2   },
-  { id: 'EBAY_FR', code: 'fr', label: 'France',         currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 71  },
-  { id: 'EBAY_IT', code: 'it', label: 'Italy',          currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 101 },
-  { id: 'EBAY_ES', code: 'es', label: 'Spain',          currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 186 },
-  { id: 'EBAY_IE', code: 'ie', label: 'Ireland',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 205 },
-  { id: 'EBAY_NL', code: 'nl', label: 'Netherlands',    currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 146 },
-  { id: 'EBAY_AT', code: 'at', label: 'Austria',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 16  },
-  { id: 'EBAY_BE', code: 'be', label: 'Belgium',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 123 },
+  { id: 'EBAY_FR', code: 'fr', label: 'France',         currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 71  },
+  { id: 'EBAY_IT', code: 'it', label: 'Italy',          currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 101 },
+  { id: 'EBAY_ES', code: 'es', label: 'Spain',          currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 186 },
+  { id: 'EBAY_IE', code: 'ie', label: 'Ireland',        currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 205 },
+  { id: 'EBAY_NL', code: 'nl', label: 'Netherlands',    currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 146 },
+  { id: 'EBAY_AT', code: 'at', label: 'Austria',        currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 16  },
+  { id: 'EBAY_BE', code: 'be', label: 'Belgium',        currencyCode: 'EUR', currencySymbol: 'â‚¬',   signatureThreshold: 600,   siteId: 123 },
   { id: 'EBAY_CH', code: 'ch', label: 'Switzerland',    currencyCode: 'CHF', currencySymbol: 'CHF', signatureThreshold: 600,   siteId: 193 },
-  { id: 'EBAY_PL', code: 'pl', label: 'Poland',         currencyCode: 'PLN', currencySymbol: 'zł',  signatureThreshold: 2000,  siteId: 212 },
+  { id: 'EBAY_PL', code: 'pl', label: 'Poland',         currencyCode: 'PLN', currencySymbol: 'zÅ‚',  signatureThreshold: 2000,  siteId: 212 },
   { id: 'EBAY_HK', code: 'hk', label: 'Hong Kong',      currencyCode: 'HKD', currencySymbol: 'HK$', signatureThreshold: 5000,  siteId: 201 },
   { id: 'EBAY_SG', code: 'sg', label: 'Singapore',      currencyCode: 'SGD', currencySymbol: 'S$',  signatureThreshold: 1000,  siteId: 216 },
   { id: 'EBAY_MY', code: 'my', label: 'Malaysia',       currencyCode: 'MYR', currencySymbol: 'RM',  signatureThreshold: 3000,  siteId: 207 },
-  { id: 'EBAY_PH', code: 'ph', label: 'Philippines',    currencyCode: 'PHP', currencySymbol: '₱',   signatureThreshold: 40000, siteId: 211 },
-  { id: 'EBAY_IN', code: 'in', label: 'India',          currencyCode: 'INR', currencySymbol: '₹',   signatureThreshold: 60000, siteId: 203 },
+  { id: 'EBAY_PH', code: 'ph', label: 'Philippines',    currencyCode: 'PHP', currencySymbol: 'â‚±',   signatureThreshold: 40000, siteId: 211 },
+  { id: 'EBAY_IN', code: 'in', label: 'India',          currencyCode: 'INR', currencySymbol: 'â‚¹',   signatureThreshold: 60000, siteId: 203 },
 ]
 
 // Flag image component using flagcdn.com (works on all browsers including Windows)
@@ -78,7 +78,7 @@ function FlagImg({ code, size = 20 }: { code: string; size?: number }) {
 
 type Marketplace = typeof MARKETPLACES[0]
 
-// ── Coming soon platforms ──────────────────────────────────────
+// â”€â”€ Coming soon platforms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PLATFORMS = [
   { name: 'Amazon Seller', icon: ShoppingCart, color: '#FF9900', feature: 'FBA inventory sync'      },
   { name: 'Shopify',       icon: Store,        color: '#96BF48', feature: 'Multi-store management'  },
@@ -86,7 +86,7 @@ const PLATFORMS = [
   { name: 'Etsy',          icon: Scissors,     color: '#F56400', feature: 'Handmade item tracking'  },
 ]
 
-// ── Info pill (matches Dart _infoPill) ─────────────────────────
+// â”€â”€ Info pill (matches Dart _infoPill) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InfoPill({ icon: Icon, text, color }: { icon: React.ElementType; text: string; color: string }) {
   return (
     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border"
@@ -96,7 +96,7 @@ function InfoPill({ icon: Icon, text, color }: { icon: React.ElementType; text: 
   )
 }
 
-// ── Feature row (matches Dart _featureRow) ─────────────────────
+// â”€â”€ Feature row (matches Dart _featureRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FeatureRow({ icon: Icon, text, color }: { icon: React.ElementType; text: string; color: string }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -108,7 +108,7 @@ function FeatureRow({ icon: Icon, text, color }: { icon: React.ElementType; text
   )
 }
 
-// ── Dark stat card (matches Dart _darkStat) ────────────────────
+// â”€â”€ Dark stat card (matches Dart _darkStat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DarkStat({ label, value, icon: Icon, color }: { label: string; value: string; icon: React.ElementType; color: string }) {
   return (
     <div className="flex-1 p-3 rounded-xl border" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
@@ -119,7 +119,7 @@ function DarkStat({ label, value, icon: Icon, color }: { label: string; value: s
   )
 }
 
-// ── Warning banner (matches Dart _warningBanner) ───────────────
+// â”€â”€ Warning banner (matches Dart _warningBanner) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function WarningBanner({ icon: Icon, color, message, action, onTap }: {
   icon: React.ElementType; color: string; message: string; action: string; onTap: () => void
 }) {
@@ -133,7 +133,7 @@ function WarningBanner({ icon: Icon, color, message, action, onTap }: {
   )
 }
 
-// ── Coming soon card (matches Dart _comingSoonCard) ────────────
+// â”€â”€ Coming soon card (matches Dart _comingSoonCard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ComingSoonCard({ name, icon: Icon, color, feature }: { name: string; icon: React.ElementType; color: string; feature: string }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-white" style={{ borderColor: C.border }}>
@@ -150,9 +150,9 @@ function ComingSoonCard({ name, icon: Icon, color, feature }: { name: string; ic
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function EbayManagerTab() {
   const supabase = createClient()
   const toast    = useToast()
@@ -167,7 +167,7 @@ export default function EbayManagerTab() {
   const [selectedMp,   setSelectedMp]   = useState(MARKETPLACES[0])
   const [showDisconnect, setShowDisconnect] = useState(false)
 
-  // ── Load all data ────────────────────────────────────────────
+  // â”€â”€ Load all data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadAll = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -217,7 +217,7 @@ export default function EbayManagerTab() {
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  // ── Connect ──────────────────────────────────────────────────
+  // â”€â”€ Connect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleConnect() {
     setIsConnecting(true)
     try {
@@ -253,7 +253,7 @@ export default function EbayManagerTab() {
       // Open OAuth popup
       const popup = window.open(oauthUrl, 'ebay_oauth', 'width=600,height=700')
 
-      // Poll for popup close → reload profile
+      // Poll for popup close â†’ reload profile
       const pollTimer = setInterval(async () => {
         if (popup?.closed) {
           clearInterval(pollTimer)
@@ -268,7 +268,7 @@ export default function EbayManagerTab() {
     }
   }
 
-  // ── Sync ─────────────────────────────────────────────────────
+  // â”€â”€ Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleSync() {
     setIsSyncing(true)
     try {
@@ -291,7 +291,7 @@ export default function EbayManagerTab() {
     finally { setIsSyncing(false) }
   }
 
-  // ── Disconnect ───────────────────────────────────────────────
+  // â”€â”€ Disconnect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleDisconnect() {
     setShowDisconnect(false); setIsLoading(true)
     try {
@@ -303,7 +303,7 @@ export default function EbayManagerTab() {
     } catch (e: any) { toast.error(e.message) }
   }
 
-  // ── Time ago ─────────────────────────────────────────────────
+  // â”€â”€ Time ago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function fmtTimeAgo(iso?: string): string {
     if (!iso) return ''
     const diff = Date.now() - new Date(iso).getTime()
@@ -314,7 +314,7 @@ export default function EbayManagerTab() {
     return `${Math.floor(h/24)}d ago`
   }
 
-  // ── Skeleton ─────────────────────────────────────────────────
+  // â”€â”€ Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (isLoading) return (
     <div>
       <h1 className="text-[24px] font-bold mb-1.5" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Marketplace Integrations</h1>
@@ -332,9 +332,9 @@ export default function EbayManagerTab() {
         <p className="text-[14px]" style={{ color: C.txt2 }}>Connect your eBay store and select your marketplace.</p>
       </div>
 
-      {/* ══════════════════════════════════════════════════════
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           NOT CONNECTED CARD
-      ══════════════════════════════════════════════════════ */}
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {!connected ? (
         <div className="rounded-2xl border bg-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden"
              style={{ borderColor: C.border }}>
@@ -402,10 +402,10 @@ export default function EbayManagerTab() {
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  ['Orders Tracked', '—'],
-                  ['Active Listings', '—'],
-                  ['Safe Buyers', '—'],
-                  ['Revenue', `${selectedMp.currencySymbol}—`],
+                  ['Orders Tracked', 'â€”'],
+                  ['Active Listings', 'â€”'],
+                  ['Safe Buyers', 'â€”'],
+                  ['Revenue', `${selectedMp.currencySymbol}â€”`],
                 ].map(([label, value]) => (
                   <div key={label} className="text-center">
                     <p className="text-[18px] font-bold" style={{ color: C.txt3, fontFamily: 'Inter, sans-serif' }}>{value}</p>
@@ -434,9 +434,9 @@ export default function EbayManagerTab() {
           </div>
         </div>
       ) : (
-        /* ══════════════════════════════════════════════════════
-            CONNECTED CARD — dark gradient (matches Dart exactly)
-        ══════════════════════════════════════════════════════ */
+        /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+            CONNECTED CARD â€” dark gradient (matches Dart exactly)
+        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
         <div className="rounded-2xl overflow-hidden"
              style={{
                background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
@@ -462,7 +462,7 @@ export default function EbayManagerTab() {
                 )}
                 <span className="inline-block px-2 py-1 rounded-md text-[11px] font-semibold border"
                       style={{ backgroundColor: C.accent + '26', borderColor: C.accent + '4D', color: C.accent }}>
-                  <FlagImg code={selectedMp.code} />  {selectedMp.label}  •  {selectedMp.currencySymbol} {selectedMp.currencyCode}
+                  <FlagImg code={selectedMp.code} />  {selectedMp.label}  â€¢  {selectedMp.currencySymbol} {selectedMp.currencyCode}
                 </span>
               </div>
               {/* Live badge */}
@@ -486,9 +486,9 @@ export default function EbayManagerTab() {
             {/* Stats grid */}
             <div className="flex gap-3 mb-5">
               <DarkStat label="Orders Synced"  value={connData?.ordersSynced?.toString() || '0'} icon={ShoppingBag} color={C.blue}   />
-              <DarkStat label="Safe Buyers"    value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : '—'}                 icon={Shield}     color={C.green}  />
+              <DarkStat label="Safe Buyers"    value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : 'â€”'}                 icon={Shield}     color={C.green}  />
               <DarkStat label="Last Sync"      value={connData?.lastSyncText || 'Never'}                           icon={RefreshCw}  color={C.accent} />
-              <DarkStat label="Token"          value={connData?.expiryText || '—'}                                 icon={Key}        color={connData?.daysUntilExpiry < 7 ? C.red : C.orange} />
+              <DarkStat label="Token"          value={connData?.expiryText || 'â€”'}                                 icon={Key}        color={connData?.daysUntilExpiry < 7 ? C.red : C.orange} />
             </div>
 
             <div className="border-t border-white/10 my-5" />
@@ -551,7 +551,7 @@ export default function EbayManagerTab() {
                       {success ? <CheckCircle size={13} style={{ color: C.green }} /> : <AlertTriangle size={13} style={{ color: C.red }} />}
                       <span className="flex-1 text-[12px]" style={{ color: success ? '#D1D5DB' : C.red }}>
                         {success
-                          ? `${found} orders • ${newOrds} new${duration ? ` • ${duration}` : ''}`
+                          ? `${found} orders â€¢ ${newOrds} new${duration ? ` â€¢ ${duration}` : ''}`
                           : `Sync failed${log.error_msg ? `: ${log.error_msg}` : ''}`}
                       </span>
                       <span className="text-[10px] text-gray-500">{timeAgo}</span>
@@ -564,7 +564,7 @@ export default function EbayManagerTab() {
         </div>
       )}
 
-      {/* ── COMING SOON SECTION ── */}
+      {/* â”€â”€ COMING SOON SECTION â”€â”€ */}
       <div>
         <div className="flex items-center gap-3 mb-4">
           <h2 className="text-[16px] font-bold" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Coming Soon</h2>

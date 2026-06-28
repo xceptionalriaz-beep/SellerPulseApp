@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/AffiliateVaultTab.tsx
 
 import { useState, useEffect } from 'react'
@@ -56,7 +56,7 @@ const NETWORKS: NetworkConfig[] = [
   { key: 'autods',    title: 'AutoDS Integration',   icon: Zap,          logoUrl: 'https://www.google.com/s2/favicons?domain=autods.com&sz=32',        previewBase: 'https://autods.com/register?ref=',       apiKeyLabel: 'Partner Key',   signupUrl: 'https://autods.com/partners',                idFormat: 'Format: alphanumeric partner key from AutoDS'          },
 ]
 
-// ── Deployment banner ──────────────────────────────────────────
+// â”€â”€ Deployment banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DeploymentBanner() {
   return (
     <div
@@ -67,7 +67,7 @@ function DeploymentBanner() {
       <div className="overflow-hidden flex-1">
         <div className="whitespace-nowrap" style={{ animation: 'marquee 32s linear infinite', display: 'inline-block' }}>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: C.muted, letterSpacing: '0.03em' }}>
-            GLOBAL DEPLOYMENT PROTOCOL ACTIVE — Changes saved here instantly inject tracking IDs into every live search result across all user sessions. Verify all IDs before saving. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GLOBAL DEPLOYMENT PROTOCOL ACTIVE — Changes saved here instantly inject tracking IDs into every live search result across all user sessions. Verify all IDs before saving.
+            GLOBAL DEPLOYMENT PROTOCOL ACTIVE â€” Changes saved here instantly inject tracking IDs into every live search result across all user sessions. Verify all IDs before saving. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GLOBAL DEPLOYMENT PROTOCOL ACTIVE â€” Changes saved here instantly inject tracking IDs into every live search result across all user sessions. Verify all IDs before saving.
           </span>
         </div>
       </div>
@@ -76,7 +76,7 @@ function DeploymentBanner() {
   )
 }
 
-// ── Tooltip ────────────────────────────────────────────────────
+// â”€â”€ Tooltip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Tooltip({ text }: { text: string }) {
   const [show, setShow] = useState(false)
   return (
@@ -114,7 +114,7 @@ function Tooltip({ text }: { text: string }) {
   )
 }
 
-// ── Table row ──────────────────────────────────────────────────
+// â”€â”€ Table row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TableRow({
   network, index, trackingId, apiKey, onTrackingChange, onApiKeyChange, onSave, isSaving, saveSuccess, testMode, fallbackTag,
 }: {
@@ -347,7 +347,7 @@ function TableRow({
   )
 }
 
-// ── Main component ─────────────────────────────────────────────
+// â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AffiliateVaultTab() {
   const supabase = createClient()
 
@@ -366,7 +366,7 @@ export default function AffiliateVaultTab() {
   const [savingAll,      setSavingAll]      = useState(false)
   const [saveAllSuccess, setSaveAllSuccess] = useState(false)
 
-  // Mock click stats — replace with real DB query when click tracking is built
+  // Mock click stats â€” replace with real DB query when click tracking is built
   const totalClicks   = 1420
   const estRevenue    = 142.50
 
@@ -458,7 +458,7 @@ export default function AffiliateVaultTab() {
   function setTrackingId(key: string, val: string) { setValues(v => ({ ...v, [key]: { ...v[key], trackingId: val } })) }
   function setApiKey(key: string, val: string)     { setValues(v => ({ ...v, [key]: { ...v[key], apiKey: val } })) }
 
-  // Table renders immediately — data fills in after single fetch
+  // Table renders immediately â€” data fills in after single fetch
 
   const missingCount = NETWORKS.length - connectedCount
   const thStyle: React.CSSProperties = {
@@ -477,7 +477,7 @@ export default function AffiliateVaultTab() {
   return (
     <div className="flex flex-col gap-6 px-8 py-8 w-full" style={{ fontFamily: 'Inter, sans-serif' }}>
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -487,7 +487,7 @@ export default function AffiliateVaultTab() {
             </span>
             {missingCount > 0 && (
               <span style={{ fontSize: 11, fontWeight: 600, color: '#b07700', backgroundColor: '#fefce8', border: '1px solid #fbbf24', borderRadius: 6, padding: '1px 8px' }}>
-                {missingCount} missing — revenue at risk
+                {missingCount} missing â€” revenue at risk
               </span>
             )}
           </div>
@@ -540,10 +540,10 @@ export default function AffiliateVaultTab() {
         </div>
       </div>
 
-      {/* ── Deployment banner ── */}
+      {/* â”€â”€ Deployment banner â”€â”€ */}
       <DeploymentBanner />
 
-      {/* ── Stats row — 4 cards ── */}
+      {/* â”€â”€ Stats row â€” 4 cards â”€â”€ */}
       <div className="grid grid-cols-4 gap-4">
 
         <div className="rounded-xl px-4 py-3" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
@@ -575,7 +575,7 @@ export default function AffiliateVaultTab() {
 
       </div>
 
-      {/* ── Global Fallback Tag ── */}
+      {/* â”€â”€ Global Fallback Tag â”€â”€ */}
       <div
         className="rounded-xl px-5 py-4 flex items-center gap-4 flex-wrap"
         style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}
@@ -618,7 +618,7 @@ export default function AffiliateVaultTab() {
         </button>
       </div>
 
-      {/* ── Table ── */}
+      {/* â”€â”€ Table â”€â”€ */}
       <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
         <div className="overflow-x-auto w-full">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -663,13 +663,13 @@ export default function AffiliateVaultTab() {
         </div>
       </div>
 
-      {/* ── Live summary ── */}
+      {/* â”€â”€ Live summary â”€â”€ */}
       {connectedCount > 0 && (
         <div className="rounded-xl px-5 py-4 flex items-center gap-3" style={{ backgroundColor: 'rgba(143,255,0,0.06)', border: '1px solid rgba(143,255,0,0.2)' }}>
           <ShieldCheck size={18} style={{ color: C.lime, flexShrink: 0 }} />
           <p style={{ fontSize: 13, fontWeight: 600, color: C.dark }}>
             {connectedCount} affiliate network{connectedCount > 1 ? 's are' : ' is'} live. Tracking IDs are being injected into product search results in real time.
-            {testMode && <span style={{ color: '#6366f1', marginLeft: 8 }}>{'Test mode active — all links include &rztest=1 parameter.'}</span>}
+            {testMode && <span style={{ color: '#6366f1', marginLeft: 8 }}>{'Test mode active â€” all links include &rztest=1 parameter.'}</span>}
           </p>
         </div>
       )}

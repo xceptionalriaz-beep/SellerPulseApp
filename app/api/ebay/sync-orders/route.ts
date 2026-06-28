@@ -1,4 +1,4 @@
-// app/api/ebay/sync-orders/route.ts
+﻿// app/api/ebay/sync-orders/route.ts
 // Syncs eBay orders to protected_orders table
 // Can be called: manually, after OAuth, or via cron
 
@@ -11,7 +11,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Risk scoring ───────────────────────────────────────────────
+// â”€â”€ Risk scoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function calculateRisk(order: any): { level: string; score: number } {
   let score = 0
 
@@ -44,7 +44,7 @@ function calculateRisk(order: any): { level: string; score: number } {
   return { level, score: Math.min(score, 100) }
 }
 
-// ── Refresh token if expired ───────────────────────────────────
+// â”€â”€ Refresh token if expired â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function refreshEbayToken(userId: string, refreshToken: string): Promise<string | null> {
   try {
     const clientId     = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
@@ -78,7 +78,7 @@ async function refreshEbayToken(userId: string, refreshToken: string): Promise<s
   } catch { return null }
 }
 
-// ── Main handler ───────────────────────────────────────────────
+// â”€â”€ Main handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
   // Auth check
   const secret = req.headers.get('x-internal-secret')
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'user_id required' }, { status: 400 })
 
   try {
-    // ── Get user's eBay credentials ──────────────────────────
+    // â”€â”€ Get user's eBay credentials â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: profile } = await (adminClient.from('profiles') as any)
       .select('ebay_access_token, ebay_refresh_token, ebay_token_expires_at, ebay_marketplace')
       .eq('id', userId)
@@ -116,15 +116,15 @@ export async function POST(req: NextRequest) {
 
     let accessToken = (profile as any).ebay_access_token
 
-    // ── Refresh token if expired ─────────────────────────────
+    // â”€â”€ Refresh token if expired â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const expiresAt = new Date((profile as any).ebay_token_expires_at ?? 0)
     if (expiresAt < new Date()) {
       const newToken = await refreshEbayToken(userId, (profile as any).ebay_refresh_token)
-      if (!newToken) return NextResponse.json({ error: 'Token expired — please reconnect eBay' }, { status: 401 })
+      if (!newToken) return NextResponse.json({ error: 'Token expired â€” please reconnect eBay' }, { status: 401 })
       accessToken = newToken
     }
 
-    // ── Fetch orders from eBay Fulfillment API ───────────────
+    // â”€â”€ Fetch orders from eBay Fulfillment API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const ordersRes = await fetch(
       'https://api.ebay.com/sell/fulfillment/v1/order?limit=50&orderFulfillmentStatus=NOT_STARTED,IN_PROGRESS',
       {
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
     let updated  = 0
     let skipped  = 0
 
-    // ── Process each order ───────────────────────────────────
+    // â”€â”€ Process each order â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     for (const order of orders) {
       try {
         const ebayOrderId    = order.orderId
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
           .single()
 
         if (existing) {
-          // Update status only — don't overwrite user's checklist progress
+          // Update status only â€” don't overwrite user's checklist progress
           await (adminClient.from('protected_orders') as any).update({
             order_status: orderStatus,
             updated_at:   new Date().toISOString(),
@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Log API usage ────────────────────────────────────────
+    // â”€â”€ Log API usage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       const { data: curr } = await (adminClient.from('api_fleet_config') as any)
         .select('rate_limit_used, requests_today')
@@ -286,7 +286,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ── GET handler for cron ───────────────────────────────────────
+// â”€â”€ GET handler for cron â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Syncs ALL connected users' orders
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization')

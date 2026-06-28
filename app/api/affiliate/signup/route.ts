@@ -1,11 +1,11 @@
-// app/api/affiliate/signup/route.ts
-// Reads riazify_ref cookie → credits the affiliate with +1 signup
+﻿// app/api/affiliate/signup/route.ts
+// Reads riazify_ref cookie â†’ credits the affiliate with +1 signup
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
-// Service role client — bypasses RLS for server-side operations
+// Service role client â€” bypasses RLS for server-side operations
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!

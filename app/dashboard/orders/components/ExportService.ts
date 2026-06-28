@@ -1,4 +1,4 @@
-// app/dashboard/orders/components/ExportService.ts
+﻿// app/dashboard/orders/components/ExportService.ts
 // Converted from: lib/pages/orders/export_service.dart
 
 export function exportOrdersCSV(orders: any[], currencySymbol = '$') {

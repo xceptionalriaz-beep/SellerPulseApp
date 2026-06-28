@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/profile/tabs/VaultTab.tsx
 // Converted from: lib/user_profile/tabs/vault_tab.dart
 //
@@ -25,7 +25,7 @@ const C = {
   purple:'#8B5CF6',
 }
 
-// ── Section header ─────────────────────────────────────────────
+// â”€â”€ Section header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SectionHeader({ title, count, color }: { title: string; count: number; color: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
@@ -36,7 +36,7 @@ function SectionHeader({ title, count, color }: { title: string; count: number; 
   )
 }
 
-// ── Empty state ────────────────────────────────────────────────
+// â”€â”€ Empty state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function EmptyState({ icon: Icon, title, subtitle, color }: {
   icon: React.ElementType; title: string; subtitle: string; color: string
 }) {
@@ -52,7 +52,7 @@ function EmptyState({ icon: Icon, title, subtitle, color }: {
   )
 }
 
-// ── Icon button ────────────────────────────────────────────────
+// â”€â”€ Icon button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function IconBtn({ icon: Icon, color, onClick }: { icon: React.ElementType; color: string; onClick: () => void }) {
   return (
     <button onClick={onClick}
@@ -63,7 +63,7 @@ function IconBtn({ icon: Icon, color, onClick }: { icon: React.ElementType; colo
   )
 }
 
-// ── Placeholder image ──────────────────────────────────────────
+// â”€â”€ Placeholder image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PlaceholderImg({ size = 44 }: { size?: number }) {
   return (
     <div className="rounded-lg flex items-center justify-center"
@@ -73,9 +73,9 @@ function PlaceholderImg({ size = 44 }: { size?: number }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SECTION 1: SAVED PRODUCTS
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function SavedProductsSection() {
   const supabase = createClient()
   const toast    = useToast()
@@ -174,9 +174,9 @@ function SavedProductsSection() {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SECTION 2: TRACKED SELLERS
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function TrackedSellersSection() {
   const supabase = createClient()
   const toast    = useToast()
@@ -296,9 +296,9 @@ function TrackedSellersSection() {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SECTION 3: RESEARCH HISTORY (paginated, search + filter)
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function ResearchHistorySection() {
   const supabase     = createClient()
   const searchRef    = useRef('')
@@ -347,9 +347,9 @@ function ResearchHistorySection() {
 
   const TREND_FILTERS = [
     { value: 'all',    label: 'All'       },
-    { value: 'rising', label: '🔥 Rising' },
-    { value: 'stable', label: '📈 Stable' },
-    { value: 'fading', label: '📉 Fading' },
+    { value: 'rising', label: 'ðŸ”¥ Rising' },
+    { value: 'stable', label: 'ðŸ“ˆ Stable' },
+    { value: 'fading', label: 'ðŸ“‰ Fading' },
   ]
 
   if (loading) return <PageSpinner />
@@ -473,7 +473,7 @@ function ResearchHistorySection() {
   )
 }
 
-// ── Loading spinner ────────────────────────────────────────────
+// â”€â”€ Loading spinner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LoadingSpinner({ small }: { small?: boolean }) {
   return (
     <div className="flex justify-center py-6">
@@ -486,13 +486,13 @@ function LoadingSpinner({ small }: { small?: boolean }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const TABS = [
-  { icon: '💾', label: 'Saved'   },
-  { icon: '🕵️', label: 'Sellers' },
-  { icon: '🔍', label: 'History' },
+  { icon: 'ðŸ’¾', label: 'Saved'   },
+  { icon: 'ðŸ•µï¸', label: 'Sellers' },
+  { icon: 'ðŸ”', label: 'History' },
 ]
 
 export default function VaultTab() {
@@ -510,7 +510,7 @@ export default function VaultTab() {
         </p>
       </div>
 
-      {/* Custom tab bar (matches Dart — no TabController) */}
+      {/* Custom tab bar (matches Dart â€” no TabController) */}
       <div className="flex p-1 rounded-xl border bg-white" style={{ borderColor: C.border }}>
         {TABS.map((tab, i) => {
           const isActive = activeTab === i

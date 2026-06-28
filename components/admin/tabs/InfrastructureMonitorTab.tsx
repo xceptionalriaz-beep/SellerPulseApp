@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/InfrastructureMonitorTab.tsx
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -579,7 +579,7 @@ export default function InfrastructureMonitorTab(_props: Props) {
         {/* Save button */}
         <button onClick={handleSaveStatus} disabled={savingStatus || (pendingStatus === sysStatus?.status && editMessage.trim() === (sysStatus?.message ?? '').trim())}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50 transition-all hover:opacity-80"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           {savingStatus
             ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
             : <><CheckCircle size={14} /> Save & Publish Status</>}
@@ -747,7 +747,7 @@ export default function InfrastructureMonitorTab(_props: Props) {
           </div>
           <button onClick={() => { setShowNewKey(true); setNewKeyResult(null); setNewPartner(''); setNewRateLimit('10000') }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-80"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14} /> Issue New Key
           </button>
         </div>
@@ -895,14 +895,14 @@ export default function InfrastructureMonitorTab(_props: Props) {
                             style={{ color: C.dark }}>{newKeyResult}</code>
                       <button onClick={() => handleCopy('new', newKeyResult)}
                         className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold"
-                        style={{ backgroundColor: C.dark, color: C.lime }}>
+                        style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                         {copiedId === 'new' ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
                       </button>
                     </div>
                   </div>
                   <button onClick={() => setShowNewKey(false)}
                     className="w-full py-2.5 rounded-xl text-[13px] font-bold"
-                    style={{ backgroundColor: C.dark, color: C.lime }}>
+                    style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                     Done — I've saved the key
                   </button>
                 </>
@@ -932,7 +932,7 @@ export default function InfrastructureMonitorTab(_props: Props) {
                       style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
                     <button onClick={handleIssueKey} disabled={!newPartner.trim() || issuingKey}
                       className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                      style={{ backgroundColor: C.dark, color: C.lime }}>
+                      style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                       {issuingKey
                         ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                         : <><Shield size={14} /> Issue Key</>}
@@ -990,7 +990,7 @@ export default function InfrastructureMonitorTab(_props: Props) {
                   style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
                 <button onClick={handleSaveKeyEdit} disabled={editSavingKey}
                   className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {editSavingKey
                     ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                     : <><Check size={14} /> Save Changes</>}

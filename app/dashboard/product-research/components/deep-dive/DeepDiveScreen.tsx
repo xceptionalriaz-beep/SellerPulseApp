@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/deep-dive/DeepDiveScreen.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/deep_dive_screen.dart
 
@@ -43,7 +43,7 @@ export default function DeepDiveScreen({ productUrl }: Props) {
     if (productUrl) startScrapingEngine(productUrl)
   }, [])
 
-  // ── Scraping engine (matches Dart _startScrapingEngine) ──────
+  // â”€â”€ Scraping engine (matches Dart _startScrapingEngine) â”€â”€â”€â”€â”€â”€
   async function startScrapingEngine(url: string) {
     setIsScraping(true)
     // Simulate 2s scraper delay (matches Dart Future.delayed 2s)
@@ -64,14 +64,14 @@ export default function DeepDiveScreen({ productUrl }: Props) {
     setIsScraping(false)
   }
 
-  // ── Loading state (matches Dart _buildLoadingState) ──────────
+  // â”€â”€ Loading state (matches Dart _buildLoadingState) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function LoadingState() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-5">
         <div className="w-10 h-10 rounded-full border-2 animate-spin"
              style={{ borderColor: C.lime, borderTopColor: 'transparent' }} />
         <p className="text-[18px] font-bold" style={{ color: C.text }}>
-          🤖 AI is scraping this eBay listing...
+          ðŸ¤– AI is scraping this eBay listing...
         </p>
         <p className="text-[14px] text-center" style={{ color: C.muted }}>
           Analyzing competitors, stock levels, and VERO risk for:<br />
@@ -81,13 +81,13 @@ export default function DeepDiveScreen({ productUrl }: Props) {
     )
   }
 
-  // ── Analyzed data layout (matches Dart _buildAnalyzedData) ───
+  // â”€â”€ Analyzed data layout (matches Dart _buildAnalyzedData) â”€â”€â”€
   function AnalyzedData() {
     if (!scrapedData) return null
     return (
       <div className="flex flex-col gap-5 flex-1 overflow-hidden">
 
-        {/* Top row — flex 4: CompetitorXray(2) + VelocityChart(3) */}
+        {/* Top row â€” flex 4: CompetitorXray(2) + VelocityChart(3) */}
         <div className="flex gap-5" style={{ flex: 4 }}>
           <div style={{ flex: 2 }}>
             <CompetitorXrayCard
@@ -102,7 +102,7 @@ export default function DeepDiveScreen({ productUrl }: Props) {
           </div>
         </div>
 
-        {/* Bottom row — flex 5: ProfitCalc + SourcingIntel + AiListing */}
+        {/* Bottom row â€” flex 5: ProfitCalc + SourcingIntel + AiListing */}
         <div className="flex gap-5" style={{ flex: 5 }}>
           <div className="flex-1">
             <ProfitCalculatorCard salePrice={scrapedData.rawPrice} />
@@ -137,13 +137,13 @@ export default function DeepDiveScreen({ productUrl }: Props) {
   return (
     <div className="flex flex-col h-full p-6 gap-5">
 
-      {/* Top bar — NeonIcon + title + search input */}
+      {/* Top bar â€” NeonIcon + title + search input */}
       <div className="flex items-center gap-4">
         <NeonIcon icon={Search} />
         <p className="text-[24px] font-bold" style={{ color: C.text }}>Deep Dive Analysis</p>
         <div className="flex-1" />
 
-        {/* Search input — width:500 height:50 matches Dart */}
+        {/* Search input â€” width:500 height:50 matches Dart */}
         <div className="flex items-center rounded-xl border overflow-hidden"
              style={{ width: 500, height: 50, backgroundColor: C.white, borderColor: C.border }}>
           <input value={inputVal} onChange={e => setInputVal(e.target.value)}

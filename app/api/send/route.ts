@@ -1,5 +1,5 @@
-// app/api/send/route.ts
-// Central Resend email API route — handles all transactional emails
+﻿// app/api/send/route.ts
+// Central Resend email API route â€” handles all transactional emails
 
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
@@ -9,11 +9,11 @@ import { ConfirmationEmail } from '@/emails/ConfirmationEmail'
 import { ResetPasswordEmail } from '@/emails/ResetPasswordEmail'
 import { AlertEmail }        from '@/emails/AlertEmail'
 
-// ── Init Resend ───────────────────────────────────────────────
+// â”€â”€ Init Resend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM   = 'Riazify <notifications@dropnrest.com>'
 
-// ── Email types ───────────────────────────────────────────────
+// â”€â”€ Email types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type EmailType = 'welcome' | 'confirmation' | 'reset_password' | 'alert'
 
 interface EmailPayload {
@@ -35,7 +35,7 @@ interface EmailPayload {
   loginUrl?:       string
 }
 
-// ── POST handler ──────────────────────────────────────────────
+// â”€â”€ POST handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
 
   // 1. Check API key
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     switch (type) {
 
       case 'welcome':
-        subject = '🎉 Welcome to Riazify — Your dashboard is ready'
+        subject = 'ðŸŽ‰ Welcome to Riazify â€” Your dashboard is ready'
         react   = WelcomeEmail({
           userName,
           userEmail:  payload.userEmail ?? to,
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         break
 
       case 'confirmation':
-        subject = '🔐 Confirm your Riazify account'
+        subject = 'ðŸ” Confirm your Riazify account'
         react   = ConfirmationEmail({
           userName,
           confirmationUrl: payload.confirmationUrl ?? '',
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         break
 
       case 'reset_password':
-        subject = '🔑 Reset your Riazify password'
+        subject = 'ðŸ”‘ Reset your Riazify password'
         react   = ResetPasswordEmail({
           userName,
           resetUrl: payload.resetUrl ?? '',
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         break
 
       case 'alert':
-        subject = `⚡ Market Alert — ${payload.nicheKeyword ?? 'Your niche'} | Riazify`
+        subject = `âš¡ Market Alert â€” ${payload.nicheKeyword ?? 'Your niche'} | Riazify`
         react   = AlertEmail({
           userName,
           alertType:    payload.alertType    ?? 'trend_surge',
@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ── GET — health check ────────────────────────────────────────
+// â”€â”€ GET â€” health check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function GET() {
   return NextResponse.json({
     status:   'ok',

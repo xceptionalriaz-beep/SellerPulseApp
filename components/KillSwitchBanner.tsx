@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/KillSwitchBanner.tsx
 // Shows maintenance banner when a tool is killed
 // Usage: <KillSwitchBanner toolKey="product_research" />

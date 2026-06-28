@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/landing/Footer.tsx
 import { useState } from 'react'
 import { Activity } from 'lucide-react'
@@ -86,7 +86,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
              style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="text-[12px]" style={{ color: T.sage }}>© 2026 Riazify — All rights reserved.</p>
+          <p className="text-[12px]" style={{ color: T.sage }}>Â© 2026 Riazify â€” All rights reserved.</p>
           <div className="flex items-center gap-4">
             {["Twitter", "LinkedIn", "YouTube", "Discord"].map(s => (
               <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"

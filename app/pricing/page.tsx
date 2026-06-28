@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 // app/pricing/page.tsx
-// Full standalone pricing page — uses shared Navbar and Footer
+// Full standalone pricing page â€” uses shared Navbar and Footer
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -48,11 +48,11 @@ const STATS = [
 ]
 
 const FAQS = [
-  { q: 'Can I cancel anytime?',               a: 'Yes — cancel from your billing settings with one click. No penalties, no questions.' },
+  { q: 'Can I cancel anytime?',               a: 'Yes â€” cancel from your billing settings with one click. No penalties, no questions.' },
   { q: 'Is there a free trial?',              a: 'Every paid plan includes a 14-day free trial. No credit card required to start.' },
   { q: 'What payment methods do you accept?', a: 'All major credit/debit cards via LemonSqueezy. Secure payment processing with full fraud protection.' },
-  { q: 'Can I switch plans later?',           a: 'Yes — upgrade or downgrade at any time. Changes apply immediately and billing is prorated.' },
-  { q: 'Do you offer annual discounts?',      a: 'Yes — annual billing saves you up to 20% compared to monthly.' },
+  { q: 'Can I switch plans later?',           a: 'Yes â€” upgrade or downgrade at any time. Changes apply immediately and billing is prorated.' },
+  { q: 'Do you offer annual discounts?',      a: 'Yes â€” annual billing saves you up to 20% compared to monthly.' },
   { q: 'What happens when I hit a limit?',    a: 'You will see a clear prompt to upgrade. Your existing data and orders are never affected.' },
 ]
 
@@ -115,13 +115,13 @@ export default function PricingPage() {
     // Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Not logged in → go to signup first
+    // Not logged in â†’ go to signup first
     if (!user) {
       router.push(`/auth/signup?plan=${plan.plan_id}&billing=${billing}&next=/pricing?checkout=${plan.plan_id}_${billing}`)
       return
     }
 
-    // Logged in → create checkout
+    // Logged in â†’ create checkout
     setCheckoutLoading(plan.plan_id)
     try {
       const { data: profile } = await supabase
@@ -186,7 +186,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* ── Billing Toggle ── */}
+        {/* â”€â”€ Billing Toggle â”€â”€ */}
         <div className="flex items-center justify-center gap-4 mb-10">
           <span className="text-[13px] font-bold" style={{ color: billing === 'monthly' ? T.dark : T.muted }}>
             Monthly
@@ -268,7 +268,7 @@ export default function PricingPage() {
                     {/* Annual total note */}
                     {billing === 'annual' && plan.price_annual_total && !isCustom && (
                       <p className="text-[11px] font-semibold mb-1" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : T.muted }}>
-                        {plan.price_annual_total} — billed annually
+                        {plan.price_annual_total} â€” billed annually
                       </p>
                     )}
                     <p className="text-[12px]" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : T.muted }}>
@@ -409,7 +409,7 @@ export default function PricingPage() {
           <button onClick={() => router.push('/auth/signup')}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[15px] hover:opacity-90"
             style={{ backgroundColor: T.lime, color: T.dark }}>
-            Start for free — no card required <ArrowRight size={16} />
+            Start for free â€” no card required <ArrowRight size={16} />
           </button>
         </div>
 

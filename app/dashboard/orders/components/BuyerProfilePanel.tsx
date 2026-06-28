@@ -1,21 +1,21 @@
-'use client'
+﻿'use client'
 // app/dashboard/orders/components/BuyerProfilePanel.tsx
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/pages/orders/buyer_profile_panel.dart
 //
 // Sections (same as Dart):
-//   ✅ Header — copy, report on eBay, flag, close
-//   ✅ Profile hero — avatar, risk badge, risk score circle
-//   ✅ Riazify Protection Directive — risk-aware message
-//   ✅ Risk score card — progress bar, score zones
-//   ✅ Key stats — return rate, disputes, orders, value
-//   ✅ Account history metrics — age, feedback, purchases
-//   ✅ Delivery address metrics — address, intl warning
-//   ✅ Risk patterns — with tooltips
-//   ✅ AI analysis card
-//   ✅ Order history with you
-//   ✅ Similar risk buyers
-// ═══════════════════════════════════════════════════════════════
+//   âœ… Header â€” copy, report on eBay, flag, close
+//   âœ… Profile hero â€” avatar, risk badge, risk score circle
+//   âœ… Riazify Protection Directive â€” risk-aware message
+//   âœ… Risk score card â€” progress bar, score zones
+//   âœ… Key stats â€” return rate, disputes, orders, value
+//   âœ… Account history metrics â€” age, feedback, purchases
+//   âœ… Delivery address metrics â€” address, intl warning
+//   âœ… Risk patterns â€” with tooltips
+//   âœ… AI analysis card
+//   âœ… Order history with you
+//   âœ… Similar risk buyers
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState, useEffect, useCallback } from 'react'
 import {
@@ -29,7 +29,7 @@ import { useToast } from '@/components/ui/AppToast'
 import { cn } from '@/lib/utils'
 import { PageSpinner } from '@/components/ui/Spinner'
 
-// ── Design tokens ──────────────────────────────────────────────
+// â”€â”€ Design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   bg: '#F7F9F5', surface: '#FFFFFF', border: '#E8EDE2',
   accent: '#8FFF00', accentDark: '#0A0D08', accentDim: '#F4FFE6',
@@ -50,7 +50,7 @@ function fmtDate(iso: string) {
   return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`
 }
 
-// ── Small helpers ──────────────────────────────────────────────
+// â”€â”€ Small helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn('w-full p-4 rounded-xl border bg-white', className)} style={{ borderColor: C.border }}>
@@ -82,19 +82,19 @@ function StatItem({ label, value, color, icon: Icon }: { label: string; value: s
 
 // Risk pattern data (matches Dart patternData)
 const PATTERN_DATA: Record<string, { label: string; short: string; tooltip: string }> = {
-  serial_returner:        { label: '📦 Serial Returner',              short: 'Returns items frequently after use',           tooltip: 'This buyer has a pattern of returning items after using them. Keep all packaging photos.' },
-  inad_claimer:           { label: '⚠️ INAD Claimer',                 short: 'Often claims Item Not As Described',           tooltip: 'Frequently files Item Not As Described disputes. A packing video is the strongest defence.' },
-  high_dispute_rate:      { label: '⚖️ High Dispute Rate',            short: 'Files disputes regularly',                    tooltip: 'This buyer has opened disputes against multiple sellers — strong signal of bad faith.' },
-  fast_returner:          { label: '⚡ Fast Returner',                 short: 'Returns within days of receiving',             tooltip: 'Returns unusually quickly — can indicate wardrobing or item switching fraud.' },
-  late_claimer:           { label: '🕐 Late Claimer',                  short: 'Files claims just before eBay deadline',       tooltip: 'Waits until day 29 of the 30-day window before filing. Monitor orders for the full 30 days.' },
-  electronics_risk:       { label: '📱 Electronics Risk',             short: 'High return rate on electronics',              tooltip: 'High return rate on electronics. Always photograph serial numbers before dispatch.' },
-  freight_forwarder:      { label: '🏭 Freight Forwarder',            short: 'Ship-to address is a commercial warehouse',    tooltip: 'Address belongs to a freight forwarder. High association with chargeback and INR fraud.' },
-  suspicious_velocity:    { label: '⚡ Suspicious Message Velocity',  short: 'Unusual number of messages sent rapidly',      tooltip: 'Sent unusually high messages in a short time — possible social engineering attempt.' },
+  serial_returner:        { label: 'ðŸ“¦ Serial Returner',              short: 'Returns items frequently after use',           tooltip: 'This buyer has a pattern of returning items after using them. Keep all packaging photos.' },
+  inad_claimer:           { label: 'âš ï¸ INAD Claimer',                 short: 'Often claims Item Not As Described',           tooltip: 'Frequently files Item Not As Described disputes. A packing video is the strongest defence.' },
+  high_dispute_rate:      { label: 'âš–ï¸ High Dispute Rate',            short: 'Files disputes regularly',                    tooltip: 'This buyer has opened disputes against multiple sellers â€” strong signal of bad faith.' },
+  fast_returner:          { label: 'âš¡ Fast Returner',                 short: 'Returns within days of receiving',             tooltip: 'Returns unusually quickly â€” can indicate wardrobing or item switching fraud.' },
+  late_claimer:           { label: 'ðŸ• Late Claimer',                  short: 'Files claims just before eBay deadline',       tooltip: 'Waits until day 29 of the 30-day window before filing. Monitor orders for the full 30 days.' },
+  electronics_risk:       { label: 'ðŸ“± Electronics Risk',             short: 'High return rate on electronics',              tooltip: 'High return rate on electronics. Always photograph serial numbers before dispatch.' },
+  freight_forwarder:      { label: 'ðŸ­ Freight Forwarder',            short: 'Ship-to address is a commercial warehouse',    tooltip: 'Address belongs to a freight forwarder. High association with chargeback and INR fraud.' },
+  suspicious_velocity:    { label: 'âš¡ Suspicious Message Velocity',  short: 'Unusual number of messages sent rapidly',      tooltip: 'Sent unusually high messages in a short time â€” possible social engineering attempt.' },
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 interface BuyerProfilePanelProps {
   buyerUsername:    string
   initialRiskLevel?: string
@@ -194,7 +194,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
       <div className="relative flex flex-col z-10 transition-transform duration-300 ease-out"
            style={{ width: '46%', minWidth: 500, maxWidth: 700, height: '100%', backgroundColor: C.bg, transform: visible ? 'translateX(0)' : 'translateX(100%)' }}>
 
-        {/* ── HEADER ── */}
+        {/* â”€â”€ HEADER â”€â”€ */}
         <div className="flex items-center gap-3 px-5 py-4 bg-white border-b shrink-0" style={{ borderColor: C.border }}>
           <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ backgroundColor: C.accent }}>
             <Search size={18} style={{ color: C.accentDark }} />
@@ -235,7 +235,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
           </div>
         </div>
 
-        {/* ── CONTENT ── */}
+        {/* â”€â”€ CONTENT â”€â”€ */}
         {loading ? (
           <div className="flex-1 overflow-y-auto p-5 space-y-4 animate-pulse">
             {/* Hero skeleton */}
@@ -299,7 +299,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
         ) : (
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
-            {/* ── Profile Hero ── */}
+            {/* â”€â”€ Profile Hero â”€â”€ */}
             <div className="p-5 rounded-2xl border" style={{
               background: `linear-gradient(135deg, ${rbg} 0%, #fff 100%)`,
               borderColor: rc + '4D', borderWidth: '1.5px'
@@ -339,7 +339,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
                     <div className="flex items-center gap-1.5 mt-2 px-2.5 py-1.5 rounded-lg border bg-white w-fit"
                          style={{ borderColor: C.border }}>
                       <Info size={12} style={{ color: C.textHint }} />
-                      <span className="text-[11px]" style={{ color: C.textSecondary }}>No risk profile — first interaction</span>
+                      <span className="text-[11px]" style={{ color: C.textSecondary }}>No risk profile â€” first interaction</span>
                     </div>
                   )}
                 </div>
@@ -352,7 +352,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               </div>
             </div>
 
-            {/* ── Riazify Protection Directive ── */}
+            {/* â”€â”€ Riazify Protection Directive â”€â”€ */}
             <div className="p-3.5 rounded-xl border" style={{
               backgroundColor: rbg,
               borderColor: rc + '80', borderWidth: '1.5px'
@@ -360,7 +360,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-[18px]"
                      style={{ backgroundColor: rc + '26' }}>
-                  {orderRiskLevel === 'LOW' ? '✅' : '⚠️'}
+                  {orderRiskLevel === 'LOW' ? 'âœ…' : 'âš ï¸'}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1.5">
@@ -380,7 +380,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               </div>
             </div>
 
-            {/* ── Risk Score Card ── */}
+            {/* â”€â”€ Risk Score Card â”€â”€ */}
             <Card>
               <SectionTitle icon={BarChart2} text="eBay RISK SCORE BREAKDOWN" />
               <div className="flex items-center gap-2 mb-3">
@@ -405,18 +405,18 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
                 <Info size={14} style={{ color: rc, marginTop: 1 }} />
                 <p className="text-[12px] leading-relaxed" style={{ color: C.textPrimary }}>
                   {orderRiskLevel === 'HIGH'
-                    ? `Score ${riskScore}/100 — This buyer has a high probability of filing disputes. Extra protection steps are strongly recommended.`
+                    ? `Score ${riskScore}/100 â€” This buyer has a high probability of filing disputes. Extra protection steps are strongly recommended.`
                     : orderRiskLevel === 'MEDIUM'
-                      ? `Score ${riskScore}/100 — This buyer has shown some risk indicators. Complete the checklist and consider signature-required shipping.`
-                      : `Score ${riskScore}/100 — This buyer appears low risk. Standard shipping practices should be sufficient.`
+                      ? `Score ${riskScore}/100 â€” This buyer has shown some risk indicators. Complete the checklist and consider signature-required shipping.`
+                      : `Score ${riskScore}/100 â€” This buyer appears low risk. Standard shipping practices should be sufficient.`
                   }
                 </p>
               </div>
             </Card>
 
-            {/* ── Key Stats ── */}
+            {/* â”€â”€ Key Stats â”€â”€ */}
             <Card>
-              <SectionTitle icon={BarChart2} text="📈 KEY STATISTICS" />
+              <SectionTitle icon={BarChart2} text="ðŸ“ˆ KEY STATISTICS" />
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <StatItem label="Return Rate"    value={`${Number(profile?.return_rate || 0).toFixed(0)}%`} color={Number(profile?.return_rate || 0) > 30 ? C.riskHigh : C.riskLow} icon={Package} />
                 <StatItem label="Disputes"       value={`${profile?.dispute_count || 0}`}                  color={(profile?.dispute_count || 0) > 2 ? C.riskHigh : C.textSecondary} icon={AlertTriangle} />
@@ -429,7 +429,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               </div>
             </Card>
 
-            {/* ── Account History Metrics ── */}
+            {/* â”€â”€ Account History Metrics â”€â”€ */}
             <Card>
               <SectionTitle icon={Calendar} text="ACCOUNT HISTORY METRICS" />
               {(() => {
@@ -443,7 +443,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
                   <>
                     <div className="grid grid-cols-3 gap-3 mb-3">
                       <StatItem label="Account Age"     value={ageText}                                  color={ageColor}  icon={Calendar}     />
-                      <StatItem label="Feedback Score"  value={profile?.feedback_score || '—'}           color={fbColor}   icon={Star}         />
+                      <StatItem label="Feedback Score"  value={profile?.feedback_score || 'â€”'}           color={fbColor}   icon={Star}         />
                       <StatItem label="Feedback %"      value={`${fbPct.toFixed(1)}%`}                   color={fbColor}   icon={CheckCircle}  />
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -454,7 +454,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
                     {ageMonths < 6 && (
                       <div className="flex items-center gap-2 mt-3 p-2.5 rounded-lg border" style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '4D' }}>
                         <AlertTriangle size={13} style={{ color: C.riskHigh }} />
-                        <p className="text-[11px]" style={{ color: C.riskHigh }}>New account — less than 6 months old. Higher risk of fraud.</p>
+                        <p className="text-[11px]" style={{ color: C.riskHigh }}>New account â€” less than 6 months old. Higher risk of fraud.</p>
                       </div>
                     )}
                   </>
@@ -462,11 +462,11 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               })()}
             </Card>
 
-            {/* ── Delivery Address Metrics ── */}
+            {/* â”€â”€ Delivery Address Metrics â”€â”€ */}
             {buyerOrders.length > 0 && (() => {
               const o = buyerOrders[0]
-              const city = o.shipping_city || '—', state = o.shipping_state || '—'
-              const zip = o.shipping_zip || '—', country = o.shipping_country || '—'
+              const city = o.shipping_city || 'â€”', state = o.shipping_state || 'â€”'
+              const zip = o.shipping_zip || 'â€”', country = o.shipping_country || 'â€”'
               const isIntl = country && !['us','united states','gb','united kingdom'].includes(country.toLowerCase())
               const addrColor = isIntl ? C.riskHigh : orderRiskLevel === 'HIGH' ? C.riskMedium : C.riskLow
               return (
@@ -489,7 +489,7 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
                       <span className="text-[12px]" style={{ color: C.textSecondary }}>{country}</span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold border"
                             style={{ backgroundColor: addrColor + '1A', borderColor: addrColor + '4D', color: addrColor }}>
-                        {isIntl ? '🌍 International' : '🏠 Domestic'}
+                        {isIntl ? 'ðŸŒ International' : 'ðŸ  Domestic'}
                       </span>
                     </div>
                   </div>
@@ -504,20 +504,20 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
                   <div className="flex items-center gap-1.5 mt-2">
                     <Info size={12} style={{ color: C.textHint }} />
                     <p className="text-[11px]" style={{ color: C.textSecondary }}>
-                      {buyerOrders.length > 1 ? `Used across ${buyerOrders.length} orders with you` : 'First order — no address history to compare'}
+                      {buyerOrders.length > 1 ? `Used across ${buyerOrders.length} orders with you` : 'First order â€” no address history to compare'}
                     </p>
                   </div>
                 </Card>
               )
             })()}
 
-            {/* ── Risk Patterns ── */}
+            {/* â”€â”€ Risk Patterns â”€â”€ */}
             {(profile?.risk_patterns as string[] || []).length > 0 && (
               <Card>
-                <SectionTitle icon={Flag} text="🚩 DETECTED RISK PATTERNS" />
+                <SectionTitle icon={Flag} text="ðŸš© DETECTED RISK PATTERNS" />
                 <div className="space-y-2">
                   {(profile.risk_patterns as string[]).map((p, i) => {
-                    const data = PATTERN_DATA[p] || { label: `⚠️ ${p.replace(/_/g,' ')}`, short: '', tooltip: 'Risk pattern detected.' }
+                    const data = PATTERN_DATA[p] || { label: `âš ï¸ ${p.replace(/_/g,' ')}`, short: '', tooltip: 'Risk pattern detected.' }
                     return (
                       <div key={i} className="flex items-start gap-2.5 p-3 rounded-lg border"
                            style={{ backgroundColor: C.riskHighBg, borderColor: C.riskHigh + '33' }}>
@@ -537,10 +537,10 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               </Card>
             )}
 
-            {/* ── AI Analysis ── */}
+            {/* â”€â”€ AI Analysis â”€â”€ */}
             {profile?.ai_analysis && (
               <Card>
-                <SectionTitle icon={Sparkles} text="🤖 AI RISK ANALYSIS" />
+                <SectionTitle icon={Sparkles} text="ðŸ¤– AI RISK ANALYSIS" />
                 <div className="flex items-start gap-3 p-3.5 rounded-xl border" style={{ backgroundColor: C.accentDim, borderColor: C.accent + '4D' }}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: C.accent }}>
                     <Sparkles size={14} style={{ color: C.accentDark }} />
@@ -553,10 +553,10 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               </Card>
             )}
 
-            {/* ── Order History ── */}
+            {/* â”€â”€ Order History â”€â”€ */}
             <Card>
               <div className="flex items-center justify-between mb-3">
-                <SectionTitle icon={History} text="🛍️ ORDER HISTORY WITH YOU" />
+                <SectionTitle icon={History} text="ðŸ›ï¸ ORDER HISTORY WITH YOU" />
                 <span className="text-[11px]" style={{ color: C.textSecondary }}>{buyerOrders.length} total</span>
               </div>
               {buyerOrders.length === 0 ? (
@@ -591,9 +591,9 @@ export default function BuyerProfilePanel({ buyerUsername, initialRiskLevel = 'L
               )}
             </Card>
 
-            {/* ── Similar Buyers ── */}
+            {/* â”€â”€ Similar Buyers â”€â”€ */}
             <Card>
-              <SectionTitle icon={Users} text="👥 SIMILAR RISK BUYERS" />
+              <SectionTitle icon={Users} text="ðŸ‘¥ SIMILAR RISK BUYERS" />
               <p className="text-[11px] mb-3" style={{ color: C.textSecondary }}>Buyers with similar return/dispute patterns</p>
               {similarBuyers.length === 0 ? (
                 <p className="text-center py-4 text-[13px]" style={{ color: C.textHint }}>No similar buyers found in your orders</p>

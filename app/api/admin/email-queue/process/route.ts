@@ -1,16 +1,16 @@
-// app/api/admin/email-queue/process/route.ts
-// ══════════════════════════════════════════════════════════════
-// Cron job processor — runs every minute via cron-job.org
+﻿// app/api/admin/email-queue/process/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// Cron job processor â€” runs every minute via cron-job.org
 // Finds pending emails due to be sent and fires them via Resend
 // Also checks exit conditions before sending
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 const FROM_EMAIL = 'notifications@dropnrest.com'
 
-// Exit conditions — cancel remaining steps if these are true
+// Exit conditions â€” cancel remaining steps if these are true
 const EXIT_CONDITIONS: Record<string, (profile: any) => boolean> = {
   'user.signup':    (p) => p?.plan_name && p.plan_name !== 'Free',      // upgraded
   'usage.limit_80': (p) => p?.plan_name && p.plan_name !== 'Free',      // upgraded
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 
         if (suppressed) {
           await (adminClient.from('email_queue') as any)
-            .update({ status: 'cancelled', error: 'Email suppressed — user unsubscribed' })
+            .update({ status: 'cancelled', error: 'Email suppressed â€” user unsubscribed' })
             .eq('id', email.id)
           results.skipped++
           continue
@@ -168,7 +168,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ── Test email sender — direct send without queue ─────────────
+// â”€â”€ Test email sender â€” direct send without queue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
   const auth = req.headers.get('x-internal-secret')
   const validSecret = process.env.INTERNAL_API_SECRET ?? process.env.NEXT_PUBLIC_INTERNAL_SECRET

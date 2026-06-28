@@ -1,4 +1,4 @@
-// app/api/admin/test-connection/route.ts
+﻿// app/api/admin/test-connection/route.ts
 // Server-side API connection tester
 // Handles APIs whose keys are stored in env vars (not DB)
 
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
 
       success = res.ok
       message = success
-        ? `Resend connected — ${Date.now() - start}ms`
-        : `Resend error — ${res.status} ${res.statusText}`
+        ? `Resend connected â€” ${Date.now() - start}ms`
+        : `Resend error â€” ${res.status} ${res.statusText}`
 
       // Update last_used_at in DB
       if (success) {
@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
 
       success = res.ok
       message = success
-        ? `eBay connected — ${Date.now() - start}ms`
-        : `eBay error — ${res.status}`
+        ? `eBay connected â€” ${Date.now() - start}ms`
+        : `eBay error â€” ${res.status}`
 
       if (success) {
         await (adminClient.from('api_fleet_config') as any)
@@ -106,8 +106,8 @@ export async function POST(req: NextRequest) {
       })
       success = res.ok
       message = success
-        ? `LemonSqueezy connected — ${Date.now() - start}ms`
-        : `LemonSqueezy error — ${res.status}`
+        ? `LemonSqueezy connected â€” ${Date.now() - start}ms`
+        : `LemonSqueezy error â€” ${res.status}`
       if (success) {
         await (adminClient.from('api_fleet_config') as any)
           .update({

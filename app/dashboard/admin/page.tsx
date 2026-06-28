@@ -27,12 +27,13 @@ import ApiVaultPage        from '@/components/admin/settings-tabs/ApiVaultPage'
 import AffiliateVaultTab   from '@/components/admin/settings-tabs/AffiliateVaultTab'
 import FounderOpsTab       from '@/components/admin/settings-tabs/FounderOpsTab'
 import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
+import BlogTab             from '@/components/admin/settings-tabs/BlogTab'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
 
-// ── Design tokens ──────────────────────────────────────────────
+// -- Design tokens ----------------------------------------------
 const C = {
-  dark:   '#0F172A',
+  dark:   '#1a2410',
   lime:   '#8FFF00',
   border: '#E2E8F0',
   bg:     '#F8FAFC',
@@ -41,7 +42,7 @@ const C = {
   hint:   '#94A3B8',
 }
 
-// ── Settings menu ──────────────────────────────────────────────
+// -- Settings menu ----------------------------------------------
 const SETTINGS_MENU = [
   { title: 'User CRM',        icon: Users        },
   { title: 'Role Builder',    icon: Shield       },
@@ -60,7 +61,7 @@ const SETTINGS_MENU = [
   { title: 'Tickets',         icon: MessageCircle, badge: 0 },
 ]
 
-// ── Tool definitions (static metadata only — no dummy stats) ──
+// -- Tool definitions (static metadata only — no dummy stats) --
 const TOOL_DEFS = [
   { name: 'Orders',              dbKey: 'ebay_orders',         desc: 'Protect orders from risky buyers & disputes',  icon: Shield,   isLive: true,  accent: '#8FFF00', eta: '' },
   { name: 'Profit Calculator',   dbKey: 'profit_calculator',   desc: 'Calculate real eBay profit after all fees',    icon: BarChart2,isLive: true,  accent: '#FBBF24', eta: '' },
@@ -70,7 +71,7 @@ const TOOL_DEFS = [
   { name: 'Dropship Analyzer',   dbKey: 'dropship_analyzer',   desc: 'Analyze dropship margins & supplier risk',    icon: Wrench,   isLive: false, accent: '#2DD4BF', eta: 'Q4 2025' },
 ]
 
-// ── Admin stats shape ──────────────────────────────────────────
+// -- Admin stats shape ------------------------------------------
 interface AdminStats {
   mrr:           number
   activeSubs:    number
@@ -98,14 +99,14 @@ const DEFAULT_STATS: AdminStats = {
   loading: true,
 }
 
-// ── Analytics Hub button ───────────────────────────────────────
+// -- Analytics Hub button ---------------------------------------
 function AnalyticsHubButton({ isActive, onTap }: { isActive: boolean; onTap: () => void }) {
   return (
     <button onClick={onTap}
       className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-[13px] font-bold transition-all"
       style={{
-        backgroundColor: isActive ? C.dark  : C.bg,
-        borderColor:     isActive ? C.dark  : C.border,
+        backgroundColor: isActive ? '#8fff00' : C.bg,
+        borderColor: isActive ? '#8fff00' : C.border,
         color:           isActive ? C.lime  : C.text,
       }}>
       <BarChart2 size={15} />
@@ -114,7 +115,7 @@ function AnalyticsHubButton({ isActive, onTap }: { isActive: boolean; onTap: () 
   )
 }
 
-// ── Stat Card ──────────────────────────────────────────────────
+// -- Stat Card --------------------------------------------------
 interface StatCardData {
   title: string; titleMobile: string; value: string; sub: string
   icon: React.ElementType
@@ -126,7 +127,7 @@ function StatCard({ d, isMobile }: { d: StatCardData; isMobile: boolean }) {
   return (
     <div className="flex flex-col gap-3 p-4 rounded-2xl border transition-all"
          style={{
-           backgroundColor: d.isHighlight ? C.dark : d.isToolCard ? '#0A0D08' : '#fff',
+           backgroundColor: d.isHighlight ? '#1a2410' : d.isToolCard ? '#1a2410' : '#fff',
            borderColor: d.isHighlight ? 'transparent' : d.isToolCard ? 'rgba(143,255,0,0.4)' : C.border,
            borderWidth: d.isToolCard ? 1.5 : 1,
            boxShadow: d.isHighlight
@@ -158,7 +159,7 @@ function StatCard({ d, isMobile }: { d: StatCardData; isMobile: boolean }) {
   )
 }
 
-// ── Tool Card ──────────────────────────────────────────────────
+// -- Tool Card --------------------------------------------------
 function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; users: number } }) {
   const Icon   = tool.icon
   const isLime = tool.accent === '#8FFF00'
@@ -177,7 +178,7 @@ function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; us
           <Icon size={18} style={{ color: tool.accent }} />
           {!tool.isLive && (
             <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center">
-              <span style={{ fontSize: 7, color: C.hint }}>🔒</span>
+              <span style={{ fontSize: 7, color: C.hint }}>??</span>
             </div>
           )}
         </div>
@@ -226,7 +227,7 @@ function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; us
   )
 }
 
-// ── CMD+K Palette ──────────────────────────────────────────────
+// -- CMD+K Palette ----------------------------------------------
 function CommandPalette({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24"
@@ -271,8 +272,8 @@ function CommandPalette({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ── Quick Action Dialogs ───────────────────────────────────────
-// ── Custom Dropdown (matches tool design) ─────────────────────
+// -- Quick Action Dialogs ---------------------------------------
+// -- Custom Dropdown (matches tool design) ---------------------
 function CustomDropdown({ value, options, onChange }: {
   value:   string
   options: { value: string; label: string }[]
@@ -324,7 +325,7 @@ function CustomDropdown({ value, options, onChange }: {
                   }}>
                   {o.label}
                   {isSelected && (
-                    <span style={{ fontSize: 12 }}>✓</span>
+                    <span style={{ fontSize: 12 }}>?</span>
                   )}
                 </button>
               )
@@ -351,7 +352,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
   const [tempPassword, setTempPassword] = useState('')
   const [copied,       setCopied]       = useState(false)
 
-  // ── Generate temp password ─────────────────────────────────
+  // -- Generate temp password ---------------------------------
   function generatePassword(n: string) {
     const safe   = (n ?? '').trim().replace(/\s/g, '')
     const prefix = safe.length >= 3 ? safe.substring(0, 3) : 'Usr'
@@ -363,18 +364,18 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
     setTempPassword(generatePassword(name || 'User'))
   }, [name])
 
-  // ── Validation ─────────────────────────────────────────────
+  // -- Validation ---------------------------------------------
   const isValidEmail = (e: string) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(e.trim())
   const isFormValid  = name.trim().length >= 2 && isValidEmail(email)
 
-  // ── Copy password ──────────────────────────────────────────
+  // -- Copy password ------------------------------------------
   function copyPassword() {
     navigator.clipboard.writeText(tempPassword)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // ── Create user ────────────────────────────────────────────
+  // -- Create user --------------------------------------------
   async function handleCreate() {
     if (!isFormValid || isSubmitting) return
     setError(''); setIsSubmitting(true)
@@ -458,7 +459,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
           <div className="flex flex-col items-center justify-center py-10 px-6">
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
                  style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
-              <span className="text-3xl">🎉</span>
+              <span className="text-3xl">??</span>
             </div>
             <p className="text-[18px] font-bold mb-1" style={{ color: C.text }}>User Created!</p>
             <p className="text-[13px] text-center mb-4" style={{ color: C.muted }}>
@@ -474,7 +475,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
               <button onClick={copyPassword}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
                 style={{ backgroundColor: copied ? 'rgba(143,255,0,0.1)' : C.border, color: copied ? '#4A8F00' : C.muted }}>
-                {copied ? '✅ Copied!' : '📋 Copy'}
+                {copied ? '? Copied!' : '?? Copy'}
               </button>
             </div>
             <p className="text-[11px] mt-2" style={{ color: C.hint }}>
@@ -488,7 +489,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
             {error && (
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg border"
                    style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
-                <span className="text-[12px] font-semibold" style={{ color: '#F87171' }}>⚠️ {error}</span>
+                <span className="text-[12px] font-semibold" style={{ color: '#F87171' }}>?? {error}</span>
               </div>
             )}
 
@@ -553,7 +554,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
                       borderColor:     role === r ? C.dark : C.border,
                       color:           role === r ? C.lime : C.muted,
                     }}>
-                    {r === 'admin' ? '🔑 Admin' : '👤 User'}
+                    {r === 'admin' ? '?? Admin' : '?? User'}
                   </button>
                 ))}
               </div>
@@ -570,11 +571,11 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
                 </span>
                 <button onClick={() => setTempPassword(generatePassword(name || 'User'))}
                   className="text-[11px] px-2 py-1 rounded hover:bg-gray-100"
-                  style={{ color: C.hint }}>🔄</button>
+                  style={{ color: C.hint }}>??</button>
                 <button onClick={copyPassword}
                   className="text-[11px] px-2 py-1 rounded hover:bg-gray-100"
                   style={{ color: copied ? '#4A8F00' : C.hint }}>
-                  {copied ? '✅' : '📋'}
+                  {copied ? '?' : '??'}
                 </button>
               </div>
             </div>
@@ -621,7 +622,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
                 {isSubmitting ? (
                   <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                        style={{ borderTopColor: C.dark }} />
-                ) : '✅ Create User'}
+                ) : '? Create User'}
               </button>
             </div>
 
@@ -699,7 +700,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col items-center py-8 px-5">
             <div className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
                  style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
-              <span className="text-2xl">✅</span>
+              <span className="text-2xl">?</span>
             </div>
             <p className="text-[16px] font-bold mb-1" style={{ color: C.text }}>Reset Complete!</p>
             <p className="text-[12px] text-center" style={{ color: C.muted }}>
@@ -745,7 +746,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
             {/* Warning */}
             <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg border"
                  style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
-              <span className="text-[13px]">⚠️</span>
+              <span className="text-[13px]">??</span>
               <p className="text-[11px]" style={{ color: '#92400E' }}>
                 This affects all platforms in your API Fleet. This action cannot be undone.
               </p>
@@ -770,7 +771,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
                 {resetting ? (
                   <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                        style={{ borderTopColor: C.dark }} />
-                ) : '🔄 Reset Now'}
+                ) : '?? Reset Now'}
               </button>
             </div>
           </div>
@@ -791,7 +792,7 @@ function KillSwitchDialog({ onClose }: { onClose: () => void }) {
           <p className="text-[16px] font-bold" style={{ color: '#F87171' }}>Emergency Kill Switch</p>
         </div>
         <p className="text-[13px] mb-5" style={{ color: C.muted }}>
-          ⚠️ This will immediately disable ALL user access. This action is logged and cannot be undone without manual restore.
+          ?? This will immediately disable ALL user access. This action is logged and cannot be undone without manual restore.
         </p>
         <div className="flex gap-2">
           <button onClick={onClose} className="flex-1 py-2 rounded-lg border text-[13px] font-semibold"
@@ -804,9 +805,9 @@ function KillSwitchDialog({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN PAGE
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function AdminPage() {
   const supabase     = createClient()
   const searchParams = useSearchParams()
@@ -844,7 +845,7 @@ function AdminPage() {
   const [isMobile,          setIsMobile]          = useState(
     () => typeof window !== 'undefined' ? window.innerWidth < 950 : false
   )
-  // ── Real stats state ───────────────────────────────────────
+  // -- Real stats state ---------------------------------------
   const [stats, setStats] = useState<AdminStats>(DEFAULT_STATS)
 
   useEffect(() => {
@@ -891,7 +892,7 @@ function AdminPage() {
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // ── Role check ─────────────────────────────────────────────
+  // -- Role check ---------------------------------------------
   useEffect(() => {
     async function check() {
       const cookie = document.cookie.split(';').find(c => c.trim().startsWith('riazify_role='))
@@ -910,7 +911,7 @@ function AdminPage() {
     check()
   }, [])
 
-  // ── Load real admin stats ──────────────────────────────────
+  // -- Load real admin stats ----------------------------------
   const loadAdminStats = useCallback(async () => {
     try {
       // 1. Fetch all profiles
@@ -1068,7 +1069,7 @@ function AdminPage() {
     if (authorized) loadAdminStats()
   }, [authorized, loadAdminStats])
 
-  // ── Responsive ─────────────────────────────────────────────
+  // -- Responsive ---------------------------------------------
   useEffect(() => {
     const ro = new ResizeObserver(entries => {
       for (const e of entries) setIsMobile(e.contentRect.width < 950)
@@ -1077,7 +1078,7 @@ function AdminPage() {
     return () => ro.disconnect()
   }, [])
 
-  // ── CMD+K ───────────────────────────────────────────────────
+  // -- CMD+K ---------------------------------------------------
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
@@ -1090,7 +1091,7 @@ function AdminPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // ── Computed stat cards from real data ─────────────────────
+  // -- Computed stat cards from real data ---------------------
   const statCards: StatCardData[] = [
     {
       title: 'Monthly Recurring Revenue', titleMobile: 'MRR',
@@ -1113,7 +1114,7 @@ function AdminPage() {
     {
       title: 'Churn Rate', titleMobile: 'Churn',
       value: stats.loading ? '—' : `${stats.churnRate.toFixed(1)}%`,
-      sub: stats.loading ? 'Loading...' : stats.churnRate < 5 ? 'Healthy ↓' : 'Action needed ↑',
+      sub: stats.loading ? 'Loading...' : stats.churnRate < 5 ? 'Healthy ?' : 'Action needed ?',
       icon: TrendingDown, isHighlight: false, isGood: stats.churnRate < 5, isToolCard: false, isTopTool: false,
     },
     {
@@ -1130,7 +1131,7 @@ function AdminPage() {
     },
   ]
 
-  // ── Tools with real sessions/users ────────────────────────
+  // -- Tools with real sessions/users ------------------------
   const tools = TOOL_DEFS.map(t => {
     const data = stats.toolStats[t.dbKey] ?? { sessions: 0, users: 0 }
     return { ...t, sessions: data.sessions, users: data.users }
@@ -1149,7 +1150,7 @@ function AdminPage() {
     </div>
   )
 
-  // ── Settings content router ────────────────────────────────
+  // -- Settings content router --------------------------------
   function getSettingsContent() {
     switch (activeSettingsTab) {
       case 0:  return <UserCrmTab
@@ -1174,11 +1175,12 @@ function AdminPage() {
       case 12: return <MarketingTab initialUsers={marketingUsers} />
       case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
       case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />
+      case 15: return <BlogTab />
       default: return null
     }
   }
 
-  // ── Header ─────────────────────────────────────────────────
+  // -- Header -------------------------------------------------
   function Header() {
     const subtitle = isSettingsMode
       ? 'Manage users, team access & platform security'
@@ -1264,7 +1266,7 @@ function AdminPage() {
     )
   }
 
-  // ── Settings sidebar item ──────────────────────────────────
+  // -- Settings sidebar item ----------------------------------
   function SidebarItem({ index }: { index: number }) {
     const item     = SETTINGS_MENU[index]
     const badge    = index === 14 ? openTickets : (item.badge ?? 0)
@@ -1293,7 +1295,7 @@ function AdminPage() {
     )
   }
 
-  // ── Quick Action Bar ───────────────────────────────────────
+  // -- Quick Action Bar ---------------------------------------
   function QuickActionBar() {
     return (
       <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border"
@@ -1327,7 +1329,7 @@ function AdminPage() {
     )
   }
 
-  // ── Dashboard Layout ───────────────────────────────────────
+  // -- Dashboard Layout ---------------------------------------
   function DashboardLayout() {
     const liveCount     = tools.filter(t => t.isLive).length
     const totalSessions = tools.filter(t => t.isLive).reduce((s, t) => s + t.sessions, 0)
@@ -1524,7 +1526,7 @@ function AdminPage() {
     )
   }
 
-  // ── Settings Layout ────────────────────────────────────────
+  // -- Settings Layout ----------------------------------------
   function SettingsLayout() {
     return (
       <div className="flex-1 min-w-0 p-6 rounded-2xl border"
@@ -1534,7 +1536,7 @@ function AdminPage() {
     )
   }
 
-  // ── Mobile Drawer ──────────────────────────────────────────
+  // -- Mobile Drawer ------------------------------------------
   function MobileDrawer() {
     if (!mobileDrawerOpen) return null
     return (

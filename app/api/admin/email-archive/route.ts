@@ -1,9 +1,9 @@
-// app/api/admin/email-archive/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/admin/email-archive/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Archives monthly stats and cleans old email data
 // Runs daily via cron-job.org
 // Also callable manually from admin panel
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -61,7 +61,7 @@ async function runArchive() {
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays)
     const cutoffISO = cutoffDate.toISOString()
 
-    // ── Step 1: Archive monthly stats per flow ────────────────
+    // â”€â”€ Step 1: Archive monthly stats per flow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: flows } = await (adminClient.from('email_flows') as any)
       .select('id, name, title')
 
@@ -134,23 +134,23 @@ async function runArchive() {
       archived++
     }
 
-    // ── Step 2: Delete old telemetry logs ─────────────────────
+    // â”€â”€ Step 2: Delete old telemetry logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { count: telemetryDeleted } = await (adminClient.from('email_telemetry_logs') as any)
       .delete({ count: 'exact' })
       .lte('occurred_at', cutoffISO)
 
-    // ── Step 3: Delete old completed queue rows ───────────────
+    // â”€â”€ Step 3: Delete old completed queue rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { count: queueDeleted } = await (adminClient.from('email_queue') as any)
       .delete({ count: 'exact' })
       .lte('created_at', cutoffISO)
       .in('status', ['sent', 'delivered', 'failed', 'cancelled', 'bounced'])
 
-    // ── Step 4: Update last_archived_at ──────────────────────
+    // â”€â”€ Step 4: Update last_archived_at â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     await (adminClient.from('email_retention_settings') as any)
       .update({ last_archived_at: new Date().toISOString() })
       .eq('id', (settings as any).id)
 
-    // ── Step 5: Webhook delivery log cleanup ──────────────────
+    // â”€â”€ Step 5: Webhook delivery log cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let webhookDeleted = 0
     try {
       const webhookCutoff = new Date()
@@ -203,7 +203,7 @@ async function runArchive() {
       console.error('[archive] Webhook cleanup error:', err)
     }
 
-    // ── Clean old api_usage_logs (keep 90 days) ───────────────
+    // â”€â”€ Clean old api_usage_logs (keep 90 days) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       const cutoff90 = new Date(Date.now() - 90 * 86400000).toISOString()
       await (adminClient.from('api_usage_logs') as any)
@@ -214,7 +214,7 @@ async function runArchive() {
       console.error('[archive] api_usage_logs cleanup error:', err)
     }
     
-    // ── Fix 12: Reset daily API rate limit counters ───────────
+    // â”€â”€ Fix 12: Reset daily API rate limit counters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await (adminClient.from('api_fleet_config') as any)
         .update({ requests_today: 0, rate_limit_used: 0 })
@@ -224,7 +224,7 @@ async function runArchive() {
       console.error('[archive] API counter reset error:', err)
     }
 
-    // ── Missing 6: Reset Resend monthly quota on 1st of month ─
+    // â”€â”€ Missing 6: Reset Resend monthly quota on 1st of month â”€
     try {
       const today = new Date()
       if (today.getDate() === 1) {

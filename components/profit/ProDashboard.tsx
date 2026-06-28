@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 // components/profit/ProDashboard.tsx
 // Converted 1:1 from lib/pages/pro_dashboard.dart
 
 import { useState, useEffect, useRef } from 'react'
 
-// ── CalculatorResult interface (matches Dart) ──────────────────
+// â”€â”€ CalculatorResult interface (matches Dart) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface CalculatorResult {
   totalRevenue:      number
   totalCosts:        number
@@ -30,7 +30,7 @@ interface ProDashboardProps {
   result:       CalculatorResult
 }
 
-// ── KPI Card (matches Dart _buildKPICard) ─────────────────────
+// â”€â”€ KPI Card (matches Dart _buildKPICard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function KPICard({ title, value, valueColor }: { title: string; value: string; valueColor: string }) {
   return (
     <div className="flex-1 flex flex-col gap-2 px-4 py-5 rounded-2xl border"
@@ -41,7 +41,7 @@ function KPICard({ title, value, valueColor }: { title: string; value: string; v
   )
 }
 
-// ── Ledger Row (matches Dart _buildLedgerRow) ─────────────────
+// â”€â”€ Ledger Row (matches Dart _buildLedgerRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LedgerRow({ label, amount, currency, isPositive = false, color }: {
   label: string; amount: number; currency: string; isPositive?: boolean; color?: string
 }) {
@@ -56,13 +56,13 @@ function LedgerRow({ label, amount, currency, isPositive = false, color }: {
   )
 }
 
-// ── Animated Donut Chart (matches Dart AnimatedDonutChart + DonutChartPainter) ──
+// â”€â”€ Animated Donut Chart (matches Dart AnimatedDonutChart + DonutChartPainter) â”€â”€
 function AnimatedDonutChart({ revenue, profit, costs, ebayFees, adFee, currency }: {
   revenue: number; profit: number; costs: number; ebayFees: number; adFee: number; currency: string
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // Animate values — matches Dart ImplicitlyAnimatedWidget
+  // Animate values â€” matches Dart ImplicitlyAnimatedWidget
   const [animated, setAnimated] = useState({ revenue: 0, profit: 0, costs: 0, ebayFees: 0, adFee: 0 })
   const target = useRef({ revenue, profit, costs, ebayFees, adFee })
   const frame  = useRef<number>(0)
@@ -91,7 +91,7 @@ function AnimatedDonutChart({ revenue, profit, costs, ebayFees, adFee, currency 
     return () => cancelAnimationFrame(frame.current)
   }, [revenue, profit, costs, ebayFees, adFee])
 
-  // Draw on canvas — matches Dart DonutChartPainter
+  // Draw on canvas â€” matches Dart DonutChartPainter
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -141,7 +141,7 @@ function AnimatedDonutChart({ revenue, profit, costs, ebayFees, adFee, currency 
   )
 }
 
-// ── Interactive Forecaster (matches Dart InteractiveForecaster) ──
+// â”€â”€ Interactive Forecaster (matches Dart InteractiveForecaster) â”€â”€
 function InteractiveForecaster({ currency, currentPrice, result }: {
   currency: string; currentPrice: number; result: CalculatorResult
 }) {
@@ -165,7 +165,7 @@ function InteractiveForecaster({ currency, currentPrice, result }: {
   if (result.totalCosts > 0) {
     roiDisplay = `${((simProfit / result.totalCosts) * 100).toFixed(1)}%`
   } else {
-    roiDisplay = simProfit > 0 ? '∞' : '0.0%'
+    roiDisplay = simProfit > 0 ? 'âˆž' : '0.0%'
   }
 
   const healthColor      = simProfit < 0 ? '#F87171' : simMargin < 15 ? '#D97706' : '#16A34A'
@@ -195,7 +195,7 @@ function InteractiveForecaster({ currency, currentPrice, result }: {
         At this price, total fees will be: {currency}{simTotalFees.toFixed(2)}
       </p>
 
-      {/* Slider — matches Dart SliderTheme */}
+      {/* Slider â€” matches Dart SliderTheme */}
       <div className="flex flex-col gap-1">
         <input type="range" min={0} max={1} step={0.001} value={dragValue}
           onChange={e => setDragValue(Number(e.target.value))}
@@ -214,7 +214,7 @@ function InteractiveForecaster({ currency, currentPrice, result }: {
   )
 }
 
-// ── Main Component ─────────────────────────────────────────────
+// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ProDashboard({ currency, currentPrice, result }: ProDashboardProps) {
   const safeAdRate           = result.totalRevenue > 0 ? ((result.netProfit + result.adFee) / result.totalRevenue) * 100 : 0
   const currentAdRatePercent = result.totalRevenue > 0 ? (result.adFee / result.totalRevenue) * 100 : 0
@@ -226,9 +226,9 @@ export default function ProDashboard({ currency, currentPrice, result }: ProDash
     : `-${currency}${Math.abs(result.netProfit).toFixed(2)}`
   const roiVal = result.totalCosts > 0
     ? `${result.roi.toFixed(1)}%`
-    : result.netProfit > 0 ? '∞' : '0.0%'
+    : result.netProfit > 0 ? 'âˆž' : '0.0%'
 
-  // Responsive — matches Dart LayoutBuilder isNarrow < 700
+  // Responsive â€” matches Dart LayoutBuilder isNarrow < 700
   const containerRef = useRef<HTMLDivElement>(null)
   const [isNarrow, setIsNarrow] = useState(false)
   useEffect(() => {
@@ -280,7 +280,7 @@ export default function ProDashboard({ currency, currentPrice, result }: ProDash
           </div>
         ) : (
           <div className="flex gap-5">
-            {/* Donut — flex 4 */}
+            {/* Donut â€” flex 4 */}
             <div className="flex flex-col gap-5" style={{ flex: 4 }}>
               <p className="text-[11px] font-bold tracking-[1px]" style={{ color: '#64748B' }}>REVENUE SPLIT</p>
               <div className="flex justify-center">
@@ -289,7 +289,7 @@ export default function ProDashboard({ currency, currentPrice, result }: ProDash
             </div>
             {/* Vertical divider */}
             <div className="w-px self-stretch" style={{ backgroundColor: '#E2E8F0' }} />
-            {/* Ledger — flex 5 */}
+            {/* Ledger â€” flex 5 */}
             <div style={{ flex: 5 }}>
               <LedgerSection currency={currency} result={result} safeAdRate={safeAdRate} adDangerProgress={adDangerProgress} />
             </div>
@@ -303,7 +303,7 @@ export default function ProDashboard({ currency, currentPrice, result }: ProDash
           <span className="text-[11px] font-bold tracking-[1px]" style={{ color: '#64748B' }}>
             WHAT-IF FORECASTER (DRAG TO TEST)
           </span>
-          <div className="px-2 py-1 rounded-md" style={{ backgroundColor: '#0F172A' }}>
+          <div className="px-2 py-1 rounded-md" style={{ backgroundColor: '#1a2410' }}>
             <span className="text-[9px] font-bold" style={{ color: '#8FFF00' }}>INTERACTIVE</span>
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function ProDashboard({ currency, currentPrice, result }: ProDash
   )
 }
 
-// ── Ledger Section (extracted for reuse in narrow/wide layouts) ──
+// â”€â”€ Ledger Section (extracted for reuse in narrow/wide layouts) â”€â”€
 function LedgerSection({ currency, result, safeAdRate, adDangerProgress }: {
   currency: string; result: CalculatorResult; safeAdRate: number; adDangerProgress: number
 }) {
@@ -338,7 +338,7 @@ function LedgerSection({ currency, result, safeAdRate, adDangerProgress }: {
         </div>
         <div className="relative h-2.5 rounded-full overflow-hidden"
              style={{ background: 'linear-gradient(to right, #8FFF00 0%, #FACC15 60%, #F87171 100%)' }}>
-          {/* Animated indicator — matches Dart AnimatedAlign */}
+          {/* Animated indicator â€” matches Dart AnimatedAlign */}
           <div className="absolute top-0 bottom-0 w-1 rounded-full bg-black transition-all duration-500"
                style={{ left: `${Math.max(0, adDangerProgress * 100 - 2)}%` }} />
         </div>

@@ -1,9 +1,9 @@
-// lib/core/ai-engine/confidenceScorer.ts
+﻿// lib/core/ai-engine/confidenceScorer.ts
 // Converted 1:1 from lib/core/ai_engine/confidence_scorer.dart
 
 import { MarketState } from './volatilitySensor'
 
-// ── ForecastSafetyMetrics (matches Dart class) ───────────────
+// â”€â”€ ForecastSafetyMetrics (matches Dart class) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export interface DataPoint { x: number; y: number }
 
 export interface ForecastSafetyMetrics {
@@ -13,7 +13,7 @@ export interface ForecastSafetyMetrics {
   lowerBound:      DataPoint[] // bottom edge of the shadow
 }
 
-// ── ConfidenceScorer (matches Dart ConfidenceScorer) ─────────
+// â”€â”€ ConfidenceScorer (matches Dart ConfidenceScorer) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export class ConfidenceScorer {
   static evaluate({
     forecastSpots,
@@ -43,18 +43,18 @@ export class ConfidenceScorer {
       label = 'Low Confidence (Unpredictable)'
     }
 
-    // Clamp score — matches Dart score.clamp(10, 99)
+    // Clamp score â€” matches Dart score.clamp(10, 99)
     score = Math.max(10, Math.min(99, score))
 
     // 2. Generate confidence shadow (interval)
     const upperBound: DataPoint[] = []
     const lowerBound: DataPoint[] = []
 
-    // Base spread based on volatility — matches Dart baseSpread
+    // Base spread based on volatility â€” matches Dart baseSpread
     const baseSpread = volatilityIndex * 10
 
     forecastSpots.forEach((current, i) => {
-      // Shadow widens further into the future — matches Dart i * 2.0
+      // Shadow widens further into the future â€” matches Dart i * 2.0
       const spread = baseSpread + i * 2.0
 
       // Low confidence = wide shadow, high confidence = tight shadow

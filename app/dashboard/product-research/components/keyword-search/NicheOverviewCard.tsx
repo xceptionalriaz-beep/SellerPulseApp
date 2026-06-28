@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/NicheOverviewCard.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/widgets/niche_overview_card.dart
 
@@ -22,7 +22,7 @@ interface Props {
   adInsight?:       string   // default "Analyzing..."
 }
 
-// ── Niche stat row (matches Dart _buildNicheStatRow) ──────────
+// â”€â”€ Niche stat row (matches Dart _buildNicheStatRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function NicheStatRow({ icon: Icon, label, value, valueColor }: {
   icon: React.ElementType; label: string; value: string; valueColor?: string
 }) {
@@ -46,7 +46,7 @@ export default function NicheOverviewCard({
   adInsight       = 'Analyzing...',
 }: Props) {
 
-  // Parse sentiment badge — matches Dart successRate.split(" (") logic
+  // Parse sentiment badge â€” matches Dart successRate.split(" (") logic
   let strPercentage  = successRate
   let sentimentBadge = ''
   if (successRate.includes(' (')) {
@@ -55,12 +55,12 @@ export default function NicheOverviewCard({
     sentimentBadge = parts[1].replace(')', '')
   }
 
-  // Saturation color — matches Dart satColor logic
+  // Saturation color â€” matches Dart satColor logic
   const satColor = saturationScore > 75 ? '#EF4444'
     : saturationScore > 40 ? '#F97316'
     : '#22C55E'
 
-  // Sentiment icon — matches Dart icon logic
+  // Sentiment icon â€” matches Dart icon logic
   const SentimentIcon = sentimentBadge.includes('BULLISH') ? Rocket
     : sentimentBadge.includes('RISK') ? AlertTriangle
     : TrendingUp
@@ -71,10 +71,10 @@ export default function NicheOverviewCard({
 
       {/* Section label */}
       <p className="text-[11px] font-bold tracking-[1.1px] mb-2" style={{ color: C.muted }}>
-        📊 NICHE OVERVIEW
+        ðŸ“Š NICHE OVERVIEW
       </p>
 
-      {/* AI Sentiment pill — only shown if badge exists */}
+      {/* AI Sentiment pill â€” only shown if badge exists */}
       {sentimentBadge && (
         <div className="flex items-center justify-center gap-1 py-1.5 rounded-lg border mb-2"
              style={{
@@ -92,7 +92,7 @@ export default function NicheOverviewCard({
       <NicheStatRow icon={Package}    label="Total Active:"      value={totalActive}    />
       <NicheStatRow icon={Target}     label="Success (STR):"     value={strPercentage}  valueColor={successColor} />
 
-      {/* Spacer — pushes competition map to bottom */}
+      {/* Spacer â€” pushes competition map to bottom */}
       <div className="flex-1" />
 
       <div className="h-px my-2" style={{ backgroundColor: C.divider }} />
@@ -106,7 +106,7 @@ export default function NicheOverviewCard({
           </p>
         </div>
 
-        {/* Progress bar — matches Dart FractionallySizedBox */}
+        {/* Progress bar â€” matches Dart FractionallySizedBox */}
         <div className="relative h-1 rounded-full overflow-hidden mb-1"
              style={{ backgroundColor: '#E5E7EB' }}>
           <div className="absolute left-0 top-0 h-full rounded-full transition-all"

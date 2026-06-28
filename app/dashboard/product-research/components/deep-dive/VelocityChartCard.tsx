@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/deep-dive/VelocityChartCard.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/widgets/velocity_chart_card.dart
 
@@ -16,16 +16,16 @@ export default function VelocityChartCard({ totalSold }: Props) {
     <div className="flex flex-col h-full p-5 rounded-2xl border"
          style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 5px 10px rgba(0,0,0,0.02)' }}>
 
-      {/* Header — matches Dart Row NeonIcon + title */}
+      {/* Header â€” matches Dart Row NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <NeonIcon icon={TrendingUp} />
         <p className="text-[16px] font-bold" style={{ color: C.text }}>30-Day Sales Velocity</p>
       </div>
 
-      {/* Expanded content — matches Dart Expanded Column */}
+      {/* Expanded content â€” matches Dart Expanded Column */}
       <div className="flex flex-col flex-1 gap-2.5">
 
-        {/* Chart placeholder — matches Dart Container with bg + bar_chart icon */}
+        {/* Chart placeholder â€” matches Dart Container with bg + bar_chart icon */}
         <div className="flex-1 flex flex-col items-center justify-center rounded-xl border"
              style={{ backgroundColor: C.bg, borderColor: C.border }}>
           <BarChart2 size={80} style={{ color: '#E2E8F0' }} />
@@ -34,7 +34,7 @@ export default function VelocityChartCard({ totalSold }: Props) {
           </p>
         </div>
 
-        {/* Sales trend row — matches Dart Row NeonIcon + Text */}
+        {/* Sales trend row â€” matches Dart Row NeonIcon + Text */}
         <div className="flex items-center gap-2.5">
           <NeonIcon icon={TrendingUp} />
           <p className="text-[14px] font-bold" style={{ color: C.text }}>

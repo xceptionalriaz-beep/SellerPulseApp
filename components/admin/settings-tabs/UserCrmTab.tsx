@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 
-// ── Inline presence helpers (from hooks/usePresence.ts) ────────
+// -- Inline presence helpers (from hooks/usePresence.ts) --------
 // If you've created hooks/usePresence.ts you can replace this
 // with: import { useOnlineUserIds, getOnlineCount } from '@/hooks/usePresence'
 
@@ -37,7 +37,7 @@ function getOnlineCount(users: any[]): number {
     u.last_seen && (Date.now() - new Date(u.last_seen).getTime()) < THREE_MIN
   ).length
 }
-// ──────────────────────────────────────────────────────────────
+// --------------------------------------------------------------
 import {
   UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
   Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
@@ -51,7 +51,7 @@ import {
 
 import { UserDetailDrawer } from './UserDetailDrawer'
 
-// ── Brand tokens ───────────────────────────────────────────────
+// -- Brand tokens -----------------------------------------------
 const C = {
   dark:    '#0a0d08', lime:    '#8fff00', limeDeep: '#4a8f00',
   limeTint:'#f4ffe6', border:  '#e8ede2', bg:       '#f7f9f5',
@@ -60,7 +60,7 @@ const C = {
 }
 const PAGE_SIZES = [25, 50, 100]
 
-// ── Badge helpers ──────────────────────────────────────────────
+// -- Badge helpers ----------------------------------------------
 function planBadge(plan: string) {
   const p = (plan ?? '').toLowerCase()
   if (p.includes('growth') || p.includes('custom') || p.includes('starter')) return { bg: C.lime,    text: C.dark  }
@@ -75,7 +75,7 @@ function statusBadge(status: string) {
   return                             { bg: C.bg,                    text: C.muted   }
 }
 
-// ── Data helpers ───────────────────────────────────────────────
+// -- Data helpers -----------------------------------------------
 function getInitials(n: string) {
   const p = (n ?? '').trim().split(/\s+/)
   return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : (n ?? 'U').slice(0,2).toUpperCase()
@@ -135,7 +135,7 @@ function ltvOf(u: any)    {
 }
 function hasDispute(u: any){ return (u.disputes ?? []).some((d:any) => d.status !== 'resolved') }
 
-// ── Health Score (0-100) ───────────────────────────────────────
+// -- Health Score (0-100) ---------------------------------------
 function calcHealthScore(u: any): number {
   let score = 0
   // Login recency (0-40 pts)
@@ -158,14 +158,14 @@ function calcHealthScore(u: any): number {
   return Math.min(Math.round(score), 100)
 }
 
-// ── Churn Risk from Health Score ───────────────────────────────
+// -- Churn Risk from Health Score -------------------------------
 function churnRisk(score: number) {
   if (score >= 70) return { label: 'Low Risk',    color: C.green, bg: 'rgba(22,163,74,0.10)'  }
   if (score >= 40) return { label: 'Medium Risk', color: C.amber, bg: 'rgba(217,119,6,0.10)'  }
   return               { label: 'High Risk',   color: C.red,   bg: 'rgba(185,28,28,0.10)'  }
 }
 
-// ── Trial Days Remaining ───────────────────────────────────────
+// -- Trial Days Remaining ---------------------------------------
 function trialDaysLeft(u: any): number | null {
   if (!planOf(u).toLowerCase().includes('free')) return null
   const sub = u.subscriptions?.[0]
@@ -180,7 +180,7 @@ function trialDaysLeft(u: any): number | null {
   return null
 }
 
-// ── eBay Connection Status ─────────────────────────────────────
+// -- eBay Connection Status -------------------------------------
 function ebayStatus(u: any): 'connected' | 'expiring' | 'disconnected' | 'none' {
   const conn = u.ebayConnection
   if (!conn) return 'none'
@@ -199,7 +199,7 @@ function ebayDaysLeft(u: any): number | null {
   return Math.ceil((new Date(e).getTime() - Date.now()) / 86400000)
 }
 
-// ── Riazify Tool Definitions ───────────────────────────────────
+// -- Riazify Tool Definitions -----------------------------------
 const TOOLS = [
   { key: 'ebay_orders',        name: 'Orders'        },
   { key: 'profit_calculator',  name: 'Profit Calc'   },
@@ -208,7 +208,7 @@ const TOOLS = [
   { key: 'competitor_research',name: 'Competitor'    },
 ]
 
-// ── Tag config ─────────────────────────────────────────────────
+// -- Tag config -------------------------------------------------
 const TAG_CFG: Record<string, { label:string; color:string; bg:string; Icon:React.ElementType }> = {
   vip:          { label:'VIP',          color:'#4a8f00', bg:'#f4ffe6', Icon: Award          },
   power_user:   { label:'Power User',   color:'#8b5cf6', bg:'#F5F3FF', Icon: Zap            },
@@ -228,7 +228,7 @@ const SEGMENT_CFG: Record<string, { label:string; Icon:React.ElementType; color:
   trial_expiring: { label:'Trial Expiring', Icon: Clock,        color:'#b91c1c', bg:'#FEF2F2' },
 }
 
-// ── Get user's primary segment ─────────────────────────────────
+// -- Get user's primary segment ---------------------------------
 function getUserSegment(u: any): string | null {
   const health    = calcHealthScore(u)
   const lastSeen  = u.last_seen
@@ -248,7 +248,7 @@ function getUserSegment(u: any): string | null {
   return null
 }
 
-// ── Export users to CSV ────────────────────────────────────────
+// -- Export users to CSV ----------------------------------------
 function exportToCSV(users: any[], filterLabel: string) {
   const headers = [
     'Name', 'Email', 'Plan', 'Status',
@@ -306,7 +306,7 @@ function exportToCSV(users: any[], filterLabel: string) {
   URL.revokeObjectURL(url)
 }
 
-// ── Avatar ─────────────────────────────────────────────────────
+// -- Avatar -----------------------------------------------------
 function Avatar({ name, size = 36, avatarUrl }: {
   name: string; size?: number; avatarUrl?: string | null
 }) {
@@ -334,7 +334,7 @@ function Avatar({ name, size = 36, avatarUrl }: {
   )
 }
 
-// ── Toast ──────────────────────────────────────────────────────
+// -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg:string; type:'success'|'error'|'info' }) {
   const map = {
     success: { bg: C.dark, border: C.lime,   text: C.lime,  Icon: CheckCircle  },
@@ -350,9 +350,9 @@ function Toast({ msg, type }: { msg:string; type:'success'|'error'|'info' }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BLOCK 1 — HUD METRIC DECK
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
   users: any[]
   onlineIds: Set<string>
@@ -427,7 +427,7 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
         setEmailProgress(sent)
       }
       setEmailDone(true)
-      showToast(`✅ ${sent} conversion email${sent !== 1 ? 's' : ''} sent!`, 'success')
+      showToast(`? ${sent} conversion email${sent !== 1 ? 's' : ''} sent!`, 'success')
       setTimeout(() => { setEmailDone(false); setEmailProgress(0) }, 4000)
     } catch {
       showToast('Failed to send emails', 'error')
@@ -439,7 +439,7 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
   // Live count — take the HIGHER of Realtime OR last_seen count
   // Realtime: who is truly online (presence channel)
   // Heartbeat: who was active within 3 min (last_seen fallback)
-  // Cross-check: if user is in onlineIds but last_seen > 5 min → stale, drop them
+  // Cross-check: if user is in onlineIds but last_seen > 5 min ? stale, drop them
   // Catches browsers that closed without a proper WebSocket goodbye
   const effectiveOnlineIds = new Set(
     Array.from(onlineIds).filter(id => {
@@ -494,7 +494,7 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* ── Expiring Trials Alert Banner ── */}
+      {/* -- Expiring Trials Alert Banner -- */}
       {expiringTrials > 0 && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border"
              style={{ backgroundColor:'rgba(217,119,6,0.08)', borderColor:'rgba(217,119,6,0.3)' }}>
@@ -510,20 +510,20 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
               {emailingAll
                 ? `Sending... ${emailProgress}/${expiringTrials}`
                 : emailDone
-                ? `All ${expiringTrials} emails sent ✅`
+                ? `All ${expiringTrials} emails sent ?`
                 : 'Hot conversion opportunity — email them now before they churn'}
             </p>
           </div>
           <button
             onClick={() => onGoToMarketing(expiringUsers)}
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-bold shrink-0 hover:opacity-80 transition-all"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Mail size={13} /> Email All {expiringTrials} <ArrowRight size={12} />
           </button>
         </div>
       )}
 
-      {/* ── 5 HUD Cards ── */}
+      {/* -- 5 HUD Cards -- */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <HudCard title="Active Subscribers" value={`${activeSubs}`} sub={`${total} total accounts`}>
           <CircleProgress value={activeRatio} color={C.lime} />
@@ -570,10 +570,10 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BLOCK 2 — CONTROLS STRIP
-// ══════════════════════════════════════════════════════════════
-// ── Advanced filter types ──────────────────────────────────────
+// --------------------------------------------------------------
+// -- Advanced filter types --------------------------------------
 interface AdvancedFilters {
   plans:      string[]   // [] = all
   statuses:   string[]   // [] = all
@@ -670,7 +670,7 @@ function applyAdvFilters(users: any[], f: AdvancedFilters): any[] {
   })
 }
 
-// ── Advanced Filter Panel ──────────────────────────────────────
+// -- Advanced Filter Panel --------------------------------------
 function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
   users: any[]
   filters: AdvancedFilters
@@ -901,7 +901,7 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
           </button>
           <button onClick={() => { onApply(draft); onClose() }}
             className="flex-[2] py-2.5 rounded-xl text-[13px] font-bold"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Show {previewCount} user{previewCount !== 1 ? 's' : ''}
           </button>
         </div>
@@ -910,7 +910,7 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
   )
 }
 
-// ── Team Detail Modal ──────────────────────────────────────────
+// -- Team Detail Modal ------------------------------------------
 function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
   const teamMembers = (user.teamMembers ?? []) as any[]
   const teamOwners  = (user.teamOwners  ?? []) as any[]
@@ -1053,7 +1053,7 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
   )
 }
 
-// ── IP Detail Modal ────────────────────────────────────────────
+// -- IP Detail Modal --------------------------------------------
 function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
   const logs    = (user.ipLogs ?? []) as any[]
   const name    = user.name ?? user.email ?? 'User'
@@ -1173,7 +1173,7 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
   )
 }
 
-// ── Export Dropdown ────────────────────────────────────────────
+// -- Export Dropdown --------------------------------------------
 function ExportDropdown({ onExportPage, users }: {
   onExportPage: () => void
   users:        any[]
@@ -1214,7 +1214,7 @@ function ExportDropdown({ onExportPage, users }: {
         style={{ borderColor:C.border, backgroundColor:C.surface, color:C.muted }}>
         {exporting
           ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.limeDeep }} />
-          : '↓'}
+          : '?'}
         Export
         <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition:'0.2s' }} />
       </button>
@@ -1391,7 +1391,7 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
               className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold"
               style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
               {advFilters.joined === 'custom'
-                ? `Joined: ${advFilters.joinedFrom || '...'} → ${advFilters.joinedTo || '...'}`
+                ? `Joined: ${advFilters.joinedFrom || '...'} ? ${advFilters.joinedTo || '...'}`
                 : `Joined: ${advFilters.joined}`} <X size={8} />
             </button>
           )}
@@ -1450,14 +1450,14 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
                 backgroundColor: isActive ? C.dark    : C.surface,
-                borderColor:     isActive ? C.dark    : C.border,
+                borderColor: isActive ? '#8fff00' : C.border,
                 color:           isActive ? '#ffffff' : C.muted,
               }}>
               <Icon size={12} style={{ color: isActive ? C.lime : C.muted }} />
               {ch.label}
               {ch.badge != null && ch.badge > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                      style={{ backgroundColor: isActive ? C.lime : C.red, color: isActive ? C.dark : '#fff' }}>
+                      style={{ backgroundColor: isActive ? C.lime : C.red, color: isActive ? '#1a2410' : '#fff' }}>
                   {ch.badge}
                 </span>
               )}
@@ -1558,10 +1558,10 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BLOCK 3 — DATA REGISTRY TABLE
-// ══════════════════════════════════════════════════════════════
-// ── Checkbox ───────────────────────────────────────────────────
+// --------------------------------------------------------------
+// -- Checkbox ---------------------------------------------------
 function Checkbox({ checked, onChange, indeterminate = false }: {
   checked: boolean; onChange: () => void; indeterminate?: boolean
 }) {
@@ -1645,7 +1645,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
     filtered = applyAdvFilters(filtered, advFilters)
   }
 
-  // ── Sort ──────────────────────────────────────────────────
+  // -- Sort --------------------------------------------------
   filtered = [...filtered].sort((a, b) => {
     let aVal: any, bVal: any
     switch (sortField) {
@@ -1662,7 +1662,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
     return 0
   })
 
-  // ── Bulk action handlers ──────────────────────────────────
+  // -- Bulk action handlers ----------------------------------
   const selectedCount = selectedIds.size
   const allSelected   = filtered.length > 0 && filtered.every(u => selectedIds.has(u.id))
 
@@ -1745,7 +1745,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
         </span>
         <span className="text-[9px] font-bold transition-all"
               style={{ color: active ? C.limeDeep : 'transparent', transform: active && sortDir === 'asc' ? 'rotate(180deg)' : 'none', display:'inline-block' }}>
-          ▼
+          ?
         </span>
       </button>
     )
@@ -1844,7 +1844,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
         ))}
       </div>
 
-      {/* ── Floating Bulk Action Bar ───────────────────────── */}
+      {/* -- Floating Bulk Action Bar ------------------------- */}
       {selectedCount > 0 && (
         <div className="fixed bottom-8 left-1/2 z-[9990] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
              style={{
@@ -1897,7 +1897,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
           <button onClick={bulkExport}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
             style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-            ↓ Export CSV
+            ? Export CSV
           </button>
 
           {/* Suspend Selected */}
@@ -1942,9 +1942,9 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BULK SUSPEND MODAL
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 const SUSPEND_REASONS = [
   { key: 'suspicious_activity',   label: 'Suspicious Activity'         },
   { key: 'account_sharing',       label: 'Account Sharing / Multi-login'},
@@ -2103,7 +2103,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                 <button onClick={doUndo}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold"
                   style={{ backgroundColor: C.amber, color: '#fff' }}>
-                  ↩ Undo All
+                  ? Undo All
                 </button>
               </div>
             </div>
@@ -2300,9 +2300,9 @@ function BulkSuspendModal({ users, onClose, onDone }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BLOCK 4 — PROFILE SLIDE-OUT DRAWER
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 
 function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=>void }) {
   const supabase = createClient()
@@ -2479,9 +2479,9 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN — UserCrmTab
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function UserCrmTab({ isInvestorMode = false, isMobile = false, onGoToMarketing }: {
   isInvestorMode?:  boolean
   isMobile?:        boolean
@@ -2504,7 +2504,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
   const [showAdd,     setShowAdd]     = useState(false)
   const [toast,       setToast]       = useState<{ msg:string; type:'success'|'error'|'info' }|null>(null)
 
-  // ── Realtime presence — who's online right now ───────────────
+  // -- Realtime presence — who's online right now ---------------
   const onlineIds = useOnlineUserIds()
 
   // 300ms search debounce
@@ -2518,7 +2518,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
     setTimeout(() => setToast(null), 3500)
   }, [])
 
-  // ── Single batch load — eliminates N+1 ──────────────────────
+  // -- Single batch load — eliminates N+1 ----------------------
   const loadUsers = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     try {
@@ -2626,7 +2626,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
         contactMap[m.user_id].count++
       }
 
-      const teamMembersMap: Record<string, any[]> = {}  // owner_id → members[]
+      const teamMembersMap: Record<string, any[]> = {}  // owner_id ? members[]
       for (const t of ((teamOwnerRes as any).data ?? []) as any[]) {
         if (!teamMembersMap[t.owner_id]) teamMembersMap[t.owner_id] = []
         teamMembersMap[t.owner_id].push({
@@ -2635,7 +2635,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
         })
       }
 
-      const teamOwnersMap: Record<string, any[]> = {}  // member_id → owners[]
+      const teamOwnersMap: Record<string, any[]> = {}  // member_id ? owners[]
       for (const t of ((teamMemberRes as any).data ?? []) as any[]) {
         if (!teamOwnersMap[t.member_id]) teamOwnersMap[t.member_id] = []
         teamOwnersMap[t.member_id].push({
@@ -2799,11 +2799,11 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
         <div className="flex items-center justify-center gap-3">
           <button disabled={page === 0} onClick={() => setPage(p => p-1)}
             className="px-4 py-2 rounded-xl border text-[12px] font-bold disabled:opacity-40 hover:opacity-80"
-            style={{ borderColor:C.border, color:C.muted }}>← Previous</button>
+            style={{ borderColor:C.border, color:C.muted }}>? Previous</button>
           <span className="text-[12px]" style={{ color:C.muted }}>Page {page+1} of {totalPages}</span>
           <button disabled={page >= totalPages-1} onClick={() => setPage(p => p+1)}
             className="px-4 py-2 rounded-xl border text-[12px] font-bold disabled:opacity-40 hover:opacity-80"
-            style={{ borderColor:C.border, color:C.muted }}>Next →</button>
+            style={{ borderColor:C.border, color:C.muted }}>Next ?</button>
         </div>
       )}
 
@@ -2831,12 +2831,12 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
   )
 }
 
-// ── QuickNotePanel ─────────────────────────────────────────────
+// -- QuickNotePanel ---------------------------------------------
 const NOTE_CATEGORIES = [
-  { key:'general', label:'General', icon:'💼', color:C.muted    },
-  { key:'support', label:'Support', icon:'🔧', color:'#3b82f6'  },
-  { key:'warning', label:'Warning', icon:'⚠️',  color:C.red      },
-  { key:'sales',   label:'Sales',   icon:'💰', color:C.green    },
+  { key:'general', label:'General', icon:'??', color:C.muted    },
+  { key:'support', label:'Support', icon:'??', color:'#3b82f6'  },
+  { key:'warning', label:'Warning', icon:'??',  color:C.red      },
+  { key:'sales',   label:'Sales',   icon:'??', color:C.green    },
 ]
 
 function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
@@ -2901,12 +2901,12 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
             return (
               <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-xl border"
                    style={{ backgroundColor:'#fff', borderColor:C.border }}>
-                <span className="text-[11px] shrink-0">{cat?.icon ?? '💼'}</span>
+                <span className="text-[11px] shrink-0">{cat?.icon ?? '??'}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px]" style={{ color:C.text }}>{n.content}</p>
                   <p className="text-[9px] mt-0.5" style={{ color:C.muted }}>{timeAgo(n.created_at)}</p>
                 </div>
-                {n.is_pinned && <span className="text-[10px] shrink-0">📌</span>}
+                {n.is_pinned && <span className="text-[10px] shrink-0">??</span>}
               </div>
             )
           })}
@@ -2954,7 +2954,7 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
               borderColor:     pinned ? C.lime                : C.border,
               color:           pinned ? C.limeDeep            : C.muted,
             }}>
-            📌 {pinned ? 'Pinned' : 'Pin'}
+            ?? {pinned ? 'Pinned' : 'Pin'}
           </button>
 
           {/* Cancel + Save */}
@@ -2976,7 +2976,7 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
   )
 }
 
-// ── ActionMenu ─────────────────────────────────────────────────
+// -- ActionMenu -------------------------------------------------
 function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
   u: any
   onDrawer: (u: any) => void
@@ -3035,7 +3035,7 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
             {plans.map(p => (
               <button key={p} onClick={() => changePlan(p)}
                 className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-gray-50 transition-colors"
-                style={{ color:C.text }}>Switch → {p}</button>
+                style={{ color:C.text }}>Switch ? {p}</button>
             ))}
             <div className="h-px" style={{ backgroundColor:C.border }} />
             {status !== 'Past Due' && (
@@ -3055,7 +3055,7 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
   )
 }
 
-// ── UserRow — extracted so useState hooks are legal ────────────
+// -- UserRow — extracted so useState hooks are legal ------------
 function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isInvestorMode, onUpdated, showToast, hiddenCols = new Set() }: {
   u: any; i: number; cols: string
   onlineIds: Set<string>

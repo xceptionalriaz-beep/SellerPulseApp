@@ -1,19 +1,19 @@
-'use client'
+﻿'use client'
 // app/auth/reset-password/page.tsx
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/pages/auth/reset_password_page.dart
 //
 // What the Dart version had:
-//   ✅ Shield logo top center
-//   ✅ New password + confirm password fields with show/hide
-//   ✅ Password strength bar (Weak/Fair/Good/Strong/Very Strong)
-//   ✅ Password match indicator (green check / red cross)
-//   ✅ Password tips checklist (8 chars, uppercase, number, special)
-//   ✅ Loading button (dark #0F172A)
-//   ✅ Success view — green check, "Password Updated!", go to app
-//   ✅ Animated switch between form and success
-//   ✅ Validation (empty, mismatch, min 8 chars)
-// ═══════════════════════════════════════════════════════════════
+//   âœ… Shield logo top center
+//   âœ… New password + confirm password fields with show/hide
+//   âœ… Password strength bar (Weak/Fair/Good/Strong/Very Strong)
+//   âœ… Password match indicator (green check / red cross)
+//   âœ… Password tips checklist (8 chars, uppercase, number, special)
+//   âœ… Loading button (dark #0F172A)
+//   âœ… Success view â€” green check, "Password Updated!", go to app
+//   âœ… Animated switch between form and success
+//   âœ… Validation (empty, mismatch, min 8 chars)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -22,7 +22,7 @@ import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
 import { cn } from '@/lib/utils'
 
-// ── Password strength calculator (mirrors Dart exactly) ────────
+// â”€â”€ Password strength calculator (mirrors Dart exactly) â”€â”€â”€â”€â”€â”€â”€â”€
 function getStrength(pass: string): { value: number; color: string; label: string } {
   if (!pass) return { value: 0, color: '#94A3B8', label: '' }
   let score = 0
@@ -39,7 +39,7 @@ function getStrength(pass: string): { value: number; color: string; label: strin
   return               { value: 1.0, color: '#00C48C', label: 'Very Strong' }
 }
 
-// ── Password Tip Row ───────────────────────────────────────────
+// â”€â”€ Password Tip Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Tip({ text, met }: { text: string; met: boolean }) {
   return (
     <div className="flex items-center gap-1.5 mt-1">
@@ -54,7 +54,7 @@ function Tip({ text, met }: { text: string; met: boolean }) {
   )
 }
 
-// ── Main Page ──────────────────────────────────────────────────
+// â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ResetPasswordPage() {
   const router   = useRouter()
   const toast    = useToast()
@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
   const isMatch   = newPass && confPass && newPass === confPass
   const isMismatch = newPass && confPass && newPass !== confPass
 
-  // ── Submit ───────────────────────────────────────────────────
+  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleSubmit() {
     if (!newPass || !confPass) {
       toast.warning('Please fill all fields')
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
     }
   }
 
-  // ── Password field shared style ──────────────────────────────
+  // â”€â”€ Password field shared style â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function PassField({
     value, onChange, show, onToggle, placeholder
   }: {
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
 
       <div className="w-full max-w-[440px]">
 
-        {/* ── SUCCESS VIEW ── */}
+        {/* â”€â”€ SUCCESS VIEW â”€â”€ */}
         {isDone ? (
           <div className="bg-white rounded-[20px] shadow-[0_8px_20px_rgba(0,0,0,0.06)] p-7 flex flex-col items-center text-center animate-fade-in">
             <div className="w-[72px] h-[72px] rounded-full bg-[#00C48C]/10 flex items-center justify-center mb-5">
@@ -165,7 +165,7 @@ export default function ResetPasswordPage() {
 
         ) : (
 
-          /* ── FORM VIEW ── */
+          /* â”€â”€ FORM VIEW â”€â”€ */
           <div className="bg-white rounded-[20px] shadow-[0_8px_20px_rgba(0,0,0,0.06)] p-7">
 
             <h1 className="text-[24px] font-bold text-[#0F172A] mb-2"

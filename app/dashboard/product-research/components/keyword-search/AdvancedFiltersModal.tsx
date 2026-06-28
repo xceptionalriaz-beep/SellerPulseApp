@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/AdvancedFiltersModal.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/widgets/advanced_filters_modal.dart
 
@@ -30,13 +30,13 @@ export default function AdvancedFiltersModal({ onClose, onApply }: Props) {
          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
          onClick={e => e.target === e.currentTarget && onClose()}>
 
-      {/* Dialog — width:500, padding:30, borderRadius:20 */}
+      {/* Dialog â€” width:500, padding:30, borderRadius:20 */}
       <div className="w-full rounded-2xl p-8 flex flex-col gap-5"
            style={{ maxWidth: 500, backgroundColor: C.white }}>
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <p className="text-[22px] font-bold" style={{ color: C.text }}>⚙️ Advanced Filters</p>
+          <p className="text-[22px] font-bold" style={{ color: C.text }}>âš™ï¸ Advanced Filters</p>
           <button onClick={onClose} className="p-1.5 hover:opacity-70">
             <X size={20} style={{ color: C.muted }} />
           </button>

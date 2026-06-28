@@ -1,6 +1,6 @@
 ﻿'use client'
 // components/admin/tabs/RevenueAnalyticsTab.tsx
-// Full rebuild — Option 2 design with real Supabase data
+// Full rebuild � Option 2 design with real Supabase data
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -21,7 +21,7 @@ import {
 
 const C = {
   lime:    '#8FFF00',
-  dark:    '#0F172A',
+  dark:    '#1a2410',
   border:  '#E2E8F0',
   bg:      '#F8FAFC',
   text:    '#0F172A',
@@ -89,7 +89,7 @@ const DEFAULT: Stats = {
   loading: true,
 }
 
-// ── Custom multi-line tooltip ─────────────────────────────────
+// -- Custom multi-line tooltip ---------------------------------
 function MultiTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   const items = [
@@ -100,7 +100,7 @@ function MultiTooltip({ active, payload, label }: any) {
   ]
   return (
     <div style={{
-      backgroundColor: '#0F172A',
+      backgroundColor: '#1a2410',
       border: '1px solid rgba(255,255,255,0.1)',
       borderRadius: 12,
       padding: '8px 12px',
@@ -122,7 +122,7 @@ function MultiTooltip({ active, payload, label }: any) {
   )
 }
 
-// ── Custom donut label ─────────────────────────────────────────
+// -- Custom donut label -----------------------------------------
 function DonutLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) {
   if (percent < 0.05) return null
   const RADIAN = Math.PI / 180
@@ -169,7 +169,7 @@ export default function RevenueAnalyticsTab({
   const load = useCallback(async () => {
     setRefreshing(true)
     try {
-      // ── Fetch transactions (real payment data) ────────────────
+      // -- Fetch transactions (real payment data) ----------------
       const { data: txns } = await (supabase.from('transactions') as any)
         .select('*')
         .order('created_at', { ascending: false })
@@ -186,7 +186,7 @@ export default function RevenueAnalyticsTab({
         user_id:         t.user_id,
       })) as any[]
 
-      // ── Fetch profiles ───────────────────────────────────────
+      // -- Fetch profiles ---------------------------------------
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, name, email, plan_name, account_status, subscription_status, country')
@@ -194,24 +194,24 @@ export default function RevenueAnalyticsTab({
       const allProfiles = (profiles ?? []) as any[]
       const totalUsers  = allProfiles.length
 
-      // ── MRR ──────────────────────────────────────────────────
+      // -- MRR --------------------------------------------------
       const mrr = allSubs
         .filter(s => s.status === 'active')
         .reduce((sum, s) => sum + (Number(s.amount) ?? 0), 0)
 
-      // ── Rev today ────────────────────────────────────────────
+      // -- Rev today --------------------------------------------
       const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0)
       const revToday = allSubs
         .filter(s => s.paid_at && new Date(s.paid_at) >= todayMidnight)
         .reduce((sum, s) => sum + (Number(s.amount) ?? 0), 0)
 
-      // ── Active subs — from profiles (more accurate) ───────────
+      // -- Active subs � from profiles (more accurate) -----------
       const activeSubs = allProfiles.filter((p: any) =>
         ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase()) &&
         p.subscription_status === 'active'
       ).length
 
-      // ── Conversion + Churn — from profiles (accurate) ─────────
+      // -- Conversion + Churn � from profiles (accurate) ---------
       const everPaid  = allProfiles.filter((p: any) =>
         ['starter', 'growth', 'custom'].includes((p.plan_name ?? '').toLowerCase())
       ).length
@@ -221,12 +221,12 @@ export default function RevenueAnalyticsTab({
       const convRate  = totalUsers > 0 ? (everPaid  / totalUsers) * 100 : 0
       const churnRate = totalUsers > 0 ? (churned   / totalUsers) * 100 : 0
 
-      // ── ARPU + ARR ────────────────────────────────────────────
+      // -- ARPU + ARR --------------------------------------------
       const paidUserCount = activeSubs
       const arpu = paidUserCount > 0 ? mrr / paidUserCount : 0
       const arr  = mrr * 12
 
-      // ── New subs this month ───────────────────────────────────
+      // -- New subs this month -----------------------------------
       const thisMonthStart = new Date()
       thisMonthStart.setDate(1); thisMonthStart.setHours(0,0,0,0)
       const newSubsThisMonth = allProfiles.filter((p: any) =>
@@ -234,7 +234,7 @@ export default function RevenueAnalyticsTab({
         p.created_at && new Date(p.created_at) >= thisMonthStart
       ).length
 
-      // ── ARPU last month ───────────────────────────────────────
+      // -- ARPU last month ---------------------------------------
       const lmStart = new Date()
       lmStart.setMonth(lmStart.getMonth() - 1)
       lmStart.setDate(1); lmStart.setHours(0,0,0,0)
@@ -252,11 +252,11 @@ export default function RevenueAnalyticsTab({
       const arpuLastMonth = lmPaid > 0 ? lmMrr / lmPaid : 0
       const arpuDiff      = arpu - arpuLastMonth
 
-      // ── ARR end of year projection ────────────────────────────
+      // -- ARR end of year projection ----------------------------
       const monthsLeft   = 12 - new Date().getMonth()  // months remaining incl. current
       const arrProjected = mrr * monthsLeft             // revenue left this year at current MRR
 
-      // ── MRR last month ────────────────────────────────────────
+      // -- MRR last month ----------------------------------------
       const lastMonthStart = new Date()
       lastMonthStart.setMonth(lastMonthStart.getMonth() - 1)
       lastMonthStart.setDate(1); lastMonthStart.setHours(0,0,0,0)
@@ -271,7 +271,7 @@ export default function RevenueAnalyticsTab({
         )
         .reduce((sum, s) => sum + (Number(s.amount) ?? 0), 0)
 
-      // ── MRR Forecast (next 30 days) ───────────────────────────
+      // -- MRR Forecast (next 30 days) ---------------------------
       const now30 = new Date(Date.now() + 30 * 86400000)
       const upcoming = allSubs.filter(s =>
         s.status === 'active' &&
@@ -281,7 +281,7 @@ export default function RevenueAnalyticsTab({
       )
       const forecastRev   = upcoming.reduce((sum, s) => sum + (Number(s.amount) ?? 0), 0)
       const forecastCount = upcoming.length
-      // ── MRR Growth — actual payments per month (fixed) ───────
+      // -- MRR Growth � actual payments per month (fixed) -------
       const now = new Date()
       const mrrGrowth = []
       let   peakMrr   = 0
@@ -308,7 +308,7 @@ export default function RevenueAnalyticsTab({
           new Date(s.paid_at) <= monthEnd
         ).length
 
-        // Conversion rate — cumulative paid users up to this month
+        // Conversion rate � cumulative paid users up to this month
         const monthPaid  = allSubs.filter(s =>
           Number(s.amount) > 0 &&
           s.paid_at &&
@@ -354,7 +354,7 @@ export default function RevenueAnalyticsTab({
         projected: true,
       })
 
-      // ── Plan distribution — from profiles (most accurate) ──────
+      // -- Plan distribution � from profiles (most accurate) ------
       const PLAN_DEFS = [
         { name: 'Free',    color: '#111c0a', key: 'free'    },
         { name: 'Starter', color: '#8fff00', key: 'starter' },
@@ -388,7 +388,7 @@ export default function RevenueAnalyticsTab({
         color:   data.color,
       }))
 
-      // ── Transactions with user info ───────────────────────────
+      // -- Transactions with user info ---------------------------
       const { data: txData } = await (supabase.from('transactions') as any)
         .select('*')
         .order('created_at', { ascending: false })
@@ -411,7 +411,7 @@ export default function RevenueAnalyticsTab({
         }
       })
 
-      // ── Revenue Goals from Supabase ───────────────────────────
+      // -- Revenue Goals from Supabase ---------------------------
       const { data: goalsData } = await supabase
         .from('revenue_goals')
         .select('period, target')
@@ -426,7 +426,7 @@ export default function RevenueAnalyticsTab({
         annual:    goalsMap['annual']    ?? 6000,
       }
 
-      // ── Sparkline — daily revenue last 30 days ───────────────
+      // -- Sparkline � daily revenue last 30 days ---------------
       const sparkline = []
       for (let i = 29; i >= 0; i--) {
         const d     = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0)
@@ -437,7 +437,7 @@ export default function RevenueAnalyticsTab({
         sparkline.push({ day: `${d.getMonth()+1}/${d.getDate()}`, rev })
       }
 
-      // ── LTV per user ──────────────────────────────────────────
+      // -- LTV per user ------------------------------------------
       const ltvMap: Record<string, number> = {}
       for (const s of allSubs) {
         if (s.user_id && Number(s.amount) > 0) {
@@ -476,7 +476,7 @@ export default function RevenueAnalyticsTab({
     } catch { return dateStr }
   }
 
-  // ── Export CSV — exports current filtered view ───────────────
+  // -- Export CSV � exports current filtered view ---------------
   function exportCSV(filtered?: any[]) {
     const data = filtered ?? stats.transactions
     const rows = [
@@ -500,7 +500,7 @@ export default function RevenueAnalyticsTab({
     URL.revokeObjectURL(url)
   }
 
-  // ── Date range filter ────────────────────────────────────────
+  // -- Date range filter ----------------------------------------
   function getDateRangeStart(range: typeof txDateRange): Date | null {
     const now = new Date()
     switch (range) {
@@ -522,7 +522,7 @@ export default function RevenueAnalyticsTab({
     </div>
   )
 
-  // ── P&L ─────────────────────────────────────────────────────
+  // -- P&L -----------------------------------------------------
   const txCount      = stats.transactions.filter(tx => Number(tx.amount) > 0).length
   const lsFee        = txCount === 0 ? 0 : stats.mrr * 0.05 + (0.50 * txCount)
   const serverCosts  = serverCostVal
@@ -533,7 +533,7 @@ export default function RevenueAnalyticsTab({
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Row 1: Dark MRR Hero + Line Chart ── */}
+      {/* -- Row 1: Dark MRR Hero + Line Chart -- */}
       <div className={`grid gap-4 ${isDesktop ? 'grid-cols-[280px_1fr]' : 'grid-cols-1'}`}>
 
         {/* Dark MRR Hero */}
@@ -594,10 +594,10 @@ export default function RevenueAnalyticsTab({
           <div className="flex items-center justify-between mb-1">
             <div>
               <p className="text-[14px] font-bold" style={{ color: C.text }}>Revenue Overview</p>
-              <p className="text-[11px]" style={{ color: C.muted }}>Last 6 months — all metrics</p>
+              <p className="text-[11px]" style={{ color: C.muted }}>Last 6 months � all metrics</p>
             </div>
             <div className="flex items-center gap-3 flex-wrap justify-end">
-              {/* Legend — top right */}
+              {/* Legend � top right */}
               {[
                 { color: C.lime,    label: 'MRR ($)',      dash: false },
                 { color: '#60A5FA', label: 'Active subs',  dash: true  },
@@ -618,9 +618,9 @@ export default function RevenueAnalyticsTab({
               {stats.peakMrr > 0 && (
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border"
                      style={{ backgroundColor: 'rgba(143,255,0,0.08)', borderColor: 'rgba(143,255,0,0.3)' }}>
-                  <span className="text-[10px]">🏆</span>
+                  <span className="text-[10px]">??</span>
                   <span className="text-[10px] font-bold" style={{ color: '#4A8F00' }}>
-                    Peak ${stats.peakMrr} · {stats.peakMonth}
+                    Peak ${stats.peakMrr} � {stats.peakMonth}
                   </span>
                 </div>
               )}
@@ -662,17 +662,17 @@ export default function RevenueAnalyticsTab({
               <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 10, fill: C.hint }}
                      axisLine={false} tickLine={false} height={18} />
-              {/* Left — MRR ($) */}
+              {/* Left � MRR ($) */}
               <YAxis yAxisId="left" tick={{ fontSize: 10, fill: C.muted }}
                      axisLine={false} tickLine={false} width={32}
                      tickFormatter={v => `$${v}`} domain={[0, 'auto']} />
-              {/* Right — % (conv + churn) */}
+              {/* Right � % (conv + churn) */}
               <YAxis yAxisId="pct" orientation="right"
                      tick={{ fontSize: 10, fill: C.muted }}
                      axisLine={false} tickLine={false} width={28}
                      tickFormatter={v => `${v}%`}
                      domain={[0, 'auto']} />
-              {/* Hidden — count (active subs — scales independently) */}
+              {/* Hidden � count (active subs � scales independently) */}
               <YAxis yAxisId="count" orientation="right"
                      hide={true} domain={[0, 'auto']} />
               <Tooltip content={<MultiTooltip />} />
@@ -681,7 +681,7 @@ export default function RevenueAnalyticsTab({
                     stroke={C.lime} strokeWidth={2.5}
                     dot={{ fill: C.lime, r: 4, strokeWidth: 0 }}
                     activeDot={{ r: 6 }} connectNulls />
-              {/* Active subs — own hidden axis */}
+              {/* Active subs � own hidden axis */}
               <Line yAxisId="count" type="monotone" dataKey="subs"
                     stroke="#60A5FA" strokeWidth={2} strokeDasharray="5 3"
                     dot={{ fill: '#60A5FA', r: 3, strokeWidth: 0 }}
@@ -702,7 +702,7 @@ export default function RevenueAnalyticsTab({
       </div>
 
 
-      {/* ── Row 2: 3 Stat Cards ── */}
+      {/* -- Row 2: 3 Stat Cards -- */}
       <div className={`grid gap-4 ${isDesktop ? 'grid-cols-3' : 'grid-cols-1'}`}>
         {[
           {
@@ -732,7 +732,7 @@ export default function RevenueAnalyticsTab({
           {
             label:    'Annual Run Rate',
             value:    `$${stats.arr.toLocaleString()}`,
-            sub:      'MRR × 12 months',
+            sub:      'MRR � 12 months',
             badge:    stats.arrProjected > 0
               ? `~$${stats.arrProjected.toLocaleString()} by Dec`
               : '$0 projected',
@@ -764,7 +764,7 @@ export default function RevenueAnalyticsTab({
                         backgroundColor: card.badgeUp ? 'rgba(22,163,74,0.1)' : 'rgba(248,113,113,0.1)',
                         color:           card.badgeUp ? '#16A34A'              : C.red,
                       }}>
-                  {card.badgeUp ? '↑' : '↓'} {card.badge}
+                  {card.badgeUp ? '?' : '?'} {card.badge}
                 </span>
               </div>
               {card.up
@@ -775,14 +775,14 @@ export default function RevenueAnalyticsTab({
         })}
       </div>
 
-      {/* ── Row 3: Transactions + Donut + P&L ── */}
+      {/* -- Row 3: Transactions + Donut + P&L -- */}
       <div className={`grid gap-4 ${isDesktop ? 'grid-cols-[1fr_240px]' : 'grid-cols-1'}`}>
 
         {/* Transaction Ledger */}
         <div className="p-5 rounded-2xl border"
              style={{ backgroundColor: '#fff', borderColor: C.border }}>
 
-          {/* Row 1 — Title + Total + Export */}
+          {/* Row 1 � Title + Total + Export */}
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className="text-[14px] font-bold" style={{ color: C.text }}>Transaction Ledger</p>
@@ -805,9 +805,9 @@ export default function RevenueAnalyticsTab({
           {/* Divider */}
           <div className="h-px mb-2" style={{ backgroundColor: C.border }} />
 
-          {/* Row 2 — Status filters left + Plan breakdown right */}
+          {/* Row 2 � Status filters left + Plan breakdown right */}
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-            {/* Status filter pills — left */}
+            {/* Status filter pills � left */}
             <div className="flex items-center gap-1.5 flex-wrap">
               {(['all', 'active', 'trial', 'cancelled', 'refunded'] as const).map(f => (
                 <button key={f} onClick={() => { setTxFilter(f); setTxPage(1) }}
@@ -825,7 +825,7 @@ export default function RevenueAnalyticsTab({
               ))}
             </div>
 
-            {/* Plan breakdown — right */}
+            {/* Plan breakdown � right */}
             {stats.transactions.length > 0 && (() => {
               const planBreakdown: Record<string, { users: number; revenue: number }> = {}
               for (const tx of stats.transactions) {
@@ -891,7 +891,7 @@ export default function RevenueAnalyticsTab({
               <p className="text-[13px] mt-3" style={{ color: C.muted }}>No transactions yet</p>
             </div>
           ) : (() => {
-            // Feature 4 — Revenue sparkline
+            // Feature 4 � Revenue sparkline
             const maxRev = Math.max(...stats.sparkline.map(s => s.rev), 1)
 
             // Apply all filters
@@ -924,8 +924,8 @@ export default function RevenueAnalyticsTab({
             const paged      = filtered.slice((txPage - 1) * TX_PER_PAGE, txPage * TX_PER_PAGE)
 
             function SortIcon({ col }: { col: string }) {
-              if (txSort.col !== col) return <span style={{ color: C.hint, fontSize: 9 }}>⇅</span>
-              return <span style={{ color: C.lime, fontSize: 9 }}>{txSort.dir === 'asc' ? '↑' : '↓'}</span>
+              if (txSort.col !== col) return <span style={{ color: C.hint, fontSize: 9 }}>?</span>
+              return <span style={{ color: C.lime, fontSize: 9 }}>{txSort.dir === 'asc' ? '?' : '?'}</span>
             }
 
             function toggleSort(col: string) {
@@ -935,11 +935,11 @@ export default function RevenueAnalyticsTab({
 
             return (
               <>
-                {/* Feature 4 — Sparkline */}
+                {/* Feature 4 � Sparkline */}
                 <div className="mb-4 p-3 rounded-xl border"
                      style={{ backgroundColor: C.bg, borderColor: C.border }}>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[11px] font-bold" style={{ color: C.muted }}>Daily Revenue — Last 30 Days</p>
+                    <p className="text-[11px] font-bold" style={{ color: C.muted }}>Daily Revenue � Last 30 Days</p>
                     <p className="text-[10px]" style={{ color: C.hint }}>Peak: ${maxRev.toFixed(0)}</p>
                   </div>
                   <div className="flex items-end gap-0.5" style={{ height: 48 }}>
@@ -1006,18 +1006,18 @@ export default function RevenueAnalyticsTab({
                         const statusColor = isActive ? C.green : isTrial ? '#60A5FA' : isRefunded ? '#F87171' : isCancelled ? C.muted : C.red
                         const statusBg    = isActive ? 'rgba(22,163,74,0.1)' : isTrial ? 'rgba(96,165,250,0.1)' : 'rgba(248,113,113,0.1)'
 
-                        // Feature 1 — Churn alert
+                        // Feature 1 � Churn alert
                         const dueDate   = tx.next_billing_at ? new Date(tx.next_billing_at) : null
                         const daysUntil = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / 86400000) : null
                         const isChurnRisk = daysUntil !== null && daysUntil <= 3 && daysUntil >= 0
 
-                        // Feature 2 — LTV
+                        // Feature 2 � LTV
                         const ltv = stats.ltvMap[tx.user_id] ?? 0
 
-                        // Feature 5 — Payment icon
+                        // Feature 5 � Payment icon
                         const providerIcon = tx.provider === 'stripe' ? 'stripe' : tx.provider === 'paypal' ? 'paypal' : 'manual'
 
-                        // Feature 6 — New vs Renewal
+                        // Feature 6 � New vs Renewal
                         const isNew     = tx.paid_at && new Date(tx.paid_at) >= thisMonthStart
                         const badgeText = isNew ? 'New' : 'Renewal'
 
@@ -1039,7 +1039,7 @@ export default function RevenueAnalyticsTab({
                                 <div>
                                   <p className="font-semibold truncate text-[12px]"
                                      style={{ color: C.text, maxWidth: 110 }}>
-                                    {obscure(tx.userLabel ?? '—')}
+                                    {obscure(tx.userLabel ?? '�')}
                                   </p>
                                 </div>
                                 {!isInvestorMode && tx.userLabel && (
@@ -1060,10 +1060,10 @@ export default function RevenueAnalyticsTab({
                             </td>
                             <td className="py-2.5 px-1">
                               <span className="text-[11px]" style={{ color: C.muted }}>
-                                {tx.plan ?? tx.plan_name ?? '—'}
+                                {tx.plan ?? tx.plan_name ?? '�'}
                               </span>
                             </td>
-                            {/* Feature 5 — Provider icon */}
+                            {/* Feature 5 � Provider icon */}
                             <td className="py-2.5 px-1">
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg capitalize"
                                     style={{ backgroundColor: 'rgba(143,255,0,0.1)', color: '#4a8f00', border: '1px solid rgba(143,255,0,0.2)' }}>
@@ -1078,10 +1078,10 @@ export default function RevenueAnalyticsTab({
                             </td>
                             <td className="py-2.5 px-1">
                               <span style={{ color: C.muted, fontSize: 11 }}>
-                                {tx.paid_at ? formatDate(tx.paid_at) : '—'}
+                                {tx.paid_at ? formatDate(tx.paid_at) : '�'}
                               </span>
                             </td>
-                            {/* Feature 5 — Next billing + churn alert */}
+                            {/* Feature 5 � Next billing + churn alert */}
                             <td className="py-2.5 px-1">
                               {dueDate ? (
                                 <div>
@@ -1096,14 +1096,14 @@ export default function RevenueAnalyticsTab({
                                   )}
                                 </div>
                               ) : (
-                                <span style={{ color: C.hint, fontSize: 11 }}>—</span>
+                                <span style={{ color: C.hint, fontSize: 11 }}>�</span>
                               )}
                             </td>
                             {/* LTV */}
                             <td className="py-2.5 px-1 text-right">
                               <span className="text-[11px] font-black"
                                     style={{ color: ltv > 0 ? '#4a8f00' : C.muted }}>
-                                {ltv > 0 ? `$${ltv.toFixed(0)}` : '—'}
+                                {ltv > 0 ? `$${ltv.toFixed(0)}` : '�'}
                               </span>
                             </td>
                             {/* Amount + badge + quick actions */}
@@ -1157,7 +1157,7 @@ export default function RevenueAnalyticsTab({
                     <button onClick={() => setTxPage(p => Math.max(1, p-1))} disabled={txPage===1}
                       className="px-3 py-1.5 rounded-lg border text-[11px] font-bold"
                       style={{ borderColor: C.border, color: txPage===1?C.hint:C.text, opacity: txPage===1?0.5:1 }}>
-                      ← Prev
+                      ? Prev
                     </button>
                     <span className="text-[11px]" style={{ color: C.muted }}>
                       Page {txPage} of {totalPages}
@@ -1165,7 +1165,7 @@ export default function RevenueAnalyticsTab({
                     <button onClick={() => setTxPage(p => Math.min(totalPages, p+1))} disabled={txPage===totalPages}
                       className="px-3 py-1.5 rounded-lg border text-[11px] font-bold"
                       style={{ borderColor: C.border, color: txPage===totalPages?C.hint:C.text, opacity: txPage===totalPages?0.5:1 }}>
-                      Next →
+                      Next ?
                     </button>
                   </div>
                 )}
@@ -1272,7 +1272,7 @@ export default function RevenueAnalyticsTab({
                         </span>
                       </div>
                       <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11 }}>
-                        {planTooltip.users} user{planTooltip.users !== 1 ? 's' : ''} · ${planTooltip.revenue.toFixed(0)} · {planTooltip.pct}%
+                        {planTooltip.users} user{planTooltip.users !== 1 ? 's' : ''} � ${planTooltip.revenue.toFixed(0)} � {planTooltip.pct}%
                       </div>
                     </div>
                   )}
@@ -1355,7 +1355,7 @@ export default function RevenueAnalyticsTab({
                 <div className="flex items-center gap-1">
                   <span style={{ color: 'rgba(255,255,255,0.45)' }}>LS Fees</span>
                   <div className="relative group">
-                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, cursor: 'help' }}>ⓘ</span>
+                    <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, cursor: 'help' }}>?</span>
                     <div className="absolute left-0 bottom-5 hidden group-hover:block z-50"
                          style={{
                            backgroundColor: '#1a2410',
@@ -1364,14 +1364,14 @@ export default function RevenueAnalyticsTab({
                            fontSize: 10, whiteSpace: 'nowrap',
                            color: 'rgba(255,255,255,0.7)',
                          }}>
-                      5% of MRR + $0.50 × {txCount} transaction{txCount !== 1 ? 's' : ''}
+                      5% of MRR + $0.50 � {txCount} transaction{txCount !== 1 ? 's' : ''}
                      </div>
                    </div>
                  </div>
                  <span className="font-bold" style={{ color: C.red }}>-${lsFee.toFixed(2)}</span>
               </div>
 
-              {/* Server Costs — editable */}
+              {/* Server Costs � editable */}
               <div className="flex justify-between text-[12px]">
                 <div className="flex items-center gap-1">
                   <span style={{ color: 'rgba(255,255,255,0.45)' }}>Server Costs</span>
@@ -1406,7 +1406,7 @@ export default function RevenueAnalyticsTab({
               {/* Divider */}
               <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.1)', marginTop: 2 }} />
 
-              {/* Net Profit — fixed $ sign */}
+              {/* Net Profit � fixed $ sign */}
               <div className="flex justify-between text-[13px]">
                 <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Net Profit</span>
                 <span className="font-extrabold"
@@ -1433,7 +1433,7 @@ export default function RevenueAnalyticsTab({
       </div>
 
 
-      {/* ── Row 4: Revenue Goals ── */}
+      {/* -- Row 4: Revenue Goals -- */}
       <div className="p-5 rounded-2xl border"
            style={{ backgroundColor: '#fff', borderColor: C.border }}>
         <div className="flex items-center justify-between mb-4">
@@ -1499,7 +1499,7 @@ export default function RevenueAnalyticsTab({
 
         <div className={`grid gap-4 ${isDesktop ? 'grid-cols-3' : 'grid-cols-1'}`}>
           {(() => {
-            // Fix 1 — actual quarterly revenue (last 3 months from mrrGrowth)
+            // Fix 1 � actual quarterly revenue (last 3 months from mrrGrowth)
             const last3Months = stats.mrrGrowth
               .filter(m => !m.projected)
               .slice(-3)
@@ -1553,7 +1553,7 @@ export default function RevenueAnalyticsTab({
                     {done ? (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
                             style={{ backgroundColor: 'rgba(22,163,74,0.15)', color: '#16A34A' }}>
-                        🎉 Reached!
+                        ?? Reached!
                       </span>
                     ) : (
                       <span className="text-[10px]" style={{ color: C.hint }}>
@@ -1594,7 +1594,7 @@ export default function RevenueAnalyticsTab({
         </div>
       </div>
 
-      {/* ── Row 5: Dispute Defense Center (placeholder) ── */}
+      {/* -- Row 5: Dispute Defense Center (placeholder) -- */}
       <div className="p-5 rounded-2xl"
            style={{ backgroundColor: C.dark, border: '1px solid rgba(248,113,113,0.2)' }}>
         <div className="flex items-start justify-between flex-wrap gap-4 mb-4">

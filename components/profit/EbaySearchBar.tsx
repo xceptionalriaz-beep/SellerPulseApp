@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/profit/EbaySearchBar.tsx
 // Updated: uses real eBay API via /api/ebay/item
 
@@ -122,7 +122,7 @@ export default function EbaySearchBar({ onFetch }: EbaySearchBarProps) {
           onClick={handleFetch}
           disabled={isFetching || !url.trim()}
           className="h-10 px-4 rounded-lg text-[13px] font-bold flex items-center justify-center shrink-0 disabled:opacity-40 transition-all"
-          style={{ backgroundColor: '#0F172A', color: '#8FFF00', minWidth: 70 }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410', minWidth: 70 }}>
           {isFetching
             ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#8FFF00' }} />
             : 'Fetch'}

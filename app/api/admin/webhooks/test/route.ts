@@ -1,4 +1,4 @@
-// app/api/admin/webhooks/test/route.ts
+﻿// app/api/admin/webhooks/test/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -33,13 +33,13 @@ export async function POST(req: NextRequest) {
     let payload = testPayload
     if ((dest as any).type === 'slack') {
       payload = {
-        text: '✅ *Riazify Test Webhook* — connection verified!',
+        text: 'âœ… *Riazify Test Webhook* â€” connection verified!',
         attachments: [{ color: '#8fff00', text: 'Your Slack webhook is configured correctly.' }],
       } as any
     } else if ((dest as any).type === 'discord') {
       payload = {
         embeds: [{
-          title:       '✅ Riazify Test Webhook',
+          title:       'âœ… Riazify Test Webhook',
           description: 'Your Discord webhook is configured correctly!',
           color:       0x8FFF00,
           timestamp:   new Date().toISOString(),

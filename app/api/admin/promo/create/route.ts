@@ -1,4 +1,4 @@
-// app/api/admin/promo/create/route.ts
+﻿// app/api/admin/promo/create/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (lsErr) {
       console.error('[promo/create] LS sync error:', lsErr)
-      // Non-critical — promo saved in DB regardless
+      // Non-critical â€” promo saved in DB regardless
     }
     
     try {

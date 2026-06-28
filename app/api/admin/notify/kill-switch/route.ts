@@ -1,8 +1,8 @@
-// app/api/admin/notify/kill-switch/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/admin/notify/kill-switch/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Sends email notification when a kill switch goes offline
 // Uses Resend API (already configured)
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -22,7 +22,7 @@ interface NotifyPayload {
 
 export async function POST(req: NextRequest) {
   try {
-    // Internal only — verify request comes from our own API
+    // Internal only â€” verify request comes from our own API
     const secret = req.headers.get('x-internal-secret')
     if (secret !== process.env.INTERNAL_API_SECRET) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -35,10 +35,10 @@ export async function POST(req: NextRequest) {
     } = body
 
     const actionLabel = action === 'kill_all'
-      ? 'KILL ALL — All Switches Offline'
+      ? 'KILL ALL â€” All Switches Offline'
       : action === 'auto_disabled'
-      ? `AUTO-DISABLED — ${switchTitle}`
-      : `OFFLINE — ${switchTitle}`
+      ? `AUTO-DISABLED â€” ${switchTitle}`
+      : `OFFLINE â€” ${switchTitle}`
 
     const urgencyColor = action === 'kill_all' ? '#b91c1c' : '#d97706'
 
@@ -56,10 +56,10 @@ export async function POST(req: NextRequest) {
     <!-- Header -->
     <div style="background:${urgencyColor};padding:24px 32px;">
       <p style="margin:0;color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
-        ${action === 'kill_all' ? '🚨 Emergency Kill All' : action === 'auto_disabled' ? '⏰ Scheduled Maintenance' : '🔴 Kill Switch Alert'}
+        ${action === 'kill_all' ? 'ðŸš¨ Emergency Kill All' : action === 'auto_disabled' ? 'â° Scheduled Maintenance' : 'ðŸ”´ Kill Switch Alert'}
       </p>
       <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;font-weight:900;">
-        ${switchTitle === 'ALL' ? 'All Systems Offline' : switchTitle} — OFFLINE
+        ${switchTitle === 'ALL' ? 'All Systems Offline' : switchTitle} â€” OFFLINE
       </h1>
     </div>
 
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       <div style="margin-top:24px;text-align:center;">
         <a href="${APP_URL}/dashboard/admin?tab=kill-switches"
            style="display:inline-block;background:#0a0d08;color:#8fff00;text-decoration:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:700;">
-          View Kill Switches →
+          View Kill Switches â†’
         </a>
       </div>
     </div>
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     <!-- Footer -->
     <div style="padding:16px 32px;background:#f7f9f5;border-top:1px solid #e8ede2;">
       <p style="margin:0;font-size:11px;color:#8a9e78;text-align:center;">
-        Riazify Admin Notifications · You receive this because you are a Riazify admin
+        Riazify Admin Notifications Â· You receive this because you are a Riazify admin
       </p>
     </div>
 
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         from:    FROM_EMAIL,
         to:      [FOUNDER_EMAIL],
-        subject: `[Riazify] ${switchTitle} — OFFLINE${reEnableMins ? ` (auto-enables in ${reEnableMins >= 60 ? `${reEnableMins/60}h` : `${reEnableMins}m`})` : ''}`,
+        subject: `[Riazify] ${switchTitle} â€” OFFLINE${reEnableMins ? ` (auto-enables in ${reEnableMins >= 60 ? `${reEnableMins/60}h` : `${reEnableMins}m`})` : ''}`,
         html,
       }),
     })

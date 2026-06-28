@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 // app/unsubscribe/page.tsx
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Handles email unsubscribe requests
 // Adds email to suppression list in DB
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export const dynamic = 'force-dynamic'
 
@@ -189,7 +189,7 @@ function UnsubscribeInner() {
         </div>
 
         <p className="text-center text-[11px] mt-6" style={{ color: T.muted }}>
-          Riazify · eBay Seller Intelligence Platform
+          Riazify Â· eBay Seller Intelligence Platform
         </p>
       </div>
     </div>

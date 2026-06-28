@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/AnalyticsHub.tsx
 
 import { useState, useEffect } from 'react'
@@ -147,7 +147,7 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
           )
         })}
       </div>
-      {/* TabHeader removed — content renders directly */}
+      {/* TabHeader removed â€” content renders directly */}
       <div key={activeTab}>{getTabContent()}</div>
     </div>
   )

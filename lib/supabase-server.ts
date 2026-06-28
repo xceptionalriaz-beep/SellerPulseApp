@@ -1,8 +1,8 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+﻿import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
-// ─── Server Client ────────────────────────────────────────────
+// â”€â”€â”€ Server Client â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Use this in Server Components, Server Actions, Route Handlers
 export function createServerSupabaseClient() {
   const cookieStore = cookies()
@@ -25,7 +25,7 @@ export function createServerSupabaseClient() {
   )
 }
 
-// ─── Admin Client (Service Role — server only) ────────────────
+// â”€â”€â”€ Admin Client (Service Role â€” server only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function createAdminClient() {
   const cookieStore = cookies()
   return createServerClient<Database>(

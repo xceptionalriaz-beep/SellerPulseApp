@@ -1,10 +1,10 @@
-// app/api/admin/suspend-user/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/suspend-user/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Handles: suspend | reactivate | ban
 // All 3 use Supabase Auth admin.updateUserById
 // Requires admin Bearer token
 // Cannot suspend/ban other admins or self
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller is admin ──────────────────────────────
+    // â”€â”€ 1. Verify caller is admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { userId, action } = await req.json()
     if (!userId || !action) {
       return NextResponse.json({ error: 'userId and action required' }, { status: 400 })
@@ -40,12 +40,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
-    // ── 3. Prevent self-action ─────────────────────────────────
+    // â”€â”€ 3. Prevent self-action â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (userId === caller.id) {
       return NextResponse.json({ error: 'Cannot suspend your own account' }, { status: 400 })
     }
 
-    // ── 4. Prevent suspending other admins ────────────────────
+    // â”€â”€ 4. Prevent suspending other admins â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: targetProfile } = await adminClient
       .from('profiles').select('role, name, account_status').eq('id', userId).single()
 
@@ -53,14 +53,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Cannot suspend another admin account' }, { status: 403 })
     }
 
-    // ── 5. Apply action via Supabase Auth ──────────────────────
+    // â”€â”€ 5. Apply action via Supabase Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const banDuration = action === 'reactivate' ? 'none' : '876000h'
     const { error: banErr } = await adminClient.auth.admin.updateUserById(userId, {
       ban_duration: banDuration,
     })
     if (banErr) throw banErr
 
-    // ── 6. Update profiles.account_status ─────────────────────
+    // â”€â”€ 6. Update profiles.account_status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const newStatus =
       action === 'suspend'    ? 'Suspended' :
       action === 'ban'        ? 'Banned'    : 'Active'
@@ -69,34 +69,34 @@ export async function POST(req: NextRequest) {
       .update({ account_status: newStatus })
       .eq('id', userId)
 
-    // ── 7. Force logout if suspending ─────────────────────────
+    // â”€â”€ 7. Force logout if suspending â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (action !== 'reactivate') {
       await adminClient.auth.admin.signOut(userId)
     }
 
-    // ── 8. Get caller IP ──────────────────────────────────────
+    // â”€â”€ 8. Get caller IP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const ipAddress =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       req.headers.get('x-real-ip') ||
       null
 
-    // ── 9. Log to admin_logs ───────────────────────────────────
+    // â”€â”€ 9. Log to admin_logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,
         target_id:  userId,
         action:     action === 'reactivate' ? 'reactivate_user' : action === 'ban' ? 'ban_user' : 'suspend_user',
-        details:    `${action === 'suspend' ? 'Suspended' : action === 'ban' ? 'Banned' : 'Reactivated'} account — ${(targetProfile as any)?.name ?? userId}`,
+        details:    `${action === 'suspend' ? 'Suspended' : action === 'ban' ? 'Banned' : 'Reactivated'} account â€” ${(targetProfile as any)?.name ?? userId}`,
         metadata:   { admin_name: (callerProfile as any)?.name ?? 'Admin', target_name: (targetProfile as any)?.name ?? userId, new_status: newStatus },
         ip_address: ipAddress,
         created_at: new Date().toISOString(),
       })
     } catch { /* non-critical */ }
 
-    // ── 10. Log to user journey timeline ──────────────────────
+    // â”€â”€ 10. Log to user journey timeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const eventMap: Record<string, { type: string; title: string; desc: string }> = {
-      suspend:    { type: 'account_suspended',   title: 'Account Suspended',         desc: 'Admin suspended account — login blocked'     },
-      reactivate: { type: 'account_reactivated', title: 'Account Reactivated',       desc: 'Admin restored access — user can login again' },
+      suspend:    { type: 'account_suspended',   title: 'Account Suspended',         desc: 'Admin suspended account â€” login blocked'     },
+      reactivate: { type: 'account_reactivated', title: 'Account Reactivated',       desc: 'Admin restored access â€” user can login again' },
       ban:        { type: 'account_banned',      title: 'Account Permanently Banned', desc: 'Admin permanently banned this account'       },
     }
     const ev = eventMap[action]

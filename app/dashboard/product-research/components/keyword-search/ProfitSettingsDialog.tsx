@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/ProfitSettingsDialog.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/widgets/profit_settings_dialog.dart
 
@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { Calculator, X, DollarSign } from 'lucide-react'
 
 const C = {
-  dark:   '#0F172A',
+  dark:   '#1a2410',
   lime:   '#8FFF00',
   border: '#E2E8F0',
   bg:     '#F8FAFC',
@@ -51,7 +51,7 @@ interface Props {
   onClose:         () => void
 }
 
-// ── Input field (matches Dart _buildInput) ────────────────────
+// â”€â”€ Input field (matches Dart _buildInput) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SettingsInput({ label, value, onChange, isCurrency = false }: {
   label: string; value: string; onChange: (v: string) => void; isCurrency?: boolean
 }) {
@@ -121,11 +121,11 @@ export default function ProfitSettingsDialog({ currentSettings, onSave, onClose 
          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
          onClick={e => e.target === e.currentTarget && onClose()}>
 
-      {/* Dialog — width:500 maxHeight:700 */}
+      {/* Dialog â€” width:500 maxHeight:700 */}
       <div className="w-full flex flex-col rounded-2xl overflow-hidden"
            style={{ maxWidth: 500, maxHeight: 700, backgroundColor: '#fff' }}>
 
-        {/* Dark header — matches Dart Container(color:0xFF0F172A) */}
+        {/* Dark header â€” matches Dart Container(color:0xFF0F172A) */}
         <div className="flex items-center gap-2.5 px-5 py-5"
              style={{ backgroundColor: C.dark }}>
           <Calculator size={20} style={{ color: C.lime }} />
@@ -139,7 +139,7 @@ export default function ProfitSettingsDialog({ currentSettings, onSave, onClose 
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
 
           {/* Core Platform Fees */}
-          <p className="text-[15px] font-bold" style={{ color: C.muted }}>🏢 Core Platform Fees</p>
+          <p className="text-[15px] font-bold" style={{ color: C.muted }}>ðŸ¢ Core Platform Fees</p>
           <div className="flex gap-4">
             <SettingsInput label="eBay Category (%)"   value={categoryFee}     onChange={setCategoryFee}     />
             <SettingsInput label="Fixed Fee ($)"       value={fixedFee}        onChange={setFixedFee}        isCurrency />
@@ -152,7 +152,7 @@ export default function ProfitSettingsDialog({ currentSettings, onSave, onClose 
           <div className="h-px" style={{ backgroundColor: C.border }} />
 
           {/* Global Sourcing & FX */}
-          <p className="text-[15px] font-bold" style={{ color: C.muted }}>🌍 Global Sourcing & FX</p>
+          <p className="text-[15px] font-bold" style={{ color: C.muted }}>ðŸŒ Global Sourcing & FX</p>
           <div className="flex gap-4">
             <SettingsInput label="Sourcing Tax (%)"  value={sourcingTax} onChange={setSourcingTax} />
             <SettingsInput label="Bank FX Fee (%)"   value={fxFee}       onChange={setFxFee}       />
@@ -161,7 +161,7 @@ export default function ProfitSettingsDialog({ currentSettings, onSave, onClose 
 
           <div className="h-px" style={{ backgroundColor: C.border }} />
 
-          {/* Advanced toggle — matches Dart toggle_on/toggle_off */}
+          {/* Advanced toggle â€” matches Dart toggle_on/toggle_off */}
           <button onClick={() => setAdvancedEnabled(s => !s)}
             className="flex items-center gap-2.5 hover:opacity-80">
             <div className="relative w-9 h-5 rounded-full transition-colors"
@@ -187,7 +187,7 @@ export default function ProfitSettingsDialog({ currentSettings, onSave, onClose 
           )}
         </div>
 
-        {/* Footer — lime Save button */}
+        {/* Footer â€” lime Save button */}
         <div className="px-5 py-4 border-t" style={{ borderColor: C.border }}>
           <button onClick={saveSettings}
             className="w-full h-11 rounded-lg text-[15px] font-bold"

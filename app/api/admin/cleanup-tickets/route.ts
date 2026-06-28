@@ -1,4 +1,4 @@
-// app/api/admin/cleanup-tickets/route.ts
+﻿// app/api/admin/cleanup-tickets/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 

@@ -1,4 +1,4 @@
-// app/api/b2b/vero/route.ts
+﻿// app/api/b2b/vero/route.ts
 import { NextRequest } from 'next/server'
 import { validateB2BKey, b2bError, b2bSuccess, handleCors, CORS_HEADERS } from '@/lib/b2b-auth'
 import { createClient } from '@supabase/supabase-js'
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const auth = await validateB2BKey(request)
   if (!auth.success) return b2bError(auth.error!, auth.statusCode!)
 
-  // ── Kill switch check ────────────────────────────────────────
+  // â”€â”€ Kill switch check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   try {
     const adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
     if (killSwitch && !killSwitch.is_enabled) {
       return b2bError('VeRO Brand Scanner is temporarily unavailable. Our team is working on restoring this feature.', 503)
     }
-  } catch { /* non-critical — allow through if check fails */ }
-  // ── End kill switch check ────────────────────────────────────
+  } catch { /* non-critical â€” allow through if check fails */ }
+  // â”€â”€ End kill switch check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   let body: { keyword?: string; keywords?: string[] }
   try { body = await request.json() }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       risk_level:     riskLevel,
       recommendation: isVero ? (riskLevel === 'high' ? 'avoid' : 'caution') : 'safe',
       message:        isVero
-        ? `"${input}" may be associated with ${brand} — a VeRO protected brand.`
+        ? `"${input}" may be associated with ${brand} â€” a VeRO protected brand.`
         : `"${input}" appears safe to list.`,
     }
   })
@@ -100,8 +100,8 @@ export async function GET() {
     description: 'Check if a keyword or product is VeRO protected on eBay',
     auth:        'Pass your API key in the x-api-key header',
     body: {
-      keyword:  'string  — single keyword to check',
-      keywords: 'array   — up to 20 keywords to check at once',
+      keyword:  'string  â€” single keyword to check',
+      keywords: 'array   â€” up to 20 keywords to check at once',
     },
     example_request: {
       method:  'POST',
@@ -116,7 +116,7 @@ export async function GET() {
         brand:          'Nike',
         risk_level:     'high',
         recommendation: 'avoid',
-        message:        '"Nike Air Max" may be associated with Nike — a VeRO protected brand.',
+        message:        '"Nike Air Max" may be associated with Nike â€” a VeRO protected brand.',
       },
       meta: {
         partner:       'Your Company Name',
@@ -130,12 +130,12 @@ export async function GET() {
       note: 'Up to 20 keywords per request',
     },
     risk_levels: {
-      high:   'Strongly associated with VeRO brand — avoid listing',
-      medium: 'Possibly associated — proceed with caution',
-      low:    'No VeRO association found — safe to list',
+      high:   'Strongly associated with VeRO brand â€” avoid listing',
+      medium: 'Possibly associated â€” proceed with caution',
+      low:    'No VeRO association found â€” safe to list',
     },
     recommendations: {
-      avoid:   'Do not list this product — high risk of removal',
+      avoid:   'Do not list this product â€” high risk of removal',
       caution: 'Research further before listing',
       safe:    'No VeRO issues detected',
     },

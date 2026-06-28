@@ -1,4 +1,4 @@
-// app/api/admin/promo/declare-winner/route.ts
+﻿// app/api/admin/promo/declare-winner/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,
         action:     'declare_ab_winner',
-        details:    `Declared winner for A/B test: ${(test as any).name} — Variant ${winner.toUpperCase()}`,
+        details:    `Declared winner for A/B test: ${(test as any).name} â€” Variant ${winner.toUpperCase()}`,
         metadata:   { testId, winner, test_name: (test as any).name, admin_name: (profile as any)?.name ?? 'Admin' },
         ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
         created_at: new Date().toISOString(),

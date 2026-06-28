@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/RoleBuilderTab.tsx
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // RIAZIFY — Role Builder Tab
 // Split-view RBAC management with permission matrix,
 // hard deletion blocks, team seat assignments,
 // and real-time session freshness enforcement.
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -15,7 +15,7 @@ import {
   Settings, Key, BarChart2, Zap, Eye, Edit3, Save, Clock, Search,
 } from 'lucide-react'
 
-// ── Brand tokens ───────────────────────────────────────────────
+// -- Brand tokens -----------------------------------------------
 const C = {
   dark:     '#0a0d08',
   lime:     '#8fff00',
@@ -31,7 +31,7 @@ const C = {
   green:    '#16a34a',
 }
 
-// ── Permission scope definitions ───────────────────────────────
+// -- Permission scope definitions -------------------------------
 type AdminScope =
   | 'crm:read'
   | 'crm:write_notes'
@@ -70,7 +70,7 @@ const SCOPE_CATEGORIES = [
   { key: 'finance', label: 'SYSTEM ANALYTICS',              Icon: BarChart2 },
 ] as const
 
-// ── Role type ──────────────────────────────────────────────────
+// -- Role type --------------------------------------------------
 interface AdminRole {
   id:             string
   role_name:      string
@@ -82,7 +82,7 @@ interface AdminRole {
   member_count?:  number
 }
 
-// ── Profile type (for team seats) ─────────────────────────────
+// -- Profile type (for team seats) -----------------------------
 interface TeamMember {
   id:             string
   name:           string | null
@@ -95,7 +95,7 @@ interface TeamMember {
   activityCount?: number
 }
 
-// ── Toast ──────────────────────────────────────────────────────
+// -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
     success: { bg: C.dark,   border: C.lime,   text: C.lime, Icon: CheckCircle  },
@@ -112,7 +112,7 @@ function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' 
   )
 }
 
-// ── Avatar initials ────────────────────────────────────────────
+// -- Avatar initials --------------------------------------------
 function Avatar({ name, email, size = 32, avatarUrl }: {
   name: string | null; email: string; size?: number; avatarUrl?: string | null
 }) {
@@ -156,7 +156,7 @@ function Avatar({ name, email, size = 32, avatarUrl }: {
   )
 }
 
-// ── Time ago ───────────────────────────────────────────────────
+// -- Time ago ---------------------------------------------------
 function timeAgo(iso: string | null) {
   if (!iso) return 'Never'
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -166,9 +166,9 @@ function timeAgo(iso: string | null) {
   return `${Math.floor(m / 1440)}d ago`
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // HUD CARDS
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function HudDeck({ roles, members, adminActionsToday }: {
   roles:             AdminRole[]
   members:           TeamMember[]
@@ -245,9 +245,9 @@ function HudDeck({ roles, members, adminActionsToday }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // DELETE CONFIRM MODAL — Hard block if users assigned
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted, onMembersReassigned, showToast }: {
   role:                 AdminRole
   allRoles:             AdminRole[]
@@ -393,7 +393,7 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
                   onClick={handleReassignAll}
                   disabled={reassigning}
                   className="flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-bold"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {reassigning
                     ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> Reassigning...</>
                     : <><Check size={13} /> Confirm Reassignments</>}
@@ -436,9 +436,9 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // PERMISSION MATRIX — Right panel editor
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMembersReassigned, showToast, isCreating }: {
   role:                 AdminRole | null
   allRoles:             AdminRole[]
@@ -647,7 +647,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
                         {/* Label */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-bold" style={{ color: isActive ? C.dark : C.muted }}>
+                            <span className="text-[12px] font-bold" style={{ color: isActive ? '#1a2410' : C.muted }}>
                               {scope.key}
                             </span>
                             {scope.danger && (
@@ -717,9 +717,9 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // ROLE LIST — Left panel
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew }: {
   roles:      AdminRole[]
   allMembers: TeamMember[]
@@ -950,9 +950,9 @@ function RoleDropdown({ value, roles, onChange }: {
     </div>
   )
 }
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // INVITE MEMBER MODAL
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
   roles:     AdminRole[]
   onClose:   () => void
@@ -1032,7 +1032,7 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
               <p className="text-[13px]" style={{ color: C.muted }}>{successMessage}</p>
               <button onClick={onClose}
                 className="mt-2 px-6 py-2.5 rounded-xl text-[13px] font-bold"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 Done
               </button>
             </div>
@@ -1120,9 +1120,9 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // TEAM SEATS TAB
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
   members:          TeamMember[]
   roles:            AdminRole[]
@@ -1268,7 +1268,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
 
   useEffect(() => { loadPendingInvites() }, [loadPendingInvites])
 
-  // ── No seat limits in admin panel ────────────────────────
+  // -- No seat limits in admin panel ------------------------
   const atLimit = false
 
   function exportRoster() {
@@ -1432,7 +1432,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
         <p className="text-[12px]" style={{ color: C.muted }}>Invite a team member to get started</p>
         <button onClick={() => setShowInvite(true)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <UserPlus size={14} /> Invite Member
         </button>
         {showInvite && (
@@ -1467,7 +1467,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
                 onClick={exportRoster}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all border"
                 style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-                ↓ Export CSV
+                ? Export CSV
               </button>
             )}
             {/* Invite Member */}
@@ -1857,7 +1857,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
                     <p className="text-[11px] font-bold" style={{ color: C.dark }}>
                       Change role from{' '}
                       <span style={{ color: C.red }}>{pendingChange.oldName}</span>
-                      {' → '}
+                      {' ? '}
                       <span style={{ color: C.limeDeep }}>{pendingChange.newName}</span>
                       ?
                     </p>
@@ -2128,7 +2128,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
           <button onClick={undoRoleChange}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold"
             style={{ backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' }}>
-            ↩ Undo ({undoTimer}s)
+            ? Undo ({undoTimer}s)
           </button>
         </div>
       )}
@@ -2136,9 +2136,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN — RoleBuilderTab
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function RoleBuilderTab() {
   const supabase = createClient()
 
@@ -2156,7 +2156,7 @@ export default function RoleBuilderTab() {
     setTimeout(() => setToast(null), 3500)
   }
 
-  // ── Load all data ────────────────────────────────────────────
+  // -- Load all data --------------------------------------------
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
@@ -2219,7 +2219,7 @@ export default function RoleBuilderTab() {
 
   useEffect(() => { loadData() }, [loadData])
 
-  // ── Handlers ─────────────────────────────────────────────────
+  // -- Handlers -------------------------------------------------
   function handleSelectRole(role: AdminRole) {
     setSelectedRole(role)
     setIsCreating(false)
@@ -2250,7 +2250,7 @@ export default function RoleBuilderTab() {
     setMembers(prev => prev.map(m => m.id === userId ? { ...m, role_id: roleId } : m))
   }
 
-  // ── Loading skeleton ─────────────────────────────────────────
+  // -- Loading skeleton -----------------------------------------
   if (loading) {
     return (
       <div className="flex flex-col gap-5">
@@ -2286,7 +2286,7 @@ export default function RoleBuilderTab() {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold transition-all"
               style={{
                 backgroundColor: isActive ? C.dark    : C.surface,
-                borderColor:     isActive ? C.dark    : C.border,
+                borderColor: isActive ? '#8fff00' : C.border,
                 color:           isActive ? '#ffffff' : C.muted,
               }}>
               <tab.Icon size={14} style={{ color: isActive ? C.lime : C.muted }} />

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/components/TbKeywordTables.tsx
 // Converted 1:1 from lib/pages/title_builder/tb_keyword_tables.dart
 
@@ -6,14 +6,14 @@ import { useState, useEffect } from 'react'
 import { Target, Lightbulb, ChevronLeft, ChevronRight, ArrowDown, ArrowUp, ChevronsUpDown, Plus, Check, AlertTriangle } from 'lucide-react'
 
 const C = {
-  dark: '#0F172A', lime: '#8FFF00', border: '#D1D5DB',
+  dark: '#1a2410', lime: '#8FFF00', border: '#D1D5DB',
   bg: '#F1F5F9', text: '#1E293B', muted: '#64748B',
 }
 
 interface KeywordRow { kw: string; search: string; comp: string; sales: string }
 interface VeroEntry  { brand_name: string }
 
-// ── Smart keyword cell — highlights VeRO words as red pills ──
+// â”€â”€ Smart keyword cell â€” highlights VeRO words as red pills â”€â”€
 function SmartKeyword({ keyword, veroDatabase }: { keyword: string; veroDatabase: VeroEntry[] }) {
   const banned = new Set(veroDatabase.map(e => e.brand_name.toLowerCase()))
   const words  = keyword.split(' ')
@@ -39,7 +39,7 @@ function SmartKeyword({ keyword, veroDatabase }: { keyword: string; veroDatabase
   )
 }
 
-// ── Sortable header ───────────────────────────────────────────
+// â”€â”€ Sortable header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SortableHeader({ title, colKey, sortCol, sortAsc, onSort }: {
   title: string; colKey: string; sortCol: string; sortAsc: boolean; onSort: (k: string) => void
 }) {
@@ -55,7 +55,7 @@ function SortableHeader({ title, colKey, sortCol, sortAsc, onSort }: {
   )
 }
 
-// ── Animated table row ─────────────────────────────────────────
+// â”€â”€ Animated table row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TableRow({ row, isEven, isUsed, onInject, veroDatabase }: {
   row: KeywordRow; isEven: boolean; isUsed: boolean
   onInject: () => void; veroDatabase: VeroEntry[]
@@ -75,17 +75,17 @@ function TableRow({ row, isEven, isUsed, onInject, veroDatabase }: {
          className="flex items-center px-5 py-3 border-b transition-all"
          style={{ backgroundColor: bgColor, borderColor: '#F3F4F6', opacity, cursor: isUsed ? 'default' : 'pointer' }}>
 
-      {/* Keyword — flex 4 */}
+      {/* Keyword â€” flex 4 */}
       <div style={{ flex: 4, minWidth: 0, paddingRight: 8 }}>
         <SmartKeyword keyword={row.kw} veroDatabase={veroDatabase} />
       </div>
 
-      {/* Searches — flex 2 */}
+      {/* Searches â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <span className="text-[13px]" style={{ color: C.muted }}>{row.search}</span>
       </div>
 
-      {/* Competition — flex 2 */}
+      {/* Competition â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <p className="text-[13px] font-bold mb-1" style={{ color: C.text }}>{row.comp}</p>
         <div className="h-1 rounded-full overflow-hidden" style={{ width: 40, backgroundColor: '#E5E7EB' }}>
@@ -93,12 +93,12 @@ function TableRow({ row, isEven, isUsed, onInject, veroDatabase }: {
         </div>
       </div>
 
-      {/* Sales — flex 2 */}
+      {/* Sales â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <span className="text-[13px] font-bold" style={{ color: '#16A34A' }}>{row.sales}</span>
       </div>
 
-      {/* Inject button — 30px fixed */}
+      {/* Inject button â€” 30px fixed */}
       <div style={{ width: 30 }}>
         <div className={`p-1 rounded-md transition-opacity ${(isUsed || hover) ? 'opacity-100' : 'opacity-0'}`}
              style={{
@@ -114,7 +114,7 @@ function TableRow({ row, isEven, isUsed, onInject, veroDatabase }: {
   )
 }
 
-// ── SmartKeywordTable ─────────────────────────────────────────
+// â”€â”€ SmartKeywordTable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SmartKeywordTable({ title, icon: Icon, initialData, currentTitle, onInject, veroDatabase }: {
   title: string; icon: React.ElementType
   initialData: KeywordRow[]; currentTitle: string
@@ -208,7 +208,7 @@ function SmartKeywordTable({ title, icon: Icon, initialData, currentTitle, onInj
   )
 }
 
-// ── Main TbKeywordTables ──────────────────────────────────────
+// â”€â”€ Main TbKeywordTables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Props {
   currentTitle: string
   onInject:     (kw: string) => void
@@ -220,7 +220,7 @@ interface Props {
 
 export default function TbKeywordTables({ currentTitle, onInject, veroDatabase, longTailData, genericData, isLoading }: Props) {
 
-  // Loading state — matches Dart beautiful loading UI
+  // Loading state â€” matches Dart beautiful loading UI
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center" style={{ height: 400 }}>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/admin/approve/page.tsx
 // ══════════════════════════════════════════════════════════════
 // Approval page for Kill All requests
@@ -220,7 +220,7 @@ function ApprovePageInner() {
               )}
               <button onClick={() => router.push('/dashboard/admin')}
                 className="mt-2 px-6 py-3 rounded-2xl font-bold text-[14px]"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 Go to Admin Panel
               </button>
             </div>
@@ -237,7 +237,7 @@ function ApprovePageInner() {
               <p style={{ color: C.muted, fontSize: 14 }}>{error}</p>
               <button onClick={() => router.push('/dashboard/admin')}
                 className="mt-2 px-6 py-3 rounded-2xl font-bold text-[14px]"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 Go to Admin Panel
               </button>
             </div>

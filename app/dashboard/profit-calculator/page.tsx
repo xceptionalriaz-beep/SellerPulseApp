@@ -1,23 +1,23 @@
 ﻿'use client'
 // app/dashboard/profit-calculator/page.tsx
-// ═══════════════════════════════════════════════════════════════
+// ---------------------------------------------------------------
 // Converted from: lib/pages/profit_calculator.dart
 //
 // What the Dart version had:
-//   ✅ Header — analytics icon, title, eBay search bar, country tabs
-//   ✅ Country tabs (US/UK/AU/CA/DE/FR/IT/ES) — dark active state
-//   ✅ Command Center panel (left) — all inputs
-//   ✅ Pro Dashboard panel (right) — results
-//   ✅ Item cost, shipping cost, sale price, buyer shipping inputs
-//   ✅ Category dropdown (20 categories with fee %)
-//   ✅ Store tier, seller level, payment processor dropdowns
-//   ✅ Ad rate + tax rate sliders
-//   ✅ International toggle
-//   ✅ eBay fee calculation (MathEngine)
-//   ✅ VeRO risk detection (keyword scanning)
-//   ✅ Product preview bar — thumbnail, VeRO highlighted title, sold count
-//   ✅ Responsive (desktop side-by-side / mobile stacked)
-// ═══════════════════════════════════════════════════════════════
+//   ? Header — analytics icon, title, eBay search bar, country tabs
+//   ? Country tabs (US/UK/AU/CA/DE/FR/IT/ES) — dark active state
+//   ? Command Center panel (left) — all inputs
+//   ? Pro Dashboard panel (right) — results
+//   ? Item cost, shipping cost, sale price, buyer shipping inputs
+//   ? Category dropdown (20 categories with fee %)
+//   ? Store tier, seller level, payment processor dropdowns
+//   ? Ad rate + tax rate sliders
+//   ? International toggle
+//   ? eBay fee calculation (MathEngine)
+//   ? VeRO risk detection (keyword scanning)
+//   ? Product preview bar — thumbnail, VeRO highlighted title, sold count
+//   ? Responsive (desktop side-by-side / mobile stacked)
+// ---------------------------------------------------------------
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { BarChart2, AlertTriangle, Flame, ImageIcon, ChevronDown } from 'lucide-react'
@@ -28,9 +28,9 @@ import ProDashboard  from '@/components/profit/ProDashboard'
 import { MathEngine } from '@/lib/math-engine'
 import KillSwitchGate from '@/components/KillSwitchGate'
 
-// ── Design tokens ──────────────────────────────────────────────
+// -- Design tokens ----------------------------------------------
 const C = {
-  dark:    '#0F172A',
+  dark:    '#1a2410',
   lime:    '#8FFF00',
   border:  '#E2E8F0',
   bg:      '#F8FAFC',
@@ -39,7 +39,7 @@ const C = {
   hint:    '#94A3B8',
 }
 
-// ── Category fees (mirrors Dart _categoryFees exactly) ─────────
+// -- Category fees (mirrors Dart _categoryFees exactly) ---------
 const CATEGORY_FEES: Record<string, number> = {
   'Other Categories (Default) - 13.25%':         13.25,
   'Books, Magazines, Movies, Music - 14.95%':    14.95,
@@ -68,14 +68,14 @@ const SELLER_LEVELS  = ['Standard', 'Top Rated Plus (-10% Final Fee)', 'Below St
 const PROCESSORS     = ['Managed', 'PayPal']
 const COUNTRIES      = ['US', 'UK', 'AU', 'CA', 'DE', 'FR', 'IT', 'ES']
 
-// ── VeRO keywords (mirrors Dart exactly) ──────────────────────
+// -- VeRO keywords (mirrors Dart exactly) ----------------------
 const VERO_KEYWORDS = [
   'apple','nike','velcro','rolex','gucci','adidas','bluetooth','onesie',
   'yeti','popsocket','canon','sony','bose','fitbit','gopro','ugg','zippo',
   'louis vuitton','chanel','prada','hermes','burberry','ray-ban','oakley',
 ]
 
-// ── Currency helper ────────────────────────────────────────────
+// -- Currency helper --------------------------------------------
 function getCurrency(country: string): string {
   if (country === 'UK') return '£'
   if (['DE','FR','IT','ES'].includes(country)) return '€'
@@ -84,7 +84,7 @@ function getCurrency(country: string): string {
   return '$'
 }
 
-// ── MathEngine (converted from lib/widgets/math_engine.dart) ───
+// -- MathEngine (converted from lib/widgets/math_engine.dart) ---
 interface CalcResult {
   ebayFee: number
   paymentFee: number
@@ -145,13 +145,13 @@ function calculate(params: {
   return { ebayFee, paymentFee, adFee, tax, totalFees, netProfit, margin, roi, breakEven }
 }
 
-// ── VeRO check ─────────────────────────────────────────────────
+// -- VeRO check -------------------------------------------------
 function checkVero(title: string): boolean {
   const lower = ` ${title.toLowerCase()} `
   return VERO_KEYWORDS.some(kw => lower.includes(` ${kw} `))
 }
 
-// ── VeRO highlighted title ─────────────────────────────────────
+// -- VeRO highlighted title -------------------------------------
 function VeroTitle({ title, keywords }: { title: string; keywords: string[] }) {
   const words = title.split(' ')
   return (
@@ -171,7 +171,7 @@ function VeroTitle({ title, keywords }: { title: string; keywords: string[] }) {
   )
 }
 
-// ── Input field ────────────────────────────────────────────────
+// -- Input field ------------------------------------------------
 function InputField({ label, value, onChange, prefix, placeholder }: {
   label: string; value: number | string; onChange: (v: number) => void
   prefix?: string; placeholder?: string
@@ -196,7 +196,7 @@ function InputField({ label, value, onChange, prefix, placeholder }: {
   )
 }
 
-// ── Select field ───────────────────────────────────────────────
+// -- Select field -----------------------------------------------
 function SelectField({ label, value, options, onChange }: {
   label: string; value: string; options: string[]; onChange: (v: string) => void
 }) {
@@ -217,7 +217,7 @@ function SelectField({ label, value, options, onChange }: {
   )
 }
 
-// ── Slider field ───────────────────────────────────────────────
+// -- Slider field -----------------------------------------------
 function SliderField({ label, value, min, max, step, onChange, suffix }: {
   label: string; value: number; min: number; max: number; step: number
   onChange: (v: number) => void; suffix?: string
@@ -235,7 +235,7 @@ function SliderField({ label, value, min, max, step, onChange, suffix }: {
   )
 }
 
-// ── Result row ─────────────────────────────────────────────────
+// -- Result row -------------------------------------------------
 function ResultRow({ label, value, color, bold }: {
   label: string; value: string; color?: string; bold?: boolean
 }) {
@@ -250,7 +250,7 @@ function ResultRow({ label, value, color, bold }: {
   )
 }
 
-// ── Big metric card ────────────────────────────────────────────
+// -- Big metric card --------------------------------------------
 function MetricCard({ label, value, sub, color, bg }: {
   label: string; value: string; sub?: string; color: string; bg: string
 }) {
@@ -263,9 +263,9 @@ function MetricCard({ label, value, sub, color, bg }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN PAGE
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function ProfitCalculatorPage() {
   const [country,    setCountry]    = useState('US')
   const [itemCost,   setItemCost]   = useState(0)
@@ -287,7 +287,7 @@ export default function ProfitCalculatorPage() {
   const [fetchedSold,  setFetchedSold]  = useState('')
   const [hasVero,      setHasVero]      = useState(false)
 
-  // ✨ THE SMART CATEGORY MAPPER — matches Dart _ebayCategoryMap
+  // ? THE SMART CATEGORY MAPPER — matches Dart _ebayCategoryMap
   const EBAY_CATEGORY_MAP: Record<string, string> = {
     '179697': 'Consumer Electronics - 9.00%',
     '15032':  'Cell Phones & Smartphones - 9.00%',
@@ -295,11 +295,11 @@ export default function ProfitCalculatorPage() {
     '260324': 'Athletic Shoes (Over $150) - 8.00%',
   }
 
-  // ✨ UPGRADED FETCH HANDLER — matches Dart _handleProductFetched
+  // ? UPGRADED FETCH HANDLER — matches Dart _handleProductFetched
   function handleProductFetched(price: number, shipping: number, categoryId: string, title: string, imageUrl: string, soldCount: string) {
     setSalePrice(price)
     setBuyerShip(shipping)
-    // ✨ MAGIC MAPPING — auto-selects category from eBay category ID
+    // ? MAGIC MAPPING — auto-selects category from eBay category ID
     setCategory(EBAY_CATEGORY_MAP[categoryId] ?? 'Other Categories (Default) - 13.25%')
     setFetchedTitle(title)
     setFetchedImage(imageUrl)
@@ -308,13 +308,13 @@ export default function ProfitCalculatorPage() {
     setHasVero(checkIfTitleHasVero(title))
   }
 
-  // ✨ VERO ENGINE — matches Dart _checkIfTitleHasVero
+  // ? VERO ENGINE — matches Dart _checkIfTitleHasVero
   function checkIfTitleHasVero(title: string): boolean {
     const lowerTitle = ` ${title.toLowerCase()} ` // Pad with spaces to match whole words
     return VERO_KEYWORDS.some(brand => lowerTitle.includes(` ${brand} `))
   }
 
-  // ── Award XP when profit is calculated ────────────────────
+  // -- Award XP when profit is calculated --------------------
   const calcTrackedRef = useRef(false)
   useEffect(() => {
     if (salePrice <= 0 || itemCost <= 0) return
@@ -362,7 +362,7 @@ export default function ProfitCalculatorPage() {
     <div className="min-h-full overflow-auto bg-[#F7F9F5]">
       <div className="w-full px-4 md:px-6 lg:px-8 pt-8 pb-10">
 
-        {/* ── HEADER: subtitle | search bar | country tabs — single row ── */}
+        {/* -- HEADER: subtitle | search bar | country tabs — single row -- */}
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <p className="text-[13px] shrink-0" style={{ color: C.muted }}>Advanced margin &amp; forecasting for {country}</p>
           <div className="flex-1 min-w-[200px]">
@@ -386,7 +386,7 @@ export default function ProfitCalculatorPage() {
           </div>
         </div>
 
-        {/* ── MAIN LAYOUT ── */}
+        {/* -- MAIN LAYOUT -- */}
         <div className="flex flex-col lg:flex-row gap-6">
 
           {/* LEFT: Command Center */}
@@ -428,7 +428,7 @@ export default function ProfitCalculatorPage() {
           </div>
         </div>
 
-        {/* ── PRODUCT PREVIEW BAR (after eBay search) ── */}
+        {/* -- PRODUCT PREVIEW BAR (after eBay search) -- */}
         {hasFetched && (
           <div className="mt-6 p-4 rounded-xl border-2 flex items-center gap-4"
                style={{

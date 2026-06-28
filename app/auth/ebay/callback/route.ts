@@ -1,5 +1,5 @@
-// app/auth/ebay/callback/route.ts
-// Handles eBay OAuth callback — exchanges code for token
+﻿// app/auth/ebay/callback/route.ts
+// Handles eBay OAuth callback â€” exchanges code for token
 // then saves to profiles table and redirects back to dashboard
 
 import { createClient } from '@supabase/supabase-js'
@@ -19,14 +19,14 @@ export async function GET(req: NextRequest) {
 
   const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? 'https://xceptionalriazebaysellertoolreazify.vercel.app'
 
-  // ── Handle eBay OAuth error ──────────────────────────────────
+  // â”€â”€ Handle eBay OAuth error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (error || !code) {
     console.error('[ebay-callback] OAuth error:', error)
     return NextResponse.redirect(`${appUrl}/dashboard/profile?tab=ebay&error=oauth_failed`)
   }
 
   try {
-    // ── Exchange code for access token ───────────────────────
+    // â”€â”€ Exchange code for access token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const clientId     = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
     const clientSecret = process.env.EBAY_CLIENT_SECRET!
     const redirectUri  = process.env.EBAY_REDIRECT_URI!
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
 
     const expiresAt = new Date(Date.now() + expires_in * 1000).toISOString()
 
-    // ── Get eBay user info ────────────────────────────────────
+    // â”€â”€ Get eBay user info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let ebayUsername = ''
     let ebayUserId   = ''
     try {
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
       }
     } catch {}
 
-    // ── Save to profiles using state (user_id) ────────────────
+    // â”€â”€ Save to profiles using state (user_id) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (state) {
       await (adminClient.from('profiles') as any).update({
         ebay_access_token:     access_token,
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
       } catch {}
     }
 
-    // ── Redirect back to profile with success ─────────────────
+    // â”€â”€ Redirect back to profile with success â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     return NextResponse.redirect(
       `${appUrl}/dashboard/profile?tab=ebay&connected=true&username=${encodeURIComponent(ebayUsername)}`
     )

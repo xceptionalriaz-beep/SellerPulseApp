@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/GamificationTab.tsx
 
 import React, { useState, useEffect, useCallback } from 'react'
@@ -27,7 +27,7 @@ const C = {
   purple:   '#7c3aed',
 }
 
-// ── Constants ──────────────────────────────────────────────────
+// -- Constants --------------------------------------------------
 const LEVEL_NAMES = ['', 'Beginner', 'Rising', 'Smart', 'Pro', 'Elite']
 const LEVEL_COLORS  = ['', C.muted, C.blue, C.amber, C.purple, C.limeDeep]
 const LEVEL_BG      = ['', C.bg, 'rgba(29,78,216,0.08)', 'rgba(217,119,6,0.08)', 'rgba(124,58,237,0.08)', C.limeTint]
@@ -61,7 +61,7 @@ function getIcon(name: string): React.ElementType {
   return ICON_MAP[name] ?? Trophy
 }
 
-// ── Helpers ────────────────────────────────────────────────────
+// -- Helpers ----------------------------------------------------
 function timeAgo(iso: string): string {
   const diff  = Date.now() - new Date(iso).getTime()
   const mins  = Math.floor(diff / 60000)
@@ -89,7 +89,7 @@ function rewardColor(type: string) {
   return { color: C.muted, bg: C.bg }
 }
 
-// ── Toast ──────────────────────────────────────────────────────
+// -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
     success: { bg: C.dark,    border: C.lime,   color: C.lime },
@@ -106,7 +106,7 @@ function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' 
   )
 }
 
-// ── CustomDropdown ─────────────────────────────────────────────
+// -- CustomDropdown ---------------------------------------------
 function CustomDropdown({ value, onChange, options, label }: {
   value: string; onChange: (v: string) => void
   options: { label: string; value: string }[]; label: string
@@ -144,7 +144,7 @@ function CustomDropdown({ value, onChange, options, label }: {
   )
 }
 
-// ── Quest Modal ────────────────────────────────────────────────
+// -- Quest Modal ------------------------------------------------
 function QuestModal({ quest, onClose, onSaved }: {
   quest?: any; onClose: () => void; onSaved: (q: any) => void
 }) {
@@ -270,7 +270,7 @@ function QuestModal({ quest, onClose, onSaved }: {
             style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
           <button onClick={handleSave} disabled={saving || !title.trim() || !rewardText.trim()}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Save size={14} /> {isEdit ? 'Save Changes' : 'Create Quest'}</>}
@@ -281,7 +281,7 @@ function QuestModal({ quest, onClose, onSaved }: {
   )
 }
 
-// ── Fulfill Modal ──────────────────────────────────────────────
+// -- Fulfill Modal ----------------------------------------------
 function FulfillModal({ item, onClose, onFulfilled }: {
   item: any; onClose: () => void; onFulfilled: (id: string) => void
 }) {
@@ -355,7 +355,7 @@ function FulfillModal({ item, onClose, onFulfilled }: {
               style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
             <button onClick={handleFulfill} disabled={saving}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {saving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                 : <><CheckCircle size={14} /> Mark Fulfilled</>}
@@ -367,7 +367,7 @@ function FulfillModal({ item, onClose, onFulfilled }: {
   )
 }
 
-// ── Badge Manager Section with Pagination ─────────────────────
+// -- Badge Manager Section with Pagination ---------------------
 function BadgeManagerSection({ badges }: { badges: any[] }) {
   const PAGE_SIZE = 6
   const [page, setPage] = useState(0)
@@ -440,9 +440,9 @@ function BadgeManagerSection({ badges }: { badges: any[] }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function GamificationTab() {
   const supabase = createClient()
 
@@ -532,7 +532,7 @@ export default function GamificationTab() {
         <div className="flex items-center gap-2">
           <button onClick={() => setShowNewQuest(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Quest
           </button>
           <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
@@ -606,7 +606,7 @@ export default function GamificationTab() {
           <button key={tab.key} onClick={() => setActiveSection(tab.key as any)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all h-9"
             style={{
-              backgroundColor: activeSection === tab.key ? C.dark : C.surface,
+              backgroundColor: activeSection === tab.key ? '#8fff00' : C.surface,
               color:           activeSection === tab.key ? C.lime : C.muted,
               border:          `1px solid ${activeSection === tab.key ? C.dark : C.border}`,
             }}>
@@ -624,7 +624,7 @@ export default function GamificationTab() {
         ))}
       </div>
 
-      {/* ── QUEST MATRIX ─────────────────────────────────────── */}
+      {/* -- QUEST MATRIX --------------------------------------- */}
       {activeSection === 'quests' && (
         <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
           <div className="grid px-4 py-2.5 border-b"
@@ -736,7 +736,7 @@ export default function GamificationTab() {
         </div>
       )}
 
-      {/* ── FULFILLMENT QUEUE ─────────────────────────────────── */}
+      {/* -- FULFILLMENT QUEUE ----------------------------------- */}
       {activeSection === 'fulfillments' && (
         <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
           <div className="flex items-center gap-2 px-4 py-2.5 border-b"
@@ -789,7 +789,7 @@ export default function GamificationTab() {
                   </p>
                   <button onClick={() => setFulfillItem(item)}
                     className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold hover:opacity-80"
-                    style={{ backgroundColor: C.dark, color: C.lime }}>
+                    style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                     <CheckCircle size={10} /> Fulfill
                   </button>
                 </div>
@@ -799,7 +799,7 @@ export default function GamificationTab() {
         </div>
       )}
 
-      {/* ── LEADERBOARD ───────────────────────────────────────── */}
+      {/* -- LEADERBOARD ----------------------------------------- */}
       {activeSection === 'leaderboard' && (
         <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
           <div className="flex items-center gap-2 px-4 py-2.5 border-b"

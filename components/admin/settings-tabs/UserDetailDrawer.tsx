@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/UserDetailDrawer.tsx
 // ─────────────────────────────────────────────────────────────
 // User Detail Drawer — opens when admin clicks "Profile"
@@ -792,7 +792,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
                       showToast('Reconnect email sent to user', 'info')
                     }}
                     className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:opacity-80"
-                    style={{ backgroundColor: C.dark, color: C.lime }}>
+                    style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                     Send Reconnect
                   </button>
                 )}
@@ -1471,7 +1471,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
                       style={{ borderColor: C.border, backgroundColor: C.surface, color: C.text }} />
                     <button onClick={saveReferral} disabled={savingRef}
                       className="flex items-center justify-center gap-2 py-2 rounded-lg text-[12px] font-bold"
-                      style={{ backgroundColor: C.dark, color: C.lime }}>
+                      style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                       {savingRef
                         ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                         : <><Check size={11} /> Save</>}

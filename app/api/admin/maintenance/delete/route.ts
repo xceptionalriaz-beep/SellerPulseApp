@@ -1,4 +1,4 @@
-// app/api/admin/maintenance/delete/route.ts
+﻿// app/api/admin/maintenance/delete/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const { id } = await req.json()
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
 
-    // ── Fetch schedule details before deleting ─────────────
+    // â”€â”€ Fetch schedule details before deleting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: schedule } = await (adminClient.from('maintenance_schedules') as any)
       .select('label, switch_id, kill_switches(title)')
       .eq('id', id).single()
@@ -35,13 +35,13 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // ── Log to audit trail ─────────────────────────────────
+    // â”€â”€ Log to audit trail â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       const { data: profile } = await adminClient.from('profiles').select('name').eq('id', user.id).single()
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   user.id,
         action:     'schedule_deleted',
-        details:    `Deleted schedule: ${(schedule as any)?.kill_switches?.title ?? 'Unknown'} — ${(schedule as any)?.label ?? id}`,
+        details:    `Deleted schedule: ${(schedule as any)?.kill_switches?.title ?? 'Unknown'} â€” ${(schedule as any)?.label ?? id}`,
         metadata:   {
           admin_name:   (profile as any)?.name ?? 'Admin',
           schedule_id:  id,

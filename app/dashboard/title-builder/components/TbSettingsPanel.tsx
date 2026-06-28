@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/components/TbSettingsPanel.tsx
 // Converted 1:1 from lib/pages/title_builder/tb_settings_panel.dart
 
@@ -12,7 +12,7 @@ const C = {
   muted:  '#9CA3AF',
   blue:   '#1D70F5',
   lime:   '#8FFF00',
-  dark:   '#0F172A',
+  dark:   '#1a2410',
 }
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
   onClose:                 () => void
 }
 
-// ── Toggle row (matches Dart _buildToggleRow) ─────────────────
+// â”€â”€ Toggle row (matches Dart _buildToggleRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ToggleRow({ icon: Icon, title, subtitle, value, onChanged }: {
   icon: React.ElementType; title: string; subtitle: string
   value: boolean; onChanged: (v: boolean) => void
@@ -42,7 +42,7 @@ function ToggleRow({ icon: Icon, title, subtitle, value, onChanged }: {
         <p className="text-[14px] font-bold" style={{ color: C.text }}>{title}</p>
         <p className="text-[11px]" style={{ color: C.muted }}>{subtitle}</p>
       </div>
-      {/* Toggle — lime track dark thumb matches Dart */}
+      {/* Toggle â€” lime track dark thumb matches Dart */}
       <div onClick={() => onChanged(!value)}
            className="relative w-11 h-6 rounded-full cursor-pointer transition-colors shrink-0"
            style={{ backgroundColor: value ? C.lime : '#E5E7EB' }}>
@@ -56,7 +56,7 @@ function ToggleRow({ icon: Icon, title, subtitle, value, onChanged }: {
   )
 }
 
-// ── VeRO mode button (matches Dart _buildVeroButton) ──────────
+// â”€â”€ VeRO mode button (matches Dart _buildVeroButton) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function VeroButton({ mode, currentMode, onTap }: {
   mode: string; currentMode: string; onTap: (v: string) => void
 }) {
@@ -74,7 +74,7 @@ function VeroButton({ mode, currentMode, onTap }: {
   )
 }
 
-// ── Main panel — slide-in drawer (matches Dart Drawer width:320) ─
+// â”€â”€ Main panel â€” slide-in drawer (matches Dart Drawer width:320) â”€
 export default function TbSettingsPanel({
   autoCapitalize, onAutoCapitalizeChanged,
   autoCopy, onAutoCopyChanged,
@@ -87,7 +87,7 @@ export default function TbSettingsPanel({
          style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
          onClick={e => e.target === e.currentTarget && onClose()}>
 
-      {/* Drawer — width:320 matches Dart */}
+      {/* Drawer â€” width:320 matches Dart */}
       <div className="h-full flex flex-col overflow-hidden"
            style={{ width: 320, backgroundColor: C.bg }}>
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/FounderOpsTab.tsx
 
 import { useState, useEffect, useCallback } from 'react'
@@ -29,7 +29,7 @@ const C = {
 
 interface Props { isInvestorMode?: boolean; isMobile?: boolean; onNavigate?: (tab: number) => void }
 
-// ── Vital Sign Card ────────────────────────────────────────────
+// â”€â”€ Vital Sign Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function VitalCard({ label, value, sub, icon: Icon, color, onClick }: {
   label: string; value: string; sub: string
   icon: React.ElementType; color: string; onClick?: () => void
@@ -57,7 +57,7 @@ function VitalCard({ label, value, sub, icon: Icon, color, onClick }: {
   )
 }
 
-// ── Section header ─────────────────────────────────────────────
+// â”€â”€ Section header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SectionHeader({ title, sub }: { title: string; sub: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
@@ -73,7 +73,7 @@ function SectionHeader({ title, sub }: { title: string; sub: string }) {
 export default function FounderOpsTab({ onNavigate }: Props) {
   const supabase = createClient()
 
-  // ── State ──────────────────────────────────────────────────
+  // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [checklist,      setChecklist]      = useState<any[]>([])
   const [toggling,       setToggling]       = useState<string | null>(null)
   const [vitals,         setVitals]         = useState({
@@ -89,7 +89,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [togglingMaint,   setTogglingMaint]   = useState(false)
 
-  // ── Load all data ──────────────────────────────────────────
+  // â”€â”€ Load all data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadAll = useCallback(async () => {
     setRefreshing(true)
     try {
@@ -242,7 +242,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
   const completed = checklist.filter(t => t.done).length
   const progress  = checklist.length > 0 ? completed / checklist.length : 0
 
-  // ── Quick Actions ──────────────────────────────────────────
+  // â”€â”€ Quick Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const QUICK_ACTIONS = [
     { label: 'User CRM',       icon: Users,      tab: 0,  color: C.blue    },
     { label: 'Affiliate Vault',icon: Globe,      tab: 10, color: C.limeDeep},
@@ -261,14 +261,14 @@ export default function FounderOpsTab({ onNavigate }: Props) {
   return (
     <div className="flex flex-col gap-6 px-6 py-6" style={{ fontFamily: 'Inter, sans-serif' }}>
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-[28px] font-black tracking-tight" style={{ color: C.text }}>
             Founder Control Center
           </h1>
           <p className="text-[13px] mt-0.5" style={{ color: C.muted }}>
-            Riazify LLC — Executive Operations Dashboard
+            Riazify LLC â€” Executive Operations Dashboard
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* ── Section 1: Business Vital Signs ── */}
+      {/* â”€â”€ Section 1: Business Vital Signs â”€â”€ */}
       <div>
         <SectionHeader title="BUSINESS VITAL SIGNS" sub="Real-time from database" />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -307,7 +307,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* ── Section 2: Weekly Checklist ── */}
+      {/* â”€â”€ Section 2: Weekly Checklist â”€â”€ */}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="p-5 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <div className="flex items-center justify-between mb-4">
@@ -353,7 +353,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
           </div>
         </div>
 
-        {/* ── Quick Actions ── */}
+        {/* â”€â”€ Quick Actions â”€â”€ */}
         <div className="p-5 rounded-2xl border" style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <SectionHeader title="QUICK ACTIONS" sub="Jump to key sections" />
           <div className="flex flex-col gap-2">
@@ -376,7 +376,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* ── Section 3: Revenue Health ── */}
+      {/* â”€â”€ Section 3: Revenue Health â”€â”€ */}
       <div>
         <SectionHeader title="REVENUE HEALTH" sub="Payments and billing status" />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -415,7 +415,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* ── Section 4: Security Pulse ── */}
+      {/* â”€â”€ Section 4: Security Pulse â”€â”€ */}
       <div>
         <SectionHeader title="SECURITY PULSE" sub="Threats and access control" />
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -456,7 +456,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* ── Section 5: Deployment Shield ── */}
+      {/* â”€â”€ Section 5: Deployment Shield â”€â”€ */}
       <div className="flex items-center gap-4 p-5 rounded-2xl flex-wrap"
            style={{
              backgroundColor: C.dark,
@@ -472,8 +472,8 @@ export default function FounderOpsTab({ onNavigate }: Props) {
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
             {maintenanceMode
-              ? 'All users see maintenance page — toggle off to restore access'
-              : 'All systems operational — next maintenance window: Sunday 02:00 AM'}
+              ? 'All users see maintenance page â€” toggle off to restore access'
+              : 'All systems operational â€” next maintenance window: Sunday 02:00 AM'}
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">

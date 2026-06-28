@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/affiliate/apply/page.tsx  OR  components/affiliate/AffiliateApplyPage.tsx
 // Public-facing affiliate application form — matches Riazify brand
 
@@ -455,7 +455,7 @@ export default function AffiliateApplyPage() {
         </div>
         <a href="/"
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-[14px] font-bold transition-all hover:opacity-90"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           Back to Riazify
         </a>
       </div>

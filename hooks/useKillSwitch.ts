@@ -1,4 +1,4 @@
-// hooks/useKillSwitch.ts
+﻿// hooks/useKillSwitch.ts
 // Checks kill switch status for a tool
 // Usage: const { isKilled, isReadOnly, message } = useKillSwitch('Orders Management')
 
@@ -48,7 +48,7 @@ export async function checkKillSwitch(title: string): Promise<KillSwitchState> {
   }
 }
 
-// Check all kill switches at once — returns map of title → state
+// Check all kill switches at once â€” returns map of title â†’ state
 export async function checkAllKillSwitches(): Promise<Record<string, KillSwitchState>> {
   try {
     const supabase = createClient()

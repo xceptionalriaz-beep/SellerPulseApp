@@ -344,7 +344,7 @@ export default function TeamTab() {
 
           <button onClick={sendInvite} disabled={!inviteEmail.trim() || sending}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {sending
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin"
                      style={{ borderTopColor: C.lime }} />
@@ -366,7 +366,7 @@ export default function TeamTab() {
           </p>
           <a href="/dashboard/billing"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Upgrade Plan →
           </a>
         </div>
@@ -524,7 +524,7 @@ export default function TeamTab() {
                           style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
                         <button onClick={() => updateRole(m.member_id, newRole)}
                           className="flex-1 py-1.5 rounded-xl text-[11px] font-bold"
-                          style={{ backgroundColor: C.dark, color: C.lime }}>Save</button>
+                          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>Save</button>
                       </div>
                     </div>
                   )}

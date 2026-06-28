@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/SecurityLogsTab.tsx
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // RIAZIFY — Security Logs Tab
 // Two-tab workspace: Activity (HUD + Fraud Sentinel + Logs)
 //                    Network Guard (Anomalies + Blocked IPs)
 // Silent 10-second auto-refresh via Visibility API
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -15,7 +15,7 @@ import {
   ChevronDown,
 } from 'lucide-react'
 
-// ── Design tokens ──────────────────────────────────────────────
+// -- Design tokens ----------------------------------------------
 const C = {
   dark:     '#0a0d08',
   lime:     '#8fff00',
@@ -32,7 +32,7 @@ const C = {
   blue:     '#1d4ed8',
 }
 
-// ── Data interfaces ────────────────────────────────────────────
+// -- Data interfaces --------------------------------------------
 interface AdminLogEntry {
   id:         string
   admin_id:   string | null
@@ -81,7 +81,7 @@ interface HudStats {
   activeAlerts:       number
 }
 
-// ── Time ago helper ────────────────────────────────────────────
+// -- Time ago helper --------------------------------------------
 function timeAgo(iso: string): string {
   const diffMs    = Date.now() - new Date(iso).getTime()
   const diffMins  = Math.floor(diffMs / 60000)
@@ -93,7 +93,7 @@ function timeAgo(iso: string): string {
   return `${diffDays}d ago`
 }
 
-// ── Action label + color mapper ────────────────────────────────
+// -- Action label + color mapper --------------------------------
 function mapAction(action: string): { label: string; color: string; bg: string } {
   const map: Record<string, { label: string; color: string; bg: string }> = {
     suspend_user:  { label: 'Suspended User',    color: C.red,      bg: 'rgba(185,28,28,0.08)'   },
@@ -109,7 +109,7 @@ function mapAction(action: string): { label: string; color: string; bg: string }
   return map[action] ?? { label: action.replace(/_/g, ' '), color: C.muted, bg: C.bg }
 }
 
-// ── Event color mapper ─────────────────────────────────────────
+// -- Event color mapper -----------------------------------------
 function mapEventColor(eventTitle: string): { color: string; bg: string } {
   if (eventTitle.toLowerCase().includes('failed'))     return { color: C.red,      bg: 'rgba(185,28,28,0.08)'   }
   if (eventTitle.toLowerCase().includes('impossible')) return { color: C.red,      bg: 'rgba(185,28,28,0.08)'   }
@@ -119,11 +119,11 @@ function mapEventColor(eventTitle: string): { color: string; bg: string } {
   return { color: C.muted, bg: C.bg }
 }
 
-// ── Toast component ────────────────────────────────────────────
+// -- Toast component --------------------------------------------
 function SecurityToast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,    border: C.lime,   text: C.lime, icon: '✓' },
-    error:   { bg: '#FEF2F2', border: '#FECACA', text: C.red,  icon: '✕' },
+    success: { bg: C.dark,    border: C.lime,   text: C.lime, icon: '?' },
+    error:   { bg: '#FEF2F2', border: '#FECACA', text: C.red,  icon: '?' },
     info:    { bg: C.bg,      border: C.border,  text: C.text, icon: 'i' },
   }
   const t = map[type]
@@ -136,7 +136,7 @@ function SecurityToast({ msg, type }: { msg: string; type: 'success' | 'error' |
   )
 }
 
-// ── Custom Dropdown ────────────────────────────────────────────
+// -- Custom Dropdown --------------------------------------------
 function CustomDropdown({ value, options, onChange }: {
   value:    string
   options:  { value: string; label: string }[]
@@ -278,9 +278,9 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // FRAUD SENTINEL BANNER
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function FraudSentinelBanner({
   alerts,
   onLockAccount,
@@ -322,7 +322,7 @@ function FraudSentinelBanner({
           <button
             onClick={() => onLockAccount(alert.user_id, alert.id)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Lock size={11} /> Lock Account
           </button>
           <button
@@ -336,9 +336,9 @@ function FraudSentinelBanner({
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // FILTERS BAR
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function FiltersBar({
   eventFilter,    setEventFilter,
   timeFilter,     setTimeFilter,
@@ -448,16 +448,16 @@ function FiltersBar({
       <button
         onClick={onExport}
         className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
-        style={{ backgroundColor: C.dark, color: C.lime, borderColor: C.dark }}>
+        style={{ backgroundColor: '#8fff00', color: '#1a2410', borderColor: C.dark }}>
         <Download size={13} /> Export
       </button>
     </div>
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // ADMIN ACTION LOGS — Left column
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function AdminActionLogs({ logs, loading, obscureEmail }: {
   logs:          AdminLogEntry[]
   loading:       boolean
@@ -502,7 +502,7 @@ function AdminActionLogs({ logs, loading, obscureEmail }: {
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>
-                    {obscureEmail(adminName)} → {obscureEmail(targetName)}
+                    {obscureEmail(adminName)} ? {obscureEmail(targetName)}
                   </p>
                   <p className="text-[10px] truncate" style={{ color: C.muted }}>
                     {log.details ?? 'No details recorded'}
@@ -524,9 +524,9 @@ function AdminActionLogs({ logs, loading, obscureEmail }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // USER SECURITY EVENTS — Right column
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function UserSecurityEvents({
   events,
   loading,
@@ -616,9 +616,9 @@ function UserSecurityEvents({
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // LOGIN ANOMALIES TABLE
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function LoginAnomaliesTable({
   logins,
   loading,
@@ -761,9 +761,9 @@ function LoginAnomaliesTable({
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BLOCKED IPS MANAGEMENT
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function BlockedIpsPanel({
   blockedIps,
   loading,
@@ -838,26 +838,26 @@ function BlockedIpsPanel({
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestorMode?: boolean }) {
   const supabase = createClient()
 
-  // ── Toast ──────────────────────────────────────────────────
+  // -- Toast --------------------------------------------------
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
   function showToast(msg: string, type: 'success' | 'error' | 'info') {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  // ── Sub-tab state ──────────────────────────────────────────
+  // -- Sub-tab state ------------------------------------------
   const [activeTab, setActiveTab] = useState<'activity' | 'network'>('activity')
 
-  // ── Session state ──────────────────────────────────────────
+  // -- Session state ------------------------------------------
   const [currentUserIps, setCurrentUserIps] = useState<Set<string>>(new Set())
 
-  // ── Block IP modal state ───────────────────────────────────
+  // -- Block IP modal state -----------------------------------
   const [blockIpModal, setBlockIpModal] = useState<string | null>(null)
   const [blockReason,  setBlockReason]  = useState('')
   const [blocking,     setBlocking]     = useState(false)
@@ -870,17 +870,17 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
   const [loading,         setLoading]          = useState(true)
   const [silentRefresh,   setSilentRefresh]    = useState(false)
 
-  // ── Filter state ───────────────────────────────────────────
+  // -- Filter state -------------------------------------------
   const [eventFilter,  setEventFilter]  = useState('all')
   const [timeFilter,   setTimeFilter]   = useState('24h')
   const [searchQuery,  setSearchQuery]  = useState('')
 
-  // ── Auto-refresh state ─────────────────────────────────────
+  // -- Auto-refresh state -------------------------------------
   const [lastUpdated,   setLastUpdated]   = useState(Date.now())
   const [isAutoRefresh, setIsAutoRefresh] = useState(true)
   const intervalRef                       = useRef<NodeJS.Timeout | null>(null)
 
-  // ── Parse time filter to milliseconds ─────────────────────
+  // -- Parse time filter to milliseconds ---------------------
   function parseInterval(filter: string): number {
     const map: Record<string, number> = {
       '1h':  1  * 60 * 60 * 1000,
@@ -892,7 +892,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     return map[filter] ?? 24 * 60 * 60 * 1000
   }
 
-  // ── Load all data ──────────────────────────────────────────
+  // -- Load all data ------------------------------------------
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     else setSilentRefresh(true)
@@ -900,14 +900,14 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     try {
       const cutoff = new Date(Date.now() - parseInterval(timeFilter)).toISOString()
 
-      // ── Admin logs (new table) ───────────────────────────
+      // -- Admin logs (new table) ---------------------------
       const { data: adminLogsData } = await (supabase.from('admin_logs') as any)
         .select('*')
         .gte('created_at', cutoff)
         .order('created_at', { ascending: false })
         .limit(50)
 
-      // ── Audit logs (legacy table) ────────────────────────
+      // -- Audit logs (legacy table) ------------------------
       const { data: auditLogsData } = await (supabase.from('audit_logs') as any)
         .select('*')
         .gte('created_at', cutoff)
@@ -933,7 +933,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 100)
 
-      // ── Security events ──────────────────────────────────
+      // -- Security events ----------------------------------
       const { data: eventsData } = await supabase
         .from('user_events')
         .select('*')
@@ -942,7 +942,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
         .order('created_at', { ascending: false })
         .limit(50)
 
-      // ── Login records with user info ─────────────────────
+      // -- Login records with user info ---------------------
       const { data: loginData } = await supabase
         .from('login_history')
         .select('id, user_id, ip_address, device_info, login_at, location_name')
@@ -969,12 +969,12 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
         }
       }
 
-      // ── Blocked IPs ──────────────────────────────────────
+      // -- Blocked IPs --------------------------------------
       const { data: blockedData } = await (supabase.from('blocked_ips') as any)
         .select('*')
         .order('created_at', { ascending: false })
 
-      // ── HUD stats ────────────────────────────────────────
+      // -- HUD stats ----------------------------------------
       const todayMidnight = new Date()
       todayMidnight.setHours(0, 0, 0, 0)
 
@@ -1011,7 +1011,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     }
   }, [supabase, timeFilter])
 
-  // ── Initial load ───────────────────────────────────────────
+  // -- Initial load -------------------------------------------
   useEffect(() => {
     loadData(false)
     // Fetch current session user + their known IPs for founder immunity
@@ -1027,7 +1027,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     })
   }, [loadData])
 
-  // ── Auto-refresh every 10 seconds via Visibility API ──────
+  // -- Auto-refresh every 10 seconds via Visibility API ------
   useEffect(() => {
     function startInterval() {
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -1058,14 +1058,14 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     }
   }, [loadData])
 
-  // ── Open block IP modal ────────────────────────────────────
+  // -- Open block IP modal ------------------------------------
   function openBlockIpModal(ipAddress: string, defaultReason: string) {
     if (currentUserIps.has(ipAddress)) return
     setBlockIpModal(ipAddress)
     setBlockReason(defaultReason)
   }
 
-  // ── Confirm block IP ───────────────────────────────────────
+  // -- Confirm block IP ---------------------------------------
   async function confirmBlockIp() {
     if (!blockIpModal || !blockReason.trim() || blocking) return
     if (blockedIpSet.has(blockIpModal)) {
@@ -1095,7 +1095,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     }
   }
 
-  // ── Unblock IP ─────────────────────────────────────────────
+  // -- Unblock IP ---------------------------------------------
   async function handleUnblockIp(id: string) {
     try {
       await (supabase.from('blocked_ips') as any).delete().eq('id', id)
@@ -1107,7 +1107,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     }
   }
 
-  // ── Lock account ───────────────────────────────────────────
+  // -- Lock account -------------------------------------------
   async function handleLockAccount(userId: string, eventId: string) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -1131,12 +1131,12 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     }
   }
 
-  // ── Dismiss alert ──────────────────────────────────────────
+  // -- Dismiss alert ------------------------------------------
   function handleDismissAlert(eventId: string) {
     setDismissedIds(prev => new Set([...prev, eventId]))
   }
 
-  // ── Export CSV ─────────────────────────────────────────────
+  // -- Export CSV ---------------------------------------------
   function handleExport() {
     const escape  = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
     const headers = ['Type', 'Action/Event', 'User', 'IP Address', 'Details', 'Time']
@@ -1172,7 +1172,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     URL.revokeObjectURL(url)
   }
 
-  // ── Obscure email for investor mode ───────────────────────
+  // -- Obscure email for investor mode -----------------------
   function obscureEmail(email: string): string {
     if (!isInvestorMode) return email
     const parts = email.split('@')
@@ -1180,7 +1180,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     return `${parts[0][0]}***@${parts[1]}`
   }
 
-  // ── Filter admin logs ──────────────────────────────────────
+  // -- Filter admin logs --------------------------------------
   const filteredAdminLogs = adminLogs.filter(log => {
     const matchesSearch = !searchQuery ||
       (log.ip_address ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1191,7 +1191,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     return matchesSearch && matchesEvent
   })
 
-  // ── Filter security events ─────────────────────────────────
+  // -- Filter security events ---------------------------------
   const filteredSecurityEvents = securityEvents.filter(event => {
     const matchesSearch = !searchQuery ||
       (event.metadata?.ip_address ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1202,13 +1202,13 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     return matchesSearch && matchesEvent
   })
 
-  // ── Blocked IPs set for quick lookup ───────────────────────
+  // -- Blocked IPs set for quick lookup -----------------------
   const blockedIpSet = useMemo(
     () => new Set(blockedIpsList.map(b => b.ip_address)),
     [blockedIpsList]
   )
 
-  // ── Filter login records ───────────────────────────────────
+  // -- Filter login records -----------------------------------
   const filteredLogins = loginRecords.filter(login => {
     if (!searchQuery) return true
     return (
@@ -1218,7 +1218,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
     )
   })
 
-  // ── Render ─────────────────────────────────────────────────
+  // -- Render -------------------------------------------------
   return (
     <div className="flex flex-col gap-5">
 
@@ -1238,7 +1238,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
                 onClick={() => setActiveTab(tab.key)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
                 style={{
-                  backgroundColor: isActive ? C.dark      : 'transparent',
+                  backgroundColor: isActive ? '#8fff00' : 'transparent',
                   color:           isActive ? C.lime      : C.muted,
                 }}>
                 <Icon size={14} />
@@ -1257,7 +1257,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
         )}
       </div>
 
-      {/* ── ACTIVITY WORKSPACE ───────────────────────────── */}
+      {/* -- ACTIVITY WORKSPACE ----------------------------- */}
       {activeTab === 'activity' && (
         <div className="flex flex-col gap-5">
 
@@ -1308,7 +1308,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
         </div>
       )}
 
-      {/* ── NETWORK GUARD ────────────────────────────────── */}
+      {/* -- NETWORK GUARD ---------------------------------- */}
       {activeTab === 'network' && (
         <div className="flex flex-col gap-5">
 

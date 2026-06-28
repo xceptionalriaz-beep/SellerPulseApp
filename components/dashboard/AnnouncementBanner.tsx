@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/dashboard/AnnouncementBanner.tsx
 
 import { useState, useEffect } from 'react'

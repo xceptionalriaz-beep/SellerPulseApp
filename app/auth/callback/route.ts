@@ -1,8 +1,8 @@
-// app/auth/callback/route.ts
+﻿// app/auth/callback/route.ts
 // Handles:
-//   1. Password recovery link clicks  → redirects to /auth/reset-password
-//   2. Google OAuth callback          → redirects to dashboard
-//   3. Email verification             → redirects to /onboarding (new users)
+//   1. Password recovery link clicks  â†’ redirects to /auth/reset-password
+//   2. Google OAuth callback          â†’ redirects to dashboard
+//   3. Email verification             â†’ redirects to /onboarding (new users)
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
@@ -40,12 +40,12 @@ export async function GET(request: NextRequest) {
     if (!error && data?.session) {
       const user = data.session.user
 
-      // ── Password recovery ──────────────────────────────────
+      // â”€â”€ Password recovery â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (type === 'recovery') {
         return NextResponse.redirect(`${origin}/auth/reset-password`)
       }
 
-      // ── Check if new user (needs onboarding) ──────────────
+      // â”€â”€ Check if new user (needs onboarding) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const { data: profile } = await supabase
         .from('profiles')
         .select('onboarding_complete, name')
@@ -58,12 +58,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(`${origin}/onboarding`)
       }
 
-      // ── Existing user → dashboard ──────────────────────────
+      // â”€â”€ Existing user â†’ dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const redirectTo = next.startsWith('/') ? `${origin}${next}` : next
       return NextResponse.redirect(redirectTo)
     }
   }
 
-  // ── Error or no code → redirect to login ──────────────────
+  // â”€â”€ Error or no code â†’ redirect to login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return NextResponse.redirect(`${origin}/auth/login?error=callback_failed`)
 }

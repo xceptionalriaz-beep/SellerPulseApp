@@ -1,13 +1,13 @@
-// lib/services/competitorService.ts
+﻿// lib/services/competitorService.ts
 // Converted 1:1 from lib/pages/competitor_research/services/competitor_service.dart
 
 import { createClient } from '@/lib/supabase'
 
 const supabase = createClient()
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // MODELS
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface StoreOverview {
   username:         string
@@ -59,9 +59,9 @@ export interface StoreScanResult {
   scannedAt:   Date
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // STATIC HELPERS
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function extractKeywords(title: string): string[] {
   const stopWords = new Set([
@@ -125,9 +125,9 @@ function estimateCategoryDemand(category: string): number {
   return d[category] ?? 65
 }
 
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // MAIN SERVICE
-// ─────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export class CompetitorService {
   private static _instance: CompetitorService
@@ -193,7 +193,7 @@ export class CompetitorService {
     const catCounts: Record<string,number> = {}
     for (const p of products) if (p.category) catCounts[p.category] = (catCounts[p.category] ?? 0) + 1
     for (const [cat, count] of Object.entries(catCounts)) {
-      if (count < 3) gaps.push({ title:`More ${cat} listings`, category:cat, estimatedDemand:65, reason:`Seller has only ${count} item(s) here — big room to expand` })
+      if (count < 3) gaps.push({ title:`More ${cat} listings`, category:cat, estimatedDemand:65, reason:`Seller has only ${count} item(s) here â€” big room to expand` })
     }
     return gaps.slice(0, 6)
   }

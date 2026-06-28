@@ -1,4 +1,4 @@
-// lib/profit-engine.ts
+﻿// lib/profit-engine.ts
 // Converted 1:1 from lib/core/utils/profit_engine.dart
 
 /// Holds all the user-defined settings for the profit calculation.

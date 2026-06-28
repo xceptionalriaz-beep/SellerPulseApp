@@ -1,9 +1,9 @@
-// app/api/admin/impersonate/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/impersonate/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Generates a one-time magic link to login as a target user.
-// Admin opens the link in a new tab — no password needed.
+// Admin opens the link in a new tab â€” no password needed.
 // User is never notified. Link expires in 24 hours.
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller is admin ──────────────────────────────
+    // â”€â”€ 1. Verify caller is admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -38,18 +38,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { userId } = await req.json()
     if (!userId) {
       return NextResponse.json({ error: 'userId required' }, { status: 400 })
     }
 
-    // ── 3. Prevent self-impersonation ──────────────────────────
+    // â”€â”€ 3. Prevent self-impersonation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (userId === caller.id) {
       return NextResponse.json({ error: 'Cannot impersonate yourself' }, { status: 400 })
     }
 
-    // ── 4. Get target user info ────────────────────────────────
+    // â”€â”€ 4. Get target user info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: targetAuth } = await adminClient.auth.admin.getUserById(userId)
     if (!targetAuth?.user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -61,18 +61,18 @@ export async function POST(req: NextRequest) {
       .eq('id', userId)
       .single()
 
-    // ── 5. Prevent impersonating admins ───────────────────────
+    // â”€â”€ 5. Prevent impersonating admins â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if ((targetProfile as any)?.role === 'admin') {
       return NextResponse.json({ error: 'Cannot impersonate another admin' }, { status: 403 })
     }
 
-    // ── 6. Prevent impersonating banned/suspended users ───────
+    // â”€â”€ 6. Prevent impersonating banned/suspended users â”€â”€â”€â”€â”€â”€â”€
     const accountStatus = (targetProfile as any)?.account_status ?? ''
     if (accountStatus === 'Banned') {
       return NextResponse.json({ error: 'Cannot impersonate a banned account' }, { status: 403 })
     }
 
-    // ── 7. Generate magic link ─────────────────────────────────
+    // â”€â”€ 7. Generate magic link â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const origin     = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? ''
     const redirectTo = `${origin}/admin/view-as`
 
@@ -89,19 +89,19 @@ export async function POST(req: NextRequest) {
 
     const magicLink = linkData.properties.action_link
 
-    // ── 8. Get caller IP ───────────────────────────────────────
+    // â”€â”€ 8. Get caller IP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const ipAddress =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       req.headers.get('x-real-ip') ||
       null
 
-    // ── 9. Log to admin_logs — impersonation is high risk ─────
+    // â”€â”€ 9. Log to admin_logs â€” impersonation is high risk â”€â”€â”€â”€â”€
     try {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,
         target_id:  userId,
         action:     'impersonate',
-        details:    `Impersonated account — ${(targetProfile as any)?.name ?? targetAuth.user.email}`,
+        details:    `Impersonated account â€” ${(targetProfile as any)?.name ?? targetAuth.user.email}`,
         metadata:   {
           admin_name:   (callerProfile as any)?.name ?? 'Admin',
           target_name:  (targetProfile as any)?.name ?? userId,
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       })
     } catch { /* non-critical */ }
 
-    // ── 10. Log to user_events ─────────────────────────────────
+    // â”€â”€ 10. Log to user_events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await adminClient.from('user_events').insert({
         user_id:     userId,

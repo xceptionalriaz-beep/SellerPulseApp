@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/ApiVaultPage.tsx
 // Full rebuild — all 7 layers
 
@@ -29,7 +29,7 @@ const C = {
   purple:   '#7c3aed',
 }
 
-// ── Category meta ──────────────────────────────────────────────
+// -- Category meta ----------------------------------------------
 const CATEGORY_META: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
   catalog: { icon: ShoppingCart,  color: C.blue,   bg: 'rgba(29,78,216,0.08)',  label: 'CATALOG' },
   payment: { icon: CreditCard,    color: C.green,  bg: 'rgba(22,163,74,0.08)',  label: 'PAYMENT' },
@@ -47,7 +47,7 @@ const PLATFORM_ICONS: Record<string, React.ElementType> = {
   stripe:       CreditCard,
 }
 
-// ── Helpers ────────────────────────────────────────────────────
+// -- Helpers ----------------------------------------------------
 function statusMeta(status: string, isLocked: boolean): { color: string; bg: string; label: string; dot: string } {
   if (isLocked)                  return { color: C.muted, bg: C.bg,                    label: 'LOCKED',  dot: '#94a3b8' }
   if (status === 'connected')    return { color: C.green, bg: 'rgba(22,163,74,0.08)', label: 'LIVE',    dot: '#16a34a' }
@@ -95,7 +95,7 @@ function timeAgo(iso: string | null): string {
   return `${Math.floor(diff / 86400000)}d ago`
 }
 
-// ── Toast ──────────────────────────────────────────────────────
+// -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
     success: { bg: C.dark,    border: C.lime,    color: C.lime },
@@ -112,7 +112,7 @@ function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' 
   )
 }
 
-// ── Notifications Panel ────────────────────────────────────────
+// -- Notifications Panel ----------------------------------------
 function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => void }) {
   const critical = apis.filter(a => {
     const days = getDaysUntilExpiry(a.expires_at)
@@ -202,8 +202,8 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
   )
 }
 
-// ── Configuration Tab ──────────────────────────────────────────
-// ── Tool Usage Breakdown (Missing 3) ──────────────────────────
+// -- Configuration Tab ------------------------------------------
+// -- Tool Usage Breakdown (Missing 3) --------------------------
 function ToolUsageBreakdown({ platformName }: { platformName: string }) {
   const [breakdown, setBreakdown] = useState<any[]>([])
   const [total,     setTotal]     = useState(0)
@@ -311,7 +311,7 @@ function ToolUsageBreakdown({ platformName }: { platformName: string }) {
   )
 }
 
-// ── ConfigTab ──────────────────────────────────────────────────
+// -- ConfigTab --------------------------------------------------
 function ConfigTab({ api, onSaved, showToast }: {
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
@@ -517,7 +517,7 @@ function ConfigTab({ api, onSaved, showToast }: {
                 Key stored in environment variables
               </p>
               <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>
-                {api.primary_key_1?.replace('env:', '')} is set in Vercel → Settings → Environment Variables.
+                {api.primary_key_1?.replace('env:', '')} is set in Vercel ? Settings ? Environment Variables.
                 This is the most secure way to store API keys.
               </p>
               <a href="https://vercel.com/dashboard" target="_blank" rel="noreferrer"
@@ -631,7 +631,7 @@ function ConfigTab({ api, onSaved, showToast }: {
             </div>
             <div>
               <p className="font-bold mb-0.5" style={{ color: C.muted }}>Key 1</p>
-              <p style={{ color: C.muted }}>API Key (from LS Settings → API)</p>
+              <p style={{ color: C.muted }}>API Key (from LS Settings ? API)</p>
             </div>
             <div>
               <p className="font-bold mb-0.5" style={{ color: C.muted }}>Key 2</p>
@@ -788,7 +788,7 @@ function ConfigTab({ api, onSaved, showToast }: {
       <div className="flex items-center gap-3 flex-wrap">
         <button onClick={handleSave} disabled={saving || !p1.trim()}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           {saving
             ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
             : <><CloudUpload size={13} /> Save to Vault</>}
@@ -848,7 +848,7 @@ function ConfigTab({ api, onSaved, showToast }: {
   )
 }
 
-// ── Activity Tab ───────────────────────────────────────────────
+// -- Activity Tab -----------------------------------------------
 function ActivityTab({ api }: { api: any }) {
   const [history,   setHistory]   = useState<any[]>([])
   const [errors,    setErrors]    = useState<any[]>([])
@@ -917,8 +917,8 @@ function ActivityTab({ api }: { api: any }) {
           <button key={t.key} onClick={() => setActiveTab(t.key as any)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
             style={{
-              backgroundColor: activeTab === t.key ? C.dark    : C.surface,
-              color:           activeTab === t.key ? C.lime    : C.muted,
+              backgroundColor: activeTab === t.key ? '#8fff00'    : C.surface,
+              color: activeTab === t.key ? '#1a2410'    : C.muted,
               border:          `1px solid ${activeTab === t.key ? C.dark : C.border}`,
             }}>
             {t.label}
@@ -1064,7 +1064,7 @@ function ActivityTab({ api }: { api: any }) {
   )
 }
 
-// ── Security Tab ───────────────────────────────────────────────
+// -- Security Tab -----------------------------------------------
 function SecurityTab({ api, onSaved, showToast }: {
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
@@ -1148,7 +1148,7 @@ function SecurityTab({ api, onSaved, showToast }: {
             style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
           <button onClick={addIp}
             className="flex items-center gap-1.5 px-3 h-9 rounded-xl text-[12px] font-bold"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={12} /> Add
           </button>
         </div>
@@ -1241,7 +1241,7 @@ function SecurityTab({ api, onSaved, showToast }: {
 
       <button onClick={saveSettings} disabled={saving}
         className="flex items-center gap-2 w-fit px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-        style={{ backgroundColor: C.dark, color: C.lime }}>
+        style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
         {saving
           ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
           : <><Shield size={13} /> Save Security Settings</>}
@@ -1250,7 +1250,7 @@ function SecurityTab({ api, onSaved, showToast }: {
   )
 }
 
-// ── Expanded Row with Tabs ─────────────────────────────────────
+// -- Expanded Row with Tabs -------------------------------------
 function ExpandedRow({ api, onSaved, showToast }: {
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
@@ -1274,8 +1274,8 @@ function ExpandedRow({ api, onSaved, showToast }: {
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
               style={{
-                backgroundColor: tab === t.key ? C.dark    : 'transparent',
-                color:           tab === t.key ? C.lime    : C.muted,
+                backgroundColor: tab === t.key ? '#8fff00'    : 'transparent',
+                color: tab === t.key ? '#1a2410'    : C.muted,
               }}>
               <TIcon size={11} />
               {t.label}
@@ -1299,7 +1299,7 @@ function ExpandedRow({ api, onSaved, showToast }: {
   )
 }
 
-// ── API Modal ──────────────────────────────────────────────────
+// -- API Modal --------------------------------------------------
 function ApiModal({ api, onClose, onSaved, showToast }: {
   api:       any
   onClose:   () => void
@@ -1390,9 +1390,9 @@ function ApiModal({ api, onClose, onSaved, showToast }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function ApiVaultPage() {
   const supabase = createClient()
 
@@ -1543,7 +1543,7 @@ export default function ApiVaultPage() {
     } catch { showToast('Export failed', 'error') }
   }
 
-  // ── Stats ────────────────────────────────────────────────────
+  // -- Stats ----------------------------------------------------
   const activeApis     = apis.filter(a => a.status === 'connected' && !a.is_locked).length
   const totalApis      = apis.filter(a => !a.is_locked).length
   const avgHealth      = activeApis > 0
@@ -1559,7 +1559,7 @@ export default function ApiVaultPage() {
     return (a.status === 'disconnected' && !a.is_locked) || (d > 0 && d <= 30)
   }).length
 
-  // ── Filter ────────────────────────────────────────────────────
+  // -- Filter ----------------------------------------------------
   const filtered = apis.filter(a => {
     if (search && !a.display_name?.toLowerCase().includes(search.toLowerCase())) return false
     if (filter === 'connected'    && a.status !== 'connected')    return false

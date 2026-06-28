@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 // lib/session-tracker.ts
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/services/session_tracker.dart
 //
 // What the Dart version did:
@@ -9,9 +9,9 @@
 //   3. Detected browser name (Chrome, Firefox, Safari, etc.)
 //   4. Returned { last_login_ip, device_platform, browser_agent }
 //
-// In Next.js this is much simpler — we're always on web,
+// In Next.js this is much simpler â€” we're always on web,
 // so no kIsWeb check needed. Browser APIs give us everything.
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 export interface LoginMetadata {
   last_login_ip:   string
@@ -20,7 +20,7 @@ export interface LoginMetadata {
 }
 
 export class SessionTracker {
-  // ── 1. Get IP Address (with fallback) ─────────────────────
+  // â”€â”€ 1. Get IP Address (with fallback) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   private static async getIP(): Promise<string> {
     // Primary: ipify.org
     try {
@@ -32,7 +32,7 @@ export class SessionTracker {
         return data.ip ?? 'No IP Logged'
       }
     } catch {
-      // Primary failed — try backup
+      // Primary failed â€” try backup
     }
 
     // Backup: ipapi.co (same as Dart fallback)
@@ -51,7 +51,7 @@ export class SessionTracker {
     return 'No IP Logged'
   }
 
-  // ── 2. Detect Platform ─────────────────────────────────────
+  // â”€â”€ 2. Detect Platform â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Mirrors the Dart platform detection logic exactly
   private static getPlatform(): string {
     if (typeof window === 'undefined') return 'Server'
@@ -69,7 +69,7 @@ export class SessionTracker {
     return platform || 'Web'
   }
 
-  // ── 3. Detect Browser ──────────────────────────────────────
+  // â”€â”€ 3. Detect Browser â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Mirrors the Dart browserName detection
   private static getBrowser(): string {
     if (typeof window === 'undefined') return 'Server'
@@ -85,7 +85,7 @@ export class SessionTracker {
     return 'Web Browser'
   }
 
-  // ── Public API — matches Dart SessionTracker.getLoginMetadata() ──
+  // â”€â”€ Public API â€” matches Dart SessionTracker.getLoginMetadata() â”€â”€
   static async getLoginMetadata(): Promise<LoginMetadata> {
     const [ip, platform, browser] = await Promise.all([
       SessionTracker.getIP(),

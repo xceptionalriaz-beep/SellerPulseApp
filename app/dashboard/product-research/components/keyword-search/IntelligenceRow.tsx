@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/IntelligenceRow.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/widgets/intelligence_row.dart
 
@@ -8,7 +8,7 @@ import { ProfitSettings } from '../keyword-search/ProfitSettingsDialog'
 
 const C = {
   lime:   '#8FFF00',
-  dark:   '#0F172A',
+  dark:   '#1a2410',
   text:   '#1E293B',
   muted:  '#94A3B8',
   border: '#F1F5F9',
@@ -48,10 +48,10 @@ interface Props {
   profitSettings:           ProfitSettings
 }
 
-// ── Flag image using flagcdn.com API ─────────────────────────
+// â”€â”€ Flag image using flagcdn.com API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FlagImg({ code }: { code: string }) {
   const c = (code === 'UK' ? 'GB' : code).toLowerCase().trim()
-  if (!c || c.length !== 2) return <span className="text-[13px]">🏳️</span>
+  if (!c || c.length !== 2) return <span className="text-[13px]">ðŸ³ï¸</span>
   return (
     <img
       src={`https://flagcdn.com/w20/${c}.png`}
@@ -65,7 +65,7 @@ function FlagImg({ code }: { code: string }) {
   )
 }
 
-// ── VeRO severity color (matches Dart _getVeroColor) ─────────
+// â”€â”€ VeRO severity color (matches Dart _getVeroColor) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getVeroColor(severity: string): string {
   const s = severity.toLowerCase()
   if (s.includes('critical') || s.includes('ban')) return '#EF4444'
@@ -74,7 +74,7 @@ function getVeroColor(severity: string): string {
   return '#EF4444'
 }
 
-// ── Smart title with VeRO inline badges (matches Dart _buildSmartTitle) ──
+// â”€â”€ Smart title with VeRO inline badges (matches Dart _buildSmartTitle) â”€â”€
 function SmartTitle({ title, veroMatches }: { title: string; veroMatches: VeroMatch[] }) {
   if (!veroMatches.length) {
     return <p className="text-[11px] font-bold line-clamp-2" style={{ color: C.text, lineHeight: 1.4 }}>{title}</p>
@@ -127,7 +127,7 @@ function SmartTitle({ title, veroMatches }: { title: string; veroMatches: VeroMa
   )
 }
 
-// ── Last sold freshness signal (matches Dart _buildLastSoldSignal) ──
+// â”€â”€ Last sold freshness signal (matches Dart _buildLastSoldSignal) â”€â”€
 function LastSoldSignal({ lastSoldDate }: { lastSoldDate: string }) {
   if (!lastSoldDate || ['Verified','N/A','null'].includes(lastSoldDate)) return null
   try {
@@ -157,7 +157,7 @@ function LastSoldSignal({ lastSoldDate }: { lastSoldDate: string }) {
   } catch { return null }
 }
 
-// ── Seeded sparkline (matches Dart _buildSparkline — same algorithm as competitor research) ──
+// â”€â”€ Seeded sparkline (matches Dart _buildSparkline â€” same algorithm as competitor research) â”€â”€
 function Sparkline({ itemId, aiVelocity, demandHeat }: { itemId: string; aiVelocity: number; demandHeat: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -220,7 +220,7 @@ function Sparkline({ itemId, aiVelocity, demandHeat }: { itemId: string; aiVeloc
   return <canvas ref={canvasRef} width={75} height={32} />
 }
 
-// ── Small action icon (matches Dart _buildSmallActionIcon) ────
+// â”€â”€ Small action icon (matches Dart _buildSmallActionIcon) â”€â”€â”€â”€
 function SmallAction({ logoUrl, onTap, fallbackColor }: { logoUrl: string; onTap: () => void; fallbackColor: string }) {
   const [imgError, setImgError] = useState(false)
   return (
@@ -234,7 +234,7 @@ function SmallAction({ logoUrl, onTap, fallbackColor }: { logoUrl: string; onTap
   )
 }
 
-// ── Main IntelligenceRow ──────────────────────────────────────
+// â”€â”€ Main IntelligenceRow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function IntelligenceRow({
   itemId, isSelected, onSelect, onProfitChanged, onPulseCheck,
   imageUrl, title, price, sellerUsername, sellerFeedbackScore,
@@ -284,7 +284,7 @@ export default function IntelligenceRow({
           onClick={e => e.stopPropagation()} />
       </div>
 
-      {/* 1. Product — flex 8 */}
+      {/* 1. Product â€” flex 8 */}
       <div className="flex items-center gap-2.5 min-w-0 pr-5" style={{ flex: 8 }}>
         <div onMouseEnter={() => setImgHover(true)} onMouseLeave={() => setImgHover(false)}
              onClick={e => { e.stopPropagation(); launchItem() }}
@@ -299,7 +299,7 @@ export default function IntelligenceRow({
         </div>
       </div>
 
-      {/* 2. Seller — flex 4 */}
+      {/* 2. Seller â€” flex 4 */}
       <div className="flex items-center gap-1.5 min-w-0" style={{ flex: 4 }}>
         <FlagImg code={sellerRegisteredCountry} />
         <p className="text-[11px] font-bold truncate" style={{ color: '#334155' }}>{sellerUsername}</p>
@@ -311,19 +311,19 @@ export default function IntelligenceRow({
         </button>
       </div>
 
-      {/* 3. Feedback — flex 2 */}
+      {/* 3. Feedback â€” flex 2 */}
       <div className="flex items-center gap-1" style={{ flex: 2 }}>
         <Star size={12} style={{ color: C.lime }} />
         <p className="text-[11px] font-black" style={{ color: strengthColor }}>{formattedFb}</p>
         {isDropship && <AlertTriangle size={11} style={{ color: '#EF4444' }} />}
       </div>
 
-      {/* 4. Trend sparkline — flex 2 */}
+      {/* 4. Trend sparkline â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <Sparkline itemId={itemId} aiVelocity={aiVelocity} demandHeat={demandHeat} />
       </div>
 
-      {/* 5. Sold + freshness — flex 2 */}
+      {/* 5. Sold + freshness â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <div className="flex items-center gap-1">
           <ShoppingBag size={12} style={{ color: '#94A3B8' }} />
@@ -332,18 +332,18 @@ export default function IntelligenceRow({
         <LastSoldSignal lastSoldDate={lastSoldDate} />
       </div>
 
-      {/* 6. Watch — flex 2 */}
+      {/* 6. Watch â€” flex 2 */}
       <div className="flex items-center gap-1" style={{ flex: 2 }}>
         <Eye size={11} style={{ color: '#64748B' }} />
         <p className="text-[11px] font-bold" style={{ color: C.text }}>{watchCount}</p>
       </div>
 
-      {/* 7. Price — flex 2 */}
+      {/* 7. Price â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <p className="text-[13px] font-black" style={{ color: C.text }}>{price}</p>
       </div>
 
-      {/* 8. Buy cost input — flex 2 */}
+      {/* 8. Buy cost input â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <input value={costInput} onChange={e => calcProfit(e.target.value)}
           onClick={e => e.stopPropagation()}
@@ -352,7 +352,7 @@ export default function IntelligenceRow({
           style={{ width: 55, backgroundColor: '#fff', borderColor: '#D1D5DB', color: C.text }} />
       </div>
 
-      {/* 9. Live profit — flex 2 */}
+      {/* 9. Live profit â€” flex 2 */}
       <div style={{ flex: 2 }}>
         {liveProfit === null
           ? <p className="text-[13px] font-bold" style={{ color: '#9CA3AF' }}>-</p>
@@ -361,7 +361,7 @@ export default function IntelligenceRow({
             </p>}
       </div>
 
-      {/* 10. Action hub — flex 3 */}
+      {/* 10. Action hub â€” flex 3 */}
       <div className="flex items-center justify-end gap-1" style={{ flex: 3 }}
            onClick={e => e.stopPropagation()}>
         <SmallAction logoUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Amazon_icon.svg/128px-Amazon_icon.svg.png"

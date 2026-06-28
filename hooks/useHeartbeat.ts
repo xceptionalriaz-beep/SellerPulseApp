@@ -1,9 +1,9 @@
-// hooks/useHeartbeat.ts
-// ─────────────────────────────────────────────────────────────
+﻿// hooks/useHeartbeat.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Updates profiles.last_seen every 2 minutes while user
 // is on the dashboard. Fires immediately on mount.
-// Add to dashboard/layout.tsx — zero UI changes for user.
-// ─────────────────────────────────────────────────────────────
+// Add to dashboard/layout.tsx â€” zero UI changes for user.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useEffect } from 'react'
 import { createClient } from '@/lib/supabase'

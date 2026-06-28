@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/profit/ProfitCalculatorCard.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/widgets/profit_calculator_card.dart
 
@@ -27,10 +27,10 @@ export default function ProfitCalculatorCard({ salePrice }: ProfitCalculatorCard
            boxShadow: '0 5px 10px rgba(0,0,0,0.02)',
          }}>
 
-      {/* Header — NeonIcon + title */}
+      {/* Header â€” NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-             style={{ backgroundColor: '#0F172A' }}>
+             style={{ backgroundColor: '#1a2410' }}>
           <Calculator size={16} style={{ color: '#8FFF00' }} />
         </div>
         <span className="text-[16px] font-bold" style={{ color: '#1E293B' }}>Profit Calculator</span>

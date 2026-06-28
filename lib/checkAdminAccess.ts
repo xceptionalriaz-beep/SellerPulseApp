@@ -1,16 +1,16 @@
-// lib/checkAdminAccess.ts
-// ══════════════════════════════════════════════════════════════
-// RIAZIFY — Shared Admin Access Guard
+﻿// lib/checkAdminAccess.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// RIAZIFY â€” Shared Admin Access Guard
 // Used by every protected API route.
-// ALWAYS fetches live from DB — never trusts JWT payload for scopes.
+// ALWAYS fetches live from DB â€” never trusts JWT payload for scopes.
 // Checks role updated_at timestamp to detect stale sessions.
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-// ── Types ──────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export type AdminScope =
   | 'crm:read'
   | 'crm:write_notes'
@@ -37,14 +37,14 @@ export interface DeniedResult {
 
 export type AccessCheckResult = AccessResult | DeniedResult
 
-// ── Main guard function ────────────────────────────────────────
+// â”€â”€ Main guard function â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Pass requiredScope = null to just verify the user is an admin
 // without checking a specific scope (useful for read-only admin routes).
 export async function checkAdminAccess(
   requiredScope: AdminScope | null = null,
   options: {
     // If the client sends X-Role-Updated-At header, we compare it
-    // to the DB value. If DB is newer → return 409 so client re-fetches.
+    // to the DB value. If DB is newer â†’ return 409 so client re-fetches.
     clientRoleUpdatedAt?: string | null
   } = {}
 ): Promise<AccessCheckResult> {
@@ -62,7 +62,7 @@ export async function checkAdminAccess(
     }
   )
 
-  // ── 1. Verify session exists ───────────────────────────────
+  // â”€â”€ 1. Verify session exists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
   if (sessionError || !session) {
@@ -77,9 +77,9 @@ export async function checkAdminAccess(
 
   const userId = session.user.id
 
-  // ── 2. Live fetch profile + joined role from DB ────────────
+  // â”€â”€ 2. Live fetch profile + joined role from DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // We JOIN admin_roles directly so we get fresh scopes every call.
-  // We never read scopes from the JWT — JWT only proves identity.
+  // We never read scopes from the JWT â€” JWT only proves identity.
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select(`
@@ -107,7 +107,7 @@ export async function checkAdminAccess(
     }
   }
 
-  // ── 3. Determine if user is an admin ──────────────────────
+  // â”€â”€ 3. Determine if user is an admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Two valid paths to admin:
   // a) profile.role === 'admin' (legacy founder account)
   // b) profile.role_id points to a role with the required scope
@@ -120,7 +120,7 @@ export async function checkAdminAccess(
     updated_at:    string
   } | null
 
-  // If neither legacy admin nor a role_id assigned → deny
+  // If neither legacy admin nor a role_id assigned â†’ deny
   if (!isLegacyAdmin && !roleData) {
     return {
       authorized: false,
@@ -131,7 +131,7 @@ export async function checkAdminAccess(
     }
   }
 
-  // ── 4. Stale session check ─────────────────────────────────
+  // â”€â”€ 4. Stale session check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // If client sends X-Role-Updated-At and DB has a newer timestamp,
   // return 409 Conflict so the client knows to re-fetch permissions.
   if (options.clientRoleUpdatedAt && roleData?.updated_at) {
@@ -152,7 +152,7 @@ export async function checkAdminAccess(
     }
   }
 
-  // ── 5. Scope check ─────────────────────────────────────────
+  // â”€â”€ 5. Scope check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Legacy admin (founder) gets all scopes automatically.
   // Other admins must have the required scope in their role.
   const scopes: AdminScope[] = isLegacyAdmin
@@ -173,7 +173,7 @@ export async function checkAdminAccess(
     }
   }
 
-  // ── 6. Authorized ─────────────────────────────────────────
+  // â”€â”€ 6. Authorized â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return {
     authorized:     true,
     userId,
@@ -184,18 +184,18 @@ export async function checkAdminAccess(
   }
 }
 
-// ── Helper: quick admin-only check (no specific scope) ────────
+// â”€â”€ Helper: quick admin-only check (no specific scope) â”€â”€â”€â”€â”€â”€â”€â”€
 export async function requireAdmin(): Promise<AccessCheckResult> {
   return checkAdminAccess(null)
 }
 
-// ── Helper: extract Bearer token from request headers ─────────
+// â”€â”€ Helper: extract Bearer token from request headers â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Used by routes that use the old token-based pattern.
 export function getBearerToken(req: Request): string | null {
   return req.headers.get('authorization')?.replace('Bearer ', '') ?? null
 }
 
-// ── Helper: verify admin via Bearer token (old pattern) ───────
+// â”€â”€ Helper: verify admin via Bearer token (old pattern) â”€â”€â”€â”€â”€â”€â”€
 // For backwards compatibility with existing routes that pass token manually.
 export async function verifyAdminToken(token: string): Promise<{
   authorized: boolean

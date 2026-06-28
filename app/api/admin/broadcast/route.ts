@@ -1,4 +1,4 @@
-// app/api/admin/broadcast/route.ts
+﻿// app/api/admin/broadcast/route.ts
 // Saves announcement to DB for all target users to see
 
 import { createClient } from '@supabase/supabase-js'

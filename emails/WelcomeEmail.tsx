@@ -1,4 +1,4 @@
-// emails/WelcomeEmail.tsx
+﻿// emails/WelcomeEmail.tsx
 // Sent when a new user signs up to Riazify
 
 import {
@@ -20,7 +20,7 @@ export function WelcomeEmail({
   return (
     <Html>
       <Head />
-      <Preview>Welcome to Riazify — Your eBay intelligence dashboard is ready</Preview>
+      <Preview>Welcome to Riazify â€” Your eBay intelligence dashboard is ready</Preview>
       <Body style={main}>
         <Container style={container}>
 
@@ -29,7 +29,7 @@ export function WelcomeEmail({
             <Row>
               <Column>
                 <div style={logoWrap}>
-                  <span style={logoIcon}>⚡</span>
+                  <span style={logoIcon}>âš¡</span>
                   <span style={logoText}>Riazify</span>
                 </div>
               </Column>
@@ -38,10 +38,10 @@ export function WelcomeEmail({
 
           {/* Hero */}
           <Section style={hero}>
-            <Heading style={h1}>Welcome to Riazify, {userName}! 🎉</Heading>
+            <Heading style={h1}>Welcome to Riazify, {userName}! ðŸŽ‰</Heading>
             <Text style={subtitle}>
               Your next-gen eBay intelligence dashboard is ready. Start scanning niches,
-              tracking competitors, and forecasting demand — all in one place.
+              tracking competitors, and forecasting demand â€” all in one place.
             </Text>
           </Section>
 
@@ -50,10 +50,10 @@ export function WelcomeEmail({
             <Text style={cardTitle}>What's waiting for you inside:</Text>
             <Row style={featureRow}>
               {[
-                { icon: '🔍', label: 'Product Research',  desc: 'Scan any niche in seconds'       },
-                { icon: '📈', label: 'AI Forecasting',    desc: '7, 30 & 90-day predictions'     },
-                { icon: '🎯', label: 'Title Builder',     desc: 'Optimize eBay titles with AI'   },
-                { icon: '🛡️', label: 'Order Protection',  desc: 'Risk-score every buyer'         },
+                { icon: 'ðŸ”', label: 'Product Research',  desc: 'Scan any niche in seconds'       },
+                { icon: 'ðŸ“ˆ', label: 'AI Forecasting',    desc: '7, 30 & 90-day predictions'     },
+                { icon: 'ðŸŽ¯', label: 'Title Builder',     desc: 'Optimize eBay titles with AI'   },
+                { icon: 'ðŸ›¡ï¸', label: 'Order Protection',  desc: 'Risk-score every buyer'         },
               ].map((f, i) => (
                 <Column key={i} style={featureCol}>
                   <div style={featureIcon}>{f.icon}</div>
@@ -67,7 +67,7 @@ export function WelcomeEmail({
           {/* CTA */}
           <Section style={ctaSection}>
             <Button style={ctaButton} href={loginUrl}>
-              Launch My Dashboard →
+              Launch My Dashboard â†’
             </Button>
             <Text style={ctaNote}>Takes less than 30 seconds to run your first scan</Text>
           </Section>
@@ -81,10 +81,10 @@ export function WelcomeEmail({
             </Text>
             <Text style={footerText}>
               <Link href="https://riazify.com/unsubscribe" style={footerLink}>Unsubscribe</Link>
-              {' · '}
+              {' Â· '}
               <Link href="https://riazify.com/privacy" style={footerLink}>Privacy Policy</Link>
             </Text>
-            <Text style={footerText}>© 2026 Riazify — Built for eBay operators.</Text>
+            <Text style={footerText}>Â© 2026 Riazify â€” Built for eBay operators.</Text>
           </Section>
 
         </Container>
@@ -95,7 +95,7 @@ export function WelcomeEmail({
 
 export default WelcomeEmail
 
-// ── Styles ─────────────────────────────────────────────────────
+// â”€â”€ Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const main        = { backgroundColor: '#f7f9f5', fontFamily: "'Inter', sans-serif" }
 const container   = { maxWidth: 600, margin: '0 auto', backgroundColor: '#ffffff',
                        borderRadius: 16, overflow: 'hidden' as const,

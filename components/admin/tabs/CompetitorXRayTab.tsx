@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/CompetitorXRayTab.tsx
 
 import { useState, useRef, useEffect } from 'react'
@@ -188,7 +188,7 @@ export default function CompetitorXRayTab(_props: Props) {
           </div>
           <button onClick={() => handleScan()} disabled={scanning || !input.trim()}
             className="flex items-center gap-2 px-6 rounded-2xl text-[13px] font-bold transition-all hover:opacity-80 disabled:opacity-50"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {scanning
               ? <RefreshCw size={15} style={{ animation: 'spin 1s linear infinite' }} />
               : <Search size={15} />}

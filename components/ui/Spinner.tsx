@@ -1,4 +1,4 @@
-// components/ui/Spinner.tsx
+﻿// components/ui/Spinner.tsx
 // Simple clean round spinner used across all pages
 
 export default function Spinner({ size = 32, color = '#8FFF00' }: {

@@ -1,17 +1,17 @@
-// app/api/geo/route.ts
-// ─────────────────────────────────────────────────────────────
+﻿// app/api/geo/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Silent IP geolocation fallback.
 // Called automatically when user logs in or
 // when browser geolocation is denied.
-// Uses ip-api.com — free, no API key needed.
-// ─────────────────────────────────────────────────────────────
+// Uses ip-api.com â€” free, no API key needed.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient }  from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    // ── Verify user is authenticated ───────────────────────
+    // â”€â”€ Verify user is authenticated â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // ── Check if location already set from browser GPS ──────
+    // â”€â”€ Check if location already set from browser GPS â”€â”€â”€â”€â”€â”€
     // Don't overwrite accurate browser data with IP data
     const { data: profile } = await supabase
       .from('profiles')
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ skipped: true, reason: 'browser location already set' })
     }
 
-    // ── Get real IP from request headers ────────────────────
+    // â”€â”€ Get real IP from request headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const forwarded = req.headers.get('x-forwarded-for')
     const realIp    = req.headers.get('x-real-ip')
     const cfIp      = req.headers.get('cf-connecting-ip') // Cloudflare
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ skipped: true, reason: 'private/local IP' })
     }
 
-    // ── Call ip-api.com ──────────────────────────────────────
+    // â”€â”€ Call ip-api.com â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Free tier: 1000 requests/day, no API key needed
     const geoRes = await fetch(
       `http://ip-api.com/json/${ip}?fields=status,country,countryCode,regionName,city,timezone`,
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Geo lookup returned failure' }, { status: 400 })
     }
 
-    // ── Save to profiles ─────────────────────────────────────
+    // â”€â”€ Save to profiles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: updateErr } = await supabase
       .from('profiles')
       .update({

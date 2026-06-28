@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/components/TbProHud.tsx
 // Converted 1:1 from lib/pages/title_builder/tb_pro_hud.dart
 
 import { useEffect, useRef } from 'react'
 import { ShieldCheck, AlertTriangle, Tag, Gauge, BarChart2, Info } from 'lucide-react'
 
-const C = { dark: '#0F172A', lime: '#8FFF00', white10: 'rgba(255,255,255,0.1)' }
+const C = { dark: '#1a2410', lime: '#8FFF00', white10: 'rgba(255,255,255,0.1)' }
 
 interface Props {
   veroCount:    number
@@ -16,7 +16,7 @@ interface Props {
   isLoading:    boolean  // from MarketProvider
 }
 
-// ── Icon badge ─────────────────────────────────────────────────
+// â”€â”€ Icon badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function IconBadge({ icon: Icon, color }: { icon: React.ElementType; color: string }) {
   return (
     <div className="p-1.5 rounded-md border shrink-0"
@@ -26,7 +26,7 @@ function IconBadge({ icon: Icon, color }: { icon: React.ElementType; color: stri
   )
 }
 
-// ── HUD row ────────────────────────────────────────────────────
+// â”€â”€ HUD row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function HudRow({ icon, label, children, tooltip }: {
   icon: React.ReactNode; label: string; children: React.ReactNode; tooltip?: string
 }) {
@@ -46,7 +46,7 @@ function HudRow({ icon, label, children, tooltip }: {
   )
 }
 
-// ── Inline saturation meter ────────────────────────────────────
+// â”€â”€ Inline saturation meter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InlineSaturMeter({ score, label, color }: { score: number; label: string; color: string }) {
   return (
     <div>
@@ -64,7 +64,7 @@ function InlineSaturMeter({ score, label, color }: { score: number; label: strin
   )
 }
 
-// ── Smart specifics ────────────────────────────────────────────
+// â”€â”€ Smart specifics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SmartSpecifics({ title, isEmpty }: { title: string; isEmpty: boolean }) {
   if (isEmpty || !title.trim()) {
     return <p className="text-[11px] italic" style={{ color: 'rgba(255,255,255,0.24)' }}>Awaiting Search...</p>
@@ -88,7 +88,7 @@ function SmartSpecifics({ title, isEmpty }: { title: string; isEmpty: boolean })
   )
 }
 
-// ── Word chip ──────────────────────────────────────────────────
+// â”€â”€ Word chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function WordChip({ word, percent }: { word: string; percent: string }) {
   return (
     <div className="flex items-center gap-1 px-2 py-1 rounded border"
@@ -99,7 +99,7 @@ function WordChip({ word, percent }: { word: string; percent: string }) {
   )
 }
 
-// ── Hero chart (matches Dart _HeroLinePainter + _animatedHeroChart) ──
+// â”€â”€ Hero chart (matches Dart _HeroLinePainter + _animatedHeroChart) â”€â”€
 function HeroChart({ data, isEmpty }: { data: number[]; isEmpty: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -116,7 +116,7 @@ function HeroChart({ data, isEmpty }: { data: number[]; isEmpty: boolean }) {
     const range = maxD - minD === 0 ? 1 : maxD - minD
     const step  = W / (data.length - 1)
 
-    // Build path — matches Dart cubic bezier
+    // Build path â€” matches Dart cubic bezier
     const pts = data.map((v, i) => ({
       x: i * step,
       y: H * 0.9 - ((v - minD) / range) * (H * 0.8),
@@ -151,18 +151,18 @@ function HeroChart({ data, isEmpty }: { data: number[]; isEmpty: boolean }) {
   return <canvas ref={canvasRef} width={400} height={60} className="w-full h-full" />
 }
 
-// ── Main TbProHud ──────────────────────────────────────────────
+// â”€â”€ Main TbProHud â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function TbProHud({ veroCount, currentTitle, timeframe, saturScore, trendData, isLoading }: Props) {
   const isEmpty  = !currentTitle.trim()
   const isSafe   = veroCount === 0
   const standby  = isEmpty || isLoading
 
-  // Chart data — matches Dart logic
+  // Chart data â€” matches Dart logic
   const chartData  = (isEmpty || isLoading || !trendData.length) ? [0,0,0,0,0,0,0,0] : trendData
   const peakText   = isEmpty || isLoading ? (isLoading ? '(ANALYZING...)' : '(--)') :
     timeframe === '7D' ? '(Peak Thursday)' : timeframe === '12M' ? '(Peak Nov)' : '(Peak Day 14)'
 
-  // Competition — matches Dart saturScore logic
+  // Competition â€” matches Dart saturScore logic
   let saturLabel = 'Awaiting Search...'
   let saturColor = 'rgba(255,255,255,0.38)'
   if (isLoading)       { saturLabel = 'Analyzing Market...'; saturColor = '#22D3EE' }

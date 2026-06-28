@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/QuestWidget.tsx
 // User-facing gamification widget shown on dashboard
 // Shows XP, level, streak, and active quests
@@ -190,7 +190,7 @@ export default function QuestWidget() {
             </span>
             {level < 5 && (
               <>
-                <span className="text-[9px]" style={{ color: C.muted }}>→</span>
+                <span className="text-[9px]" style={{ color: C.muted }}>â†’</span>
                 <span className="text-[9px]" style={{ color: C.muted }}>
                   {LEVEL_NAMES[level + 1]} at {nextXP} XP
                 </span>

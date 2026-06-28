@@ -1,8 +1,8 @@
-// app/api/admin/pricing/update/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/admin/pricing/update/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Updates landing page pricing card content
-// Admin only — saves to landing_pricing table
-// ══════════════════════════════════════════════════════════════
+// Admin only â€” saves to landing_pricing table
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'

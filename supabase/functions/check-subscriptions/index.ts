@@ -1,4 +1,4 @@
-// supabase/functions/check-subscriptions/index.ts
+﻿// supabase/functions/check-subscriptions/index.ts
 // Daily subscription expiry checker
 // Called by external cron (cron-job.org) every day at midnight
 

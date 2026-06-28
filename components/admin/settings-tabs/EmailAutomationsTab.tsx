@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/EmailAutomationsTab.tsx
 // ══════════════════════════════════════════════════════════════
 // Full email automation system with:
@@ -317,7 +317,7 @@ function StepEditorModal({
           </button>
           <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> : <><Save size={14} /> Save Step</>}
           </button>
         </div>
@@ -471,7 +471,7 @@ function FlowRow({
             <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>EMAIL STEPS</p>
             <button onClick={() => onAddStep(flow.id)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:opacity-80"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Plus size={11} /> Add Step
             </button>
           </div>
@@ -487,7 +487,7 @@ function FlowRow({
                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-white"
                    style={{ borderColor: C.border }}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-black"
-                     style={{ backgroundColor: C.dark, color: C.lime }}>
+                     style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {step.step_order}
                 </div>
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onEditStep(step, flow.name)}>
@@ -671,7 +671,7 @@ function NewFlowModal({
             </button>
             <button onClick={handleCreate} disabled={saving || !name.trim()}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {saving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                 : <><Plus size={14} /> Create Flow</>}
@@ -787,7 +787,7 @@ function AddStepModal({
           </button>
           <button onClick={handleSave} disabled={saving || !subject.trim()}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Save size={14} /> Save Step</>}
@@ -999,7 +999,7 @@ function DataRetentionSection({
             </button>
             <button onClick={handleArchiveNow} disabled={archiving}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {archiving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                 : <><RefreshCw size={13} /> Archive & Clean Now</>}
@@ -1344,7 +1344,7 @@ export default function EmailAutomationsTab() {
         <div className="flex items-center gap-2">
           <button onClick={() => setShowNewFlow(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Flow
           </button>
           <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
@@ -1695,7 +1695,7 @@ export default function EmailAutomationsTab() {
                     <div className="flex items-center justify-center">
                       {stepOrder != null ? (
                         <span className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center"
-                              style={{ backgroundColor: C.dark, color: C.lime }}>
+                              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                           {stepOrder}
                         </span>
                       ) : (

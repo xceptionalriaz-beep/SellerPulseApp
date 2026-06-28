@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 
 const C = {
-  dark: '#0F172A', lime: '#8FFF00', border: '#E2E8F0',
+  dark: '#1a2410', lime: '#8FFF00', border: '#E2E8F0',
   bg: '#F8FAFC', text: '#0F172A', muted: '#64748B', hint: '#94A3B8',
 }
 
@@ -23,7 +23,7 @@ interface Props {
   onUserUpdated:   (id: string, field: string, value: any) => void
 }
 
-// ── Format DB user (matches Dart _formatDatabaseUser) ─────────
+// -- Format DB user (matches Dart _formatDatabaseUser) ---------
 function formatUser(db: any) {
   const email    = db.email ?? 'unknown@user.com'
   let name       = db.name ?? ''
@@ -79,7 +79,7 @@ function statusColors(status: string) {
   return { color: '#16A34A', bg: 'rgba(22,163,74,0.12)' }
 }
 
-// ── Support note dialog (matches Dart _showSupportNoteDialog) ──
+// -- Support note dialog (matches Dart _showSupportNoteDialog) --
 function SupportNoteDialog({ userId, userName, onClose, onSaved }: {
   userId: string; userName: string; onClose: () => void; onSaved: (note: string) => void
 }) {
@@ -122,7 +122,7 @@ function SupportNoteDialog({ userId, userName, onClose, onSaved }: {
   )
 }
 
-// ── Device manager dialog (matches Dart _showDeviceManagerDialog)
+// -- Device manager dialog (matches Dart _showDeviceManagerDialog)
 function DeviceManagerDialog({ userId, userName, onClose }: {
   userId: string; userName: string; onClose: () => void
 }) {
@@ -155,7 +155,7 @@ function DeviceManagerDialog({ userId, userName, onClose }: {
             <h3 className="text-[18px] font-bold" style={{ color: C.dark }}>Active Devices: {userName}</h3>
             <p className="text-[12px]" style={{ color: C.muted }}>Manage active sessions and revoke access.</p>
           </div>
-          <button onClick={onClose} className="text-[13px]" style={{ color: C.hint }}>✕</button>
+          <button onClick={onClose} className="text-[13px]" style={{ color: C.hint }}>?</button>
         </div>
         {loading ? (
           <div className="flex justify-center py-12">
@@ -191,7 +191,7 @@ function DeviceManagerDialog({ userId, userName, onClose }: {
   )
 }
 
-// ── Action buttons (matches Dart _buildActionButtons) ─────────
+// -- Action buttons (matches Dart _buildActionButtons) ---------
 function ActionButtons({ user, rawUser, onUserUpdated, onOpenDrawer }: {
   user: any; rawUser: any; onUserUpdated: (id: string, f: string, v: any) => void; onOpenDrawer: () => void
 }) {
@@ -299,7 +299,7 @@ function ActionButtons({ user, rawUser, onUserUpdated, onOpenDrawer }: {
   )
 }
 
-// ── Main table ────────────────────────────────────────────────
+// -- Main table ------------------------------------------------
 export default function AdminUserTable({ allUsers, isInvestorMode, searchQuery, selectedFilter, onUserUpdated }: Props) {
   const supabase = createClient()
   const [userHistories, setUserHistories] = useState<Record<string, any[]>>({})
@@ -350,7 +350,7 @@ export default function AdminUserTable({ allUsers, isInvestorMode, searchQuery, 
     <div className="w-full rounded-2xl border overflow-hidden"
          style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 4px 10px rgba(0,0,0,0.03)' }}>
 
-      {/* ── Desktop table ── */}
+      {/* -- Desktop table -- */}
       <div className="hidden xl:block overflow-x-auto">
         {/* Header */}
         <div className="flex items-center gap-4 px-6 py-4 border-b" style={{ borderColor: C.border }}>
@@ -436,7 +436,7 @@ export default function AdminUserTable({ allUsers, isInvestorMode, searchQuery, 
                   ) : (
                     <div>
                       <div className="flex items-start gap-1">
-                        <span className="text-[14px]">🌍</span>
+                        <span className="text-[14px]">??</span>
                         <p className="text-[12px] font-semibold" style={{ color: C.dark }}>
                           {dbUser.verified_city ?? 'Unknown'}
                         </p>
@@ -445,7 +445,7 @@ export default function AdminUserTable({ allUsers, isInvestorMode, searchQuery, 
                         {dbUser.is_location_verified && (
                           <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center"
                                style={{ backgroundColor: C.lime }}>
-                            <span style={{ fontSize: 8 }}>✓</span>
+                            <span style={{ fontSize: 8 }}>?</span>
                           </div>
                         )}
                         <p className="text-[10px]" style={{ color: C.hint }}>{user.ip}</p>
@@ -494,7 +494,7 @@ export default function AdminUserTable({ allUsers, isInvestorMode, searchQuery, 
         })}
       </div>
 
-      {/* ── Mobile cards ── */}
+      {/* -- Mobile cards -- */}
       <div className="xl:hidden">
         <div className="px-6 py-4 border-b" style={{ borderColor: C.border }}>
           <span className="text-[11px] font-bold tracking-wider" style={{ color: C.hint }}>USERS LIST</span>

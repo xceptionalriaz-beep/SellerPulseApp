@@ -1,17 +1,17 @@
-import { createBrowserClient }              from '@supabase/ssr'
+﻿import { createBrowserClient }              from '@supabase/ssr'
 import { createClient as createBaseClient } from '@supabase/supabase-js'
 import type { Database }                    from '@/types/database'
 
-// ─── Browser Client ───────────────────────────────────────────
+// â”€â”€â”€ Browser Client â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Use this in Client Components ('use client')
 export function createClient() {
 
-  // ── Impersonation tab detection ────────────────────────────
+  // â”€â”€ Impersonation tab detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // When an admin uses "Login as User", the view-as page sets
   // this flag in sessionStorage. sessionStorage is tab-specific
   // so ONLY the impersonation tab has this flag.
   // All other tabs (including the admin's original tab) are
-  // completely unaffected — they still use the normal client.
+  // completely unaffected â€” they still use the normal client.
   const isImpersonating =
     typeof window !== 'undefined' &&
     window.sessionStorage.getItem('__riazify_impersonating__') === '1'
@@ -34,8 +34,8 @@ export function createClient() {
     )
   }
 
-  // ── Normal client — all regular tabs ──────────────────────
-  // Unchanged from your original — uses localStorage by default
+  // â”€â”€ Normal client â€” all regular tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Unchanged from your original â€” uses localStorage by default
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

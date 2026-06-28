@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/WebhooksTab.tsx
 
 import React, { useState, useEffect, useCallback } from 'react'
@@ -348,7 +348,7 @@ function DestinationModal({
             </button>
             <button onClick={handleSave} disabled={saving || !name.trim() || !url.trim()}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {saving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                 : <><Save size={14} /> {isEdit ? 'Save Changes' : 'Add Destination'}</>}
@@ -761,7 +761,7 @@ function WebhookRetentionSection({
           {/* Clean button */}
           <button onClick={handleCleanNow} disabled={archiving}
             className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-40 w-fit px-4"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {archiving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><RefreshCw size={13} /> Clean Now</>}
@@ -1050,7 +1050,7 @@ export default function WebhooksTab() {
         <div className="flex items-center gap-2">
           <button onClick={() => setShowAdd(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Destination
           </button>
           <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
@@ -1106,7 +1106,7 @@ export default function WebhooksTab() {
           <p className="text-[14px] font-bold" style={{ color: C.muted }}>No webhook destinations configured</p>
           <button onClick={() => setShowAdd(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14} /> Add First Destination
           </button>
         </div>

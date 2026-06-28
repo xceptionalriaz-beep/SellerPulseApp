@@ -1,5 +1,5 @@
-// app/api/admin/maintenance/run-schedules/route.ts
-// ── Vercel Cron Job — runs every minute ──────────────────────
+﻿// app/api/admin/maintenance/run-schedules/route.ts
+// â”€â”€ Vercel Cron Job â€” runs every minute â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Checks all active maintenance schedules and:
 // 1. Disables switch if maintenance window starts
 // 2. Re-enables switch if maintenance window ends
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const results = { triggered: 0, ended: 0, errors: 0, autoReEnabled: 0 }
 
   try {
-    // ── Check auto re-enable timers ────────────────────────
+    // â”€â”€ Check auto re-enable timers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: timedSwitches } = await (adminClient.from('kill_switches') as any)
       .select('id, title, is_enabled, re_enable_at')
       .eq('is_enabled', false)
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
         const inWindow = isInMaintenanceWindow(schedule, now)
         const pastEnd  = isPastEndTime(schedule, now)
 
-        // Window started — disable switch
+        // Window started â€” disable switch
         if (inWindow && sw.is_enabled) {
           await (adminClient.from('kill_switches') as any).update({
             is_enabled:  false,
@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
           results.triggered++
         }
 
-        // Window ended — re-enable switch
+        // Window ended â€” re-enable switch
         if (pastEnd && !sw.is_enabled && schedule.last_triggered_at) {
           await (adminClient.from('kill_switches') as any).update({
             is_enabled:  true,

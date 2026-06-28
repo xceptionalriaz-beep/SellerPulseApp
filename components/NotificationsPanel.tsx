@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 // components/NotificationsPanel.tsx
 // Converted 1:1 from lib/widgets/notifications_panel.dart
-// Auto-detects admin vs user role — works everywhere
+// Auto-detects admin vs user role â€” works everywhere
 
 import { useState, useEffect } from 'react'
 import {
@@ -23,7 +23,7 @@ const C = {
   text:   '#64748B',
 }
 
-// ── Types ─────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface AppNotification {
   id:          string
   type:        string
@@ -41,7 +41,7 @@ interface NotifConfig {
   label: string
 }
 
-// ── Admin notification type config ────────────────────────────
+// â”€â”€ Admin notification type config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ADMIN_TYPE_CONFIG: Record<string, NotifConfig> = {
   new_user:        { icon: UserPlus,    color: '#8B5CF6', label: 'New User'  },
   payment_failed:  { icon: CreditCard,  color: '#EF4444', label: 'Payment'   },
@@ -53,13 +53,13 @@ const ADMIN_TYPE_CONFIG: Record<string, NotifConfig> = {
   new_bug:         { icon: Bug,         color: '#F59E0B', label: 'Bug'       },
 }
 
-// ── User notification type config ─────────────────────────────
+// â”€â”€ User notification type config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const USER_TYPE_CONFIG: Record<string, NotifConfig> = {
   high_risk:     { icon: AlertTriangle, color: '#FF4D6A', label: 'High Risk' },
   ship_deadline: { icon: Clock,         color: '#FFB800', label: 'Deadline'  },
 }
 
-// ── Time ago helper ───────────────────────────────────────────
+// â”€â”€ Time ago helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function timeAgo(d: Date): string {
   const diff = Date.now() - new Date(d).getTime()
   const mins = Math.floor(diff / 60000)
@@ -72,7 +72,7 @@ function timeAgo(d: Date): string {
   return `${dt.getDate()}/${dt.getMonth()+1}`
 }
 
-// ── Mock notifications (replaced by Supabase when deployed) ──
+// â”€â”€ Mock notifications (replaced by Supabase when deployed) â”€â”€
 function getMockNotifications(isAdmin: boolean): AppNotification[] {
   if (isAdmin) return [
     { id: '1', type: 'new_user',        title: 'New user registered',        message: 'john@example.com just signed up for Pro.',          isRead: false, createdAt: new Date(Date.now() - 300000),   actionUrl: '/dashboard/admin', ebayOrderId: '' },
@@ -84,12 +84,12 @@ function getMockNotifications(isAdmin: boolean): AppNotification[] {
   ]
   return [
     { id: '7', type: 'high_risk',     title: 'High Risk Order #1234',   message: 'Buyer has 3 disputes in the last 30 days. Review before shipping.', isRead: false, createdAt: new Date(Date.now() - 600000),  ebayOrderId: 'ORD-1234567890' },
-    { id: '8', type: 'ship_deadline', title: 'Ship by 5PM today',       message: 'Order #5678 — MacBook Charger. Estimated delivery in 3 days.',      isRead: false, createdAt: new Date(Date.now() - 1800000), ebayOrderId: 'ORD-5678901234' },
-    { id: '9', type: 'ship_deadline', title: 'Deadline tomorrow 9AM',   message: 'Order #9012 — USB-C Cable 3-Pack. Customer paid for express.',      isRead: true,  createdAt: new Date(Date.now() - 86400000),ebayOrderId: 'ORD-9012345678' },
+    { id: '8', type: 'ship_deadline', title: 'Ship by 5PM today',       message: 'Order #5678 â€” MacBook Charger. Estimated delivery in 3 days.',      isRead: false, createdAt: new Date(Date.now() - 1800000), ebayOrderId: 'ORD-5678901234' },
+    { id: '9', type: 'ship_deadline', title: 'Deadline tomorrow 9AM',   message: 'Order #9012 â€” USB-C Cable 3-Pack. Customer paid for express.',      isRead: true,  createdAt: new Date(Date.now() - 86400000),ebayOrderId: 'ORD-9012345678' },
   ]
 }
 
-// ── Section header (matches Dart _sectionHeader) ─────────────
+// â”€â”€ Section header (matches Dart _sectionHeader) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SectionHeader({ icon: Icon, title, subtitle, color }: {
   icon: React.ElementType; title: string; subtitle: string; color: string
 }) {
@@ -106,7 +106,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color }: {
   )
 }
 
-// ── Admin card (matches Dart _adminCard) ──────────────────────
+// â”€â”€ Admin card (matches Dart _adminCard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AdminCard({ n, config, onRead }: { n: AppNotification; config: NotifConfig; onRead: (id: string) => void }) {
   const Icon   = config.icon
   const isRead = n.isRead
@@ -134,7 +134,7 @@ function AdminCard({ n, config, onRead }: { n: AppNotification; config: NotifCon
           {n.actionUrl && (
             <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded"
                   style={{ backgroundColor: config.color + '1A', color: config.color }}>
-              View →
+              View â†’
             </span>
           )}
         </div>
@@ -143,7 +143,7 @@ function AdminCard({ n, config, onRead }: { n: AppNotification; config: NotifCon
   )
 }
 
-// ── User card (matches Dart _userCard) ────────────────────────
+// â”€â”€ User card (matches Dart _userCard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function UserCard({ n, onRead }: { n: AppNotification; onRead: (id: string) => void }) {
   const isHighRisk = n.type === 'high_risk'
   const color      = isHighRisk ? '#FF4D6A' : '#FFB800'
@@ -184,7 +184,7 @@ function UserCard({ n, onRead }: { n: AppNotification; onRead: (id: string) => v
   )
 }
 
-// ── Main NotificationsPanel ───────────────────────────────────
+// â”€â”€ Main NotificationsPanel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [isLoading,     setIsLoading]     = useState(true)
@@ -326,7 +326,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
               <button key={type} onClick={() => setActiveFilter(type)}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border shrink-0 transition-all text-[10px] font-semibold"
                 style={{
-                  backgroundColor: active ? C.dark : 'transparent',
+                  backgroundColor: active ? '#8fff00' : 'transparent',
                   borderColor:     active ? C.lime + '66' : C.border,
                   color:           active ? C.white : C.text,
                 }}>
@@ -353,7 +353,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
               <BellOff size={38} style={{ color: C.lime }} />
             </div>
             <p className="text-[18px] font-bold" style={{ color: C.dark }}>
-              {isAdmin ? 'No alerts right now' : 'All caught up! 🎉'}
+              {isAdmin ? 'No alerts right now' : 'All caught up! ðŸŽ‰'}
             </p>
             <p className="text-[13px] text-center" style={{ color: C.muted }}>
               {isAdmin ? 'Platform is running smoothly.' : 'No alerts or reminders right now.'}
@@ -379,7 +379,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
             })}
           </div>
         ) : (
-          // User list — high risk + deadlines
+          // User list â€” high risk + deadlines
           <div>
             {['high_risk', 'ship_deadline'].map(type => {
               const items  = filtered.filter(n => n.type === type)
@@ -403,7 +403,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ── Slide-in panel wrapper (matches Dart showNotificationsPanel) ──
+// â”€â”€ Slide-in panel wrapper (matches Dart showNotificationsPanel) â”€â”€
 export function NotificationsPanelOverlay({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[9999] flex justify-end"

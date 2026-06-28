@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/KillSwitchGate.tsx
 // ══════════════════════════════════════════════════════════════
 // Wraps tool pages — shows maintenance screen if switch is OFF
@@ -199,7 +199,7 @@ export default function KillSwitchGate({ switchTitle, children }: Props) {
           onClick={handleRetry}
           disabled={checking}
           className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-[14px] disabled:opacity-50 transition-all hover:opacity-80"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <RefreshCw size={15} className={checking ? 'animate-spin' : ''} />
           {checking ? 'Checking...' : 'Check Again'}
         </button>

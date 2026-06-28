@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 // lib/core/ai-engine/marketChartService wired here
 // matches Dart: MarketChartService.prepareData()
@@ -20,7 +20,7 @@ import {
 } from "recharts";
 import { Zap, Anchor } from "lucide-react";
 
-// ── Types ─────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface DataPoint {
   date: string
   value?: number
@@ -32,14 +32,14 @@ interface DataPoint {
 
 interface Props {
   searchQuery?:  string
-  // Real data props — pass these from your edge function response
+  // Real data props â€” pass these from your edge function response
   liveData?:     { date: string; value: number }[]       // historical points
   forecastData?: { date: string; forecastValue: number }[] // forecast points
   percentChange?: number
   confidenceScore?: number
 }
 
-// ── Default mock data (used until edge function is ready) ─────
+// â”€â”€ Default mock data (used until edge function is ready) â”€â”€â”€â”€â”€
 const defaultMockData: DataPoint[] = [
   { date: "04-30", value: 3800,  isForecast: false },
   { date: "05-06", value: 5200,  isForecast: false },
@@ -61,7 +61,7 @@ export default function MarketTrendChart({
 
   const neonGreen    = "#8FFF00"
 
-  // ── Run MarketChartService AI engine on liveData ────────────
+  // â”€â”€ Run MarketChartService AI engine on liveData â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // matches Dart: MarketChartService.prepareData(fullData, timeFrame)
   const aiPackage = (() => {
     if (liveData && liveData.length > 0) {
@@ -71,7 +71,7 @@ export default function MarketTrendChart({
     return null
   })()
 
-  // ── Map to Recharts format ────────────────────────────────
+  // â”€â”€ Map to Recharts format â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const chartData: DataPoint[] = (() => {
     if (aiPackage) {
       // Use AI-processed currentData for historical
@@ -112,7 +112,7 @@ export default function MarketTrendChart({
   const aiPercentChange = aiPackage ? Math.round(aiPackage.percentChange * 10) / 10 : percentChange
   const aiMarketState   = aiPackage?.marketState ?? MarketState.stable
 
-  // ── Custom tooltip — only shows on real data hover, never on reference lines ──
+  // â”€â”€ Custom tooltip â€” only shows on real data hover, never on reference lines â”€â”€
   const CustomTooltip = ({ active, payload }: any) => {
     // Guard: must be active, have payload, and have a real numeric value
     if (!active || !payload || !payload.length) return null
@@ -125,7 +125,7 @@ export default function MarketTrendChart({
            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)" }}>
         {!data.isForecast ? (
           <span className="text-sm font-black text-gray-900">
-            📦 Vol: {(val / 1000).toFixed(2)}K
+            ðŸ“¦ Vol: {(val / 1000).toFixed(2)}K
           </span>
         ) : (
           <span className="text-sm font-black text-gray-900">
@@ -147,7 +147,7 @@ export default function MarketTrendChart({
       <div className="flex justify-between items-start mb-4">
         <div>
           <h2 className="text-[12px] font-bold text-slate-500 tracking-[1.1px] uppercase mb-1">
-            📈 SALES TREND & FORECAST ("{searchQuery}")
+            ðŸ“ˆ SALES TREND & FORECAST ("{searchQuery}")
           </h2>
           <div className="flex items-center flex-wrap gap-3 mt-1">
             <div className="flex items-baseline gap-1">
@@ -216,7 +216,7 @@ export default function MarketTrendChart({
                     <text x={0} y={0} dy={16} textAnchor="middle"
                       fill={isFc ? "#15803d" : "#94A3B8"}
                       fontSize={10} fontWeight={isFc ? 900 : 600}>
-                      {isFc ? `AI • ${payload.value}` : payload.value}
+                      {isFc ? `AI â€¢ ${payload.value}` : payload.value}
                     </text>
                   </g>
                 )
@@ -236,10 +236,10 @@ export default function MarketTrendChart({
 
             {/* Price drop event line */}
             <ReferenceLine x={eventDate} stroke="#fb923c" strokeDasharray="4 4" strokeWidth={1}
-              label={{ position: 'top', value: '📉 $5 Price Drop Event',
+              label={{ position: 'top', value: 'ðŸ“‰ $5 Price Drop Event',
                        fill: '#c2410c', fontSize: 10, fontWeight: 'bold' }} />
 
-            {/* TODAY line — full height muted gray dashed */}
+            {/* TODAY line â€” full height muted gray dashed */}
             <ReferenceLine x={todayDate}
               stroke="#cbd5e1"
               strokeDasharray="3 3"

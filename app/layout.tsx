@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { Inter, Space_Grotesk } from 'next/font/google'
 import { ToastProvider } from '@/components/ui/AppToast'
 import AffiliateTracker from '@/components/AffiliateTracker'
 import './globals.css'
 
-// ─── Fonts ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Fonts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -17,10 +17,10 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 })
 
-// ─── Metadata ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Metadata â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export const metadata: Metadata = {
   title: {
-    default: 'Riazify — eBay Seller Tools',
+    default: 'Riazify â€” eBay Seller Tools',
     template: '%s | Riazify',
   },
   description:
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    title: 'Riazify — eBay Seller Tools',
+    title: 'Riazify â€” eBay Seller Tools',
     description: 'The all-in-one SaaS platform for serious eBay sellers.',
     siteName: 'Riazify',
   },
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
 }
 
-// ─── Root Layout ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Root Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function RootLayout({
   children,
 }: {
@@ -58,9 +58,9 @@ export default function RootLayout({
         <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
       </head>
       <body className="font-body antialiased bg-bg text-dark min-h-screen">
-        {/* Affiliate click tracker — reads cookie set by middleware */}
+        {/* Affiliate click tracker â€” reads cookie set by middleware */}
         <AffiliateTracker />
-        {/* ToastProvider wraps everything — toast works on every page */}
+        {/* ToastProvider wraps everything â€” toast works on every page */}
         <ToastProvider>
           {children}
         </ToastProvider>

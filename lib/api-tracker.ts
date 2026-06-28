@@ -1,4 +1,4 @@
-// lib/api-tracker.ts
+﻿// lib/api-tracker.ts
 // Tracks API usage in api_fleet_config + api_usage_logs tables
 // Call this whenever a tool uses an external API
 
@@ -10,7 +10,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Log a single API call ──────────────────────────────────────
+// â”€â”€ Log a single API call â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Call this after every external API call in your routes
 export async function logApiCall(options: {
   userId?:         string | null
@@ -63,12 +63,12 @@ export async function logApiCall(options: {
     }
 
   } catch (err) {
-    // Non-critical — never block tool functionality
+    // Non-critical â€” never block tool functionality
     console.error('[api-tracker]', err)
   }
 }
 
-// ── Reset daily counters (called from daily cron) ──────────────
+// â”€â”€ Reset daily counters (called from daily cron) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function resetDailyCounters(): Promise<void> {
   try {
     await (adminClient.from('api_fleet_config') as any)

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/MarketingTab.tsx
 // Full marketing center — 7 sections
 
@@ -74,9 +74,9 @@ function SectionHeader({ title, sub }: { title: string; sub: string }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any[] }) {
   const supabase = createClient()
 
@@ -168,7 +168,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
   return (
     <div className="flex flex-col gap-6 px-6 py-6" style={{ fontFamily: 'Inter, sans-serif' }}>
 
-      {/* ── Header ── */}
+      {/* -- Header -- */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-[24px] font-black tracking-tight" style={{ color: C.text }}>Marketing</h1>
@@ -184,7 +184,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
         </button>
       </div>
 
-      {/* ── HUD Stats ── */}
+      {/* -- HUD Stats -- */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { label: 'EMAILS SENT',      value: stats.sent,             icon: Mail,       color: C.blue    },
@@ -206,7 +206,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
         ))}
       </div>
 
-      {/* ── Tab switcher ── */}
+      {/* -- Tab switcher -- */}
       <div className="flex items-center gap-1 p-1 rounded-xl flex-wrap"
            style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
         {TABS.map(t => {
@@ -214,7 +214,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
           return (
             <button key={t.key} onClick={() => setView(t.key as any)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-bold transition-all"
-              style={{ backgroundColor: active ? C.dark : 'transparent', color: active ? C.lime : C.muted }}>
+              style={{ backgroundColor: active ? '#8fff00' : 'transparent', color: active ? C.lime : C.muted }}>
               <t.icon size={13} />
               {t.label}
             </button>
@@ -222,7 +222,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
         })}
       </div>
 
-      {/* ── Views ── */}
+      {/* -- Views -- */}
       {view === 'overview'   && <OverviewSection funnel={funnel} stats={stats} history={history} broadcasts={broadcasts} onStartCampaign={() => setView('campaign')} onLoadUsers={setCampaignUsers} supabase={supabase} />}
       {view === 'campaign'   && <CampaignBuilder users={campaignUsers} onLoadUsers={setCampaignUsers} loadingUsers={loadingCampaignUsers} setLoadingUsers={setLoadingCampaignUsers} supabase={supabase} onSent={() => { loadHistory(); setView('history') }} />}
       {view === 'audience'   && <AudienceBuilder supabase={supabase} onLoadCampaign={(u) => { setCampaignUsers(u); setView('campaign') }} />}
@@ -236,9 +236,9 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // OVERVIEW SECTION
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function OverviewSection({ funnel, stats, history, broadcasts, onStartCampaign, onLoadUsers, supabase }: any) {
   const total = funnel.free + funnel.trial + funnel.starter + funnel.growth + funnel.custom
   const paid  = funnel.starter + funnel.growth + funnel.custom
@@ -300,7 +300,7 @@ function OverviewSection({ funnel, stats, history, broadcasts, onStartCampaign, 
             <SectionHeader title="OPPORTUNITIES" sub="Revenue waiting" />
             <button onClick={loadExpiringUsers}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold hover:opacity-80"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Send size={11} />
               Campaign
             </button>
@@ -387,9 +387,9 @@ function OverviewSection({ funnel, stats, history, broadcasts, onStartCampaign, 
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // AUDIENCE BUILDER
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function AudienceBuilder({ supabase, onLoadCampaign }: { supabase: any; onLoadCampaign: (u: any[]) => void }) {
   const [filters, setFilters] = useState({
     plans:       [] as string[],
@@ -559,7 +559,7 @@ function AudienceBuilder({ supabase, onLoadCampaign }: { supabase: any; onLoadCa
         <div className="flex items-center gap-3 mt-5 pt-4 border-t" style={{ borderColor: C.border }}>
           <button onClick={runSearch} disabled={loading}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {loading ? <RefreshCw size={14} className="animate-spin" /> : <Search size={14} />}
             Search Audience
           </button>
@@ -585,7 +585,7 @@ function AudienceBuilder({ supabase, onLoadCampaign }: { supabase: any; onLoadCa
             </p>
             <button onClick={() => onLoadCampaign(results)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Send size={12} />
               Launch Campaign for These Users
             </button>
@@ -631,9 +631,9 @@ function AudienceBuilder({ supabase, onLoadCampaign }: { supabase: any; onLoadCa
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // CAMPAIGN BUILDER — Upgraded with 10 new features
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, supabase, onSent }: {
   users: any[]; onLoadUsers: (u: any[]) => void
   loadingUsers: boolean; setLoadingUsers: (v: boolean) => void
@@ -894,7 +894,7 @@ function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, su
                 style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
               <button onClick={sendCampaign}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 Confirm Send
               </button>
             </div>
@@ -1269,9 +1269,9 @@ function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, su
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // CAMPAIGN HISTORY
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function CampaignHistory({ history, loading, onNewCampaign }: {
   history: any[]; loading: boolean; onNewCampaign: () => void
 }) {
@@ -1287,7 +1287,7 @@ function CampaignHistory({ history, loading, onNewCampaign }: {
       <p className="text-[15px] font-bold" style={{ color: C.dark }}>No campaigns yet</p>
       <button onClick={onNewCampaign}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold mt-2"
-        style={{ backgroundColor: C.dark, color: C.lime }}>
+        style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
         <Send size={14} /> Start First Campaign
       </button>
     </div>
@@ -1306,7 +1306,7 @@ function CampaignHistory({ history, loading, onNewCampaign }: {
         <p className="text-[14px] font-black" style={{ color: C.dark }}>{history.length} email{history.length !== 1 ? 's' : ''} sent</p>
         <button onClick={onNewCampaign}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <Send size={13} /> New Campaign
         </button>
       </div>
@@ -1341,9 +1341,9 @@ function CampaignHistory({ history, loading, onNewCampaign }: {
 }
 
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // BROADCASTS SECTION
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function BroadcastsSection({ broadcasts, supabase, onRefresh }: { broadcasts: any[]; supabase: any; onRefresh: () => void }) {
   const [creating,   setCreating]   = useState(false)
   const [message,    setMessage]    = useState('')
@@ -1443,7 +1443,7 @@ function BroadcastsSection({ broadcasts, supabase, onRefresh }: { broadcasts: an
             <div className="flex gap-2">
               <button onClick={createBroadcast} disabled={saving || !message.trim()}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold disabled:opacity-50"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 {saving ? <RefreshCw size={12} className="animate-spin" /> : <Megaphone size={12} />}
                 Send Broadcast
               </button>
@@ -1501,9 +1501,9 @@ function BroadcastsSection({ broadcasts, supabase, onRefresh }: { broadcasts: an
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // SUPPRESSED / UNSUBSCRIBES
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function SuppressedSection({ suppressed, supabase, onRefresh }: { suppressed: any[]; supabase: any; onRefresh: () => void }) {
   const [search, setSearch] = useState('')
   const [removing, setRemoving] = useState<string | null>(null)
@@ -1591,9 +1591,9 @@ function SuppressedSection({ suppressed, supabase, onRefresh }: { suppressed: an
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // AB TEST MANAGER
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function ABTestSection({ supabase }: { supabase: any }) {
   const [tests,      setTests]      = useState<any[]>([])
   const [creating,   setCreating]   = useState(false)
@@ -1718,7 +1718,7 @@ function ABTestSection({ supabase }: { supabase: any }) {
             <div className="flex gap-2">
               <button onClick={createTest} disabled={saving || !testName || !subjectA || !subjectB}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold disabled:opacity-50"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 {saving ? <RefreshCw size={12} className="animate-spin" /> : <Check size={12} />}
                 Create Test
               </button>
@@ -1828,9 +1828,9 @@ function ABTestSection({ supabase }: { supabase: any }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // REVENUE ATTRIBUTION
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function RevenueAttributionSection({ supabase }: { supabase: any }) {
   const [data,    setData]    = useState<any>({ byTemplate: [], byPromo: [], totalAttributed: 0, totalCampaigns: 0 })
   const [loading, setLoading] = useState(true)
@@ -1974,9 +1974,9 @@ function RevenueAttributionSection({ supabase }: { supabase: any }) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 // REFERRAL PROGRAM
-// ══════════════════════════════════════════════════════════════
+// --------------------------------------------------------------
 function ReferralSection({ supabase }: { supabase: any }) {
   const [referrals, setReferrals] = useState<any[]>([])
   const [affiliates,setAffiliates]= useState<any[]>([])

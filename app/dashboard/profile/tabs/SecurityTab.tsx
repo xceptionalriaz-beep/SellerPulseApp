@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 'use client'
 // app/dashboard/profile/tabs/SecurityTab.tsx
 // Converted from: lib/user_profile/tabs/security_tab.dart
@@ -17,7 +17,7 @@ import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
 import { cn } from '@/lib/utils'
 
-// ── Color tokens (exact match to Dart _C) ──────────────────────
+// â”€â”€ Color tokens (exact match to Dart _C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   surface: '#FFFFFF', navy: '#0F172A', txt1: '#0F172A',
   txt2: '#64748B', txt3: '#94A3B8', border: '#E2E8F0',
@@ -25,7 +25,7 @@ const C = {
   blue: '#1D70F5', accent: '#8FFF00',
 }
 
-// ── Card (matches Dart _Card) ───────────────────────────────────
+// â”€â”€ Card (matches Dart _Card) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Card({ children, danger }: { children: React.ReactNode; danger?: boolean }) {
   return (
     <div className="w-full p-5 rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.03)] border"
@@ -35,7 +35,7 @@ function Card({ children, danger }: { children: React.ReactNode; danger?: boolea
   )
 }
 
-// ── Card title (matches Dart _cardTitle) ────────────────────────
+// â”€â”€ Card title (matches Dart _cardTitle) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CardTitle({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
   return (
     <div className="flex items-center gap-2.5 mb-4">
@@ -47,7 +47,7 @@ function CardTitle({ icon: Icon, title }: { icon: React.ElementType; title: stri
   )
 }
 
-// ── Benefit row (matches Dart _benefit) ────────────────────────
+// â”€â”€ Benefit row (matches Dart _benefit) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Benefit({ icon: Icon, text }: { icon: React.ElementType; text: string }) {
   return (
     <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ function Benefit({ icon: Icon, text }: { icon: React.ElementType; text: string }
   )
 }
 
-// ── Step indicator (matches Dart _step in scanning view) ────────
+// â”€â”€ Step indicator (matches Dart _step in scanning view) â”€â”€â”€â”€â”€â”€â”€â”€
 function Step({ num, label, active }: { num: string; label: string; active: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1">
@@ -72,7 +72,7 @@ function Step({ num, label, active }: { num: string; label: string; active: bool
   )
 }
 
-// ── Pass field ──────────────────────────────────────────────────
+// â”€â”€ Pass field â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PassField({ label, value, onChange, show, onToggle, onChanged }: {
   label: string; value: string; onChange: (v: string) => void
   show: boolean; onToggle: () => void; onChanged?: () => void
@@ -83,7 +83,7 @@ function PassField({ label, value, onChange, show, onToggle, onChanged }: {
       <div className="relative">
         <input type={show ? 'text' : 'password'} value={value}
           onChange={e => { onChange(e.target.value); onChanged?.() }}
-          placeholder="••••••••"
+          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
           className="w-full h-[46px] px-3.5 pr-10 rounded-lg border bg-[#F8FAFC] text-[13px] outline-none transition-all"
           style={{ borderColor: C.border, color: C.txt1 }}
           onFocus={e => (e.target as HTMLInputElement).style.borderColor = C.navy}
@@ -97,13 +97,13 @@ function PassField({ label, value, onChange, show, onToggle, onChanged }: {
   )
 }
 
-// ── Types ───────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface SecurityCheck { label: string; passed: boolean; pts: string; icon: React.ElementType }
 interface LoginRecord { id?: string; device_info?: string; ip_address?: string; login_at?: string; location_name?: string }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN COMPONENT
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function SecurityTab() {
   const supabase = createClient()
   const toast    = useToast()
@@ -158,9 +158,9 @@ export default function SecurityTab() {
 
   const strength = passStrength(newPass)
 
-  // ── Time ago helper (mirrors Dart timeStr logic) ────────────
+  // â”€â”€ Time ago helper (mirrors Dart timeStr logic) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function fmtTime(iso?: string): string {
-    if (!iso) return '—'
+    if (!iso) return 'â€”'
     try {
       const dt   = new Date(iso)
       const diff = Date.now() - dt.getTime()
@@ -173,10 +173,10 @@ export default function SecurityTab() {
       if (d === 1) return 'Yesterday'
       if (d < 7)   return `${d}d ago`
       return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`
-    } catch { return '—' }
+    } catch { return 'â€”' }
   }
 
-  // ── Load all data ────────────────────────────────────────────
+  // â”€â”€ Load all data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadAll = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -188,7 +188,7 @@ export default function SecurityTab() {
       setIsEmailVerified(emailVerified)
       setHasPassword(hasPwd)
 
-      // Login history — try login_at column (matches Dart)
+      // Login history â€” try login_at column (matches Dart)
       const { data: history } = await supabase
         .from('login_history').select('*').eq('user_id', user.id)
         .order('login_at', { ascending: false }).limit(8)
@@ -230,7 +230,7 @@ export default function SecurityTab() {
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  // ── Change password (mirrors Dart _changePassword) ──────────
+  // â”€â”€ Change password (mirrors Dart _changePassword) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleChangePassword() {
     if (!currPass || !newPass || !confPass) { toast.warning('Please fill all fields'); return }
     if (newPass !== confPass)              { toast.error('New passwords do not match'); return }
@@ -252,12 +252,12 @@ export default function SecurityTab() {
       const { error } = await supabase.auth.updateUser({ password: newPass })
       if (error) { toast.error(error.message); return }
       setCurrPass(''); setNewPass(''); setConfPass(''); setPassChanged(0)
-      toast.show('✅ Password updated successfully!')
+      toast.show('âœ… Password updated successfully!')
     } catch (e: any) { toast.error(e.message || 'Error updating password') }
     finally { setIsSavingPass(false) }
   }
 
-  // ── Forgot password (mirrors Dart _sendPasswordReset) ───────
+  // â”€â”€ Forgot password (mirrors Dart _sendPasswordReset) â”€â”€â”€â”€â”€â”€â”€
   async function handleForgotPassword() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user?.email) { toast.error('No email found on your account'); return }
@@ -265,11 +265,11 @@ export default function SecurityTab() {
       await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo: `${window.location.origin}/auth/callback?type=recovery`
       })
-      toast.show(`📧 Reset link sent to ${user.email}! Check your inbox.`)
+      toast.show(`ðŸ“§ Reset link sent to ${user.email}! Check your inbox.`)
     } catch (e: any) { toast.error(e.message) }
   }
 
-  // ── 2FA: Start enrollment ────────────────────────────────────
+  // â”€â”€ 2FA: Start enrollment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handle2FAEnable() {
     setIs2FALoading(true); setTwoFAStep('scanning')
     try {
@@ -297,7 +297,7 @@ export default function SecurityTab() {
     } finally { setIs2FALoading(false) }
   }
 
-  // ── 2FA: Verify ──────────────────────────────────────────────
+  // â”€â”€ 2FA: Verify â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handle2FAVerify() {
     const code = otpCode.trim().replace(/\s/g, '')
     if (code.length !== 6 || isNaN(Number(code))) { toast.warning('Enter the 6-digit code from your authenticator app'); return }
@@ -306,12 +306,12 @@ export default function SecurityTab() {
       const { data: challenge } = await (supabase.auth as any).mfa.challenge({ factorId })
       await (supabase.auth as any).mfa.verify({ factorId, challengeId: challenge.id, code })
       setTwoFAStep('enabled'); setOtpCode('')
-      toast.show('🔐 2FA enabled successfully!')
-    } catch { toast.error('Invalid code — try again') }
+      toast.show('ðŸ” 2FA enabled successfully!')
+    } catch { toast.error('Invalid code â€” try again') }
     finally { setIs2FALoading(false) }
   }
 
-  // ── 2FA: Disable ─────────────────────────────────────────────
+  // â”€â”€ 2FA: Disable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handle2FADisable() {
     setIs2FALoading(true); setShowDisable2FA(false)
     try {
@@ -322,7 +322,7 @@ export default function SecurityTab() {
     finally { setIs2FALoading(false) }
   }
 
-  // ── Sign out all sessions ────────────────────────────────────
+  // â”€â”€ Sign out all sessions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleSignOutAll() {
     setIsSigningOut(true); setShowSignOutAll(false)
     try {
@@ -331,7 +331,7 @@ export default function SecurityTab() {
     } catch { setIsSigningOut(false) }
   }
 
-  // ── Delete account ───────────────────────────────────────────
+  // â”€â”€ Delete account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleDeleteAccount() {
     if (deleteConfirmText !== 'DELETE') { toast.error('You must type DELETE exactly to confirm'); return }
     setShowDeleteAcct(false)
@@ -357,7 +357,7 @@ export default function SecurityTab() {
         <p className="text-[14px] mt-1.5" style={{ color: C.txt2 }}>Manage your password, sessions and account security.</p>
       </div>
 
-      {/* ── 1. SECURITY SCORE ── */}
+      {/* â”€â”€ 1. SECURITY SCORE â”€â”€ */}
       <Card>
         <div className="flex items-center gap-5 mb-5">
           <div className="relative w-20 h-20 shrink-0">
@@ -391,7 +391,7 @@ export default function SecurityTab() {
         </div>
       </Card>
 
-      {/* ── 2+3. Password + 2FA side by side ── */}
+      {/* â”€â”€ 2+3. Password + 2FA side by side â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Change Password */}
@@ -521,7 +521,7 @@ export default function SecurityTab() {
         </Card>
       </div>
 
-      {/* ── 4. LOGIN HISTORY ── */}
+      {/* â”€â”€ 4. LOGIN HISTORY â”€â”€ */}
       <Card>
         <div className="flex items-center justify-between">
           <CardTitle icon={History} title="Login History" />
@@ -572,7 +572,7 @@ export default function SecurityTab() {
                           <span className="text-[11px] truncate" style={{ color: C.txt2 }}>{location}</span>
                         </>
                       ) : (
-                        <span className="text-[11px]" style={{ color: C.txt3 }}>—</span>
+                        <span className="text-[11px]" style={{ color: C.txt3 }}>â€”</span>
                       )}
                     </div>
                     <div className="w-16 shrink-0 text-right text-[11px]" style={{ color: C.txt3 }}>
@@ -586,7 +586,7 @@ export default function SecurityTab() {
         )}
       </Card>
 
-      {/* ── 5+6. Sessions + Danger Zone ── */}
+      {/* â”€â”€ 5+6. Sessions + Danger Zone â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Active Sessions */}
@@ -643,7 +643,7 @@ export default function SecurityTab() {
         </div>
       </div>
 
-      {/* ── CONFIRM DIALOGS ── */}
+      {/* â”€â”€ CONFIRM DIALOGS â”€â”€ */}
 
       {/* Disable 2FA */}
       {showDisable2FA && (

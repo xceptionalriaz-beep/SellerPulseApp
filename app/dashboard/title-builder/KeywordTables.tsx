@@ -1,22 +1,22 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/KeywordTables.tsx
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/pages/title_builder/tb_keyword_tables.dart
 //
 // What the Dart version had:
-//   ✅ Loading state — spinner + "Fetching Live Keyword Data..."
-//   ✅ Two tables side by side on desktop, stacked on mobile
-//   ✅ LONG TAIL KEYWORDS table (dark navy header, lime icon)
-//   ✅ GENERIC KEYWORD IDEAS table (dark navy header, lime icon)
-//   ✅ Sortable columns — KEYWORD, SEARCHES, COMP., SALES
-//   ✅ Sort arrows (asc/desc) with blue highlight
-//   ✅ Pagination — 10 items per page, prev/next
-//   ✅ "Hover to Inject" badge on desktop
-//   ✅ Row hover → green tint + inject button appears
-//   ✅ Already-used keywords → grey out + check icon
-//   ✅ VeRO word detection → red pill with warning icon
-//   ✅ Competition heat bar (green/orange/red based on value)
-// ═══════════════════════════════════════════════════════════════
+//   âœ… Loading state â€” spinner + "Fetching Live Keyword Data..."
+//   âœ… Two tables side by side on desktop, stacked on mobile
+//   âœ… LONG TAIL KEYWORDS table (dark navy header, lime icon)
+//   âœ… GENERIC KEYWORD IDEAS table (dark navy header, lime icon)
+//   âœ… Sortable columns â€” KEYWORD, SEARCHES, COMP., SALES
+//   âœ… Sort arrows (asc/desc) with blue highlight
+//   âœ… Pagination â€” 10 items per page, prev/next
+//   âœ… "Hover to Inject" badge on desktop
+//   âœ… Row hover â†’ green tint + inject button appears
+//   âœ… Already-used keywords â†’ grey out + check icon
+//   âœ… VeRO word detection â†’ red pill with warning icon
+//   âœ… Competition heat bar (green/orange/red based on value)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState, useEffect } from 'react'
 import {
@@ -27,13 +27,13 @@ import {
 import { PageSpinner } from '@/components/ui/Spinner'
 import { cn } from '@/lib/utils'
 
-// ── Types ──────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface KeywordRow {
   kw: string; search: string; comp: string; sales: string
 }
 interface VeroEntry { brand_name: string; risk_level?: string }
 
-// ── Smart keyword renderer (matches Dart _buildSmartKeyword) ───
+// â”€â”€ Smart keyword renderer (matches Dart _buildSmartKeyword) â”€â”€â”€
 function SmartKeyword({ keyword, veroDatabase }: {
   keyword: string; veroDatabase: VeroEntry[]
 }) {
@@ -61,7 +61,7 @@ function SmartKeyword({ keyword, veroDatabase }: {
   )
 }
 
-// ── Sortable header (matches Dart _sortableHeader) ─────────────
+// â”€â”€ Sortable header (matches Dart _sortableHeader) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SortHeader({ title, columnKey, sortCol, sortAsc, onSort }: {
   title: string; columnKey: string; sortCol: string
   sortAsc: boolean; onSort: (col: string) => void
@@ -84,7 +84,7 @@ function SortHeader({ title, columnKey, sortCol, sortAsc, onSort }: {
   )
 }
 
-// ── Animated table row (matches Dart AnimatedTableRow) ─────────
+// â”€â”€ Animated table row (matches Dart AnimatedTableRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TableRow({ row, isEven, isUsed, onInject, veroDatabase }: {
   row: KeywordRow; isEven: boolean; isUsed: boolean
   onInject: () => void; veroDatabase: VeroEntry[]
@@ -144,7 +144,7 @@ function TableRow({ row, isEven, isUsed, onInject, veroDatabase }: {
   )
 }
 
-// ── Smart keyword table (matches Dart SmartKeywordTable) ────────
+// â”€â”€ Smart keyword table (matches Dart SmartKeywordTable) â”€â”€â”€â”€â”€â”€â”€â”€
 function SmartKeywordTable({ title, icon: Icon, data, currentTitle, onInject, veroDatabase }: {
   title: string; icon: React.ElementType
   data: KeywordRow[]; currentTitle: string
@@ -184,7 +184,7 @@ function SmartKeywordTable({ title, icon: Icon, data, currentTitle, onInject, ve
 
       {/* Dark header (matches Dart Container with navy bg) */}
       <div className="flex items-center gap-2.5 px-5 py-4"
-           style={{ backgroundColor: '#0F172A', borderRadius: '10px 10px 0 0' }}>
+           style={{ backgroundColor: '#1a2410', borderRadius: '10px 10px 0 0' }}>
         <Icon size={19} style={{ color: '#8FFF00' }} />
         <span className="flex-1 text-[14px] font-black text-white tracking-[1.2px] truncate">{title}</span>
         <span className="hidden md:block px-2.5 py-1 rounded-full text-[10px] font-bold text-white/70"
@@ -251,9 +251,9 @@ function SmartKeywordTable({ title, icon: Icon, data, currentTitle, onInject, ve
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN EXPORT (matches Dart TbKeywordTables)
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 interface KeywordTablesProps {
   currentTitle:  string
   onInject:      (kw: string) => void

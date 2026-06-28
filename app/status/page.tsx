@@ -1,5 +1,5 @@
-// app/status/page.tsx
-// Public system status page — readable by anyone
+﻿// app/status/page.tsx
+// Public system status page â€” readable by anyone
 
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
@@ -109,7 +109,7 @@ export default async function StatusPage() {
         <Link href="/dashboard"
           className="text-[12px] font-semibold px-3 py-1.5 rounded-xl border transition-all hover:opacity-80"
           style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }}>
-          ← Back to App
+          â† Back to App
         </Link>
       </nav>
 
@@ -170,7 +170,7 @@ export default async function StatusPage() {
         )}
       </div>
 
-      {/* Footer — matches landing page */}
+      {/* Footer â€” matches landing page */}
       <footer className="py-16 border-t" style={{ background: '#1a2410', borderColor: '#1a2410' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
@@ -237,7 +237,7 @@ export default async function StatusPage() {
           <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
                style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             <p className="text-[12px]" style={{ color: '#8a9e78' }}>
-              © {new Date().getFullYear()} Riazify — All rights reserved.
+              Â© {new Date().getFullYear()} Riazify â€” All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               {['Twitter', 'LinkedIn', 'YouTube', 'Discord'].map(s => (

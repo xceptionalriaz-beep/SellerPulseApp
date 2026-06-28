@@ -1,19 +1,19 @@
-'use client'
+﻿'use client'
 // components/ui/ForgotPasswordDialog.tsx
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/widgets/forgot_password_dialog.dart
 //
 // What the Dart version had:
-//   ✅ Modal dialog — white, rounded-[24px], max-width 450px
-//   ✅ Lock icon + "Reset Password" heading
-//   ✅ Description text
-//   ✅ Email field — pre-filled with email from login page
-//   ✅ Lime "Send Reset Link" button with loading spinner
-//   ✅ Cancel button
-//   ✅ Success toast (lime) on send
-//   ✅ Error toast (red) on failure
-//   ✅ Closes dialog on success
-// ═══════════════════════════════════════════════════════════════
+//   âœ… Modal dialog â€” white, rounded-[24px], max-width 450px
+//   âœ… Lock icon + "Reset Password" heading
+//   âœ… Description text
+//   âœ… Email field â€” pre-filled with email from login page
+//   âœ… Lime "Send Reset Link" button with loading spinner
+//   âœ… Cancel button
+//   âœ… Success toast (lime) on send
+//   âœ… Error toast (red) on failure
+//   âœ… Closes dialog on success
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState } from 'react'
 import { KeyRound, Mail, X } from 'lucide-react'
@@ -75,12 +75,12 @@ export default function ForgotPasswordDialog({
   }
 
   return (
-    // ── Backdrop ──────────────────────────────────────────────
+    // â”€â”€ Backdrop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      {/* ── Dialog Box ── */}
+      {/* â”€â”€ Dialog Box â”€â”€ */}
       <div className="bg-white rounded-[24px] w-full max-w-[450px] p-[30px] shadow-panel mx-4 animate-slide-down">
 
         {/* Header */}

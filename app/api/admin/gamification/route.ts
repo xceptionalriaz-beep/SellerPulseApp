@@ -1,4 +1,4 @@
-// app/api/admin/gamification/route.ts
+﻿// app/api/admin/gamification/route.ts
 // Fetch all gamification data for admin tab
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
         completionsToday: completionsToday ?? 0,
         avgLevel,
         pendingFulfillments: (pendingFulfillments ?? []).length,
-        mostPopular: mostPopular?.title ?? '—',
+        mostPopular: mostPopular?.title ?? 'â€”',
       }
     })
   } catch (err: any) {

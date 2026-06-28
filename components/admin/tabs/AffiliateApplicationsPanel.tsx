@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/AffiliateApplicationsPanel.tsx
 
 import { useState, useEffect } from 'react'
@@ -62,7 +62,7 @@ function formatDate(d: string): string {
 }
 
 function formatMethod(method: string | null): string {
-  if (!method) return '—'
+  if (!method) return 'â€”'
   if (method === 'paypal') return 'PayPal'
   if (method === 'bank')   return 'Bank Transfer'
   if (method === 'crypto') return 'Crypto'
@@ -146,7 +146,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
       // Check code uniqueness
       const { data: existing } = await (supabase.from('affiliates') as any)
         .select('id').eq('code', code).limit(1)
-      if (existing?.length > 0) { setCodeError('Code already taken — try another'); setProcessing(null); return }
+      if (existing?.length > 0) { setCodeError('Code already taken â€” try another'); setProcessing(null); return }
 
       const rate = customRate ? Number(customRate) / 100 : null
 
@@ -166,7 +166,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
         custom_commission: rate,
         traffic_source:  app.platform        ?? null,
         country:         app.country         ?? null,
-        notes:           `Approved from application · ${app.platform} · ${app.content_niche}`,
+        notes:           `Approved from application Â· ${app.platform} Â· ${app.content_niche}`,
       }])
 
       await (supabase.from('affiliate_applications') as any)
@@ -269,7 +269,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
             </button>
           </div>
 
-          {/* Filter tabs + Search — Fix 5+6 */}
+          {/* Filter tabs + Search â€” Fix 5+6 */}
           <div className="px-6 py-2.5 shrink-0 flex items-center gap-3 flex-wrap"
                style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.bg }}>
             <div className="flex gap-1.5">
@@ -295,7 +295,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
               ))}
             </div>
 
-            {/* Search — Fix 5 */}
+            {/* Search â€” Fix 5 */}
             <div className="flex items-center gap-2 h-8 px-3 rounded-xl flex-1"
                  style={{
                    border:     `1.5px solid ${searchFocused ? C.lime : C.border}`,
@@ -365,7 +365,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                     </div>
                     <div className="min-w-0">
                       <p className="text-[13px] font-bold truncate" style={{ color: C.text }}>{app.full_name}</p>
-                      <p className="text-[11px] truncate" style={{ color: C.muted }}>{app.email} · {app.country}</p>
+                      <p className="text-[11px] truncate" style={{ color: C.muted }}>{app.email} Â· {app.country}</p>
                     </div>
                   </div>
 
@@ -391,7 +391,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                   {/* Date */}
                   <div>
                     <p className="text-[12px]" style={{ color: C.text }}>{formatDate(app.created_at)}</p>
-                    <p className="text-[10px]" style={{ color: C.muted }}>{app.content_niche?.split(' ')[0] ?? '—'}</p>
+                    <p className="text-[10px]" style={{ color: C.muted }}>{app.content_niche?.split(' ')[0] ?? 'â€”'}</p>
                   </div>
 
                   {/* Actions */}
@@ -500,7 +500,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                 <div className="flex justify-center">
                   {isPending  && <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-bold" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}><Clock size={13} /> Pending Review</span>}
                   {isApproved && <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-bold" style={{ backgroundColor: '#F0FDF4', color: C.green }}><CheckCircle size={13} /> Approved</span>}
-                  {isRejected && <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-bold" style={{ backgroundColor: '#FEF2F2', color: C.red }}><X size={13} /> Rejected{app.rejection_reason ? ` — ${app.rejection_reason}` : ''}</span>}
+                  {isRejected && <span className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-bold" style={{ backgroundColor: '#FEF2F2', color: C.red }}><X size={13} /> Rejected{app.rejection_reason ? ` â€” ${app.rejection_reason}` : ''}</span>}
                 </div>
 
                 {/* Avatar */}
@@ -624,7 +624,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                style={{ borderColor: C.border, boxShadow: '0 24px 60px rgba(0,0,0,0.25)' }}>
             <div className="px-5 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
               <p className="text-[15px] font-bold" style={{ color: C.text }}>Approve Application</p>
-              <p className="text-[12px] mt-0.5" style={{ color: C.muted }}>{approveDialog.full_name} · {approveDialog.email}</p>
+              <p className="text-[12px] mt-0.5" style={{ color: C.muted }}>{approveDialog.full_name} Â· {approveDialog.email}</p>
             </div>
             <div className="p-5 flex flex-col gap-4">
 
@@ -659,7 +659,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                   </div>
                 </div>
                 {codeError && <p className="text-[11px] mt-1" style={{ color: C.red }}>{codeError}</p>}
-                <p className="text-[10px] mt-1" style={{ color: C.muted }}>Auto-generated — edit to customize</p>
+                <p className="text-[10px] mt-1" style={{ color: C.muted }}>Auto-generated â€” edit to customize</p>
               </div>
 
               {/* Custom commission */}
@@ -678,7 +678,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                   />
                   <span className="text-[13px] font-bold" style={{ color: C.muted }}>%</span>
                 </div>
-                <p className="text-[10px] mt-1" style={{ color: C.muted }}>Default: 25% · Enter 30 for 30%</p>
+                <p className="text-[10px] mt-1" style={{ color: C.muted }}>Default: 25% Â· Enter 30 for 30%</p>
               </div>
 
               <div className="flex gap-2">
@@ -707,7 +707,7 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
              onClick={e => e.target === e.currentTarget && setRejectDialog(null)}>
           <div className="bg-white rounded-2xl border p-6 w-full max-w-sm" style={{ borderColor: C.border }}>
             <p className="text-[15px] font-bold mb-1" style={{ color: C.text }}>Reject Application</p>
-            <p className="text-[12px] mb-4" style={{ color: C.muted }}>{rejectDialog.full_name} · {rejectDialog.email}</p>
+            <p className="text-[12px] mb-4" style={{ color: C.muted }}>{rejectDialog.full_name} Â· {rejectDialog.email}</p>
             <p className="text-[11px] font-bold mb-1.5" style={{ color: C.muted }}>Reason (optional)</p>
             <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)}
               placeholder="e.g. Content not related to eBay selling..."

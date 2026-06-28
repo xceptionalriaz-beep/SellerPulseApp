@@ -1,8 +1,8 @@
-// app/api/team/accept/route.ts
-// ─────────────────────────────────────────────────────────────
-// Member clicks the invite link → joins the team
-// Token from URL → validates → creates team_members row
-// ─────────────────────────────────────────────────────────────
+﻿// app/api/team/accept/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Member clicks the invite link â†’ joins the team
+// Token from URL â†’ validates â†’ creates team_members row
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -15,18 +15,18 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller (must be logged in) ──────────────────
+    // â”€â”€ 1. Verify caller (must be logged in) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Please log in first' }, { status: 401 })
 
     const { data: { user: caller } } = await supabase.auth.getUser(token)
     if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // ── 2. Get invite token from body ─────────────────────────
+    // â”€â”€ 2. Get invite token from body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { inviteToken } = await req.json()
     if (!inviteToken) return NextResponse.json({ error: 'Invite token required' }, { status: 400 })
 
-    // ── 3. Find and validate the invite ───────────────────────
+    // â”€â”€ 3. Find and validate the invite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: invite } = await supabase
       .from('team_invites')
       .select('*')
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You cannot join your own team' }, { status: 400 })
     }
 
-    // ── 4. Create team_members row ────────────────────────────
+    // â”€â”€ 4. Create team_members row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: memberErr } = await supabase
       .from('team_members')
       .upsert({
@@ -72,11 +72,11 @@ export async function POST(req: NextRequest) {
 
     if (memberErr) throw memberErr
 
-    // ── 5. Mark invite as accepted ────────────────────────────
+    // â”€â”€ 5. Mark invite as accepted â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     await supabase.from('team_invites')
       .update({ status: 'accepted' }).eq('id', (invite as any).id)
 
-    // ── 6. Get owner name for response ────────────────────────
+    // â”€â”€ 6. Get owner name for response â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: ownerProfile } = await supabase
       .from('profiles').select('name, email').eq('id', (invite as any).owner_id).single()
 

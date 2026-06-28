@@ -1,17 +1,17 @@
-// app/dashboard/title-builder/components/engines/titleSpinnerEngine.ts
+﻿// app/dashboard/title-builder/components/engines/titleSpinnerEngine.ts
 // Converted 1:1 from lib/pages/title_builder/title_spinner_engine.dart
 
-// 🚀 ORIGINAL PRO RULES
+// ðŸš€ ORIGINAL PRO RULES
 const BIND_WORDS  = ['for','with','to','and','in','on','of','-','&','+','fits']
 const POWER_WORDS = ['new','genuine','oem','fast','premium','pro','heavy-duty','original','authentic','quality']
 
-// 🚀 GOD-TIER UPGRADE 1: Policy Guard — silent deletion
+// ðŸš€ GOD-TIER UPGRADE 1: Policy Guard â€” silent deletion
 const BANNED_WORDS = ['free shipping','wow','look','cheap','guaranteed','bonus','gift','sale','hot']
 
-// 🚀 GOD-TIER UPGRADE 2: Space Maximizer — safe fillers to hit 80 chars
+// ðŸš€ GOD-TIER UPGRADE 2: Space Maximizer â€” safe fillers to hit 80 chars
 const FILLER_WORDS = ['Premium','Quality','USA','Top Rated','Durable','Reliable','Pro','Elite','Best']
 
-// 🚀 GOD-TIER UPGRADE 3: Mini-Thesaurus
+// ðŸš€ GOD-TIER UPGRADE 3: Mini-Thesaurus
 const THESAURUS: Record<string, string[]> = {
   'genuine':  ['Authentic','OEM','Original','100% Real'],
   'fast':     ['Quick','Rapid','High-Speed','Swift'],
@@ -35,7 +35,7 @@ function shuffle<T>(arr: T[]): T[] {
 export class TitleSpinnerEngine {
   static spin(originalTitle: string, lockCount = 3): string {
 
-    // 1. POLICY GUARD — silent assassination of banned words
+    // 1. POLICY GUARD â€” silent assassination of banned words
     let safeTitle = originalTitle
     for (const banned of BANNED_WORDS) {
       safeTitle = safeTitle.replace(new RegExp(`\\b${banned.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'gi'), '')
@@ -56,7 +56,7 @@ export class TitleSpinnerEngine {
       let word = originalWord
       let lower = word.toLowerCase()
 
-      // 50% chance to swap synonyms — never swap locked core words
+      // 50% chance to swap synonyms â€” never swap locked core words
       if (i >= lockCount && THESAURUS[lower]) {
         if (randBool()) {
           const synonyms = THESAURUS[lower]
@@ -120,7 +120,7 @@ export class TitleSpinnerEngine {
 
     // 7. 80-CHARACTER GUARDIAN & AUTO-FILLER
     if (spunTitle.length > 80) {
-      // Too long — safely cut down
+      // Too long â€” safely cut down
       let cut       = spunTitle.substring(0, 80)
       const lastSp  = cut.lastIndexOf(' ')
       spunTitle     = lastSp > -1 ? spunTitle.substring(0, lastSp) : cut
@@ -132,7 +132,7 @@ export class TitleSpinnerEngine {
       spunTitle = finalWords.join(' ')
 
     } else {
-      // 🚀 SPACE MAXIMIZER — inject fillers to boost eBay ranking
+      // ðŸš€ SPACE MAXIMIZER â€” inject fillers to boost eBay ranking
       const shuffledFillers = shuffle(FILLER_WORDS)
       for (const filler of shuffledFillers) {
         if (spunTitle.toLowerCase().includes(filler.toLowerCase())) continue

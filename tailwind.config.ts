@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+﻿import type { Config } from 'tailwindcss'
 
 const config: Config = {
   content: [
@@ -22,7 +22,7 @@ const config: Config = {
         border:    '#E8EDE2',
 
         // Admin
-        adminDark: '#0F172A',
+        admindark: '#1a2410',
 
         // Risk levels
         risk: {

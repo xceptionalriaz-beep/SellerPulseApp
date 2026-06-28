@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/HoverableDataRow.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/widgets/hoverable_data_row.dart
 
@@ -38,7 +38,7 @@ interface Props {
   isSelected:  boolean
 }
 
-// ── Title with VeRO highlight (matches Dart _buildTitleWithVeroHighlight) ──
+// â”€â”€ Title with VeRO highlight (matches Dart _buildTitleWithVeroHighlight) â”€â”€
 function TitleWithVero({ title, veroWord }: { title: string; veroWord?: string }) {
   if (!veroWord || !title.toLowerCase().includes(veroWord.toLowerCase())) {
     return <p className="text-[12px] font-bold line-clamp-2" style={{ color: C.text }}>{title}</p>
@@ -107,7 +107,7 @@ export default function HoverableDataRow({
           style={{ accentColor: C.lime }} />
       </div>
 
-      {/* 1. Product info — flex 10 */}
+      {/* 1. Product info â€” flex 10 */}
       <div className="flex items-center gap-2.5 min-w-0" style={{ flex: 10 }}>
         <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0"
              style={{ backgroundColor: '#F3F4F6' }}>
@@ -125,12 +125,12 @@ export default function HoverableDataRow({
         </div>
       </div>
 
-      {/* 2. eBay price — flex 3 */}
+      {/* 2. eBay price â€” flex 3 */}
       <div style={{ flex: 3 }}>
         <p className="text-[13px] font-black" style={{ color: C.text }}>{sales}</p>
       </div>
 
-      {/* 3. Cost input — flex 2 */}
+      {/* 3. Cost input â€” flex 2 */}
       <div style={{ flex: 2 }}>
         <input
           value={costInput}
@@ -146,7 +146,7 @@ export default function HoverableDataRow({
           }} />
       </div>
 
-      {/* 4. Live profit badge — flex 2 */}
+      {/* 4. Live profit badge â€” flex 2 */}
       <div style={{ flex: 2 }}>
         {profit === null ? (
           <p className="text-[11px] font-bold" style={{ color: '#9CA3AF' }}>-</p>
@@ -164,7 +164,7 @@ export default function HoverableDataRow({
         )}
       </div>
 
-      {/* 5. Action group — flex 4 */}
+      {/* 5. Action group â€” flex 4 */}
       <div className="flex items-center justify-end gap-2" style={{ flex: 4 }}>
         {/* Amazon launch button */}
         <button onClick={launchAmazon}

@@ -1,4 +1,4 @@
-// ─── Supabase Database Types ──────────────────────────────────────────────────
+﻿// â”€â”€â”€ Supabase Database Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Matches the existing Supabase schema for Riazify
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -145,7 +145,7 @@ export type Database = {
   }
 }
 
-// ─── Convenience Types ────────────────────────────────────────────────────────
+// â”€â”€â”€ Convenience Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Order = Database['public']['Tables']['protected_orders']['Row']
 export type AdminNotification = Database['public']['Tables']['admin_notifications']['Row']

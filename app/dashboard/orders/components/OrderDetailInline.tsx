@@ -1,28 +1,28 @@
-'use client'
+﻿'use client'
 // app/dashboard/orders/[id]/page.tsx
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/pages/orders/order_detail_screen.dart
-// All 3 parts (5254 lines of Dart → single Next.js page)
+// All 3 parts (5254 lines of Dart â†’ single Next.js page)
 //
 // Sections (same as Dart):
-//   ✅ Header — order ID, item title, close/back button
-//   ✅ Alert banner — LOW/MEDIUM/HIGH/dispute/all-done states
-//   ✅ Order summary card — item, price, buyer, status, condition, dispatch countdown
-//   ✅ Risk score card — score/100, progress bar, return rate, disputes
-//   ✅ Ship to address — copy + Google Maps dialog
-//   ✅ Protection checklist — 5 animated steps, risk-aware unlock
-//   ✅ Low risk banner
-//   ✅ Why this buyer is risky — AI analysis, patterns, red flags
-//   ✅ Evidence vault — 5 types, upload, link, delete
-//   ✅ Evidence report PDF button
-//   ✅ Buyer history — expandable, last 5 transactions
-//   ✅ Shipping requirements — risk-aware, mark as shipped dialog
-//   ✅ Quick actions — message templates, INAD policy, cancel order
-//   ✅ Message templates dialog — 4 templates, resizable, history
-//   ✅ Mark as shipped dialog — carrier, tracking, date, options
-//   ✅ Cancel order — 3-step flow
-//   ✅ INAD policy panel — personalised rules
-// ═══════════════════════════════════════════════════════════════
+//   âœ… Header â€” order ID, item title, close/back button
+//   âœ… Alert banner â€” LOW/MEDIUM/HIGH/dispute/all-done states
+//   âœ… Order summary card â€” item, price, buyer, status, condition, dispatch countdown
+//   âœ… Risk score card â€” score/100, progress bar, return rate, disputes
+//   âœ… Ship to address â€” copy + Google Maps dialog
+//   âœ… Protection checklist â€” 5 animated steps, risk-aware unlock
+//   âœ… Low risk banner
+//   âœ… Why this buyer is risky â€” AI analysis, patterns, red flags
+//   âœ… Evidence vault â€” 5 types, upload, link, delete
+//   âœ… Evidence report PDF button
+//   âœ… Buyer history â€” expandable, last 5 transactions
+//   âœ… Shipping requirements â€” risk-aware, mark as shipped dialog
+//   âœ… Quick actions â€” message templates, INAD policy, cancel order
+//   âœ… Message templates dialog â€” 4 templates, resizable, history
+//   âœ… Mark as shipped dialog â€” carrier, tracking, date, options
+//   âœ… Cancel order â€” 3-step flow
+//   âœ… INAD policy panel â€” personalised rules
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -41,7 +41,7 @@ import { useToast } from '@/components/ui/AppToast'
 import { cn } from '@/lib/utils'
 import Spinner, { PageSpinner } from '@/components/ui/Spinner'
 
-// ── Design tokens ──────────────────────────────────────────────
+// â”€â”€ Design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   bg: '#F4F6F0', surface: '#FFFFFF', border: '#E4EAD8',
   accent: '#8FFF00', accentDeep: '#4A8F00', accentDark: '#0A0D08',
@@ -64,7 +64,7 @@ const STEPS = [
 const EVIDENCE_TYPES = [
   { key: 'serial_number',  icon: Camera,   label: 'Serial number close-up' },
   { key: 'item_photos',    icon: Package,  label: 'Item from all angles' },
-  { key: 'packing_video',  icon: Video,    label: 'Packing video (uncut, 2–5 min)' },
+  { key: 'packing_video',  icon: Video,    label: 'Packing video (uncut, 2â€“5 min)' },
   { key: 'shipping_label', icon: Truck,    label: 'Shipping label + tracking' },
   { key: 'weight_receipt', icon: Receipt,  label: 'Weight receipt from carrier' },
 ]
@@ -80,7 +80,7 @@ function fmtDate(iso: string) {
   return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`
 }
 
-// ── Small reusables ────────────────────────────────────────────
+// â”€â”€ Small reusables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Card({ children, color, borderColor, className = '' }: {
   children: React.ReactNode; color?: string; borderColor?: string; className?: string
 }) {
@@ -119,9 +119,9 @@ function MiniRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN PAGE
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClose: () => void }) {
   const router   = useRouter()
   const supabase = createClient()
@@ -200,7 +200,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
       checklist_completed:  allCompleted,
     } as any).eq('id', id)
 
-    // ── Award XP when order fully protected ──────────────────
+    // â”€â”€ Award XP when order fully protected â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (allCompleted) {
       try {
         const { data: { user } } = await supabase.auth.getUser()
@@ -217,7 +217,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             } as any)
             .eq('id', user.id)
         }
-      } catch { /* non-critical — never block order protection */ }
+      } catch { /* non-critical â€” never block order protection */ }
     }
   }
 
@@ -273,7 +273,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
       <ShieldOff size={40} style={{ color: C.textHint }} />
       <p className="text-[14px]" style={{ color: C.textHint }}>Order not found</p>
       <button onClick={onClose} className="px-4 py-2 rounded-lg text-[13px] font-semibold"
-        style={{ backgroundColor: C.accent, color: C.accentDark }}>← Back to Orders</button>
+        style={{ backgroundColor: C.accent, color: C.accentDark }}>â† Back to Orders</button>
     </div>
   )
 
@@ -294,7 +294,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
   const state       = order.shipping_state   || ''
   const zip         = order.shipping_zip     || ''
   const country     = order.shipping_country || ''
-  const fullAddress = [city && state ? `${city}, ${state}` : city || state, zip, country].filter(Boolean).join(' · ')
+  const fullAddress = [city && state ? `${city}, ${state}` : city || state, zip, country].filter(Boolean).join(' Â· ')
   const disputeOpened = order.dispute_opened || false
   const disputeReason = order.dispute_reason || ''
   const returnRate    = Number(buyerProfile?.return_rate || 0)
@@ -312,7 +312,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
   const canAddEvidence = evidence.length > 0 ? true
     : riskLevel === 'LOW' ? true
     : riskLevel === 'MEDIUM' ? pct >= 0.4
-    : pct >= 0.6  // HIGH — need 3/5
+    : pct >= 0.6  // HIGH â€” need 3/5
   const showChecklist = riskLevel === 'HIGH' || riskLevel === 'MEDIUM'
 
   // Status colors
@@ -323,7 +323,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
 
   return (
     <div className="min-h-full" style={{ backgroundColor: C.bg }}>
-      {/* ── HEADER ── */}
+      {/* â”€â”€ HEADER â”€â”€ */}
       <div className="flex items-center gap-3 px-4 py-3.5 sticky top-0 z-10 border-b"
            style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -334,11 +334,11 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
           <p className="text-[15px] font-bold truncate" style={{ color: C.textPrimary }}>Order #{ebayOrderId}</p>
           {createdAt && (
             <p className="text-[10px] truncate" style={{ color: C.textHint }}>
-              {fmtDate(createdAt.toISOString())} · {itemTitle}
+              {fmtDate(createdAt.toISOString())} Â· {itemTitle}
             </p>
           )}
         </div>
-        {/* Close button — top right, red on hover */}
+        {/* Close button â€” top right, red on hover */}
         <button onClick={onClose}
           className="w-8 h-8 rounded-lg flex items-center justify-center border transition-all shrink-0"
           style={{ borderColor: C.border }}
@@ -358,7 +358,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
         </button>
       </div>
 
-      {/* ── ALERT BANNER ── */}
+      {/* â”€â”€ ALERT BANNER â”€â”€ */}
       {riskLevel === 'LOW' && !disputeOpened && (
         <div className="flex items-center gap-3 px-4 py-2.5 border-b"
              style={{ backgroundColor: C.accentDim, borderColor: C.accent + '4D' }}>
@@ -366,8 +366,8 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             <CheckCircle size={14} style={{ color: C.accentDark }} />
           </div>
           <div className="flex-1">
-            <p className="text-[11px] font-extrabold tracking-[0.5px]" style={{ color: C.accentDeep }}>LOW RISK — SAFE TO SHIP</p>
-            <p className="text-[10px]" style={{ color: C.textSecondary }}>Trusted buyer — no extra protection steps needed</p>
+            <p className="text-[11px] font-extrabold tracking-[0.5px]" style={{ color: C.accentDeep }}>LOW RISK â€” SAFE TO SHIP</p>
+            <p className="text-[10px]" style={{ color: C.textSecondary }}>Trusted buyer â€” no extra protection steps needed</p>
           </div>
           <span className="text-[14px] font-bold" style={{ color: C.accentDeep }}>${itemPrice.toFixed(2)}</span>
         </div>
@@ -379,7 +379,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             <Gavel size={16} className="text-white" />
           </div>
           <div className="flex-1">
-            <p className="text-[11px] font-extrabold tracking-[0.4px]" style={{ color: C.riskHigh }}>DISPUTE OPENED — ACTION REQUIRED</p>
+            <p className="text-[11px] font-extrabold tracking-[0.4px]" style={{ color: C.riskHigh }}>DISPUTE OPENED â€” ACTION REQUIRED</p>
             <p className="text-[10px]" style={{ color: C.textSecondary }}>
               {disputeReason || 'Submit your evidence vault to eBay immediately'}
             </p>
@@ -394,8 +394,8 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             <CheckCircle size={14} style={{ color: C.accentDark }} />
           </div>
           <div className="flex-1">
-            <p className="text-[11px] font-extrabold" style={{ color: C.accentDeep }}>ORDER PROTECTED ✓</p>
-            <p className="text-[10px]" style={{ color: C.textSecondary }}>All steps complete — safe to ship!</p>
+            <p className="text-[11px] font-extrabold" style={{ color: C.accentDeep }}>ORDER PROTECTED âœ“</p>
+            <p className="text-[10px]" style={{ color: C.textSecondary }}>All steps complete â€” safe to ship!</p>
           </div>
           <span className="text-[14px] font-bold" style={{ color: C.accentDeep }}>${itemPrice.toFixed(2)}</span>
         </div>
@@ -408,13 +408,13 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             </div>
             <div>
               <p className="text-[11px] font-extrabold" style={{ color: rc }}>
-                {riskLevel === 'HIGH' ? '⚠️ DO NOT SHIP — Action Required!' : '⚠️ Caution — Complete 3 of 5 steps to ship'}
+                {riskLevel === 'HIGH' ? 'âš ï¸ DO NOT SHIP â€” Action Required!' : 'âš ï¸ Caution â€” Complete 3 of 5 steps to ship'}
               </p>
               <p className="text-[10px]" style={{ color: C.textSecondary }}>Complete all protection steps first</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            {[['💰 At Risk', `$${itemPrice.toFixed(2)}`], ['📅 Dispatch', daysLeft <= 0 ? 'Overdue!' : `${daysLeft} day${daysLeft===1?'':'s'} left`], ['🛡️ Protection', `${doneSteps}/${totalSteps} done`]].map(([l, v]) => (
+            {[['ðŸ’° At Risk', `$${itemPrice.toFixed(2)}`], ['ðŸ“… Dispatch', daysLeft <= 0 ? 'Overdue!' : `${daysLeft} day${daysLeft===1?'':'s'} left`], ['ðŸ›¡ï¸ Protection', `${doneSteps}/${totalSteps} done`]].map(([l, v]) => (
               <div key={l} className="px-3 py-2 rounded-lg text-center" style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}>
                 <p className="text-[13px] font-bold" style={{ color: rc }}>{v}</p>
                 <p className="text-[9px] font-semibold" style={{ color: C.textSecondary }}>{l}</p>
@@ -424,7 +424,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
         </div>
       )}
 
-      {/* ── CONTENT ── */}
+      {/* â”€â”€ CONTENT â”€â”€ */}
       <div className="p-3.5 space-y-3">
 
         {/* Order summary + Risk score row */}
@@ -583,7 +583,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
                 <CheckCircle size={20} style={{ color: C.accentDeep }} />
               </div>
               <div>
-                <p className="text-[11px] font-extrabold tracking-[0.4px]" style={{ color: C.accentDeep }}>ORDER SAFE — NO EXTRA STEPS NEEDED</p>
+                <p className="text-[11px] font-extrabold tracking-[0.4px]" style={{ color: C.accentDeep }}>ORDER SAFE â€” NO EXTRA STEPS NEEDED</p>
                 <p className="text-[11px]" style={{ color: C.textSecondary }}>This buyer has low risk. You can ship normally.</p>
                 <div className="flex items-center gap-1 mt-1">
                   <Info size={10} style={{ color: C.textHint }} />
@@ -623,8 +623,8 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             {(patterns.length > 0 ? patterns : [
               'Serial INAD claimer (12 cases in 8 months)',
               'Returns 65% of high-value electronics',
-              "Always claims 'Not as described' after 15–25 days",
-              'Never accepts partial refunds — always full return',
+              "Always claims 'Not as described' after 15â€“25 days",
+              'Never accepts partial refunds â€” always full return',
             ]).slice(0, 4).map((f: string, i: number) => (
               <div key={i} className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: rc }} />
@@ -715,7 +715,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
           {showBuyerHist ? (
             <div className="px-3.5 pb-3.5 space-y-3">
               <div className="grid grid-cols-3 gap-2">
-                {[['Account Age', buyerProfile?.account_age_days ? `${Math.floor(buyerProfile.account_age_days/365)}y` : '—'],
+                {[['Account Age', buyerProfile?.account_age_days ? `${Math.floor(buyerProfile.account_age_days/365)}y` : 'â€”'],
                   ['Total Buys', `${buyerProfile?.total_orders || 0} items`],
                   ['Win Rate',   `${buyerProfile?.win_rate || 72}%`]].map(([l, v]) => (
                   <div key={l} className="p-2.5 rounded-lg border text-center" style={{ backgroundColor: C.bg, borderColor: C.border }}>
@@ -759,7 +759,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
               <div className="flex items-center gap-2 p-2.5 rounded-lg border"
                    style={{ backgroundColor: rc + '1A', borderColor: rc + '4D' }}>
                 <AlertTriangle size={14} style={{ color: rc }} />
-                <p className="text-[11px] font-semibold" style={{ color: rc }}>HIGH RISK — Extra shipping protection required!</p>
+                <p className="text-[11px] font-semibold" style={{ color: rc }}>HIGH RISK â€” Extra shipping protection required!</p>
               </div>
             )}
             {(riskLevel === 'HIGH'
@@ -777,7 +777,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
             {order.tracking_number ? (
               <div className="p-3 rounded-lg border" style={{ backgroundColor: C.accentDim, borderColor: C.accent + '66' }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ backgroundColor: C.accent, color: C.accentDark }}>SHIPPED ✓</span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ backgroundColor: C.accent, color: C.accentDark }}>SHIPPED âœ“</span>
                 </div>
                 <MiniRow icon={Truck} label="Carrier" value={order.carrier || 'Unknown'} />
                 <MiniRow icon={Tag} label="Tracking" value={order.tracking_number} />
@@ -825,7 +825,7 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
 
       </div>
 
-      {/* ── MAP DIALOG ── */}
+      {/* â”€â”€ MAP DIALOG â”€â”€ */}
       {showMapDialog && createPortal(
         <div className="fixed inset-0 z-[9999] z-50 bg-black/50 flex items-center justify-center p-4" onClick={e => e.target === e.currentTarget && setShowMapDialog(false)}>
           <div className="bg-white rounded-2xl overflow-hidden border max-w-xl w-full" style={{ borderColor: C.border }}>
@@ -866,31 +866,31 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
         document.body
       )}
 
-      {/* ── MESSAGE TEMPLATES DIALOG ── */}
+      {/* â”€â”€ MESSAGE TEMPLATES DIALOG â”€â”€ */}
       {showMsgDialog && (
         <MessageDialog order={order} onClose={() => setShowMsgDialog(false)} checklist={checklist} toggleStep={toggleStep}
           onSaved={(msg: any) => { setSentMessages(prev => [msg, ...prev]); toast.show('Saved & copied! Paste into eBay messages.') }}
           sentMessages={sentMessages} supabase={supabase} />
       )}
 
-      {/* ── MARK AS SHIPPED DIALOG ── */}
+      {/* â”€â”€ MARK AS SHIPPED DIALOG â”€â”€ */}
       {showShipDialog && (
         <ShipDialog order={order} onClose={() => setShowShipDialog(false)}
-          onShipped={() => { setShowShipDialog(false); toast.show('✅ Order marked as shipped!'); router.refresh() }}
+          onShipped={() => { setShowShipDialog(false); toast.show('âœ… Order marked as shipped!'); router.refresh() }}
           supabase={supabase} />
       )}
 
-      {/* ── CANCEL FLOW ── */}
+      {/* â”€â”€ CANCEL FLOW â”€â”€ */}
       {showCancelFlow && (
         <CancelOrderFlow order={order} onClose={() => setShowCancelFlow(false)} />
       )}
 
-      {/* ── INAD POLICY PANEL ── */}
+      {/* â”€â”€ INAD POLICY PANEL â”€â”€ */}
       {showInad && (
         <InadPanel order={order} onClose={() => setShowInad(false)} />
       )}
 
-      {/* ── EVIDENCE DIALOG ── */}
+      {/* â”€â”€ EVIDENCE DIALOG â”€â”€ */}
       {showEvidDlg && (
         <EvidenceDialog order={order} evidence={evidence} onClose={() => setShowEvidDlg(false)}
           onSaved={() => { loadEvidence(); setShowEvidDlg(false) }}
@@ -900,10 +900,10 @@ export function OrderDetailInline({ orderId, onClose }: { orderId: string; onClo
   )
 }
 
-// ══════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════
-// EVIDENCE REPORT CARD — with generating state (matches Dart)
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// EVIDENCE REPORT CARD â€” with generating state (matches Dart)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function EvidenceReportCard({ orderId, supabase, toast }: any) {
   const [generating, setGenerating] = useState(false)
 
@@ -921,7 +921,7 @@ function EvidenceReportCard({ orderId, supabase, toast }: any) {
         const url = URL.createObjectURL(bytes.data)
         const a = document.createElement('a'); a.href = url; a.download = fileName; a.click()
         URL.revokeObjectURL(url)
-        toast.show?.('✅ Evidence report saved!')
+        toast.show?.('âœ… Evidence report saved!')
       }
     } catch (e: any) {
       toast.show?.(`Error: ${e.message}`)
@@ -952,7 +952,7 @@ function EvidenceReportCard({ orderId, supabase, toast }: any) {
 }
 
 
-// ── Resizable Textarea (matches Dart GestureDetector onVerticalDragUpdate) ──
+// â”€â”€ Resizable Textarea (matches Dart GestureDetector onVerticalDragUpdate) â”€â”€
 function ResizableTextarea({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [height, setHeight] = useState(200)
   const dragging = useRef(false)
@@ -994,9 +994,9 @@ function ResizableTextarea({ value, onChange }: { value: string; onChange: (v: s
 }
 
 
-// ══════════════════════════════════════════════════════════════
-// MESSAGE DIALOG — 9 UX upgrades (1:1 Dart conversion)
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// MESSAGE DIALOG â€” 9 UX upgrades (1:1 Dart conversion)
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function MessageDialog({ order, onClose, onSaved, sentMessages, supabase, checklist, toggleStep }: any) {
   const buyerName = order.buyer_username || 'Buyer'
   const itemTitle = order.item_title     || 'your item'
@@ -1021,13 +1021,13 @@ Thank you for your purchase!`,
     'High-Risk':
 `Hi ${buyerName},
 
-Thank you for your order of "${itemTitle}" (Order #${orderId} — ${currSym}${itemPrice}).
+Thank you for your order of "${itemTitle}" (Order #${orderId} â€” ${currSym}${itemPrice}).
 
 Before I ship, I want to confirm:
-✅ Item has been video recorded showing full condition
-✅ Packing process is being filmed (uncut)
-✅ Signature will be required on delivery
-✅ Full insurance has been added
+âœ… Item has been video recorded showing full condition
+âœ… Packing process is being filmed (uncut)
+âœ… Signature will be required on delivery
+âœ… Full insurance has been added
 
 Your tracking number will be sent immediately upon shipment. All evidence is stored securely.
 
@@ -1040,7 +1040,7 @@ I hope your order "${itemTitle}" (Order #${orderId}) has arrived safely!
 
 Could you please confirm receipt when you get a chance? I want to make sure everything arrived in perfect condition as described.
 
-If there are any issues at all, please message me BEFORE opening a case — I'm always happy to resolve any problems quickly and fairly!
+If there are any issues at all, please message me BEFORE opening a case â€” I'm always happy to resolve any problems quickly and fairly!
 
 Thank you!`,
 
@@ -1053,9 +1053,9 @@ I hope you're absolutely delighted with your order. Your satisfaction means ever
 
 If you're happy with your purchase, I'd really appreciate a positive review when you get a chance!
 
-Feel free to check out my other listings — I have many more great items available.
+Feel free to check out my other listings â€” I have many more great items available.
 
-Thanks again for your business! 😊`,
+Thanks again for your business! ðŸ˜Š`,
   }
 
   // Update 1: Risk-aware auto-selection
@@ -1070,7 +1070,7 @@ Thanks again for your business! 😊`,
   function templateTip() {
     switch (selected) {
       case 'High-Risk':  return 'Send this BEFORE shipping. It creates a paper trail showing you notified the buyer of all protection steps taken.'
-      case 'Follow-Up':  return 'Send 2–3 days after estimated delivery. Ask the buyer to confirm receipt before they open any case.'
+      case 'Follow-Up':  return 'Send 2â€“3 days after estimated delivery. Ask the buyer to confirm receipt before they open any case.'
       case 'Thank You':  return 'Send after confirmed delivery. A warm thank-you often prevents negative feedback and encourages repeat business.'
       default:           return 'Send this as soon as you have a tracking number. Buyers who receive proactive updates are far less likely to open disputes.'
     }
@@ -1079,11 +1079,11 @@ Thanks again for your business! 😊`,
   // Update 6: Smart char counter guidance
   function charGuidance(len: number) {
     if (selected === 'High-Risk' || isRisky) {
-      if (len >= 600) return '✅ Good detail — dispute-ready'
-      if (len >= 300) return '⚠️ Add more detail for high-risk orders'
-      return '❌ Too short for a high-risk buyer'
+      if (len >= 600) return 'âœ… Good detail â€” dispute-ready'
+      if (len >= 300) return 'âš ï¸ Add more detail for high-risk orders'
+      return 'âŒ Too short for a high-risk buyer'
     }
-    return len >= 200 ? '✅ Good length' : 'Short — consider adding more'
+    return len >= 200 ? 'âœ… Good length' : 'Short â€” consider adding more'
   }
 
   function charColor(len: number) {
@@ -1121,7 +1121,7 @@ Thanks again for your business! 😊`,
       <div className="bg-white rounded-2xl max-w-[580px] w-full max-h-[90vh] flex flex-col overflow-hidden border"
            style={{ borderColor: C.border }}>
 
-        {/* Header — Update 2 */}
+        {/* Header â€” Update 2 */}
         <div className="flex items-center gap-3 px-5 py-4 border-b shrink-0" style={{ borderColor: C.border, backgroundColor: C.surface }}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                style={{ backgroundColor: C.statusShipped }}>
@@ -1138,7 +1138,7 @@ Thanks again for your business! 😊`,
             {showHist ? <FileText size={12} /> : <History size={12} />}
             {showHist ? 'Compose' : 'History'}
           </button>
-          {/* X close — red on hover */}
+          {/* X close â€” red on hover */}
           <button onClick={onClose}
             className="w-7 h-7 rounded-lg border flex items-center justify-center transition-all ml-1"
             style={{ borderColor: C.border }}
@@ -1193,8 +1193,8 @@ Thanks again for your business! 😊`,
                   <Shield size={14} style={{ color: riskLevel === 'HIGH' ? C.riskHigh : C.riskMedium }} />
                   <p className="text-[11px] font-semibold flex-1" style={{ color: riskLevel === 'HIGH' ? C.riskHigh : C.riskMedium }}>
                     {riskLevel === 'HIGH'
-                      ? '🔴 HIGH RISK — High-Risk template pre-selected'
-                      : `🟡 MEDIUM RISK (score ${riskScore}) — High-Risk template recommended`}
+                      ? 'ðŸ”´ HIGH RISK â€” High-Risk template pre-selected'
+                      : `ðŸŸ¡ MEDIUM RISK (score ${riskScore}) â€” High-Risk template recommended`}
                   </p>
                 </div>
               )}
@@ -1229,7 +1229,7 @@ Thanks again for your business! 😊`,
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     { label: buyerName, color: C.accentDeep, bg: C.accentDim },
-                    { label: itemTitle.length > 22 ? itemTitle.substring(0, 22) + '…' : itemTitle, color: '#1565C0', bg: '#E8F0FF' },
+                    { label: itemTitle.length > 22 ? itemTitle.substring(0, 22) + 'â€¦' : itemTitle, color: '#1565C0', bg: '#E8F0FF' },
                     { label: `Order #${orderId}`, color: '#1565C0', bg: '#E8F0FF' },
                     { label: `${currSym}${itemPrice}`, color: '#2E7D32', bg: '#E8F5E9' },
                   ].map((c, i) => (
@@ -1249,12 +1249,12 @@ Thanks again for your business! 😊`,
                   {body.split('\n').length > 3 && (
                     <button onClick={() => setPreviewExpanded(e => !e)}
                       className="ml-auto text-[10px] font-semibold" style={{ color: C.accentDeep }}>
-                      {previewExpanded ? 'Show less ▲' : 'Show more ▼'}
+                      {previewExpanded ? 'Show less â–²' : 'Show more â–¼'}
                     </button>
                   )}
                 </div>
                 <p className="text-[12px] leading-relaxed whitespace-pre-wrap" style={{ color: C.textSecondary }}>
-                  {previewExpanded ? body : body.split('\n').slice(0, 3).join('\n') + (body.split('\n').length > 3 ? '…' : '')}
+                  {previewExpanded ? body : body.split('\n').slice(0, 3).join('\n') + (body.split('\n').length > 3 ? 'â€¦' : '')}
                 </p>
               </div>
 
@@ -1262,11 +1262,11 @@ Thanks again for your business! 😊`,
               <div className="flex items-center justify-between">
                 <p className="text-[12px] font-semibold" style={{ color: C.textPrimary }}>Message</p>
                 <p className="text-[10px]" style={{ color: charColor(body.length) }}>
-                  {body.length} chars · {charGuidance(body.length)}
+                  {body.length} chars Â· {charGuidance(body.length)}
                 </p>
               </div>
 
-              {/* Resizable textarea — matches Dart drag resize */}
+              {/* Resizable textarea â€” matches Dart drag resize */}
               <ResizableTextarea value={body} onChange={setBody} />
 
               {/* Update 7: Context tip */}
@@ -1279,7 +1279,7 @@ Thanks again for your business! 😊`,
           )}
         </div>
 
-        {/* Footer — Update 8: Button hierarchy */}
+        {/* Footer â€” Update 8: Button hierarchy */}
         {!showHist ? (
           <div className="flex items-center gap-2 px-5 py-4 border-t shrink-0" style={{ borderColor: C.border }}>
             {/* Copy Only button */}
@@ -1294,7 +1294,7 @@ Thanks again for your business! 😊`,
                 <p className="text-[9px]" style={{ color: C.textHint }}>(no history)</p>
               </div>
             </button>
-            {/* Cancel — red on hover */}
+            {/* Cancel â€” red on hover */}
             <button onClick={onClose}
               className="px-3 py-2 rounded-lg border text-[12px] font-semibold transition-all"
               style={{ borderColor: C.border, color: C.textSecondary }}
@@ -1310,7 +1310,7 @@ Thanks again for your business! 😊`,
                 btn.style.borderColor = C.border
                 btn.style.color = C.textSecondary
               }}>Cancel</button>
-            {/* Save & Copy — primary lime */}
+            {/* Save & Copy â€” primary lime */}
             <button onClick={handleSave} disabled={saving}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-bold transition-all disabled:opacity-40"
               style={{ backgroundColor: C.accent, color: C.accentDark }}
@@ -1334,9 +1334,9 @@ Thanks again for your business! 😊`,
 }
 
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SHIP DIALOG
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function ShipDialog({ order, onClose, onShipped, supabase }: any) {
   const [carrier,    setCarrier]    = useState('UPS')
   const [tracking,   setTracking]   = useState('')
@@ -1383,9 +1383,9 @@ function ShipDialog({ order, onClose, onShipped, supabase }: any) {
             <span className="text-[18px] font-bold" style={{ color: C.textPrimary }}>Order Shipped!</span>
           </div>
           <div className="space-y-2 mb-5">
-            <p className="text-[14px]" style={{ color: C.textPrimary }}>✅ Tracking: {tracking}</p>
-            <p className="text-[14px]" style={{ color: C.textPrimary }}>✅ Expected: {expDelivery.toLocaleDateString()}</p>
-            {autoMsg && <p className="text-[14px]" style={{ color: C.textPrimary }}>✅ Buyer notified automatically</p>}
+            <p className="text-[14px]" style={{ color: C.textPrimary }}>âœ… Tracking: {tracking}</p>
+            <p className="text-[14px]" style={{ color: C.textPrimary }}>âœ… Expected: {expDelivery.toLocaleDateString()}</p>
+            {autoMsg && <p className="text-[14px]" style={{ color: C.textPrimary }}>âœ… Buyer notified automatically</p>}
           </div>
           <button onClick={() => { onShipped() }}
             className="w-full py-2.5 rounded-xl text-[14px] font-bold"
@@ -1472,9 +1472,9 @@ function ShipDialog({ order, onClose, onShipped, supabase }: any) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
-// CANCEL ORDER FLOW — 3 steps
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// CANCEL ORDER FLOW â€” 3 steps
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function CancelOrderFlow({ order, onClose }: any) {
   const [step,   setStep]   = useState(1)
   const [reason, setReason] = useState('')
@@ -1483,7 +1483,7 @@ function CancelOrderFlow({ order, onClose }: any) {
     { key: 'out_of_stock',    label: 'Item out of stock / unavailable',     defect: true,  consequence: 'A defect will be added to your seller account. Too many can affect your seller level.', tip: 'End your listing immediately to prevent further purchases of an unavailable item.' },
     { key: 'address_problem', label: 'Problem with delivery address',       defect: false, consequence: 'No defect if buyer confirms. Document the conversation in eBay messages.', tip: 'Ask the buyer to update their address first. If they cannot, proceed with cancellation.' },
     { key: 'buyer_mistake',   label: 'Buyer made a mistake / changed mind', defect: false, consequence: 'No defect if buyer confirms. Select "Buyer requested" in eBay cancellation form.', tip: 'Get written confirmation from the buyer via eBay messages before cancelling.' },
-    { key: 'suspicious_buyer', label: 'Suspicious buyer — protecting myself', defect: true,  consequence: 'May add a defect. However protecting yourself from a fraudulent buyer is worth it.', tip: 'Document all suspicious activity. Report the buyer after cancelling via buyer profile panel.' },
+    { key: 'suspicious_buyer', label: 'Suspicious buyer â€” protecting myself', defect: true,  consequence: 'May add a defect. However protecting yourself from a fraudulent buyer is worth it.', tip: 'Document all suspicious activity. Report the buyer after cancelling via buyer profile panel.' },
   ]
   const sel = REASONS.find(r => r.key === reason)
 
@@ -1555,7 +1555,7 @@ function CancelOrderFlow({ order, onClose }: any) {
               <button onClick={() => reason && setStep(2)} disabled={!reason}
                 className="w-full py-3 rounded-xl text-[14px] font-bold text-white disabled:opacity-40"
                 style={{ backgroundColor: C.riskHigh }}>
-                Next →
+                Next â†’
               </button>
             </div>
           )}
@@ -1569,7 +1569,7 @@ function CancelOrderFlow({ order, onClose }: any) {
                 <div className="flex items-start gap-2.5">
                   {sel.defect ? <AlertTriangle size={16} style={{ color: C.riskHigh }} /> : <CheckCircle size={16} style={{ color: C.riskLow }} />}
                   <div>
-                    <p className="text-[12px] font-bold" style={{ color: sel.defect ? C.riskHigh : C.riskLow }}>{sel.defect ? 'Account Defect Warning' : 'No Defect — Safe to Cancel'}</p>
+                    <p className="text-[12px] font-bold" style={{ color: sel.defect ? C.riskHigh : C.riskLow }}>{sel.defect ? 'Account Defect Warning' : 'No Defect â€” Safe to Cancel'}</p>
                     <p className="text-[11px] mt-1" style={{ color: sel.defect ? C.riskHigh : C.riskLow }}>{sel.consequence}</p>
                   </div>
                 </div>
@@ -1581,8 +1581,8 @@ function CancelOrderFlow({ order, onClose }: any) {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => setStep(1)} className="px-4 py-2.5 rounded-xl border text-[13px] font-semibold" style={{ borderColor: C.border, color: C.textHint }}>← Back</button>
-                <button onClick={() => setStep(3)} className="flex-1 py-2.5 rounded-xl text-white text-[13px] font-bold" style={{ backgroundColor: C.riskHigh }}>I Understand — Continue →</button>
+                <button onClick={() => setStep(1)} className="px-4 py-2.5 rounded-xl border text-[13px] font-semibold" style={{ borderColor: C.border, color: C.textHint }}>â† Back</button>
+                <button onClick={() => setStep(3)} className="flex-1 py-2.5 rounded-xl text-white text-[13px] font-bold" style={{ backgroundColor: C.riskHigh }}>I Understand â€” Continue â†’</button>
               </div>
             </div>
           )}
@@ -1620,9 +1620,9 @@ function CancelOrderFlow({ order, onClose }: any) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // INAD POLICY PANEL
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function InadPanel({ order, onClose }: any) {
   const riskLevel  = (order.risk_level || 'LOW').toUpperCase()
   const itemPrice  = Number(order.item_price || 0)
@@ -1678,7 +1678,7 @@ function InadPanel({ order, onClose }: any) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
 
-          {/* 1. Order context card — matches Dart _showInadPolicyPanel order context */}
+          {/* 1. Order context card â€” matches Dart _showInadPolicyPanel order context */}
           <div className="p-3.5 rounded-xl border" style={{ backgroundColor: riskColor(riskLevel) + '1A', borderColor: riskColor(riskLevel) + '50' }}>
             <div className="flex items-center gap-1.5 mb-2">
               <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: '#9C27B01A' }}>
@@ -1693,11 +1693,11 @@ function InadPanel({ order, onClose }: any) {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {[
-                riskLevel === 'HIGH' ? '🔴 HIGH RISK' : riskLevel === 'MEDIUM' ? '🟡 MEDIUM RISK' : '🟢 LOW RISK',
-                isElectronics && '📱 Electronics',
-                isHighValue  && '💰 High Value',
-                hasSig       && '✍️ Sig Required',
-                hasTracking  && '📦 Tracked',
+                riskLevel === 'HIGH' ? 'ðŸ”´ HIGH RISK' : riskLevel === 'MEDIUM' ? 'ðŸŸ¡ MEDIUM RISK' : 'ðŸŸ¢ LOW RISK',
+                isElectronics && 'ðŸ“± Electronics',
+                isHighValue  && 'ðŸ’° High Value',
+                hasSig       && 'âœï¸ Sig Required',
+                hasTracking  && 'ðŸ“¦ Tracked',
               ].filter(Boolean).map((tag: any, i) => (
                 <span key={i} className="px-2 py-0.5 rounded text-[10px] font-semibold"
                       style={{ backgroundColor: '#E8F0FF', color: '#1565C0' }}>{tag}</span>
@@ -1705,7 +1705,7 @@ function InadPanel({ order, onClose }: any) {
             </div>
           </div>
 
-          {/* 2. Protection status banner — matches Dart */}
+          {/* 2. Protection status banner â€” matches Dart */}
           <div className="p-3 rounded-xl border" style={{
             backgroundColor: order.checklist_completed ? C.riskLowBg : C.riskHighBg,
             borderColor: order.checklist_completed ? C.riskLow + '50' : C.riskHigh + '50'
@@ -1717,8 +1717,8 @@ function InadPanel({ order, onClose }: any) {
               <div>
                 <p className="text-[12px] font-bold" style={{ color: order.checklist_completed ? C.riskLow : C.riskHigh }}>
                   {order.checklist_completed
-                    ? 'Evidence Vault Complete — You Are Protected'
-                    : 'Evidence Vault Incomplete — You Are At Risk'}
+                    ? 'Evidence Vault Complete â€” You Are Protected'
+                    : 'Evidence Vault Incomplete â€” You Are At Risk'}
                 </p>
                 <p className="text-[11px] mt-1" style={{ color: order.checklist_completed ? C.riskLow : C.riskHigh }}>
                   {order.checklist_completed
@@ -1729,7 +1729,7 @@ function InadPanel({ order, onClose }: any) {
             </div>
           </div>
 
-          {/* 3. What is INAD — matches Dart _inadSection + _inadInfoCard */}
+          {/* 3. What is INAD â€” matches Dart _inadSection + _inadInfoCard */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#9C27B01A' }}>
@@ -1747,7 +1747,7 @@ function InadPanel({ order, onClose }: any) {
             </div>
           </div>
 
-          {/* 4. Rules — matches Dart exactly with all 4 rules */}
+          {/* 4. Rules â€” matches Dart exactly with all 4 rules */}
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#9C27B01A' }}>
@@ -1756,11 +1756,11 @@ function InadPanel({ order, onClose }: any) {
               <p className="text-[13px] font-bold" style={{ color: C.textPrimary }}>Rules That Apply To This Order</p>
             </div>
             {[
-              { title: 'Proof of Delivery Required', body: 'You must provide tracking showing delivery to the buyer address. Without tracking, eBay will side with the buyer.', status: hasTracking ? 'done' : 'warn', statusText: hasTracking ? 'Tracking added ✓' : 'No tracking — add before shipping!' },
-              isHighValue ? { title: `Signature Confirmation ($${itemPrice.toFixed(0)} order)`, body: `Orders over $${sigThreshold} require signature confirmation. Without it, you may lose an INR or INAD claim.`, status: hasSig ? 'done' : 'warn', statusText: hasSig ? 'Signature required ✓' : 'Enable signature-required shipping!' } : null,
-              isElectronics ? { title: 'Electronics — Serial Number Documentation', body: 'For electronics, photograph the serial number before dispatch. Buyers sometimes swap components and claim INAD. Serial number proof is your strongest defence.', status: 'info', statusText: 'Photograph serial number before dispatch' } : null,
-              isHighRisk ? { title: 'High Risk Buyer — Video Evidence', body: 'This buyer is flagged HIGH RISK. Record a packing video showing the item condition, all accessories, and packaging before sealing the box.', status: 'warn', statusText: 'Video evidence strongly recommended' } : null,
-              { title: 'Listing Description Must Match Item', body: 'Your listing condition, photos, and description must exactly match what you ship. Any discrepancy — even minor — gives the buyer grounds for INAD.', status: 'info', statusText: 'Verify listing matches item before shipping' },
+              { title: 'Proof of Delivery Required', body: 'You must provide tracking showing delivery to the buyer address. Without tracking, eBay will side with the buyer.', status: hasTracking ? 'done' : 'warn', statusText: hasTracking ? 'Tracking added âœ“' : 'No tracking â€” add before shipping!' },
+              isHighValue ? { title: `Signature Confirmation ($${itemPrice.toFixed(0)} order)`, body: `Orders over $${sigThreshold} require signature confirmation. Without it, you may lose an INR or INAD claim.`, status: hasSig ? 'done' : 'warn', statusText: hasSig ? 'Signature required âœ“' : 'Enable signature-required shipping!' } : null,
+              isElectronics ? { title: 'Electronics â€” Serial Number Documentation', body: 'For electronics, photograph the serial number before dispatch. Buyers sometimes swap components and claim INAD. Serial number proof is your strongest defence.', status: 'info', statusText: 'Photograph serial number before dispatch' } : null,
+              isHighRisk ? { title: 'High Risk Buyer â€” Video Evidence', body: 'This buyer is flagged HIGH RISK. Record a packing video showing the item condition, all accessories, and packaging before sealing the box.', status: 'warn', statusText: 'Video evidence strongly recommended' } : null,
+              { title: 'Listing Description Must Match Item', body: 'Your listing condition, photos, and description must exactly match what you ship. Any discrepancy â€” even minor â€” gives the buyer grounds for INAD.', status: 'info', statusText: 'Verify listing matches item before shipping' },
             ].filter(Boolean).map((rule: any, i) => {
               const isDone = rule.status === 'done'
               const isInfo = rule.status === 'info'
@@ -1781,7 +1781,7 @@ function InadPanel({ order, onClose }: any) {
             })}
           </div>
 
-          {/* 5. How to win — matches Dart _inadWinStep */}
+          {/* 5. How to win â€” matches Dart _inadWinStep */}
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#9C27B01A' }}>
@@ -1822,9 +1822,9 @@ function InadPanel({ order, onClose }: any) {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
-// EVIDENCE DIALOG — 1:1 match with Dart _showAddEvidenceDialog
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// EVIDENCE DIALOG â€” 1:1 match with Dart _showAddEvidenceDialog
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: any) {
   const [tab,            setTab]            = useState<'photo'|'link'>('photo')
   const [selType,        setSelType]        = useState('serial_number')
@@ -1833,7 +1833,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
   const [linkMsg,        setLinkMsg]        = useState('')
   const [notesVal,       setNotesVal]       = useState('')
   const [saving,         setSaving]         = useState(false)
-  // sessionUploads — files added this session before saving (matches Dart sessionUploads list)
+  // sessionUploads â€” files added this session before saving (matches Dart sessionUploads list)
   const [sessionUploads, setSessionUploads] = useState<any[]>([])
 
   const uploaded = new Set(evidence.map((e: any) => e.checklist_step || e.evidence_type))
@@ -1845,7 +1845,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
     { key: 'weight_receipt', icon: Receipt,  label: 'Weight Receipt', hint: 'From carrier'           },
   ]
   const videoTypes = [
-    { key: 'packing_video',  icon: Video,    label: 'Packing Video',  hint: 'Uncut 2–5 min'         },
+    { key: 'packing_video',  icon: Video,    label: 'Packing Video',  hint: 'Uncut 2â€“5 min'         },
   ]
   const isPhotoTab    = tab === 'photo'
   const currentTypes  = isPhotoTab ? photoTypes : videoTypes
@@ -1861,7 +1861,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
   // sessionCount matches Dart: sessionUploads.length + (linkFilled ? 1 : 0)
   const sessionCount = sessionUploads.length + (isPhotoTab ? 0 : linkFilled ? 1 : 0)
 
-  // Link validator — matches Dart 800ms debounce
+  // Link validator â€” matches Dart 800ms debounce
   function handleLinkChange(val: string) {
     setLinkUrl(val)
     setLinkStatus('idle'); setLinkMsg('')
@@ -1877,19 +1877,19 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
         setLinkMsg(providerName(val))
       } else {
         setLinkStatus('warning')
-        setLinkMsg('Unknown provider — make sure link is public')
+        setLinkMsg('Unknown provider â€” make sure link is public')
       }
     }, 800)
   }
 
   function providerName(url: string) {
-    if (url.includes('drive.google.com'))  return 'Google Drive — link detected ✓'
-    if (url.includes('photos.google.com') || url.includes('photos.app.goo.gl')) return 'Google Photos — link detected ✓'
-    if (url.includes('dropbox.com'))       return 'Dropbox — link detected ✓'
-    if (url.includes('icloud.com'))        return 'iCloud — link detected ✓'
-    if (url.includes('onedrive.live.com') || url.includes('1drv.ms')) return 'OneDrive — link detected ✓'
-    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube — link detected ✓'
-    return 'Valid link detected ✓'
+    if (url.includes('drive.google.com'))  return 'Google Drive â€” link detected âœ“'
+    if (url.includes('photos.google.com') || url.includes('photos.app.goo.gl')) return 'Google Photos â€” link detected âœ“'
+    if (url.includes('dropbox.com'))       return 'Dropbox â€” link detected âœ“'
+    if (url.includes('icloud.com'))        return 'iCloud â€” link detected âœ“'
+    if (url.includes('onedrive.live.com') || url.includes('1drv.ms')) return 'OneDrive â€” link detected âœ“'
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube â€” link detected âœ“'
+    return 'Valid link detected âœ“'
   }
 
   function dbEvidenceType(type: string) {
@@ -1951,7 +1951,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
         saved++
       }
 
-      toast.show?.(`${saved} evidence item${saved > 1 ? 's' : ''} saved — vault updated!`)
+      toast.show?.(`${saved} evidence item${saved > 1 ? 's' : ''} saved â€” vault updated!`)
       onSaved()
     } catch (e: any) { console.error(e); toast.show?.('Error saving evidence') }
     finally { setSaving(false) }
@@ -1966,7 +1966,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
       <div className="bg-white rounded-2xl max-w-lg w-full flex flex-col border"
            style={{ borderColor: C.border, maxHeight: '85vh' }}>
 
-        {/* Header — with sessionCount badge (matches Dart) */}
+        {/* Header â€” with sessionCount badge (matches Dart) */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b shrink-0" style={{ borderColor: C.border }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: C.accent }}>
             <Shield size={15} style={{ color: C.accentDark }} />
@@ -1974,10 +1974,10 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-bold" style={{ color: C.textPrimary }}>Evidence Vault</p>
             <p className="text-[10px]" style={{ color: C.textSecondary }}>
-              {evidence.length > 0 ? `${evidence.length} saved · add more or remove` : 'Select type → upload → repeat as needed'}
+              {evidence.length > 0 ? `${evidence.length} saved Â· add more or remove` : 'Select type â†’ upload â†’ repeat as needed'}
             </p>
           </div>
-          {/* Session count badge — matches Dart */}
+          {/* Session count badge â€” matches Dart */}
           {sessionCount > 0 && (
             <div className="px-2.5 py-1 rounded-full text-[10px] font-bold mr-1"
                  style={{ backgroundColor: C.accent, color: C.accentDark }}>
@@ -2006,7 +2006,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
-          {/* Already in vault — matches Dart */}
+          {/* Already in vault â€” matches Dart */}
           {evidence.length > 0 && (
             <div className="space-y-2">
               <p className="text-[9px] font-bold tracking-[0.6px]" style={{ color: C.textHint }}>ALREADY IN VAULT</p>
@@ -2050,7 +2050,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
             </div>
           )}
 
-          {/* Tab selector — matches Dart _evidenceTabBtn */}
+          {/* Tab selector â€” matches Dart _evidenceTabBtn */}
           <div className="grid grid-cols-2 gap-2">
             {[['photo', UploadCloud, 'Upload Photo'], ['link', Video, 'Add Video Link']].map(([t, Icon, label]: any) => (
               <button key={t} onClick={() => {
@@ -2065,10 +2065,10 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
             ))}
           </div>
 
-          {/* Evidence type pills — matches Dart exactly including locked/inSession states */}
+          {/* Evidence type pills â€” matches Dart exactly including locked/inSession states */}
           <div className="space-y-2">
             <p className="text-[9px] font-bold tracking-[0.6px]" style={{ color: C.textHint }}>EVIDENCE TYPE</p>
-            <p className="text-[9px]" style={{ color: C.textHint }}>Locked types are already saved — delete first to replace</p>
+            <p className="text-[9px]" style={{ color: C.textHint }}>Locked types are already saved â€” delete first to replace</p>
             <div className="flex flex-wrap gap-2">
               {currentTypes.map(({ key, icon: TypeIcon, label, hint }) => {
                 const sel       = (effectiveType === key) || (selType === key && !uploaded.has(key))
@@ -2095,7 +2095,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
                       </p>
                       <p className="text-[9px] leading-tight"
                          style={{ color: locked ? C.textHint : inSession ? C.accentDeep : C.textHint }}>
-                        {locked ? 'Saved — delete to replace' : inSession ? 'Ready to save ✓' : hint}
+                        {locked ? 'Saved â€” delete to replace' : inSession ? 'Ready to save âœ“' : hint}
                       </p>
                     </div>
                     {locked && <Lock size={10} style={{ color: C.textHint }} />}
@@ -2110,17 +2110,17 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
           {/* Photo tab content */}
           {isPhotoTab && (
             uploaded.has(effectiveType || selType) ? (
-              /* Lock screen — matches Dart */
+              /* Lock screen â€” matches Dart */
               <div className="flex flex-col items-center justify-center py-7 rounded-xl border"
                    style={{ backgroundColor: C.bg, borderColor: C.border }}>
                 <Lock size={26} style={{ color: C.textHint }} />
                 <p className="text-[12px] font-semibold mt-2.5" style={{ color: C.textSecondary }}>This type is already saved</p>
                 <p className="text-[10px] text-center mt-1 px-4" style={{ color: C.textHint }}>
-                  Delete it from "Already in Vault" above — then come back to upload a replacement
+                  Delete it from "Already in Vault" above â€” then come back to upload a replacement
                 </p>
               </div>
             ) : (
-              /* Drop zone — matches Dart _EvidenceDropZone */
+              /* Drop zone â€” matches Dart _EvidenceDropZone */
               <div>
                 <p className="text-[9px] font-bold tracking-[0.6px] mb-2" style={{ color: C.textHint }}>
                   {`UPLOAD FOR: ${currentTypes.find(t => t.key === (effectiveType || selType))?.label?.toUpperCase()}`}
@@ -2130,7 +2130,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
                   alreadyAdded={sessionUploads.some(u => u.type === (effectiveType || selType))}
                   onFilePicked={(name: string, size: string, bytes: Uint8Array) => {
                     if (sessionUploads.some(u => u.type === (effectiveType || selType))) {
-                      toast.show?.('Already added — select another type'); return
+                      toast.show?.('Already added â€” select another type'); return
                     }
                     setSessionUploads(prev => [...prev, { type: effectiveType || selType, name, size, bytes, url: '' }])
                   }}
@@ -2146,7 +2146,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
               {/* Warning */}
               <div className="flex items-start gap-2 p-2.5 rounded-lg border" style={{ backgroundColor: '#FFFBEA', borderColor: C.riskMedium + '4D' }}>
                 <AlertTriangle size={11} style={{ color: C.riskMedium, marginTop: 1 }} />
-                <p className="text-[10px]" style={{ color: C.riskMedium }}>Set link to "Anyone with link can view" — private links fail in disputes</p>
+                <p className="text-[10px]" style={{ color: C.riskMedium }}>Set link to "Anyone with link can view" â€” private links fail in disputes</p>
               </div>
               {/* Link input with live validator */}
               <div className="relative">
@@ -2181,7 +2181,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
                   return (
                     <div key={name} className="flex items-center gap-1 px-2 py-1 rounded-full border text-[10px]"
                          style={{ backgroundColor: active ? C.accentDim : C.bg, borderColor: active ? C.accent : C.border, color: active ? C.accentDeep : C.textHint, fontWeight: active ? 700 : 400 }}>
-                      ☁️ {name}
+                      â˜ï¸ {name}
                     </div>
                   )
                 })}
@@ -2197,7 +2197,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
             </div>
           )}
 
-          {/* Session uploads — matches Dart "UPLOADED THIS SESSION" */}
+          {/* Session uploads â€” matches Dart "UPLOADED THIS SESSION" */}
           {sessionUploads.length > 0 && (
             <div className="space-y-2">
               <div className="border-t pt-2" style={{ borderColor: C.border }}>
@@ -2230,10 +2230,10 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
           )}
         </div>
 
-        {/* Footer — "No minimum — upload 1 or all 5" + Save N Items button */}
+        {/* Footer â€” "No minimum â€” upload 1 or all 5" + Save N Items button */}
         <div className="flex items-center gap-2 px-4 py-3 border-t shrink-0" style={{ borderColor: C.border }}>
           <Info size={11} style={{ color: C.textHint }} />
-          <span className="flex-1 text-[10px]" style={{ color: C.textHint }}>No minimum — upload 1 or all 5</span>
+          <span className="flex-1 text-[10px]" style={{ color: C.textHint }}>No minimum â€” upload 1 or all 5</span>
           <button onClick={onClose}
             className="px-3 py-2 rounded-lg border text-[12px] font-semibold transition-all"
             style={{ borderColor: C.border, color: C.textSecondary }}
@@ -2263,7 +2263,7 @@ function EvidenceDialog({ order, evidence, onClose, onSaved, supabase, toast }: 
   )
 }
 
-// ── Drop zone component (matches Dart _EvidenceDropZone) ──
+// â”€â”€ Drop zone component (matches Dart _EvidenceDropZone) â”€â”€
 function DropZone({ selType, alreadyAdded, onFilePicked }: any) {
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -2279,7 +2279,7 @@ function DropZone({ selType, alreadyAdded, onFilePicked }: any) {
     if (!['image/jpeg','image/jpg','image/png','image/webp'].includes(file.type)) {
       alert('Only JPG / PNG files allowed'); return
     }
-    if (file.size > 5 * 1024 * 1024) { alert('File too large — max 5 MB'); return }
+    if (file.size > 5 * 1024 * 1024) { alert('File too large â€” max 5 MB'); return }
     const reader = new FileReader()
     reader.onload = e => {
       const bytes = new Uint8Array(e.target?.result as ArrayBuffer)
@@ -2311,10 +2311,10 @@ function DropZone({ selType, alreadyAdded, onFilePicked }: any) {
         <UploadCloud size={20} style={{ color: done || isDragging ? C.accentDark : C.accentDeep }} />
       </div>
       <p className="text-[12px] font-bold" style={{ color: C.accentDeep, fontFamily: 'var(--font-space-grotesk)' }}>
-        {done ? 'Photo added ✓' : isDragging ? 'Drop photo here' : 'Tap to choose or drag & drop'}
+        {done ? 'Photo added âœ“' : isDragging ? 'Drop photo here' : 'Tap to choose or drag & drop'}
       </p>
       <p className="text-[10px] mt-0.5" style={{ color: C.textHint }}>
-        {done ? 'Select another type to add more' : 'JPG or PNG — max 5 MB'}
+        {done ? 'Select another type to add more' : 'JPG or PNG â€” max 5 MB'}
       </p>
     </div>
   )

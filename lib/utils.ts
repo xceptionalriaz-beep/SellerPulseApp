@@ -1,12 +1,12 @@
-import { clsx, type ClassValue } from 'clsx'
+﻿import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
-// ─── Class Name Helper ────────────────────────────────────────────────────────
+// â”€â”€â”€ Class Name Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// ─── Risk Level Helpers ───────────────────────────────────────────────────────
+// â”€â”€â”€ Risk Level Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function getRiskColors(level: 'HIGH' | 'MEDIUM' | 'LOW') {
   switch (level) {
     case 'HIGH':
@@ -33,7 +33,7 @@ export function getRiskColors(level: 'HIGH' | 'MEDIUM' | 'LOW') {
   }
 }
 
-// ─── Format Helpers ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Format Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function formatCurrency(amount: number, symbol = '$'): string {
   return `${symbol}${amount.toFixed(2)}`
 }
@@ -67,7 +67,7 @@ export function timeAgo(dateString: string): string {
   return `${days}d ago`
 }
 
-// ─── String Helpers ───────────────────────────────────────────────────────────
+// â”€â”€â”€ String Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function truncate(str: string, length: number): string {
   return str.length > length ? `${str.substring(0, length)}...` : str
 }
@@ -81,7 +81,7 @@ export function initials(name: string): string {
     .slice(0, 2)
 }
 
-// ─── eBay Fee Calculator ──────────────────────────────────────────────────────
+// â”€â”€â”€ eBay Fee Calculator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Based on standard eBay fee structure
 export function calculateEbayFees(salePrice: number, shippingCost: number = 0): {
   finalValueFee: number
@@ -95,7 +95,7 @@ export function calculateEbayFees(salePrice: number, shippingCost: number = 0): 
   return { finalValueFee, paymentFee, totalFees }
 }
 
-// ─── Debounce ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Debounce â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delay: number

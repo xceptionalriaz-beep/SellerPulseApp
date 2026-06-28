@@ -1,4 +1,4 @@
-// lib/math-engine.ts
+﻿// lib/math-engine.ts
 // Converted 1:1 from lib/widgets/math_engine.dart
 
 export interface CalculatorResult {
@@ -48,7 +48,7 @@ export class MathEngine {
     sellerLevel:       string
     country:           string
     paymentProcessor:  string
-    isInternational:   boolean  // ✨ NEW: Accepts the International toggle state
+    isInternational:   boolean  // âœ¨ NEW: Accepts the International toggle state
     categoryFees:      Record<string, number>
   }): CalculatorResult {
 
@@ -66,7 +66,7 @@ export class MathEngine {
     let activeFeeDecimal = baseFeePercent / 100
     if (sellerLevel.includes('Top Rated')) activeFeeDecimal *= 0.90  // 10% discount on the FVF amount
 
-    // ✨ NEW: Adds the 1.65% International Cross-Border Fee if the toggle is ON!
+    // âœ¨ NEW: Adds the 1.65% International Cross-Border Fee if the toggle is ON!
     if (isInternational) activeFeeDecimal += 0.0165
 
     // 3. Payment Processor Routing

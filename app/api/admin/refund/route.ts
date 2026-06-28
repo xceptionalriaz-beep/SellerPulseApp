@@ -1,4 +1,4 @@
-// app/api/admin/refund/route.ts
+﻿// app/api/admin/refund/route.ts
 // Issues a refund via LemonSqueezy API + sends confirmation email
 
 import { createClient }         from '@supabase/supabase-js'
@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'LemonSqueezy not connected' }, { status: 500 })
     }
 
-    // If no real LS order ID → preview/mock data
-    if (!lsOrderId || lsOrderId === '—') {
-      return NextResponse.json({ error: 'No LemonSqueezy order ID — this is preview data' }, { status: 400 })
+    // If no real LS order ID â†’ preview/mock data
+    if (!lsOrderId || lsOrderId === 'â€”') {
+      return NextResponse.json({ error: 'No LemonSqueezy order ID â€” this is preview data' }, { status: 400 })
     }
 
     // Call LemonSqueezy refund API
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
             plan:          (txn as any)?.plan
                             ? (txn as any).plan.charAt(0).toUpperCase() + (txn as any).plan.slice(1)
                             : 'Starter',
-            invoice:       (txn as any)?.invoice ?? '—',
+            invoice:       (txn as any)?.invoice ?? 'â€”',
             reason:        reasonMap[refundReason] ?? refundReason,
             refundDate:    new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
           }))
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
           await resend.emails.send({
             from:    process.env.RESEND_FROM_EMAIL ?? 'Riazify <notifications@dropnrest.com>',
             to:      userEmail,
-            subject: `Your refund of $${amount.toFixed(2)} has been processed — Riazify`,
+            subject: `Your refund of $${amount.toFixed(2)} has been processed â€” Riazify`,
             html,
           })
         }

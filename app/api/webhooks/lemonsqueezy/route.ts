@@ -1,5 +1,5 @@
-// app/api/webhooks/lemonsqueezy/route.ts
-// LemonSqueezy webhook handler — merged complete version
+﻿// app/api/webhooks/lemonsqueezy/route.ts
+// LemonSqueezy webhook handler â€” merged complete version
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +11,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Verify signature ───────────────────────────────────────────
+// â”€â”€ Verify signature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function verifySignature(payload: string, signature: string, secret: string): boolean {
   try {
     const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
@@ -19,7 +19,7 @@ function verifySignature(payload: string, signature: string, secret: string): bo
   } catch { return false }
 }
 
-// ── Map variant ID to plan name ────────────────────────────────
+// â”€â”€ Map variant ID to plan name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getPlanFromVariantId(variantId: string): string {
   const map: Record<string, string> = {
     '1816372': 'starter',
@@ -32,7 +32,7 @@ function getPlanFromVariantId(variantId: string): string {
   return map[variantId] ?? 'free'
 }
 
-// ── Map variant/product name to plan ──────────────────────────
+// â”€â”€ Map variant/product name to plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getPlanFromName(variantName: string | null, productName: string | null): string {
   const name = (variantName ?? productName ?? '').toLowerCase()
   if (name.includes('growth'))  return 'growth'
@@ -41,7 +41,7 @@ function getPlanFromName(variantName: string | null, productName: string | null)
   return 'starter'
 }
 
-// ── Fire internal webhook (Discord notifications) ─────────────
+// â”€â”€ Fire internal webhook (Discord notifications) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function fireWebhook(req: NextRequest, event_type: string, data: Record<string, any>) {
   try {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${req.headers.get('host')}`
@@ -56,7 +56,7 @@ async function fireWebhook(req: NextRequest, event_type: string, data: Record<st
   } catch {}
 }
 
-// ── Save transaction to DB ─────────────────────────────────────
+// â”€â”€ Save transaction to DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function saveTransaction(data: {
   userId?:        string | null
   userEmail?:     string | null
@@ -93,7 +93,7 @@ async function saveTransaction(data: {
       amount:         data.amount,
       status:         data.status,
       billing:        data.billing ?? 'monthly',
-      payment_method: data.paymentMethod ?? '—',
+      payment_method: data.paymentMethod ?? 'â€”',
       sub_id:         data.lsSubId,
       ls_sub_id:      data.lsSubId,
       ls_order_id:    data.lsOrderId,
@@ -110,7 +110,7 @@ async function saveTransaction(data: {
   }
 }
 
-// ── Update promo code usage count ─────────────────────────────
+// â”€â”€ Update promo code usage count â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function updatePromoUsage(couponCode: string) {
   try {
     const { count } = await (adminClient.from('transactions') as any)
@@ -126,7 +126,7 @@ async function updatePromoUsage(couponCode: string) {
   }
 }
 
-// ── Update profile by user_id (preferred) or email ────────────
+// â”€â”€ Update profile by user_id (preferred) or email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function updateProfile(
   userId:  string | null,
   email:   string | null,
@@ -147,7 +147,7 @@ async function updateProfile(
   }
 }
 
-// ── Enqueue email flow ─────────────────────────────────────────
+// â”€â”€ Enqueue email flow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function enqueueEmail(
   req:           NextRequest,
   trigger_event: string,
@@ -175,7 +175,7 @@ async function enqueueEmail(
   }
 }
 
-// ── Insert admin notification ──────────────────────────────────
+// â”€â”€ Insert admin notification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function notifyAdmin(type: string, title: string, message: string) {
   try {
     await (adminClient.from('admin_notifications') as any).insert({
@@ -190,7 +190,7 @@ async function notifyAdmin(type: string, title: string, message: string) {
   }
 }
 
-// ── Main handler ───────────────────────────────────────────────
+// â”€â”€ Main handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function POST(req: NextRequest) {
   const payload   = await req.text()
   const signature = req.headers.get('x-signature') ?? ''
@@ -229,7 +229,7 @@ export async function POST(req: NextRequest) {
         const plan = variantId
           ? getPlanFromVariantId(variantId)
           : getPlanFromName(obj.first_order_item?.variant_name, obj.first_order_item?.product_name)
-        const amount = obj.total ? `$${(obj.total / 100).toFixed(2)}` : '—'
+        const amount = obj.total ? `$${(obj.total / 100).toFixed(2)}` : 'â€”'
 
         await updateProfile(userId, userEmail, {
           plan_name:           plan,
@@ -255,7 +255,7 @@ export async function POST(req: NextRequest) {
         const plan = variantId
           ? getPlanFromVariantId(variantId)
           : getPlanFromName(obj.variant_name, obj.product_name)
-        const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
+        const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : 'â€”'
         const cardBrand    = obj.card_brand     ?? obj.payment_method_brand     ?? null
         const cardLastFour = obj.card_last_four ?? obj.payment_method_last_four ?? null
 
@@ -294,7 +294,7 @@ export async function POST(req: NextRequest) {
         const plan = variantId
           ? getPlanFromVariantId(variantId)
           : getPlanFromName(obj.variant_name, obj.product_name)
-        const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : '—'
+        const amount = obj.unit_price ? `$${(obj.unit_price / 100).toFixed(2)}` : 'â€”'
 
         if (obj.status === 'active') {
           await updateProfile(userId, userEmail, {
@@ -357,7 +357,7 @@ export async function POST(req: NextRequest) {
         })
         await enqueueEmail(req, 'payment.failed', userId, userEmail)
         await notifyAdmin('payment_failed', 'Payment Failed', `Payment failed for ${userEmail}`)
-        const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
+        const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : 'â€”'
         await fireWebhook(req, 'payment.failed', {
           email: userEmail, amount,
           next_attempt: obj.next_billing_date ?? 'Unknown',
@@ -371,7 +371,7 @@ export async function POST(req: NextRequest) {
           subscription_status: 'active',
           current_period_end:  periodEnd,
         })
-        const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : '—'
+        const amount = obj.billing_price ? `$${(obj.billing_price / 100).toFixed(2)}` : 'â€”'
         await fireWebhook(req, 'payment.recovered', {
           email: userEmail, amount, status: 'Payment succeeded',
         })

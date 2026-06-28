@@ -1,4 +1,4 @@
-// app/api/payments/checkout/route.ts
+﻿// app/api/payments/checkout/route.ts
 // Creates a LemonSqueezy checkout URL for a given plan + billing cycle
 
 import { createClient } from '@supabase/supabase-js'
@@ -10,7 +10,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Variant ID map from ls_config table ───────────────────────
+// â”€â”€ Variant ID map from ls_config table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function getVariantId(plan: string, billing: string): Promise<string | null> {
   const key = `${plan}_${billing}` // e.g. starter_monthly
   const { data } = await (adminClient.from('ls_config') as any)

@@ -1,18 +1,18 @@
-'use client'
+﻿'use client'
 // app/dashboard/page.tsx
 // Converted from: lib/pages/dashboard_home.dart
 //
 // What the Dart version had:
-//   ✅ Greeting header (Good morning/afternoon/evening + name)
-//   ✅ Alert banners (unprotected high-risk, stale orders, no tracking)
-//   ✅ 4 stat cards (Revenue, Protection Rate, At-Risk, Est. Saved)
-//   ✅ Revenue trend line chart (14 days, two lines)
-//   ✅ Risk donut chart (HIGH/MEDIUM/LOW)
-//   ✅ Recent activity feed (orders + messages)
-//   ✅ Action Centre (urgent actions + protected value card)
-//   ✅ Loading state
-//   ✅ Refresh button
-//   ✅ Responsive (mobile/tablet/desktop)
+//   âœ… Greeting header (Good morning/afternoon/evening + name)
+//   âœ… Alert banners (unprotected high-risk, stale orders, no tracking)
+//   âœ… 4 stat cards (Revenue, Protection Rate, At-Risk, Est. Saved)
+//   âœ… Revenue trend line chart (14 days, two lines)
+//   âœ… Risk donut chart (HIGH/MEDIUM/LOW)
+//   âœ… Recent activity feed (orders + messages)
+//   âœ… Action Centre (urgent actions + protected value card)
+//   âœ… Loading state
+//   âœ… Refresh button
+//   âœ… Responsive (mobile/tablet/desktop)
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -30,7 +30,7 @@ import { cn, timeAgo, formatCurrency } from '@/lib/utils'
 import type { Profile } from '@/types/database'
 import QuestWidget from '@/components/QuestWidget'
 
-// ── Design tokens (matches Dart _C class exactly) ──────────────
+// â”€â”€ Design tokens (matches Dart _C class exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   accent:       '#8FFF00',
   accentDeep:   '#4A8F00',
@@ -51,7 +51,7 @@ const C = {
   textHint:     '#8A9E78',
 }
 
-// ── Stat Card ──────────────────────────────────────────────────
+// â”€â”€ Stat Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function StatCard({ icon: Icon, label, value, sub, color, bg, bar, index }: {
   icon: React.ElementType; label: string; value: string; sub: string
   color: string; bg: string; bar?: number; index: number
@@ -82,7 +82,7 @@ function StatCard({ icon: Icon, label, value, sub, color, bg, bar, index }: {
   )
 }
 
-// ── Alert Banner ───────────────────────────────────────────────
+// â”€â”€ Alert Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AlertBanner({ icon: Icon, color, bg, text, sub, action, onTap }: {
   icon: React.ElementType; color: string; bg: string
   text: string; sub: string; action?: string; onTap?: () => void
@@ -109,7 +109,7 @@ function AlertBanner({ icon: Icon, color, bg, text, sub, action, onTap }: {
   )
 }
 
-// ── Activity Item ──────────────────────────────────────────────
+// â”€â”€ Activity Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ActivityItem({ item, onGoToOrders }: {
   item: Record<string, any>; onGoToOrders?: () => void
 }) {
@@ -155,9 +155,9 @@ function ActivityItem({ item, onGoToOrders }: {
   )
 }
 
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN PAGE
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function DashboardHomePage() {
   const router   = useRouter()
   const supabase = createClient()
@@ -176,7 +176,7 @@ export default function DashboardHomePage() {
   const [chartData,    setChartData]    = useState<any[]>([])
   const [activity,     setActivity]     = useState<any[]>([])
 
-  // ── Load all data ─────────────────────────────────────────────
+  // â”€â”€ Load all data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
@@ -263,7 +263,7 @@ export default function DashboardHomePage() {
         acts.push({
           type: 'order', id: o.id,
           title: o.item_title || 'Unknown Item',
-          subtitle: `${o.risk_level || 'LOW'} RISK • $${Number(o.item_price || 0).toFixed(2)}`,
+          subtitle: `${o.risk_level || 'LOW'} RISK â€¢ $${Number(o.item_price || 0).toFixed(2)}`,
           time: o.created_at, risk: o.risk_level,
           status: o.order_status, protected: o.checklist_completed,
         })
@@ -301,7 +301,7 @@ export default function DashboardHomePage() {
     { name: 'Low',    value: stats.lowRisk,  color: C.accentDeep },
   ].filter(d => d.value > 0)
 
-  // ── Loading ───────────────────────────────────────────────────
+  // â”€â”€ Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
       <div className="w-14 h-14 bg-[#F4FFE6] rounded-2xl flex items-center justify-center">
@@ -310,7 +310,7 @@ export default function DashboardHomePage() {
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
         </svg>
       </div>
-      <p className="text-[14px] text-[#4A5E38]">Loading Riazify…</p>
+      <p className="text-[14px] text-[#4A5E38]">Loading Riazifyâ€¦</p>
     </div>
   )
 
@@ -318,12 +318,12 @@ export default function DashboardHomePage() {
     <div className="bg-[#F7F9F5] min-h-full overflow-auto">
       <div className="w-full px-4 md:px-6 lg:px-8 pt-8 pb-10 space-y-6">
 
-        {/* ── HEADER ── */}
+        {/* â”€â”€ HEADER â”€â”€ */}
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-[26px] md:text-[28px] font-extrabold text-[#1A2410] tracking-tight leading-tight"
                 style={{ fontFamily: 'var(--font-space-grotesk)' }}>
-              {greeting}, {firstName}! 👋
+              {greeting}, {firstName}! ðŸ‘‹
             </h1>
             <p className="text-[13px] text-[#4A5E38] mt-1">
               Here&apos;s your Riazify overview for today
@@ -335,19 +335,19 @@ export default function DashboardHomePage() {
           </button>
         </div>
 
-        {/* ── ALERT BANNERS ── */}
+        {/* â”€â”€ ALERT BANNERS â”€â”€ */}
         {(stats.unprotHigh > 0 || stats.stale > 0 || stats.noTracking > 0) && (
           <div className="space-y-2">
             {stats.unprotHigh > 0 && (
               <AlertBanner icon={AlertTriangle} color={C.riskHigh} bg={C.riskHighBg}
                 text={`${stats.unprotHigh} high-risk ${stats.unprotHigh === 1 ? 'order needs' : 'orders need'} protection`}
-                sub={`$${stats.atRisk.toFixed(2)} at risk — complete checklists before shipping`}
+                sub={`$${stats.atRisk.toFixed(2)} at risk â€” complete checklists before shipping`}
                 action="View orders" onTap={goToOrders} />
             )}
             {stats.stale > 0 && (
               <AlertBanner icon={Clock} color={C.riskMed} bg={C.riskMedBg}
                 text={`${stats.stale} ${stats.stale === 1 ? 'order has' : 'orders have'} been pending for 7+ days`}
-                sub="Buyers may open a case — check these orders now"
+                sub="Buyers may open a case â€” check these orders now"
                 action="View orders" onTap={goToOrders} />
             )}
             {stats.noTracking > 0 && (
@@ -359,7 +359,7 @@ export default function DashboardHomePage() {
           </div>
         )}
 
-        {/* ── STAT CARDS ── */}
+        {/* â”€â”€ STAT CARDS â”€â”€ */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard index={0} icon={DollarSign} label="Total Revenue"
             value={`$${stats.totalRevenue.toFixed(2)}`}
@@ -381,10 +381,10 @@ export default function DashboardHomePage() {
             color={C.riskLow} bg={C.riskLowBg} />
         </div>
 
-        {/* ── QUEST WIDGET ── */}
+        {/* â”€â”€ QUEST WIDGET â”€â”€ */}
         <QuestWidget />
 
-        {/* ── CHARTS ── */}
+        {/* â”€â”€ CHARTS â”€â”€ */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
           {/* Revenue Chart */}
@@ -475,7 +475,7 @@ export default function DashboardHomePage() {
           </div>
         </div>
 
-        {/* ── BOTTOM ROW ── */}
+        {/* â”€â”€ BOTTOM ROW â”€â”€ */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
           {/* Recent Activity */}
@@ -487,7 +487,7 @@ export default function DashboardHomePage() {
               </h2>
               <button onClick={goToOrders}
                 className="text-[12px] font-semibold text-[#4A8F00] hover:underline">
-                View all →
+                View all â†’
               </button>
             </div>
             {activity.length === 0 ? (
@@ -540,7 +540,7 @@ export default function DashboardHomePage() {
                     <p className="text-[12px] font-semibold text-[#1A2410]">
                       {stats.stale} {stats.stale === 1 ? 'order' : 'orders'} pending 7+ days
                     </p>
-                    <p className="text-[10px] text-[#4A5E38]">Buyers may open a case — act now</p>
+                    <p className="text-[10px] text-[#4A5E38]">Buyers may open a case â€” act now</p>
                   </div>
                   <ArrowRight size={14} className="shrink-0 text-[#8A9E78]" />
                 </button>

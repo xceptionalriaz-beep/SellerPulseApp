@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/ChromeExtensionTab.tsx
 
 import { useState, useRef } from 'react'
@@ -429,7 +429,7 @@ export default function ChromeExtensionTab(_props: Props) {
                   }} />
                 <button onClick={handleSaveMsg} disabled={isSavingMsg}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold w-fit transition-all hover:opacity-80 disabled:opacity-50"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {isSavingMsg
                     ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                     : msgSaved ? <><Check size={12} /> Saved!</> : 'Save Message'}
@@ -598,7 +598,7 @@ export default function ChromeExtensionTab(_props: Props) {
             <button onClick={handleSaveSelectors}
               disabled={!hasPendingSelectors || isSavingSelectors}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all hover:opacity-80 disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {isSavingSelectors
                 ? <><div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> Saving...</>
                 : <><Check size={12} /> Save All Changes</>}

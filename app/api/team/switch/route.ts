@@ -1,9 +1,9 @@
-// app/api/team/switch/route.ts
-// ─────────────────────────────────────────────────────────────
+﻿// app/api/team/switch/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Team member switches to an owner's account view
 // OR switches back to their own account
 // Sets profiles.active_team_owner_id
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -16,19 +16,19 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller ──────────────────────────────────────
+    // â”€â”€ 1. Verify caller â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: { user: caller } } = await supabase.auth.getUser(token)
     if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // ── 2. Parse body ─────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // ownerId = null means switch back to own account
     const { ownerId } = await req.json()
 
     if (ownerId) {
-      // ── 3. Verify caller is actually a member of this owner ──
+      // â”€â”€ 3. Verify caller is actually a member of this owner â”€â”€
       const { data: membership } = await supabase
         .from('team_members')
         .select('id, role')
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         }, { status: 403 })
       }
 
-      // ── 4. Get owner info ────────────────────────────────────
+      // â”€â”€ 4. Get owner info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const { data: owner } = await supabase
         .from('profiles')
         .select('name, email, account_status')
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         ?? (owner as any)?.email?.split('@')[0]
         ?? 'Team Account'
 
-      // ── 5. Set active_team_owner_id ──────────────────────────
+      // â”€â”€ 5. Set active_team_owner_id â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       await (supabase.from('profiles') as any)
         .update({ active_team_owner_id: ownerId })
         .eq('id', caller.id)
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       })
 
     } else {
-      // ── Switch back to own account ───────────────────────────
+      // â”€â”€ Switch back to own account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       await (supabase.from('profiles') as any)
         .update({ active_team_owner_id: null })
         .eq('id', caller.id)

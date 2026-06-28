@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/deep-dive/AiListingCard.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/widgets/ai_listing_card.dart
 
@@ -14,17 +14,17 @@ interface Props {
 
 export default function AiListingCard({ optimizedTitle, suggestedPrice }: Props) {
   return (
-    // Lime border — matches Dart Border.all(color:0xFF8FFF00, width:2)
+    // Lime border â€” matches Dart Border.all(color:0xFF8FFF00, width:2)
     <div className="flex flex-col h-full p-5 rounded-2xl"
          style={{ backgroundColor: '#fff', border: `2px solid ${C.lime}`, boxShadow: '0 5px 10px rgba(0,0,0,0.02)' }}>
 
-      {/* Header — matches Dart Row NeonIcon + title */}
+      {/* Header â€” matches Dart Row NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <NeonIcon icon={Sparkles} />
         <p className="text-[16px] font-bold" style={{ color: C.text }}>AI Listing Assistant</p>
       </div>
 
-      {/* Content — matches Dart Expanded Column */}
+      {/* Content â€” matches Dart Expanded Column */}
       <div className="flex flex-col flex-1">
 
         {/* Optimized title */}
@@ -50,7 +50,7 @@ export default function AiListingCard({ optimizedTitle, suggestedPrice }: Props)
           <p className="text-[12px]" style={{ color: '#22C55E' }}> (Win BuyBox)</p>
         </div>
 
-        {/* Spacer — matches Dart Spacer() */}
+        {/* Spacer â€” matches Dart Spacer() */}
         <div className="flex-1" />
 
         {/* Generate description button */}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/shared/AnimatedActionButton.tsx
 // Converted 1:1 from lib/pages/product_research/shared/animated_action_button.dart
 

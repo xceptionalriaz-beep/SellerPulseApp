@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // lib/login-history.ts
 import { createClient } from '@/lib/supabase'
 import { SessionTracker } from '@/lib/session-tracker'
@@ -12,7 +12,7 @@ export async function logLogin(): Promise<void> {
 
     const metadata = await SessionTracker.getLoginMetadata()
 
-    // 1. Update profiles — include last_active_date for streak tracking
+    // 1. Update profiles â€” include last_active_date for streak tracking
     await (supabase.from('profiles') as any)
       .update({
         last_login_ip:    metadata.last_login_ip,
@@ -28,7 +28,7 @@ export async function logLogin(): Promise<void> {
       .insert({
         user_id:     user.id,
         ip_address:  metadata.last_login_ip,
-        device_info: `${metadata.device_platform} — ${metadata.browser_agent}`,
+        device_info: `${metadata.device_platform} â€” ${metadata.browser_agent}`,
       } as never)
 
     // 3. Fire webhook if admin login
@@ -51,9 +51,9 @@ export async function logLogin(): Promise<void> {
             event_type: 'admin.login',
             data: {
               name:    (profile as any)?.name    ?? 'Admin',
-              email:   (profile as any)?.email   ?? user.email ?? '—',
-              ip:      metadata.last_login_ip    ?? '—',
-              device:  metadata.device_platform  ?? '—',
+              email:   (profile as any)?.email   ?? user.email ?? 'â€”',
+              ip:      metadata.last_login_ip    ?? 'â€”',
+              device:  metadata.device_platform  ?? 'â€”',
               time:    new Date().toLocaleString('en-GB', { timeZone: 'Asia/Dhaka' }),
             }
           }),

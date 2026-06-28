@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/competitor-research/listing-ideas/page.tsx
 // Converted 1:1 from lib/pages/competitor_research/listing_ideas_screen.dart
 
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-// ── Design tokens (matches Dart _C) ──────────────────────────
+// â”€â”€ Design tokens (matches Dart _C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
   bg:         '#F8FAFC',
   surface:    '#FFFFFF',
@@ -26,7 +26,7 @@ const C = {
   rising:     '#00E5A0',
 }
 
-// ── Helpers ───────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function timeAgo(dt: Date): string {
   const diff = Date.now() - dt.getTime()
   const m = Math.floor(diff / 60000)
@@ -38,7 +38,7 @@ function timeAgo(dt: Date): string {
   return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`
 }
 
-// ── Idea card (matches Dart _IdeaCard) ────────────────────────
+// â”€â”€ Idea card (matches Dart _IdeaCard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function IdeaCard({ idea, onRemove, onCopyTitle }: {
   idea: any; onRemove: () => void; onCopyTitle: () => void
 }) {
@@ -177,7 +177,7 @@ function IdeaCard({ idea, onRemove, onCopyTitle }: {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ListingIdeasPage() {
   const supabase = createClient()
   const router   = useRouter()
@@ -218,7 +218,7 @@ export default function ListingIdeasPage() {
     navigator.clipboard.writeText(text)
   }
 
-  // Filtered + sorted — matches Dart _filtered getter
+  // Filtered + sorted â€” matches Dart _filtered getter
   const filtered = (() => {
     let list = [...ideas]
     if (search) {
@@ -236,7 +236,7 @@ export default function ListingIdeasPage() {
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: C.bg }}>
 
-      {/* Header — matches Dart _buildHeader() */}
+      {/* Header â€” matches Dart _buildHeader() */}
       <div className="flex items-center gap-4 px-8 py-6 border-b"
            style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <button onClick={() => router.back()}
@@ -277,7 +277,7 @@ export default function ListingIdeasPage() {
         </button>
       </div>
 
-      {/* Toolbar — matches Dart _buildToolbar() */}
+      {/* Toolbar â€” matches Dart _buildToolbar() */}
       <div className="flex items-center gap-3 px-8 py-3.5 border-b"
            style={{ backgroundColor: C.bg, borderColor: C.border }}>
         {/* Search */}
@@ -289,7 +289,7 @@ export default function ListingIdeasPage() {
             className="flex-1 text-[13px] outline-none bg-transparent" style={{ color: C.textPri }} />
         </div>
 
-        {/* Sort dropdown — matches Dart _SortDropdown */}
+        {/* Sort dropdown â€” matches Dart _SortDropdown */}
         <div className="relative">
           <button onClick={() => setShowSort(s => !s)}
             className="flex items-center gap-2 h-9 px-3 rounded-lg border text-[12px]"
@@ -329,7 +329,7 @@ export default function ListingIdeasPage() {
                  style={{ borderTopColor: C.accent }} />
           </div>
         ) : ideas.length === 0 ? (
-          /* Empty state — matches Dart _buildEmptyState() */
+          /* Empty state â€” matches Dart _buildEmptyState() */
           <div className="flex flex-col items-center justify-center h-full py-20">
             <div className="w-18 h-18 rounded-full flex items-center justify-center mb-5"
                  style={{ width: 72, height: 72, backgroundColor: C.accentDim }}>
@@ -352,7 +352,7 @@ export default function ListingIdeasPage() {
             <p className="text-[14px]" style={{ color: C.textSec }}>No ideas match your search</p>
           </div>
         ) : (
-          /* Grid — matches Dart GridView maxCrossAxisExtent 380, childAspectRatio 0.78 */
+          /* Grid â€” matches Dart GridView maxCrossAxisExtent 380, childAspectRatio 0.78 */
           <div className="p-8 grid gap-3.5"
                style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
             {filtered.map((idea, i) => (

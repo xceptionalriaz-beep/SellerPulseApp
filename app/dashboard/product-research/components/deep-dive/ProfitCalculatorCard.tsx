@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/deep-dive/ProfitCalculatorCard.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/widgets/profit_calculator_card.dart
 
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function ProfitCalculatorCard({ salePrice }: Props) {
-  // Default sourcing cost to 40% of sale price — matches Dart initState
+  // Default sourcing cost to 40% of sale price â€” matches Dart initState
   const [sourcingCost, setSourcingCost] = useState(salePrice * 0.4)
 
   const ebayFees = salePrice * 0.1325
@@ -25,13 +25,13 @@ export default function ProfitCalculatorCard({ salePrice }: Props) {
     <div className="flex flex-col h-full p-5 rounded-2xl border"
          style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 5px 10px rgba(0,0,0,0.02)' }}>
 
-      {/* Header — matches Dart Row NeonIcon + title */}
+      {/* Header â€” matches Dart Row NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <NeonIcon icon={Calculator} />
         <p className="text-[16px] font-bold" style={{ color: C.text }}>Profit Calculator</p>
       </div>
 
-      {/* Content — matches Dart Expanded Column */}
+      {/* Content â€” matches Dart Expanded Column */}
       <div className="flex flex-col flex-1 gap-2.5">
 
         {/* Sourcing cost row */}
@@ -40,7 +40,7 @@ export default function ProfitCalculatorCard({ salePrice }: Props) {
           <p className="text-[16px] font-bold" style={{ color: C.text }}>${sourcingCost.toFixed(2)}</p>
         </div>
 
-        {/* Slider — matches Dart Slider lime/grey/dark */}
+        {/* Slider â€” matches Dart Slider lime/grey/dark */}
         <input type="range" min={1} max={sliderMax} step={0.01}
           value={sourcingCost}
           onChange={e => setSourcingCost(parseFloat(e.target.value))}
@@ -58,10 +58,10 @@ export default function ProfitCalculatorCard({ salePrice }: Props) {
           </p>
         </div>
 
-        {/* Spacer — matches Dart Spacer() */}
+        {/* Spacer â€” matches Dart Spacer() */}
         <div className="flex-1" />
 
-        {/* Net profit box — matches Dart dark Container */}
+        {/* Net profit box â€” matches Dart dark Container */}
         <div className="flex items-center justify-between p-4 rounded-xl"
              style={{ backgroundColor: C.dark }}>
           <p className="text-[14px] font-bold text-white">NET PROFIT:</p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/deep-dive/CompetitorXrayCard.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/widgets/competitor_xray_card.dart
 
@@ -14,7 +14,7 @@ interface Props {
   seller:   string
 }
 
-// ── Info row (matches Dart _buildInfoRow) ─────────────────────
+// â”€â”€ Info row (matches Dart _buildInfoRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InfoRow({ icon: Icon, label, value, valueColor }: {
   icon: React.ElementType; label: string; value: string; valueColor?: string
 }) {
@@ -32,13 +32,13 @@ export default function CompetitorXrayCard({ title, price, imageUrl, seller }: P
     <div className="flex flex-col h-full p-5 rounded-2xl border"
          style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 5px 10px rgba(0,0,0,0.02)' }}>
 
-      {/* Header — matches Dart Row NeonIcon + title */}
+      {/* Header â€” matches Dart Row NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <NeonIcon icon={ScanLine} />
         <p className="text-[16px] font-bold" style={{ color: C.text }}>Competitor X-Ray</p>
       </div>
 
-      {/* Content — matches Dart Expanded Column */}
+      {/* Content â€” matches Dart Expanded Column */}
       <div className="flex flex-col flex-1 justify-center gap-4">
 
         {/* Product image + title + seller */}
@@ -63,7 +63,7 @@ export default function CompetitorXrayCard({ title, price, imageUrl, seller }: P
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Info rows — matches Dart _buildInfoRow × 3 */}
+        {/* Info rows â€” matches Dart _buildInfoRow Ã— 3 */}
         <div className="flex flex-col gap-2.5">
           <InfoRow icon={Tag}    label="Sold Price:"      value={price}                                       />
           <InfoRow icon={Flame}  label="Demand:"          value="EXTREME (Top 1%)"  valueColor="#C2410C"      />

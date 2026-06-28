@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/components/TbTopBar.tsx
 // Converted 1:1 from lib/pages/title_builder/tb_top_bar.dart
 
@@ -12,20 +12,20 @@ const C = {
   muted:   '#94A3B8',
   lime:    '#8FFF00',
   blue:    '#1D70F5',
-  dark:    '#0F172A',
+  dark:    '#1a2410',
 }
 
-// ── Option types ──────────────────────────────────────────────
+// â”€â”€ Option types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Option { val: string; label: string; enabled: boolean }
 
-// ── ProDropdown (matches Dart ProDropdown + _DropdownPill) ────
+// â”€â”€ ProDropdown (matches Dart ProDropdown + _DropdownPill) â”€â”€â”€â”€
 function ProDropdown({ prefix, currentValue, options, onChanged }: {
   prefix: string; currentValue: string
   options: Option[]; onChanged: (v: string) => void
 }) {
   const [open, setOpen] = useState(false)
 
-  // Display label — first word of matching option label (matches Dart displayLabel logic)
+  // Display label â€” first word of matching option label (matches Dart displayLabel logic)
   const displayLabel = (() => {
     const match = options.find(o => o.val === currentValue)
     return match ? match.label.split(' ')[0] : currentValue
@@ -68,7 +68,7 @@ function ProDropdown({ prefix, currentValue, options, onChanged }: {
   )
 }
 
-// ── DropdownPill (matches Dart _DropdownPill) ─────────────────
+// â”€â”€ DropdownPill (matches Dart _DropdownPill) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DropdownPill({ option, isSelected, onTap }: {
   option: Option; isSelected: boolean; onTap?: () => void
 }) {
@@ -96,7 +96,7 @@ function DropdownPill({ option, isSelected, onTap }: {
   )
 }
 
-// ── Search field (matches Dart _searchField) ──────────────────
+// â”€â”€ Search field (matches Dart _searchField) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SearchField({ icon: Icon, hint, btnText, btnColor, textColor = '#fff', onAction }: {
   icon: React.ElementType; hint: string; btnText: string
   btnColor: string; textColor?: string; onAction: (val: string) => void
@@ -122,7 +122,7 @@ function SearchField({ icon: Icon, hint, btnText, btnColor, textColor = '#fff', 
   )
 }
 
-// ── Props ─────────────────────────────────────────────────────
+// â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Props {
   selectedTimeframe:    string
   onTimeframeChanged:   (v: string) => void
@@ -135,7 +135,7 @@ interface Props {
   onOpenSettings:       () => void
 }
 
-// ── Main TbTopBar ─────────────────────────────────────────────
+// â”€â”€ Main TbTopBar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function TbTopBar({
   selectedTimeframe, onTimeframeChanged,
   selectedMarket,    onMarketChanged,
@@ -149,11 +149,11 @@ export default function TbTopBar({
     { val: 'Walmart', label: 'Walmart (Coming Soon)',   enabled: false },
   ]
   const locationOptions: Option[] = [
-    { val: 'All', label: 'All Locations 🌍',     enabled: true },
-    { val: 'US',  label: 'United States 🇺🇸',   enabled: true },
-    { val: 'UK',  label: 'United Kingdom 🇬🇧',  enabled: true },
-    { val: 'CA',  label: 'Canada 🇨🇦',           enabled: true },
-    { val: 'AU',  label: 'Australia 🇦🇺',        enabled: true },
+    { val: 'All', label: 'All Locations ðŸŒ',     enabled: true },
+    { val: 'US',  label: 'United States ðŸ‡ºðŸ‡¸',   enabled: true },
+    { val: 'UK',  label: 'United Kingdom ðŸ‡¬ðŸ‡§',  enabled: true },
+    { val: 'CA',  label: 'Canada ðŸ‡¨ðŸ‡¦',           enabled: true },
+    { val: 'AU',  label: 'Australia ðŸ‡¦ðŸ‡º',        enabled: true },
   ]
   const timeOptions: Option[] = [
     { val: '7D',  label: 'Time: 7D',  enabled: true },
@@ -164,13 +164,13 @@ export default function TbTopBar({
   return (
     <div className="p-5 rounded-xl border" style={{ backgroundColor: '#fff', borderColor: C.border }}>
 
-      {/* Search fields — desktop: side by side, mobile: stacked */}
+      {/* Search fields â€” desktop: side by side, mobile: stacked */}
       <div className="flex flex-col md:flex-row items-stretch gap-4 mb-4">
         <div className="flex-1">
           <SearchField icon={Link}   hint="Paste Competitor Item ID..." btnText="Extract"
             btnColor={C.blue} onAction={onExtract} />
         </div>
-        {/* Divider — desktop only */}
+        {/* Divider â€” desktop only */}
         <div className="hidden md:flex items-center">
           <span className="text-[24px] font-light" style={{ color: C.muted }}>|</span>
         </div>

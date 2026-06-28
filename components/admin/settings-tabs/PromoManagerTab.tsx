@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/PromoManagerTab.tsx
 // ══════════════════════════════════════════════════════════════
 // RIAZIFY — Promo & Codes Tab
@@ -224,7 +224,7 @@ function PromoCodesTable({
             {/* Code */}
             <div className="flex items-center gap-1.5">
               <span className="text-[12px] font-black px-2 py-1 rounded-lg font-mono tracking-wider"
-                    style={{ backgroundColor: C.dark, color: C.lime }}>
+                    style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 {obscureCode(code.code)}
               </span>
               <button
@@ -478,7 +478,7 @@ function PromoCodeModal({
               {!isEdit && (
                 <button onClick={generateCode}
                   className="px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   Generate
                 </button>
               )}
@@ -597,7 +597,7 @@ function PromoCodeModal({
           </button>
           <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: C.dark, color: C.lime }}>
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : isEdit ? 'Save Changes' : 'Create Code'}
@@ -738,7 +738,7 @@ function DeclareWinnerModal({ test, variant, onClose, onConfirm }: {
             </button>
             <button onClick={handleConfirm} disabled={!isValid || confirming}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {confirming
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                 : <><Trophy size={14} /> Declare Winner</>}
@@ -1158,7 +1158,7 @@ function CreateAbTestModal({
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px" style={{ backgroundColor: C.border }} />
             <span className="text-[11px] font-black px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: C.dark, color: C.lime }}>VS</span>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>VS</span>
             <div className="flex-1 h-px" style={{ backgroundColor: C.border }} />
           </div>
 
@@ -1204,7 +1204,7 @@ function CreateAbTestModal({
             </button>
             <button onClick={handleCreate} disabled={saving}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-              style={{ backgroundColor: C.dark, color: C.lime }}>
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               {saving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                 : <><BarChart2 size={14} /> Launch Test</>}
@@ -1501,7 +1501,7 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
         {/* New Code */}
         <button onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-bold hover:opacity-80"
-          style={{ backgroundColor: C.dark, color: C.lime }}>
+          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <Plus size={14} /> New Code
         </button>
       </div>
@@ -1545,7 +1545,7 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
             {canCreateTest && (
               <button onClick={() => setShowCreateTest(true)}
                 className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 <Plus size={13} /> New Test
               </button>
             )}

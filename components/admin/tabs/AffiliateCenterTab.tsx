@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/tabs/AffiliateCenterTab.tsx
 // Full rebuild with real Supabase data
 
@@ -341,7 +341,7 @@ function AddAffiliateDialog({ onClose, onCreated }: { onClose: () => void; onCre
                 />
                 <button onClick={generateCode}
                   className="px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all hover:opacity-80"
-                  style={{ backgroundColor: C.dark, color: C.lime, whiteSpace: 'nowrap' }}>
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410', whiteSpace: 'nowrap' }}>
                   Generate
                 </button>
               </div>
@@ -493,7 +493,7 @@ function AddAffiliateDialog({ onClose, onCreated }: { onClose: () => void; onCre
               </button>
               <button onClick={save} disabled={saving}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
-                style={{ backgroundColor: C.dark, color: C.lime }}>
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                 {saving
                   ? <span className="flex items-center justify-center gap-2">
                       <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
@@ -615,7 +615,7 @@ function GenerateLinkDialog({ affiliates, onClose }: { affiliates: Affiliate[]; 
                           style={{ backgroundColor: selected === a.id ? C.limeTint : 'transparent' }}>
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                                 style={{ backgroundColor: C.dark, color: C.lime }}>
+                                 style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                               {a.name.charAt(0)}
                             </div>
                             <span className="text-[13px] font-semibold" style={{ color: C.text }}>{a.name}</span>
@@ -1408,7 +1408,7 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                   {/* Affiliate */}
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold"
-                         style={{ backgroundColor: C.dark, color: C.lime }}>{aff.name.charAt(0)}</div>
+                         style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>{aff.name.charAt(0)}</div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>{aff.name}</p>

@@ -1,4 +1,4 @@
-// app/api/payments/portal/route.ts
+﻿// app/api/payments/portal/route.ts
 // Returns a LemonSqueezy customer portal URL for updating payment method
 
 import { createClient } from '@supabase/supabase-js'
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await adminClient.auth.getUser(token)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // Get user profile — need subscription_id and customer_id
+    // Get user profile â€” need subscription_id and customer_id
     const { data: profile } = await (adminClient.from('profiles') as any)
       .select('subscription_id, ls_customer_id, plan_name')
       .eq('id', user.id)
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fallback — try customer portal via customer ID
+    // Fallback â€” try customer portal via customer ID
     if (customerId) {
       const res = await fetch(`https://api.lemonsqueezy.com/v1/customers/${customerId}`, {
         headers: lsHeaders,

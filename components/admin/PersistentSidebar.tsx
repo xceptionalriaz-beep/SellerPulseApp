@@ -84,7 +84,7 @@ interface Props { investorMode: boolean }
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
-  dark:   '#0F172A',
+  dark:   '#1a2410',
   lime:   '#8FFF00',
   border: '#E2E8F0',
   bg:     '#F8FAFC',

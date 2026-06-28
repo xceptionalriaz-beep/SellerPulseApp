@@ -1,4 +1,4 @@
-// components/emails/RefundConfirmation.tsx
+﻿// components/emails/RefundConfirmation.tsx
 // Refund confirmation email template using react-email
 
 import {
@@ -21,7 +21,7 @@ export default function RefundConfirmation({
   customerEmail = '',
   amount        = '$0.00',
   plan          = 'Starter',
-  invoice       = '—',
+  invoice       = 'â€”',
   reason        = 'Customer request',
   refundDate    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
 }: RefundConfirmationProps) {
@@ -52,7 +52,7 @@ export default function RefundConfirmation({
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 16px',
               }}>
-                <Text style={{ fontSize: 24, margin: 0 }}>↩</Text>
+                <Text style={{ fontSize: 24, margin: 0 }}>â†©</Text>
               </div>
               <Text style={{ fontSize: 22, fontWeight: 900, color: '#0a0d08', margin: '0 0 8px', letterSpacing: '-0.5px' }}>
                 Refund Processed
@@ -68,7 +68,7 @@ export default function RefundConfirmation({
                 {amount}
               </Text>
               <Text style={{ fontSize: 12, color: '#8a9e78', margin: 0 }}>
-                Full refund — {plan} plan
+                Full refund â€” {plan} plan
               </Text>
             </Section>
 
@@ -99,7 +99,7 @@ export default function RefundConfirmation({
             {/* Timeline note */}
             <Section style={{ backgroundColor: 'rgba(217,119,6,0.06)', borderRadius: 12, padding: '14px 18px', marginBottom: 24, border: '1px solid rgba(217,119,6,0.2)' }}>
               <Text style={{ fontSize: 12, color: '#d97706', margin: 0, fontWeight: 600 }}>
-                ⏱ Please allow 5–10 business days for the refund to appear in your account, depending on your bank or payment provider.
+                â± Please allow 5â€“10 business days for the refund to appear in your account, depending on your bank or payment provider.
               </Text>
             </Section>
 
@@ -116,7 +116,7 @@ export default function RefundConfirmation({
                    color: '#8fff00', padding: '12px 28px', borderRadius: 12,
                    fontWeight: 900, fontSize: 13, textDecoration: 'none',
                  }}>
-                View Pricing Plans →
+                View Pricing Plans â†’
               </a>
             </Section>
 
@@ -127,7 +127,7 @@ export default function RefundConfirmation({
               Questions? Reply to this email or contact us at{' '}
               <a href="mailto:support@riazify.com" style={{ color: '#4a8f00' }}>support@riazify.com</a>
               <br />
-              Riazify · eBay Seller Intelligence Platform
+              Riazify Â· eBay Seller Intelligence Platform
             </Text>
           </Section>
         </Container>

@@ -1,16 +1,16 @@
-'use client'
+﻿'use client'
 // app/admin/view-as/page.tsx
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Correctly extracts tokens from URL hash BEFORE any other
 // Supabase client can consume them, then stores in sessionStorage
 // (tab-isolated) so the admin's original tab is unaffected.
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Users, X, AlertTriangle, RefreshCw } from 'lucide-react'
 
-// ── Isolated client — sessionStorage only ─────────────────────
+// â”€â”€ Isolated client â€” sessionStorage only â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function makeIsolatedClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +35,7 @@ export default function ViewAsPage() {
   useEffect(() => {
     async function init() {
       try {
-        // ── Step 1: Extract tokens from URL hash ──────────────
+        // â”€â”€ Step 1: Extract tokens from URL hash â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // Supabase puts them after # like:
         // /admin/view-as#access_token=...&refresh_token=...
         const rawHash = window.location.hash.replace('#', '')
@@ -44,7 +44,7 @@ export default function ViewAsPage() {
         const accessToken  = params.get('access_token')
         const refreshToken = params.get('refresh_token')
 
-        // ── Step 2: Clear hash immediately ────────────────────
+        // â”€â”€ Step 2: Clear hash immediately â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // Prevents the app's default Supabase client (localStorage)
         // from also consuming and storing these tokens
         window.history.replaceState(
@@ -60,7 +60,7 @@ export default function ViewAsPage() {
           )
         }
 
-        // ── Step 3: Set session in isolated client ────────────
+        // â”€â”€ Step 3: Set session in isolated client â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const supabase = makeIsolatedClient()
 
         const { data, error: sessionErr } = await supabase.auth.setSession({
@@ -69,9 +69,9 @@ export default function ViewAsPage() {
         })
 
         if (sessionErr) throw sessionErr
-        if (!data.user)  throw new Error('Failed to establish session — no user returned')
+        if (!data.user)  throw new Error('Failed to establish session â€” no user returned')
 
-        // ── Step 4: Load their profile name ───────────────────
+        // â”€â”€ Step 4: Load their profile name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const name =
           data.user.user_metadata?.full_name ??
           data.user.user_metadata?.name ??
@@ -81,7 +81,7 @@ export default function ViewAsPage() {
         setUserName(name)
         setUserEmail(data.user.email ?? '')
 
-        // ── Step 5: Mark tab as impersonation ─────────────────
+        // â”€â”€ Step 5: Mark tab as impersonation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         // So app's Supabase client can detect and use sessionStorage
         sessionStorage.setItem('__riazify_impersonating__', '1')
 
@@ -97,7 +97,7 @@ export default function ViewAsPage() {
     init()
   }, [])
 
-  // ── Loading ────────────────────────────────────────────────
+  // â”€â”€ Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
@@ -112,7 +112,7 @@ export default function ViewAsPage() {
     )
   }
 
-  // ── Error ─────────────────────────────────────────────────
+  // â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (status === 'error') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-5">
@@ -134,7 +134,7 @@ export default function ViewAsPage() {
     )
   }
 
-  // ── Ready — show banner + redirect ─────────────────────────
+  // â”€â”€ Ready â€” show banner + redirect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <div className="min-h-screen bg-[#f8fafc]">
 
@@ -147,10 +147,10 @@ export default function ViewAsPage() {
           </div>
           <div>
             <p className="text-[13px] font-black text-white leading-tight">
-              Admin Mode — Viewing as {userName}
+              Admin Mode â€” Viewing as {userName}
             </p>
             <p className="text-[10px] text-purple-200">
-              {userEmail} · Isolated session · Close this tab to exit
+              {userEmail} Â· Isolated session Â· Close this tab to exit
             </p>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function ViewAsPage() {
   )
 }
 
-// ── Auto-navigate to dashboard ─────────────────────────────────
+// â”€â”€ Auto-navigate to dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ImpersonationDashboard({
   userName, userEmail
 }: { userName: string; userEmail: string }) {

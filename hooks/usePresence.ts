@@ -1,23 +1,23 @@
-// hooks/usePresence.ts
-// ─────────────────────────────────────────────────────────────
-// usePresence()       → USER dashboard layout
+﻿// hooks/usePresence.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// usePresence()       â†’ USER dashboard layout
 //                       joins 'riazify-presence' channel
 //                       skips automatically for admin accounts
 //
-// useOnlineUserIds()  → ADMIN CRM only
+// useOnlineUserIds()  â†’ ADMIN CRM only
 //                       subscribes to 'riazify-presence'
-//                       (no conflict — admin skips usePresence)
+//                       (no conflict â€” admin skips usePresence)
 //
-// getOnlineCount()    → fallback using last_seen (3 min window)
+// getOnlineCount()    â†’ fallback using last_seen (3 min window)
 //                       matches the 2-min heartbeat interval
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 
 const CHANNEL = 'riazify-presence'
 
-// ── For USER dashboard layout ─────────────────────────────────
+// â”€â”€ For USER dashboard layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function usePresence() {
   const supabase = createClient()
 
@@ -34,7 +34,7 @@ export function usePresence() {
           .eq('id', user.id)
           .single()
 
-        // Admins skip — they observe from useOnlineUserIds instead
+        // Admins skip â€” they observe from useOnlineUserIds instead
         // This prevents the "cannot add callbacks after subscribe" conflict
         if ((profile as any)?.role === 'admin') return
 
@@ -60,7 +60,7 @@ export function usePresence() {
   }, [])
 }
 
-// ── For ADMIN CRM — subscribe to same channel ─────────────────
+// â”€â”€ For ADMIN CRM â€” subscribe to same channel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Safe: admin skips usePresence() above so no conflict
 export interface OnlineUser {
   userId:   string
@@ -74,7 +74,7 @@ export function useOnlineUserIds(): Set<string> {
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    // Same channel name as users — admin skipped joining so no conflict
+    // Same channel name as users â€” admin skipped joining so no conflict
     const channel = supabase
       .channel(CHANNEL)
       .on('presence', { event: 'sync' }, () => {
@@ -106,7 +106,7 @@ export function useOnlineUserIds(): Set<string> {
   return onlineIds
 }
 
-// ── Fallback: count from last_seen (3 min = 1 heartbeat + buffer)
+// â”€â”€ Fallback: count from last_seen (3 min = 1 heartbeat + buffer)
 // Heartbeat fires every 2 min, so 3 min = user definitely gone
 export function getOnlineCount(users: any[]): number {
   const THREE_MIN = 3 * 60 * 1000

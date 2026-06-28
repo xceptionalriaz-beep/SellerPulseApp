@@ -8,9 +8,9 @@
 //   ? Lime active state with left border indicator + scale animation
 //   ? Shield logo at top of sidebar
 //   ? Tooltip on each sidebar icon
-//   ? Top navbar � "Riazify" brand text + notification bell + avatar
-//   ? Avatar � Google photo OR DiceBear OR initials fallback
-//   ? Notification bell � hover lime, pulse animation, red badge
+//   ? Top navbar ? "Riazify" brand text + notification bell + avatar
+//   ? Avatar ? Google photo OR DiceBear OR initials fallback
+//   ? Notification bell ? hover lime, pulse animation, red badge
 //   ? Bottom-right Windows-style toast (4s, progress bar)
 //   ? Mobile drawer (hamburger menu)
 //   ? Logout button
@@ -20,8 +20,8 @@
 //   ? Role-based routing
 //
 // NEW (presence system):
-//   ? useHeartbeat � updates last_seen every 2 min (invisible)
-//   ? usePresence  � joins Supabase Realtime channel so admin
+//   ? useHeartbeat ? updates last_seen every 2 min (invisible)
+//   ? usePresence  ? joins Supabase Realtime channel so admin
 //                    CRM shows who is online right now
 //
 // NEW (kill switch visibility):
@@ -36,7 +36,7 @@ import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
-  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -221,7 +221,7 @@ function NotifToast({
   return (
     <div
       className="fixed z-50 w-[320px] rounded-[14px] overflow-hidden border border-lime/25 shadow-[0_8px_20px_rgba(0,0,0,0.3)] animate-slide-up cursor-pointer"
-      style={{ right: 20, bottom: 20 + bottomOffset, backgroundColor: '#0F172A' }}
+      style={{ right: 20, bottom: 20 + bottomOffset, backgroundColor: '#1a2410' }}
       onClick={onTap}
     >
       <div className="flex items-start gap-3 p-3.5 pr-3">
@@ -334,7 +334,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             .map((s: any) => s.title as string)
         )
         setDisabledTools(disabled)
-      } catch { /* non-critical � show all tools if check fails */ }
+      } catch { /* non-critical ? show all tools if check fails */ }
     }
     loadProfile()
   }, [])
@@ -419,10 +419,10 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
         {!mounted ? (
-          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col bg-dark" style={{ minHeight:'100vh' }} />
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight:'100vh', backgroundColor:'#1a2410' }} />
         ) : (cachedIsAdmin || isAdmin) ? (
           /* -- ADMIN SIDEBAR -- */
-          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col bg-dark" style={{ minHeight:'100vh' }}>
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight:'100vh', backgroundColor:'#1a2410' }}>
             {/* Logo */}
             <button
               onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null); router.push('/dashboard/admin') }}
@@ -464,6 +464,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: DollarSign,    label: 'Affiliate Vault',  tab: 10, isChild: true                                         },
                 { icon: BarChart2,     label: 'Founder Ops',      tab: 11                                                         },
                 { icon: Mail,          label: 'Marketing',        tab: 12                                                         },
+                { icon: BookOpen,      label: 'Blog',             tab: 15                                                         },
+                
               ].map((item) => {
                 const isActive = (item as any).isAnalytics
                   ? activeAnalyticsTab === (item as any).key
@@ -541,7 +543,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             {/* Settings + Logout */}
             <div className="px-2 pb-6" style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:12 }}>
               <button
-                title="Admin Settings � Coming Soon"
+                title="Admin Settings ? Coming Soon"
                 className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
                 style={{ color:'rgba(255,255,255,0.5)' }}>
                 <Settings size={15} />
@@ -557,7 +559,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </aside>
         ) : (
           /* -- USER SIDEBAR -- */
-          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col bg-dark rounded-[30px] m-3">
+          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor:'#1a2410' }}>
             <div className="flex justify-center pt-[30px] pb-[35px]">
               <button onClick={() => router.push('/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
                 <Shield size={24} className="text-lime" />

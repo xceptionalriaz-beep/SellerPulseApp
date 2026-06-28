@@ -1,4 +1,4 @@
-// app/dashboard/product-research/models/searchFilters.ts
+﻿// app/dashboard/product-research/models/searchFilters.ts
 // Converted 1:1 from lib/pages/product_research/keyword_search/models/search_filters.dart
 
 export interface SearchFilters {
@@ -16,7 +16,7 @@ export interface SearchFilters {
   salesRange:   string  // 'Total' | '7 Days' | '15 Days' | '30 Days'
 }
 
-// Default factory — matches Dart SearchFilters() constructor defaults
+// Default factory â€” matches Dart SearchFilters() constructor defaults
 export function defaultFilters(): SearchFilters {
   return {
     marketplace:  'US',
@@ -34,13 +34,13 @@ export function defaultFilters(): SearchFilters {
   }
 }
 
-// Currency symbol getter — matches Dart get currencySymbol
+// Currency symbol getter â€” matches Dart get currencySymbol
 export function getCurrencySymbol(marketplace: string): string {
   switch (marketplace) {
-    case 'UK': return '£'
+    case 'UK': return 'Â£'
     case 'DE':
     case 'IT':
-    case 'FR': return '€'
+    case 'FR': return 'â‚¬'
     default:   return '$'
   }
 }

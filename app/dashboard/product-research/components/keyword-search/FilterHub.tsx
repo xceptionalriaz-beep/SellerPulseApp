@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/keyword-search/FilterHub.tsx
 // Converted 1:1 from lib/pages/product_research/keyword_search/widgets/filter_hub.dart
 
@@ -7,7 +7,7 @@ import { Store, Truck, DollarSign, Star, Package, Tag, Calendar, TrendingUp, Hel
 import { SearchFilters, getCurrencySymbol } from '../../models/searchFilters'
 
 const C = {
-  dark:   '#0F172A',
+  dark:   '#1a2410',
   text:   '#1E293B',
   muted:  '#94A3B8',
   border: '#E2E8F0',
@@ -21,7 +21,7 @@ interface Props {
   onChange: (f: SearchFilters) => void
 }
 
-// ── Dropdown pill item ────────────────────────────────────────
+// â”€â”€ Dropdown pill item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FilterPill({ label, selected, onTap }: { label: string; selected: boolean; onTap: () => void }) {
   const [hover, setHover] = useState(false)
   return (
@@ -40,7 +40,7 @@ function FilterPill({ label, selected, onTap }: { label: string; selected: boole
   )
 }
 
-// ── Filter dropdown — fixed position so never clipped ─────────
+// â”€â”€ Filter dropdown â€” fixed position so never clipped â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FilterDropdown({ value, items, onChange }: {
   value: string
   items: { val: string; label: string }[]
@@ -102,7 +102,7 @@ function FilterDropdown({ value, items, onChange }: {
   )
 }
 
-// ── Range input ───────────────────────────────────────────────
+// â”€â”€ Range input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RangeInput({ hintMin, hintMax, onMinChange, onMaxChange }: {
   hintMin: string; hintMax: string
   onMinChange: (v: string) => void; onMaxChange: (v: string) => void
@@ -131,7 +131,7 @@ function InputBox({ hint, onChange }: { hint: string; onChange: (v: string) => v
   )
 }
 
-// ── Individual filter card — equal width ──────────────────────
+// â”€â”€ Individual filter card â€” equal width â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FilterCard({ title, icon: Icon, helpText, children }: {
   title: string; icon: React.ElementType; helpText: string; children: React.ReactNode
 }) {
@@ -153,7 +153,7 @@ function FilterCard({ title, icon: Icon, helpText, children }: {
   )
 }
 
-// ── Main FilterHub ────────────────────────────────────────────
+// â”€â”€ Main FilterHub â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function FilterHub({ filters, onChange }: Props) {
   function update(partial: Partial<SearchFilters>) {
     onChange({ ...filters, ...partial })
@@ -167,10 +167,10 @@ export default function FilterHub({ filters, onChange }: Props) {
       <FilterCard title="Marketplace" icon={Store} helpText="Select which eBay country site to search.">
         <FilterDropdown value={filters.marketplace}
           items={[
-            { val: 'US', label: '🇺🇸 ebay.com'   },
-            { val: 'UK', label: '🇬🇧 ebay.co.uk' },
-            { val: 'DE', label: '🇩🇪 ebay.de'    },
-            { val: 'IT', label: '🇮🇹 ebay.it'    },
+            { val: 'US', label: 'ðŸ‡ºðŸ‡¸ ebay.com'   },
+            { val: 'UK', label: 'ðŸ‡¬ðŸ‡§ ebay.co.uk' },
+            { val: 'DE', label: 'ðŸ‡©ðŸ‡ª ebay.de'    },
+            { val: 'IT', label: 'ðŸ‡®ðŸ‡¹ ebay.it'    },
           ]}
           onChange={v => update({ marketplace: v })} />
       </FilterCard>
@@ -179,9 +179,9 @@ export default function FilterHub({ filters, onChange }: Props) {
       <FilterCard title="Shipping Location" icon={Truck} helpText="Filter by where the item is located.">
         <FilterDropdown value={filters.shipFrom}
           items={[
-            { val: 'Any', label: '🌎 Anywhere'       },
-            { val: 'US',  label: '🇺🇸 United States' },
-            { val: 'CN',  label: '🇨🇳 China'         },
+            { val: 'Any', label: 'ðŸŒŽ Anywhere'       },
+            { val: 'US',  label: 'ðŸ‡ºðŸ‡¸ United States' },
+            { val: 'CN',  label: 'ðŸ‡¨ðŸ‡³ China'         },
           ]}
           onChange={v => update({ shipFrom: v })} />
       </FilterCard>
@@ -204,9 +204,9 @@ export default function FilterHub({ filters, onChange }: Props) {
       <FilterCard title="Condition" icon={Package} helpText="Target New, Used, or Any items.">
         <FilterDropdown value={filters.condition}
           items={[
-            { val: 'New',  label: '✨ New'  },
-            { val: 'Used', label: '📦 Used' },
-            { val: 'Any',  label: '🔄 Any'  },
+            { val: 'New',  label: 'âœ¨ New'  },
+            { val: 'Used', label: 'ðŸ“¦ Used' },
+            { val: 'Any',  label: 'ðŸ”„ Any'  },
           ]}
           onChange={v => update({ condition: v })} />
       </FilterCard>
@@ -215,8 +215,8 @@ export default function FilterHub({ filters, onChange }: Props) {
       <FilterCard title="Listing Type" icon={Tag} helpText="Fixed price or Auction listings.">
         <FilterDropdown value={filters.listingType}
           items={[
-            { val: 'Fixed',   label: '💰 Buy It Now' },
-            { val: 'Auction', label: '🔨 Auction'    },
+            { val: 'Fixed',   label: 'ðŸ’° Buy It Now' },
+            { val: 'Auction', label: 'ðŸ”¨ Auction'    },
           ]}
           onChange={v => update({ listingType: v })} />
       </FilterCard>
@@ -225,10 +225,10 @@ export default function FilterHub({ filters, onChange }: Props) {
       <FilterCard title="Sales Range" icon={Calendar} helpText="Filter sales by timeframe.">
         <FilterDropdown value={filters.salesRange}
           items={[
-            { val: 'Total',   label: '📅 Total'   },
-            { val: '7 Days',  label: '🔥 7 Days'  },
-            { val: '15 Days', label: '📈 15 Days' },
-            { val: '30 Days', label: '📆 30 Days' },
+            { val: 'Total',   label: 'ðŸ“… Total'   },
+            { val: '7 Days',  label: 'ðŸ”¥ 7 Days'  },
+            { val: '15 Days', label: 'ðŸ“ˆ 15 Days' },
+            { val: '30 Days', label: 'ðŸ“† 30 Days' },
           ]}
           onChange={v => update({ salesRange: v })} />
       </FilterCard>

@@ -1,4 +1,4 @@
-// app/api/ebay/item/route.ts
+﻿// app/api/ebay/item/route.ts
 // Fetch single eBay item by ID or URL
 // Used by: Title Builder (extract) + Profit Calculator (auto-fill)
 
@@ -11,7 +11,7 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// ── Get app-level OAuth token ──────────────────────────────────
+// â”€â”€ Get app-level OAuth token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function getAppToken(): Promise<string | null> {
   try {
     const clientId     = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
@@ -33,7 +33,7 @@ async function getAppToken(): Promise<string | null> {
   } catch { return null }
 }
 
-// ── Extract item ID from URL or raw ID ────────────────────────
+// â”€â”€ Extract item ID from URL or raw ID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function extractItemId(input: string): string | null {
   input = input.trim()
 
@@ -67,18 +67,18 @@ export async function GET(req: NextRequest) {
 
   if (!input) return NextResponse.json({ error: 'id or url required' }, { status: 400 })
 
-  // ── Extract item ID ─────────────────────────────────────────
+  // â”€â”€ Extract item ID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const itemId = extractItemId(input)
   if (!itemId) return NextResponse.json({ error: 'Invalid eBay item ID or URL' }, { status: 400 })
 
   const start = Date.now()
 
   try {
-    // ── Get app token ───────────────────────────────────────
+    // â”€â”€ Get app token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = await getAppToken()
     if (!token) return NextResponse.json({ error: 'Failed to get eBay token' }, { status: 500 })
 
-    // ── Fetch item from eBay Browse API ──────────────────────
+    // â”€â”€ Fetch item from eBay Browse API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const itemRes = await fetch(
       `https://api.ebay.com/buy/browse/v1/item/v1|${itemId}|0`,
       {
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
 
     const item = await itemRes.json()
 
-    // ── Extract data for both Title Builder and Profit Calculator
+    // â”€â”€ Extract data for both Title Builder and Profit Calculator
     const price       = parseFloat(item.price?.value ?? 0)
     const shipping    = parseFloat(item.shippingOptions?.[0]?.shippingCost?.value ?? 0)
     const categoryId  = item.categoryPath?.split('|')?.[0] ?? ''
@@ -179,7 +179,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ── Log API usage ──────────────────────────────────────────────
+// â”€â”€ Log API usage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function logUsage(toolName: string, callName: string, responseTimeMs: number) {
   try {
     const { data: curr } = await (adminClient.from('api_fleet_config') as any)

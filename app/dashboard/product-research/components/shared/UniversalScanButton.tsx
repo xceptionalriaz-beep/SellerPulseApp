@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/shared/UniversalScanButton.tsx
 // Converted 1:1 from lib/pages/product_research/shared/universal_scan_button.dart
 

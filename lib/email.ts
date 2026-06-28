@@ -1,4 +1,4 @@
-// lib/email.ts
+﻿// lib/email.ts
 // Helper functions to send emails from anywhere in the app
 // Usage: await sendWelcomeEmail({ to: 'user@email.com', userName: 'James' })
 
@@ -17,12 +17,12 @@ async function send(body: Record<string, unknown>) {
   return res.json()
 }
 
-// ── Send welcome email after signup ──────────────────────────
+// â”€â”€ Send welcome email after signup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function sendWelcomeEmail(opts: { to: string; userName: string }) {
   return send({ type: 'welcome', ...opts, userEmail: opts.to })
 }
 
-// ── Send email confirmation / OTP ─────────────────────────────
+// â”€â”€ Send email confirmation / OTP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function sendConfirmationEmail(opts: {
   to:              string
   userName:        string
@@ -32,7 +32,7 @@ export function sendConfirmationEmail(opts: {
   return send({ type: 'confirmation', ...opts })
 }
 
-// ── Send password reset email ──────────────────────────────────
+// â”€â”€ Send password reset email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function sendResetPasswordEmail(opts: {
   to:       string
   userName: string
@@ -41,7 +41,7 @@ export function sendResetPasswordEmail(opts: {
   return send({ type: 'reset_password', ...opts })
 }
 
-// ── Send market alert email ────────────────────────────────────
+// â”€â”€ Send market alert email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function sendAlertEmail(opts: {
   to:           string
   userName:     string

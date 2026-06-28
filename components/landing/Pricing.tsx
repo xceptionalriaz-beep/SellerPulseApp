@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 // components/landing/Pricing.tsx
-// Landing page pricing section — shows plan cards
+// Landing page pricing section â€” shows plan cards
 // Full pricing page is at /pricing
 
 import { useEffect, useState } from 'react'
@@ -215,7 +215,7 @@ export default function Pricing() {
                     </div>
                     {billing === 'annual' && plan.price_annual_total && !isCustom && (
                       <p className="text-[11px] font-semibold mb-1" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : T.muted }}>
-                        {plan.price_annual_total} — billed annually
+                        {plan.price_annual_total} â€” billed annually
                       </p>
                     )}
                     <p className="text-[12px]" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : T.muted }}>

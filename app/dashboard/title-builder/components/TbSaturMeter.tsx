@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/title-builder/components/TbSaturMeter.tsx
 // Converted 1:1 from lib/pages/title_builder/tb_satur_meter.dart
 
@@ -15,7 +15,7 @@ function getScoreColor(score: number): string {
   return '#F87171'
 }
 
-// ── Gauge painter (matches Dart _GaugePainter exactly) ─────────
+// â”€â”€ Gauge painter (matches Dart _GaugePainter exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function GaugeCanvas({ score }: { score: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -27,12 +27,12 @@ function GaugeCanvas({ score }: { score: number }) {
     ctx.clearRect(0, 0, W, H)
 
     const cx          = W / 2
-    const cy          = H           // center at bottom — matches Dart Offset(width/2, height)
+    const cy          = H           // center at bottom â€” matches Dart Offset(width/2, height)
     const radius      = W / 2
     const strokeWidth = 15
     const arcRadius   = radius - 10 // matches Dart radius - 10
 
-    // 1. Background track — grey, half circle from π to 2π
+    // 1. Background track â€” grey, half circle from Ï€ to 2Ï€
     ctx.beginPath()
     ctx.arc(cx, cy, arcRadius, Math.PI, 2 * Math.PI)
     ctx.strokeStyle = '#E5E7EB'
@@ -43,7 +43,7 @@ function GaugeCanvas({ score }: { score: number }) {
     // 2. Gradient fill track
     const clampedScore = Math.min(Math.max(score, 0), 1)
     if (clampedScore > 0) {
-      // Matches Dart SweepGradient colors: lime → orange → red
+      // Matches Dart SweepGradient colors: lime â†’ orange â†’ red
       const grad = ctx.createLinearGradient(0, cy, W, cy)
       grad.addColorStop(0,    '#8FFF00')
       grad.addColorStop(0.33, '#8FFF00')
@@ -58,7 +58,7 @@ function GaugeCanvas({ score }: { score: number }) {
       ctx.stroke()
     }
 
-    // 3. Needle — matches Dart needle angle + line + base circle
+    // 3. Needle â€” matches Dart needle angle + line + base circle
     const needleAngle = Math.PI + Math.PI * clampedScore
     const needleLen   = arcRadius - 20  // matches Dart radius - 30
     const needleEndX  = cx + needleLen * Math.cos(needleAngle)
@@ -83,7 +83,7 @@ function GaugeCanvas({ score }: { score: number }) {
   return <canvas ref={canvasRef} width={150} height={80} className="w-full" />
 }
 
-// ── Main TbSaturMeter ─────────────────────────────────────────
+// â”€â”€ Main TbSaturMeter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function TbSaturMeter({ score, label }: Props) {
   const scoreColor = getScoreColor(score)
 
@@ -92,7 +92,7 @@ export default function TbSaturMeter({ score, label }: Props) {
       {/* SizedBox(height:80, width:150) with CustomPaint + Align bottomCenter */}
       <div className="relative" style={{ width: 150, height: 80 }}>
         <GaugeCanvas score={score} />
-        {/* Overlaid text — Align bottomCenter with Column */}
+        {/* Overlaid text â€” Align bottomCenter with Column */}
         <div className="absolute bottom-2.5 left-0 right-0 flex flex-col items-center">
           <p className="text-[22px] font-bold" style={{ color: '#0F172A' }}>
             {Math.round(score * 100)}%

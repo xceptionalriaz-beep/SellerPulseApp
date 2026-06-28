@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 // components/ui/AppToast.tsx
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Converted from: lib/widgets/app_toast.dart
 //
 // What the Dart version did:
@@ -23,7 +23,7 @@
 //   toast.sending()
 //   toast.noInternet()
 //   toast.loading()
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createContext, useContext, useState, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -33,7 +33,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// ── Types ──────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type ToastType = 'success' | 'error' | 'warning' | 'info'
 
 interface ToastItem {
@@ -57,25 +57,25 @@ interface ToastContextValue {
   loading:    () => void
 }
 
-// ── Context ────────────────────────────────────────────────────
+// â”€â”€ Context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-// ── Hook ───────────────────────────────────────────────────────
+// â”€â”€ Hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext)
   if (!ctx) throw new Error('useToast must be used inside <ToastProvider>')
   return ctx
 }
 
-// ── Colors (matches Dart exactly) ─────────────────────────────
+// â”€â”€ Colors (matches Dart exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const TOAST_STYLES: Record<ToastType, { bg: string; text: string; border: string }> = {
-  success: { bg: '#8FFF00', text: '#0A0D08', border: '#6FCC00' }, // Lime — dark text
+  success: { bg: '#8FFF00', text: '#0A0D08', border: '#6FCC00' }, // Lime â€” dark text
   error:   { bg: '#EF4444', text: '#FFFFFF', border: '#DC2626' }, // Red
-  warning: { bg: '#F59E0B', text: '#0A0D08', border: '#D97706' }, // Amber — dark text
+  warning: { bg: '#F59E0B', text: '#0A0D08', border: '#D97706' }, // Amber â€” dark text
   info:    { bg: '#0F172A', text: '#FFFFFF', border: '#1E293B' }, // Dark navy
 }
 
-// ── Single Toast Item ──────────────────────────────────────────
+// â”€â”€ Single Toast Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ToastBubble({
   item,
   onRemove,
@@ -117,7 +117,7 @@ function ToastBubble({
   )
 }
 
-// ── Toast Container (portal — renders above everything) ────────
+// â”€â”€ Toast Container (portal â€” renders above everything) â”€â”€â”€â”€â”€â”€â”€â”€
 function ToastContainer({ toasts, onRemove }: {
   toasts: ToastItem[]
   onRemove: (id: string) => void
@@ -139,7 +139,7 @@ function ToastContainer({ toasts, onRemove }: {
   )
 }
 
-// ── Provider ───────────────────────────────────────────────────
+// â”€â”€ Provider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
   const counterRef = useRef(0)
@@ -162,7 +162,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  // ── Public API (mirrors Dart AppToast exactly) ───────────────
+  // â”€â”€ Public API (mirrors Dart AppToast exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const toast: ToastContextValue = {
     show: (msg, icon, dur = 2000) =>
       addToast(msg, 'success', icon ?? <CheckCircle size={15} />, dur),

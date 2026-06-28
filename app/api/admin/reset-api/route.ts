@@ -1,19 +1,19 @@
-// app/api/admin/reset-api/route.ts
-// Server-side — uses service role key to bypass RLS
+﻿// app/api/admin/reset-api/route.ts
+// Server-side â€” uses service role key to bypass RLS
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    // ── Admin client with service role key ────────────────────
+    // â”€â”€ Admin client with service role key â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── Verify caller is admin ────────────────────────────────
+    // â”€â”€ Verify caller is admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── Reset counters directly ───────────────────────────────
+    // â”€â”€ Reset counters directly â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error } = await supabase
       .from('api_fleet_config')
       .update({
@@ -38,10 +38,10 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error
 
-    // ── Log to admin notifications ────────────────────────────
+    // â”€â”€ Log to admin notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     await supabase.from('admin_notifications').insert({
       type:    'api_limit',
-      title:   '🔄 API Counters Reset',
+      title:   'ðŸ”„ API Counters Reset',
       message: `Daily API counters were manually reset by admin.`,
       is_read: false,
     })

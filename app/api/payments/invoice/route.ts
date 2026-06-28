@@ -1,4 +1,4 @@
-// app/api/payments/invoice/route.ts
+﻿// app/api/payments/invoice/route.ts
 export const dynamic = 'force-dynamic'
 // Proxies LemonSqueezy invoice PDF through your server
 // so the browser can download it directly without CORS issues
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const txnId = req.nextUrl.searchParams.get('txnId')
     if (!txnId) return NextResponse.json({ error: 'Missing txnId' }, { status: 400 })
 
-    // Fetch transaction — verify it belongs to this user
+    // Fetch transaction â€” verify it belongs to this user
     const { data: txn } = await (adminClient.from('transactions') as any)
       .select('invoice, plan, created_at, user_id')
       .eq('id', txnId)

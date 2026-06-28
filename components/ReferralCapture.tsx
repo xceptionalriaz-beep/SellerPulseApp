@@ -1,10 +1,10 @@
-// ─────────────────────────────────────────────────────────────
+﻿// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // PATCH for app/layout.tsx
 //
 // Add this component anywhere inside your RootLayout's <body>
 // It captures UTM params + referral codes on EVERY page visit
 // and stores them in localStorage for use during signup
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 'use client'
 
@@ -15,7 +15,7 @@ export function ReferralCapture() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Only capture once — don't overwrite existing referral
+    // Only capture once â€” don't overwrite existing referral
     if (typeof window === 'undefined') return
     if (localStorage.getItem('riazify_referral')) return
 
@@ -42,10 +42,10 @@ export function ReferralCapture() {
   return null // renders nothing
 }
 
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // In your RootLayout, add:
 //
-// import { ReferralCapture } from './ReferralCapture'  ← create file
+// import { ReferralCapture } from './ReferralCapture'  â† create file
 // import { Suspense } from 'react'
 //
 // <body>
@@ -54,4 +54,4 @@ export function ReferralCapture() {
 //   </Suspense>
 //   {children}
 // </body>
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

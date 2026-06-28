@@ -1,4 +1,4 @@
-// emails/ConfirmationEmail.tsx
+﻿// emails/ConfirmationEmail.tsx
 // Email verification / confirmation code email
 
 import {
@@ -20,18 +20,18 @@ export function ConfirmationEmail({
   return (
     <Html>
       <Head />
-      <Preview>Confirm your Riazify account — one click away</Preview>
+      <Preview>Confirm your Riazify account â€” one click away</Preview>
       <Body style={main}>
         <Container style={container}>
 
           {/* Header */}
           <Section style={header}>
-            <Text style={logoText}>⚡ Riazify</Text>
+            <Text style={logoText}>âš¡ Riazify</Text>
           </Section>
 
           {/* Body */}
           <Section style={body}>
-            <div style={iconWrap}>🔐</div>
+            <div style={iconWrap}>ðŸ”</div>
             <Heading style={h1}>Confirm your email</Heading>
             <Text style={bodyText}>
               Hey {userName}, you're almost in! Just confirm your email address
@@ -50,7 +50,7 @@ export function ConfirmationEmail({
             {/* Button */}
             <Section style={{ textAlign: 'center' as const, margin: '32px 0' }}>
               <Button style={ctaButton} href={confirmationUrl}>
-                ✅ Confirm My Account
+                âœ… Confirm My Account
               </Button>
             </Section>
 
@@ -62,7 +62,7 @@ export function ConfirmationEmail({
 
           <Hr style={divider} />
           <Section style={footer}>
-            <Text style={footerText}>© 2026 Riazify — Built for eBay operators.</Text>
+            <Text style={footerText}>Â© 2026 Riazify â€” Built for eBay operators.</Text>
           </Section>
 
         </Container>

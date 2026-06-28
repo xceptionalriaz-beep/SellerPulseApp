@@ -1,8 +1,8 @@
-// app/api/email/enqueue/route.ts
-// ══════════════════════════════════════════════════════════════
+﻿// app/api/email/enqueue/route.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Enqueues emails when trigger events fire
 // Called internally when: user signs up, hits limit, payment fails
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +11,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? ''
 
 export async function POST(req: NextRequest) {
   try {
-    // Internal only — accept both secret variants
+    // Internal only â€” accept both secret variants
     const secret = req.headers.get('x-internal-secret')
     const validSecret = process.env.INTERNAL_API_SECRET ?? process.env.NEXT_PUBLIC_INTERNAL_SECRET
     if (secret !== validSecret) {
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'trigger_event and to_email required' }, { status: 400 })
     }
 
-    // Find active flow — handle both old (trigger) and new (trigger_event) column names
+    // Find active flow â€” handle both old (trigger) and new (trigger_event) column names
     const { data: flows } = await (adminClient.from('email_flows') as any)
       .select('id, name, title, trigger, trigger_event')
       .eq('is_active', true)
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     // Normalize flow name
     const flowName = flow.name ?? flow.title ?? 'Email Flow'
 
-    // ── Suppression list check ────────────────────────────────
+    // â”€â”€ Suppression list check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Never queue emails for unsubscribed users
     const { count: suppressed } = await (adminClient.from('email_suppressions') as any)
       .select('id', { count: 'exact', head: true })
@@ -55,12 +55,12 @@ export async function POST(req: NextRequest) {
     if ((suppressed ?? 0) > 0) {
       return NextResponse.json({
         success: true,
-        message: 'Email suppressed — user unsubscribed',
+        message: 'Email suppressed â€” user unsubscribed',
         queued:  0,
       })
     }
 
-    // ── Duplicate prevention ──────────────────────────────────
+    // â”€â”€ Duplicate prevention â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Check if user already has pending/sent emails for this flow
     if (user_id) {
       const { count } = await (adminClient.from('email_queue') as any)
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       if ((count ?? 0) > 0) {
         return NextResponse.json({
           success: true,
-          message: 'User already in this flow — skipping duplicate',
+          message: 'User already in this flow â€” skipping duplicate',
           queued:  0,
         })
       }

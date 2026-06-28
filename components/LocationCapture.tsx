@@ -1,21 +1,21 @@
-'use client'
+﻿'use client'
 // app/components/LocationCapture.tsx
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Shows a notification bar on the dashboard.
-// Layer 1: Browser GPS (most accurate — city level)
+// Layer 1: Browser GPS (most accurate â€” city level)
 // Layer 2: IP geolocation (silent fallback if denied)
 //
 // Add to your dashboard layout:
 //   import { LocationCapture } from '@/components/LocationCapture'
 //   <LocationCapture />
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useEffect, useState } from 'react'
 import { MapPin, X, Check, Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
-// ── Convert country code to flag emoji ───────────────────────
-// BD → 🇧🇩,  US → 🇺🇸,  GB → 🇬🇧
+// â”€â”€ Convert country code to flag emoji â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// BD â†’ ðŸ‡§ðŸ‡©,  US â†’ ðŸ‡ºðŸ‡¸,  GB â†’ ðŸ‡¬ðŸ‡§
 function toFlag(code: string): string {
   if (!code || code.length !== 2) return ''
   return code.toUpperCase().split('').map(c =>
@@ -23,7 +23,7 @@ function toFlag(code: string): string {
   ).join('')
 }
 
-// ── Reverse geocode lat/lng → city + country ─────────────────
+// â”€â”€ Reverse geocode lat/lng â†’ city + country â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function reverseGeocode(lat: number, lon: number) {
   const res = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`,
@@ -32,7 +32,7 @@ async function reverseGeocode(lat: number, lon: number) {
   if (!res.ok) throw new Error('Reverse geocode failed')
   const data = await res.json()
 
-  // Extract city — try multiple fields in order
+  // Extract city â€” try multiple fields in order
   const city =
     data.address?.city         ??  // large city
     data.address?.town         ??  // medium town
@@ -42,7 +42,7 @@ async function reverseGeocode(lat: number, lon: number) {
     data.address?.state_district ?? // district fallback
     null
 
-  // country_code from Nominatim is lowercase (e.g. "bd") → uppercase "BD"
+  // country_code from Nominatim is lowercase (e.g. "bd") â†’ uppercase "BD"
   const country_code = (data.address?.country_code ?? '').toUpperCase() || null
 
   return {
@@ -78,14 +78,14 @@ export function LocationCapture() {
         .eq('id', user.id)
         .single()
 
-      // Already have browser-accurate location — skip
+      // Already have browser-accurate location â€” skip
       if ((profile as any)?.location_source === 'browser') {
         // Still run IP geo silently for timezone refresh
         runIpGeo(user)
         return
       }
 
-      // No location at all — try silent IP geo first
+      // No location at all â€” try silent IP geo first
       await runIpGeo(user)
 
       // Then show notification to get better browser GPS data
@@ -94,7 +94,7 @@ export function LocationCapture() {
     init()
   }, [])
 
-  // ── Silent IP geolocation (no user interaction needed) ─────
+  // â”€â”€ Silent IP geolocation (no user interaction needed) â”€â”€â”€â”€â”€
   async function runIpGeo(user: any) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -110,7 +110,7 @@ export function LocationCapture() {
     } catch { /* non-critical */ }
   }
 
-  // ── Browser GPS → reverse geocode → save ───────────────────
+  // â”€â”€ Browser GPS â†’ reverse geocode â†’ save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleAllow() {
     setLoading(true)
     try {
@@ -146,7 +146,7 @@ export function LocationCapture() {
       setTimeout(() => setShow(false), 3000)
 
     } catch (err: any) {
-      // User denied OR timeout — fall back to IP geo silently
+      // User denied OR timeout â€” fall back to IP geo silently
       const { data: { user } } = await supabase.auth.getUser()
       if (user) runIpGeo(user)
       setShow(false)

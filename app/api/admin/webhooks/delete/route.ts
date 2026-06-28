@@ -1,4 +1,4 @@
-// app/api/admin/webhooks/delete/route.ts
+﻿// app/api/admin/webhooks/delete/route.ts
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 

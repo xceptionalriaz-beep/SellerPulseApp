@@ -1,7 +1,7 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 // supabase/functions/market-brain/index.ts
 // Converted 1:1 from lib/core/services/market_brain_service.dart
-// Handles: Cache check → eBay fetch → VeRO scan → Cache save
+// Handles: Cache check â†’ eBay fetch â†’ VeRO scan â†’ Cache save
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -34,11 +34,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // ── Get user from auth header ─────────────────────────────
+    // â”€â”€ Get user from auth header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const authHeader = req.headers.get('Authorization') ?? ''
     const { data: { user } } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
 
-    // ── Check active filters ──────────────────────────────────
+    // â”€â”€ Check active filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // matches Dart hasActiveFilters logic
     const hasActiveFilters = filters && (
       filters.marketplace !== 'US' ||
@@ -52,10 +52,10 @@ serve(async (req) => {
       filters.minSales     > 0
     )
 
-    // ══════════════════════════════════════════════════════════
-    // ⚡ PHASE 1: CACHE INTERCEPTOR
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // âš¡ PHASE 1: CACHE INTERCEPTOR
     // matches Dart Phase 1 cache check
-    // ══════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     if (page === 1 && !hasActiveFilters) {
       try {
         const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -69,7 +69,7 @@ serve(async (req) => {
           .maybeSingle()
 
         if (cachedData) {
-          console.log(`⚡ CACHE HIT: Loaded '${cleanQuery}' instantly!`)
+          console.log(`âš¡ CACHE HIT: Loaded '${cleanQuery}' instantly!`)
 
           // matches Dart: build FlSpot list from trend_data
           const cachedSpots = (cachedData.trend_data as any[]).map((e: any, i: number) => ({
@@ -101,14 +101,14 @@ serve(async (req) => {
           }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
       } catch (e) {
-        console.warn(`⚠️ Cache read failed, proceeding to fresh fetch: ${e}`)
+        console.warn(`âš ï¸ Cache read failed, proceeding to fresh fetch: ${e}`)
       }
     }
 
-    // ══════════════════════════════════════════════════════════
-    // 🐢 PHASE 2: FRESH FETCH via ebay-search edge function
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ðŸ¢ PHASE 2: FRESH FETCH via ebay-search edge function
     // matches Dart: supabase.functions.invoke('ebay-search', body: requestBody)
-    // ══════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     const requestBody: any = { query, page }
     if (hasActiveFilters && filters) requestBody.filters = filters
 
@@ -132,7 +132,7 @@ serve(async (req) => {
     const totalEbayListings: number = parseInt(data.total?.toString() ?? '0') || 0
     const dynamicTrend: any[]  = data.historicalTrend ?? []
 
-    // ── Build trend data (matches Dart FlSpot list) ───────────
+    // â”€â”€ Build trend data (matches Dart FlSpot list) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let newTrendData: { x: number; y: number }[] = []
 
     if (dynamicTrend.length > 0) {
@@ -155,7 +155,7 @@ serve(async (req) => {
       }
     }
 
-    // ── STR & sentiment (matches Dart calculatedSTR logic) ────
+    // â”€â”€ STR & sentiment (matches Dart calculatedSTR logic) â”€â”€â”€â”€
     let baseStr = totalEbayListings < 1000 ? 60.0 : totalEbayListings > 50000 ? 15.0 : 35.0
     const seedN = [...cleanQuery].reduce((a, c) => a + c.charCodeAt(0), 0)
     let s2 = seedN
@@ -170,13 +170,13 @@ serve(async (req) => {
     let sentimentLabel: string
     let successColor:   string
     if (isTrendingUp && calculatedSTR > 50) {
-      sentimentLabel = '🚀 STRONG BULLISH';  successColor = 'FF16A34A'
+      sentimentLabel = 'ðŸš€ STRONG BULLISH';  successColor = 'FF16A34A'
     } else if (!isTrendingUp && calculatedSTR < 25) {
-      sentimentLabel = '⚠️ HIGH RISK (Saturated)'; successColor = 'FFDC2626'
+      sentimentLabel = 'âš ï¸ HIGH RISK (Saturated)'; successColor = 'FFDC2626'
     } else if (isTrendingUp && calculatedSTR < 40) {
-      sentimentLabel = '📈 SPECULATIVE GROWTH';    successColor = 'FF2563EB'
+      sentimentLabel = 'ðŸ“ˆ SPECULATIVE GROWTH';    successColor = 'FF2563EB'
     } else {
-      sentimentLabel = '⚖️ NEUTRAL / STEADY';       successColor = 'FF475569'
+      sentimentLabel = 'âš–ï¸ NEUTRAL / STEADY';       successColor = 'FF475569'
     }
 
     const densityScore = Math.min(95, Math.max(5, 100 - calculatedSTR))
@@ -187,7 +187,7 @@ serve(async (req) => {
     else if (densityScore > 40) insight = 'Moderate Competition. Est. 5-8% Ad Rate needed.'
     else                        insight = 'Low Competition. Organic ranking highly possible.'
 
-    // ── Price calculations (matches Dart totalPrice / validPrices) ──
+    // â”€â”€ Price calculations (matches Dart totalPrice / validPrices) â”€â”€
     let totalPrice = 0, validPrices = 0
     for (const item of itemSummaries) {
       const val = parseFloat(item.price?.value?.toString() ?? '0')
@@ -196,7 +196,7 @@ serve(async (req) => {
     const calculatedAvgPrice  = validPrices > 0 ? totalPrice / validPrices : 0
     const calculatedMarketVol = calculatedAvgPrice * totalEbayListings * 0.10
 
-    // ── Format helpers (matches Dart NumberFormat) ────────────
+    // â”€â”€ Format helpers (matches Dart NumberFormat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const formatCurrency = (n: number) => `$${n.toFixed(2)}`
     const formatCompact  = (n: number) => {
       if (n >= 1000000) return `$${(n/1000000).toFixed(1)}M`
@@ -205,10 +205,10 @@ serve(async (req) => {
     }
     const formatDecimal  = (n: number) => n.toLocaleString('en-US')
 
-    // ══════════════════════════════════════════════════════════
-    // 🧠 PRODUCT MAPPING & INTELLIGENCE INJECTION
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ðŸ§  PRODUCT MAPPING & INTELLIGENCE INJECTION
     // matches Dart mappedProducts logic exactly
-    // ══════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     const mappedProducts = itemSummaries.map((item: any) => {
       const priceData    = item.price
       const imageData    = item.image
@@ -253,10 +253,10 @@ serve(async (req) => {
       }
     })
 
-    // ══════════════════════════════════════════════════════════
-    // ✨ VERO SCANNER 3.0
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // âœ¨ VERO SCANNER 3.0
     // matches Dart VeRO Scanner Multi-Match logic exactly
-    // ══════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     try {
       const { data: veroData } = await supabase
         .from('vero_brands')
@@ -293,10 +293,10 @@ serve(async (req) => {
         }
       }
     } catch (e) {
-      console.error(`🚨 VERO SCANNER ERROR: ${e}`)
+      console.error(`ðŸš¨ VERO SCANNER ERROR: ${e}`)
     }
 
-    // ── Build result (matches Dart MarketResearchResult) ──────
+    // â”€â”€ Build result (matches Dart MarketResearchResult) â”€â”€â”€â”€â”€â”€
     const result = {
       nicheTotalActive:    `${formatDecimal(totalEbayListings)}+ listings`,
       nicheAvgPrice:       formatCurrency(calculatedAvgPrice),
@@ -310,10 +310,10 @@ serve(async (req) => {
       fromCache:           false,
     }
 
-    // ══════════════════════════════════════════════════════════
-    // 💾 PHASE 3: SAVE TO CACHE
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    // ðŸ’¾ PHASE 3: SAVE TO CACHE
     // matches Dart Phase 3 cache save
-    // ══════════════════════════════════════════════════════════
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
     if (page === 1 && !hasActiveFilters) {
       try {
         await supabase.from('market_cache').insert({
@@ -329,9 +329,9 @@ serve(async (req) => {
           trend_data:      result.historicalSalesData.map((e: any) => ({ x: e.x, y: e.y })),
           products:        result.liveProducts,
         })
-        console.log(`💾 CACHE SAVED: '${cleanQuery}'`)
+        console.log(`ðŸ’¾ CACHE SAVED: '${cleanQuery}'`)
       } catch (e) {
-        console.warn(`⚠️ Cache write failed: ${e}`)
+        console.warn(`âš ï¸ Cache write failed: ${e}`)
       }
     }
 

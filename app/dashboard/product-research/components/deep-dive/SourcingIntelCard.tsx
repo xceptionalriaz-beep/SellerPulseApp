@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // app/dashboard/product-research/components/deep-dive/SourcingIntelCard.tsx
 // Converted 1:1 from lib/pages/product_research/deep_dive/widgets/sourcing_intel_card.dart
 
@@ -14,7 +14,7 @@ interface Props {
   keywords:  string
 }
 
-// ── Info row (matches Dart _buildInfoRow) ─────────────────────
+// â”€â”€ Info row (matches Dart _buildInfoRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InfoRow({ icon: Icon, label, value, valueColor }: {
   icon: React.ElementType; label: string; value: string; valueColor?: string
 }) {
@@ -27,7 +27,7 @@ function InfoRow({ icon: Icon, label, value, valueColor }: {
   )
 }
 
-// ── Animated source button (matches Dart _AnimatedSourceButton) ──
+// â”€â”€ Animated source button (matches Dart _AnimatedSourceButton) â”€â”€
 function AnimatedSourceButton({ domain, price, color }: { domain: string; price: string; color: string }) {
   const [hover, setHover] = useState(false)
   return (
@@ -60,13 +60,13 @@ export default function SourcingIntelCard({ stockLeft, veroRisk, keywords }: Pro
     <div className="flex flex-col h-full p-5 rounded-2xl border"
          style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 5px 10px rgba(0,0,0,0.02)' }}>
 
-      {/* Header — matches Dart Row NeonIcon + title */}
+      {/* Header â€” matches Dart Row NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <NeonIcon icon={Globe} />
         <p className="text-[16px] font-bold" style={{ color: C.text }}>Sourcing & Intel</p>
       </div>
 
-      {/* Content — matches Dart Expanded Column */}
+      {/* Content â€” matches Dart Expanded Column */}
       <div className="flex flex-col flex-1">
 
         {/* Source buttons */}

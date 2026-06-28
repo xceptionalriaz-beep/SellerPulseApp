@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 
 const C = {
-  dark: '#0F172A', lime: '#8FFF00', border: '#E2E8F0',
+  dark: '#1a2410', lime: '#8FFF00', border: '#E2E8F0',
   bg: '#F8FAFC', text: '#0F172A', muted: '#64748B', hint: '#94A3B8',
 }
 
@@ -21,7 +21,7 @@ interface Props {
   onClose:       () => void
 }
 
-// ── Helpers ───────────────────────────────────────────────────
+// -- Helpers ---------------------------------------------------
 function safeStr(v: any, fallback = ''): string {
   if (v == null) return fallback
   const s = v.toString().trim()
@@ -60,12 +60,12 @@ function formatDateTime(raw: string): string {
   } catch { return 'Recent' }
 }
 
-// ── Section label ──────────────────────────────────────────────
+// -- Section label ----------------------------------------------
 function SectionLabel({ text, color }: { text: string; color?: string }) {
   return <p className="text-[11px] font-bold tracking-wider mb-3" style={{ color: color ?? C.hint }}>{text}</p>
 }
 
-// ── Metric card ────────────────────────────────────────────────
+// -- Metric card ------------------------------------------------
 function MetricCard({ title, value, icon: Icon }: { title: string; value: string; icon: React.ElementType }) {
   return (
     <div className="flex-1 p-4 rounded-xl border" style={{ backgroundColor: '#fff', borderColor: C.border }}>
@@ -76,7 +76,7 @@ function MetricCard({ title, value, icon: Icon }: { title: string; value: string
   )
 }
 
-// ── Quick action button ────────────────────────────────────────
+// -- Quick action button ----------------------------------------
 function QuickAction({ icon: Icon, label, loading, onTap, isDanger = false }: {
   icon: React.ElementType; label: string; loading: boolean; onTap: () => void; isDanger?: boolean
 }) {
@@ -96,7 +96,7 @@ function QuickAction({ icon: Icon, label, loading, onTap, isDanger = false }: {
   )
 }
 
-// ── System row ─────────────────────────────────────────────────
+// -- System row -------------------------------------------------
 function SystemRow({ label, value, copyable }: { label: string; value: string; copyable?: boolean }) {
   return (
     <div className="flex items-center justify-between py-1">
@@ -113,7 +113,7 @@ function SystemRow({ label, value, copyable }: { label: string; value: string; c
   )
 }
 
-// ── Plan/Status badge dropdown ─────────────────────────────────
+// -- Plan/Status badge dropdown ---------------------------------
 function BadgeDropdown({ value, options, onSelect, bgColor, textColor }: {
   value: string; options: { value: string; label?: string }[]
   onSelect: (v: string) => void; bgColor: string; textColor: string
@@ -183,7 +183,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
     fetchData()
   }, [user.id])
 
-  // ── Derived values ─────────────────────────────────────────
+  // -- Derived values -----------------------------------------
   const name        = safeStr(user.name,        'Unknown User')
   const email       = safeStr(user.email,        'No Email')
   const shortId     = safeStr(user.display_id,   'Generating...')
@@ -282,7 +282,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
 
         <div className="flex-1 overflow-y-auto px-8 pb-10">
 
-          {/* ── Hero ── */}
+          {/* -- Hero -- */}
           <div className="flex flex-col items-center mb-6">
             {avatarUrl ? (
               <img src={avatarUrl} className="w-24 h-24 rounded-full object-cover" />
@@ -305,7 +305,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
             </div>
           </div>
 
-          {/* ── Quick Actions ── */}
+          {/* -- Quick Actions -- */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <QuickAction icon={Mail}    label="Email"        loading={false}          onTap={() => {}} />
             <QuickAction icon={Lock}    label="Reset Pass"   loading={resettingPass}  onTap={sendPasswordReset} />
@@ -314,14 +314,14 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
 
           <div className="h-px mb-6" style={{ backgroundColor: '#F1F5F9' }} />
 
-          {/* ── Metrics ── */}
+          {/* -- Metrics -- */}
           <SectionLabel text="ACCOUNT METRICS" />
           <div className="flex gap-3 mb-8">
             <MetricCard title="Monthly Value" value={`$${mrr.toFixed(0)}`} icon={DollarSign} />
             <MetricCard title="Member Since"  value={joinDate}             icon={Calendar} />
           </div>
 
-          {/* ── Plan Usage ── */}
+          {/* -- Plan Usage -- */}
           <SectionLabel text="PLAN USAGE" />
           <div className="p-4 rounded-xl border mb-8"
                style={{
@@ -336,7 +336,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
                 {isOverLimit && (
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold"
                         style={{ backgroundColor: 'rgba(248,113,113,0.1)', color: '#F87171' }}>
-                    ⚠️ Over Limit
+                    ?? Over Limit
                   </span>
                 )}
               </div>
@@ -351,7 +351,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
             </p>
           </div>
 
-          {/* ── Connected Stores ── */}
+          {/* -- Connected Stores -- */}
           <div className="flex items-center justify-between mb-3">
             <SectionLabel text="CONNECTED STORES" />
             {!loadingStores && <span className="text-[11px] font-bold mb-3" style={{ color: '#16A34A' }}>{stores.length} Active</span>}
@@ -380,7 +380,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
 
           <div className="h-px my-6" style={{ backgroundColor: '#F1F5F9' }} />
 
-          {/* ── Active Devices ── */}
+          {/* -- Active Devices -- */}
           <div className="flex items-center justify-between mb-3">
             <SectionLabel text="ACTIVE DEVICES" />
             {!loadingDevices && <span className="text-[11px] font-bold mb-3" style={{ color: '#16A34A' }}>{devices.length} Online</span>}
@@ -417,7 +417,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
             </div>
           )}
 
-          {/* ── Security & Login Audit ── */}
+          {/* -- Security & Login Audit -- */}
           <SectionLabel text="SECURITY & LOGIN AUDIT" />
           {loadingHistory ? (
             <div className="flex justify-center py-4">
@@ -445,7 +445,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
 
           <div className="h-px my-6" style={{ backgroundColor: '#F1F5F9' }} />
 
-          {/* ── Admin Support Notes ── */}
+          {/* -- Admin Support Notes -- */}
           <SectionLabel text="ADMIN SUPPORT NOTES" />
           <textarea rows={4} value={note} onChange={e => setNote(e.target.value)}
             placeholder="Add a private note about this user..."
@@ -461,7 +461,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
 
           <div className="h-px mb-6" style={{ backgroundColor: '#F1F5F9' }} />
 
-          {/* ── System Metadata ── */}
+          {/* -- System Metadata -- */}
           <SectionLabel text="SYSTEM METADATA" />
           <div className="flex flex-col gap-3 mb-8">
             <SystemRow label="Display ID"   value={shortId}     copyable />
@@ -472,7 +472,7 @@ export default function UserDetailDrawer({ user, onUserUpdated, onClose }: Props
 
           <div className="h-px mb-6" style={{ backgroundColor: '#F1F5F9' }} />
 
-          {/* ── Danger Zone ── */}
+          {/* -- Danger Zone -- */}
           <SectionLabel text="DANGER ZONE" color="#F87171" />
           <button onClick={() => setShowDelete(true)}
             className="w-full flex items-center justify-center gap-2 py-4 rounded-xl border text-[13px] font-bold"

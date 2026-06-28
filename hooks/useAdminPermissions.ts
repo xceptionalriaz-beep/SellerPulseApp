@@ -1,15 +1,15 @@
-// hooks/useAdminPermissions.ts
-// ══════════════════════════════════════════════════════════════
-// RIAZIFY — Admin Permissions Hook
+﻿// hooks/useAdminPermissions.ts
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// RIAZIFY â€” Admin Permissions Hook
 // Fetches live scopes from DB on every mount.
 // Never trusts JWT payload for scope data.
 // Detects stale sessions via role updated_at timestamp.
-// ══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 
-// ── Types ──────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export type AdminScope =
   | 'crm:read'
   | 'crm:write_notes'
@@ -23,7 +23,7 @@ export type AdminScope =
 export interface AdminPermissions {
   // Loading state
   loading:      boolean
-  // Is this the founder account (role = 'admin') — bypasses all scope checks
+  // Is this the founder account (role = 'admin') â€” bypasses all scope checks
   isFounder:    boolean
   // Has any admin access at all (founder OR has a role_id)
   isAdmin:      boolean
@@ -41,33 +41,33 @@ export interface AdminPermissions {
   refetch:      () => Promise<void>
 }
 
-// ── Tab → Scope mapping ────────────────────────────────────────
+// â”€â”€ Tab â†’ Scope mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Maps each SETTINGS_MENU index to the required scope.
 // null = founder only (completely hidden from team members)
 // undefined = any admin can access
 export const TAB_SCOPE_MAP: Record<number, AdminScope | null | undefined> = {
   0:  'crm:read',          // User CRM
-  1:  null,                // Role Builder      → founder only
+  1:  null,                // Role Builder      â†’ founder only
   2:  'crm:read',          // Security Logs
   3:  'crm:edit_tiers',    // Promos & Codes
-  4:  null,                // Kill Switches     → founder only
+  4:  null,                // Kill Switches     â†’ founder only
   5:  'crm:edit_tiers',    // Plan Limits
   6:  'crm:write_notes',   // Emails
   7:  'infra:selectors',   // Webhooks
   8:  'crm:edit_tiers',    // Gamification
   9:  'infra:selectors',   // API Vault
   10: 'finance:view_mrr',  // Affiliate Vault
-  11: null,                // Founder Ops       → founder only
+  11: null,                // Founder Ops       â†’ founder only
   12: 'crm:write_notes',   // Marketing
 }
 
-// ── All scopes granted to founder ─────────────────────────────
+// â”€â”€ All scopes granted to founder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FOUNDER_SCOPES: AdminScope[] = [
   'crm:read', 'crm:write_notes', 'crm:edit_tiers', 'crm:danger_zone',
   'infra:selectors', 'infra:kill_switch', 'infra:ota_update', 'finance:view_mrr',
 ]
 
-// ── Hook ───────────────────────────────────────────────────────
+// â”€â”€ Hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export function useAdminPermissions(): AdminPermissions {
   const supabase = createClient()
 
@@ -91,7 +91,7 @@ export function useAdminPermissions(): AdminPermissions {
         setLoading(false); return
       }
 
-      // Always fetch fresh from DB — never use JWT claims for scopes
+      // Always fetch fresh from DB â€” never use JWT claims for scopes
       const { data: profile, error } = await supabase
         .from('profiles')
         .select(`
@@ -121,12 +121,12 @@ export function useAdminPermissions(): AdminPermissions {
         updated_at: string
       } | null
 
-      // Check for stale session — if DB updated_at is newer, re-fetch
+      // Check for stale session â€” if DB updated_at is newer, re-fetch
       if (roleData?.updated_at && lastUpdatedAtRef.current) {
         const dbTs     = new Date(roleData.updated_at).getTime()
         const cachedTs = new Date(lastUpdatedAtRef.current).getTime()
         if (dbTs > cachedTs) {
-          // Scopes changed — update ref and continue with fresh data
+          // Scopes changed â€” update ref and continue with fresh data
           lastUpdatedAtRef.current = roleData.updated_at
         }
       } else if (roleData?.updated_at) {
@@ -161,18 +161,18 @@ export function useAdminPermissions(): AdminPermissions {
     return () => clearInterval(interval)
   }, [fetchPermissions])
 
-  // ── hasScope ───────────────────────────────────────────────
+  // â”€â”€ hasScope â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function hasScope(scope: AdminScope): boolean {
     if (isFounder) return true
     return scopes.includes(scope)
   }
 
-  // ── canAccessTab ───────────────────────────────────────────
+  // â”€â”€ canAccessTab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Returns true if this user can see and access the given tab index
   function canAccessTab(tabIndex: number): boolean {
     if (isFounder) return true
     const requiredScope = TAB_SCOPE_MAP[tabIndex]
-    // null = founder only — non-founders never get access
+    // null = founder only â€” non-founders never get access
     if (requiredScope === null) return false
     // undefined = any admin
     if (requiredScope === undefined) return isAdmin

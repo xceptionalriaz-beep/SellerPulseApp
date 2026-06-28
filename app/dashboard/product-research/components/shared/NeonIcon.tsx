@@ -1,4 +1,4 @@
-// app/dashboard/product-research/components/shared/NeonIcon.tsx
+﻿// app/dashboard/product-research/components/shared/NeonIcon.tsx
 // Converted 1:1 from lib/pages/product_research/shared/neon_icon.dart
 
 interface Props {

@@ -1,10 +1,10 @@
-// app/api/admin/roles/delete/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/roles/delete/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Deletes a custom role from admin_roles table
 // HARD BLOCK: refuses deletion if any profiles still use this role
 // Requires admin Bearer token
 // Cannot delete system roles
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── 1. Verify caller is admin ──────────────────────────────
+    // â”€â”€ 1. Verify caller is admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -31,11 +31,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // ── 2. Parse body ──────────────────────────────────────────
+    // â”€â”€ 2. Parse body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { roleId } = await req.json()
     if (!roleId) return NextResponse.json({ error: 'roleId is required' }, { status: 400 })
 
-    // ── 3. Check role exists and is not a system role ──────────
+    // â”€â”€ 3. Check role exists and is not a system role â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: existing } = await adminClient
       .from('admin_roles')
       .select('is_system_role, role_name')
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'System roles cannot be deleted' }, { status: 403 })
     }
 
-    // ── 4. HARD BLOCK — check if any profiles use this role ───
+    // â”€â”€ 4. HARD BLOCK â€” check if any profiles use this role â”€â”€â”€
     const { count, error: countError } = await adminClient
       .from('profiles')
       .select('id', { count: 'exact', head: true })
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       }, { status: 409 })
     }
 
-    // ── 5. Safe to delete ─────────────────────────────────────
+    // â”€â”€ 5. Safe to delete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { error: deleteError } = await adminClient
       .from('admin_roles')
       .delete()
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 })
 
-    // ── 6. Log to user_events ──────────────────────────────────
+    // â”€â”€ 6. Log to user_events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await adminClient.from('user_events').insert({
         user_id:     caller.id,

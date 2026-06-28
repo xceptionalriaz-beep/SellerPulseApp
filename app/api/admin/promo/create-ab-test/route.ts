@@ -1,8 +1,8 @@
-// app/api/admin/promo/create-ab-test/route.ts
-// ──────────────────────────────────────────────────────────────
+﻿// app/api/admin/promo/create-ab-test/route.ts
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Creates a new A/B pricing test
 // Founder only OR admin with manage_ab_tests scope
-// ──────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -15,14 +15,14 @@ export async function POST(req: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // ── Verify auth ────────────────────────────────────────────
+    // â”€â”€ Verify auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { data: { user: caller } } = await adminClient.auth.getUser(token)
     if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // ── Check founder or manage_ab_tests scope ─────────────────
+    // â”€â”€ Check founder or manage_ab_tests scope â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data: profile } = await adminClient
       .from('profiles').select('role, name').eq('id', caller.id).single()
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Parse and validate body ────────────────────────────────
+    // â”€â”€ Parse and validate body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const {
       name,
       variant_a_label,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Variant prices must be different' }, { status: 400 })
     }
 
-    // ── Insert into ab_tests ───────────────────────────────────
+    // â”€â”€ Insert into ab_tests â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const { data, error } = await (adminClient.from('ab_tests') as any)
       .insert({
         name:               name.trim(),
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // ── Log to admin_logs ──────────────────────────────────────
+    // â”€â”€ Log to admin_logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     try {
       await (adminClient.from('admin_logs') as any).insert({
         admin_id:   caller.id,

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 // components/admin/settings-tabs/crm_widgets/AdminControlsBar.tsx
 // Converted 1:1 from lib/pages/admin_settings_tabs/crm_widgets/admin_controls_bar.dart
 
@@ -13,9 +13,9 @@ interface Props {
   onRefresh:       () => void
 }
 
-const C = { dark: '#0F172A', lime: '#8FFF00', border: '#E2E8F0', muted: '#64748B', hint: '#94A3B8' }
+const C = { dark: '#1a2410', lime: '#8FFF00', border: '#E2E8F0', muted: '#64748B', hint: '#94A3B8' }
 
-// ── Filter chip (matches Dart _buildFilterChip) ───────────────
+// â”€â”€ Filter chip (matches Dart _buildFilterChip) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FilterChip({ label, icon: Icon, isAlert = false, badgeCount, isActive, onTap }: {
   label: string; icon: React.ElementType; isAlert?: boolean
   badgeCount?: number; isActive: boolean; onTap: () => void
@@ -24,8 +24,8 @@ function FilterChip({ label, icon: Icon, isAlert = false, badgeCount, isActive, 
     <button onClick={onTap}
       className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
       style={{
-        backgroundColor: isActive ? C.dark : '#fff',
-        borderColor:     isActive ? C.dark : C.border,
+        backgroundColor: isActive ? '#8fff00' : '#fff',
+        borderColor: isActive ? '#8fff00' : C.border,
         color:           isActive ? '#fff' : '#334155',
       }}>
       <Icon size={13} style={{ color: isActive ? C.lime : isAlert ? '#FB923C' : C.muted }} />
@@ -34,7 +34,7 @@ function FilterChip({ label, icon: Icon, isAlert = false, badgeCount, isActive, 
         <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
               style={{
                 backgroundColor: isActive ? C.lime : '#F87171',
-                color:           isActive ? C.dark : '#fff',
+                color: isActive ? '#1a2410' : '#fff',
               }}>
           {badgeCount}
         </span>
@@ -58,7 +58,7 @@ export default function AdminControlsBar({ allUsers, onSearch, onAddUser, select
     { label: 'Support waiting', icon: Headphones,    isAlert: false, badge: supportCount  },
   ]
 
-  // ── Search box ──────────────────────────────────────────────
+  // â”€â”€ Search box â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const SearchBox = (
     <div className="flex items-center gap-2 h-12 px-4 rounded-xl border bg-white"
          style={{ borderColor: C.border }}>
@@ -71,7 +71,7 @@ export default function AdminControlsBar({ allUsers, onSearch, onAddUser, select
     </div>
   )
 
-  // ── Refresh button ──────────────────────────────────────────
+  // â”€â”€ Refresh button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const RefreshBtn = (
     <button onClick={onRefresh} title="Sync with Database"
       className="w-12 h-12 flex items-center justify-center rounded-xl border bg-white shrink-0 hover:opacity-80"
@@ -80,7 +80,7 @@ export default function AdminControlsBar({ allUsers, onSearch, onAddUser, select
     </button>
   )
 
-  // ── Desktop Add User button ─────────────────────────────────
+  // â”€â”€ Desktop Add User button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const DesktopAddBtn = (
     <button onClick={onAddUser}
       className="flex items-center gap-1.5 px-5 py-3 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
@@ -89,7 +89,7 @@ export default function AdminControlsBar({ allUsers, onSearch, onAddUser, select
     </button>
   )
 
-  // ── Mobile Add User button ──────────────────────────────────
+  // â”€â”€ Mobile Add User button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const MobileAddBtn = (
     <button onClick={onAddUser} title="Add New User"
       className="w-12 h-12 flex items-center justify-center rounded-xl shrink-0 hover:opacity-90"
@@ -103,7 +103,7 @@ export default function AdminControlsBar({ allUsers, onSearch, onAddUser, select
       {/* Desktop layout (matches Dart isDesktop > 1100) */}
       <div className="hidden xl:flex items-center gap-6">
         <div style={{ width: 250, flexShrink: 0 }}>{SearchBox}</div>
-        {/* Filter chips — Wrap spaceEvenly matches Dart WrapAlignment.spaceEvenly */}
+        {/* Filter chips â€” Wrap spaceEvenly matches Dart WrapAlignment.spaceEvenly */}
         <div className="flex-1 flex flex-wrap justify-evenly gap-2">
           {filters.map(f => (
             <FilterChip key={f.label} label={f.label} icon={f.icon}
