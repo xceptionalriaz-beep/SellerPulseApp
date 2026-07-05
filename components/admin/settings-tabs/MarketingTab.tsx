@@ -11,7 +11,7 @@ import {
   Eye, Tag, Gift, ArrowRight, Plus, Trash2,
   Target, Megaphone, DollarSign, Filter,
   ToggleLeft, ToggleRight, Calendar, Edit2,
-  MousePointer, UserX, Search, ChevronDown,
+  MousePointer, UserX, Search, ChevronDown, Rss,
 } from 'lucide-react'
 
 const C = {
@@ -77,10 +77,271 @@ function SectionHeader({ title, sub }: { title: string; sub: string }) {
 // --------------------------------------------------------------
 // MAIN COMPONENT
 // --------------------------------------------------------------
+function BlogSubscribersSection({ supabase }: { supabase: any }) {
+  const [subscribers, setSubscribers]   = useState<any[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [search, setSearch]             = useState('')
+  const [sending, setSending]           = useState(false)
+  const [showModal, setShowModal]       = useState(false)
+  const [nlSubject, setNlSubject]       = useState('')
+  const [nlUrl, setNlUrl]               = useState('')
+  const [toast, setToast]               = useState<string | null>(null)
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3500) }
+
+  async function load() {
+    setLoading(true)
+    const { data } = await (supabase.from('newsletter_subscribers') as any)
+      .select('*').order('subscribed_at', { ascending: false })
+    setSubscribers(data ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  async function toggleActive(id: string, current: boolean) {
+    await (supabase.from('newsletter_subscribers') as any).update({ is_active: !current }).eq('id', id)
+    setSubscribers(prev => prev.map(s => s.id === id ? { ...s, is_active: !current } : s))
+    showToast(!current ? 'Subscriber reactivated' : 'Subscriber unsubscribed')
+  }
+
+  async function deleteSubscriber(id: string) {
+    await (supabase.from('newsletter_subscribers') as any).delete().eq('id', id)
+    setSubscribers(prev => prev.filter(s => s.id !== id))
+    showToast('Subscriber deleted')
+  }
+
+  function exportCSV() {
+    const rows = [['Email', 'Source', 'Subscribed At', 'Active']]
+    subscribers.forEach(s => rows.push([s.email, s.source, s.subscribed_at, s.is_active ? 'Yes' : 'No']))
+    const csv = rows.map(r => r.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'blog-subscribers.csv'; a.click()
+    URL.revokeObjectURL(url)
+    showToast('CSV exported')
+  }
+
+  async function sendNewsletter() {
+    if (!nlUrl.trim()) { showToast('Enter a blog post URL'); return }
+    if (!nlSubject.trim()) { showToast('Enter an email subject'); return }
+    setShowModal(false)
+    setSending(true)
+    const post = nlUrl.trim()
+    const title = nlSubject.trim()
+    setSending(true)
+    try {
+      const active = subscribers.filter(s => s.is_active)
+      let sent = 0
+      for (const sub of active) {
+        await fetch('/api/blog/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: sub.email,
+            subject: title,
+            html: `<div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;padding:24px">
+              <div style="background:#1a2410;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center">
+                <h1 style="color:#8fff00;font-size:24px;margin:0">Riazify Blog</h1>
+              </div>
+              <h2 style="color:#1a2410;font-size:20px">${title}</h2>
+              <p style="color:#8a9e78;font-size:14px;line-height:1.6">We just published a new article on the Riazify Blog. Click below to read it:</p>
+              <a href="${post}" style="display:inline-block;background:#8fff00;color:#1a2410;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;margin:16px 0">Read Article →</a>
+              <hr style="border:1px solid #e8ede2;margin:24px 0"/>
+              <p style="color:#8a9e78;font-size:12px">You're receiving this because you subscribed to Riazify Blog updates. <a href="https://riazify.com/unsubscribe?email=${sub.email}" style="color:#4a8f00">Unsubscribe</a></p>
+            </div>`
+          })
+        })
+        sent++
+      }
+      showToast(`Newsletter sent to ${sent} subscribers ✓`)
+    } catch (err: any) {
+      showToast(`Error: ${err.message}`)
+    }
+    setSending(false)
+  }
+
+  const filtered = subscribers.filter(s =>
+    !search || s.email?.toLowerCase().includes(search.toLowerCase()) || s.source?.toLowerCase().includes(search.toLowerCase())
+  )
+  const active   = subscribers.filter(s => s.is_active).length
+  const inactive = subscribers.length - active
+
+  return (
+    <div className="flex flex-col gap-5">
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2"
+             style={{ backgroundColor: C.dark, border: `1px solid ${C.lime}` }}>
+          <CheckCircle size={14} style={{ color: C.lime }} />
+          <p className="text-[13px] font-bold" style={{ color: C.lime }}>{toast}</p>
+        </div>
+      )}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'TOTAL SUBSCRIBERS', value: subscribers.length, color: C.limeDeep },
+          { label: 'ACTIVE',            value: active,             color: C.green    },
+          { label: 'UNSUBSCRIBED',      value: inactive,           color: C.muted    },
+        ].map(s => (
+          <div key={s.label} className="p-4 rounded-2xl border flex flex-col gap-1"
+               style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            <p className="text-[24px] font-black" style={{ color: s.color }}>{s.value}</p>
+            <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex-1 min-w-[200px]"
+             style={{ padding: 2, backgroundColor: 'transparent', borderRadius: 50 }}
+             onFocusCapture={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = C.lime}
+             onBlurCapture={e => (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'}>
+          <div className="flex items-center gap-2 px-3 py-2"
+               style={{ backgroundColor: C.surface, borderRadius: 50 }}>
+            <Search size={13} style={{ color: C.muted }} />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search subscribers..."
+              className="flex-1 text-[12px] bg-transparent"
+              style={{ color: C.text, border: 'none', outline: 'none' }} />
+          </div>
+        </div>
+        <button onClick={exportCSV}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[12px] font-bold hover:opacity-70 transition-all"
+          style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
+          Export CSV
+        </button>
+        <button onClick={() => setShowModal(true)} disabled={sending}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-black hover:opacity-90 transition-all"
+          style={{ backgroundColor: C.lime, color: C.dark }}>
+          {sending ? 'Sending...' : `Send Newsletter (${active})`}
+        </button>
+
+        {/* Send Newsletter Modal */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+               onClick={() => setShowModal(false)}>
+            <div className="rounded-2xl border shadow-2xl p-6 w-full max-w-md mx-4"
+                 style={{ backgroundColor: '#fff', borderColor: C.border }}
+                 onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <p className="text-[16px] font-black" style={{ color: C.dark }}>Send Newsletter</p>
+                  <p className="text-[12px]" style={{ color: C.muted }}>Will send to {active} active subscribers</p>
+                </div>
+                <button onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:opacity-70" style={{ backgroundColor: C.bg }}>
+                  <X size={14} style={{ color: C.muted }} />
+                </button>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <p className="text-[11px] font-black mb-1.5" style={{ color: C.muted }}>EMAIL SUBJECT</p>
+                  <input value={nlSubject} onChange={e => setNlSubject(e.target.value)}
+                    placeholder="e.g. New Article: How to Scale Your eBay Business"
+                    className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
+                    style={{ borderColor: C.border, color: C.dark, backgroundColor: C.surface }} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-black mb-1.5" style={{ color: C.muted }}>BLOG POST URL</p>
+                  <input value={nlUrl} onChange={e => setNlUrl(e.target.value)}
+                    placeholder="https://riazify.com/blog/your-post-slug"
+                    className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
+                    style={{ borderColor: C.border, color: C.dark, backgroundColor: C.surface }} />
+                </div>
+                <div className="p-3 rounded-xl" style={{ backgroundColor: C.limeTint, border: '1px solid rgba(143,255,0,0.3)' }}>
+                  <p className="text-[11px]" style={{ color: C.limeDeep }}>
+                    This will send an email to <strong>{active} active subscribers</strong> via Resend.
+                  </p>
+                </div>
+                <div className="flex gap-2 mt-1">
+                  <button onClick={() => setShowModal(false)}
+                    className="flex-1 py-2.5 rounded-xl text-[13px] font-bold border"
+                    style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
+                    Cancel
+                  </button>
+                  <button onClick={sendNewsletter} disabled={sending}
+                    className="flex-1 py-2.5 rounded-xl text-[13px] font-black"
+                    style={{ backgroundColor: C.lime, color: C.dark }}>
+                    {sending ? 'Sending...' : 'Send Now →'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <RefreshCw size={20} className="animate-spin" style={{ color: C.limeDeep }} />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <Mail size={32} style={{ color: C.muted }} />
+            <p className="text-[14px] font-bold" style={{ color: C.text }}>No subscribers yet</p>
+            <p className="text-[12px]" style={{ color: C.muted }}>Subscribers appear here when people sign up on the blog</p>
+          </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ backgroundColor: C.bg, borderBottom: `1px solid ${C.border}` }}>
+                {['EMAIL', 'SOURCE', 'SUBSCRIBED', 'STATUS', 'ACTIONS'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-[10px] font-black tracking-wider"
+                      style={{ color: C.muted }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((s: any, i: number) => (
+                <tr key={s.id} style={{ borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                  <td className="px-4 py-3">
+                    <p className="text-[13px] font-bold" style={{ color: C.text }}>{s.email}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full capitalize"
+                          style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                      {s.source || 'blog'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="text-[12px]" style={{ color: C.muted }}>
+                      {s.subscribed_at ? new Date(s.subscribed_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
+                          style={{ backgroundColor: s.is_active ? C.limeTint : C.bg, color: s.is_active ? C.limeDeep : C.muted, border: `1px solid ${s.is_active ? 'rgba(143,255,0,0.3)' : C.border}` }}>
+                      {s.is_active ? '● Active' : '○ Unsubscribed'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <button onClick={() => toggleActive(s.id, s.is_active)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg border hover:opacity-70"
+                        style={{ borderColor: C.border, backgroundColor: C.bg }}
+                        title={s.is_active ? 'Unsubscribe' : 'Reactivate'}>
+                        {s.is_active ? <ToggleRight size={13} style={{ color: C.limeDeep }} /> : <ToggleLeft size={13} style={{ color: C.muted }} />}
+                      </button>
+                      <button onClick={() => deleteSubscriber(s.id)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
+                        style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}
+                        title="Delete">
+                        <Trash2 size={12} style={{ color: C.red }} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any[] }) {
   const supabase = createClient()
 
-  const [view,          setView]          = useState<'overview' | 'campaign' | 'history' | 'broadcasts' | 'audience' | 'suppressed' | 'abtests' | 'attribution' | 'referrals'>('overview')
+  const [view, setView] = useState<'overview' | 'campaign' | 'history' | 'broadcasts' | 'audience' | 'suppressed' | 'abtests' | 'attribution' | 'referrals' | 'blog_subscribers'>('overview')
   const [campaignUsers, setCampaignUsers] = useState<any[]>(initialUsers)
   const [history,       setHistory]       = useState<any[]>([])
   const [broadcasts,    setBroadcasts]    = useState<any[]>([])
@@ -162,7 +423,8 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
     { key: 'abtests',      label: 'A/B Tests',       icon: Activity   },
     { key: 'attribution',  label: 'Attribution',     icon: TrendingUp },
     { key: 'referrals',    label: 'Referrals',       icon: Users      },
-    { key: 'suppressed',   label: 'Unsubscribes',    icon: UserX      },
+    { key: 'suppressed',       label: 'Unsubscribes',    icon: UserX },
+    { key: 'blog_subscribers', label: 'Blog Subscribers', icon: Rss   },
   ]
 
   return (
@@ -214,7 +476,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
           return (
             <button key={t.key} onClick={() => setView(t.key as any)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-bold transition-all"
-              style={{ backgroundColor: active ? '#8fff00' : 'transparent', color: active ? C.lime : C.muted }}>
+              style={{ backgroundColor: active ? '#8fff00' : 'transparent', color: active ? C.dark : C.muted }}>
               <t.icon size={13} />
               {t.label}
             </button>
@@ -232,6 +494,7 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
       {view === 'attribution'&& <RevenueAttributionSection supabase={supabase} />}
       {view === 'referrals'  && <ReferralSection supabase={supabase} />}
       {view === 'suppressed' && <SuppressedSection suppressed={suppressed} supabase={supabase} onRefresh={loadSuppressed} />}
+      {view === 'blog_subscribers' && <BlogSubscribersSection supabase={supabase} />}
     </div>
   )
 }

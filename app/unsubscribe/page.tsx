@@ -1,201 +1,113 @@
-﻿'use client'
-// app/unsubscribe/page.tsx
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// Handles email unsubscribe requests
-// Adds email to suppression list in DB
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-export const dynamic = 'force-dynamic'
-
-import { useState, useEffect, Suspense } from 'react'
+﻿// app/unsubscribe/page.tsx
+'use client'
+import { Suspense } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
-import { Mail, Check, X } from 'lucide-react'
+import Link from 'next/link'
 
-const T = {
-  dark:     '#0a0d08',
+const C = {
   lime:     '#8fff00',
   limeDeep: '#4a8f00',
   limeTint: '#f4ffe6',
+  dark:     '#1a2410',
   border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
   muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
+  bg:       '#f7f9f5',
 }
 
-function UnsubscribeInner() {
+function UnsubscribeContent() {
   const searchParams = useSearchParams()
-  const email        = searchParams.get('email') ?? ''
+  const email = searchParams.get('email') || ''
+  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'idle'>('idle')
 
-  const [state,   setState]   = useState<'confirm' | 'loading' | 'done' | 'error'>('confirm')
-  const [resubscribed, setResubscribed] = useState(false)
-
-  async function handleUnsubscribe() {
-    if (!email) { setState('error'); return }
-    setState('loading')
-    try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      // Add to suppression list
-      await (supabase.from('email_suppressions') as any).upsert({
-        email:        email.toLowerCase(),
-        reason:       'unsubscribed',
-        unsubscribed_at: new Date().toISOString(),
-      }, { onConflict: 'email' })
-
-      // Cancel all pending queue emails for this address
-      await (supabase.from('email_queue') as any)
-        .update({ status: 'cancelled', error: 'User unsubscribed' })
-        .eq('to_email', email.toLowerCase())
-        .eq('status', 'pending')
-
-      setState('done')
-    } catch {
-      setState('error')
-    }
-  }
-
-  async function handleResubscribe() {
-    try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      await (supabase.from('email_suppressions') as any)
-        .delete().eq('email', email.toLowerCase())
-      setResubscribed(true)
-    } catch { /* silent */ }
-  }
+  useEffect(() => {
+    if (!email) return
+    setStatus('loading')
+    fetch('/api/blog/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+      .then(r => r.json())
+      .then(d => setStatus(d.success ? 'success' : 'error'))
+      .catch(() => setStatus('error'))
+  }, [email])
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-         style={{ backgroundColor: T.bg }}>
-      <div className="w-full max-w-md">
+    <div style={{ backgroundColor: C.dark, borderRadius: 24, border: '1px solid rgba(143,255,0,0.2)', padding: '48px 40px', maxWidth: 480, width: '100%', textAlign: 'center' }}>
+      <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 32, textDecoration: 'none' }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.dark} strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span style={{ fontSize: 20, fontWeight: 900, color: '#fff' }}>Riazify</span>
+      </Link>
 
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-               style={{ backgroundColor: T.dark }}>
-            <span style={{ color: T.lime, fontSize: 18, fontWeight: 900 }}>R</span>
+      {!email && (
+        <>
+          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <span className="text-[22px] font-extrabold" style={{ color: T.dark }}>Riazify</span>
-        </div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Invalid link</h1>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>This unsubscribe link is missing the email address. Please use the link from your email.</p>
+          <Link href="/blog" style={{ display: 'inline-block', backgroundColor: C.dark, color: C.lime, fontWeight: 700, fontSize: 13, padding: '10px 24px', borderRadius: 12, textDecoration: 'none' }}>← Back to Blog</Link>
+        </>
+      )}
 
-        <div className="rounded-2xl overflow-hidden shadow-xl"
-             style={{ backgroundColor: T.surface, border: `1px solid ${T.border}` }}>
+      {status === 'loading' && (
+        <>
+          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: C.limeTint, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Unsubscribing...</h1>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>Please wait a moment.</p>
+          <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        </>
+      )}
 
-          {/* Confirm state */}
-          {state === 'confirm' && (
-            <div className="flex flex-col items-center p-8 gap-5 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                   style={{ backgroundColor: T.limeTint }}>
-                <Mail size={28} style={{ color: T.limeDeep }} />
-              </div>
-              <div>
-                <h2 className="text-[20px] font-black mb-2" style={{ color: T.dark }}>
-                  Unsubscribe from Riazify emails
-                </h2>
-                <p className="text-[13px]" style={{ color: T.muted }}>
-                  You will no longer receive automated emails from Riazify at:
-                </p>
-                <p className="text-[14px] font-bold mt-1" style={{ color: T.dark }}>{email}</p>
-              </div>
-              <div className="flex flex-col gap-2 w-full">
-                <button onClick={handleUnsubscribe}
-                  className="w-full py-3 rounded-2xl text-[14px] font-bold"
-                  style={{ backgroundColor: T.dark, color: T.lime }}>
-                  Yes, unsubscribe me
-                </button>
-                <a href="/"
-                  className="w-full py-3 rounded-2xl text-[14px] font-semibold text-center border"
-                  style={{ borderColor: T.border, color: T.muted }}>
-                  No, keep me subscribed
-                </a>
-              </div>
-            </div>
-          )}
+      {status === 'success' && (
+        <>
+          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: C.limeTint, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>You've been unsubscribed</h1>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>
+            <strong style={{ color: C.lime }}>{email}</strong> has been removed from the Riazify Blog newsletter.
+          </p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 28 }}>You won't receive any more emails from us. You can resubscribe anytime from the blog.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Link href="/blog" style={{ display: 'block', backgroundColor: C.dark, color: C.lime, fontWeight: 700, fontSize: 13, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>← Back to Blog</Link>
+            <button onClick={() => { fetch('/api/blog/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'resubscribe' }) }).then(() => setStatus('idle')) }}
+              style={{ backgroundColor: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontWeight: 600, fontSize: 13, padding: '12px 24px', borderRadius: 12, cursor: 'pointer' }}>
+              Actually, resubscribe me
+            </button>
+          </div>
+        </>
+      )}
 
-          {/* Loading state */}
-          {state === 'loading' && (
-            <div className="flex flex-col items-center py-16 gap-3">
-              <div className="w-10 h-10 rounded-full border-4 border-transparent animate-spin"
-                   style={{ borderTopColor: T.limeDeep }} />
-              <p style={{ color: T.muted }}>Processing your request...</p>
-            </div>
-          )}
-
-          {/* Done state */}
-          {state === 'done' && (
-            <div className="flex flex-col items-center p-8 gap-5 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                   style={{ backgroundColor: T.limeTint }}>
-                <Check size={28} style={{ color: T.limeDeep }} />
-              </div>
-              <div>
-                <h2 className="text-[20px] font-black mb-2" style={{ color: T.dark }}>
-                  You've been unsubscribed
-                </h2>
-                <p className="text-[13px]" style={{ color: T.muted }}>
-                  We've removed <strong>{email}</strong> from our email list.
-                  You won't receive any more automated emails from Riazify.
-                </p>
-              </div>
-              {!resubscribed ? (
-                <button onClick={handleResubscribe}
-                  className="text-[12px] underline hover:opacity-70"
-                  style={{ color: T.muted }}>
-                  Changed your mind? Re-subscribe
-                </button>
-              ) : (
-                <p className="text-[12px] font-bold" style={{ color: T.limeDeep }}>
-                  You've been re-subscribed successfully
-                </p>
-              )}
-              <a href="/dashboard"
-                className="w-full py-3 rounded-2xl text-[14px] font-bold text-center"
-                style={{ backgroundColor: T.dark, color: T.lime }}>
-                Go to Dashboard
-              </a>
-            </div>
-          )}
-
-          {/* Error state */}
-          {state === 'error' && (
-            <div className="flex flex-col items-center p-8 gap-5 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
-                <X size={28} style={{ color: T.red }} />
-              </div>
-              <div>
-                <h2 className="text-[20px] font-black mb-2" style={{ color: T.dark }}>
-                  Something went wrong
-                </h2>
-                <p className="text-[13px]" style={{ color: T.muted }}>
-                  We couldn't process your unsubscribe request.
-                  Please try again or contact support.
-                </p>
-              </div>
-              <button onClick={() => setState('confirm')}
-                className="w-full py-3 rounded-2xl text-[14px] font-bold"
-                style={{ backgroundColor: T.dark, color: T.lime }}>
-                Try Again
-              </button>
-            </div>
-          )}
-        </div>
-
-        <p className="text-center text-[11px] mt-6" style={{ color: T.muted }}>
-          Riazify Â· eBay Seller Intelligence Platform
-        </p>
-      </div>
+      {status === 'error' && (
+        <>
+          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Something went wrong</h1>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>We couldn't process your request. Please try again.</p>
+          <Link href="/blog" style={{ display: 'inline-block', backgroundColor: C.dark, color: C.lime, fontWeight: 700, fontSize: 13, padding: '10px 24px', borderRadius: 12, textDecoration: 'none' }}>← Back to Blog</Link>
+        </>
+      )}
     </div>
   )
 }
 
 export default function UnsubscribePage() {
-  return <Suspense><UnsubscribeInner /></Suspense>
+  return (
+    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: '#f7f9f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <Suspense fallback={
+        <div style={{ backgroundColor: C.dark, borderRadius: 24, border: '1px solid rgba(143,255,0,0.2)', padding: '48px 40px', maxWidth: 480, width: '100%', textAlign: 'center' }}>
+          <p style={{ color: '#8a9e78', fontSize: 14 }}>Loading...</p>
+        </div>
+      }>
+        <UnsubscribeContent />
+      </Suspense>
+    </div>
+  )
 }

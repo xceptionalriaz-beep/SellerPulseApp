@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -9,8 +9,9 @@ import {
   DollarSign, ShoppingBag, Users, Eye, Cpu, Plus, Minus
 } from 'lucide-react'
 import Pricing from '@/components/landing/Pricing'
+import BlogStrip from '@/components/landing/BlogStrip'
 
-// ── Brand tokens ───────────────────────────────────────────────
+// -- Brand tokens -----------------------------------------------
 const T = {
   white:       '#ffffff',
   surface:     '#f7f9f5',
@@ -26,7 +27,7 @@ const T = {
   black:       '#0a0d08',
 }
 
-// ── Animated counter ───────────────────────────────────────────
+// -- Animated counter -------------------------------------------
 function Counter({ to, prefix = '', suffix = '', duration = 2000 }: {
   to: number; prefix?: string; suffix?: string; duration?: number
 }) {
@@ -53,7 +54,7 @@ function Counter({ to, prefix = '', suffix = '', duration = 2000 }: {
   return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>
 }
 
-// ── Mini sparkline SVG ─────────────────────────────────────────
+// -- Mini sparkline SVG -----------------------------------------
 function MiniChart({ scanned }: { scanned: boolean }) {
   return (
     <svg viewBox="0 0 320 80" className="w-full" style={{ height: 80 }}>
@@ -76,9 +77,9 @@ function MiniChart({ scanned }: { scanned: boolean }) {
       <path d="M240,18 C260,16 280,14 300,12" fill="none" stroke="#8fff00"
             strokeWidth="2.5" strokeDasharray="6 4" strokeLinecap="round"/>
       <circle cx="300" cy="12" r="4" fill="white" stroke="#8fff00" strokeWidth="2"/>
-      <text x="304" y="16" fontSize="7" fill="#4a8f00" fontWeight="900">AI • 06-05</text>
+      <text x="304" y="16" fontSize="7" fill="#4a8f00" fontWeight="900">AI � 06-05</text>
       <line x1="140" y1="0" x2="140" y2="80" stroke="#fb923c" strokeWidth="1" strokeDasharray="4 3"/>
-      <text x="144" y="10" fontSize="6.5" fill="#c2410c" fontWeight="bold">📉 Price Drop</text>
+      <text x="144" y="10" fontSize="6.5" fill="#c2410c" fontWeight="bold">?? Price Drop</text>
       {scanned && (
         <circle cx="120" cy="30" r="5" fill="#8fff00" opacity="0.9">
           <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.5s" repeatCount="indefinite"/>
@@ -88,7 +89,7 @@ function MiniChart({ scanned }: { scanned: boolean }) {
   )
 }
 
-// ── Navbar ─────────────────────────────────────────────────────
+// -- Navbar -----------------------------------------------------
 function Navbar() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -153,7 +154,7 @@ function Navbar() {
             )}
           </div>
           {['Pricing', 'How It Works', 'Blog'].map(item => (
-            <a key={item} href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase().replace(' ', '-')}`}
+            <a key={item} href={item === 'Pricing' ? '/pricing' : item === 'Blog' ? '/blog' : `#${item.toLowerCase().replace(' ', '-')}`}
                className="text-[14px] font-medium hover:opacity-70 transition-opacity"
                style={{ color: T.carbon }}>{item}</a>
           ))}
@@ -166,7 +167,7 @@ function Navbar() {
           <button onClick={() => router.push('/auth/signup')}
             className="text-[14px] font-black px-5 py-2.5 rounded-xl transition-all hover:scale-105 hover:shadow-lg"
             style={{ background: T.lime, color: T.black }}>
-            Get Started Free →
+            Get Started Free ?
           </button>
         </div>
 
@@ -179,12 +180,12 @@ function Navbar() {
         <div className="md:hidden px-6 pb-6 flex flex-col gap-4 border-t"
              style={{ background: T.white, borderColor: T.border }}>
           {['Tools', 'Pricing', 'How It Works', 'Blog'].map(item => (
-            <a key={item} href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase().replace(' ', '-')}`} className="text-[15px] font-medium py-1" style={{ color: T.carbon }}>{item}</a>
+            <a key={item} href={item === 'Pricing' ? '/pricing' : item === 'Blog' ? '/blog' : `#${item.toLowerCase().replace(' ', '-')}`} className="text-[15px] font-medium py-1" style={{ color: T.carbon }}>{item}</a>
           ))}
           <button onClick={() => router.push('/auth/signup')}
             className="mt-2 py-3 rounded-xl font-black text-[15px]"
             style={{ background: T.lime, color: T.black }}>
-            Get Started Free →
+            Get Started Free ?
           </button>
         </div>
       )}
@@ -192,7 +193,7 @@ function Navbar() {
   )
 }
 
-// ── Hero ───────────────────────────────────────────────────────
+// -- Hero -------------------------------------------------------
 function HeroSection() {
   const router = useRouter()
   const [niche, setNiche] = useState('')
@@ -239,7 +240,7 @@ function HeroSection() {
               <button onClick={handleScan} disabled={scanning}
                 className="px-6 py-4 font-black text-[14px] transition-all hover:opacity-90 shrink-0"
                 style={{ background: T.lime, color: T.black }}>
-                {scanning ? '⚡ Scanning...' : 'Scan Niche →'}
+                {scanning ? '? Scanning...' : 'Scan Niche ?'}
               </button>
             </div>
             <div className="flex items-center gap-5 flex-wrap">
@@ -273,20 +274,20 @@ function HeroSection() {
                           boxShadow: '0 20px 60px rgba(74,143,0,0.08), 0 4px 16px rgba(0,0,0,0.04)' }}>
               <div className="absolute -top-3 -left-3 px-3 py-1.5 rounded-full border text-[11px] font-black shadow-lg"
                    style={{ background: T.white, borderColor: T.border, color: T.limeDeep }}>
-                📈 +33.8% this week
+                ?? +33.8% this week
               </div>
               <div className="absolute -top-3 right-8 px-3 py-1.5 rounded-full border text-[11px] font-black shadow-lg"
                    style={{ background: T.white, borderColor: T.border, color: T.carbon }}>
-                🔥 312 active sellers
+                ?? 312 active sellers
               </div>
               <div className="absolute -bottom-3 left-8 px-3 py-1.5 rounded-full border text-[11px] font-black shadow-lg"
                    style={{ background: T.white, borderColor: T.border, color: T.limeDeep }}>
-                ⚡ AI Confidence: {scanned ? '95%' : '70%'}
+                ? AI Confidence: {scanned ? '95%' : '70%'}
               </div>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <p className="text-[11px] font-black tracking-[1.1px] mb-1" style={{ color: T.sage }}>
-                    📈 SALES TREND & FORECAST {scanned && niche ? `("${niche}")` : '("Overall Market")'}
+                    ?? SALES TREND & FORECAST {scanned && niche ? `("${niche}")` : '("Overall Market")'}
                   </p>
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-[20px] font-black" style={{ color: T.limeDeep }}>+33.8%</span>
@@ -339,12 +340,12 @@ function HeroSection() {
   )
 }
 
-// ── Social Proof Strip ─────────────────────────────────────────
+// -- Social Proof Strip -----------------------------------------
 function SocialProofStrip() {
   const items = [
-    '⚡ 12,000+ Active Sellers', '📦 $4.2M+ Revenue Protected', '🎯 98% AI Accuracy',
-    '🔥 50K+ Niches Tracked Daily', '⭐ 4.9/5 Average Rating', '🚀 30-Second Setup',
-    '💰 Zero Dead Stock Guarantee', '🌍 US, UK, DE, IT Markets',
+    '? 12,000+ Active Sellers', '?? $4.2M+ Revenue Protected', '?? 98% AI Accuracy',
+    '?? 50K+ Niches Tracked Daily', '? 4.9/5 Average Rating', '?? 30-Second Setup',
+    '?? Zero Dead Stock Guarantee', '?? US, UK, DE, IT Markets',
   ]
   const doubled = [...items, ...items]
   return (
@@ -361,7 +362,7 @@ function SocialProofStrip() {
   )
 }
 
-// ── Anti-Loss Banner ───────────────────────────────────────────
+// -- Anti-Loss Banner -------------------------------------------
 function AntiLossBanner() {
   return (
     <section className="py-24" style={{ background: T.surface }}>
@@ -377,7 +378,7 @@ function AntiLossBanner() {
         <p className="text-[17px] leading-relaxed max-w-2xl mx-auto mb-12" style={{ color: T.sage }}>
           Before you deploy capital, Riazify cross-references{' '}
           <span className="font-semibold px-1.5 py-0.5 rounded" style={{ background: T.limePale, color: T.carbon }}>active wholesale listing counts</span>{' '}
-          against historical sell-through velocity to calculate true seller competition — in real time.
+          against historical sell-through velocity to calculate true seller competition � in real time.
         </p>
         <div className="rounded-3xl border p-8 lg:p-12 max-w-3xl mx-auto"
              style={{ background: T.white, borderColor: T.border, boxShadow: '0 12px 40px rgba(74,143,0,0.06)' }}>
@@ -393,7 +394,7 @@ function AntiLossBanner() {
             <span className="text-[11px]" style={{ color: T.sage }}>Oversaturated</span>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ background: T.lime, boxShadow: `0 0 6px ${T.lime}` }} />
-              <span className="text-[13px] font-black" style={{ color: T.limeDeep }}>Saturation: Low (Ideal) — 24%</span>
+              <span className="text-[13px] font-black" style={{ color: T.limeDeep }}>Saturation: Low (Ideal) � 24%</span>
             </div>
             <span className="text-[11px]" style={{ color: T.sage }}>Wide open</span>
           </div>
@@ -416,14 +417,14 @@ function AntiLossBanner() {
   )
 }
 
-// ── Tool Showcase ──────────────────────────────────────────────
+// -- Tool Showcase ----------------------------------------------
 function ToolShowcase() {
   const tools = [
     { icon: Search,      name: 'Product Research',  desc: 'Scan any eBay niche in seconds. Get saturation score, sell-through rate, market volume, and AI demand forecasting before spending a single dollar.',    badge: 'Most Used',  color: '#4a8f00' },
     { icon: BarChart2,   name: 'Title Builder',      desc: 'AI-powered eBay title generator with keyword injection, VeRO protection, real-time character counter, and a spin engine for unlimited variations.',   badge: 'AI Powered', color: '#6bcc00' },
-    { icon: Eye,         name: 'Competitor X-Ray',   desc: 'Deep scan any eBay seller — their revenue, active listings, top products, keyword gaps, and sell-through rate. Know your competition inside out.',   badge: 'Exclusive',  color: '#4a8f00' },
+    { icon: Eye,         name: 'Competitor X-Ray',   desc: 'Deep scan any eBay seller � their revenue, active listings, top products, keyword gaps, and sell-through rate. Know your competition inside out.',   badge: 'Exclusive',  color: '#4a8f00' },
     { icon: ShoppingBag, name: 'Orders Manager',     desc: 'Risk-scored order management with buyer profile analysis, dropshipping detection, dispute protection checklists, and smart deadline reminders.',     badge: 'Essential',  color: '#6bcc00' },
-    { icon: DollarSign,  name: 'Profit Calculator',  desc: 'Calculate true eBay net profit with eBay fees, shipping, FX rates, sourcing tax, ad costs, and cashback — all in one real-time calculation engine.', badge: 'Pro Tool',   color: '#4a8f00' },
+    { icon: DollarSign,  name: 'Profit Calculator',  desc: 'Calculate true eBay net profit with eBay fees, shipping, FX rates, sourcing tax, ad costs, and cashback � all in one real-time calculation engine.', badge: 'Pro Tool',   color: '#4a8f00' },
     { icon: Package,     name: 'Inventory Manager',  desc: 'Track your full inventory pipeline with AI demand forecasting, reorder alerts, dead stock warnings, and supplier performance scoring in one view.',    badge: 'New',        color: '#6bcc00' },
   ]
   return (
@@ -475,7 +476,7 @@ function ToolShowcase() {
   )
 }
 
-// ── Live Stats ─────────────────────────────────────────────────
+// -- Live Stats -------------------------------------------------
 function LiveStats() {
   const stats = [
     { val: 48392, label: 'Niche Scans Today',   suffix: '+', icon: Search     },
@@ -487,7 +488,7 @@ function LiveStats() {
     <section className="py-20" style={{ background: T.carbon }}>
       <div className="max-w-6xl mx-auto px-6">
         <p className="text-center text-[12px] font-black tracking-[2px] mb-10" style={{ color: T.sage }}>
-          RIAZIFY BY THE NUMBERS — LIVE
+          RIAZIFY BY THE NUMBERS � LIVE
         </p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((s, i) => {
@@ -512,7 +513,7 @@ function LiveStats() {
   )
 }
 
-// ── Bento Grid ─────────────────────────────────────────────────
+// -- Bento Grid -------------------------------------------------
 function BentoGrid() {
   return (
     <section className="py-24" style={{ background: T.surface }}>
@@ -522,7 +523,7 @@ function BentoGrid() {
             Three Pillars.<br/><span style={{ color: T.carbon }}>One Unfair Advantage.</span>
           </h2>
           <p className="text-[17px] max-w-2xl mx-auto" style={{ color: T.sage }}>
-            Every intelligence layer in Riazify is engineered around one obsession — getting you to the right product before everyone else.
+            Every intelligence layer in Riazify is engineered around one obsession � getting you to the right product before everyone else.
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -550,7 +551,7 @@ function BentoGrid() {
                 <path d="M0,50 C30,45 50,40 80,42 C110,44 120,30 130,52 C140,58 160,55 190,48 C220,40 250,35 280,32" fill="none" stroke="#8fff00" strokeWidth="2" strokeLinecap="round"/>
                 <line x1="128" y1="0" x2="128" y2="70" stroke="#fb923c" strokeDasharray="3 3" strokeWidth="1.5"/>
                 <rect x="84" y="3" width="88" height="16" rx="4" fill="#fff7ed"/>
-                <text x="128" y="14" fontSize="7" fill="#c2410c" textAnchor="middle" fontWeight="bold">📉 $5 Price Drop Event</text>
+                <text x="128" y="14" fontSize="7" fill="#c2410c" textAnchor="middle" fontWeight="bold">?? $5 Price Drop Event</text>
                 <circle cx="128" cy="52" r="3.5" fill="#fb923c"/>
               </svg>
             </div>
@@ -559,7 +560,7 @@ function BentoGrid() {
                 Auto-flag supplier anomalies <span style={{ color: T.limeDeep }}>before they tank your rank.</span>
               </h3>
               <p className="text-[14px] leading-relaxed" style={{ color: T.sage }}>
-                Riazify monitors price drop events, stock spikes, and listing velocity changes in real time — alerting you the moment your niche is disrupted.
+                Riazify monitors price drop events, stock spikes, and listing velocity changes in real time � alerting you the moment your niche is disrupted.
               </p>
             </div>
           </div>
@@ -581,7 +582,7 @@ function BentoGrid() {
                     Stop driving by <span style={{ color: T.limeDeep }}>looking in the rearview mirror.</span>
                   </h3>
                   <p className="text-[14px] leading-relaxed" style={{ color: T.sage }}>
-                    Legacy tools show where demand was. Riazify shows where it's going — with AI projection nodes extending 7, 30, and 90 days forward.
+                    Legacy tools show where demand was. Riazify shows where it's going � with AI projection nodes extending 7, 30, and 90 days forward.
                   </p>
                 </div>
                 <div className="rounded-2xl p-3 shrink-0 w-full lg:w-48"
@@ -600,7 +601,7 @@ function BentoGrid() {
                     <path d="M100,25 C115,22 125,20 140,18" fill="none" stroke="#8fff00" strokeDasharray="5 3" strokeWidth="2"/>
                     <circle cx="140" cy="18" r="3" fill="white" stroke="#8fff00" strokeWidth="1.5"/>
                   </svg>
-                  <p className="text-[9px] font-black text-center mt-1" style={{ color: T.limeDeep }}>AI • 06-05 Projection</p>
+                  <p className="text-[9px] font-black text-center mt-1" style={{ color: T.limeDeep }}>AI � 06-05 Projection</p>
                 </div>
               </div>
             </div>
@@ -621,9 +622,9 @@ function BentoGrid() {
                   {['BRAND','MAP PRICE','YOUR PRICE','STATUS'].map(h => <span key={h}>{h}</span>)}
                 </div>
                 {[
-                  ['Anker',  '$29.99', '$28.50', '⚠️ Below MAP'],
-                  ['Belkin', '$49.99', '$52.00', '✅ Compliant'],
-                  ['Aukey',  '$19.99', '$19.99', '✅ Compliant'],
+                  ['Anker',  '$29.99', '$28.50', '?? Below MAP'],
+                  ['Belkin', '$49.99', '$52.00', '? Compliant'],
+                  ['Aukey',  '$19.99', '$19.99', '? Compliant'],
                 ].map(([brand, map, price, status], i) => (
                   <div key={i} className="grid grid-cols-4 px-4 py-2.5 text-[11px] border-t"
                        style={{ borderColor: T.border, background: i % 2 === 0 ? T.white : T.surface }}>
@@ -631,7 +632,7 @@ function BentoGrid() {
                     <span style={{ color: T.sage }}>{map}</span>
                     <span className="font-bold" style={{ color: T.carbon }}>{price}</span>
                     <span className="font-semibold text-[10px]"
-                          style={{ color: status.includes('⚠️') ? '#f59e0b' : '#16a34a' }}>{status}</span>
+                          style={{ color: status.includes('??') ? '#f59e0b' : '#16a34a' }}>{status}</span>
                   </div>
                 ))}
               </div>
@@ -643,7 +644,7 @@ function BentoGrid() {
   )
 }
 
-// ── Trust Section ──────────────────────────────────────────────
+// -- Trust Section ----------------------------------------------
 function TrustSection() {
   return (
     <section className="py-24" style={{ background: T.white }}>
@@ -659,9 +660,9 @@ function TrustSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { quote: '"SellerPulse flagged a hidden saturation spike on a pet grooming line I was about to buy in bulk. Saved my business over $3,500 in dead inventory on day one."', name: 'James R.', role: '7-Figure eBay Seller · Pet Supplies', rating: 5 },
-            { quote: '"The AI forecast is scary accurate. I sourced 200 units of a trending product 3 weeks before it went viral on eBay. Sold out in 4 days."', name: 'Sarah K.', role: 'eBay Dropshipper · Electronics', rating: 5 },
-            { quote: '"Finally a tool built for eBay operators, not Amazon sellers. The Title Builder alone saved me 10 hours a week."', name: 'Marcus T.', role: 'eBay Power Seller · Home & Garden', rating: 5 },
+            { quote: '"SellerPulse flagged a hidden saturation spike on a pet grooming line I was about to buy in bulk. Saved my business over $3,500 in dead inventory on day one."', name: 'James R.', role: '7-Figure eBay Seller � Pet Supplies', rating: 5 },
+            { quote: '"The AI forecast is scary accurate. I sourced 200 units of a trending product 3 weeks before it went viral on eBay. Sold out in 4 days."', name: 'Sarah K.', role: 'eBay Dropshipper � Electronics', rating: 5 },
+            { quote: '"Finally a tool built for eBay operators, not Amazon sellers. The Title Builder alone saved me 10 hours a week."', name: 'Marcus T.', role: 'eBay Power Seller � Home & Garden', rating: 5 },
           ].map((t, i) => (
             <div key={i} className="rounded-3xl border p-8 flex flex-col gap-5 relative overflow-hidden"
                  style={{ background: T.surface, borderColor: T.border }}>
@@ -689,12 +690,12 @@ function TrustSection() {
   )
 }
 
-// ── How It Works ───────────────────────────────────────────────
+// -- How It Works -----------------------------------------------
 function HowItWorks() {
   const steps = [
     { n: '01', title: 'Enter Your Niche',      desc: 'Type any product or keyword. Riazify instantly pulls live eBay market data, saturation scores, and trend velocity.',                                                   icon: Target    },
-    { n: '02', title: 'Read the Intelligence', desc: 'See historical actuals, AI forecast projections, competitor analysis, and MAP compliance — all in one unified dashboard.',                                               icon: BarChart2 },
-    { n: '03', title: 'Move with Confidence',  desc: 'Source the right products, set the right prices, and scale your eBay business with predictive intelligence — not guesswork.',                                          icon: TrendingUp},
+    { n: '02', title: 'Read the Intelligence', desc: 'See historical actuals, AI forecast projections, competitor analysis, and MAP compliance � all in one unified dashboard.',                                               icon: BarChart2 },
+    { n: '03', title: 'Move with Confidence',  desc: 'Source the right products, set the right prices, and scale your eBay business with predictive intelligence � not guesswork.',                                          icon: TrendingUp},
   ]
   return (
     <section id="how-it-works" className="py-24" style={{ background: T.surface }}>
@@ -727,11 +728,11 @@ function HowItWorks() {
   )
 }
 
-// ── FAQ ────────────────────────────────────────────────────────
+// -- FAQ --------------------------------------------------------
 function FAQ() {
   const [open, setOpen] = useState<number | null>(null)
   const faqs = [
-    { q: 'Is Riazify only for eBay sellers?',      a: "Currently yes — Riazify is purpose-built for eBay operators. We're expanding to Amazon and Walmart in Q3 2026. eBay-focused tools mean deeper data, better accuracy, and zero feature bloat from other marketplaces." },
+    { q: 'Is Riazify only for eBay sellers?',      a: "Currently yes � Riazify is purpose-built for eBay operators. We're expanding to Amazon and Walmart in Q3 2026. eBay-focused tools mean deeper data, better accuracy, and zero feature bloat from other marketplaces." },
     { q: 'How accurate is the AI forecast?',       a: 'Our hybrid regressor model achieves 98% accuracy on 7-day forecasts and 91% on 30-day projections, validated against 18 months of live eBay sales data. Each prediction comes with a confidence score so you always know how much to trust it.' },
     { q: 'What does the free plan include?',       a: "The free plan includes 5 niche scans per day, basic trend charts, a saturation meter, and the profit calculator. No credit card required. Upgrade to Pro when you're ready to scale." },
     { q: 'Can I cancel my subscription anytime?', a: 'Absolutely. Cancel in one click from your account settings. No lock-in contracts, no cancellation fees, no questions asked. Your data remains accessible for 30 days after cancellation.' },
@@ -771,15 +772,15 @@ function FAQ() {
   )
 }
 
-// ── Trust Badges ───────────────────────────────────────────────
+// -- Trust Badges -----------------------------------------------
 function TrustBadges() {
   const badges = [
-    { icon: '🔒', label: 'SSL Secured',     sub: '256-bit encryption'   },
-    { icon: '🇪🇺', label: 'GDPR Compliant', sub: 'Full data protection' },
-    { icon: '🛡️', label: 'eBay API Partner',sub: 'Official data source' },
-    { icon: '⚡',  label: '99.9% Uptime',   sub: 'SLA guaranteed'       },
-    { icon: '🔐', label: 'OAuth 2.0',       sub: 'Secure auth standard' },
-    { icon: '💳', label: 'PCI Compliant',   sub: 'Safe payments'        },
+    { icon: '??', label: 'SSL Secured',     sub: '256-bit encryption'   },
+    { icon: '????', label: 'GDPR Compliant', sub: 'Full data protection' },
+    { icon: '???', label: 'eBay API Partner',sub: 'Official data source' },
+    { icon: '?',  label: '99.9% Uptime',   sub: 'SLA guaranteed'       },
+    { icon: '??', label: 'OAuth 2.0',       sub: 'Secure auth standard' },
+    { icon: '??', label: 'PCI Compliant',   sub: 'Safe payments'        },
   ]
   return (
     <section className="py-12 border-y" style={{ background: T.surface, borderColor: T.border }}>
@@ -802,12 +803,12 @@ function TrustBadges() {
   )
 }
 
-// ── Who Is Riazify For ─────────────────────────────────────────
+// -- Who Is Riazify For -----------------------------------------
 function WhoIsItFor() {
   const personas = [
-    { emoji: '🚀', title: 'New eBay Sellers',   pain: "You don't know which products to sell or how to avoid overcrowded niches that kill margins.", solution: "Riazify's saturation meter and AI demand forecasting tells you exactly where to start — before you spend a single dollar on inventory.", cta: 'Start for free →', stats: [{ val: '< 30 sec', label: 'to first niche scan' }, { val: '5 scans', label: 'free every day' }] },
-    { emoji: '📈', title: 'Scaling Operators',  pain: "You're growing but flying blind — no reliable data on where demand is heading or when to restock.", solution: "Riazify's hybrid AI regressor gives you 7, 30, and 90-day forecasts with confidence scores — so you source ahead of the curve, not behind it.", cta: 'Upgrade to Pro →', stats: [{ val: '98%', label: 'AI forecast accuracy' }, { val: '$4.2M+', label: 'revenue protected' }], highlight: true },
-    { emoji: '🏢', title: 'Agencies & Resellers',pain: 'Managing multiple eBay accounts with no centralized intelligence layer is burning time and leaving money on the table.', solution: 'Riazify Business gives you 5 user seats, API access, white-label reports, and a dedicated success manager — everything agencies need to deliver results at scale.', cta: 'Contact Sales →', stats: [{ val: '5 seats', label: 'per Business plan' }, { val: 'API', label: 'full access' }] },
+    { emoji: '??', title: 'New eBay Sellers',   pain: "You don't know which products to sell or how to avoid overcrowded niches that kill margins.", solution: "Riazify's saturation meter and AI demand forecasting tells you exactly where to start � before you spend a single dollar on inventory.", cta: 'Start for free ?', stats: [{ val: '< 30 sec', label: 'to first niche scan' }, { val: '5 scans', label: 'free every day' }] },
+    { emoji: '??', title: 'Scaling Operators',  pain: "You're growing but flying blind � no reliable data on where demand is heading or when to restock.", solution: "Riazify's hybrid AI regressor gives you 7, 30, and 90-day forecasts with confidence scores � so you source ahead of the curve, not behind it.", cta: 'Upgrade to Pro ?', stats: [{ val: '98%', label: 'AI forecast accuracy' }, { val: '$4.2M+', label: 'revenue protected' }], highlight: true },
+    { emoji: '??', title: 'Agencies & Resellers',pain: 'Managing multiple eBay accounts with no centralized intelligence layer is burning time and leaving money on the table.', solution: 'Riazify Business gives you 5 user seats, API access, white-label reports, and a dedicated success manager � everything agencies need to deliver results at scale.', cta: 'Contact Sales ?', stats: [{ val: '5 seats', label: 'per Business plan' }, { val: 'API', label: 'full access' }] },
   ]
   return (
     <section className="py-24" style={{ background: T.white }}>
@@ -822,7 +823,7 @@ function WhoIsItFor() {
             Who Is Riazify For?<br/><span style={{ color: T.carbon }}>Everyone Selling on eBay.</span>
           </h2>
           <p className="text-[17px] max-w-2xl mx-auto" style={{ color: T.sage }}>
-            Whether you're listing your first item or managing a $1M/year operation — Riazify scales with you.
+            Whether you're listing your first item or managing a $1M/year operation � Riazify scales with you.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -838,11 +839,11 @@ function WhoIsItFor() {
                 <span className="text-[40px]">{p.emoji}</span>
                 <h3 className="text-[22px] font-black mt-3 mb-4" style={{ color: p.highlight ? T.white : T.carbon }}>{p.title}</h3>
                 <div className="p-3.5 rounded-xl mb-4" style={{ background: p.highlight ? 'rgba(239,68,68,0.1)' : '#FFF5F5', border: '1px solid rgba(239,68,68,0.2)' }}>
-                  <p className="text-[12px] font-semibold" style={{ color: '#DC2626' }}>😤 The Problem:</p>
+                  <p className="text-[12px] font-semibold" style={{ color: '#DC2626' }}>?? The Problem:</p>
                   <p className="text-[13px] mt-1" style={{ color: p.highlight ? '#fca5a5' : '#7f1d1d' }}>{p.pain}</p>
                 </div>
                 <div className="p-3.5 rounded-xl" style={{ background: p.highlight ? 'rgba(143,255,0,0.08)' : T.limeTint, border: `1px solid ${T.accentBorder}` }}>
-                  <p className="text-[12px] font-semibold" style={{ color: T.limeDeep }}>✅ The Riazify Fix:</p>
+                  <p className="text-[12px] font-semibold" style={{ color: T.limeDeep }}>? The Riazify Fix:</p>
                   <p className="text-[13px] mt-1" style={{ color: p.highlight ? '#d4f5a0' : T.carbon }}>{p.solution}</p>
                 </div>
               </div>
@@ -872,7 +873,7 @@ function WhoIsItFor() {
   )
 }
 
-// ── Sticky Mobile CTA ──────────────────────────────────────────
+// -- Sticky Mobile CTA ------------------------------------------
 function StickyMobileCTA() {
   const router = useRouter()
   const [visible, setVisible] = useState(false)
@@ -886,20 +887,20 @@ function StickyMobileCTA() {
          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.1)' }}>
       <div className="flex items-center justify-between px-5 py-3 border-t" style={{ background: T.white, borderColor: T.border }}>
         <div>
-          <p className="text-[13px] font-black" style={{ color: T.carbon }}>Free scan — no card needed</p>
+          <p className="text-[13px] font-black" style={{ color: T.carbon }}>Free scan � no card needed</p>
           <p className="text-[11px]" style={{ color: T.sage }}>Join 12,000+ eBay sellers</p>
         </div>
         <button onClick={() => router.push('/auth/signup')}
           className="px-5 py-2.5 rounded-xl font-black text-[13px] shrink-0"
           style={{ background: T.lime, color: T.black }}>
-          Get Started →
+          Get Started ?
         </button>
       </div>
     </div>
   )
 }
 
-// ── Scroll Progress Bar ────────────────────────────────────────
+// -- Scroll Progress Bar ----------------------------------------
 function ScrollProgress() {
   const [progress, setProgress] = useState(0)
   useEffect(() => {
@@ -921,7 +922,7 @@ function ScrollProgress() {
   )
 }
 
-// ── Back To Top ────────────────────────────────────────────────
+// -- Back To Top ------------------------------------------------
 function BackToTop() {
   const [visible, setVisible] = useState(false)
   useEffect(() => {
@@ -938,12 +939,12 @@ function BackToTop() {
   )
 }
 
-// ── Results Showcase ───────────────────────────────────────────
+// -- Results Showcase -------------------------------------------
 function ResultsShowcase() {
   const results = [
     { avatar: 'M', name: 'Marcus T.', role: 'eBay Power Seller',  before: 'Spent 3 hours manually checking niches. Hit dead stock twice in one month.',                           after: 'Found a $12K/month niche in under 8 minutes on his first Riazify scan.',         metric: '$12K',     label: 'niche found in 8 min',  color: T.limeDeep              },
     { avatar: 'J', name: 'James R.',  role: '7-Figure eBay Seller',before: 'Almost ordered 500 units of a pet grooming line with hidden saturation.',                             after: 'Riazify flagged the spike. Saved $3,500 in dead inventory on day one.',           metric: '$3.5K',    label: 'dead stock avoided',    color: '#16a34a', highlight: true },
-    { avatar: 'S', name: 'Sarah K.',  role: 'eBay Dropshipper',    before: 'Always sourcing reactively — buying after trends peaked and margins collapsed.',                      after: 'Used AI forecast to source 200 units 3 weeks early. Sold out in 4 days.',        metric: '200 units',label: 'sold out in 4 days',    color: T.limeMid               },
+    { avatar: 'S', name: 'Sarah K.',  role: 'eBay Dropshipper',    before: 'Always sourcing reactively � buying after trends peaked and margins collapsed.',                      after: 'Used AI forecast to source 200 units 3 weeks early. Sold out in 4 days.',        metric: '200 units',label: 'sold out in 4 days',    color: T.limeMid               },
   ]
   return (
     <section className="py-24" style={{ background: T.surface }}>
@@ -969,7 +970,7 @@ function ResultsShowcase() {
               <div className="p-6 border-b" style={{ borderColor: r.highlight ? 'rgba(255,255,255,0.08)' : T.border }}>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
-                       style={{ background: '#FEE2E2', color: '#DC2626' }}>✕</div>
+                       style={{ background: '#FEE2E2', color: '#DC2626' }}>?</div>
                   <p className="text-[11px] font-black tracking-wider" style={{ color: '#DC2626' }}>BEFORE RIAZIFY</p>
                 </div>
                 <p className="text-[13px] leading-relaxed italic" style={{ color: r.highlight ? '#94a3b8' : T.sage }}>"{r.before}"</p>
@@ -977,7 +978,7 @@ function ResultsShowcase() {
               <div className="p-6 flex-1">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black"
-                       style={{ background: T.limeTint, color: T.limeDeep }}>✓</div>
+                       style={{ background: T.limeTint, color: T.limeDeep }}>?</div>
                   <p className="text-[11px] font-black tracking-wider" style={{ color: T.limeDeep }}>AFTER RIAZIFY</p>
                 </div>
                 <p className="text-[13px] leading-relaxed mb-6" style={{ color: r.highlight ? '#e2e8f0' : T.carbon }}>"{r.after}"</p>
@@ -1008,7 +1009,7 @@ function ResultsShowcase() {
   )
 }
 
-// ── Final CTA ──────────────────────────────────────────────────
+// -- Final CTA --------------------------------------------------
 function FinalCTA() {
   const router = useRouter()
   return (
@@ -1021,7 +1022,7 @@ function FinalCTA() {
             Start Selling Smarter<br/><span style={{ color: T.carbon }}>Today. Not Tomorrow.</span>
           </h2>
           <p className="text-[17px] mb-10 max-w-xl mx-auto" style={{ color: T.sage }}>
-            Join thousands of eBay operators who replaced guesswork with intelligence. Your first scan is free — no card required.
+            Join thousands of eBay operators who replaced guesswork with intelligence. Your first scan is free � no card required.
           </p>
           <button onClick={() => router.push("/auth/signup")}
             className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-black text-[18px] transition-all hover:scale-105"
@@ -1041,7 +1042,7 @@ function FinalCTA() {
   )
 }
 
-// ── Footer ─────────────────────────────────────────────────────
+// -- Footer -----------------------------------------------------
 function Footer() {
   const [email, setEmail] = useState("")
   return (
@@ -1075,22 +1076,23 @@ function Footer() {
             { title: "Product", links: [
                 { label: "Features",         href: "#features"  },
                 { label: "Pricing",          href: "/pricing"   },
-                { label: "Changelog",        href: "#"          },
+                { label: "Changelog", href: "/changelog" },
                 { label: "Roadmap",          href: "/roadmap"   },
                 { label: "Status",           href: "/status"    },
                 { label: "Chrome Extension", href: "#"          },
               ]},
             { title: "Company", links: [
-                { label: "About",     href: "#" },
-                { label: "Blog",      href: "#" },
-                { label: "Careers",   href: "#" },
-                { label: "Press Kit", href: "#" },
+                { label: "About",  href: "/about" },
+                { label: "Blog",      href: "/blog" },
+                { label: "Careers", href: "/careers" },
+                { label: "Press Kit", href: "/press-kit" },
+                { label: "Affiliates", href: "/affiliate" },
               ]},
             { title: "Legal", links: [
-                { label: "Privacy Policy",   href: "#" },
-                { label: "Terms of Service", href: "#" },
-                { label: "Cookie Policy",    href: "#" },
-                { label: "GDPR",             href: "#" },
+                { label: "Privacy Policy",   href: "/privacy-policy"   },
+                { label: "Terms of Service", href: "/terms-of-service" },
+                { label: "Cookie Policy",    href: "/cookie-policy"    },
+                { label: "GDPR",             href: "/gdpr" },
               ]},
           ].map(col => (
             <div key={col.title}>
@@ -1099,7 +1101,7 @@ function Footer() {
                 {col.links.map(l => (
                   <a key={l.label} href={l.href}
                      className="text-[13px] transition-opacity hover:opacity-100 opacity-60"
-                     style={{ color: l.label === "Roadmap" || l.label === "Status" || l.label === "Pricing" ? T.lime : T.sage }}>
+                     style={{ color: l.href !== '#' ? T.lime : T.sage }}>
                     {l.label}
                   </a>
                 ))}
@@ -1110,7 +1112,7 @@ function Footer() {
 
         <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
              style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="text-[12px]" style={{ color: T.sage }}>© 2026 Riazify — All rights reserved.</p>
+          <p className="text-[12px]" style={{ color: T.sage }}>� 2026 Riazify � All rights reserved.</p>
           <div className="flex items-center gap-4">
             {["Twitter", "LinkedIn", "YouTube", "Discord"].map(s => (
               <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"
@@ -1123,7 +1125,7 @@ function Footer() {
   )
 }
 
-// ── Main Page ──────────────────────────────────────────────────
+// -- Main Page --------------------------------------------------
 export default function LandingPage() {
   return (
     <main style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
@@ -1144,6 +1146,7 @@ export default function LandingPage() {
       <FAQ />
       <Pricing />
       <FinalCTA />
+      <BlogStrip />
       <Footer />
       <StickyMobileCTA />
     </main>

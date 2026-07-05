@@ -28,6 +28,7 @@ import AffiliateVaultTab   from '@/components/admin/settings-tabs/AffiliateVault
 import FounderOpsTab       from '@/components/admin/settings-tabs/FounderOpsTab'
 import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
 import BlogTab             from '@/components/admin/settings-tabs/BlogTab'
+import ChangelogTab        from '@/components/admin/settings-tabs/ChangelogTab'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
 
@@ -59,6 +60,8 @@ const SETTINGS_MENU = [
   { title: 'Marketing',       icon: Mail         },
   { title: 'Payments',        icon: CreditCard   },
   { title: 'Tickets',         icon: MessageCircle, badge: 0 },
+  { title: 'Blog',            icon: FileText     },
+  { title: 'Changelog',       icon: Wrench       },
 ]
 
 // -- Tool definitions (static metadata only — no dummy stats) --
@@ -822,7 +825,7 @@ function AdminPage() {
       'user-crm': 0, 'role-builder': 1, 'security': 2, 'promos': 3,
       'kill-switches': 4, 'plan-limits': 5, 'emails': 6, 'webhooks': 7,
       'gamification': 8, 'api-vault': 9, 'affiliate': 10, 'founder-ops': 11,
-      'marketing': 12, 'payments': 13, 'tickets': 14,
+      'marketing': 12, 'payments': 13, 'tickets': 14, 'blog': 15, 'changelog': 16,
     }
     return tab ? (tabMap[tab] ?? 0) : 0
   })
@@ -1176,6 +1179,7 @@ function AdminPage() {
       case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
       case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />
       case 15: return <BlogTab />
+      case 16: return <ChangelogTab />
       default: return null
     }
   }

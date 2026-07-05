@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 // app/roadmap/RoadmapClient.tsx
 
 import { useState, useEffect } from 'react'
@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-// ── Brand colours ──────────────────────────────────────────────
+// -- Brand colours ----------------------------------------------
 const C = {
   dark:     '#0a0d08',
   lime:     '#8fff00',
@@ -148,7 +148,7 @@ export default function RoadmapClient() {
     setSubmitting(false)
   }
 
-  // ── Filter + search + sort ─────────────────────────────────
+  // -- Filter + search + sort ---------------------------------
   const displayed = features
     .filter(f => filter === 'all' ? true : f.status === filter)
     .filter(f => category === 'All Categories' ? true : f.category === category)
@@ -162,7 +162,7 @@ export default function RoadmapClient() {
       : new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
 
-  // ── Status counts ──────────────────────────────────────────
+  // -- Status counts ------------------------------------------
   const counts = {
     all:          features.length,
     in_progress:  features.filter(f => f.status === 'in_progress').length,
@@ -171,7 +171,7 @@ export default function RoadmapClient() {
     done:         features.filter(f => f.status === 'done').length,
   }
 
-  // ── Group by status (for "All" view) ──────────────────────
+  // -- Group by status (for "All" view) ----------------------
   const grouped: Record<string, Feature[]> = {
     in_progress:  displayed.filter(f => f.status === 'in_progress'),
     planned:      displayed.filter(f => f.status === 'planned'),
@@ -182,7 +182,7 @@ export default function RoadmapClient() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: C.bg }}>
 
-      {/* ── Nav ──────────────────────────────────────────────── */}
+      {/* -- Nav ------------------------------------------------ */}
       <nav className="sticky top-0 z-40 border-b px-6 py-3 flex items-center justify-between"
            style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.2)' }}>
         <div className="flex items-center gap-4">
@@ -222,7 +222,7 @@ export default function RoadmapClient() {
         </div>
       </nav>
 
-      {/* ── Hero — Option A ───────────────────────────────────── */}
+      {/* -- Hero � Option A ------------------------------------- */}
       <div className="text-center px-6 pt-12 pb-10 relative overflow-hidden"
            style={{ backgroundColor: C.dark, borderBottom: `1px solid rgba(143,255,0,0.15)` }}>
 
@@ -271,10 +271,10 @@ export default function RoadmapClient() {
         </div>
       </div>
 
-      {/* ── Controls ─────────────────────────────────────────── */}
+      {/* -- Controls ------------------------------------------- */}
       <div className="px-6 max-w-3xl mx-auto flex flex-col gap-3 mt-8 mb-6">
 
-        {/* Filter tabs with counts — Fix 10 */}
+        {/* Filter tabs with counts � Fix 10 */}
         <div className="flex items-center gap-2 flex-wrap">
           {([
             { key: 'all',          label: 'All',          count: counts.all          },
@@ -303,7 +303,7 @@ export default function RoadmapClient() {
           })}
         </div>
 
-        {/* Search + Category + Sort — Fix 4, 5, 6 */}
+        {/* Search + Category + Sort � Fix 4, 5, 6 */}
         <div className="flex items-center gap-2">
           {/* Search */}
           <div className="flex items-center gap-2 h-9 px-3 rounded-xl flex-1"
@@ -325,7 +325,7 @@ export default function RoadmapClient() {
             )}
           </div>
 
-          {/* Category filter — custom dropdown */}
+          {/* Category filter � custom dropdown */}
           <div className="relative">
             <button onClick={() => setShowCat(s => !s)}
               className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-semibold transition-all"
@@ -386,7 +386,7 @@ export default function RoadmapClient() {
         </div>
       </div>
 
-      {/* ── Feature list ─────────────────────────────────────── */}
+      {/* -- Feature list --------------------------------------- */}
       <div className="px-6 pb-16 max-w-3xl mx-auto">
 
         {/* Fix 1: Skeleton loading */}
@@ -416,7 +416,7 @@ export default function RoadmapClient() {
               {search ? `No results for "${search}"` : 'No features yet'}
             </p>
             <p className="text-[13px] mt-1" style={{ color: C.muted }}>
-              {search ? 'Try a different search term' : 'Check back soon — we are always building!'}
+              {search ? 'Try a different search term' : 'Check back soon � we are always building!'}
             </p>
             {user && !search && (
               <button onClick={() => setShowSubmit(true)}
@@ -466,7 +466,7 @@ export default function RoadmapClient() {
         )}
       </div>
 
-      {/* ── Submit Request Dialog ─────────────────────────────── */}
+      {/* -- Submit Request Dialog ------------------------------- */}
       {showSubmit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
              style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
@@ -527,7 +527,7 @@ export default function RoadmapClient() {
         </div>
       )}
 
-      {/* ── Toast ─────────────────────────────────────────────── */}
+      {/* -- Toast ----------------------------------------------- */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2"
              style={{ backgroundColor: C.dark, border: `1px solid ${C.lime}`, color: C.lime }}>
@@ -543,7 +543,7 @@ export default function RoadmapClient() {
         }
       `}</style>
 
-      {/* Footer — matches landing page */}
+      {/* Footer � matches landing page */}
       <footer className="py-16 border-t" style={{ background: '#1a2410', borderColor: '#1a2410' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
@@ -587,7 +587,7 @@ export default function RoadmapClient() {
                 ]},
               { title: 'Company', links: [
                   { label: 'About',     href: '#' },
-                  { label: 'Blog',      href: '#' },
+                  { label: 'Blog',      href: '/blog' },
                   { label: 'Careers',   href: '#' },
                   { label: 'Press Kit', href: '#' },
                 ]},
@@ -616,7 +616,7 @@ export default function RoadmapClient() {
           {/* Bottom bar */}
           <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
                style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-            <p className="text-[12px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Riazify — All rights reserved.</p>
+            <p className="text-[12px]" style={{ color: C.muted }}>� {new Date().getFullYear()} Riazify � All rights reserved.</p>
             <div className="flex items-center gap-4">
               {['Twitter', 'LinkedIn', 'YouTube', 'Discord'].map(s => (
                 <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"
@@ -631,7 +631,7 @@ export default function RoadmapClient() {
   )
 }
 
-// ── Feature Card ───────────────────────────────────────────────
+// -- Feature Card -----------------------------------------------
 function FeatureCard({ feat, votedIds, onVote }: {
   feat: Feature; votedIds: Set<string>; onVote: (f: Feature) => void
 }) {

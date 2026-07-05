@@ -36,7 +36,7 @@ import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
-  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -465,6 +465,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: BarChart2,     label: 'Founder Ops',      tab: 11                                                         },
                 { icon: Mail,          label: 'Marketing',        tab: 12                                                         },
                 { icon: BookOpen,      label: 'Blog',             tab: 15                                                         },
+                { icon: Wrench,        label: 'Changelog',        tab: 16                                                         },
                 
               ].map((item) => {
                 const isActive = (item as any).isAnalytics
@@ -503,13 +504,12 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
               {/* Analytics Hub */}
               {[
-                { icon: Zap,        label: 'API Fleet',       tab: 1, key: 'api'      },
-                { icon: Trophy,     label: 'Feature Roadmap', tab: 4, key: 'roadmap'  },
-                { icon: ChevronDown,label: 'More Analytics',        tab: -1, key: 'more', isMoreBtn: true },
-                { icon: Shield,     label: 'VeRO Command Center',   tab: 2, key: 'vero',        isMoreChild: true },
-                { icon: BarChart2,  label: 'Infrastructure Monitor',tab: 5, key: 'infra',       isMoreChild: true },
-                { icon: Search,     label: 'Competitor X-Ray',      tab: 6, key: 'competitor',  isMoreChild: true },
-                { icon: Package,    label: 'Chrome Extension',      tab: 7, key: 'chrome',      isMoreChild: true },
+                { icon: Zap,        label: 'API Fleet',              tab: 1, key: 'api'        },
+                { icon: Trophy,     label: 'Feature Roadmap',        tab: 4, key: 'roadmap'    },
+                { icon: Shield,     label: 'VeRO Command Center',    tab: 2, key: 'vero'       },
+                { icon: BarChart2,  label: 'Infrastructure Monitor', tab: 5, key: 'infra'      },
+                { icon: Search,     label: 'Competitor X-Ray',       tab: 6, key: 'competitor' },
+                { icon: Package,    label: 'Chrome Extension',       tab: 7, key: 'chrome'     },
               ].map((item) => {
                 const isActive = activeAnalyticsTab === item.key
                 if ((item as any).isMoreChild && !showMoreAnalytics) return null

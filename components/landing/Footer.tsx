@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/landing/Footer.tsx
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Activity } from 'lucide-react'
 
 const T = {
@@ -20,6 +21,7 @@ const T = {
 
 export default function Footer() {
   const [email, setEmail] = useState("")
+  const pathname = usePathname()
   return (
     <footer className="py-16 border-t" style={{ background: T.carbon, borderColor: "#1a2410" }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -51,22 +53,23 @@ export default function Footer() {
             { title: "Product", links: [
                 { label: "Features",         href: "#features" },
                 { label: "Pricing",          href: "/pricing"  },
-                { label: "Changelog",        href: "#"         },
+                { label: "Changelog", href: "/changelog" },
                 { label: "Roadmap",          href: "/roadmap"  },
                 { label: "Status",           href: "/status"   },
                 { label: "Chrome Extension", href: "#"         },
               ]},
             { title: "Company", links: [
-                { label: "About",     href: "#" },
-                { label: "Blog",      href: "#" },
-                { label: "Careers",   href: "#" },
-                { label: "Press Kit", href: "#" },
+                { label: "About",  href: "/about" },
+                { label: "Blog",      href: "/blog" },
+                { label: "Careers", href: "/careers" },
+                { label: "Press Kit", href: "/press-kit" },
+                { label: "Affiliates", href: "/affiliate" },
               ]},
             { title: "Legal", links: [
-                { label: "Privacy Policy",   href: "#" },
-                { label: "Terms of Service", href: "#" },
-                { label: "Cookie Policy",    href: "#" },
-                { label: "GDPR",             href: "#" },
+                { label: "Privacy Policy",   href: "/privacy-policy"   },
+                { label: "Terms of Service", href: "/terms-of-service" },
+                { label: "Cookie Policy",    href: "/cookie-policy"    },
+                { label: "GDPR",             href: "/gdpr"             },
               ]},
           ].map(col => (
             <div key={col.title}>
@@ -75,7 +78,7 @@ export default function Footer() {
                 {col.links.map(l => (
                   <a key={l.label} href={l.href}
                      className="text-[13px] transition-opacity hover:opacity-100 opacity-60"
-                     style={{ color: l.label === 'Roadmap' || l.label === 'Status' || l.label === 'Pricing' ? T.lime : T.sage }}>
+                     style={{ color: l.href !== '#' ? T.lime : T.sage }}>
                     {l.label}
                   </a>
                 ))}
@@ -86,7 +89,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
              style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="text-[12px]" style={{ color: T.sage }}>Â© 2026 Riazify â€” All rights reserved.</p>
+          <p className="text-[12px]" style={{ color: T.sage }}>© 2026 Riazify — All rights reserved.</p>
           <div className="flex items-center gap-4">
             {["Twitter", "LinkedIn", "YouTube", "Discord"].map(s => (
               <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"
