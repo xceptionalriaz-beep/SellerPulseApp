@@ -66,7 +66,12 @@ export default function AffiliatePage() {
     min_payout:        50,
     cookie_days:       30,
     is_program_active: true,
+    default_discount:  50,
   })
+  const [calcPlans, setCalcPlans] = useState([
+    { id: 'starter', name: 'Starter', price: 49 },
+    { id: 'growth',  name: 'Growth',  price: 99 },
+  ])
 
   // Derived display values
   const commPct     = Math.round(settings.commission_rate * 100)
@@ -77,10 +82,12 @@ export default function AffiliatePage() {
   const starterRef  = parseFloat((29 * settings.commission_rate).toFixed(2))
 
   useEffect(() => {
-    // Fetch real settings from admin
     fetch('/api/affiliate/settings')
       .then(r => r.json())
-      .then(d => { if (d.settings) setSettings(d.settings) })
+      .then(d => {
+        if (d.settings) setSettings(d.settings)
+        if (d.calcPlans && d.calcPlans.length > 0) setCalcPlans(d.calcPlans)
+      })
       .catch(() => {})
   }, [])
 
@@ -112,18 +119,19 @@ export default function AffiliatePage() {
     const month1El = document.getElementById('calc-month1')
     const monthlyEl = document.getElementById('calc-monthly')
     const annualEl = document.getElementById('calc-annual')
-    let activePlan = 49
-    const discPct = 0.50 // 50% welcome discount month 1
+    let activePlan = calcPlans[0]?.price ?? 49
+    const discPct = (settings.default_discount ?? 50) / 100
     const discMonths = 1
+    const commRate = settings.commission_rate ?? 0.25
+    const commMo = settings.commission_months ?? 12
 
     const updateCalc = () => {
       if (!slider || !refsEl || !month1El || !monthlyEl || !annualEl) return
       const refs = parseInt(slider.value)
-      const commission = perReferral / 49 // derive rate from perReferral
       const discountedPrice = activePlan * (1 - discPct)
-      const month1Earn = discountedPrice * commission
-      const monthFullEarn = activePlan * commission
-      const total = refs * (month1Earn * discMonths + monthFullEarn * (commMonths - discMonths))
+      const month1Earn = discountedPrice * commRate
+      const monthFullEarn = activePlan * commRate
+      const total = refs * (month1Earn * discMonths + monthFullEarn * (commMo - discMonths))
       refsEl.textContent = String(refs)
       month1El.textContent = '$' + (refs * month1Earn).toFixed(2)
       monthlyEl.textContent = '$' + (refs * monthFullEarn).toFixed(2)
@@ -133,17 +141,17 @@ export default function AffiliatePage() {
     updateCalc()
 
     // Plan buttons
-    ;[49, 99].forEach(p => {
-      const btn = document.getElementById(`plan-${p}`)
+    calcPlans.forEach(p => {
+      const btn = document.getElementById(`plan-${p.id}`)
       if (!btn) return
       btn.addEventListener('click', () => {
-        activePlan = p
-        ;[49, 99].forEach(pp => {
-          const b = document.getElementById(`plan-${pp}`) as HTMLElement
+        activePlan = p.price
+        calcPlans.forEach(pp => {
+          const b = document.getElementById(`plan-${pp.id}`) as HTMLElement
           if (!b) return
-          b.style.backgroundColor = pp === p ? '#1a2410' : 'rgba(255,255,255,0.08)'
-          b.style.color = pp === p ? '#8fff00' : 'rgba(255,255,255,0.5)'
-          b.style.border = pp === p ? '1px solid #8fff00' : '1px solid rgba(255,255,255,0.1)'
+          b.style.backgroundColor = pp.id === p.id ? '#1a2410' : 'rgba(255,255,255,0.08)'
+          b.style.color = pp.id === p.id ? '#8fff00' : 'rgba(255,255,255,0.5)'
+          b.style.border = pp.id === p.id ? '1px solid #8fff00' : '1px solid rgba(255,255,255,0.1)'
         })
         updateCalc()
       })
@@ -188,7 +196,7 @@ export default function AffiliatePage() {
     counters.forEach(el => cObs.observe(el))
 
     return () => { style.remove(); scrollObs.disconnect(); cObs.disconnect() }
-  }, [])
+  }, [settings, calcPlans])
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }} suppressHydrationWarning>
@@ -472,11 +480,11 @@ export default function AffiliatePage() {
                 {/* Plan selector */}
                 <div className="flex items-center gap-2 justify-center">
                   <p className="text-[12px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Plan:</p>
-                  {[49, 99].map(p => (
-                    <button key={p} id={`plan-${p}`}
+                  {calcPlans.map(p => (
+                    <button key={p.id} id={`plan-${p.id}`}
                             className="px-4 py-1.5 rounded-lg text-[12px] font-black transition-all"
-                            style={{ backgroundColor: p === 49 ? C.dark : 'rgba(255,255,255,0.08)', color: p === 49 ? C.lime : 'rgba(255,255,255,0.5)', border: p === 49 ? `1px solid ${C.lime}` : '1px solid rgba(255,255,255,0.1)' }}>
-                      ${p} plan
+                            style={{ backgroundColor: p.id === calcPlans[0]?.id ? C.dark : 'rgba(255,255,255,0.08)', color: p.id === calcPlans[0]?.id ? C.lime : 'rgba(255,255,255,0.5)', border: p.id === calcPlans[0]?.id ? `1px solid ${C.lime}` : '1px solid rgba(255,255,255,0.1)' }}>
+                      ${p.price} plan
                     </button>
                   ))}
                 </div>

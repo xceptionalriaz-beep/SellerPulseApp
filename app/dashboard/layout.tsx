@@ -466,6 +466,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: Mail,          label: 'Marketing',        tab: 12                                                         },
                 { icon: BookOpen,      label: 'Blog',             tab: 15                                                         },
                 { icon: Wrench,        label: 'Changelog',        tab: 16                                                         },
+                { icon: FileText,      label: 'Page Editor',      tab: 17                                                         },
                 
               ].map((item) => {
                 const isActive = (item as any).isAnalytics

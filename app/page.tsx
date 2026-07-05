@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import EditableSection from '@/components/EditableSection'
 import { useRouter } from 'next/navigation'
 import {
   Zap, TrendingUp, BarChart2, Shield, ArrowRight,
@@ -207,6 +208,11 @@ function HeroSection() {
   }
 
   return (
+    <EditableSection sectionId="hero" label="Hero Section" fields={[
+      { key: 'headline', label: 'Headline', value: 'Stop Guessing eBay Demand. Spot Winning Trends Fast.', type: 'textarea' },
+      { key: 'subtitle', label: 'Subtitle', value: 'Riazify combines live marketplace analytics, automated supplier event tracking, and predictive AI forecasting into a single, lightning-fast dashboard built for scaling operators.', type: 'textarea' },
+      { key: 'cta', label: 'CTA Button', value: 'Scan Niche ?', type: 'text' },
+    ]}>
     <section className="min-h-screen flex items-center pt-20" style={{ background: T.white }}>
       <div className="max-w-7xl mx-auto px-6 w-full py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
@@ -337,6 +343,7 @@ function HeroSection() {
         </div>
       </div>
     </section>
+    </EditableSection>
   )
 }
 

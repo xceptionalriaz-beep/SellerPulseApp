@@ -29,6 +29,7 @@ import FounderOpsTab       from '@/components/admin/settings-tabs/FounderOpsTab'
 import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
 import BlogTab             from '@/components/admin/settings-tabs/BlogTab'
 import ChangelogTab        from '@/components/admin/settings-tabs/ChangelogTab'
+import PageEditorTab from '@/components/admin/settings-tabs/PageEditorTab'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
 
@@ -62,6 +63,7 @@ const SETTINGS_MENU = [
   { title: 'Tickets',         icon: MessageCircle, badge: 0 },
   { title: 'Blog',            icon: FileText     },
   { title: 'Changelog',       icon: Wrench       },
+  { title: 'Page Editor', icon: FileText },
 ]
 
 // -- Tool definitions (static metadata only — no dummy stats) --
@@ -1180,6 +1182,7 @@ function AdminPage() {
       case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />
       case 15: return <BlogTab />
       case 16: return <ChangelogTab />
+      case 17: return <PageEditorTab />
       default: return null
     }
   }

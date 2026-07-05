@@ -202,11 +202,13 @@ export default function AffiliateTab() {
   const [copied,      setCopied]      = useState(false)
   const [couponCopied,  setCouponCopied]  = useState(false)
   const [calcSignups,   setCalcSignups]   = useState(10)
-  const [calcPlan,      setCalcPlan]      = useState<49 | 99>(49)
+  const [calcPlan,      setCalcPlan]      = useState<number>(49)
+  const [calcPlans,     setCalcPlans]     = useState<{id:string,name:string,price:number}[]>([{id:'starter',name:'Starter',price:49},{id:'growth',name:'Growth',price:99}])
   const [openFaq,       setOpenFaq]       = useState<number | null>(null)
 
   const load = useCallback(async () => {
     try {
+      fetch('/api/affiliate/settings').then(r=>r.json()).then(d=>{ if(d.calcPlans?.length) { setCalcPlans(d.calcPlans); setCalcPlan(d.calcPlans[0].price) } }).catch(()=>{})
       const { data: { user } } = await supabase.auth.getUser()
       if (!user?.email) { setNotAffiliate(true); setLoading(false); return }
 
@@ -727,11 +729,11 @@ export default function AffiliateTab() {
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-[11px] font-bold" style={{ color: C.muted }}>Earnings calculator</p>
                   <div className="flex gap-1">
-                    {([49, 99] as (49|99)[]).map(p => (
-                      <button key={p} onClick={() => setCalcPlan(p)}
+                    {calcPlans.map(p => (
+                      <button key={p.id} onClick={() => setCalcPlan(p.price)}
                         className="px-2 py-0.5 rounded text-[10px] font-bold"
-                        style={{ backgroundColor: calcPlan === p ? C.dark : C.bg, color: calcPlan === p ? C.lime : C.muted }}>
-                        ${p} plan
+                        style={{ backgroundColor: calcPlan === p.price ? C.dark : C.bg, color: calcPlan === p.price ? C.lime : C.muted }}>
+                        ${p.price} plan
                       </button>
                     ))}
                   </div>
