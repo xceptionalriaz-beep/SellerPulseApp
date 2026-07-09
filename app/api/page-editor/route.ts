@@ -60,14 +60,34 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const supabase = getSupabase()
-    const { page, section, field } = await req.json()
+    const body = await req.json()
 
+    // Clear ALL rows from entire table
+    if (body.clearAll === true) {
+      const { error } = await (supabase.from('page_editor') as any)
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000')
+      if (error) throw error
+      return NextResponse.json({ success: true, cleared: 'all' })
+    }
+
+    const { page, section, field } = body
+
+    // Clear ALL changes for a specific page
+    if (section === '__all__' && field === '__all__') {
+      const { error } = await (supabase.from('page_editor') as any)
+        .delete()
+        .eq('page', page)
+      if (error) throw error
+      return NextResponse.json({ success: true })
+    }
+
+    // Delete single field
     const { error } = await (supabase.from('page_editor') as any)
       .delete()
       .eq('page', page)
       .eq('section', section)
       .eq('field', field)
-
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (err: any) {

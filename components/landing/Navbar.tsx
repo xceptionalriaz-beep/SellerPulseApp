@@ -2,6 +2,7 @@
 // components/landing/Navbar.tsx
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useBrand } from '@/hooks/useBrand'
 import {
   Activity, ChevronDown, Menu, X,
   Search, BarChart2, Eye, ShoppingBag, DollarSign, Package,
@@ -24,6 +25,7 @@ const T = {
 
 export default function Navbar() {
   const router = useRouter()
+  const { brand } = useBrand()
   const [open,      setOpen]      = useState(false)
   const [toolsOpen, setToolsOpen] = useState(false)
   const [scrolled,  setScrolled]  = useState(false)
@@ -52,10 +54,7 @@ export default function Navbar() {
          }}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push('/')}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: T.lime }}>
-            <Activity size={16} style={{ color: T.black }} />
-          </div>
-          <span className="text-[18px] font-black tracking-tight" style={{ color: T.carbon }}>Riazify</span>
+          <img src={brand.logo_full_dark} alt={brand.brand_name} style={{ height: 32, width: 'auto' }} />
         </div>
 
         <div className="hidden md:flex items-center gap-6">

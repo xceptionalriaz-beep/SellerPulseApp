@@ -47,24 +47,46 @@ export default function PageEditorTab() {
   const [fullscreen, setFullscreen]       = useState(false)
   const [toast, setToast]                 = useState<string | null>(null)
   const [allChanges, setAllChanges]       = useState<Record<string, Record<string, string>>>({})
+  const [dbLoaded, setDbLoaded]           = useState(false)
+
+  // Load ALL saved changes from DB on mount
+  useEffect(() => {
+    async function loadAllFromDB() {
+      try {
+        const res = await fetch('/api/page-editor')
+        const data = await res.json()
+        // Convert flat DB rows to nested { pageId: { key: value } }
+        const nested: Record<string, Record<string, string>> = {}
+        for (const row of data.raw ?? []) {
+          if (!nested[row.page]) nested[row.page] = {}
+          nested[row.page][`${row.section}.${row.field}`] = row.value ?? ''
+        }
+        setAllChanges(nested)
+      } catch {}
+      setDbLoaded(true)
+    }
+    loadAllFromDB()
+  }, [])
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
   // Listen for messages from iframe
   useEffect(() => {
-    function handleMessage(e: MessageEvent) {
+    async function handleMessage(e: MessageEvent) {
       if (e.data?.type === 'RIAZIFY_SAVE_ALL') {
-        // Save all changes from inline editing
         const { changes, page } = e.data
-        Object.entries(changes).forEach(async ([key, value]) => {
-          const parts = key.split('_')
+        for (const [key, val] of Object.entries(changes as Record<string, { old: string; new: string; tag: string }>)) {
+          const section = val.tag?.toLowerCase() || 'content'
           await fetch('/api/page-editor', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ page, section: parts[0] || 'content', field: key, value })
+            body:    JSON.stringify({ page, section, field: key, value: JSON.stringify(val) })
           })
-        })
-        setAllChanges(prev => ({ ...prev, [page]: { ...(prev[page] ?? {}), ...changes as Record<string, string> } }))
+        }
+        setAllChanges(prev => ({
+          ...prev,
+          [page]: { ...(prev[page] ?? {}), ...Object.fromEntries(Object.entries(changes as Record<string, {old:string;new:string;tag:string}>).map(([k,v]) => [k, JSON.stringify(v)])) }
+        }))
         showToast('Changes saved ✓')
       }
       if (e.data?.type === 'RIAZIFY_EDIT_CLICK') {
@@ -91,180 +113,126 @@ export default function PageEditorTab() {
     if (!iframe?.contentDocument) return
     const doc = iframe.contentDocument
 
-    // Inject CSS for inline editing
+    // Inject CSS
     const style = doc.createElement('style')
     style.textContent = `
-      [contenteditable="true"] {
+      .rz-el { cursor: text; }
+      .rz-el:hover { outline: 1px dashed rgba(143,255,0,0.6) !important; outline-offset: 3px; border-radius: 3px; }
+      .rz-el[contenteditable="true"] {
         outline: 2px solid #8fff00 !important;
         outline-offset: 2px;
         border-radius: 4px;
-        cursor: text !important;
-        min-width: 20px;
-        transition: outline 0.15s ease;
-      }
-      [contenteditable="true"]:focus {
-        outline: 3px solid #8fff00 !important;
         background: rgba(143,255,0,0.05) !important;
-      }
-      .rz-editable-wrap {
-        position: relative;
-        cursor: pointer;
-      }
-      .rz-editable-wrap:hover > .rz-hover-label {
-        display: flex !important;
-      }
-      .rz-hover-label {
-        display: none;
-        position: absolute;
-        top: -24px;
-        left: 0;
-        background: #8fff00;
-        color: #1a2410;
-        font-size: 10px;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 4px 4px 4px 0;
-        z-index: 99999;
-        font-family: Inter, sans-serif;
-        white-space: nowrap;
-        pointer-events: none;
-        align-items: center;
-        gap: 4px;
+        cursor: text !important;
       }
       .rz-save-btn {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: #8fff00;
-        color: #1a2410;
-        font-size: 14px;
-        font-weight: 900;
-        padding: 12px 24px;
-        border-radius: 14px;
-        border: none;
-        cursor: pointer;
-        z-index: 99999;
+        position: fixed; bottom: 24px; right: 24px;
+        background: #8fff00; color: #1a2410;
+        font-size: 14px; font-weight: 900;
+        padding: 12px 28px; border-radius: 14px;
+        border: none; cursor: pointer; z-index: 99999;
         font-family: Inter, sans-serif;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25);
         display: none;
-        align-items: center;
-        gap: 8px;
       }
-      .rz-saved-toast {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: #1a2410;
-        color: #8fff00;
-        font-size: 13px;
-        font-weight: 700;
-        padding: 12px 20px;
-        border-radius: 14px;
-        z-index: 99999;
-        font-family: Inter, sans-serif;
-        border: 1px solid #8fff00;
-        display: none;
+      .rz-toast {
+        position: fixed; bottom: 24px; right: 24px;
+        background: #1a2410; color: #8fff00;
+        font-size: 13px; font-weight: 700;
+        padding: 12px 20px; border-radius: 14px;
+        z-index: 99999; font-family: Inter, sans-serif;
+        border: 1px solid #8fff00; display: none;
       }
     `
     doc.head.appendChild(style)
 
-    // Track changes
-    const changes: Record<string, string> = {}
-    let hasChanges = false
+    // Track changes with OLD and NEW text
+    const changes: Record<string, { old: string; new: string; tag: string }> = {}
 
     // Save button
     const saveBtn = doc.createElement('button')
     saveBtn.className = 'rz-save-btn'
-    saveBtn.innerHTML = '✓ Save Changes'
+    saveBtn.textContent = '\u2713 Save Changes'
     doc.body.appendChild(saveBtn)
 
-    const toast = doc.createElement('div')
-    toast.className = 'rz-saved-toast'
-    toast.textContent = 'Changes saved!'
-    doc.body.appendChild(toast)
+    const toastEl = doc.createElement('div')
+    toastEl.className = 'rz-toast'
+    toastEl.textContent = 'Changes saved!'
+    doc.body.appendChild(toastEl)
 
-    saveBtn.addEventListener('click', async () => {
-      saveBtn.textContent = 'Saving...'
-      // Send all changes to parent
+    // Use data attribute set by admin to identify page
+    const pageId = iframe.dataset.pageId || 'landing'
+
+    saveBtn.addEventListener('click', () => {
+      const exportChanges: Record<string, { old: string; new: string; tag: string }> = {}
+      for (const [k, v] of Object.entries(changes)) {
+        if (v.old !== v.new) exportChanges[k] = v
+      }
       window.parent.postMessage({
         type:    'RIAZIFY_SAVE_ALL',
-        changes,
-        page:    window.location.pathname === '/' ? 'landing' : window.location.pathname.replace('/', ''),
+        changes: exportChanges,
+        page:    pageId,
       }, '*')
       saveBtn.style.display = 'none'
-      toast.style.display = 'block'
-      setTimeout(() => { toast.style.display = 'none' }, 2500)
-      hasChanges = false
+      toastEl.style.display = 'block'
+      setTimeout(() => { toastEl.style.display = 'none' }, 2500)
     })
 
-    // Make text elements editable on click
-    const editableSelectors = [
-      'h1', 'h2', 'h3', 'h4',
-      'p:not(footer p):not(nav p)',
-      'button:not([type="submit"]):not(.rz-save-btn)',
-      'a.font-black', 'span.font-black',
-      '[class*="font-black"]',
-      '[class*="font-bold"]',
-    ]
+    // Target only leaf text elements
+    const selectors = ['h1', 'h2', 'h3', 'h4', 'p', 'span', 'a', 'button', 'label']
+    let counter = 0
 
-    editableSelectors.forEach(sel => {
+    selectors.forEach(sel => {
       doc.querySelectorAll(sel).forEach((el: any) => {
-        // Skip nav, footer, tiny text
-        if (el.closest('nav') || el.closest('footer') || el.closest('.rz-save-btn')) return
-        if (el.textContent.trim().length < 2) return
-        if (el.querySelector('svg') || el.querySelector('img')) return
+        if (el.closest('nav') || el.closest('footer') || el.closest('.rz-save-btn') || el.closest('.rz-toast')) return
+        if (el.querySelector('h1,h2,h3,h4,p,span,a,button')) return
+        if (el.querySelector('svg,img')) return
+        const text = el.textContent.trim()
+        if (text.length < 3) return
+        if (el.dataset.rzId) return
 
-        // Wrap in editable container
-        el.title = 'Click to edit'
+        const id = sel.toUpperCase() + '_' + counter++ + '_' + text.slice(0, 20).replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '')
+        el.dataset.rzId = id
+        el.classList.add('rz-el')
+
+        // Store original text as data attribute BEFORE any edit
+        el.dataset.rzOriginal = text
 
         el.addEventListener('click', (e: any) => {
+          // Read original from data attribute (always preserved)
+          const originalText = el.dataset.rzOriginal || text
           e.stopPropagation()
+          if (el.getAttribute('contenteditable')) return
           el.setAttribute('contenteditable', 'true')
           el.focus()
-
-          // Select all text
-          const range = doc.createRange()
-          range.selectNodeContents(el)
-          const sel2 = window.getSelection()
-          if (sel2) { sel2.removeAllRanges(); sel2.addRange(range) }
+          try {
+            const range = doc.createRange()
+            range.selectNodeContents(el)
+            const s = window.getSelection()
+            if (s) { s.removeAllRanges(); s.addRange(range) }
+          } catch {}
         })
 
         el.addEventListener('blur', () => {
           el.removeAttribute('contenteditable')
-          const key = el.tagName + '_' + el.textContent.trim().slice(0, 20).replace(/\s/g, '_')
-          changes[key] = el.textContent.trim()
-          hasChanges = true
-          saveBtn.style.display = 'flex'
+          const origText = el.dataset.rzOriginal || ''
+          const newText = el.textContent.trim()
+          if (newText !== origText && newText.length > 0) {
+            changes[id] = { old: origText, new: newText, tag: sel.toUpperCase() }
+            saveBtn.style.display = 'block'
+          }
         })
 
         el.addEventListener('keydown', (e: any) => {
-          if (e.key === 'Enter' && el.tagName !== 'TEXTAREA') {
-            e.preventDefault()
-            el.blur()
-          }
+          if (e.key === 'Enter') { e.preventDefault(); el.blur() }
           if (e.key === 'Escape') {
-            el.blur()
-          }
-        })
-
-        // Hover effect
-        el.style.cursor = 'text'
-        el.addEventListener('mouseenter', () => {
-          if (!el.getAttribute('contenteditable')) {
-            el.style.outline = '1px dashed rgba(143,255,0,0.5)'
-            el.style.outlineOffset = '3px'
-            el.style.borderRadius = '3px'
-          }
-        })
-        el.addEventListener('mouseleave', () => {
-          if (!el.getAttribute('contenteditable')) {
-            el.style.outline = 'none'
+            el.textContent = el.dataset.rzOriginal || ''
+            el.removeAttribute('contenteditable')
           }
         })
       })
     })
 
-    // Notify parent ready
     window.parent.postMessage({ type: 'RIAZIFY_PAGE_READY' }, '*')
   }
   function handleFieldChange(key: string, value: string) {
@@ -321,25 +289,139 @@ export default function PageEditorTab() {
     showToast('Section reset to default')
   }
 
-  // Export all changes
+  // Export all changes with full AI prompt
   function exportChanges() {
-    const lines: string[] = ['=== Riazify Page Editor Export ===', `Date: ${new Date().toLocaleString()}`, '']
+    const projectPath = 'C:\\Users\\Xceptional Riaz\\Downloads\\riazify-phase1\\riazify\\'
+
+    const pageFileMap: Record<string, string> = {
+      landing:   'app/page.tsx',
+      about:     'app/about/page.tsx',
+      affiliate: 'app/affiliate/page.tsx',
+      careers:   'app/careers/page.tsx',
+      presskit:  'app/press-kit/page.tsx',
+      changelog: 'app/changelog/page.tsx',
+    }
+
+    const lines: string[] = [
+      '=== RIAZIFY PAGE EDITOR — CODE UPDATE REQUEST ===',
+      `Generated: ${new Date().toLocaleString()}`,
+      '',
+      '──────────────────────────────────────────────────',
+      'PROMPT FOR AI ASSISTANT:',
+      '──────────────────────────────────────────────────',
+      'You are helping update the Riazify SaaS project.',
+      'Stack: Next.js 14 + TypeScript + Tailwind CSS + Supabase',
+      `Project path: ${projectPath}`,
+      '',
+      'The user has edited text on public pages using the Riazify Page Editor.',
+      'The changes need to be permanently updated in the code files.',
+      '',
+      'FOR EACH CHANGE BELOW:',
+      '1. Find the file specified',
+      '2. Use PowerShell to locate the OLD TEXT:',
+      '   Select-String -Path "FILE_PATH" -Pattern "OLD TEXT"',
+      '3. Replace OLD TEXT with NEW TEXT exactly',
+      '4. After ALL changes are done run: npm run build',
+      '5. Confirm build succeeded with no errors',
+      '',
+      'If you cannot find OLD TEXT exactly, ask the user to share the file.',
+      '──────────────────────────────────────────────────',
+      '',
+    ]
+
+    let hasChanges = false
+
     for (const [pageId, changes] of Object.entries(allChanges)) {
       if (!Object.keys(changes).length) continue
-      const page = PAGES.find(p => p.id === pageId)
-      lines.push(`--- ${page?.label ?? pageId} ---`)
-      for (const [key, value] of Object.entries(changes)) {
-        lines.push(`${key}: ${value}`)
-      }
+      hasChanges = true
+      const page = PAGES.find(p => p.id === pageId) ?? { label: pageId, url: '/' }
+      const file = pageFileMap[pageId] || 'app/page.tsx'
+
+      lines.push(`=== PAGE: ${page.label} ===`)
+      lines.push(`FILE: ${file}`)
+      lines.push(`FULL PATH: ${projectPath}${file.replace(/\//g, '\\')}`)
       lines.push('')
+
+      let changeNum = 1
+      for (const [key, rawValue] of Object.entries(changes)) {
+        let oldText = ''
+        let newText = ''
+        let tag = ''
+        try {
+          const parsed = JSON.parse(String(rawValue))
+          oldText = parsed.old || ''
+          newText = parsed.new || String(rawValue)
+          tag = parsed.tag || ''
+        } catch {
+          newText = String(rawValue)
+        }
+        lines.push(`CHANGE ${changeNum}:`)
+        lines.push(`Element: ${tag}`)
+        lines.push(`OLD TEXT: ${oldText}`)
+        lines.push(`NEW TEXT: ${newText}`)
+        lines.push(`PowerShell to find: Select-String -Path "${file}" -Pattern "${oldText.slice(0, 40).replace(/['"]/g, '')}"`)
+        lines.push('')
+        changeNum++
+      }
     }
+
+    if (!hasChanges) {
+      showToast('No changes to export yet')
+      return
+    }
+
+    lines.push('──────────────────────────────────────────────────')
+    lines.push('AFTER ALL CHANGES:')
+    lines.push(`cd "${projectPath}"`)
+    lines.push('npm run build')
+    lines.push('── Verify build succeeds with no errors ──')
+    lines.push('──────────────────────────────────────────────────')
+    lines.push('')
+    lines.push('Generated by Riazify Page Editor')
+
     navigator.clipboard.writeText(lines.join('\n'))
-    showToast('All changes copied to clipboard ✓')
+    showToast('Export copied! Clearing changes...')
+
+    // Auto-clear ALL changes from DB after export
+    setTimeout(async () => {
+      try {
+        // Delete everything from page_editor table
+        await fetch('/api/page-editor?clearAll=true', {
+          method:  'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ clearAll: true })
+        })
+        setAllChanges({})
+        showToast('Changes exported & cleared ✓')
+      } catch {
+        showToast('Export copied ✓')
+      }
+    }, 500)
+  }
+
+  // Clear all changes from DB after export
+  async function clearAllChanges() {
+    try {
+      // Delete all rows for all pages
+      for (const pageId of Object.keys(allChanges)) {
+        const page = PAGES.find(p => p.id === pageId)
+        if (!page) continue
+        await fetch('/api/page-editor', {
+          method:  'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ page: pageId, section: '__all__', field: '__all__' })
+        })
+      }
+      setAllChanges({})
+      showToast('All changes cleared ✓ Fresh start!')
+    } catch {
+      showToast('Error clearing changes')
+    }
   }
 
   // Change page
-  function changePage(page: typeof PAGES[0]) {
-    setActivePage(page)
+  function changePage(p: typeof PAGES[0]) {
+    setActivePage(p)
     setEditPanel(null)
     setLoading(true)
     setIframeKey(k => k + 1)
@@ -460,6 +542,7 @@ export default function PageEditorTab() {
             key={iframeKey}
             ref={iframeRef}
             src={iframeUrl}
+            data-page-id={activePage.id}
             style={{
               width:        viewport === 'mobile' ? '390px' : '100%',
               height:       viewport === 'mobile' ? '844px' : '100%',

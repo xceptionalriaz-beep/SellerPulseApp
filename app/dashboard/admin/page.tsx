@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase'
 import {
   Shield, BarChart2, Settings, ArrowLeft, Search,
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
-  Wrench, Trophy, Zap, UserPlus, Key, FileText,
+  Wrench, Trophy, Zap, UserPlus, Key, FileText, Image,
   Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail, CreditCard,
   MessageCircle,
 } from 'lucide-react'
@@ -63,7 +63,7 @@ const SETTINGS_MENU = [
   { title: 'Tickets',         icon: MessageCircle, badge: 0 },
   { title: 'Blog',            icon: FileText     },
   { title: 'Changelog',       icon: Wrench       },
-  { title: 'Page Editor', icon: FileText },
+  { title: 'Page Editor', icon: FileText         },
 ]
 
 // -- Tool definitions (static metadata only — no dummy stats) --

@@ -32,11 +32,13 @@
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useBrand } from '@/hooks/useBrand'
+import AdminSettingsModal from '@/components/admin/AdminSettingsModal'
 import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
-  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -262,6 +264,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams()
   const toast    = useToast()
   const supabase = createClient()
+  const { brand } = useBrand()
+  const [showAdminSettings, setShowAdminSettings] = useState(false)
 
   const [profile,        setProfile]        = useState<Profile | null>(null)
   const [mobileOpen,     setMobileOpen]     = useState(false)
@@ -531,10 +535,10 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                         router.push(`/dashboard/admin?analytics=${item.key}`, { scroll: false })
                         window.dispatchEvent(new CustomEvent('admin-analytics-tab', { detail: item.tab }))
                       }}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 hover:text-white w-full text-left"
-                      style={{ backgroundColor: 'transparent', color: isActive ? '#8FFF00' : 'rgba(255,255,255,1)', paddingLeft: (item as any).isMoreChild ? 28 : undefined }}>
-                      <item.icon size={15} />
-                      <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1 }}>{item.label}</span>
+                      className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left"
+                      style={{ backgroundColor: isActive ? 'rgba(143,255,0,0.1)' : 'transparent', border: isActive ? '1px solid rgba(143,255,0,0.2)' : '1px solid transparent' }}>
+                      <item.icon size={15} style={{ color: isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', flexShrink:0, transition:'color 0.15s' }} className="group-hover:!text-lime"/>
+                      <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', transition:'color 0.15s' }} className="group-hover:!text-lime">{item.label}</span>
                       {isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
                     </button>
                 )
@@ -544,7 +548,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             {/* Settings + Logout */}
             <div className="px-2 pb-6" style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:12 }}>
               <button
-                title="Admin Settings ? Coming Soon"
+                onClick={() => setShowAdminSettings(true)}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
                 style={{ color:'rgba(255,255,255,0.5)' }}>
                 <Settings size={15} />
@@ -563,7 +567,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor:'#1a2410' }}>
             <div className="flex justify-center pt-[30px] pb-[35px]">
               <button onClick={() => router.push('/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
-                <Shield size={24} className="text-lime" />
+                <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 24, height: 24 }} />
               </button>
             </div>
             <div className="flex flex-col flex-1">
@@ -680,7 +684,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           <div className="relative w-[250px] bg-dark flex flex-col z-10 animate-slide-right">
             <div className="pt-[50px] pb-[30px] flex flex-col items-center">
               <button onClick={() => { router.push('/dashboard'); setMobileOpen(false) }}>
-                <Shield size={36} className="text-lime" />
+                <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 36, height: 36 }} />
               </button>
               <span className="text-lime text-base font-extrabold tracking-wide mt-1.5">Riazify</span>
             </div>
@@ -760,6 +764,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
+      {showAdminSettings && <AdminSettingsModal onClose={() => setShowAdminSettings(false)} />}
       {/* -- BOTTOM-RIGHT TOASTS -- */}
       {toasts.map((t, i) => (
         <NotifToast
