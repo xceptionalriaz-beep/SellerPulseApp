@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: `${brandName} — eBay Seller Tools`,
+      default: `${brandName} - eBay Seller Tools`,
       template: `%s | ${brandName}`,
     },
     description:
@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       locale: 'en_US',
-      title: `${brandName} — eBay Seller Tools`,
+      title: `${brandName} - eBay Seller Tools`,
       description: 'The all-in-one SaaS platform for serious eBay sellers.',
       siteName: brandName,
       images: [{ url: ogImage, width: 1200, height: 630, alt: brandName }],
