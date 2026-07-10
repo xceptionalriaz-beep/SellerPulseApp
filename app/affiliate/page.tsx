@@ -201,14 +201,14 @@ export default function AffiliatePage() {
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }} suppressHydrationWarning>
       <Navbar />
-      <div style={{ paddingTop: '80px' }}>
+      <div style={{ paddingTop: '72px' }}>
 
         {/* ── 1. HERO ── */}
         <div style={{ backgroundColor: C.dark, position: 'relative', overflow: 'hidden' }}>
           {/* Background grid pattern */}
           <div style={{ position: 'absolute', inset: 0, backgroundImage: `radial-gradient(circle at 1px 1px, rgba(143,255,0,0.08) 1px, transparent 0)`, backgroundSize: '32px 32px', pointerEvents: 'none' }}/>
-          <div className="max-w-6xl mx-auto px-6 py-24" style={{ position: 'relative', zIndex: 1 }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div className="max-w-6xl mx-auto px-4 py-12 md:py-24" style={{ position: 'relative', zIndex: 1 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
               {/* Left — text */}
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
@@ -216,13 +216,13 @@ export default function AffiliatePage() {
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: C.lime }}/>
                   <span className="text-[11px] font-black tracking-wider" style={{ color: C.lime }}>AFFILIATE PROGRAM — NOW OPEN</span>
                 </div>
-                <h1 className="text-[44px] md:text-[52px] font-black leading-tight mb-5" style={{ color: '#fff' }}>
+                <h1 className="text-[28px] md:text-[52px] font-black leading-tight mb-5" style={{ color: '#fff' }}>
                   Earn <span style={{ color: C.lime }}>{commPct}% recurring</span> commission promoting Riazify
                 </h1>
                 <p className="text-[16px] leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   Refer eBay sellers to the tool they actually need — and earn {commPct}% commission for up to {commMonths} months per customer. No caps. No limits.
                 </p>
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
                   <Link href="/affiliate/apply"
                         className="flex items-center gap-2 px-8 py-4 rounded-xl font-black text-[15px] hover:opacity-90 transition-all"
                         style={{ backgroundColor: C.lime, color: C.dark }}>
@@ -467,7 +467,7 @@ export default function AffiliatePage() {
 
         {/* ── 7. EARNINGS CALCULATOR ── */}
         <div style={{ backgroundColor: C.dark }}>
-          <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+          <div className="max-w-4xl mx-auto px-4 py-14 text-center">
             <p className="text-[11px] font-black tracking-wider mb-2" style={{ color: C.muted }}>EARNINGS CALCULATOR</p>
             <h2 className="text-[32px] font-black mb-3" style={{ color: '#fff' }}>
               How much could you earn?
@@ -475,10 +475,10 @@ export default function AffiliatePage() {
             <p className="text-[15px] mb-10" style={{ color: 'rgba(255,255,255,0.5)' }}>
               Same calculator our affiliates use in their dashboard.
             </p>
-            <div className="p-8 rounded-3xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(143,255,0,0.2)' }}>
+            <div className="p-4 md:p-8 rounded-3xl" style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(143,255,0,0.2)' }}>
               <div className="flex flex-col gap-6">
                 {/* Plan selector */}
-                <div className="flex items-center gap-2 justify-center">
+                <div className="flex items-center gap-2 justify-center flex-wrap">
                   <p className="text-[12px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Plan:</p>
                   {calcPlans.map(p => (
                     <button key={p.id} id={`plan-${p.id}`}
@@ -503,7 +503,7 @@ export default function AffiliatePage() {
                   </div>
                 </div>
                 {/* Results - same 3 cards as user dashboard */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {[
                     { label: 'Month 1',      id: 'calc-month1',  val: '$9.80',   highlight: false },
                     { label: '/mo after',    id: 'calc-monthly', val: '$12.25',  highlight: true  },

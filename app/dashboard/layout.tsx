@@ -38,7 +38,7 @@ import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
-  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -470,7 +470,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: Mail,          label: 'Marketing',        tab: 12                                                         },
                 { icon: BookOpen,      label: 'Blog',             tab: 15                                                         },
                 { icon: Wrench,        label: 'Changelog',        tab: 16                                                         },
-                { icon: FileText,      label: 'Page Editor',      tab: 17                                                         },
+                { icon: Briefcase,     label: 'Careers',          tab: 17                                                         },
+                { icon: FileText,      label: 'Page Editor',      tab: 18                                                         },
                 
               ].map((item) => {
                 const isActive = (item as any).isAnalytics

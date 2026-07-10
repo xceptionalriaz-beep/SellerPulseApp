@@ -4,6 +4,8 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { CheckCircle, AlertTriangle, XCircle, Activity } from 'lucide-react'
+import Navbar from '@/components/landing/Navbar'
+import Footer from '@/components/landing/Footer'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -95,37 +97,49 @@ export default async function StatusPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f7f9f5', fontFamily: "'DM Sans', 'Inter', sans-serif" }}>
 
-      {/* Nav */}
-      <nav className="px-6 py-4 border-b flex items-center justify-between"
-           style={{ backgroundColor: '#0a0d08', borderColor: 'rgba(143,255,0,0.2)' }}>
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-               style={{ backgroundColor: '#8fff00' }}>
-            <Activity size={14} color="#0a0d08" strokeWidth={2.5} />
-          </div>
-          <span className="text-[15px] font-bold text-white">Riazify</span>
-          <span className="text-[13px] ml-1" style={{ color: '#8a9e78' }}>/ Status</span>
-        </Link>
-        <Link href="/dashboard"
-          className="text-[12px] font-semibold px-3 py-1.5 rounded-xl border transition-all hover:opacity-80"
-          style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }}>
-          â† Back to App
-        </Link>
-      </nav>
+      <Navbar/>
 
       {/* Hero status banner */}
-      <div className="text-center py-16 px-6">
-        <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl mb-6"
-             style={{ backgroundColor: cfg.bg, border: `2px solid ${cfg.border}` }}>
-          <Icon size={28} style={{ color: cfg.color }} />
-          <span className="text-[22px] font-bold" style={{ color: cfg.color }}>{cfg.label}</span>
+      <div className="text-center px-4 pt-20 pb-12 relative overflow-hidden">
+        {/* Decorative circles */}
+        <div className="absolute pointer-events-none" style={{ top: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'rgba(143,255,0,0.08)' }}/>
+        <div className="absolute pointer-events-none" style={{ bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'rgba(143,255,0,0.06)' }}/>
+        <div className="absolute pointer-events-none" style={{ top: 20, left: '30%', width: 140, height: 140, borderRadius: '50%', background: 'rgba(143,255,0,0.04)' }}/>
+
+        <div className="relative" style={{ zIndex: 1 }}>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
+               style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}` }}>
+            <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: cfg.dot }}/>
+            <span className="text-[12px] font-bold" style={{ color: cfg.color }}>{cfg.label}</span>
+          </div>
+
+          <h1 className="font-black mb-3" style={{ color: '#1a2410', fontSize: 'clamp(28px, 5vw, 48px)' }}>
+            System Status
+          </h1>
+
+          <p className="text-[15px] max-w-md mx-auto mb-2" style={{ color: '#8a9e78' }}>
+            {status.message}
+          </p>
+          <p className="text-[12px] mb-8" style={{ color: '#8a9e78' }}>
+            Last updated {timeAgo(status.updated_at)}
+          </p>
+
+          {/* Stats */}
+          <div className="inline-flex items-center gap-6 px-6 py-3 rounded-2xl border mx-auto"
+               style={{ backgroundColor: '#fff', borderColor: '#e8ede2' }}>
+            {[
+              { label: 'API', status: 'operational' },
+              { label: 'Dashboard', status: 'operational' },
+              { label: 'Database', status: 'operational' },
+            ].map(item => (
+              <div key={item.label} className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#16a34a' }}/>
+                <span className="text-[12px] font-semibold" style={{ color: '#1a2410' }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <p className="text-[15px] max-w-md mx-auto" style={{ color: '#8a9e78' }}>
-          {status.message}
-        </p>
-        <p className="text-[12px] mt-3" style={{ color: '#8a9e78' }}>
-          Last updated {timeAgo(status.updated_at)}
-        </p>
       </div>
 
       {/* Individual component statuses */}
@@ -169,86 +183,23 @@ export default async function StatusPage() {
           ))
         )}
       </div>
-
-      {/* Footer â€” matches landing page */}
-      <footer className="py-16 border-t" style={{ background: '#1a2410', borderColor: '#1a2410' }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-            <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                     style={{ background: '#8fff00' }}>
-                  <Activity size={13} color="#0a0d08" />
-                </div>
-                <span className="text-[16px] font-black text-white">Riazify</span>
-              </div>
-              <p className="text-[13px] leading-relaxed mb-5" style={{ color: '#8a9e78' }}>
-                Next-gen eBay intelligence for scaling operators. Built by sellers, for sellers.
-              </p>
-              <div className="flex rounded-xl overflow-hidden border"
-                   style={{ borderColor: 'rgba(143,255,0,0.2)' }}>
-                <input placeholder="Your email..."
-                  className="flex-1 px-4 py-2.5 text-[13px] outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: '#fff' }} />
-                <button className="px-4 py-2.5 text-[12px] font-black shrink-0"
-                        style={{ background: '#8fff00', color: '#0a0d08' }}>
-                  Subscribe
-                </button>
-              </div>
-            </div>
-            {[
-              { title: 'Product', links: [
-                  { label: 'Features',         href: '/#features' },
-                  { label: 'Pricing',          href: '/#pricing'  },
-                  { label: 'Changelog',        href: '#'          },
-                  { label: 'Roadmap',          href: '/roadmap'   },
-                  { label: 'Status',           href: '/status'    },
-                  { label: 'Chrome Extension', href: '#'          },
-                ]},
-              { title: 'Company', links: [
-                  { label: 'About',     href: '#' },
-                  { label: 'Blog',      href: '#' },
-                  { label: 'Careers',   href: '#' },
-                  { label: 'Press Kit', href: '#' },
-                ]},
-              { title: 'Legal', links: [
-                  { label: 'Privacy Policy',   href: '#' },
-                  { label: 'Terms of Service', href: '#' },
-                  { label: 'Cookie Policy',    href: '#' },
-                  { label: 'GDPR',             href: '#' },
-                ]},
-            ].map(col => (
-              <div key={col.title}>
-                <p className="text-[12px] font-black tracking-wider mb-4 text-white">
-                  {col.title.toUpperCase()}
-                </p>
-                <div className="flex flex-col gap-2.5">
-                  {col.links.map(l => (
-                    <Link key={l.label} href={l.href}
-                      className="text-[13px] transition-opacity hover:opacity-100 opacity-60"
-                      style={{ color: l.label === 'Roadmap' || l.label === 'Status' ? '#8fff00' : '#8a9e78' }}>
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
-               style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-            <p className="text-[12px]" style={{ color: '#8a9e78' }}>
-              Â© {new Date().getFullYear()} Riazify â€” All rights reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              {['Twitter', 'LinkedIn', 'YouTube', 'Discord'].map(s => (
-                <a key={s} href="#"
-                   className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"
-                   style={{ color: '#8a9e78' }}>{s}</a>
-              ))}
-            </div>
+    {/* Subscribe */}
+      <div className="max-w-2xl mx-auto w-full px-4 pb-16">
+        <div className="rounded-2xl p-6 text-center" style={{ backgroundColor: '#1a2410' }}>
+          <h3 className="text-[16px] font-black text-white mb-2">Get status updates</h3>
+          <p className="text-[13px] mb-4" style={{ color: '#8a9e78' }}>Get notified when incidents occur or resolve.</p>
+          <div className="flex gap-2 max-w-sm mx-auto">
+            <input type="email" placeholder="your@email.com"
+                   className="flex-1 h-10 px-4 rounded-xl text-[13px] outline-none"
+                   style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}/>
+            <button className="h-10 px-4 rounded-xl text-[13px] font-black shrink-0"
+                    style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+              Subscribe
+            </button>
           </div>
         </div>
-      </footer>
+      </div>
+      <Footer/>
     </div>
   )
 }

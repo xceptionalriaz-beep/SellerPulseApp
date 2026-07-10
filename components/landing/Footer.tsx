@@ -61,6 +61,7 @@ export default function Footer() {
             { title: "Company", links: [
                 { label: "About",  href: "/about" },
                 { label: "Blog",      href: "/blog" },
+                { label: "Contact",  href: "/contact"   },
                 { label: "Careers", href: "/careers" },
                 { label: "Press Kit", href: "/press-kit" },
                 { label: "Affiliates", href: "/affiliate" },
@@ -87,9 +88,9 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
+        <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4"
              style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="text-[12px]" style={{ color: T.sage }}>© 2026 Riazify — All rights reserved.</p>
+          <p className="text-[12px] text-center md:text-left" style={{ color: T.sage }}>© 2026 Riazify — All rights reserved.</p>
           <div className="flex items-center gap-4">
             {["Twitter", "LinkedIn", "YouTube", "Discord"].map(s => (
               <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"

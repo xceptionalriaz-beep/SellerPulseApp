@@ -359,7 +359,38 @@ export default function DashboardHomePage() {
           </div>
         )}
 
-        {/* â”€â”€ STAT CARDS â”€â”€ */}
+        {/* ── EMPTY STATE ── */}
+        {stats.totalOrders === 0 && !loading && (
+          <div className="rounded-2xl border-2 border-dashed border-[#C8DDB8] bg-white p-6 flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#F4FFE6' }}>
+              <Shield size={28} style={{ color: '#4A8F00' }}/>
+            </div>
+            <div>
+              <h2 className="text-[18px] font-black text-[#1A2410] mb-1">Welcome to Riazify, {firstName}!</h2>
+              <p className="text-[13px] text-[#8A9E78]">Connect your eBay account to start protecting your orders and seeing your analytics here.</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 w-full max-w-lg">
+              {[
+                { step: '1', label: 'Connect eBay',    desc: 'Link your seller account',    href: '/dashboard/settings?tab=ebay' },
+                { step: '2', label: 'Import orders',   desc: 'Sync your recent orders',     href: '/dashboard/orders' },
+                { step: '3', label: 'Get protected',   desc: 'Complete order checklists',   href: '/dashboard/orders' },
+              ].map(s => (
+                <button key={s.step} onClick={() => router.push(s.href)}
+                        className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#E8EDE2] hover:border-[#8FFF00] hover:bg-[#F4FFE6] transition-all">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-black" style={{ backgroundColor: '#1A2410', color: '#8FFF00' }}>{s.step}</div>
+                  <p className="text-[12px] font-bold text-[#1A2410]">{s.label}</p>
+                  <p className="text-[10px] text-[#8A9E78]">{s.desc}</p>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => router.push('/dashboard/settings?tab=ebay')}
+                    className="px-6 py-3 rounded-xl font-black text-[13px]" style={{ backgroundColor: '#8FFF00', color: '#1A2410' }}>
+              Connect eBay now
+            </button>
+          </div>
+        )}
+
+        {/* ── STAT CARDS ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard index={0} icon={DollarSign} label="Total Revenue"
             value={`$${stats.totalRevenue.toFixed(2)}`}

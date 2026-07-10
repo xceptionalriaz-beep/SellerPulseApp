@@ -28,7 +28,7 @@ export async function logLogin(): Promise<void> {
       .insert({
         user_id:     user.id,
         ip_address:  metadata.last_login_ip,
-        device_info: `${metadata.device_platform} â€” ${metadata.browser_agent}`,
+        device_info: `${metadata.device_platform} 'â€" ${metadata.browser_agent}`,
       } as never)
 
     // 3. Fire webhook if admin login

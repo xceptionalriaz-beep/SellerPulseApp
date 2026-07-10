@@ -25,23 +25,18 @@ export default function CookiePolicyPage() {
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }}>
       <Navbar />
-      <div style={{ paddingTop: '80px' }}>
+      <div style={{ paddingTop: '72px' }}>
 
         {/* Hero */}
         <div style={{ backgroundColor: C.dark }}>
-          <div className="max-w-4xl mx-auto px-6 py-16">
-            <div className="flex items-center gap-2 mb-4">
-              <Link href="/" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.muted }}>Home</Link>
-              <span style={{ color: C.muted }}>›</span>
-              <span className="text-[12px] font-bold" style={{ color: C.lime }}>Cookie Policy</span>
-            </div>
-            <h1 className="text-[40px] font-black mb-3" style={{ color: '#fff' }}>Cookie Policy</h1>
+          <div className="max-w-4xl mx-auto px-4 py-16 md:py-24 text-center">
+            <h1 className="font-black mb-3" style={{ color: '#fff', fontSize: 'clamp(28px, 5vw, 40px)' }}>Cookie Policy</h1>
             <p className="text-[14px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Last updated: {LAST_UPDATED}</p>
           </div>
         </div>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="rounded-3xl border p-8 md:p-12 flex flex-col gap-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
 
             {/* Intro */}
@@ -105,7 +100,8 @@ export default function CookiePolicyPage() {
                       <p className="text-[13px] font-black" style={{ color: C.dark }}>{cat.type}</p>
                       <p className="text-[12px]" style={{ color: C.muted }}>— {cat.desc}</p>
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
                       <thead>
                         <tr style={{ backgroundColor: C.bg, borderTop: `1px solid ${C.border}` }}>
                           {['Cookie Name', 'Purpose', 'Duration'].map(h => (
@@ -123,6 +119,7 @@ export default function CookiePolicyPage() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -160,7 +157,55 @@ export default function CookiePolicyPage() {
             </div>
           </div>
         </div>
-        <Footer />
+        {/* FAQ */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 48px' }}>
+        <h2 style={{ fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 900, color: '#1a2410', textAlign: 'center', margin: '0 0 8px' }}>Cookie questions</h2>
+        <p style={{ fontSize: 14, color: '#8a9e78', textAlign: 'center', margin: '0 0 28px' }}>Quick answers about how we use cookies</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[
+            { q: 'Can I use Riazify without cookies?', a: 'Essential cookies are required for login and authentication to work. Without them, you cannot stay logged in. Analytics and preference cookies are optional.' },
+            { q: 'Do you sell my cookie data?', a: 'No. We never sell your data including cookie data to third parties. Cookies are only used to improve your experience on Riazify.' },
+            { q: 'How do I delete Riazify cookies?', a: 'Open your browser settings, go to Privacy or Cookies section, and delete cookies from riazify.com. Note this will log you out of your account.' },
+            { q: 'Does Riazify use tracking cookies?', a: 'We only use anonymous analytics via Vercel to understand general usage patterns. We do not use advertising or cross-site tracking cookies.' },
+            { q: 'How long do cookies last?', a: 'Session cookies are deleted when you close your browser. Authentication cookies last 7 days. Analytics and preference cookies last up to 1 year.' },
+          ].map((faq, i) => (
+            <details key={i} style={{ background: '#ffffff', border: '1px solid #e8ede2', borderRadius: 12, overflow: 'hidden' }}>
+              <summary style={{ padding: '14px 18px', fontSize: 13, fontWeight: 700, color: '#1a2410', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {faq.q}
+                <span style={{ fontSize: 16, color: '#8a9e78', flexShrink: 0, marginLeft: 12 }}>+</span>
+              </summary>
+              <div style={{ padding: '0 18px 14px' }}>
+                <p style={{ fontSize: 13, color: '#8a9e78', margin: 0, lineHeight: 1.6 }}>{faq.a}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Banner */}
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 16px 60px' }}>
+        <div style={{ background: '#1a2410', borderRadius: 20, padding: '40px 24px', textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 100, background: 'rgba(143,255,0,0.1)', border: '1px solid rgba(143,255,0,0.3)', marginBottom: 16 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#8fff00' }}>14-day free trial</span>
+          </div>
+          <h2 style={{ fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: 900, color: '#ffffff', margin: '0 0 10px', lineHeight: 1.1 }}>
+            Ready to grow your eBay business?
+          </h2>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 24px' }}>
+            No credit card required. No commitment. Cancel anytime.
+          </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a href="/auth/signup" style={{ height: 46, padding: '0 24px', borderRadius: 12, background: '#8fff00', color: '#1a2410', fontSize: 14, fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+              Start free trial
+            </a>
+            <a href="/pricing" target="_blank" rel="noopener noreferrer"
+               style={{ height: 46, padding: '0 24px', borderRadius: 12, background: 'rgba(255,255,255,0.08)', color: '#ffffff', fontSize: 14, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>
+              View pricing
+            </a>
+          </div>
+        </div>
+      </div>
+      <Footer/>
       </div>
     </div>
   )

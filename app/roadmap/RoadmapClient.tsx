@@ -8,6 +8,7 @@ import {
   Search, SlidersHorizontal, Flag, Activity, ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
+import Navbar from '@/components/landing/Navbar'
 
 // -- Brand colours ----------------------------------------------
 const C = {
@@ -182,78 +183,32 @@ export default function RoadmapClient() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: C.bg }}>
 
-      {/* -- Nav ------------------------------------------------ */}
-      <nav className="sticky top-0 z-40 border-b px-6 py-3 flex items-center justify-between"
-           style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.2)' }}>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                 style={{ backgroundColor: C.lime }}>
-              <Activity size={14} style={{ color: C.dark }} />
-            </div>
-            <span className="text-[15px] font-bold" style={{ color: '#fff' }}>Riazify</span>
-            <span className="text-[13px]" style={{ color: C.muted }}>/ Roadmap</span>
-          </Link>
-
-          {/* Fix 3: Back to App link */}
-          {user && (
-            <Link href="/dashboard"
-              className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-xl border transition-all hover:opacity-80"
-              style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.5)' }}>
-              <ArrowLeft size={13} /> Back to App
-            </Link>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {user ? (
-            <button onClick={() => setShowSubmit(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-80"
-              style={{ backgroundColor: C.lime, color: C.dark }}>
-              <Plus size={14} /> Request Feature
-            </button>
-          ) : (
-            <Link href="/auth/login?next=/roadmap"
-              className="px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-80"
-              style={{ backgroundColor: C.lime, color: C.dark }}>
-              Sign in to vote
-            </Link>
-          )}
-        </div>
-      </nav>
-
-      {/* -- Hero � Option A ------------------------------------- */}
-      <div className="text-center px-6 pt-12 pb-10 relative overflow-hidden"
-           style={{ backgroundColor: C.dark, borderBottom: `1px solid rgba(143,255,0,0.15)` }}>
-
-        {/* Lime radial glow behind title */}
-        <div className="absolute pointer-events-none"
-             style={{
-               top: -40, left: '50%', transform: 'translateX(-50%)',
-               width: 600, height: 260,
-               background: 'radial-gradient(ellipse at center top, rgba(143,255,0,0.1) 0%, transparent 65%)',
-             }} />
-
-        {/* "Always improving" pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 relative"
-             style={{ backgroundColor: 'rgba(143,255,0,0.08)', border: '1px solid rgba(143,255,0,0.2)' }}>
-          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: C.lime }} />
-          <span className="text-[11px] font-semibold tracking-wide" style={{ color: C.lime }}>
+      {/* -- Hero -- */}
+      <div className="text-center px-4 pt-20 pb-10 relative overflow-hidden"
+           style={{ backgroundColor: C.bg }}>
+        {/* Decorative circles */}
+        <div className="absolute pointer-events-none" style={{ top: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'rgba(143,255,0,0.08)' }}/>
+        <div className="absolute pointer-events-none" style={{ bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'rgba(143,255,0,0.06)' }}/>
+        <div className="absolute pointer-events-none" style={{ top: 20, left: '30%', width: 140, height: 140, borderRadius: '50%', background: 'rgba(143,255,0,0.04)' }}/>
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 relative"
+             style={{ backgroundColor: C.limeTint, border: `1px solid ${C.lime}` }}>
+          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: C.limeDeep }}/>
+          <span className="text-[12px] font-semibold tracking-wide" style={{ color: C.limeDeep }}>
             Always improving
           </span>
         </div>
-
         {/* Title */}
-        <h1 className="text-[34px] font-bold mb-3 relative" style={{ color: '#fff' }}>
+        <h1 className="font-bold mb-3 relative" style={{ color: C.dark, fontSize: 'clamp(28px, 5vw, 48px)' }}>
           Product Roadmap
         </h1>
-        <p className="text-[14px] max-w-md mx-auto mb-8 leading-relaxed relative" style={{ color: C.muted }}>
+        <p className="text-[15px] max-w-md mx-auto mb-8 leading-relaxed relative" style={{ color: C.muted }}>
           See what we are building. Vote on features you want most.
           Your votes directly shape what we build next.
         </p>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-4 gap-3 max-w-xl mx-auto relative">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto relative">
           {[
             { label: 'Planned',     value: counts.planned,                                    border: 'rgba(143,255,0,0.2)',  valueBg: 'rgba(143,255,0,0.06)',  color: C.lime    },
             { label: 'In Progress', value: counts.in_progress,                                border: 'rgba(29,112,245,0.25)', valueBg: 'rgba(29,112,245,0.06)', color: '#1D70F5' },
@@ -272,7 +227,7 @@ export default function RoadmapClient() {
       </div>
 
       {/* -- Controls ------------------------------------------- */}
-      <div className="px-6 max-w-3xl mx-auto flex flex-col gap-3 mt-8 mb-6">
+      <div className="px-4 max-w-3xl mx-auto flex flex-col gap-3 mt-6 mb-4">
 
         {/* Filter tabs with counts � Fix 10 */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -304,7 +259,7 @@ export default function RoadmapClient() {
         </div>
 
         {/* Search + Category + Sort � Fix 4, 5, 6 */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
           <div className="flex items-center gap-2 h-9 px-3 rounded-xl flex-1"
                style={{
@@ -542,91 +497,6 @@ export default function RoadmapClient() {
           100% { opacity: 0; transform: translateX(-50%) translateY(-24px); }
         }
       `}</style>
-
-      {/* Footer � matches landing page */}
-      <footer className="py-16 border-t" style={{ background: '#1a2410', borderColor: '#1a2410' }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-
-            {/* Brand + newsletter */}
-            <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: C.lime }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                       stroke={C.dark} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                  </svg>
-                </div>
-                <span className="text-[16px] font-black text-white">Riazify</span>
-              </div>
-              <p className="text-[13px] leading-relaxed mb-5" style={{ color: C.muted }}>
-                Next-gen eBay intelligence for scaling operators. Built by sellers, for sellers.
-              </p>
-              <div className="flex rounded-xl overflow-hidden border" style={{ borderColor: 'rgba(143,255,0,0.2)' }}>
-                <input
-                  value={newsletterEmail}
-                  onChange={e => setNewsletterEmail(e.target.value)}
-                  placeholder="Your email..."
-                  className="flex-1 px-4 py-2.5 text-[13px] outline-none"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: '#fff' }} />
-                <button className="px-4 py-2.5 text-[12px] font-black shrink-0"
-                        style={{ background: C.lime, color: C.dark }}>
-                  Subscribe
-                </button>
-              </div>
-            </div>
-
-            {/* Links columns */}
-            {[
-              { title: 'Product', links: [
-                  { label: 'Features',         href: '/#features'  },
-                  { label: 'Pricing',          href: '/#pricing'   },
-                  { label: 'Changelog',        href: '#'           },
-                  { label: 'Roadmap',          href: '/roadmap'    },
-                  { label: 'Chrome Extension', href: '#'           },
-                ]},
-              { title: 'Company', links: [
-                  { label: 'About',     href: '#' },
-                  { label: 'Blog',      href: '/blog' },
-                  { label: 'Careers',   href: '#' },
-                  { label: 'Press Kit', href: '#' },
-                ]},
-              { title: 'Legal', links: [
-                  { label: 'Privacy Policy',   href: '#' },
-                  { label: 'Terms of Service', href: '#' },
-                  { label: 'Cookie Policy',    href: '#' },
-                  { label: 'GDPR',             href: '#' },
-                ]},
-            ].map(col => (
-              <div key={col.title}>
-                <p className="text-[12px] font-black tracking-wider mb-4 text-white">{col.title.toUpperCase()}</p>
-                <div className="flex flex-col gap-2.5">
-                  {col.links.map(l => (
-                    <Link key={l.label} href={l.href}
-                       className="text-[13px] transition-opacity hover:opacity-100 opacity-60"
-                       style={{ color: l.label === 'Roadmap' ? C.lime : C.muted }}>
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom bar */}
-          <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
-               style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-            <p className="text-[12px]" style={{ color: C.muted }}>� {new Date().getFullYear()} Riazify � All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              {['Twitter', 'LinkedIn', 'YouTube', 'Discord'].map(s => (
-                <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"
-                   style={{ color: C.muted }}>{s}</a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
-
     </div>
   )
 }

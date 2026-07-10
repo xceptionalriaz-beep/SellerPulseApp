@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase'
 import {
   Shield, BarChart2, Settings, ArrowLeft, Search,
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
-  Wrench, Trophy, Zap, UserPlus, Key, FileText, Image,
+  Wrench, Trophy, Zap, UserPlus, Key, FileText, Image, Briefcase,
   Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail, CreditCard,
   MessageCircle,
 } from 'lucide-react'
@@ -30,6 +30,7 @@ import MarketingTab        from '@/components/admin/settings-tabs/MarketingTab'
 import BlogTab             from '@/components/admin/settings-tabs/BlogTab'
 import ChangelogTab        from '@/components/admin/settings-tabs/ChangelogTab'
 import PageEditorTab from '@/components/admin/settings-tabs/PageEditorTab'
+import CareersTab    from '@/components/admin/settings-tabs/CareersTab'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
 
@@ -63,6 +64,7 @@ const SETTINGS_MENU = [
   { title: 'Tickets',         icon: MessageCircle, badge: 0 },
   { title: 'Blog',            icon: FileText     },
   { title: 'Changelog',       icon: Wrench       },
+  { title: 'Careers',         icon: Briefcase    },
   { title: 'Page Editor', icon: FileText         },
 ]
 
@@ -1182,7 +1184,8 @@ function AdminPage() {
       case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />
       case 15: return <BlogTab />
       case 16: return <ChangelogTab />
-      case 17: return <PageEditorTab />
+      case 17: return <CareersTab />
+      case 18: return <PageEditorTab />
       default: return null
     }
   }

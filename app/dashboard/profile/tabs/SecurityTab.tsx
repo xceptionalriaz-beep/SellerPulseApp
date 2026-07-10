@@ -336,8 +336,12 @@ export default function SecurityTab() {
     if (deleteConfirmText !== 'DELETE') { toast.error('You must type DELETE exactly to confirm'); return }
     setShowDeleteAcct(false)
     try {
+      const res = await fetch('/api/user/delete-account', { method: 'POST' })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error)
       await supabase.auth.signOut()
       toast.show('Account deleted. Goodbye!')
+      window.location.href = '/'
     } catch (e: any) { toast.error(e.message) }
   }
 

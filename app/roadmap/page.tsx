@@ -1,5 +1,7 @@
 ﻿// app/roadmap/page.tsx
 import RoadmapClient from './RoadmapClient'
+import Navbar from '@/components/landing/Navbar'
+import Footer from '@/components/landing/Footer'
 
 export const metadata = {
   title: 'Feature Roadmap | Riazify',
@@ -7,5 +9,11 @@ export const metadata = {
 }
 
 export default function RoadmapPage() {
-  return <RoadmapClient />
+  return (
+    <>
+      <Navbar/>
+      <RoadmapClient/>
+      <Footer/>
+    </>
+  )
 }
