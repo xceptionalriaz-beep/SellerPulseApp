@@ -1,5 +1,6 @@
 ﻿'use client'
 // components/admin/settings-tabs/RoleBuilderTab.tsx
+import TeamMembersPanel from '@/components/admin/settings-tabs/TeamMembersPanel'
 // --------------------------------------------------------------
 // RIAZIFY — Role Builder Tab
 // Split-view RBAC management with permission matrix,
@@ -2363,6 +2364,9 @@ export default function RoleBuilderTab() {
       )}
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
+      <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #e8ede2' }}>
+        <TeamMembersPanel />
+      </div>
     </div>
   )
 }

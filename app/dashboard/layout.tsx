@@ -327,13 +327,10 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           router.push('/dashboard/admin')
         }
         // Load section permissions if user has a role assigned
-        if ((data as any).role_id && !(data as any).is_super_admin) {
-          const { data: roleData } = await (supabase.from('admin_roles') as any)
-            .select('section_permissions')
-            .eq('id', (data as any).role_id)
-            .single()
-          if (roleData?.section_permissions && Object.keys(roleData.section_permissions).length > 0) {
-            setSectionPerms(roleData.section_permissions)
+        if (!(data as any).is_super_admin) {
+          const perms = (data as any).section_permissions
+          if (perms && Object.keys(perms).length > 0) {
+            setSectionPerms(perms)
           }
         }
       }
