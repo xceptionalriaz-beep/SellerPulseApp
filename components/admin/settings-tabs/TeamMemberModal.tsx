@@ -2,8 +2,9 @@
 // components/admin/settings-tabs/TeamMemberModal.tsx
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
-import { X, Check, RefreshCw, Shield, Eye, EyeOff, Lock } from 'lucide-react'
+import { X, Check, RefreshCw, Shield, ChevronRight, ChevronDown } from 'lucide-react'
 import ProDropdown from '@/components/ui/ProDropdown'
+import { TAB_ACTIONS } from '@/components/admin/settings-tabs/tabActions'
 
 const C = {
   lime:        '#8fff00',
@@ -113,7 +114,21 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
     })
     return initial
   })
-  const [toast, setToast]             = useState<string | null>(null)
+  const [toast, setToast]               = useState<string | null>(null)
+  const [expandedTab, setExpandedTab]   = useState<string | null>(null)
+  const [actionPerms, setActionPerms]   = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    // Initialize from existing tab_permissions if available
+    ALL_TABS.forEach(tab => {
+      const actions = TAB_ACTIONS[tab.key] ?? []
+      actions.forEach(action => {
+        const key = `${tab.key}__${action.key}`
+        const existing = (member.tab_permissions as any)?.[key]
+        initial[key] = existing !== undefined ? existing : false
+      })
+    })
+    return initial
+  })
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
@@ -141,10 +156,16 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
         sectionPerms[t.key] = tabPerms[t.key] !== 'none'
       })
 
-      // Build tab_permissions for view/full distinction
-      const tabPermsFull: Record<string, TabPermission> = {}
+      // Build tab_permissions combining access level + individual actions
+      const tabPermsFull: Record<string, any> = {}
       ALL_TABS.forEach(t => {
         tabPermsFull[t.key] = { access: tabPerms[t.key] }
+        // Add individual action permissions
+        const actions = TAB_ACTIONS[t.key] ?? []
+        actions.forEach(action => {
+          const key = `${t.key}__${action.key}`
+          tabPermsFull[key] = actionPerms[key] ?? false
+        })
       })
 
       const { error } = await (supabase.from('profiles') as any)
@@ -265,11 +286,67 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
                 <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px', paddingBottom: 6, borderBottom: `1px solid ${C.border}` }}>{section}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {ALL_TABS.filter(t => t.section === section).map(tab => {
-                    const level = isSuperAdmin ? 'full' : (tabPerms[tab.key] ?? 'none')
+                    const level      = isSuperAdmin ? 'full' : (tabPerms[tab.key] ?? 'none')
+                    const actions    = TAB_ACTIONS[tab.key] ?? []
+                    const isExpanded = expandedTab === tab.key
                     return (
-                      <div key={tab.key} style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', padding: '8px 12px', borderRadius: 8, background: level === 'full' ? C.greenBg : level === 'view' ? '#eff6ff' : 'transparent', gap: 12 }}>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0 }}>{tab.label}</p>
-                        <AccessBadge level={level} onClick={() => !isSuperAdmin && cycleAccess(tab.key)} disabled={isSuperAdmin}/>
+                      <div key={tab.key}>
+                        {/* Tab row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', alignItems: 'center', padding: '8px 12px', borderRadius: isExpanded ? '8px 8px 0 0' : 8, background: level === 'full' ? C.greenBg : level === 'view' ? '#eff6ff' : 'transparent', gap: 10 }}>
+                          <p style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0 }}>{tab.label}</p>
+                          <AccessBadge level={level} onClick={() => !isSuperAdmin && cycleAccess(tab.key)} disabled={isSuperAdmin}/>
+                          {actions.length > 0 && (
+                            <button onClick={() => setExpandedTab(isExpanded ? null : tab.key)}
+                                    style={{ width: 24, height: 24, borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                                    title="Manage granular permissions">
+                              {isExpanded ? <ChevronDown size={12} style={{ color: C.muted }}/> : <ChevronRight size={12} style={{ color: C.muted }}/>}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Expanded actions */}
+                        {isExpanded && actions.length > 0 && (
+                          <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 4 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 6, borderBottom: `1px solid ${C.border}`, marginBottom: 2 }}>
+                              <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>Granular permissions</p>
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button onClick={() => {
+                                  const updates: Record<string, boolean> = {}
+                                  actions.forEach(a => { updates[`${tab.key}__${a.key}`] = true })
+                                  setActionPerms(prev => ({ ...prev, ...updates }))
+                                }} style={{ fontSize: 10, fontWeight: 700, color: C.green, background: C.greenBg, border: `0.5px solid ${C.greenBorder}`, borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}>
+                                  All on
+                                </button>
+                                <button onClick={() => {
+                                  const updates: Record<string, boolean> = {}
+                                  actions.forEach(a => { updates[`${tab.key}__${a.key}`] = false })
+                                  setActionPerms(prev => ({ ...prev, ...updates }))
+                                }} style={{ fontSize: 10, fontWeight: 700, color: C.muted, background: C.surface, border: `0.5px solid ${C.border}`, borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}>
+                                  All off
+                                </button>
+                              </div>
+                            </div>
+                            {actions.map(action => {
+                              const actionKey = `${tab.key}__${action.key}`
+                              const enabled   = isSuperAdmin ? true : (actionPerms[actionKey] ?? false)
+                              const riskColor = action.risk === 'high' ? C.red : action.risk === 'medium' ? '#b45309' : C.green
+                              return (
+                                <div key={action.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <p style={{ fontSize: 12, fontWeight: 600, color: C.text, margin: 0 }}>{action.label}</p>
+                                      <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4, color: riskColor, background: action.risk === 'high' ? C.redBg : action.risk === 'medium' ? '#fffbeb' : C.greenBg, border: `0.5px solid ${riskColor}20` }}>
+                                        {action.risk}
+                                      </span>
+                                    </div>
+                                    <p style={{ fontSize: 11, color: C.muted, margin: '1px 0 0' }}>{action.desc}</p>
+                                  </div>
+                                  <Toggle checked={enabled} onChange={() => !isSuperAdmin && setActionPerms(prev => ({ ...prev, [actionKey]: !prev[actionKey] }))} disabled={isSuperAdmin}/>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
