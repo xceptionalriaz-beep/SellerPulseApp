@@ -108,7 +108,7 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
   const [tabPerms, setTabPerms] = useState<Record<string, AccessLevel>>(() => {
     const initial: Record<string, AccessLevel> = {}
     ALL_TABS.forEach(t => {
-      const existing = member.tab_permissions?.[t.key]
+      const existing = (member.tab_permissions as any)?.[t.key]
       const access = existing?.access
       initial[t.key] = (access === 'view' || access === 'full') ? access : 'none'
     })
@@ -118,13 +118,12 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
   const [expandedTab, setExpandedTab]   = useState<string | null>(null)
   const [actionPerms, setActionPerms]   = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
-    // Initialize from existing tab_permissions if available
     ALL_TABS.forEach(tab => {
       const actions = TAB_ACTIONS[tab.key] ?? []
       actions.forEach(action => {
         const key = `${tab.key}__${action.key}`
         const existing = (member.tab_permissions as any)?.[key]
-        initial[key] = existing !== undefined ? existing : false
+        initial[key] = existing === true
       })
     })
     return initial
@@ -156,26 +155,31 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
         sectionPerms[t.key] = tabPerms[t.key] !== 'none'
       })
 
-      // Build tab_permissions combining access level + individual actions
+      // Build tab_permissions — store access level + action permissions
       const tabPermsFull: Record<string, any> = {}
       ALL_TABS.forEach(t => {
+        // Store access level
         tabPermsFull[t.key] = { access: tabPerms[t.key] }
-        // Add individual action permissions
-        const actions = TAB_ACTIONS[t.key] ?? []
-        actions.forEach(action => {
-          const key = `${t.key}__${action.key}`
-          tabPermsFull[key] = actionPerms[key] ?? false
-        })
+      })
+      // Store individual action permissions flat
+      Object.keys(actionPerms).forEach(key => {
+        tabPermsFull[key] = actionPerms[key]
       })
 
-      const { error } = await (supabase.from('profiles') as any)
-        .update({
+      const res = await fetch('/api/admin/update-team-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id:                  member.id,
           is_super_admin:      isSuperAdmin,
           role_id:             selectedRoleId === 'none' ? null : selectedRoleId,
           section_permissions: sectionPerms,
           tab_permissions:     tabPermsFull,
-        })
-        .eq('id', member.id)
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to save')
+      const error = null
 
       if (error) throw error
       showToast('Permissions saved!')
@@ -314,6 +318,8 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
                                   const updates: Record<string, boolean> = {}
                                   actions.forEach(a => { updates[`${tab.key}__${a.key}`] = true })
                                   setActionPerms(prev => ({ ...prev, ...updates }))
+                                  // Auto-set tab to full access
+                                  setTabPerms(prev => ({ ...prev, [tab.key]: 'full' }))
                                 }} style={{ fontSize: 10, fontWeight: 700, color: C.green, background: C.greenBg, border: `0.5px solid ${C.greenBorder}`, borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}>
                                   All on
                                 </button>
@@ -321,6 +327,8 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
                                   const updates: Record<string, boolean> = {}
                                   actions.forEach(a => { updates[`${tab.key}__${a.key}`] = false })
                                   setActionPerms(prev => ({ ...prev, ...updates }))
+                                  // Auto-set tab to no access
+                                  setTabPerms(prev => ({ ...prev, [tab.key]: 'none' }))
                                 }} style={{ fontSize: 10, fontWeight: 700, color: C.muted, background: C.surface, border: `0.5px solid ${C.border}`, borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}>
                                   All off
                                 </button>
@@ -341,7 +349,15 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
                                     </div>
                                     <p style={{ fontSize: 11, color: C.muted, margin: '1px 0 0' }}>{action.desc}</p>
                                   </div>
-                                  <Toggle checked={enabled} onChange={() => !isSuperAdmin && setActionPerms(prev => ({ ...prev, [actionKey]: !prev[actionKey] }))} disabled={isSuperAdmin}/>
+                                  <Toggle checked={enabled} onChange={() => {
+                                    if (isSuperAdmin) return
+                                    const newVal = !actionPerms[actionKey]
+                                    setActionPerms(prev => ({ ...prev, [actionKey]: newVal }))
+                                    // Auto-set tab to full access if any action is turned on
+                                    if (newVal && tabPerms[tab.key] === 'none') {
+                                      setTabPerms(prev => ({ ...prev, [tab.key]: 'full' }))
+                                    }
+                                  }} disabled={isSuperAdmin}/>
                                 </div>
                               )
                             })}
