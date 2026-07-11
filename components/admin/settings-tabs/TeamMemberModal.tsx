@@ -51,6 +51,10 @@ const ALL_TABS = [
   { key: 'infra_monitor',   label: 'Infrastructure Monitor', section: 'Analytics' },
   { key: 'competitor_xray', label: 'Competitor X-Ray',   section: 'Analytics'  },
   { key: 'chrome_extension',label: 'Chrome Extension',   section: 'Analytics'  },
+  { key: 'settings_brand',       label: 'Brand',         section: 'Admin Settings' },
+  { key: 'settings_general',     label: 'General',       section: 'Admin Settings' },
+  { key: 'settings_security',    label: 'Security',      section: 'Admin Settings' },
+  { key: 'settings_integrations',label: 'Integrations',  section: 'Admin Settings' },
 ]
 
 type AccessLevel = 'none' | 'view' | 'full'
