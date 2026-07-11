@@ -913,6 +913,8 @@ function AdminPage() {
       setAuthorized((data as any)?.role === 'admin')
       setIsSuperAdmin((data as any)?.is_super_admin ?? false)
       setTabPermissions((data as any)?.tab_permissions ?? {})
+      console.log('TAB PERMISSIONS:', (data as any)?.tab_permissions)
+      console.log('IS SUPER ADMIN:', (data as any)?.is_super_admin)
       setChecking(false)
     }
     check()
@@ -1145,6 +1147,7 @@ function AdminPage() {
   })
 
   if (checking) return null
+  const permsLoaded = isSuperAdmin || Object.keys(tabPermissions).length > 0
 
   if (!authorized) return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
@@ -1549,7 +1552,7 @@ function AdminPage() {
     return (
       <div className="flex-1 min-w-0 p-6 rounded-2xl border"
            style={{ backgroundColor: '#fff', borderColor: C.border }}>
-        {getSettingsContent()}
+        {permsLoaded ? getSettingsContent() : null}
       </div>
     )
   }
