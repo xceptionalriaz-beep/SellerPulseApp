@@ -2695,15 +2695,10 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
 
   return (
     <div className="flex flex-col gap-5 pb-20">
-      {viewOnly && (
-        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:10 }}>
-          <span style={{ fontSize:12, fontWeight:600, color:'#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes.</span>
-        </div>
-      )}
       {/* View only banner */}
       {viewOnly && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes. Contact your admin to request access.</span>
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:10 }}>
+          <span style={{ fontSize:12, fontWeight:600, color:'#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes. Contact your admin to request access.</span>
         </div>
       )}
       {/* Skeleton loader — shows table shape while data loads */}
