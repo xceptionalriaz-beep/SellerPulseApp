@@ -909,11 +909,14 @@ function AdminPage() {
       const role = cookie ? cookie.split('=')[1].trim() : null
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setChecking(false); return }
-      const { data } = await supabase.from('profiles').select('role, is_super_admin, tab_permissions').eq('id', user.id).single()
+      const { data } = await supabase.from('profiles').select('role, is_super_admin, tab_permissions, section_permissions').eq('id', user.id).single()
       setAuthorized((data as any)?.role === 'admin')
       setIsSuperAdmin((data as any)?.is_super_admin ?? false)
-      setTabPermissions((data as any)?.tab_permissions ?? {})
-      console.log('TAB PERMISSIONS:', (data as any)?.tab_permissions)
+      // Fetch via API to bypass RLS
+      const res = await fetch('/api/admin/get-my-permissions')
+      const permsData = await res.json()
+      setTabPermissions(permsData?.tab_permissions ?? (data as any)?.tab_permissions ?? {})
+      console.log('TAB PERMISSIONS:', permsData?.tab_permissions ?? (data as any)?.tab_permissions)
       console.log('IS SUPER ADMIN:', (data as any)?.is_super_admin)
       setChecking(false)
     }
