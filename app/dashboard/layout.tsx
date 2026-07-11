@@ -488,9 +488,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 if (!sectionPerms || (profile as any)?.is_super_admin) return true
                 // If item has no permKey → always show
                 if (!(item as any).permKey) return true
-                // Check section permission — default to true if key not explicitly set
-                const perm = sectionPerms[(item as any).permKey]
-                return perm !== false
+                // Only show if explicitly set to true
+                return sectionPerms[(item as any).permKey] === true
               }).map((item) => {
                 const isActive = (item as any).isAnalytics
                   ? activeAnalyticsTab === (item as any).key
