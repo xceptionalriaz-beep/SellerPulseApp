@@ -280,6 +280,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [showSupport,    setShowSupport]    = useState(false)
   const [showSettings,      setShowSettings]      = useState(false)
   const [showAffiliateMenu,  setShowAffiliateMenu]  = useState(false)
+  const [sectionPerms, setSectionPerms] = useState<Record<string, boolean> | null>(null)
   const [showMoreAnalytics,  setShowMoreAnalytics]  = useState(false)
   const [activeAdminTab,     setActiveAdminTab]     = useState<string | null>(searchParams.get('settings'))
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<string | null>(searchParams.get('analytics'))
@@ -324,6 +325,16 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         setCachedIsAdmin((data as any).role === 'admin')
         if ((data as any).role === 'admin' && !window.location.pathname.startsWith('/dashboard/admin')) {
           router.push('/dashboard/admin')
+        }
+        // Load section permissions if user has a role assigned
+        if ((data as any).role_id && !(data as any).is_super_admin) {
+          const { data: roleData } = await (supabase.from('admin_roles') as any)
+            .select('section_permissions')
+            .eq('id', (data as any).role_id)
+            .single()
+          if (roleData?.section_permissions && Object.keys(roleData.section_permissions).length > 0) {
+            setSectionPerms(roleData.section_permissions)
+          }
         }
       }
       if (user && !user.email_confirmed_at) setEmailUnverified(true)
@@ -451,29 +462,36 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               {/* Admin Settings */}
               <div style={{ height:8 }} />
               {[
-                { icon: Users,         label: 'User CRM',         tab: 0                                                          },
-                { icon: BarChart2,     label: 'Revenue',          tab: 0, key: 'revenue', isAnalytics: true                       },
-                { icon: MessageCircle, label: 'Tickets',          tab: 14                                                         },
-                { icon: CreditCard,    label: 'Payments',         tab: 13                                                         },
-                { icon: DollarSign,    label: 'Promos & Codes',   tab: 3                                                          },
-                { icon: Power,         label: 'Kill Switches',    tab: 4                                                          },
-                { icon: Settings,      label: 'Plan Limits',      tab: 5                                                          },
-                { icon: FileText,      label: 'Emails',           tab: 6                                                          },
-                { icon: Zap,           label: 'Webhooks',         tab: 7                                                          },
-                { icon: Shield,        label: 'Role Builder',     tab: 1                                                          },
-                { icon: Key,           label: 'Security Logs',    tab: 2                                                          },
-                { icon: Trophy,        label: 'Gamification',     tab: 8                                                          },
-                { icon: Key,           label: 'API Vault',        tab: 9                                                          },
-                { icon: DollarSign,    label: 'Affiliate Center', tab: 3, key: 'affiliate', hasChild: true, isAnalytics: true     },
-                { icon: DollarSign,    label: 'Affiliate Vault',  tab: 10, isChild: true                                         },
-                { icon: BarChart2,     label: 'Founder Ops',      tab: 11                                                         },
-                { icon: Mail,          label: 'Marketing',        tab: 12                                                         },
-                { icon: BookOpen,      label: 'Blog',             tab: 15                                                         },
-                { icon: Wrench,        label: 'Changelog',        tab: 16                                                         },
-                { icon: Briefcase,     label: 'Careers',          tab: 17                                                         },
-                { icon: FileText,      label: 'Page Editor',      tab: 18                                                         },
-                
-              ].map((item) => {
+                { icon: Users,         label: 'User CRM',         tab: 0,  permKey: 'user_crm'        },
+                { icon: BarChart2,     label: 'Revenue',          tab: 0,  permKey: 'founder_ops',    key: 'revenue', isAnalytics: true },
+                { icon: MessageCircle, label: 'Tickets',          tab: 14, permKey: 'tickets'         },
+                { icon: CreditCard,    label: 'Payments',         tab: 13, permKey: 'payments'        },
+                { icon: DollarSign,    label: 'Promos & Codes',   tab: 3,  permKey: 'promos'          },
+                { icon: Power,         label: 'Kill Switches',    tab: 4,  permKey: 'kill_switches'   },
+                { icon: Settings,      label: 'Plan Limits',      tab: 5,  permKey: 'plan_limits'     },
+                { icon: FileText,      label: 'Emails',           tab: 6,  permKey: 'emails'          },
+                { icon: Zap,           label: 'Webhooks',         tab: 7,  permKey: 'webhooks'        },
+                { icon: Shield,        label: 'Role Builder',     tab: 1,  permKey: 'role_builder'    },
+                { icon: Key,           label: 'Security Logs',    tab: 2,  permKey: 'security_logs'   },
+                { icon: Trophy,        label: 'Gamification',     tab: 8,  permKey: 'gamification'    },
+                { icon: Key,           label: 'API Vault',        tab: 9,  permKey: 'api_vault'       },
+                { icon: DollarSign,    label: 'Affiliate Center', tab: 3,  permKey: 'affiliate_vault', key: 'affiliate', hasChild: true, isAnalytics: true },
+                { icon: DollarSign,    label: 'Affiliate Vault',  tab: 10, permKey: 'affiliate_vault', isChild: true },
+                { icon: BarChart2,     label: 'Founder Ops',      tab: 11, permKey: 'founder_ops'     },
+                { icon: Mail,          label: 'Marketing',        tab: 12, permKey: 'marketing'       },
+                { icon: BookOpen,      label: 'Blog',             tab: 15, permKey: 'blog'            },
+                { icon: Wrench,        label: 'Changelog',        tab: 16, permKey: 'changelog'       },
+                { icon: Briefcase,     label: 'Careers',          tab: 17, permKey: 'careers'         },
+                { icon: FileText,      label: 'Page Editor',      tab: 18, permKey: 'page_editor'     },
+              ].filter(item => {
+                // Super admin or no permissions set → show all
+                if (!sectionPerms || (profile as any)?.is_super_admin) return true
+                // If item has no permKey → always show
+                if (!(item as any).permKey) return true
+                // Check section permission — default to true if key not explicitly set
+                const perm = sectionPerms[(item as any).permKey]
+                return perm !== false
+              }).map((item) => {
                 const isActive = (item as any).isAnalytics
                   ? activeAnalyticsTab === (item as any).key
                   : (item as any).isChild

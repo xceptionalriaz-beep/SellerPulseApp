@@ -4,6 +4,8 @@ import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
 import Link from 'next/link'
 import JobListings from '@/components/landing/JobListings'
+import LifeAtRiazify from '@/components/landing/LifeAtRiazify'
+import TypewriterText from '@/components/ui/TypewriterText'
 import type { Metadata } from 'next'
 import {
   MapPin, TrendingUp, Users, Zap, Code, Megaphone,
@@ -65,10 +67,10 @@ const VALUES = [
 ]
 
 const FAQS = [
-  { q: 'Is Riazify fully remote?',                   a: 'Yes — we hire globally and work async-first. You can work from anywhere.' },
-  { q: 'When will new roles open?',                  a: 'We plan to begin hiring in Q3 2026. Follow us on social or submit a speculative application to be first in line.' },
-  { q: 'Can I send a speculative CV?',               a: 'Absolutely. Click Apply now on any role above — we read every application and respond to strong ones.' },
-  { q: 'What does the hiring process look like?',    a: 'For most roles: a short intro call, a small take-home task, then a final conversation with the founder.' },
+  { q: 'Is Riazify fully remote?',                a: 'Yes — we hire globally and work async-first. You can work from anywhere.' },
+  { q: 'When will new roles open?',               a: 'We plan to begin hiring in Q3 2026. Follow us on social or submit a speculative application to be first in line.' },
+  { q: 'Can I send a speculative CV?',            a: 'Absolutely. Click Apply now on any role above — we read every application and respond to strong ones.' },
+  { q: 'What does the hiring process look like?', a: 'For most roles: a short intro call, a small take-home task, then a final conversation with the founder.' },
 ]
 
 export default async function CareersPage() {
@@ -80,6 +82,9 @@ export default async function CareersPage() {
 
         {/* ── 1. HERO ── */}
         <div style={{ backgroundColor: C.dark, position: 'relative', overflow: 'hidden' }}>
+          {/* Background decorative circles */}
+          <div style={{ position: 'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius: '50%', background: 'rgba(143,255,0,0.04)', pointerEvents: 'none' }}/>
+          <div style={{ position: 'absolute', bottom: -80, left: -80, width: 300, height: 300, borderRadius: '50%', background: 'rgba(143,255,0,0.03)', pointerEvents: 'none' }}/>
           <div className="max-w-5xl mx-auto px-6 py-24 text-center" style={{ position: 'relative', zIndex: 1 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
                  style={{ backgroundColor: 'rgba(143,255,0,0.12)', border: '1px solid rgba(143,255,0,0.25)' }}>
@@ -87,8 +92,13 @@ export default async function CareersPage() {
               <span className="text-[11px] font-black tracking-wider" style={{ color: C.lime }}>WE'RE HIRING SOON</span>
             </div>
             <h1 className="text-[44px] md:text-[60px] font-black leading-tight mb-6" style={{ color: '#fff' }}>
-              Join the team building<br/>
-              <span style={{ color: C.lime }}>the future of eBay selling</span>
+              <TypewriterText
+                text="Join the team building the future of eBay selling"
+                speed={40}
+                delay={300}
+                cursor={true}
+                style={{ color: '#fff' }}
+              />
             </h1>
             <p className="text-[16px] leading-relaxed max-w-2xl mx-auto mb-10" style={{ color: 'rgba(255,255,255,0.55)' }}>
               We're a small team with a big mission. If you're passionate about helping eBay sellers win — and you want to own what you build — we want to hear from you.
@@ -128,8 +138,8 @@ export default async function CareersPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {WHY.map((item, i) => (
-                <div key={i} className="flex gap-5 p-6 rounded-2xl border"
-                     style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                <div key={i} className="flex gap-5 p-6 rounded-2xl border careers-fade-card"
+                     style={{ backgroundColor: C.bg, borderColor: C.border, animationDelay: `${i * 0.1}s` }}>
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                        style={{ backgroundColor: C.dark }}>
                     <item.icon size={20} style={{ color: C.lime }}/>
@@ -177,8 +187,8 @@ export default async function CareersPage() {
             <p className="text-[14px] mb-10" style={{ color: C.muted }}>These are the kinds of roles we'll be hiring for as Riazify grows.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {FUTURE_ROLES.map((item, i) => (
-                <div key={i} className="flex gap-4 p-6 rounded-2xl border"
-                     style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                <div key={i} className="flex gap-4 p-6 rounded-2xl border careers-fade-card"
+                     style={{ backgroundColor: C.bg, borderColor: C.border, animationDelay: `${i * 0.1}s` }}>
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                        style={{ backgroundColor: C.dark }}>
                     <item.icon size={20} style={{ color: C.lime }}/>
@@ -210,8 +220,8 @@ export default async function CareersPage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {VALUES.map((item, i) => (
-                <div key={i} className="flex gap-5 p-6 rounded-2xl"
-                     style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div key={i} className="flex gap-5 p-6 rounded-2xl careers-fade-card"
+                     style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', animationDelay: `${i * 0.1}s` }}>
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                        style={{ backgroundColor: 'rgba(143,255,0,0.15)' }}>
                     <item.icon size={20} style={{ color: C.lime }}/>
@@ -227,27 +237,7 @@ export default async function CareersPage() {
         </div>
 
         {/* ── 7. LIFE AT RIAZIFY ── */}
-        <div style={{ backgroundColor: C.bg }}>
-          <div className="max-w-5xl mx-auto px-6 py-20">
-            <p className="text-[11px] font-black tracking-wider mb-2" style={{ color: C.muted }}>LIFE AT RIAZIFY</p>
-            <h2 className="text-[32px] font-black mb-10" style={{ color: C.dark }}>What working here looks like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { val: '100%', label: 'Remote',          desc: 'Work from anywhere'    },
-                { val: 'Day 1', label: 'Equity',         desc: 'From your first day'   },
-                { val: 'Async', label: 'Communication',  desc: 'No pointless meetings' },
-                { val: '∞',    label: 'Learning budget', desc: 'Courses, books, tools' },
-              ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center text-center p-6 rounded-2xl border"
-                     style={{ backgroundColor: '#fff', borderColor: C.border }}>
-                  <p className="text-[28px] font-black mb-1" style={{ color: C.limeDeep }}>{item.val}</p>
-                  <p className="text-[13px] font-black mb-1" style={{ color: C.dark }}>{item.label}</p>
-                  <p className="text-[11px]" style={{ color: C.muted }}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <LifeAtRiazify />
 
         {/* ── 8. FAQ ── */}
         <div style={{ backgroundColor: '#fff' }}>
@@ -304,6 +294,33 @@ export default async function CareersPage() {
 
         <Footer />
       </div>
+
+      {/* Global scroll animation styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .careers-fade-card {
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .careers-fade-card.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      `}}/>
+      <script dangerouslySetInnerHTML={{ __html: `
+        (function() {
+          var cards = document.querySelectorAll('.careers-fade-card');
+          var obs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+              if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                obs.unobserve(e.target);
+              }
+            });
+          }, { threshold: 0.1 });
+          cards.forEach(function(el) { obs.observe(el); });
+        })();
+      `}}/>
     </div>
   )
 }
