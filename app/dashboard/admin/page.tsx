@@ -31,6 +31,7 @@ import BlogTab             from '@/components/admin/settings-tabs/BlogTab'
 import ChangelogTab        from '@/components/admin/settings-tabs/ChangelogTab'
 import PageEditorTab from '@/components/admin/settings-tabs/PageEditorTab'
 import CareersTab    from '@/components/admin/settings-tabs/CareersTab'
+import PermissionWrapper from '@/components/admin/PermissionWrapper'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
 
@@ -1175,24 +1176,24 @@ function AdminPage() {
           return tabPermissions[key] !== false
         }}
       />
-      case 1:  return <RoleBuilderTab />
-      case 2:  return <SecurityLogsTab     isInvestorMode={investorMode} />
-      case 3:  return <PromoManagerTab />
-      case 4:  return <KillSwitchesTab />
-      case 5:  return <PlanLimitsTab />
-      case 6:  return <EmailAutomationsTab />
-      case 7:  return <WebhooksTab />
-      case 8:  return <GamificationTab />
-      case 9:  return <ApiVaultPage />
-      case 10: return <AffiliateVaultTab />
-      case 11: return <FounderOpsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
-      case 12: return <MarketingTab initialUsers={marketingUsers} />
-      case 13: return <PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} />
-      case 14: return <TicketManagerTab onOpenCount={setOpenTickets} />
-      case 15: return <BlogTab />
-      case 16: return <ChangelogTab />
-      case 17: return <CareersTab />
-      case 18: return <PageEditorTab />
+      case 1:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.role_builder?.access === 'view'} tabLabel="Role Builder"><RoleBuilderTab /></PermissionWrapper>
+      case 2:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.security_logs?.access === 'view'} tabLabel="Security Logs"><SecurityLogsTab isInvestorMode={investorMode} /></PermissionWrapper>
+      case 3:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.promos?.access === 'view'} tabLabel="Promos"><PromoManagerTab /></PermissionWrapper>
+      case 4:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.kill_switches?.access === 'view'} tabLabel="Kill Switches"><KillSwitchesTab /></PermissionWrapper>
+      case 5:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.plan_limits?.access === 'view'} tabLabel="Plan Limits"><PlanLimitsTab /></PermissionWrapper>
+      case 6:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.emails?.access === 'view'} tabLabel="Emails"><EmailAutomationsTab /></PermissionWrapper>
+      case 7:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.webhooks?.access === 'view'} tabLabel="Webhooks"><WebhooksTab /></PermissionWrapper>
+      case 8:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.gamification?.access === 'view'} tabLabel="Gamification"><GamificationTab /></PermissionWrapper>
+      case 9:  return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.api_vault?.access === 'view'} tabLabel="API Vault"><ApiVaultPage /></PermissionWrapper>
+      case 10: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.affiliate_vault?.access === 'view'} tabLabel="Affiliate Vault"><AffiliateVaultTab /></PermissionWrapper>
+      case 11: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.founder_ops?.access === 'view'} tabLabel="Founder Ops"><FounderOpsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} /></PermissionWrapper>
+      case 12: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.marketing?.access === 'view'} tabLabel="Marketing"><MarketingTab initialUsers={marketingUsers} /></PermissionWrapper>
+      case 13: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.payments?.access === 'view'} tabLabel="Payments"><PaymentsTab onNavigate={(tab) => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(tab) }} /></PermissionWrapper>
+      case 14: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.tickets?.access === 'view'} tabLabel="Tickets"><TicketManagerTab onOpenCount={setOpenTickets} /></PermissionWrapper>
+      case 15: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.blog?.access === 'view'} tabLabel="Blog"><BlogTab /></PermissionWrapper>
+      case 16: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.changelog?.access === 'view'} tabLabel="Changelog"><ChangelogTab /></PermissionWrapper>
+      case 17: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.careers?.access === 'view'} tabLabel="Careers"><CareersTab /></PermissionWrapper>
+      case 18: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.page_editor?.access === 'view'} tabLabel="Page Editor"><PageEditorTab /></PermissionWrapper>
       default: return null
     }
   }
