@@ -10,8 +10,6 @@ interface Props {
 }
 
 export default function PermissionWrapper({ children, viewOnly, tabLabel }: Props) {
-  console.log('PermissionWrapper:', tabLabel, 'viewOnly:', viewOnly)
-  
   if (!viewOnly) return <>{children}</>
 
   return (
