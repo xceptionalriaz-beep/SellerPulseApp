@@ -35,17 +35,18 @@ export default function PermissionWrapper({ children, viewOnly, tabLabel }: Prop
       {/* Content */}
       {children}
 
-      {/* Full overlay blocking all clicks */}
+      {/* Full overlay blocking all clicks but allowing scroll */}
       <div style={{
-        position: 'fixed',
-        top:      0,
-        left:     0,
-        right:    0,
-        bottom:   0,
-        zIndex:   9998,
-        cursor:   'not-allowed',
-        background: 'transparent',
-      }}/>
+        position:      'fixed',
+        top:           0,
+        left:          0,
+        right:         0,
+        bottom:        0,
+        zIndex:        9998,
+        cursor:        'default',
+        background:    'transparent',
+        userSelect:    'text',
+      }} onClick={e => e.preventDefault()}/>
     </div>
   )
 }
