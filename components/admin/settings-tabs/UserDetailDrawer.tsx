@@ -470,10 +470,11 @@ function EmailModal({ user, supabase, showToast, onClose }: {
   )
 }
 
-export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
+export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly = false }: {
   user:any; onClose:()=>void
   onUpdated:(id:string,f:string,v:any)=>void
   showToast:(msg:string,type:'success'|'error'|'info')=>void
+  viewOnly?: boolean
 }) {
   const supabase = createClient()
 
@@ -709,8 +710,12 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
 
         {/* ── Scrollable content area ── */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-
-
+          {/* View only banner */}
+          {viewOnly && (
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:8, marginBottom:16 }}>
+              <span style={{ fontSize:11, fontWeight:600, color:'#1d4ed8' }}>👁 View only — you can browse but cannot make changes.</span>
+            </div>
+          )}
           {/* ── ACTIONS TAB ── */}
           {activeTab === 'actions' && (<>
           {/* User Tags */}
@@ -1879,9 +1884,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast }: {
             style={{ borderColor:'rgba(185,28,28,0.3)', color:C.red, backgroundColor:'rgba(185,28,28,0.03)' }}>
             <Trash2 size={14} /> Delete User Account
           </button>
-
           </>)}
-
         </div>
       </div>
 

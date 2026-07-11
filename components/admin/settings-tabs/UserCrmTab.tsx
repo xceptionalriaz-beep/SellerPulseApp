@@ -2823,6 +2823,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
           onClose={() => setDrawerUser(null)}
           onUpdated={onUpdated}
           showToast={showToast}
+          viewOnly={viewOnly}
         />
       )}
 
