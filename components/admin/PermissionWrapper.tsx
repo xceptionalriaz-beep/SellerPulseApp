@@ -11,6 +11,7 @@ interface Props {
 }
 
 export default function PermissionWrapper({ children, viewOnly, tabLabel }: Props) {
+  console.log('PermissionWrapper:', tabLabel, 'viewOnly:', viewOnly)
   return (
     <div style={{ position: 'relative' }}>
       {viewOnly && (
