@@ -1175,8 +1175,8 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
 
 // -- Export Dropdown --------------------------------------------
 function ExportDropdown({ onExportPage, users }: {
-  onExportPage: () => void
-  users:        any[]
+  onExportPage?: () => void
+  users:         any[]
 }) {
   const supabase    = createClient()
   const [open,      setOpen]      = useState(false)
@@ -1224,7 +1224,7 @@ function ExportDropdown({ onExportPage, users }: {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute top-full left-0 mt-1.5 z-50 rounded-2xl border overflow-hidden shadow-xl min-w-[200px]"
                style={{ backgroundColor:'#fff', borderColor:C.border }}>
-            <button onClick={() => { onExportPage(); setOpen(false) }}
+            <button onClick={() => { onExportPage?.(); setOpen(false) }}
               className="w-full flex flex-col px-4 py-3 text-left hover:bg-gray-50 border-b transition-colors"
               style={{ borderColor:C.border }}>
               <p className="text-[13px] font-bold" style={{ color:C.dark }}>Export Current Page</p>
@@ -1247,7 +1247,7 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
   filter:string; onFilter:(f:string)=>void
   segment:string|null; onSegment:(s:string|null)=>void
   activeTag:string|null; onTag:(t:string|null)=>void
-  onAddUser:()=>void; onRefresh:()=>void; onExport:()=>void
+  onAddUser?:()=>void; onRefresh:()=>void; onExport?:()=>void
   advFilters: AdvancedFilters; onAdvFilters:(f:AdvancedFilters)=>void
   pageSize:number; onPageSize:(n:number)=>void
   showing:number; total:number
@@ -1342,12 +1342,14 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
             style={{ color: refreshing ? C.limeDeep : C.muted }} />
         </button>
         {/* Export dropdown */}
-        <ExportDropdown onExportPage={onExport} users={users} />
-        <button onClick={onAddUser}
-          className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
-          style={{ backgroundColor:C.dark, color:C.lime }}>
-          <Plus size={14} /> Add New User
-        </button>
+        {onExport && <ExportDropdown onExportPage={onExport} users={users} />}
+        {onAddUser && (
+          <button onClick={onAddUser}
+            className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
+            style={{ backgroundColor:C.dark, color:C.lime }}>
+            <Plus size={14} /> Add New User
+          </button>
+        )}
       </div>
 
       {/* Active advanced filter chips */}
@@ -2482,10 +2484,12 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
 // --------------------------------------------------------------
 // MAIN — UserCrmTab
 // --------------------------------------------------------------
-export default function UserCrmTab({ isInvestorMode = false, isMobile = false, onGoToMarketing }: {
+export default function UserCrmTab({ isInvestorMode = false, isMobile = false, onGoToMarketing, viewOnly = false, canDo = () => true }: {
   isInvestorMode?:  boolean
   isMobile?:        boolean
   onGoToMarketing?: (users: any[]) => void
+  viewOnly?:        boolean
+  canDo?:           (action: string) => boolean
 }) {
   const supabase = createClient()
 
@@ -2691,6 +2695,17 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
 
   return (
     <div className="flex flex-col gap-5 pb-20">
+      {viewOnly && (
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:10 }}>
+          <span style={{ fontSize:12, fontWeight:600, color:'#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes.</span>
+        </div>
+      )}
+      {/* View only banner */}
+      {viewOnly && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes. Contact your admin to request access.</span>
+        </div>
+      )}
       {/* Skeleton loader — shows table shape while data loads */}
       {loading && (
         <div className="flex flex-col gap-5">
@@ -2743,13 +2758,13 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
         onSegment={setSegment}
         activeTag={activeTag}
         onTag={setActiveTag}
-        onAddUser={() => setShowAdd(true)}
+        onAddUser={canDo('create_user') ? () => setShowAdd(true) : undefined}
         onRefresh={loadUsers}
         advFilters={advFilters}
         onAdvFilters={setAdvFilters}
         pageSize={pageSize}
         onPageSize={(n) => { setPageSize(n); setPage(0) }}
-        onExport={() => {
+        onExport={canDo('export_csv') ? () => {
           let filtered = [...users]
           if (searchQuery) {
             const q = searchQuery.toLowerCase()
@@ -2774,7 +2789,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
           }
           exportToCSV(filtered, segment ? (SEGMENT_CFG[segment]?.label ?? segment) : filter)
           showToast(`Exported ${filtered.length} users to CSV`, 'success')
-        }}
+        } : undefined}
         showing={users.length}
         total={total}
       />

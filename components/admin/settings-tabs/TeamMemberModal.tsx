@@ -108,18 +108,24 @@ function AccessBadge({ level, onClick, disabled }: { level: AccessLevel; onClick
 
 export default function TeamMemberModal({ member, roles, onClose, onSaved }: Props) {
   const supabase = createClient()
-  const [saving, setSaving]           = useState(false)
+  const [saving, setSaving]             = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(member.is_super_admin)
   const [selectedRoleId, setSelectedRoleId] = useState(member.role_id ?? 'none')
-  const [tabPerms, setTabPerms] = useState<Record<string, AccessLevel>>(() => {
+
+  // Initialize tab perms — merge role perms + user overrides
+  const initTabPerms = () => {
     const initial: Record<string, AccessLevel> = {}
+    ALL_TABS.forEach(t => { initial[t.key] = 'none' })
+    // Apply user's personal tab_permissions
     ALL_TABS.forEach(t => {
       const existing = (member.tab_permissions as any)?.[t.key]
       const access = existing?.access
-      initial[t.key] = (access === 'view' || access === 'full') ? access : 'none'
+      if (access === 'view' || access === 'full') initial[t.key] = access
     })
     return initial
-  })
+  }
+
+  const [tabPerms, setTabPerms]         = useState<Record<string, AccessLevel>>(initTabPerms)
   const [toast, setToast]               = useState<string | null>(null)
   const [expandedTab, setExpandedTab]   = useState<string | null>(null)
   const [actionPerms, setActionPerms]   = useState<Record<string, boolean>>(() => {
@@ -134,6 +140,39 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
     })
     return initial
   })
+
+  // Load role permissions and merge with user overrides
+  useEffect(() => {
+    async function loadRolePerms() {
+      if (!member.role_id) return
+      const { data } = await (supabase.from('admin_roles') as any)
+        .select('permissions, section_permissions')
+        .eq('id', member.role_id)
+        .single()
+      if (!data) return
+
+      // Merge: role perms as base, user overrides on top
+      setTabPerms(prev => {
+        const merged: Record<string, AccessLevel> = { ...prev }
+        // Apply role section_permissions as base
+        const roleSection = data.section_permissions ?? {}
+        ALL_TABS.forEach(t => {
+          if (merged[t.key] === 'none' && roleSection[t.key] === true) {
+            merged[t.key] = 'full' // role gives full by default
+          }
+        })
+        // Apply role tab permissions (view/full)
+        const rolePerms = data.permissions ?? {}
+        ALL_TABS.forEach(t => {
+          if (merged[t.key] === 'none' && rolePerms[t.key]) {
+            merged[t.key] = rolePerms[t.key] as AccessLevel
+          }
+        })
+        return merged
+      })
+    }
+    loadRolePerms()
+  }, [member.role_id])
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
@@ -251,7 +290,26 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
                   { val: 'none', label: 'No role', enabled: true },
                   ...roles.map(r => ({ val: r.id, label: r.role_name, enabled: true }))
                 ]}
-                onChanged={v => setSelectedRoleId(v)}
+                onChanged={async (v) => {
+                  setSelectedRoleId(v)
+                  if (v === 'none') return
+                  // Load new role permissions and merge
+                  const { data } = await (supabase.from('admin_roles') as any)
+                    .select('permissions, section_permissions')
+                    .eq('id', v)
+                    .single()
+                  if (!data) return
+                  setTabPerms(prev => {
+                    const merged: Record<string, AccessLevel> = { ...prev }
+                    const roleSection = data.section_permissions ?? {}
+                    const rolePerms   = data.permissions ?? {}
+                    ALL_TABS.forEach(t => {
+                      if (roleSection[t.key] === true && merged[t.key] === 'none') merged[t.key] = 'full'
+                      if (rolePerms[t.key] && merged[t.key] === 'none') merged[t.key] = rolePerms[t.key] as AccessLevel
+                    })
+                    return merged
+                  })
+                }}
                 width="full"
                 maxItems={6}
               />

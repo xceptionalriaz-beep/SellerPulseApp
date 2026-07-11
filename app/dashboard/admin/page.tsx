@@ -847,6 +847,8 @@ function AdminPage() {
   })
   const [showKillSwitch,    setShowKillSwitch]    = useState(false)
   const [mobileDrawerOpen,  setMobileDrawerOpen]  = useState(false)
+  const [tabPermissions,    setTabPermissions]    = useState<Record<string, any>>({})
+  const [isSuperAdmin,      setIsSuperAdmin]      = useState(false)
   const [marketingUsers,    setMarketingUsers]    = useState<any[]>([])
   const [openTickets,       setOpenTickets]       = useState(0)
   const [isMobile,          setIsMobile]          = useState(
@@ -904,15 +906,12 @@ function AdminPage() {
     async function check() {
       const cookie = document.cookie.split(';').find(c => c.trim().startsWith('riazify_role='))
       const role = cookie ? cookie.split('=')[1].trim() : null
-      if (role === 'admin') {
-        setAuthorized(true)
-        setChecking(false)
-        return
-      }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setChecking(false); return }
-      const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      const { data } = await supabase.from('profiles').select('role, is_super_admin, tab_permissions').eq('id', user.id).single()
       setAuthorized((data as any)?.role === 'admin')
+      setIsSuperAdmin((data as any)?.is_super_admin ?? false)
+      setTabPermissions((data as any)?.tab_permissions ?? {})
       setChecking(false)
     }
     check()
@@ -1166,6 +1165,14 @@ function AdminPage() {
         onGoToMarketing={(users) => {
           setMarketingUsers(users)
           setActiveSettingsTab(12)
+        }}
+        viewOnly={!isSuperAdmin && tabPermissions?.user_crm?.access === 'view'}
+        canDo={(action: string) => {
+          if (isSuperAdmin) return true
+          if (!tabPermissions?.user_crm) return true
+          if (tabPermissions?.user_crm?.access === 'view') return false
+          const key = `user_crm__${action}`
+          return tabPermissions[key] !== false
         }}
       />
       case 1:  return <RoleBuilderTab />

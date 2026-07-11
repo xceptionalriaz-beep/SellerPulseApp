@@ -328,9 +328,25 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         }
         // Load section permissions if user has a role assigned
         if (!(data as any).is_super_admin) {
-          const perms = (data as any).section_permissions
-          if (perms && Object.keys(perms).length > 0) {
-            setSectionPerms(perms)
+          // Start with role permissions as base
+          let mergedPerms: Record<string, boolean> = {}
+          if ((data as any).role_id) {
+            const { data: roleData } = await (supabase.from('admin_roles') as any)
+              .select('section_permissions')
+              .eq('id', (data as any).role_id)
+              .single()
+            if (roleData?.section_permissions) {
+              mergedPerms = { ...roleData.section_permissions }
+            }
+          }
+          // Apply user overrides on top of role permissions
+          const userPerms = (data as any).section_permissions
+          if (userPerms && Object.keys(userPerms).length > 0) {
+            mergedPerms = { ...mergedPerms, ...userPerms }
+          }
+          // Only set if any permissions exist
+          if (Object.keys(mergedPerms).length > 0) {
+            setSectionPerms(mergedPerms)
           }
         }
       }
