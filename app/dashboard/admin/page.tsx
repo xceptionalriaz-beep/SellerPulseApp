@@ -1152,6 +1152,28 @@ function AdminPage() {
   if (checking) return null
   const permsLoaded = isSuperAdmin || Object.keys(tabPermissions).length > 0
 
+  // Block direct URL access to restricted tabs
+  useEffect(() => {
+    if (!permsLoaded) return
+    if (isSuperAdmin) return
+    const perm = tabPermissions[Object.keys(tabPermissions)[0]]
+    const tabKeyMap: Record<number, string> = {
+      0:'user_crm', 1:'role_builder', 2:'security_logs', 3:'promos',
+      4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
+      8:'gamification', 9:'api_vault', 10:'affiliate_vault', 11:'founder_ops',
+      12:'marketing', 13:'payments', 14:'tickets', 15:'blog',
+      16:'changelog', 17:'careers', 18:'page_editor'
+    }
+    const key = tabKeyMap[activeSettingsTab]
+    if (key && tabPermissions[key]?.access === 'none') {
+      // Redirect to first allowed tab
+      const firstAllowed = Object.entries(tabKeyMap).find(([, k]) =>
+        tabPermissions[k]?.access !== 'none'
+      )
+      if (firstAllowed) setActiveSettingsTab(Number(firstAllowed[0]))
+    }
+  }, [permsLoaded, activeSettingsTab])
+
   if (!authorized) return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
       <div className="w-14 h-14 rounded-2xl flex items-center justify-center"

@@ -26,6 +26,14 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error
 
+    // Log permission change
+    await supabase.from('admin_notifications').insert({
+      title:   'Permissions updated',
+      message: `Permissions updated for user ${id}`,
+      type:    'info',
+      is_read: false,
+    }).single()
+
     return NextResponse.json({ success: true })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })

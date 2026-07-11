@@ -326,28 +326,30 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         if ((data as any).role === 'admin' && !window.location.pathname.startsWith('/dashboard/admin')) {
           router.push('/dashboard/admin')
         }
-        // Load section permissions if user has a role assigned
+        // Load section permissions via API (bypasses RLS, always fresh)
         if (!(data as any).is_super_admin) {
-          // Start with role permissions as base
-          let mergedPerms: Record<string, boolean> = {}
-          if ((data as any).role_id) {
-            const { data: roleData } = await (supabase.from('admin_roles') as any)
-              .select('section_permissions')
-              .eq('id', (data as any).role_id)
-              .single()
-            if (roleData?.section_permissions) {
-              mergedPerms = { ...roleData.section_permissions }
+          try {
+            const res = await fetch('/api/admin/get-my-permissions')
+            const permsData = await res.json()
+            const userPerms = permsData?.section_permissions ?? {}
+            const roleId = (data as any).role_id
+            let mergedPerms: Record<string, boolean> = {}
+            if (roleId) {
+              const { data: roleData } = await (supabase.from('admin_roles') as any)
+                .select('section_permissions')
+                .eq('id', roleId)
+                .single()
+              if (roleData?.section_permissions) {
+                mergedPerms = { ...roleData.section_permissions }
+              }
             }
-          }
-          // Apply user overrides on top of role permissions
-          const userPerms = (data as any).section_permissions
-          if (userPerms && Object.keys(userPerms).length > 0) {
-            mergedPerms = { ...mergedPerms, ...userPerms }
-          }
-          // Only set if any permissions exist
-          if (Object.keys(mergedPerms).length > 0) {
-            setSectionPerms(mergedPerms)
-          }
+            if (Object.keys(userPerms).length > 0) {
+              mergedPerms = { ...mergedPerms, ...userPerms }
+            }
+            if (Object.keys(mergedPerms).length > 0) {
+              setSectionPerms(mergedPerms)
+            }
+          } catch {}
         }
       }
       if (user && !user.email_confirmed_at) setEmailUnverified(true)
@@ -365,6 +367,21 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       } catch { /* non-critical ? show all tools if check fails */ }
     }
     loadProfile()
+  }, [])
+
+  // -- Reload permissions every 5 minutes ------------------------
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/admin/get-my-permissions')
+        const permsData = await res.json()
+        if (!(permsData?.is_super_admin)) {
+          const userPerms = permsData?.section_permissions ?? {}
+          if (Object.keys(userPerms).length > 0) setSectionPerms(userPerms)
+        }
+      } catch {}
+    }, 300000) // 5 minutes
+    return () => clearInterval(interval)
   }, [])
 
   // -- Reload kill switches every 60 seconds ----------------------
