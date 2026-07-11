@@ -165,3 +165,13 @@ export const TAB_ACTIONS: Record<string, TabAction[]> = {
   ],
 
 }
+
+// Analytics Hub tabs
+export const ANALYTICS_TABS = [
+  { key: 'api_fleet',        label: 'API Fleet'              },
+  { key: 'feature_roadmap',  label: 'Feature Roadmap'        },
+  { key: 'vero_center',      label: 'VeRO Command Center'    },
+  { key: 'infra_monitor',    label: 'Infrastructure Monitor' },
+  { key: 'competitor_xray',  label: 'Competitor X-Ray'       },
+  { key: 'chrome_extension', label: 'Chrome Extension'       },
+]

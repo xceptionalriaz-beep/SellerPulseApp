@@ -524,13 +524,16 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
               {/* Analytics Hub */}
               {[
-                { icon: Zap,        label: 'API Fleet',              tab: 1, key: 'api'        },
-                { icon: Trophy,     label: 'Feature Roadmap',        tab: 4, key: 'roadmap'    },
-                { icon: Shield,     label: 'VeRO Command Center',    tab: 2, key: 'vero'       },
-                { icon: BarChart2,  label: 'Infrastructure Monitor', tab: 5, key: 'infra'      },
-                { icon: Search,     label: 'Competitor X-Ray',       tab: 6, key: 'competitor' },
-                { icon: Package,    label: 'Chrome Extension',       tab: 7, key: 'chrome'     },
-              ].map((item) => {
+                { icon: Zap,        label: 'API Fleet',              tab: 1, key: 'api',        permKey: 'api_fleet'        },
+                { icon: Trophy,     label: 'Feature Roadmap',        tab: 4, key: 'roadmap',    permKey: 'feature_roadmap'  },
+                { icon: Shield,     label: 'VeRO Command Center',    tab: 2, key: 'vero',       permKey: 'vero_center'      },
+                { icon: BarChart2,  label: 'Infrastructure Monitor', tab: 5, key: 'infra',      permKey: 'infra_monitor'    },
+                { icon: Search,     label: 'Competitor X-Ray',       tab: 6, key: 'competitor', permKey: 'competitor_xray'  },
+                { icon: Package,    label: 'Chrome Extension',       tab: 7, key: 'chrome',     permKey: 'chrome_extension' },
+              ].filter(item => {
+                if (!sectionPerms || (profile as any)?.is_super_admin) return true
+                return sectionPerms[(item as any).permKey] === true
+              }).map((item) => {
                 const isActive = activeAnalyticsTab === item.key
                 if ((item as any).isMoreChild && !showMoreAnalytics) return null
                 if ((item as any).isMoreBtn) return (

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { X, Check, RefreshCw, Shield, ChevronRight, ChevronDown } from 'lucide-react'
 import ProDropdown from '@/components/ui/ProDropdown'
-import { TAB_ACTIONS } from '@/components/admin/settings-tabs/tabActions'
+import { TAB_ACTIONS, ANALYTICS_TABS } from '@/components/admin/settings-tabs/tabActions'
 
 const C = {
   lime:        '#8fff00',
@@ -44,7 +44,13 @@ const ALL_TABS = [
   { key: 'blog',            label: 'Blog',               section: 'Content'  },
   { key: 'changelog',       label: 'Changelog',          section: 'Content'  },
   { key: 'careers',         label: 'Careers',            section: 'Content'  },
-  { key: 'page_editor',     label: 'Page Editor',        section: 'Content'  },
+  { key: 'page_editor',     label: 'Page Editor',        section: 'Content'    },
+  { key: 'api_fleet',       label: 'API Fleet',          section: 'Analytics'  },
+  { key: 'feature_roadmap', label: 'Feature Roadmap',    section: 'Analytics'  },
+  { key: 'vero_center',     label: 'VeRO Command Center',section: 'Analytics'  },
+  { key: 'infra_monitor',   label: 'Infrastructure Monitor', section: 'Analytics' },
+  { key: 'competitor_xray', label: 'Competitor X-Ray',   section: 'Analytics'  },
+  { key: 'chrome_extension',label: 'Chrome Extension',   section: 'Analytics'  },
 ]
 
 type AccessLevel = 'none' | 'view' | 'full'
