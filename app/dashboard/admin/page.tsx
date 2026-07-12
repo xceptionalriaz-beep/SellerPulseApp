@@ -1609,22 +1609,8 @@ function AdminPage() {
 
   // -- Settings Layout ----------------------------------------
   function SettingsLayout() {
-    const tabKeyMap: Record<number, string> = {
-      0:'user_crm', 1:'role_builder', 2:'security_logs', 3:'promos',
-      4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
-      8:'gamification', 9:'api_vault', 10:'affiliate_vault', 11:'founder_ops',
-      12:'marketing', 13:'payments', 14:'tickets', 15:'blog',
-      16:'changelog', 17:'careers', 18:'page_editor',
-      19:'api_fleet', 20:'feature_roadmap', 21:'vero_center', 22:'infra_monitor', 23:'competitor_xray', 24:'chrome_extension'
-    }
-    const key = tabKeyMap[activeSettingsTab]
-    const isLockedTab = !isSuperAdmin && key && tabPermissions[key]?.access === 'none'
-    if (isLockedTab) {
-      return <div className="flex-1 min-w-0">{permsLoaded ? getSettingsContent() : null}</div>
-    }
     return (
-      <div className="flex-1 min-w-0 p-6 rounded-2xl border"
-           style={{ backgroundColor: '#fff', borderColor: C.border }}>
+      <div className="flex-1 min-w-0">
         {permsLoaded ? getSettingsContent() : null}
       </div>
     )
