@@ -14,24 +14,26 @@ export default function PermissionWrapper({ children, viewOnly, tabLabel }: Prop
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
-      {/* View only banner */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 8, 
-        padding: '10px 20px', 
-        background: '#eff6ff', 
-        borderBottom: '1px solid #bfdbfe',
-        position: 'sticky',
-        top: 0,
-        zIndex: 9999,
-      }}>
-        <Eye size={15} style={{ color: '#1d4ed8', flexShrink: 0 }}/>
-        <p style={{ fontSize: 13, fontWeight: 600, color: '#1d4ed8', margin: 0 }}>
-          View only{tabLabel ? ` — ${tabLabel}` : ''} — you can browse but cannot make any changes. Contact your admin to request full access.
-        </p>
+      {/* View only pill — floats top-right, doesn't push content down */}
+      <div title="You can browse but cannot make any changes. Contact your admin to request full access."
+        style={{
+          position:        'absolute',
+          top:             16,
+          right:           16,
+          zIndex:          9999,
+          display:         'flex',
+          alignItems:      'center',
+          gap:             6,
+          padding:         '4px 10px',
+          borderRadius:    100,
+          background:      '#F1F5F9',
+          border:          '0.5px solid #E2E8F0',
+          cursor:          'default',
+        }}>
+        <Eye size={13} style={{ color: '#64748B', flexShrink: 0 }}/>
+        <span style={{ fontSize: 12, fontWeight: 600, color: '#64748B' }}>View only</span>
       </div>
-
+      
       {/* Content */}
       {children}
 
