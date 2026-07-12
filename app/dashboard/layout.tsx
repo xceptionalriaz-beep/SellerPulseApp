@@ -351,7 +351,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               setSectionPerms(mergedPerms)
             }
             // Load sidebar mode
-            setSidebarMode((permsData?.sidebar_mode ?? 'hide') as 'hide' | 'ghost')
+              setSidebarMode(((data as any)?.sidebar_mode ?? 'hide') as 'hide' | 'ghost')
           } catch {}
         }
       }
