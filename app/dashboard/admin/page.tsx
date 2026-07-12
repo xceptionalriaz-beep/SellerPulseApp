@@ -1169,7 +1169,8 @@ function AdminPage() {
       4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
       8:'gamification', 9:'api_vault', 10:'affiliate_vault', 11:'founder_ops',
       12:'marketing', 13:'payments', 14:'tickets', 15:'blog',
-      16:'changelog', 17:'careers', 18:'page_editor'
+      16:'changelog', 17:'careers', 18:'page_editor',
+      19:'api_fleet', 20:'feature_roadmap', 21:'vero_center', 22:'infra_monitor', 23:'competitor_xray', 24:'chrome_extension'
     }
     const key = tabKeyMap[activeSettingsTab]
     if (key && tabPermissions[key]?.access === 'none') {
