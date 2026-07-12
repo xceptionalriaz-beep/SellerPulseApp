@@ -516,6 +516,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: Wrench,        label: 'Changelog',        tab: 16, permKey: 'changelog'       },
                 { icon: Briefcase,     label: 'Careers',          tab: 17, permKey: 'careers'         },
                 { icon: FileText,      label: 'Page Editor',      tab: 18, permKey: 'page_editor'     },
+                { icon: Zap,           label: 'API Fleet',        tab: 19, permKey: 'api_fleet'        },
+                { icon: Trophy,        label: 'Feature Roadmap',  tab: 20, permKey: 'feature_roadmap'  },
+                { icon: Shield,        label: 'VeRO Command Center', tab: 21, permKey: 'vero_center'   },
+                { icon: BarChart2,     label: 'Infrastructure Monitor', tab: 22, permKey: 'infra_monitor' },
+                { icon: Search,        label: 'Competitor X-Ray', tab: 23, permKey: 'competitor_xray'  },
+                { icon: Package,       label: 'Chrome Extension', tab: 24, permKey: 'chrome_extension' },
+
               ].filter(item => {
                 // Super admin or no permissions set → show all
                 if (!sectionPerms || (profile as any)?.is_super_admin) return true
@@ -566,50 +573,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                   </button>
                 )
               })}
-
-              {/* Analytics Hub */}
-              {[
-                { icon: Zap,        label: 'API Fleet',              tab: 1, key: 'api',        permKey: 'api_fleet'        },
-                { icon: Trophy,     label: 'Feature Roadmap',        tab: 4, key: 'roadmap',    permKey: 'feature_roadmap'  },
-                { icon: Shield,     label: 'VeRO Command Center',    tab: 2, key: 'vero',       permKey: 'vero_center'      },
-                { icon: BarChart2,  label: 'Infrastructure Monitor', tab: 5, key: 'infra',      permKey: 'infra_monitor'    },
-                { icon: Search,     label: 'Competitor X-Ray',       tab: 6, key: 'competitor', permKey: 'competitor_xray'  },
-                { icon: Package,    label: 'Chrome Extension',       tab: 7, key: 'chrome',     permKey: 'chrome_extension' },
-              ].filter(item => {
-                  if (!sectionPerms || (profile as any)?.is_super_admin) return true
-                  if (sidebarMode === 'ghost') return true
-                  return sectionPerms[(item as any).permKey] === true
-                }).map((item) => {
-                const isActive = activeAnalyticsTab === item.key
-                  const isLocked = sidebarMode === 'ghost' && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] !== true
-                  if ((item as any).isMoreChild && !showMoreAnalytics) return null
-                if ((item as any).isMoreBtn) return (
-                  <button key={item.key}
-                    onClick={() => setShowMoreAnalytics(v => !v)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-white/10 w-full"
-                    style={{ color:'rgba(255,255,255,0.4)' }}>
-                    <ChevronDown size={15} style={{ transform: showMoreAnalytics ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }} />
-                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500, flex:1 }}>More Analytics</span>
-                  </button>
-                )
-                return (
-                  <button key={item.key}
-                      onClick={() => {
-                        setActiveAnalyticsTab(item.key)
-                        setActiveAdminTab(null)
-                        router.push(`/dashboard/admin?analytics=${item.key}`, { scroll: false })
-                        window.dispatchEvent(new CustomEvent('admin-analytics-tab', { detail: item.tab }))
-                      }}
-                      className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left"
-                      style={{ backgroundColor: isActive ? 'rgba(143,255,0,0.1)' : 'transparent', border: isActive ? '1px solid rgba(143,255,0,0.2)' : '1px solid transparent' }}>
-                      <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', flexShrink:0, transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}/>
-                        <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}>{item.label}</span>
-                        {isLocked && <Lock size={10} style={{ color:'rgba(255,255,255,0.3)', flexShrink:0 }}/>}
-                        {isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
-                    </button>
-                )
-              })}
-            </div>
+              </div>
 
             {/* Settings + Logout */}
             <div className="px-2 pb-6" style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:12 }}>

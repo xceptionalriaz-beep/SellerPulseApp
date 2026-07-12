@@ -34,6 +34,12 @@ import CareersTab    from '@/components/admin/settings-tabs/CareersTab'
 import PermissionWrapper from '@/components/admin/PermissionWrapper'
 import PaymentsTab        from '@/components/admin/settings-tabs/PaymentsTab'
 import TicketManagerTab   from '@/components/admin/settings-tabs/TicketManagerTab'
+import GlobalApiFleetTab        from '@/components/admin/tabs/GlobalApiFleetTab'
+import VeroCommandCenterTab     from '@/components/admin/tabs/VeroCommandCenterTab'
+import FeatureRoadmapTab        from '@/components/admin/tabs/FeatureRoadmapTab'
+import InfrastructureMonitorTab from '@/components/admin/tabs/InfrastructureMonitorTab'
+import CompetitorXRayTab        from '@/components/admin/tabs/CompetitorXRayTab'
+import ChromeExtensionTab       from '@/components/admin/tabs/ChromeExtensionTab'
 
 // -- Design tokens ----------------------------------------------
 const C = {
@@ -1243,6 +1249,12 @@ function AdminPage() {
       case 16: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.changelog?.access === 'view'} tabLabel="Changelog"><ChangelogTab /></PermissionWrapper>
       case 17: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.careers?.access === 'view'} tabLabel="Careers"><CareersTab /></PermissionWrapper>
       case 18: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.page_editor?.access === 'view'} tabLabel="Page Editor"><PageEditorTab /></PermissionWrapper>
+      case 19: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.api_fleet?.access === 'view'} tabLabel="API Fleet"><GlobalApiFleetTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
+      case 20: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.feature_roadmap?.access === 'view'} tabLabel="Feature Roadmap"><FeatureRoadmapTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
+      case 21: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.vero_center?.access === 'view'} tabLabel="VeRO Command Center"><VeroCommandCenterTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
+      case 22: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.infra_monitor?.access === 'view'} tabLabel="Infrastructure Monitor"><InfrastructureMonitorTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
+      case 23: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.competitor_xray?.access === 'view'} tabLabel="Competitor X-Ray"><CompetitorXRayTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
+      case 24: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.chrome_extension?.access === 'view'} tabLabel="Chrome Extension"><ChromeExtensionTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
       default: return null
     }
   }

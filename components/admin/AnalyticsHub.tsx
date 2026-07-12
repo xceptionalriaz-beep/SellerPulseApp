@@ -3,18 +3,11 @@
 
 import { useState, useEffect } from 'react'
 import {
-  BarChart2, Globe, Shield, Handshake, Map,
-  Server, Eye, Chrome, ArrowLeft,
+  BarChart2, Handshake, ArrowLeft,
 } from 'lucide-react'
 
 import RevenueAnalyticsTab      from './tabs/RevenueAnalyticsTab'
-import GlobalApiFleetTab        from './tabs/GlobalApiFleetTab'
-import VeroCommandCenterTab     from './tabs/VeroCommandCenterTab'
 import AffiliateCenterTab       from './tabs/AffiliateCenterTab'
-import FeatureRoadmapTab        from './tabs/FeatureRoadmapTab'
-import InfrastructureMonitorTab from './tabs/InfrastructureMonitorTab'
-import CompetitorXRayTab        from './tabs/CompetitorXRayTab'
-import ChromeExtensionTab       from './tabs/ChromeExtensionTab'
 
 const C = {
   dark:       '#0F172A',
@@ -35,14 +28,8 @@ interface TabItem {
 }
 
 const TABS: TabItem[] = [
-  { title: 'Revenue Analytics',      description: 'MRR, subscriptions & financial overview',  icon: BarChart2 },
-  { title: 'Global API Fleet',       description: 'eBay API usage, limits & health',           icon: Globe,    hasAlert: true, alertText: 'New brands added'   },
-  { title: 'VeRO Command Center',    description: 'Brand protection & VeRO violations',        icon: Shield,   hasAlert: true, alertText: 'New brands added'   },
-  { title: 'Affiliate Center',       description: 'Partner performance & commissions',         icon: Handshake },
-  { title: 'Feature Roadmap',        description: 'Planned features & release timeline',       icon: Map       },
-  { title: 'Infrastructure Monitor', description: 'Server health, uptime & monitoring',        icon: Server,   hasAlert: true, alertText: 'Service degraded'  },
-  { title: 'Competitor X-Ray',       description: 'Competitor tracking & market analysis',     icon: Eye,      hasAlert: true, alertText: 'New data available' },
-  { title: 'Chrome Extension',       description: 'Extension analytics & install stats',       icon: Chrome    },
+  { title: 'Revenue Analytics', description: 'MRR, subscriptions & financial overview', icon: BarChart2 },
+  { title: 'Affiliate Center',  description: 'Partner performance & commissions',        icon: Handshake },
 ]
 
 interface AnalyticsHubProps {
@@ -79,14 +66,8 @@ export default function AnalyticsHub({ isInvestorMode, isMobile, onBack, initial
   function getTabContent() {
     const props = { isInvestorMode, isMobile, startChartAnimation }
     switch (activeTab) {
-      case 0: return <RevenueAnalyticsTab      {...props} isDesktop={!isMobile} />
-      case 1: return <GlobalApiFleetTab        {...props} />
-      case 2: return <VeroCommandCenterTab     {...props} />
-      case 3: return <AffiliateCenterTab       {...props} />
-      case 4: return <FeatureRoadmapTab        {...props} />
-      case 5: return <InfrastructureMonitorTab {...props} />
-      case 6: return <CompetitorXRayTab        {...props} />
-      case 7: return <ChromeExtensionTab       {...props} />
+      case 0: return <RevenueAnalyticsTab {...props} isDesktop={!isMobile} />
+      case 1: return <AffiliateCenterTab  {...props} />
       default: return null
     }
   }
