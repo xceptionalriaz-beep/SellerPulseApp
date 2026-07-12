@@ -261,7 +261,7 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
   const inProgress = tickets.filter(t => t.status === 'in_progress').length
 
   return (
-    <div className="flex flex-col gap-6 p-6" style={{ backgroundColor: C.bg, minHeight: '100vh' }}>
+    <div className="flex flex-col gap-6 p-6">
 
       {/* Toast */}
       {toast && (

@@ -499,12 +499,12 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {can('view_switches') && <button onClick={() => handleReport(report, false)}
+                  {can('approve_report') && <button onClick={() => handleReport(report, false)}
                     className="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80"
                     style={{ backgroundColor: '#FEF2F2' }}>
                     <XCircle size={16} style={{ color: '#f87171' }} />
                   </button>}
-                  {can('view_switches') && <button onClick={() => handleReport(report, true)}
+                  {can('approve_report') && <button onClick={() => handleReport(report, true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white"
                     style={{ backgroundColor: C.dark }}>
                     <CheckCircle size={13} /> Approve & Ban
@@ -550,7 +550,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
             className={isMobile ? 'w-full' : 'flex-[2]'}
           />
           <RiskDropdown value={selectedRisk} onChange={setSelectedRisk} />
-          {can('view_switches') && <button onClick={addNewBrand} disabled={isAdding || !brandName.trim()}
+          {can('add_brand') && <button onClick={addNewBrand} disabled={isAdding || !brandName.trim()}
             className={`h-11 flex items-center justify-center gap-2 rounded-xl text-[13px] font-bold transition-all ${isMobile ? 'w-full' : 'px-5'}`}
             style={{
               backgroundColor: C.dark,
@@ -599,14 +599,17 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
         {/* Drag & drop + Google Sheets */}
         <div className={`flex gap-4 ${isMobile ? 'flex-col' : ''}`}>
           <div className={isMobile ? 'w-full' : 'flex-[2]'}
-               onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-               onClick={() => !isSyncing && fileRef.current?.click()}
+               onDragOver={can('import_csv') ? onDragOver : undefined}
+               onDragLeave={can('import_csv') ? onDragLeave : undefined}
+               onDrop={can('import_csv') ? onDrop : undefined}
+               onClick={() => can('import_csv') && !isSyncing && fileRef.current?.click()}
                style={{
                  padding: '24px 0', textAlign: 'center',
                  backgroundColor: isDragging ? 'rgba(143,255,0,0.08)' : C.bg,
                  borderRadius: 12,
                  border: `1.5px dashed ${isDragging ? C.lime : '#CBD5E1'}`,
-                 cursor: isSyncing ? 'not-allowed' : 'pointer',
+                 cursor: can('import_csv') ? (isSyncing ? 'not-allowed' : 'pointer') : 'not-allowed',
+                 opacity: can('import_csv') ? 1 : 0.5,
                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                }}>
             {isSyncing
@@ -624,10 +627,11 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
 
           {/* Fix 2 â€” Google Sheets with proxy info */}
           <div className={isMobile ? 'w-full' : 'flex-1'}
-               onClick={() => !isSyncing && setShowGSheet(true)}
+               onClick={() => can('sync_sheet') && !isSyncing && setShowGSheet(true)}
                style={{
-                 padding: '24px 0', borderRadius: 12, cursor: 'pointer',
+                 padding: '24px 0', borderRadius: 12, cursor: can('sync_sheet') ? 'pointer' : 'not-allowed',
                  backgroundColor: C.dark,
+                 opacity: can('sync_sheet') ? 1 : 0.5,
                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                  border: `1px solid rgba(143,255,0,0.2)`,
                }}>
@@ -729,7 +733,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
                 </span>
                 {b.evidence_url && <Link size={11} style={{ color: C.hint }} />}
                 {/* Fix 1 â€” confirm before delete */}
-                {can('view_switches') && <button
+                {can('remove_brand') && <button
                   onClick={() => setConfirmBrand(b.brand_name)}
                   disabled={isRemoving}
                   className="ml-1 w-5 h-5 flex items-center justify-center rounded-full hover:opacity-80 transition-all"
