@@ -1151,11 +1151,13 @@ function AdminPage() {
 
   const permsLoaded = isSuperAdmin || Object.keys(tabPermissions).length > 0
 
-  // Block direct URL access to restricted tabs
+  // Block direct URL access to restricted tabs — only on initial load, not on every click
+  const didInitialRedirect = useRef(false)
   useEffect(() => {
     if (!permsLoaded) return
     if (isSuperAdmin) return
-    const perm = tabPermissions[Object.keys(tabPermissions)[0]]
+    if (didInitialRedirect.current) return
+    didInitialRedirect.current = true
     const tabKeyMap: Record<number, string> = {
       0:'user_crm', 1:'role_builder', 2:'security_logs', 3:'promos',
       4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
@@ -1165,13 +1167,13 @@ function AdminPage() {
     }
     const key = tabKeyMap[activeSettingsTab]
     if (key && tabPermissions[key]?.access === 'none') {
-      // Redirect to first allowed tab
+      // Redirect to first allowed tab — only for the initial deep-link/page-load case
       const firstAllowed = Object.entries(tabKeyMap).find(([, k]) =>
         tabPermissions[k]?.access !== 'none'
       )
       if (firstAllowed) setActiveSettingsTab(Number(firstAllowed[0]))
     }
-  }, [permsLoaded, activeSettingsTab])
+  }, [permsLoaded])
 
   if (checking) return null
   if (!authorized) return (
@@ -1187,6 +1189,25 @@ function AdminPage() {
 
   // -- Settings content router --------------------------------
   function getSettingsContent() {
+    const tabKeyMap: Record<number, string> = {
+      0:'user_crm', 1:'role_builder', 2:'security_logs', 3:'promos',
+      4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
+      8:'gamification', 9:'api_vault', 10:'affiliate_vault', 11:'founder_ops',
+      12:'marketing', 13:'payments', 14:'tickets', 15:'blog',
+      16:'changelog', 17:'careers', 18:'page_editor'
+    }
+    const key = tabKeyMap[activeSettingsTab]
+    if (!isSuperAdmin && key && tabPermissions[key]?.access === 'none') {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.dark }}>
+            <Shield size={26} style={{ color: C.lime }} />
+          </div>
+          <p className="text-[16px] font-bold" style={{ color: C.text }}>You don't have access to this tab</p>
+          <p className="text-[13px]" style={{ color: C.muted }}>Contact your admin if you think this is a mistake.</p>
+        </div>
+      )
+    }
     switch (activeSettingsTab) {
       case 0:  return <UserCrmTab
         isInvestorMode={investorMode}
