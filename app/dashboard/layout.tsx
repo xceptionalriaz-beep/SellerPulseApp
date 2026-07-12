@@ -576,11 +576,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: Search,     label: 'Competitor X-Ray',       tab: 6, key: 'competitor', permKey: 'competitor_xray'  },
                 { icon: Package,    label: 'Chrome Extension',       tab: 7, key: 'chrome',     permKey: 'chrome_extension' },
               ].filter(item => {
-                if (!sectionPerms || (profile as any)?.is_super_admin) return true
-                return sectionPerms[(item as any).permKey] === true
-              }).map((item) => {
+                  if (!sectionPerms || (profile as any)?.is_super_admin) return true
+                  if (sidebarMode === 'ghost') return true
+                  return sectionPerms[(item as any).permKey] === true
+                }).map((item) => {
                 const isActive = activeAnalyticsTab === item.key
-                if ((item as any).isMoreChild && !showMoreAnalytics) return null
+                  const isLocked = sidebarMode === 'ghost' && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] !== true
+                  if ((item as any).isMoreChild && !showMoreAnalytics) return null
                 if ((item as any).isMoreBtn) return (
                   <button key={item.key}
                     onClick={() => setShowMoreAnalytics(v => !v)}
@@ -600,9 +602,10 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                       }}
                       className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left"
                       style={{ backgroundColor: isActive ? 'rgba(143,255,0,0.1)' : 'transparent', border: isActive ? '1px solid rgba(143,255,0,0.2)' : '1px solid transparent' }}>
-                      <item.icon size={15} style={{ color: isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', flexShrink:0, transition:'color 0.15s' }} className="group-hover:!text-lime"/>
-                      <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', transition:'color 0.15s' }} className="group-hover:!text-lime">{item.label}</span>
-                      {isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
+                      <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', flexShrink:0, transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}/>
+                        <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,0.7)', transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}>{item.label}</span>
+                        {isLocked && <Lock size={10} style={{ color:'rgba(255,255,255,0.3)', flexShrink:0 }}/>}
+                        {isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
                     </button>
                 )
               })}
