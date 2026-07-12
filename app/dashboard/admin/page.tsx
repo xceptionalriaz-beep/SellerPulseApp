@@ -1197,14 +1197,15 @@ function AdminPage() {
   // -- Settings content router --------------------------------
   function getSettingsContent() {
     const tabKeyMap: Record<number, string> = {
-      0:'user_crm', 1:'role_builder', 2:'security_logs', 3:'promos',
-      4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
-      8:'gamification', 9:'api_vault', 10:'affiliate_vault', 11:'founder_ops',
-      12:'marketing', 13:'payments', 14:'tickets', 15:'blog',
-      16:'changelog', 17:'careers', 18:'page_editor'
-    }
-    const key = tabKeyMap[activeSettingsTab]
-    if (!isSuperAdmin && key && tabPermissions[key]?.access === 'none') {
+        0:'user_crm', 1:'role_builder', 2:'security_logs', 3:'promos',
+        4:'kill_switches', 5:'plan_limits', 6:'emails', 7:'webhooks',
+        8:'gamification', 9:'api_vault', 10:'affiliate_vault', 11:'founder_ops',
+        12:'marketing', 13:'payments', 14:'tickets', 15:'blog',
+        16:'changelog', 17:'careers', 18:'page_editor',
+        19:'api_fleet', 20:'feature_roadmap', 21:'vero_center', 22:'infra_monitor', 23:'competitor_xray', 24:'chrome_extension'
+      }
+      const key = tabKeyMap[activeSettingsTab]
+      if (!isSuperAdmin && key && tabPermissions[key]?.access === 'none') {
       return (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.dark }}>
