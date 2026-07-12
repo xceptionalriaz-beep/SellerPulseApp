@@ -5,6 +5,7 @@ import RichEditor from '@/components/admin/RichEditor'
 // Full rich-text blog editor — Advanced SEO Edition
 // Features: Rich toolbar, FAQ blocks, Callouts, CTA banners, Auto ToC, Live preview
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -145,6 +146,7 @@ function generateToC(html: string): string {
 
 // ── Main Component ─────────────────────────────────────────────
 export default function BlogTab() {
+  const { can } = useTabPermissions('blog')
   const supabase  = createClient()
   const editorRef = useRef<HTMLDivElement>(null)
 
@@ -1200,24 +1202,24 @@ export default function BlogTab() {
         {selectedPosts.length > 0 && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border" style={{ borderColor: C.border, backgroundColor: C.surface }}>
             <span className="text-[11px] font-bold" style={{ color: C.muted }}>{selectedPosts.length} selected</span>
-            <button onClick={() => bulkAction('live')} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>Set Live</button>
-            <button onClick={() => bulkAction('draft')} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: C.bg, color: C.muted }}>Set Draft</button>
-            <button onClick={() => bulkAction('delete')} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: 'rgba(185,28,28,0.1)', color: C.red }}>Delete</button>
+            {can('publish_post') && <button onClick={() => bulkAction('live')} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>Set Live</button>}
+            {can('publish_post') && <button onClick={() => bulkAction('draft')} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: C.bg, color: C.muted }}>Set Draft</button>}
+            {can('delete_post') && <button onClick={() => bulkAction('delete')} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ backgroundColor: 'rgba(185,28,28,0.1)', color: C.red }}>Delete</button>}
           </div>
         )}
 
         {/* Action buttons */}
         <div className="flex items-center gap-2 ml-auto">
-          <button onClick={() => { openNew(); setShowTemplates(true) }}
+          {can('create_post') && <button onClick={() => { openNew(); setShowTemplates(true) }}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold border"
             style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
             <Layers size={13}/> From Template
-          </button>
-          <button onClick={openNew}
+          </button>}
+          {can('create_post') && <button onClick={openNew}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14}/> New Post
-          </button>
+          </button>}
         </div>
       </div>
 

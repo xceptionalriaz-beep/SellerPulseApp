@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { X, Check, RefreshCw, Shield, ChevronRight, ChevronDown } from 'lucide-react'
 import ProDropdown from '@/components/ui/ProDropdown'
-import { TAB_ACTIONS, ANALYTICS_TABS } from '@/components/admin/settings-tabs/tabActions'
+import { TAB_ACTIONS, ANALYTICS_TABS, ANALYTICS_TAB_ACTIONS, SETTINGS_TAB_ACTIONS } from '@/components/admin/settings-tabs/tabActions'
 
 const C = {
   lime:        '#8fff00',
@@ -73,6 +73,7 @@ interface TeamMember {
   avatar_url:     string | null
   tab_permissions?: Record<string, { access: string }>
   section_permissions?: Record<string, boolean>
+  sidebar_mode?: 'hide' | 'ghost'
 }
 
 interface Role {
@@ -83,6 +84,7 @@ interface Role {
 interface Props {
   member:  TeamMember
   roles:   Role[]
+  members: TeamMember[]
   onClose: () => void
   onSaved: () => void
 }
@@ -110,11 +112,14 @@ function AccessBadge({ level, onClick, disabled }: { level: AccessLevel; onClick
   )
 }
 
-export default function TeamMemberModal({ member, roles, onClose, onSaved }: Props) {
+export default function TeamMemberModal({ member, roles, members, onClose, onSaved }: Props) {
   const supabase = createClient()
   const [saving, setSaving]             = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(member.is_super_admin)
+  const [sidebarMode, setSidebarMode]   = useState<'hide' | 'ghost'>(member.sidebar_mode ?? 'hide')
   const [selectedRoleId, setSelectedRoleId] = useState(member.role_id ?? 'none')
+  const [showDiff, setShowDiff]         = useState(false)
+  const [initialPerms, setInitialPerms] = useState<Record<string, AccessLevel>>({})
 
   // Initialize tab perms — merge role perms + user overrides
   const initTabPerms = () => {
@@ -130,12 +135,21 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
   }
 
   const [tabPerms, setTabPerms]         = useState<Record<string, AccessLevel>>(initTabPerms)
+  const [initialPermsSet, setInitialPermsSet] = useState(false)
+  // Track initial perms for diff view
+  useEffect(() => {
+    if (!initialPermsSet) {
+      setInitialPerms({ ...initTabPerms() })
+      setInitialPermsSet(true)
+    }
+  }, [])
   const [toast, setToast]               = useState<string | null>(null)
   const [expandedTab, setExpandedTab]   = useState<string | null>(null)
+  const [showCopyFrom, setShowCopyFrom] = useState(false)
   const [actionPerms, setActionPerms]   = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
     ALL_TABS.forEach(tab => {
-      const actions = TAB_ACTIONS[tab.key] ?? []
+      const actions = TAB_ACTIONS[tab.key] ?? ANALYTICS_TAB_ACTIONS[tab.key] ?? SETTINGS_TAB_ACTIONS[tab.key] ?? []
       actions.forEach(action => {
         const key = `${tab.key}__${action.key}`
         const existing = (member.tab_permissions as any)?.[key]
@@ -219,15 +233,19 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id:                  member.id,
-          is_super_admin:      isSuperAdmin,
-          role_id:             selectedRoleId === 'none' ? null : selectedRoleId,
-          section_permissions: sectionPerms,
-          tab_permissions:     tabPermsFull,
+          id:                     member.id,
+          is_super_admin:         isSuperAdmin,
+          role_id:                selectedRoleId === 'none' ? null : selectedRoleId,
+          section_permissions:    sectionPerms,
+          tab_permissions:        tabPermsFull,
+          permissions_updated_at: new Date().toISOString(),
+          sidebar_mode:           sidebarMode,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to save')
+      setInitialPerms({ ...tabPerms })
+      setShowDiff(false)
       const error = null
 
       if (error) throw error
@@ -269,6 +287,80 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
             <button onClick={() => setAll('full')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.greenBorder}`, background: C.greenBg, color: C.green, cursor: 'pointer' }}>All full</button>
             <button onClick={() => setAll('view')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>All view</button>
             <button onClick={() => setAll('none')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>Clear all</button>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowCopyFrom(v => !v)} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>Copy from...</button>
+              {showCopyFrom && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 9999, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 220, overflow: 'hidden', maxHeight: 300, overflowY: 'auto' }}>
+                  {/* Copy from Role */}
+                  <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', padding: '8px 12px 4px', margin: 0 }}>From role</p>
+                  {roles.map(r => (
+                    <button key={r.id} onClick={async () => {
+                      const { data } = await (createClient().from('admin_roles') as any).select('permissions, section_permissions').eq('id', r.id).single()
+                      if (data) {
+                        const rolePerms = data.permissions ?? {}
+                        const roleSection = data.section_permissions ?? {}
+                        setTabPerms(prev => {
+                          const merged = { ...prev }
+                          ALL_TABS.forEach(t => {
+                            if (roleSection[t.key] === true) merged[t.key] = 'full'
+                            if (rolePerms[t.key]) merged[t.key] = rolePerms[t.key] as AccessLevel
+                          })
+                          return merged
+                        })
+                        showToast(`Copied from ${r.role_name}!`)
+                      }
+                      setShowCopyFrom(false)
+                    }}
+                    style={{ width: '100%', padding: '7px 12px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 12, color: C.text, display: 'flex', alignItems: 'center', gap: 8 }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.bg}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                      <div style={{ width: 20, height: 20, borderRadius: 6, background: C.limeTint, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 9, fontWeight: 900, color: C.limeDeep }}>R</span>
+                      </div>
+                      {r.role_name}
+                    </button>
+                  ))}
+                  {/* Copy from User */}
+                  {members.filter(m => m.id !== member.id && m.tab_permissions).length > 0 && (
+                    <>
+                      <div style={{ height: 1, background: C.border, margin: '4px 0' }}/>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', padding: '4px 12px', margin: 0 }}>From team member</p>
+                      {members.filter(m => m.id !== member.id && m.tab_permissions).map(m => (
+                        <button key={m.id} onClick={() => {
+                          const perms = m.tab_permissions as any
+                          if (perms) {
+                            setTabPerms(prev => {
+                              const merged = { ...prev }
+                              ALL_TABS.forEach(t => {
+                                const access = perms[t.key]?.access
+                                if (access === 'view' || access === 'full' || access === 'none') {
+                                  merged[t.key] = access as AccessLevel
+                                }
+                              })
+                              return merged
+                            })
+                            showToast(`Copied from ${m.name ?? m.email}!`)
+                          }
+                          setShowCopyFrom(false)
+                        }}
+                        style={{ width: '100%', padding: '7px 12px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', fontSize: 12, color: C.text, display: 'flex', alignItems: 'center', gap: 8 }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.bg}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <span style={{ fontSize: 9, fontWeight: 900, color: C.lime }}>{(m.name ?? m.email ?? '?')[0].toUpperCase()}</span>
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <p style={{ fontSize: 12, color: C.text, margin: 0, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{m.name ?? m.email}</p>
+                            {m.name && <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>{m.email}</p>}
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+              {showCopyFrom && <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onClick={() => setShowCopyFrom(false)}/>}
+            </div>
             <button onClick={save} disabled={saving}
                     style={{ height: 36, padding: '0 18px', borderRadius: 8, border: 'none', background: saving ? C.border : C.lime, color: saving ? C.muted : C.dark, fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
               {saving ? <><RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }}/> Saving...</> : <><Check size={13}/> Save changes</>}
@@ -331,6 +423,56 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
               <p style={{ fontSize: 11, color: C.muted, margin: 0, lineHeight: 1.5 }}>Super admins bypass all permission checks and see everything.</p>
             </div>
 
+            {/* Sidebar mode toggle */}
+            {!isSuperAdmin && (
+              <div style={{ background: C.bg, borderRadius: 12, padding: 14, border: `1px solid ${C.border}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0 }}>Ghost Mode</p>
+                  <Toggle checked={sidebarMode === 'ghost'} onChange={() => setSidebarMode(v => v === 'ghost' ? 'hide' : 'ghost')}/>
+                </div>
+                <p style={{ fontSize: 11, color: C.muted, margin: 0, lineHeight: 1.5 }}>No-access tabs show in the sidebar as locked, instead of being hidden.</p>
+              </div>
+            )}
+
+            {/* Quick Presets */}
+            {!isSuperAdmin && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>Quick presets</p>
+                {[
+                  { label: 'Support Agent', desc: 'Tickets + User CRM view', action: () => setTabPerms(prev => {
+                    const next: Record<string, AccessLevel> = {}
+                    ALL_TABS.forEach(t => { next[t.key] = 'none' })
+                    next['tickets'] = 'full'; next['user_crm'] = 'view'
+                    return next
+                  })},
+                  { label: 'Content Editor', desc: 'Blog + Changelog + Careers', action: () => setTabPerms(prev => {
+                    const next: Record<string, AccessLevel> = {}
+                    ALL_TABS.forEach(t => { next[t.key] = 'none' })
+                    next['blog'] = 'full'; next['changelog'] = 'full'; next['careers'] = 'full'; next['page_editor'] = 'view'
+                    return next
+                  })},
+                  { label: 'Analyst', desc: 'View only across all analytics', action: () => setTabPerms(prev => {
+                    const next: Record<string, AccessLevel> = {}
+                    ALL_TABS.forEach(t => { next[t.key] = t.section === 'Analytics' ? 'view' : 'none' })
+                    next['payments'] = 'view'; next['marketing'] = 'view'
+                    return next
+                  })},
+                  { label: 'Developer', desc: 'API Vault + Webhooks + Infra', action: () => setTabPerms(prev => {
+                    const next: Record<string, AccessLevel> = {}
+                    ALL_TABS.forEach(t => { next[t.key] = 'none' })
+                    next['api_vault'] = 'full'; next['webhooks'] = 'full'; next['infra_monitor'] = 'view'; next['api_fleet'] = 'view'
+                    return next
+                  })},
+                ].map(preset => (
+                  <button key={preset.label} onClick={() => { preset.action(); showToast(`Applied ${preset.label} preset`) }}
+                    style={{ textAlign: 'left', padding: '7px 10px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.bg, cursor: 'pointer', width: '100%' }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: C.text, margin: '0 0 1px' }}>{preset.label}</p>
+                    <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>{preset.desc}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Legend */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>Legend</p>
@@ -349,17 +491,82 @@ export default function TeamMemberModal({ member, roles, onClose, onSaved }: Pro
 
           {/* Right panel — tabs */}
           <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 16px' }}>
-              Tab Permissions — click badge to cycle: No access → View only → Full access
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>
+                Tab Permissions — click badge to cycle
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {/* Last modified */}
+                {(member as any).permissions_updated_at && (
+                  <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+                    Updated {new Date((member as any).permissions_updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </p>
+                )}
+                {/* Show diff button */}
+                {Object.keys(initialPerms).length > 0 && (
+                  <button onClick={() => setShowDiff(v => !v)}
+                    style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, border: `1px solid ${C.border}`, background: showDiff ? C.dark : C.bg, color: showDiff ? C.lime : C.muted, cursor: 'pointer' }}>
+                    {showDiff ? 'Hide changes' : 'Show changes'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Diff view */}
+            {showDiff && (
+              <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12, marginBottom: 16 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px' }}>Pending changes</p>
+                {(() => {
+                  const changes = ALL_TABS.filter(t => tabPerms[t.key] !== initialPerms[t.key])
+                  if (changes.length === 0) return <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>No changes yet</p>
+                  return changes.map(t => (
+                    <div key={t.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <p style={{ fontSize: 12, color: C.text, margin: 0, flex: 1 }}>{t.label}</p>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: C.muted }}>{initialPerms[t.key] ?? 'none'}</span>
+                      <span style={{ fontSize: 10, color: C.muted }}>→</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: tabPerms[t.key] === 'full' ? C.green : tabPerms[t.key] === 'view' ? '#1d4ed8' : C.red }}>
+                        {tabPerms[t.key] ?? 'none'}
+                      </span>
+                    </div>
+                  ))
+                })()}
+              </div>
+            )}
 
             {sections.map(section => (
               <div key={section} style={{ marginBottom: 24 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px', paddingBottom: 6, borderBottom: `1px solid ${C.border}` }}>{section}</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingBottom: 6, borderBottom: `1px solid ${C.border}` }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>{section}</p>
+                  {!isSuperAdmin && (
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button onClick={() => {
+                        setTabPerms(prev => {
+                          const next = { ...prev }
+                          ALL_TABS.filter(t => t.section === section).forEach(t => { next[t.key] = 'full' })
+                          return next
+                        })
+                      }} style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, border: `1px solid ${C.greenBorder}`, background: C.greenBg, color: C.green, cursor: 'pointer' }}>Full</button>
+                      <button onClick={() => {
+                        setTabPerms(prev => {
+                          const next = { ...prev }
+                          ALL_TABS.filter(t => t.section === section).forEach(t => { next[t.key] = 'view' })
+                          return next
+                        })
+                      }} style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>View</button>
+                      <button onClick={() => {
+                        setTabPerms(prev => {
+                          const next = { ...prev }
+                          ALL_TABS.filter(t => t.section === section).forEach(t => { next[t.key] = 'none' })
+                          return next
+                        })
+                      }} style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>None</button>
+                    </div>
+                  )}
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {ALL_TABS.filter(t => t.section === section).map(tab => {
                     const level      = isSuperAdmin ? 'full' : (tabPerms[tab.key] ?? 'none')
-                    const actions    = TAB_ACTIONS[tab.key] ?? []
+                    const actions    = TAB_ACTIONS[tab.key] ?? ANALYTICS_TAB_ACTIONS[tab.key] ?? SETTINGS_TAB_ACTIONS[tab.key] ?? []
                     const isExpanded = expandedTab === tab.key
                     return (
                       <div key={tab.key}>

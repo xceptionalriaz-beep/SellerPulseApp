@@ -2,6 +2,7 @@
 // components/admin/tabs/AffiliateCenterTab.tsx
 // Full rebuild with real Supabase data
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -817,6 +818,7 @@ function PayoutLineChart({ payouts }: { payouts: Payout[] }) {
 }
 
 export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }: Props) {
+  const { can } = useTabPermissions('affiliate_vault')
   const supabase = createClient()
 
   const [loading,        setLoading]        = useState(true)
@@ -1437,8 +1439,8 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                           style={{ border: `1.5px solid ${C.lime}`, color: C.text }}>
                           <option value="1">1mo</option><option value="2">2mo</option><option value="3">3mo</option>
                         </select>
-                        <button onClick={() => saveDiscount(aff.id)} disabled={savingDiscount}
-                          className="p-0.5 rounded" style={{ backgroundColor: C.lime, color: C.dark }}><CheckCircle size={9} /></button>
+                        {can('edit_commission') && <button onClick={() => saveDiscount(aff.id)} disabled={savingDiscount}
+                          className="p-0.5 rounded" style={{ backgroundColor: C.lime, color: C.dark }}><CheckCircle size={9} /></button>}
                         <button onClick={() => { setEditDiscount(null); setDiscountInput('') }}
                           className="p-0.5 rounded" style={{ backgroundColor: C.bg, color: C.muted }}><X size={9} /></button>
                       </div>
@@ -1466,13 +1468,13 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                   {/* Payout */}
                   <div>
                     {(() => {
-                      if (!wr && aff.payout >= 50) return (
+                      if (!wr && aff.payout >= 50) return can('view_payouts') ? (
                         <button onClick={() => setConfirmPay(aff)} disabled={isPaying}
                           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80"
                           style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.lime}50` }}>
                           {isPaying ? '...' : `$${aff.payout.toFixed(2)}`}
                         </button>
-                      )
+                      ) : null
                       if (!wr && aff.payout > 0 && aff.payout < 50) return (
                         <div><p className="text-[11px] font-bold" style={{ color: C.muted }}>${aff.payout.toFixed(2)}</p><p className="text-[9px]" style={{ color: C.muted }}>Min. $50</p></div>
                       )
@@ -1516,9 +1518,9 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                           <button onClick={() => { navigator.clipboard.writeText(`https://riazify.com?ref=${aff.code}`); setActionMenu(null) }}
                             className="w-full px-4 py-2.5 text-left text-[12px] font-bold hover:opacity-80"
                             style={{ color: C.text }}>Copy Referral Link</button>
-                          <button onClick={() => { setConfirmRemove(aff.id); setActionMenu(null) }}
+                          {can('view_affiliates') && <button onClick={() => { setConfirmRemove(aff.id); setActionMenu(null) }}
                             className="w-full px-4 py-2.5 text-left text-[12px] font-bold hover:opacity-80"
-                            style={{ color: C.red }}>Remove Affiliate</button>
+                            style={{ color: C.red }}>Remove Affiliate</button>}
                         </div>
                       </>
                     )}
@@ -1599,8 +1601,8 @@ export default function AffiliateCenterTab({ isInvestorMode = false, isMobile }:
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {isPending&&!isProcessing&&(<>
-                        <button onClick={()=>{setRejectDialog(w);setRejectReason('')}} className="px-2.5 py-1 rounded-lg text-[11px] font-bold border hover:opacity-80" style={{ borderColor:C.border,color:C.muted }}>Reject</button>
-                        <button onClick={()=>approveWithdrawal(w,w.payment_method??'paypal')} className="px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80" style={{ backgroundColor:C.dark,color:C.lime }}>Approve</button>
+                        {can('view_payouts') && <button onClick={()=>{setRejectDialog(w);setRejectReason('')}} className="px-2.5 py-1 rounded-lg text-[11px] font-bold border hover:opacity-80" style={{ borderColor:C.border,color:C.muted }}>Reject</button>}
+                        {can('view_payouts') && <button onClick={()=>approveWithdrawal(w,w.payment_method??'paypal')} className="px-2.5 py-1 rounded-lg text-[11px] font-bold hover:opacity-80" style={{ backgroundColor:C.dark,color:C.lime }}>Approve</button>}
                       </>)}
                       {isProcessing&&<div className="flex items-center gap-1.5"><div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.lime }}/><span className="text-[11px]" style={{ color:C.muted }}>Processing...</span></div>}
                       {(isPaid||isCancelled)&&<span className="text-[11px]" style={{ color:C.muted }}>—</span>}

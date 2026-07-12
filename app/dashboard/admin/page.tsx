@@ -1149,7 +1149,6 @@ function AdminPage() {
     return { ...t, sessions: data.sessions, users: data.users }
   })
 
-  if (checking) return null
   const permsLoaded = isSuperAdmin || Object.keys(tabPermissions).length > 0
 
   // Block direct URL access to restricted tabs
@@ -1174,6 +1173,7 @@ function AdminPage() {
     }
   }, [permsLoaded, activeSettingsTab])
 
+  if (checking) return null
   if (!authorized) return (
     <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
       <div className="w-14 h-14 rounded-2xl flex items-center justify-center"

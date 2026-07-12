@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     )
 
     const body = await req.json()
-    const { id, is_super_admin, role_id, section_permissions, tab_permissions } = body
+    const { id, is_super_admin, role_id, section_permissions, tab_permissions, permissions_updated_at, sidebar_mode } = body
 
     if (!id) return NextResponse.json({ error: 'Missing user id' }, { status: 400 })
 
@@ -18,9 +18,11 @@ export async function POST(req: NextRequest) {
       .from('profiles')
       .update({
         is_super_admin,
-        role_id:             role_id ?? null,
-        section_permissions: section_permissions ?? {},
-        tab_permissions:     tab_permissions ?? {},
+        role_id:                role_id ?? null,
+        section_permissions:    section_permissions ?? {},
+        tab_permissions:        tab_permissions ?? {},
+        permissions_updated_at: permissions_updated_at ?? new Date().toISOString(),
+        sidebar_mode:           sidebar_mode ?? 'hide',
       })
       .eq('id', id)
 

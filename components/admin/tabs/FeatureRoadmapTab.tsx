@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/tabs/FeatureRoadmapTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -96,6 +97,7 @@ function StatusBadge({ status }: { status: string }) {
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function FeatureRoadmapTab(_props: Props) {
+  const { can } = useTabPermissions('feature_roadmap')
   const supabase = createClient()
 
   // ── State ──────────────────────────────────────────────────
@@ -316,11 +318,11 @@ export default function FeatureRoadmapTab(_props: Props) {
             style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
             <ExternalLink size={13} /> View Public Board
           </a>
-          <button onClick={() => setAddDialog(true)}
+          {can('view_roles') && <button onClick={() => setAddDialog(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-bold transition-all hover:opacity-80"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14} /> Add Feature
-          </button>
+          </button>}
           <button onClick={handleRefresh}
             className="w-8 h-8 flex items-center justify-center rounded-xl border transition-all hover:opacity-70"
             style={{ borderColor: C.border, backgroundColor: C.surface }}>
@@ -594,21 +596,21 @@ export default function FeatureRoadmapTab(_props: Props) {
 
                   {/* Actions */}
                   <div className="flex items-center gap-1.5">
-                    <button onClick={() => handleApprove(feat)}
+                    {can('view_roles') && <button onClick={() => handleApprove(feat)}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
                       style={{ backgroundColor: C.limeDeep, color: '#fff' }}>
                       <CheckCircle size={11} /> Approve
-                    </button>
-                    <button onClick={() => handleStatusChange(feat.id, 'rejected')}
+                    </button>}
+                    {can('view_roles') && <button onClick={() => handleStatusChange(feat.id, 'rejected')}
                       className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-bold border"
                       style={{ borderColor: '#FECACA', color: C.red, backgroundColor: '#FEF2F2' }}>
                       <X size={11} /> Reject
-                    </button>
-                    <button onClick={() => setDeleteConfirm(feat)}
+                    </button>}
+                    {can('view_roles') && <button onClick={() => setDeleteConfirm(feat)}
                       className="w-6 h-6 flex items-center justify-center rounded-lg border transition-all hover:opacity-70"
                       style={{ borderColor: '#FECACA', backgroundColor: '#FEF2F2' }}>
                       <Trash2 size={11} style={{ color: C.red }} />
-                    </button>
+                    </button>}
                   </div>
                 </div>
               )
@@ -677,27 +679,27 @@ export default function FeatureRoadmapTab(_props: Props) {
 
                   {/* Actions */}
                   <div className="flex items-center gap-1.5">
-                    <button onClick={() => handleTogglePublic(feat)}
+                    {can('view_roles') && <button onClick={() => handleTogglePublic(feat)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg border transition-all hover:opacity-70"
                       title={feat.is_public ? 'Hide' : 'Show'}
                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
                       {feat.is_public ? <Eye size={13} style={{ color: C.green }} /> : <EyeOff size={13} style={{ color: C.muted }} />}
-                    </button>
-                    <button onClick={() => openEdit(feat)}
+                    </button>}
+                    {can('view_roles') && <button onClick={() => openEdit(feat)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg border transition-all hover:opacity-70"
                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
                       <Pencil size={13} style={{ color: C.muted }} />
-                    </button>
-                    <button onClick={() => setVoteReset(feat)}
+                    </button>}
+                    {can('view_roles') && <button onClick={() => setVoteReset(feat)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg border transition-all hover:opacity-70"
                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
                       <RotateCcw size={12} style={{ color: C.muted }} />
-                    </button>
-                    <button onClick={() => setDeleteConfirm(feat)}
+                    </button>}
+                    {can('view_roles') && <button onClick={() => setDeleteConfirm(feat)}
                       className="w-7 h-7 flex items-center justify-center rounded-lg border transition-all hover:opacity-70"
                       style={{ borderColor: '#FECACA', backgroundColor: '#FEF2F2' }}>
                       <Trash2 size={13} style={{ color: C.red }} />
-                    </button>
+                    </button>}
                   </div>
                 </div>
               )

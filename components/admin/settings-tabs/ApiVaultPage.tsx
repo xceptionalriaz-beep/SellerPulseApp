@@ -2,6 +2,7 @@
 // components/admin/settings-tabs/ApiVaultPage.tsx
 // Full rebuild — all 7 layers
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -312,9 +313,11 @@ function ToolUsageBreakdown({ platformName }: { platformName: string }) {
 }
 
 // -- ConfigTab --------------------------------------------------
-function ConfigTab({ api, onSaved, showToast }: {
+function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }: {
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canRevoke?: boolean
+  canEdit?:   boolean
 }) {
   // Fix 6: Create supabase once using useState to avoid new instance on every render
   const [supabase]   = useState(() => createClient())
@@ -826,7 +829,7 @@ function ConfigTab({ api, onSaved, showToast }: {
           </a>
         )}
         <div className="flex-1" />
-        <button onClick={handleRevoke}
+        {canRevoke && <button onClick={handleRevoke}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all"
           style={{
             backgroundColor: confirmRevoke ? C.red                   : 'rgba(185,28,28,0.08)',
@@ -834,7 +837,7 @@ function ConfigTab({ api, onSaved, showToast }: {
           }}>
           <Trash2 size={13} />
           {confirmRevoke ? 'Click again to confirm revoke' : 'Revoke Keys'}
-        </button>
+        </button>}
       </div>
 
       <div className="flex items-start gap-2 p-3 rounded-xl border"
@@ -1251,9 +1254,10 @@ function SecurityTab({ api, onSaved, showToast }: {
 }
 
 // -- Expanded Row with Tabs -------------------------------------
-function ExpandedRow({ api, onSaved, showToast }: {
+function ExpandedRow({ api, onSaved, showToast, canRevoke = true }: {
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canRevoke?: boolean
 }) {
   const [tab, setTab] = useState<'config' | 'activity' | 'security'>('config')
 
@@ -1292,7 +1296,7 @@ function ExpandedRow({ api, onSaved, showToast }: {
       </div>
 
       {/* Tab content */}
-      {tab === 'config'   && <ConfigTab   api={api} onSaved={onSaved} showToast={showToast} />}
+      {tab === 'config'   && <ConfigTab   api={api} onSaved={onSaved} showToast={showToast} canRevoke={canRevoke} />}
       {tab === 'activity' && <ActivityTab api={api} />}
       {tab === 'security' && <SecurityTab api={api} onSaved={onSaved} showToast={showToast} />}
     </div>
@@ -1300,11 +1304,12 @@ function ExpandedRow({ api, onSaved, showToast }: {
 }
 
 // -- API Modal --------------------------------------------------
-function ApiModal({ api, onClose, onSaved, showToast }: {
-  api:       any
-  onClose:   () => void
-  onSaved:   (updatedApi: any) => void
-  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+function ApiModal({ api, onClose, onSaved, showToast, canRevoke = true }: {
+  api:        any
+  onClose:    () => void
+  onSaved:    (updatedApi: any) => void
+  showToast:  (msg: string, type: 'success' | 'error' | 'info') => void
+  canRevoke?: boolean
 }) {
   const [visible,    setVisible]    = useState(false)
   // Fix 7: track live api data inside modal so header refreshes after save
@@ -1383,6 +1388,7 @@ function ApiModal({ api, onClose, onSaved, showToast }: {
             api={liveApi}
             onSaved={handleSaved}
             showToast={showToast}
+            canRevoke={canRevoke}
           />
         </div>
       </div>
@@ -1394,6 +1400,7 @@ function ApiModal({ api, onClose, onSaved, showToast }: {
 // MAIN COMPONENT
 // --------------------------------------------------------------
 export default function ApiVaultPage() {
+  const { can } = useTabPermissions('api_vault')
   const supabase = createClient()
 
   const [apis,         setApis]         = useState<any[]>([])
@@ -1671,18 +1678,18 @@ export default function ApiVaultPage() {
             </button>
           ))}
         </div>
-        <button onClick={testAll} disabled={testing}
+        {can('view_keys') && <button onClick={testAll} disabled={testing}
           className="flex items-center gap-2 h-10 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
           style={{ borderColor: C.border, backgroundColor: C.surface, color: C.text }}>
           {testing
             ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.text }} />
             : <><Wifi size={13} /> Test All</>}
-        </button>
-        <button onClick={exportAuditLog}
+        </button>}
+        {can('view_keys') && <button onClick={exportAuditLog}
           className="flex items-center gap-2 h-10 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
           style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
           <Download size={13} /> Export Log
-        </button>
+        </button>}
       </div>
 
       {/* API Fleet Grid */}
@@ -1845,9 +1852,10 @@ export default function ApiVaultPage() {
             setSelectedApi(updatedApi)
           }}
           showToast={showToast}
+          canRevoke={can('reset_key')}
         />
       )}
-
+      
       {/* Notifications panel */}
       {showNotifs && <NotificationsPanel apis={apis} onClose={() => setShowNotifs(false)} />}
 

@@ -85,9 +85,9 @@ export default function Navbar() {
               </div>
             )}
           </div>
-          {['Pricing', 'How It Works', 'Blog'].map(item => (
+          {['Features', 'Pricing', 'How It Works', 'Blog'].map(item => (
             <a key={item}
-               href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase().replace(' ', '-')}`}
+               href={item === 'Pricing' ? '/pricing' : item === 'Features' ? '/features' : `#${item.toLowerCase().replace(' ', '-')}`}
                className="text-[14px] font-medium hover:opacity-70 transition-opacity"
                style={{ color: T.carbon }}>{item}</a>
           ))}
@@ -112,9 +112,9 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden px-6 pb-6 flex flex-col gap-4 border-t"
              style={{ background: T.white, borderColor: T.border }}>
-          {['Tools', 'Pricing', 'How It Works', 'Blog'].map(item => (
+          {['Features', 'Tools', 'Pricing', 'How It Works', 'Blog'].map(item => (
             <a key={item}
-               href={item === 'Pricing' ? '/pricing' : `#${item.toLowerCase().replace(' ', '-')}`}
+               href={item === 'Pricing' ? '/pricing' : item === 'Features' ? '/features' : `#${item.toLowerCase().replace(' ', '-')}`}
                className="text-[15px] font-medium py-1" style={{ color: T.carbon }}>{item}</a>
           ))}
           <button onClick={() => router.push('/auth/signup')}

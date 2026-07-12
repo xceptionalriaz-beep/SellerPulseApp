@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import ProDropdown from '@/components/ui/ProDropdown'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 
 const C = {
   lime:     '#8fff00',
@@ -17,6 +18,7 @@ const C = {
 }
 
 export default function AdminGeneralSettings() {
+  const { can } = useTabPermissions('settings_general')
   const [status, setStatus]       = useState<{id:string; status:string; message:string; updated_at:string; updated_by:string|null} | null>(null)
   const [loading, setLoading]     = useState(true)
   const [saving, setSaving]       = useState(false)
@@ -112,10 +114,10 @@ export default function AdminGeneralSettings() {
                           rows={2}
                           style={{ flex: 1, fontSize: 13, padding: '8px 12px', borderRadius: 8, border: `0.5px solid ${C.border}`, outline: 'none', color: C.text, background: C.surface, fontFamily: 'Inter, sans-serif', resize: 'none' }}/>
               </div>
-              <button onClick={saveStatus} disabled={saving}
+              {can('save_general') && <button onClick={saveStatus} disabled={saving}
                       style={{ alignSelf: 'flex-start', height: 34, padding: '0 16px', borderRadius: 100, border: 'none', background: saved ? C.limeDeep : C.lime, color: C.dark, fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>
                 {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save status'}
-              </button>
+              </button>}
               {status?.updated_at && (
                 <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
                   Last updated: {formatDate(status.updated_at)}
@@ -133,8 +135,8 @@ export default function AdminGeneralSettings() {
                 <p style={{ fontSize: 13, fontWeight: 600, color: C.text, margin: '0 0 2px' }}>Enable maintenance mode</p>
                 <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>Temporarily disable access for non-admin users</p>
               </div>
-              <div onClick={!savingMaint ? toggleMaintenance : undefined}
-                   style={{ width: 36, height: 20, borderRadius: 100, background: maintenance ? C.lime : C.border, position: 'relative', cursor: savingMaint ? 'wait' : 'pointer', flexShrink: 0, transition: 'background .2s' }}>
+              <div onClick={!savingMaint && can('edit_maintenance') ? toggleMaintenance : undefined}
+                   style={{ width: 36, height: 20, borderRadius: 100, background: maintenance ? C.lime : C.border, position: 'relative', cursor: !can('edit_maintenance') ? 'not-allowed' : savingMaint ? 'wait' : 'pointer', flexShrink: 0, transition: 'background .2s', opacity: can('edit_maintenance') ? 1 : 0.5 }}>
                 <div style={{ width: 14, height: 14, borderRadius: '50%', background: C.surface, position: 'absolute', top: 3, left: maintenance ? 19 : 3, transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}/>
               </div>
             </div>

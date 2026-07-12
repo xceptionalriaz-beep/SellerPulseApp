@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { RefreshCw, Check, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 
 const C = {
   lime:        '#8fff00',
@@ -118,6 +119,7 @@ const ALL_LOGOS = [
 ]
 
 export default function BrandManagerTab() {
+  const { can } = useTabPermissions('settings_brand')
   const supabase  = createClient()
   const [brand, setBrand]       = useState<Brand>(DEFAULTS)
   const [loading, setLoading]   = useState(true)
@@ -303,18 +305,18 @@ export default function BrandManagerTab() {
 
           {custom ? (
             <div style={{ display: 'flex', gap: 6 }}>
-              <button onClick={() => fileRefs.current[item.key]?.click()}
+              {can('upload_logo') && <button onClick={() => fileRefs.current[item.key]?.click()}
                       style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '8px', borderRadius: 8, background: C.blueBg, border: `0.5px solid ${C.blueBorder}`, color: C.blue, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Replace
-              </button>
-              <button onClick={() => removeUpload(item.key)}
+              </button>}
+              {can('upload_logo') && <button onClick={() => removeUpload(item.key)}
                       style={{ padding: '8px 12px', borderRadius: 8, background: C.redBg, border: `0.5px solid ${C.redBorder}`, color: C.red, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
                 Remove
-              </button>
+              </button>}
             </div>
           ) : (
-            <div onClick={() => !isUp && fileRefs.current[item.key]?.click()}
+            <div onClick={() => !isUp && can('upload_logo') && fileRefs.current[item.key]?.click()}
                  style={{ border: `1.5px dashed ${C.border}`, borderRadius: 8, padding: '12px', textAlign: 'center', cursor: 'pointer' }}>
               {isUp ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
@@ -361,16 +363,16 @@ export default function BrandManagerTab() {
           <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>Upload logos and brand assets — updates everywhere instantly, no redeploy needed</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          {hasAnyCustom && (
+          {hasAnyCustom && can('upload_logo') && (
             <button onClick={resetAll}
                     style={{ fontSize: 12, color: C.red, background: C.redBg, border: `0.5px solid ${C.redBorder}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer' }}>
               Reset all
             </button>
           )}
-          <button onClick={saveAllSettings} disabled={savingAll}
+          {can('save_brand') && <button onClick={saveAllSettings} disabled={savingAll}
                   style={{ height: 34, padding: '0 16px', borderRadius: 100, border: 'none', background: savedAll ? C.limeDeep : C.lime, color: C.dark, fontSize: 12, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, transition: 'background .2s' }}>
             {savingAll ? 'Saving...' : savedAll ? 'Saved!' : 'Save configuration'}
-          </button>
+          </button>}
           <button onClick={load}
                   style={{ fontSize: 12, color: C.muted, background: C.bg, border: `0.5px solid ${C.border}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
             <RefreshCw size={12} className={loading ? 'animate-spin' : ''}/> Refresh

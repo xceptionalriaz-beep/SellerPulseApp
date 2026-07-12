@@ -51,7 +51,7 @@ export default function Footer() {
 
           {[
             { title: "Product", links: [
-                { label: "Features",         href: "#features" },
+                { label: "Features",         href: "/features" },
                 { label: "Pricing",          href: "/pricing"  },
                 { label: "Changelog", href: "/changelog" },
                 { label: "Roadmap",          href: "/roadmap"  },

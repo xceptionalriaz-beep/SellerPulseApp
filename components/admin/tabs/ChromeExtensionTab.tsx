@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/tabs/ChromeExtensionTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -95,6 +96,7 @@ const DEFAULT_BROADCASTS: BroadcastEntry[] = [
 
 // ══════════════════════════════════════════════════════════════
 export default function ChromeExtensionTab(_props: Props) {
+  const { can } = useTabPermissions('chrome_extension')
   const supabase = createClient()
 
   // ── Core state ─────────────────────────────────────────────
@@ -427,13 +429,13 @@ export default function ChromeExtensionTab(_props: Props) {
                     backgroundColor: C.bg, borderColor: C.border,
                     color: C.text, fontFamily: 'inherit',
                   }} />
-                <button onClick={handleSaveMsg} disabled={isSavingMsg}
+                {can('view_switches') && <button onClick={handleSaveMsg} disabled={isSavingMsg}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold w-fit transition-all hover:opacity-80 disabled:opacity-50"
                   style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                   {isSavingMsg
                     ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
                     : msgSaved ? <><Check size={12} /> Saved!</> : 'Save Message'}
-                </button>
+                </button>}
               </div>
             )}
           </div>
@@ -494,13 +496,13 @@ export default function ChromeExtensionTab(_props: Props) {
                   Unsaved changes
                 </span>
               )}
-              <button onClick={handleForceSync} disabled={isForceSyncing}
+              {can('view_switches') && <button onClick={handleForceSync} disabled={isForceSyncing}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold border transition-all hover:opacity-80 disabled:opacity-50"
                 style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
                 {isForceSyncing
                   ? <><div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.limeDeep }} /> Syncing...</>
                   : <><Radio size={12} style={{ color: C.limeDeep }} /> Force Sync</>}
-              </button>
+              </button>}
             </div>
           </div>
 
@@ -654,7 +656,7 @@ export default function ChromeExtensionTab(_props: Props) {
                     color: C.text, fontFamily: 'inherit', transition: 'all 0.2s',
                   }} />
               </div>
-              <button onClick={handlePushOTA}
+              {can('view_switches') && <button onClick={handlePushOTA}
                 disabled={!otaVersion.trim() || !otaNotes.trim() || isPushingOTA}
                 className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold transition-all hover:opacity-80 disabled:opacity-40"
                 style={{ backgroundColor: otaSuccess ? C.limeDeep : C.dark, color: C.lime }}>
@@ -663,7 +665,7 @@ export default function ChromeExtensionTab(_props: Props) {
                   : otaSuccess
                     ? <><Check size={14} /> Pushed Successfully!</>
                     : <><Download size={14} /> Push to All Clients</>}
-              </button>
+              </button>}
             </div>
 
             {/* OTA History */}
@@ -731,17 +733,17 @@ export default function ChromeExtensionTab(_props: Props) {
                     color: C.text, fontFamily: 'inherit', transition: 'all 0.2s',
                   }} />
               </div>
-              <button onClick={handleSendBroadcast}
+              {can('view_switches') && <button onClick={handleSendBroadcast}
                 disabled={!broadcastMsg.trim() || isSendingBroadcast}
                 className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold transition-all hover:opacity-80 disabled:opacity-40"
                 style={{ backgroundColor: SEV[severity].bg, color: SEV[severity].color,
                          border: `1.5px solid ${SEV[severity].border}` }}>
                 {isSendingBroadcast
                   ? <><div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: SEV[severity].color }} /> Sending...</>
-                  : <><Send size={14} /> Send to All Users</>}
-              </button>
+                 : <><Send size={14} /> Send to All Users</>}
+              </button>}
             </div>
-
+            
             {/* Broadcast history */}
             <div className="px-5 pb-4 flex flex-col gap-2">
               <div className="flex items-center gap-2 mb-1">

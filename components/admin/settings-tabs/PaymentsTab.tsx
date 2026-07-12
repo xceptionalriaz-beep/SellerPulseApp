@@ -1,5 +1,6 @@
 ﻿'use client'
 // components/admin/settings-tabs/PaymentsTab.tsx
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -125,6 +126,7 @@ const DAILY_CHART = Array.from({ length: 30 }, (_, i) => {
 // PAYMENTS TAB
 // ══════════════════════════════════════════════════════════════
 export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number) => void }) {
+  const { can } = useTabPermissions('payments')
   const supabase = createClient()
   const router   = useRouter()
 
@@ -686,11 +688,11 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
               style={{ border: `1px solid ${C.border}` }}>
               <RefreshCw size={12} style={{ color: C.muted }} />
             </button>
-            <button onClick={exportCSV}
+            {can('export_payments') && <button onClick={exportCSV}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold hover:opacity-80"
               style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Download size={11} /> Export
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -865,11 +867,11 @@ export default function PaymentsTab({ onNavigate }: { onNavigate?: (tab: number)
                             <Zap size={9} /> Retry
                           </button>
                         ) : txn.status === 'paid' || txn.status === 'active' ? (
-                          <button onClick={() => setRefundTxn(txn)}
+                          can('issue_refund') ? <button onClick={() => setRefundTxn(txn)}
                             className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80 ml-auto"
                             style={{ backgroundColor: 'rgba(217,119,6,0.08)', color: C.amber }}>
                             <RotateCcw size={9} /> Refund
-                          </button>
+                          </button> : null
                         ) : (
                         <button
                           onClick={() => { setSubTxn(txn); setSubAction(null); setSubError(null); setSubSuccess(null) }}

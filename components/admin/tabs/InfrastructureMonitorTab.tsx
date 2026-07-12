@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/tabs/InfrastructureMonitorTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -191,6 +192,7 @@ const STATUS_CONFIG = {
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function InfrastructureMonitorTab(_props: Props) {
+  const { can } = useTabPermissions('infra_monitor')
   const supabase = createClient()
 
   // ── State ──────────────────────────────────────────────────
@@ -577,13 +579,13 @@ export default function InfrastructureMonitorTab(_props: Props) {
         </div>
 
         {/* Save button */}
-        <button onClick={handleSaveStatus} disabled={savingStatus || (pendingStatus === sysStatus?.status && editMessage.trim() === (sysStatus?.message ?? '').trim())}
+        {can('view_logs') && <button onClick={handleSaveStatus} disabled={savingStatus || (pendingStatus === sysStatus?.status && editMessage.trim() === (sysStatus?.message ?? '').trim())}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-50 transition-all hover:opacity-80"
           style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           {savingStatus
             ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
             : <><CheckCircle size={14} /> Save & Publish Status</>}
-        </button>
+        </button>}
       </div>
 
       {/* ── Individual Component Status (collapsible) ─────────── */}
@@ -745,11 +747,11 @@ export default function InfrastructureMonitorTab(_props: Props) {
               Manage third-party startups paying to access your VeRO & Profit Engine APIs.
             </p>
           </div>
-          <button onClick={() => { setShowNewKey(true); setNewKeyResult(null); setNewPartner(''); setNewRateLimit('10000') }}
+          {can('view_logs') && <button onClick={() => { setShowNewKey(true); setNewKeyResult(null); setNewPartner(''); setNewRateLimit('10000') }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-80"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14} /> Issue New Key
-          </button>
+          </button>}
         </div>
 
         {/* API Keys table */}
@@ -834,25 +836,25 @@ export default function InfrastructureMonitorTab(_props: Props) {
 
                   {/* Actions — own column */}
                   <div className="flex items-center gap-1">
-                    <button onClick={() => openEditKey(key)}
+                    {can('view_logs') && <button onClick={() => openEditKey(key)}
                       className="w-5 h-5 flex items-center justify-center rounded-md border transition-all hover:opacity-70"
                       title="Edit"
                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
                       <Pencil size={10} style={{ color: C.muted }} />
-                    </button>
-                    <button onClick={() => handleToggleKey(key)}
+                    </button>}
+                    {can('view_logs') && <button onClick={() => handleToggleKey(key)}
                       className="w-5 h-5 flex items-center justify-center rounded-md border transition-all hover:opacity-70"
                       title={key.is_active ? 'Revoke' : 'Enable'}
                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
                       {key.is_active
                         ? <EyeOff size={10} style={{ color: C.muted }} />
                         : <Eye size={10} style={{ color: C.green }} />}
-                    </button>
-                    <button onClick={() => setDeleteKeyConfirm(key)}
+                    </button>}
+                    {can('view_logs') && <button onClick={() => setDeleteKeyConfirm(key)}
                       className="w-5 h-5 flex items-center justify-center rounded-md border transition-all hover:opacity-70"
                       style={{ borderColor: '#FECACA', backgroundColor: '#FEF2F2' }}>
                       <Trash2 size={10} style={{ color: C.red }} />
-                    </button>
+                    </button>}
                   </div>
                 </div>
               ))}

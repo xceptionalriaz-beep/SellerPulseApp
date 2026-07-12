@@ -2,6 +2,7 @@
 // components/admin/settings-tabs/ChangelogTab.tsx
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Eye, EyeOff, RefreshCw, X, Check } from 'lucide-react'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 
 const C = {
   lime:     '#8fff00',
@@ -45,6 +46,7 @@ const EMPTY: Omit<Entry, 'id' | 'created_at'> = {
 }
 
 export default function ChangelogTab() {
+  const { can } = useTabPermissions('changelog')
   const [entries, setEntries]         = useState<Entry[]>([])
   const [loading, setLoading]         = useState(true)
   const [showForm, setShowForm]       = useState(false)
@@ -220,10 +222,10 @@ export default function ChangelogTab() {
              style={{ backgroundColor: C.bg, borderColor: C.border, color: C.muted }}>
             Preview ↗
           </a>
-          <button onClick={openNew} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-black hover:opacity-90 transition-all"
+          {can('create_entry') && <button onClick={openNew} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-black hover:opacity-90 transition-all"
                   style={{ backgroundColor: C.lime, color: C.dark }}>
             <Plus size={14}/>New Entry
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -361,16 +363,16 @@ export default function ChangelogTab() {
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl border"
              style={{ backgroundColor: C.limeTint, borderColor: 'rgba(143,255,0,0.3)' }}>
           <span className="text-[12px] font-black" style={{ color: C.limeDeep }}>{selected.size} selected</span>
-          <button onClick={bulkPublish}
+          {can('publish_entry') && <button onClick={bulkPublish}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black hover:opacity-70"
                   style={{ backgroundColor: C.dark, color: C.lime }}>
             <Eye size={11}/>Publish All
-          </button>
-          <button onClick={bulkDelete}
+          </button>}
+          {can('delete_entry') && <button onClick={bulkDelete}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black hover:opacity-70"
                   style={{ backgroundColor: 'rgba(185,28,28,0.1)', color: C.red }}>
             <Trash2 size={11}/>Delete All
-          </button>
+          </button>}
           <button onClick={() => setSelected(new Set())}
                   className="ml-auto text-[11px] font-bold hover:opacity-70"
                   style={{ color: C.muted }}>
@@ -452,21 +454,21 @@ export default function ChangelogTab() {
                   {/* Actions */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
-                      <button onClick={() => togglePublish(entry)} title={entry.is_published ? 'Unpublish' : 'Publish'}
+                      {can('publish_entry') && <button onClick={() => togglePublish(entry)} title={entry.is_published ? 'Unpublish' : 'Publish'}
                               className="w-7 h-7 flex items-center justify-center rounded-lg border hover:opacity-70"
                               style={{ borderColor: C.border, backgroundColor: C.bg }}>
                         {entry.is_published ? <EyeOff size={12} style={{ color: C.muted }}/> : <Eye size={12} style={{ color: C.limeDeep }}/>}
-                      </button>
-                      <button onClick={() => openEdit(entry)}
+                      </button>}
+                      {can('edit_entry') && <button onClick={() => openEdit(entry)}
                               className="w-7 h-7 flex items-center justify-center rounded-lg border hover:opacity-70"
                               style={{ borderColor: C.border, backgroundColor: C.bg }}>
                         <Edit2 size={12} style={{ color: C.muted }}/>
-                      </button>
-                      <button onClick={() => setDeleteId(entry.id)}
+                      </button>}
+                      {can('delete_entry') && <button onClick={() => setDeleteId(entry.id)}
                               className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
                               style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
                         <Trash2 size={12} style={{ color: C.red }}/>
-                      </button>
+                      </button>}
                     </div>
                   </td>
                 </tr>

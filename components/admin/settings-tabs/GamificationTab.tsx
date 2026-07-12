@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/settings-tabs/GamificationTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import React, { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -444,6 +445,7 @@ function BadgeManagerSection({ badges }: { badges: any[] }) {
 // MAIN COMPONENT
 // --------------------------------------------------------------
 export default function GamificationTab() {
+  const { can } = useTabPermissions('gamification')
   const supabase = createClient()
 
   const [quests,       setQuests]       = useState<any[]>([])
@@ -530,11 +532,11 @@ export default function GamificationTab() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowNewQuest(true)}
+          {can('create_quest') && <button onClick={() => setShowNewQuest(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Quest
-          </button>
+          </button>}
           <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
             className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
@@ -703,7 +705,7 @@ export default function GamificationTab() {
                 </span>
 
                 {/* Active toggle */}
-                <div onClick={() => handleToggleQuest(quest.id, !quest.is_active)}
+                <div onClick={() => can('edit_quest') && handleToggleQuest(quest.id, !quest.is_active)}
                      className="relative w-10 h-5 rounded-full cursor-pointer"
                      style={{ backgroundColor: quest.is_active ? C.dark : 'rgba(100,116,139,0.35)' }}>
                   <div style={{
@@ -717,18 +719,18 @@ export default function GamificationTab() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-1">
-                  <button onClick={() => setEditQuest(quest)}
+                  {can('edit_quest') && <button onClick={() => setEditQuest(quest)}
                     className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70"
                     style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
                     <Edit size={10} style={{ color: C.muted }} />
-                  </button>
-                  <button onClick={() => handleDeleteQuest(quest.id)} disabled={deletingId === quest.id}
+                  </button>}
+                  {can('delete_quest') && <button onClick={() => handleDeleteQuest(quest.id)} disabled={deletingId === quest.id}
                     className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 disabled:opacity-40"
                     style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
                     {deletingId === quest.id
                       ? <div className="w-3 h-3 rounded-full border border-transparent animate-spin" style={{ borderTopColor: C.red }} />
                       : <Trash2 size={10} style={{ color: C.red }} />}
-                  </button>
+                  </button>}
                 </div>
               </div>
             )
@@ -787,11 +789,11 @@ export default function GamificationTab() {
                   <p className="text-[10px]" style={{ color: C.muted }}>
                     {item.completed_at ? timeAgo(item.completed_at) : '—'}
                   </p>
-                  <button onClick={() => setFulfillItem(item)}
+                  {can('fulfill_reward') && <button onClick={() => setFulfillItem(item)}
                     className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold hover:opacity-80"
                     style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
                     <CheckCircle size={10} /> Fulfill
-                  </button>
+                  </button>}
                 </div>
               ))}
             </>

@@ -8,6 +8,7 @@
 // → Last 50 email telemetry logs
 // ══════════════════════════════════════════════════════════════
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -329,7 +330,7 @@ function StepEditorModal({
 // ── Flow Row ───────────────────────────────────────────────────
 function FlowRow({
   flow, isExpanded, onToggle, onToggleActive, onEditStep,
-  onDeleteFlow, onAddStep, onDeleteStep, toggling,
+  onDeleteFlow, onAddStep, onDeleteStep, toggling, canManage = true,
 }: {
   flow:           EmailFlow
   isExpanded:     boolean
@@ -340,6 +341,7 @@ function FlowRow({
   onAddStep:      (flowId: string) => void
   onDeleteStep:   (stepId: string, flowId: string) => void
   toggling:       string | null
+  canManage?:     boolean
 }) {
   return (
     <div>
@@ -409,7 +411,7 @@ function FlowRow({
         </div>
 
         {/* Active toggle */}
-        <div onClick={e => { e.stopPropagation(); onToggleActive(flow) }}>
+        <div onClick={e => { e.stopPropagation(); canManage && onToggleActive(flow) }}>
           {toggling === flow.id ? (
             <div className="w-10 h-5 flex items-center justify-center">
               <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
@@ -430,7 +432,7 @@ function FlowRow({
         </div>
 
         {/* Delete flow */}
-        <div className="flex justify-center" onClick={e => { e.stopPropagation(); onDeleteFlow(flow) }}>
+        <div className="flex justify-center" onClick={e => { e.stopPropagation(); canManage && onDeleteFlow(flow) }}>
           <div className="w-7 h-7 flex items-center justify-center rounded-xl cursor-pointer hover:opacity-80"
                style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
             <Trash2 size={13} style={{ color: C.red }} />
@@ -469,11 +471,11 @@ function FlowRow({
 
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>EMAIL STEPS</p>
-            <button onClick={() => onAddStep(flow.id)}
+            {canManage && <button onClick={() => onAddStep(flow.id)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:opacity-80"
               style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Plus size={11} /> Add Step
-            </button>
+            </button>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -501,11 +503,11 @@ function FlowRow({
                       onClick={() => onEditStep(step, flow.name)}>
                   Edit →
                 </span>
-                <button onClick={() => onDeleteStep(step.id, flow.id)}
+                {canManage && <button onClick={() => onDeleteStep(step.id, flow.id)}
                   className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 shrink-0"
                   style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
                   <Trash2 size={11} style={{ color: C.red }} />
-                </button>
+                </button>}
               </div>
             ))}
           </div>
@@ -1012,6 +1014,7 @@ function DataRetentionSection({
 }
 
 export default function EmailAutomationsTab() {
+  const { can } = useTabPermissions('emails')
   const supabase = createClient()
 
   const [flows,       setFlows]       = useState<EmailFlow[]>([])
@@ -1342,11 +1345,11 @@ export default function EmailAutomationsTab() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowNewFlow(true)}
+          {can('manage_flows') && <button onClick={() => setShowNewFlow(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Flow
-          </button>
+          </button>}
           <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
             className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
@@ -1391,6 +1394,7 @@ export default function EmailAutomationsTab() {
               onAddStep={(flowId) => setAddingStep({ flowId, flowName: flow.name })}
               onDeleteStep={handleDeleteStep}
               toggling={toggling}
+              canManage={can('manage_flows')}
             />
           ))
         )}

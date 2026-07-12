@@ -6,6 +6,7 @@
 // Separate from affiliate codes (managed in Affiliate Center)
 // ══════════════════════════════════════════════════════════════
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -179,6 +180,9 @@ function PromoCodesTable({
   onCopy,
   obscureCode,
   obscureNumber,
+  canEdit = true,
+  canDelete = true,
+  canToggle = true,
 }: {
   codes:          PromoCode[]
   onEdit:         (code: PromoCode) => void
@@ -186,6 +190,9 @@ function PromoCodesTable({
   onDelete:       (code: PromoCode) => void
   onCopy:         (code: string) => void
   obscureCode:    (code: string) => string
+  canEdit?:       boolean
+  canDelete?:     boolean
+  canToggle?:     boolean
   obscureNumber:  (val: number) => string
 }) {
   const [actionMenu, setActionMenu] = useState<string | null>(null)
@@ -311,24 +318,24 @@ function PromoCodesTable({
                       style={{ color: C.text }}>
                       <Copy size={13} /> Copy Code
                     </button>
-                    <button onClick={() => { onEdit(code); setActionMenu(null) }}
+                    {canEdit && <button onClick={() => { onEdit(code); setActionMenu(null) }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-[12px] font-bold hover:bg-gray-50"
                       style={{ color: C.text }}>
                       <Edit3 size={13} /> Edit
-                    </button>
-                    <button onClick={() => { onToggle(code); setActionMenu(null) }}
+                    </button>}
+                    {canToggle && <button onClick={() => { onToggle(code); setActionMenu(null) }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-[12px] font-bold hover:bg-gray-50"
                       style={{ color: code.status === 'active' ? C.amber : C.green }}>
                       {code.status === 'active'
                         ? <><ToggleLeft  size={13} /> Disable</>
                         : <><ToggleRight size={13} /> Enable</>}
-                    </button>
+                    </button>}
                     <div className="h-px my-1" style={{ backgroundColor: C.border }} />
-                    <button onClick={() => { onDelete(code); setActionMenu(null) }}
+                    {canDelete && <button onClick={() => { onDelete(code); setActionMenu(null) }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-[12px] font-bold hover:bg-gray-50"
                       style={{ color: C.red }}>
                       <Trash2 size={13} /> Delete
-                    </button>
+                    </button>}
                   </div>
                 </>
               )}
@@ -1220,6 +1227,7 @@ function CreateAbTestModal({
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function PromoManagerTab({ isInvestorMode = false }: { isInvestorMode?: boolean }) {
+  const { can } = useTabPermissions('promos')
   const supabase = createClient()
 
   // ── Investor mode obscuring ────────────────────────────────
@@ -1492,18 +1500,17 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
         </div>
 
         {/* Export */}
-        <button onClick={exportCSV}
+        {can('view_analytics') && <button onClick={exportCSV}
           className="flex items-center gap-2 h-10 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
           style={{ backgroundColor: C.surface, borderColor: C.border, color: C.muted }}>
           <Download size={14} /> Export
-        </button>
-
+        </button>}
         {/* New Code */}
-        <button onClick={() => setShowCreate(true)}
+        {can('create_promo') && <button onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-bold hover:opacity-80"
           style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <Plus size={14} /> New Code
-        </button>
+        </button>}
       </div>
 
       {/* Promo Codes Table */}
@@ -1521,6 +1528,9 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
           onCopy={handleCopy}
           obscureCode={obscureCode}
           obscureNumber={obscureNumber}
+          canEdit={can('edit_promo')}
+          canDelete={can('delete_promo')}
+          canToggle={can('toggle_promo')}
         />
       </div>
 

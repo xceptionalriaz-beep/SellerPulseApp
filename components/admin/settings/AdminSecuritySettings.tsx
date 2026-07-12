@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { RefreshCw, Check, Shield, Clock, Mail, Lock } from 'lucide-react'
 import ProDropdown from '@/components/ui/ProDropdown'
 import { createClient } from '@/lib/supabase'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 
 const C = {
   lime:        '#8fff00',
@@ -28,6 +29,7 @@ interface LoginEntry {
 }
 
 export default function AdminSecuritySettings() {
+  const { can } = useTabPermissions('settings_security')
   const supabase = createClient()
   const [loading, setLoading]               = useState(true)
   const [saving, setSaving]                 = useState<string | null>(null)
@@ -145,6 +147,7 @@ export default function AdminSecuritySettings() {
                 </div>
               </div>
               <Toggle enabled={sessionTimeout} onToggle={() => {
+                if (!can('edit_session')) return
                 const newVal = !sessionTimeout
                 setSessionTimeout(newVal)
                 saveSetting('session_timeout_enabled', String(newVal), 'Session timeout')
@@ -187,6 +190,7 @@ export default function AdminSecuritySettings() {
               </div>
             </div>
             <Toggle enabled={loginNotif} onToggle={() => {
+              if (!can('edit_security')) return
               const newVal = !loginNotif
               setLoginNotif(newVal)
               saveSetting('login_notifications_enabled', String(newVal), 'Login notifications')

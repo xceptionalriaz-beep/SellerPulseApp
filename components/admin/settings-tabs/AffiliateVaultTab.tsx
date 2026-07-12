@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/settings-tabs/AffiliateVaultTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -116,7 +117,7 @@ function Tooltip({ text }: { text: string }) {
 
 // â”€â”€ Table row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TableRow({
-  network, index, trackingId, apiKey, onTrackingChange, onApiKeyChange, onSave, isSaving, saveSuccess, testMode, fallbackTag,
+  network, index, trackingId, apiKey, onTrackingChange, onApiKeyChange, onSave, isSaving, saveSuccess, testMode, fallbackTag, canEdit = true,
 }: {
   network:          NetworkConfig
   index:            number
@@ -127,6 +128,7 @@ function TableRow({
   onSave:           () => void
   isSaving:         boolean
   saveSuccess:      boolean
+  canEdit?:         boolean
   testMode:         boolean
   fallbackTag:      string
 }) {
@@ -320,7 +322,7 @@ function TableRow({
 
           <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
-          <button
+          {canEdit && <button
             onClick={onSave}
             disabled={isSaving}
             className="flex items-center gap-1.5 h-8 px-3 rounded-lg transition-all"
@@ -339,7 +341,7 @@ function TableRow({
               <Check size={12} />
             ) : null}
             {isSaving ? 'Saving...' : saveSuccess ? 'Saved' : 'Save'}
-          </button>
+          </button>}
         </div>
       </td>
 
@@ -349,6 +351,7 @@ function TableRow({
 
 // â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AffiliateVaultTab() {
+  const { can } = useTabPermissions('affiliate_vault')
   const supabase = createClient()
 
   const [values,         setValues]         = useState<Record<string, VaultValues>>(
@@ -515,14 +518,14 @@ export default function AffiliateVaultTab() {
           </button>
 
           {/* Save All button */}
-          <button onClick={saveAll} disabled={savingAll}
+          {can('edit_commission') && <button onClick={saveAll} disabled={savingAll}
             className="flex items-center gap-2 px-3 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-50"
             style={{ backgroundColor: saveAllSuccess ? C.limeDeep : C.lime, fontSize: 12, fontWeight: 700, color: C.dark }}>
             {savingAll
               ? <RefreshCw size={13} className="animate-spin" />
               : saveAllSuccess ? <Check size={13} /> : <Save size={13} />}
             {savingAll ? 'Saving...' : saveAllSuccess ? 'All Saved!' : 'Save All'}
-          </button>
+          </button>}
 
           {/* Refresh button */}
           <button onClick={loadVault} disabled={refreshing}
@@ -602,7 +605,7 @@ export default function AffiliateVaultTab() {
             onBlur={e  => { e.target.style.borderColor = C.border }}
           />
         </div>
-        <button
+        {can('edit_commission') && <button
           onClick={saveFallbackTag}
           disabled={savingFallback}
           className="flex items-center gap-1.5 h-9 px-4 rounded-lg transition-all shrink-0"
@@ -615,7 +618,7 @@ export default function AffiliateVaultTab() {
         >
           {savingFallback ? <RefreshCw size={13} className="animate-spin" /> : fallbackSaved ? <Check size={13} /> : <Save size={13} />}
           {savingFallback ? 'Saving...' : fallbackSaved ? 'Saved' : 'Save Fallback'}
-        </button>
+        </button>}
       </div>
 
       {/* â”€â”€ Table â”€â”€ */}
@@ -656,6 +659,7 @@ export default function AffiliateVaultTab() {
                   saveSuccess={saveSuccess[network.key] ?? false}
                   testMode={testMode}
                   fallbackTag={fallbackTag}
+                  canEdit={can('edit_commission')}
                 />
               ))}
             </tbody>

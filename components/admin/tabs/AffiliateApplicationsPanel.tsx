@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import {
   X, CheckCircle, ExternalLink, ChevronRight, ChevronLeft,
   Globe, Mail, MapPin, Clock, AlertCircle, Search, Tag,
@@ -70,6 +71,7 @@ function formatMethod(method: string | null): string {
 }
 
 export default function AffiliateApplicationsPanel({ applications, onClose, onRefresh }: Props) {
+  const { can } = useTabPermissions('affiliate_vault')
   const supabase = createClient()
 
   const [rejectDialog,   setRejectDialog]   = useState<Application | null>(null)
@@ -402,21 +404,21 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                       <ChevronRight size={13} style={{ color: C.muted }} />
                     </button>
                     {isPending && (<>
-                      <button onClick={() => { setRejectDialog(app); setRejectReason('') }}
+                      {can('approve_affiliate') && <button onClick={() => { setRejectDialog(app); setRejectReason('') }}
                         className="px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all"
                         style={{ borderColor: '#FECACA', color: C.red, backgroundColor: '#FEF2F2' }}
                         onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEE2E2' }}
                         onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FEF2F2' }}>
                         Reject
-                      </button>
-                      <button onClick={() => openApproveDialog(app)} disabled={isProc}
+                      </button>}
+                      {can('approve_affiliate') && <button onClick={() => openApproveDialog(app)} disabled={isProc}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:opacity-80"
                         style={{ backgroundColor: C.limeDeep, color: '#fff' }}>
                         {isProc
                           ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
                           : <CheckCircle size={11} />}
                         Approve
-                      </button>
+                      </button>}
                     </>)}
                     {isApproved && (
                       <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold"
@@ -595,19 +597,19 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
               {/* Footer */}
               {isPending && (
                 <div className="p-5 shrink-0 flex flex-col gap-2" style={{ borderTop: `1px solid ${C.border}` }}>
-                  <button onClick={() => openApproveDialog(app)} disabled={isProc}
+                  {can('approve_affiliate') && <button onClick={() => openApproveDialog(app)} disabled={isProc}
                     className="w-full py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 transition-all hover:opacity-90"
                     style={{ backgroundColor: C.limeDeep, color: '#fff' }}>
                     {isProc ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} /> : <CheckCircle size={16} />}
                     Approve & Create Affiliate
-                  </button>
-                  <button onClick={() => { setRejectDialog(app); setRejectReason('') }}
+                  </button>}
+                  {can('approve_affiliate') && <button onClick={() => { setRejectDialog(app); setRejectReason('') }}
                     className="w-full py-3 rounded-xl border text-[14px] font-bold transition-all"
                     style={{ borderColor: '#FECACA', color: C.red, backgroundColor: '#FEF2F2' }}
                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEE2E2' }}
                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FEF2F2' }}>
                     Reject Application
-                  </button>
+                  </button>}
                 </div>
               )}
             </div>
@@ -687,13 +689,13 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
                   style={{ borderColor: C.border, color: C.muted }}>
                   Cancel
                 </button>
-                <button onClick={confirmApprove} disabled={processing === approveDialog.id}
+                {can('approve_affiliate') && <button onClick={confirmApprove} disabled={processing === approveDialog.id}
                   className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2"
                   style={{ backgroundColor: C.limeDeep, color: '#fff' }}>
                   {processing === approveDialog.id
                     ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
                     : <><CheckCircle size={14} /> Confirm Approve</>}
-                </button>
+                </button>}
               </div>
             </div>
           </div>
@@ -719,9 +721,9 @@ export default function AffiliateApplicationsPanel({ applications, onClose, onRe
               <button onClick={() => setRejectDialog(null)}
                 className="flex-1 py-2.5 rounded-xl border text-[13px] font-bold"
                 style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
-              <button onClick={() => rejectApplication(rejectDialog, rejectReason)}
+              {can('approve_affiliate') && <button onClick={() => rejectApplication(rejectDialog, rejectReason)}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold"
-                style={{ backgroundColor: C.red, color: '#fff' }}>Reject</button>
+                style={{ backgroundColor: C.red, color: '#fff' }}>Reject</button>}
             </div>
           </div>
         </div>

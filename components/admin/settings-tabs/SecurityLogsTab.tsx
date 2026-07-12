@@ -7,6 +7,7 @@
 // Silent 10-second auto-refresh via Visibility API
 // --------------------------------------------------------------
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -285,10 +286,12 @@ function FraudSentinelBanner({
   alerts,
   onLockAccount,
   onDismiss,
+  canLock = true,
 }: {
   alerts:          SecurityEvent[]
   onLockAccount:   (userId: string, eventId: string) => void
   onDismiss:       (eventId: string) => void
+  canLock?:        boolean
 }) {
   const criticalAlerts = alerts.filter(a =>
     a.event_title.toLowerCase().includes('impossible') ||
@@ -319,12 +322,12 @@ function FraudSentinelBanner({
           <p className="text-[10px] font-semibold shrink-0" style={{ color: C.muted }}>
             {timeAgo(alert.created_at)}
           </p>
-          <button
+          {canLock && <button
             onClick={() => onLockAccount(alert.user_id, alert.id)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Lock size={11} /> Lock Account
-          </button>
+          </button>}
           <button
             onClick={() => onDismiss(alert.id)}
             className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 shrink-0">
@@ -347,6 +350,7 @@ function FiltersBar({
   lastUpdated,
   onExport,
   onManualRefresh,
+  canExport = true,
 }: {
   eventFilter:      string
   setEventFilter:   (v: string) => void
@@ -358,6 +362,7 @@ function FiltersBar({
   lastUpdated:      number
   onExport:         () => void
   onManualRefresh:  () => void
+  canExport?:       boolean
 }) {
   const eventOptions = [
     { value: 'all',            label: 'All Events'       },
@@ -445,12 +450,12 @@ function FiltersBar({
       </button>
 
       {/* Export */}
-      <button
+      {canExport && <button
         onClick={onExport}
         className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
         style={{ backgroundColor: '#8fff00', color: '#1a2410', borderColor: C.dark }}>
         <Download size={13} /> Export
-      </button>
+      </button>}
     </div>
   )
 }
@@ -842,6 +847,7 @@ function BlockedIpsPanel({
 // MAIN COMPONENT
 // --------------------------------------------------------------
 export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestorMode?: boolean }) {
+  const { can } = useTabPermissions('security_logs')
   const supabase = createClient()
 
   // -- Toast --------------------------------------------------
@@ -1275,6 +1281,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
             alerts={securityEvents.filter(e => !dismissedIds.has(e.id))}
             onLockAccount={handleLockAccount}
             onDismiss={handleDismissAlert}
+            canLock={can('clear_logs')}
           />
 
           {/* Filters Bar */}
@@ -1286,6 +1293,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
             lastUpdated={lastUpdated}
             onExport={handleExport}
             onManualRefresh={() => loadData(false)}
+            canExport={can('export_logs')}
           />
 
           {/* Two column logs */}

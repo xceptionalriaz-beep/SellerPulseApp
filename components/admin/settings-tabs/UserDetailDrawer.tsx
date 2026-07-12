@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import {
   UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
   Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
@@ -476,6 +477,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
   showToast:(msg:string,type:'success'|'error'|'info')=>void
   viewOnly?: boolean
 }) {
+  const { can } = useTabPermissions('user_crm')
   const supabase = createClient()
 
   const [stores,        setStores]        = useState<any[]>([])
@@ -744,7 +746,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                     const TagIcon = cfg.Icon
                     const active  = userTags.includes(key)
                     return (
-                      <button key={key} onClick={() => toggleTag(key)}
+                      <button key={key} onClick={() => can('manage_tags') && toggleTag(key)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all hover:opacity-80"
                         style={{
                           backgroundColor: active ? cfg.bg        : 'transparent',
@@ -1328,14 +1330,14 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                       <span className="text-[10px]" style={{ color:C.muted }}>
                         {noteContent.length}/500
                       </span>
-                      <button onClick={addNote} disabled={!noteContent.trim() || savingNote}
+                      {can('add_notes') && <button onClick={addNote} disabled={!noteContent.trim() || savingNote}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold disabled:opacity-50"
                         style={{ backgroundColor:C.dark, color:C.lime }}>
                         {savingNote
                           ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
                                  style={{ borderTopColor:C.lime }} />
                           : <><Check size={11} /> Save Note</>}
-                      </button>
+                      </button>}
                     </div>
                   </div>
                 )}
@@ -1380,18 +1382,18 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                                 {noteTime(n.created_at)}
                               </span>
                               {/* Pin toggle */}
-                              <button
+                              {can('add_notes') && <button
                                 onClick={() => togglePin(n.id, n.is_pinned)}
                                 className="w-5 h-5 flex items-center justify-center rounded hover:opacity-70"
                                 title={n.is_pinned ? 'Unpin' : 'Pin'}>
                                 <Shield size={10} style={{ color: n.is_pinned ? cat.color : C.muted }} />
-                              </button>
+                              </button>}
                               {/* Delete */}
-                              <button
+                              {can('add_notes') && <button
                                 onClick={() => deleteNote(n.id)}
                                 className="w-5 h-5 flex items-center justify-center rounded hover:opacity-70">
                                 <X size={10} style={{ color:C.muted }} />
-                              </button>
+                              </button>}
                             </div>
                           </div>
                           {/* Note content */}
@@ -1692,14 +1694,14 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                             style={{ borderColor:C.border, color:C.muted }}>
                             Cancel
                           </button>
-                          <button onClick={handleImpersonate} disabled={impersonating}
+                          {can('impersonate_user') && <button onClick={handleImpersonate} disabled={impersonating}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold disabled:opacity-50"
                             style={{ backgroundColor:'#8b5cf6', color:'#fff' }}>
                             {impersonating
                               ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
                                      style={{ borderTopColor:'#fff' }} />
                               : <><Users size={12} /> Open New Tab</>}
-                          </button>
+                          </button>}
                         </div>
                       </div>
                     )
@@ -1808,7 +1810,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                     </div>
                   )}
                   {/* Suspend active */}
-                  {isActive && (
+                  {isActive && can('suspend_user') && (
                     <button onClick={() => setConfirmSuspend(true)} disabled={suspending}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold hover:opacity-80 disabled:opacity-50 border"
                       style={{ borderColor:'#fdba74', color:'#c2410c', backgroundColor:'#FFF7ED' }}>
@@ -1816,7 +1818,7 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                     </button>
                   )}
                   {/* Permanent ban (only for non-banned) */}
-                  {!isBanned && (
+                  {!isBanned && can('suspend_user') && (
                     <button onClick={() => { setBanText(''); setConfirmBan(true) }}
                       className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold hover:opacity-80 border"
                       style={{ borderColor:'#fca5a5', color:'#7f1d1d', backgroundColor:'#FEF2F2' }}>
@@ -1879,11 +1881,11 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
 
           <div className="h-px mb-5" style={{ backgroundColor: C.border }} />
           <SectionLabel text="DANGER ZONE" danger />
-          <button onClick={() => { setDeleteText(''); setConfirmDelete(true) }}
+          {can('delete_user') && <button onClick={() => { setDeleteText(''); setConfirmDelete(true) }}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border text-[13px] font-bold hover:opacity-80"
             style={{ borderColor:'rgba(185,28,28,0.3)', color:C.red, backgroundColor:'rgba(185,28,28,0.03)' }}>
             <Trash2 size={14} /> Delete User Account
-          </button>
+          </button>}
           </>)}
         </div>
       </div>

@@ -2,6 +2,7 @@
 // components/admin/tabs/VeroCommandCenterTab.tsx
 // Fixed: confirm delete, CORS proxy, success feedback, click-outside, loading states, brand colors, CSV errors
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -242,6 +243,7 @@ function GoogleSheetDialog({ onClose, onSync }: { onClose: () => void; onSync: (
 }
 
 export default function VeroCommandCenterTab({ isMobile }: Props) {
+  const { can } = useTabPermissions('vero_center')
   const supabase = createClient()
 
   const [loading,        setLoading]        = useState(true)
@@ -497,16 +499,16 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleReport(report, false)}
+                  {can('view_switches') && <button onClick={() => handleReport(report, false)}
                     className="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80"
                     style={{ backgroundColor: '#FEF2F2' }}>
                     <XCircle size={16} style={{ color: '#f87171' }} />
-                  </button>
-                  <button onClick={() => handleReport(report, true)}
+                  </button>}
+                  {can('view_switches') && <button onClick={() => handleReport(report, true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold text-white"
                     style={{ backgroundColor: C.dark }}>
                     <CheckCircle size={13} /> Approve & Ban
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
@@ -548,7 +550,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
             className={isMobile ? 'w-full' : 'flex-[2]'}
           />
           <RiskDropdown value={selectedRisk} onChange={setSelectedRisk} />
-          <button onClick={addNewBrand} disabled={isAdding || !brandName.trim()}
+          {can('view_switches') && <button onClick={addNewBrand} disabled={isAdding || !brandName.trim()}
             className={`h-11 flex items-center justify-center gap-2 rounded-xl text-[13px] font-bold transition-all ${isMobile ? 'w-full' : 'px-5'}`}
             style={{
               backgroundColor: C.dark,
@@ -558,7 +560,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <Shield size={16} style={{ color: C.lime }} />}
             <span style={{ color: C.lime }}>{isAdding ? 'Saving...' : 'Ban Brand'}</span>
-          </button>
+          </button>}
         </div>
 
         {/* Bulk import divider */}
@@ -727,7 +729,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
                 </span>
                 {b.evidence_url && <Link size={11} style={{ color: C.hint }} />}
                 {/* Fix 1 â€” confirm before delete */}
-                <button
+                {can('view_switches') && <button
                   onClick={() => setConfirmBrand(b.brand_name)}
                   disabled={isRemoving}
                   className="ml-1 w-5 h-5 flex items-center justify-center rounded-full hover:opacity-80 transition-all"
@@ -736,7 +738,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
                     ? <div className="w-3 h-3 rounded-full border border-transparent animate-spin"
                            style={{ borderTopColor: C.muted }} />
                     : <X size={12} style={{ color: C.muted }} />}
-                </button>
+                </button>}
               </div>
             )
           })}

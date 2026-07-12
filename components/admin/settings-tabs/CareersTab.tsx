@@ -2,6 +2,7 @@
 // components/admin/settings-tabs/CareersTab.tsx
 import React, { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import {
   Plus, Edit2, Trash2, Eye, EyeOff, RefreshCw,
   Check, X, Briefcase, MapPin, Clock, Copy, ExternalLink,
@@ -180,6 +181,7 @@ function parseApplication(desc: string) {
 }
 
 export default function CareersTab() {
+  const { can } = useTabPermissions('careers')
   const supabase = createClient()
   const [mainTab, setMainTab]       = useState<'jobs' | 'applications'>('jobs')
   const [apps, setApps]             = useState<Application[]>([])
@@ -624,9 +626,9 @@ export default function CareersTab() {
                 <button onClick={load} style={{ fontSize: 12, color: C.muted, background: C.bg, border: `0.5px solid ${C.border}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                   <RefreshCw size={11}/> Refresh
                 </button>
-                <button onClick={openNew} style={{ fontSize: 12, fontWeight: 700, background: C.lime, color: C.dark, border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                {can('create_job') && <button onClick={openNew} style={{ fontSize: 12, fontWeight: 700, background: C.lime, color: C.dark, border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                   <Plus size={13}/> New Job
-                </button>
+                </button>}
               </>
             )}
             {mainTab === 'applications' && (
@@ -634,7 +636,7 @@ export default function CareersTab() {
                 <button onClick={loadApps} style={{ fontSize: 12, color: C.muted, background: C.bg, border: `0.5px solid ${C.border}`, borderRadius: 8, padding: '5px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
                   <RefreshCw size={11}/> Refresh
                 </button>
-                {apps.length > 0 && (
+                {apps.length > 0 && can('run_ai_screening') && (
                   <button onClick={screenAll} disabled={screeningAll}
                           style={{ fontSize: 12, fontWeight: 700, background: screeningAll ? C.border : C.dark, color: screeningAll ? C.muted : C.lime, border: 'none', borderRadius: 8, padding: '5px 12px', cursor: screeningAll ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                     {screeningAll ? <><RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }}/> Screening...</> : '✦ AI Screen All'}
@@ -794,12 +796,12 @@ export default function CareersTab() {
                                   {recLabel}
                                 </span>
                               </div>
-                            ) : (
+                            ) : can('run_ai_screening') ? (
                               <button onClick={e => { e.stopPropagation(); screenOne(app) }}
                                       style={{ fontSize: 11, fontWeight: 700, color: C.limeDeep, background: C.limeTint, border: `0.5px solid ${C.lime}`, borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>
                                 ✦ Screen
                               </button>
-                            )}
+                            ) : null}
                           </td>
                           <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
                             <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 100, padding: '3px 10px', color: statusCfg.color, background: statusCfg.bg, border: `0.5px solid ${statusCfg.border}` }}>
@@ -960,10 +962,10 @@ export default function CareersTab() {
                   <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 4px' }}>✦ AI Screening not run yet</p>
                   <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Run AI screening to get a score, recommendation and flag analysis</p>
                 </div>
-                <button onClick={() => screenOne(selectedApp!)} disabled={screeningId === app.id}
+                {can('run_ai_screening') && <button onClick={() => screenOne(selectedApp!)} disabled={screeningId === app.id}
                         style={{ height: 38, padding: '0 18px', borderRadius: 10, background: C.dark, color: C.lime, border: 'none', fontSize: 13, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   {screeningId === app.id ? <><RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }}/> Screening...</> : '✦ Run AI Screen'}
-                </button>
+                </button>}
               </div>
             )}
 
@@ -1066,10 +1068,10 @@ export default function CareersTab() {
                   maxItems={5}
                 />
               </div>
-              <button onClick={() => setConfirmDelete({ id: app.id, label: parseApplication(app.description).name || 'this application', type: 'app' })}
+              {can('delete_application') && <button onClick={() => setConfirmDelete({ id: app.id, label: parseApplication(app.description).name || 'this application', type: 'app' })}
                       style={{ height: 34, padding: '0 14px', borderRadius: 8, border: `0.5px solid ${C.redBorder}`, background: C.redBg, color: C.red, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Trash2 size={13}/> Delete application
-              </button>
+              </button>}
             </div>
 
           </div>
@@ -1147,7 +1149,7 @@ export default function CareersTab() {
               <p style={{ fontSize: 13, color: C.muted, margin: '0 0 16px' }}>
                 {filter === 'all' ? 'Click "New Job" to create your first posting' : `No ${filter} postings found`}
               </p>
-              {filter === 'all' && (
+              {filter === 'all' && can('create_job') && (
                 <button onClick={openNew} style={{ fontSize: 12, fontWeight: 700, background: C.lime, color: C.dark, border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>
                   + New Job
                 </button>
@@ -1194,22 +1196,22 @@ export default function CareersTab() {
                       <td style={{ padding: '12px 16px', fontSize: 12, color: C.muted, whiteSpace: 'nowrap' }}>{formatDate(job.created_at)}</td>
                       <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <button onClick={() => togglePublish(job)} title={job.is_published ? 'Unpublish' : 'Publish'}
+                          {can('publish_job') && <button onClick={() => togglePublish(job)} title={job.is_published ? 'Unpublish' : 'Publish'}
                                   style={{ width: 28, height: 28, borderRadius: 6, border: `0.5px solid ${C.border}`, background: C.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {job.is_published ? <EyeOff size={12} style={{ color: C.muted }}/> : <Eye size={12} style={{ color: C.muted }}/>}
-                          </button>
-                          <button onClick={() => openEdit(job)} title="Edit"
+                          </button>}
+                          {can('edit_job') && <button onClick={() => openEdit(job)} title="Edit"
                                   style={{ width: 28, height: 28, borderRadius: 6, border: `0.5px solid ${C.border}`, background: C.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Edit2 size={12} style={{ color: C.muted }}/>
-                          </button>
+                          </button>}
                           <button onClick={() => duplicateJob(job)} disabled={duplicating === job.id} title="Duplicate"
                                   style={{ width: 28, height: 28, borderRadius: 6, border: `0.5px solid ${C.border}`, background: C.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {duplicating === job.id ? <RefreshCw size={10} style={{ color: C.muted, animation: 'spin 1s linear infinite' }}/> : <Copy size={12} style={{ color: C.muted }}/>}
                           </button>
-                          <button onClick={() => setConfirmDelete({ id: job.id, label: job.title, type: 'job' })} title="Delete"
+                          {can('delete_job') && <button onClick={() => setConfirmDelete({ id: job.id, label: job.title, type: 'job' })} title="Delete"
                                   style={{ width: 28, height: 28, borderRadius: 6, border: `0.5px solid ${C.redBorder}`, background: C.redBg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Trash2 size={12} style={{ color: C.red }}/>
-                          </button>
+                          </button>}
                         </div>
                       </td>
                     </tr>

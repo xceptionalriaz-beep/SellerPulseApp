@@ -2,6 +2,7 @@
 // components/admin/settings-tabs/TicketManagerTab.tsx
 // Full ticket management tab for admin panel
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -67,7 +68,9 @@ function priorityConfig(priority: string) {
 }
 
 // -- Main component ---------------------------------------------
+
 export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count: number) => void }) {
+  const { can } = useTabPermissions('tickets')
   const supabase = createClient()
 
   const [tickets,       setTickets]       = useState<any[]>([])
@@ -277,16 +280,16 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setConfirmClean(true)}
+          {can('delete_ticket') && <button onClick={() => setConfirmClean(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
             <Trash2 size={13} /> Clean Old
-          </button>
-          <button onClick={exportCSV}
+          </button>}
+          {can('export_tickets') && <button onClick={exportCSV}
             className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
             <Download size={13} /> Export
-          </button>
+          </button>}
           <button onClick={loadTickets}
             className="flex items-center gap-2 px-3 py-2 rounded-xl border hover:opacity-70 text-[12px] font-bold"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
@@ -496,11 +499,11 @@ export default function TicketManagerTab({ onOpenCount }: { onOpenCount?: (count
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => deleteTicket(selected.id)}
+                {can('delete_ticket') && <button onClick={() => deleteTicket(selected.id)}
                   className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
                   style={{ border: `1px solid rgba(185,28,28,0.3)`, backgroundColor: 'rgba(185,28,28,0.05)' }}>
                   <Trash2 size={13} style={{ color: C.red }} />
-                </button>
+                </button>}
                 <button onClick={() => setSelected(null)}
                   className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
                   style={{ border: `1px solid ${C.border}` }}>

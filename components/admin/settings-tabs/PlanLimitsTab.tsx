@@ -6,6 +6,7 @@
 // Inline editing with secure save confirmation
 // ══════════════════════════════════════════════════════════════
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -568,11 +569,13 @@ function EditPanel({
   onClose,
   onSaved,
   showToast,
+  canEdit = true,
 }: {
   plan:      PlanLimit
   onClose:   () => void
   onSaved:   (updated: PlanLimit) => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canEdit?:  boolean
 }) {
   const supabase          = createClient()
   const [edit, setEdit]   = useState<EditState>(planToEditState(plan))
@@ -814,13 +817,13 @@ function EditPanel({
             style={{ borderColor: C.border, color: C.muted, backgroundColor: C.surface }}>
             Cancel
           </button>
-          <button onClick={handleSave} disabled={saving}
+          {canEdit && <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Save size={14} /> Save Limits</>}
-          </button>
+          </button>}
         </div>
       </div>
     </div>
@@ -834,12 +837,14 @@ function GatingMatrix({
   onToggleExpand,
   onPlanUpdated,
   showToast,
+  canEdit = true,
 }: {
   plans:          PlanLimit[]
   expandedId:     string | null
   onToggleExpand: (id: string) => void
   onPlanUpdated:  (updated: PlanLimit) => void
   showToast:      (msg: string, type: 'success' | 'error' | 'info') => void
+  canEdit?:       boolean
 }) {
   const supabase = createClient()
   const [togglingActive, setTogglingActive] = useState<string | null>(null)
@@ -902,6 +907,7 @@ function GatingMatrix({
               onClose={() => onToggleExpand(plan.id)}
               onSaved={onPlanUpdated}
               showToast={showToast}
+              canEdit={canEdit}
             />
           )}
         </div>
@@ -916,6 +922,7 @@ function GatingMatrix({
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMode?: boolean }) {
+  const { can } = useTabPermissions('plan_limits')
   const supabase = createClient()
 
   const [plans,      setPlans]      = useState<PlanLimit[]>([])
@@ -1106,18 +1113,18 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowPricingEditor(true)}
+          {can('edit_limits') && <button onClick={() => setShowPricingEditor(true)}
             className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
             title="Edit Landing Page Pricing">
             <Layout size={13} />
-          </button>
-          <button onClick={exportPlansCSV}
+          </button>}
+          {can('view_limits') && <button onClick={exportPlansCSV}
             className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
             title="Export plans as CSV">
             <Download size={13} />
-          </button>
+          </button>}
           <button onClick={handleRefresh} disabled={refreshing}
             className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
@@ -1151,6 +1158,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
           onToggleExpand={handleToggleExpand}
           onPlanUpdated={handlePlanUpdated}
           showToast={showToast}
+          canEdit={can('edit_limits')}
         />
       )}
 

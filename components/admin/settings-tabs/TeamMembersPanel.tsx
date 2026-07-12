@@ -30,6 +30,7 @@ interface TeamMember {
   avatar_url:     string | null
   tab_permissions?: Record<string, { access: string }>
   section_permissions?: Record<string, boolean>
+  sidebar_mode?: 'hide' | 'ghost'
 }
 
 interface Role {
@@ -47,7 +48,7 @@ export default function TeamMembersPanel() {
   const load = useCallback(async () => {
     setLoading(true)
     const [{ data: admins }, { data: rolesList }] = await Promise.all([
-      supabase.from('profiles').select('id, name, email, role, role_id, is_super_admin, avatar_url, tab_permissions').eq('role', 'admin').order('name'),
+      supabase.from('profiles').select('id, name, email, role, role_id, is_super_admin, avatar_url, tab_permissions, sidebar_mode').eq('role', 'admin').order('name'),
       (supabase.from('admin_roles') as any).select('id, role_name').order('role_name'),
     ])
     setMembers((admins ?? []) as TeamMember[])
@@ -63,16 +64,16 @@ export default function TeamMembersPanel() {
     return roles.find(r => r.id === member.role_id)?.role_name ?? '—'
   }
 
-  function getAccessCount(member: TeamMember) {
-    if (member.is_super_admin) return 'All tabs'
-    if (!member.tab_permissions) return 'Not configured'
-    const full = Object.values(member.tab_permissions).filter(p => p.access === 'full').length
-    const view = Object.values(member.tab_permissions).filter(p => p.access === 'view').length
-    if (full === 0 && view === 0) return 'No access'
+  function getAccessSummary(member: TeamMember) {
+    if (member.is_super_admin) return { text: 'All tabs', color: '#4a8f00', bg: '#f4ffe6', border: '#8fff00' }
+    if (!member.tab_permissions) return { text: 'Not configured', color: '#8a9e78', bg: '#f7f9f5', border: '#e8ede2' }
+    const full = Object.entries(member.tab_permissions).filter(([k, v]: any) => !k.includes('__') && v?.access === 'full').length
+    const view = Object.entries(member.tab_permissions).filter(([k, v]: any) => !k.includes('__') && v?.access === 'view').length
+    if (full === 0 && view === 0) return { text: 'No access', color: '#b91c1c', bg: '#fef2f2', border: '#fecaca' }
     const parts = []
     if (full > 0) parts.push(`${full} full`)
-    if (view > 0) parts.push(`${view} view`)
-    return parts.join(', ')
+    if (view > 0) parts.push(`${view} view only`)
+    return { text: parts.join(' · '), color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe' }
   }
 
   function initials(name: string, email: string) {
@@ -143,8 +144,15 @@ export default function TeamMembersPanel() {
                         <span style={{ fontSize: 12, color: C.text }}>{getRoleName(member)}</span>
                       )}
                     </td>
-                    <td style={{ padding: '12px 16px', fontSize: 12, color: C.muted, whiteSpace: 'nowrap' }}>
-                      {getAccessCount(member)}
+                    <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                      {(() => {
+                        const s = getAccessSummary(member)
+                        return (
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 100, color: s.color, background: s.bg, border: `0.5px solid ${s.border}` }}>
+                            {s.text}
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: C.green, background: C.greenBg, border: `0.5px solid ${C.greenBorder}`, borderRadius: 100, padding: '2px 8px' }}>
@@ -167,6 +175,7 @@ export default function TeamMembersPanel() {
         <TeamMemberModal
           member={selected}
           roles={roles}
+          members={members}
           onClose={() => setSelected(null)}
           onSaved={load}
         />

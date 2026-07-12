@@ -56,6 +56,15 @@ export default function AdminSettingsModal({ onClose }: Props) {
 
   const hasAnyAccess = isSuperAdmin || ALL_TABS.some(t => getAccess(t.permKey) !== 'none')
   const TABS = loading ? [] : ALL_TABS.filter(t => getAccess(t.permKey) !== 'none')
+
+  // Auto-select first allowed tab when permissions load
+  useEffect(() => {
+    if (!loading && TABS.length > 0) {
+      if (getAccess(ALL_TABS.find(t => t.id === activeTab)?.permKey ?? '') === 'none') {
+        setActiveTab(TABS[0].id)
+      }
+    }
+  }, [loading])
   const currentAccess = getAccess(ALL_TABS.find(t => t.id === activeTab)?.permKey ?? '')
   const viewOnly = currentAccess === 'view'
 

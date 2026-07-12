@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/settings-tabs/WebhooksTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import React, { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -486,7 +487,7 @@ function EventsModal({
 // ── Destination Table Row ──────────────────────────────────────
 function DestinationRow({
   destination, events, onToggleActive, onToggleEvent,
-  onTest, onEdit, onDelete, onExpand, testing,
+  onTest, onEdit, onDelete, onExpand, testing, canManage = true,
 }: {
   destination:    any
   events:         any[]
@@ -497,6 +498,7 @@ function DestinationRow({
   onDelete:       (id: string) => void
   onExpand:       (dest: any) => void
   testing:        string | null
+  canManage?:     boolean
 }) {
   const [showTestMenu, setShowTestMenu] = useState(false)
   const destEvents   = events.filter(e => e.destination_id === destination.id)
@@ -584,13 +586,13 @@ function DestinationRow({
       <div className="flex items-center gap-1.5 justify-end">
         {/* Test dropdown */}
         <div className="relative">
-          <button onClick={() => setShowTestMenu(p => !p)} disabled={testing === destination.id}
+          {canManage && <button onClick={() => setShowTestMenu(p => !p)} disabled={testing === destination.id}
             className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold hover:opacity-80 disabled:opacity-40"
             style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
             {testing === destination.id
               ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.limeDeep }} />
               : <><Send size={10} /> Test <ChevronDown size={9} /></>}
-          </button>
+          </button>}
           {showTestMenu && (
             <>
               <div className="fixed inset-0 z-[200]" onClick={() => setShowTestMenu(false)} />
@@ -620,18 +622,18 @@ function DestinationRow({
         </div>
 
         {/* Edit */}
-        <button onClick={() => onEdit(destination)}
+        {canManage && <button onClick={() => onEdit(destination)}
           className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
           style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
           <Eye size={11} style={{ color: C.muted }} />
-        </button>
+        </button>}
 
         {/* Delete */}
-        <button onClick={() => onDelete(destination.id)}
+        {canManage && <button onClick={() => onDelete(destination.id)}
           className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
           style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
           <Trash2 size={11} style={{ color: C.red }} />
-        </button>
+        </button>}
       </div>
     </div>
   )
@@ -885,6 +887,7 @@ function DeleteConfirmModal({
 
 // ══════════════════════════════════════════════════════════════
 export default function WebhooksTab() {
+  const { can } = useTabPermissions('webhooks')
   const supabase = createClient()
 
   const [destinations, setDestinations] = useState<any[]>([])
@@ -1048,11 +1051,11 @@ export default function WebhooksTab() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowAdd(true)}
+          {can('create_webhook') && <button onClick={() => setShowAdd(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Destination
-          </button>
+          </button>}
           <button onClick={() => { setRefreshing(true); loadData() }} disabled={refreshing}
             className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
@@ -1104,11 +1107,11 @@ export default function WebhooksTab() {
              style={{ borderColor: C.border }}>
           <Webhook size={32} style={{ color: C.border }} />
           <p className="text-[14px] font-bold" style={{ color: C.muted }}>No webhook destinations configured</p>
-          <button onClick={() => setShowAdd(true)}
+          {can('create_webhook') && <button onClick={() => setShowAdd(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={14} /> Add First Destination
-          </button>
+          </button>}
         </div>
       ) : (
         <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
@@ -1132,6 +1135,7 @@ export default function WebhooksTab() {
               onDelete={handleDelete}
               onExpand={d => setExpandedDest(d)}
               testing={testing}
+              canManage={can('edit_webhook')}
             />
           ))}
         </div>

@@ -8,6 +8,7 @@ import TeamMembersPanel from '@/components/admin/settings-tabs/TeamMembersPanel'
 // and real-time session freshness enforcement.
 // --------------------------------------------------------------
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -440,7 +441,7 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
 // --------------------------------------------------------------
 // PERMISSION MATRIX — Right panel editor
 // --------------------------------------------------------------
-function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMembersReassigned, showToast, isCreating }: {
+function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMembersReassigned, showToast, isCreating, canEdit = true, canDelete = true }: {
   role:                 AdminRole | null
   allRoles:             AdminRole[]
   allMembers:           TeamMember[]
@@ -449,6 +450,8 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
   onMembersReassigned:  (userId: string, roleId: string) => void
   showToast:            (msg: string, type: 'success' | 'error' | 'info') => void
   isCreating:           boolean
+  canEdit?:             boolean
+  canDelete?:           boolean
 }) {
   const supabase = createClient()
 
@@ -684,7 +687,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
             <p className="text-[11px]" style={{ color: isDirty ? C.amber : C.muted }}>
               {isDirty ? 'Unsaved changes' : 'No changes'}
             </p>
-            <button
+            {canEdit && <button
               onClick={handleSave}
               disabled={!isDirty || saving}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40 transition-all"
@@ -695,7 +698,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
               {saving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
                 : <><Save size={14} /> {isCreating ? 'Create Role' : 'Save Changes'}</>}
-            </button>
+            </button>}
           </div>
         )}
       </div>
@@ -721,12 +724,13 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
 // --------------------------------------------------------------
 // ROLE LIST — Left panel
 // --------------------------------------------------------------
-function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew }: {
-  roles:      AdminRole[]
-  allMembers: TeamMember[]
-  selectedId: string | null
-  onSelect:   (role: AdminRole) => void
-  onCreateNew:() => void
+function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCreate = true }: {
+  roles:       AdminRole[]
+  allMembers:  TeamMember[]
+  selectedId:  string | null
+  onSelect:    (role: AdminRole) => void
+  onCreateNew: () => void
+  canCreate?:  boolean
 }) {
   function memberCount(roleId: string) {
     return allMembers.filter(m => m.role_id === roleId).length
@@ -784,7 +788,7 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew }: {
       </div>
 
       {/* Create new role button */}
-      <button
+      {canCreate && <button
         onClick={onCreateNew}
         className="flex items-center justify-center gap-2 py-3 rounded-2xl border text-[13px] font-bold transition-all hover:opacity-80"
         style={{
@@ -795,7 +799,7 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew }: {
         }}>
         <Plus size={15} />
         {selectedId === '__new__' ? 'Creating New Role...' : 'Create Custom Role'}
-      </button>
+      </button>}
     </div>
   )
 }
@@ -1124,11 +1128,12 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
 // --------------------------------------------------------------
 // TEAM SEATS TAB
 // --------------------------------------------------------------
-function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
+function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = true }: {
   members:          TeamMember[]
   roles:            AdminRole[]
   onMemberUpdated:  (id: string, roleId: string | null) => void
   showToast:        (msg: string, type: 'success' | 'error' | 'info') => void
+  canManage?:       boolean
 }) {
   const supabase = createClient()
   const [loadingId,        setLoadingId]        = useState<string | null>(null)
@@ -1431,11 +1436,11 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
         </div>
         <p className="text-[14px] font-bold" style={{ color: C.text }}>No team seats assigned</p>
         <p className="text-[12px]" style={{ color: C.muted }}>Invite a team member to get started</p>
-        <button onClick={() => setShowInvite(true)}
+        {canManage && <button onClick={() => setShowInvite(true)}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
           style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <UserPlus size={14} /> Invite Member
-        </button>
+        </button>}
         {showInvite && (
           <InviteMemberModal roles={roles} onClose={() => setShowInvite(false)}
             onInvited={() => { setShowInvite(false); loadPendingInvites() }} showToast={showToast} />
@@ -1473,7 +1478,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
             )}
             {/* Invite Member */}
             <div className="relative group">
-              <button
+              {canManage && <button
                 onClick={() => !atLimit && setShowInvite(true)}
                 disabled={atLimit}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
@@ -1484,7 +1489,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
                   opacity:         atLimit ? 0.6 : 1,
                 }}>
                 <UserPlus size={13} /> Invite Member
-              </button>
+              </button>}
               {atLimit && (
                 <div className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                      style={{ backgroundColor: C.dark, color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
@@ -1760,12 +1765,12 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
                     }}>
                     {historyLoading === member.id ? '...' : 'History'}
                   </button>
-                  <button
+                  {canManage && <button
                     onClick={() => { setRevokeTarget(member); setRevokeConfirmText('') }}
                     className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
                     style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
                     Revoke
-                  </button>
+                  </button>}
                 </div>
               </div>
               {/* Role history timeline */}
@@ -1906,7 +1911,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
           </div>
 
           {/* Change Role */}
-          <div className="relative">
+          {canManage && <div className="relative">
             <button
               onClick={() => setShowBulkRole(s => !s)}
               disabled={bulkLoading}
@@ -1947,16 +1952,16 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
                 </div>
               </>
             )}
-          </div>
-
+          </div>}
+          
           {/* Bulk Revoke */}
-          <button
+          {canManage && <button
             onClick={() => setShowBulkRevoke(true)}
             disabled={bulkLoading}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-50"
             style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
             Revoke {selectedIds.size}
-          </button>
+          </button>}
 
           {/* Clear */}
           <button onClick={() => setSelectedIds(new Set())}
@@ -2141,6 +2146,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast }: {
 // MAIN — RoleBuilderTab
 // --------------------------------------------------------------
 export default function RoleBuilderTab() {
+  const { can } = useTabPermissions('role_builder')
   const supabase = createClient()
 
   const [roles,              setRoles]              = useState<AdminRole[]>([])
@@ -2328,6 +2334,7 @@ export default function RoleBuilderTab() {
               selectedId={isCreating ? '__new__' : selectedRole?.id ?? null}
               onSelect={handleSelectRole}
               onCreateNew={handleCreateNew}
+              canCreate={can('create_role')}
             />
           </div>
 
@@ -2348,6 +2355,8 @@ export default function RoleBuilderTab() {
               onMembersReassigned={(userId, roleId) => handleMemberUpdated(userId, roleId)}
               showToast={showToast}
               isCreating={isCreating}
+              canEdit={can('edit_role')}
+              canDelete={can('delete_role')}
             />
           </div>
         </div>
@@ -2360,6 +2369,7 @@ export default function RoleBuilderTab() {
           roles={roles}
           onMemberUpdated={handleMemberUpdated}
           showToast={showToast}
+          canManage={can('manage_team')}
         />
       )}
 

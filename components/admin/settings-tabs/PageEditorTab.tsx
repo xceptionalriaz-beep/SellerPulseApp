@@ -1,5 +1,6 @@
 'use client'
 // components/admin/settings-tabs/PageEditorTab.tsx
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   X, Save, RotateCcw, Copy, Check, ChevronLeft,
@@ -35,6 +36,7 @@ interface EditPanel {
 }
 
 export default function PageEditorTab() {
+  const { can } = useTabPermissions('page_editor')
   const iframeRef                         = useRef<HTMLIFrameElement>(null)
   const [activePage, setActivePage]       = useState(PAGES[0])
   const [iframeKey, setIframeKey]         = useState(0)
@@ -506,7 +508,7 @@ export default function PageEditorTab() {
             <ExternalLink size={14} style={{ color: '#fff' }}/>
           </a>
           {/* Export */}
-          {totalChanges > 0 && (
+          {totalChanges > 0 && can('edit_content') && (
             <button onClick={exportChanges}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-black hover:opacity-90"
                     style={{ backgroundColor: C.lime, color: C.dark }}>
@@ -632,15 +634,15 @@ export default function PageEditorTab() {
 
             {/* Panel footer */}
             <div style={{ padding: '16px 20px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8, flexShrink: 0 }}>
-              <button onClick={resetSection}
+              {can('edit_content') && <button onClick={resetSection}
                       style={{ flex: 1, height: 40, borderRadius: 12, border: `1px solid ${C.border}`, backgroundColor: C.bg, color: C.muted, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <RotateCcw size={13}/>Reset
-              </button>
-              <button onClick={saveChanges} disabled={saving}
+              </button>}
+              {can('publish_changes') && <button onClick={saveChanges} disabled={saving}
                       style={{ flex: 2, height: 40, borderRadius: 12, border: 'none', backgroundColor: saved ? C.limeDeep : C.lime, color: C.dark, fontSize: 13, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 {saving ? <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }}/> : saved ? <Check size={13}/> : <Save size={13}/>}
                 {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}
-              </button>
+              </button>}
             </div>
           </div>
         )}

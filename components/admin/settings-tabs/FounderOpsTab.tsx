@@ -1,6 +1,7 @@
 ﻿'use client'
 // components/admin/settings-tabs/FounderOpsTab.tsx
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -71,6 +72,7 @@ function SectionHeader({ title, sub }: { title: string; sub: string }) {
 }
 
 export default function FounderOpsTab({ onNavigate }: Props) {
+  const { can } = useTabPermissions('founder_ops')
   const supabase = createClient()
 
   // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -488,7 +490,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
               {maintenanceMode ? 'MAINTENANCE' : 'LIVE'}
             </span>
           </div>
-          <button onClick={toggleMaintenanceMode} disabled={togglingMaint}
+          {can('export_financial') && <button onClick={toggleMaintenanceMode} disabled={togglingMaint}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:opacity-80 disabled:opacity-50"
             style={{
               backgroundColor: maintenanceMode ? C.amber : C.lime,
@@ -502,7 +504,7 @@ export default function FounderOpsTab({ onNavigate }: Props) {
               <ToggleLeft size={11} />
             )}
             {maintenanceMode ? 'Restore Live' : 'Force Maintenance'}
-          </button>
+          </button>}
         </div>
       </div>
 

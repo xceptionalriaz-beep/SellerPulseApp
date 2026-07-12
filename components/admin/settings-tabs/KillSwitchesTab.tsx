@@ -8,6 +8,7 @@
 // Auto-refreshes every 30 seconds via Visibility API
 // ══════════════════════════════════════════════════════════════
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import MaintenanceScheduleModal from '@/components/admin/MaintenanceScheduleModal'
@@ -263,7 +264,7 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
 
 // ── Kill Switch Row (table row) ───────────────────────────────
 function KillSwitchRow({
-  sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount,
+  sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount, canToggle = true,
 }: {
   sw:                  KillSwitch
   onDisable:           (sw: KillSwitch) => void
@@ -277,6 +278,7 @@ function KillSwitchRow({
   currentUserName:     string
   scheduleCount:       number
   incidentCount:       number
+  canToggle?:          boolean
 }) {
   const isOffline            = !sw.is_enabled
   const isHidden             = !sw.is_visible
@@ -415,7 +417,7 @@ function KillSwitchRow({
         <Toggle
           on={sw.is_enabled}
           spinning={isToggling}
-          onClick={() => sw.is_enabled ? onDisable(sw) : onEnable(sw)}
+          onClick={() => canToggle ? (sw.is_enabled ? onDisable(sw) : onEnable(sw)) : undefined}
         />
       </div>
 
@@ -425,7 +427,7 @@ function KillSwitchRow({
         <VisibleToggle
           on={sw.is_visible}
           spinning={isVisibilityToggling}
-          onClick={() => onToggleVisibility(sw)}
+          onClick={() => canToggle ? onToggleVisibility(sw) : undefined}
         />
       </div>
 
@@ -946,6 +948,7 @@ function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEn
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestorMode?: boolean }) {
+  const { can } = useTabPermissions('kill_switches')
   const supabase = createClient()
 
   const [switches,       setSwitches]       = useState<KillSwitch[]>([])
@@ -1389,6 +1392,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
                 currentUserName={currentUserName}
                 scheduleCount={scheduleCounts[sw.id] ?? 0}
                 incidentCount={incidentCounts[sw.title] ?? 0}
+                canToggle={can('toggle_switch')}
               />
             ))}
           </div>
@@ -1438,7 +1442,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
                   Instantly disables all {activeCount} active feature{activeCount !== 1 ? 's' : ''} simultaneously for every user on the platform. Use only during a major outage.
                 </p>
               </div>
-              <button
+              {can('toggle_switch') && <button
                 onClick={() => setShowKillAll(true)}
                 disabled={killingAll || activeCount === 0}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-black hover:opacity-80 disabled:opacity-40 shrink-0"
@@ -1447,7 +1451,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
                   ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
                   : <Zap size={13} />}
                 {activeCount === 0 ? 'All Offline' : 'Kill All Systems'}
-              </button>
+              </button>}
             </div>
           </div>
         )}

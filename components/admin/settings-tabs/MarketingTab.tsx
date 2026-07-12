@@ -2,6 +2,7 @@
 // components/admin/settings-tabs/MarketingTab.tsx
 // Full marketing center — 7 sections
 
+import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
@@ -339,6 +340,7 @@ function BlogSubscribersSection({ supabase }: { supabase: any }) {
 }
 
 export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any[] }) {
+  const { can } = useTabPermissions('marketing')
   const supabase = createClient()
 
   const [view, setView] = useState<'overview' | 'campaign' | 'history' | 'broadcasts' | 'audience' | 'suppressed' | 'abtests' | 'attribution' | 'referrals' | 'blog_subscribers'>('overview')
@@ -486,9 +488,9 @@ export default function MarketingTab({ initialUsers = [] }: { initialUsers?: any
 
       {/* -- Views -- */}
       {view === 'overview'   && <OverviewSection funnel={funnel} stats={stats} history={history} broadcasts={broadcasts} onStartCampaign={() => setView('campaign')} onLoadUsers={setCampaignUsers} supabase={supabase} />}
-      {view === 'campaign'   && <CampaignBuilder users={campaignUsers} onLoadUsers={setCampaignUsers} loadingUsers={loadingCampaignUsers} setLoadingUsers={setLoadingCampaignUsers} supabase={supabase} onSent={() => { loadHistory(); setView('history') }} />}
+      {view === 'campaign'   && <CampaignBuilder users={campaignUsers} onLoadUsers={setCampaignUsers} loadingUsers={loadingCampaignUsers} setLoadingUsers={setLoadingCampaignUsers} supabase={supabase} onSent={() => { loadHistory(); setView('history') }} canSend={can('send_broadcast')} />}
       {view === 'audience'   && <AudienceBuilder supabase={supabase} onLoadCampaign={(u) => { setCampaignUsers(u); setView('campaign') }} />}
-      {view === 'history'    && <CampaignHistory history={history} loading={loadingHist} onNewCampaign={() => setView('campaign')} />}
+      {view === 'history'    && <CampaignHistory history={history} loading={loadingHist} onNewCampaign={() => setView('campaign')} canCreate={can('create_campaign')} />}
       {view === 'broadcasts' && <BroadcastsSection broadcasts={broadcasts} supabase={supabase} onRefresh={loadBroadcasts} />}
       {view === 'abtests'    && <ABTestSection supabase={supabase} />}
       {view === 'attribution'&& <RevenueAttributionSection supabase={supabase} />}
@@ -897,10 +899,10 @@ function AudienceBuilder({ supabase, onLoadCampaign }: { supabase: any; onLoadCa
 // --------------------------------------------------------------
 // CAMPAIGN BUILDER — Upgraded with 10 new features
 // --------------------------------------------------------------
-function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, supabase, onSent }: {
+function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, supabase, onSent, canSend = true }: {
   users: any[]; onLoadUsers: (u: any[]) => void
   loadingUsers: boolean; setLoadingUsers: (v: boolean) => void
-  supabase: any; onSent: () => void
+  supabase: any; onSent: () => void; canSend?: boolean
 }) {
   const cancelRef = useState({ cancelled: false })[0]
 
@@ -1327,12 +1329,12 @@ function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, su
           </div>
 
           {/* Send test */}
-          <button onClick={sendTestEmail} disabled={sendingTest}
+          {canSend && <button onClick={sendTestEmail} disabled={sendingTest}
             className="flex items-center gap-2 px-3 py-2 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-50 transition-all"
             style={{ borderColor: C.border, color: C.muted, backgroundColor: C.bg }}>
             {sendingTest ? <RefreshCw size={13} className="animate-spin" /> : <Mail size={13} />}
             Send Test Email to Me
-          </button>
+          </button>}
         </div>
 
         {/* RIGHT: Recipients */}
@@ -1463,7 +1465,7 @@ function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, su
               <X size={14} /> Stop
             </button>
           )}
-          <button onClick={() => setConfirmOpen(true)} disabled={sending || done || sendCount === 0}
+          {canSend && <button onClick={() => setConfirmOpen(true)} disabled={sending || done || sendCount === 0}
             className="flex items-center gap-2.5 px-6 py-3 rounded-2xl text-[14px] font-bold disabled:opacity-50 transition-all"
             style={{ backgroundColor: done ? C.limeDeep : sendCount > 0 ? C.dark : C.border, color: done ? '#fff' : C.lime }}>
             {sending ? (
@@ -1475,7 +1477,7 @@ function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, su
             ) : (
               <><Send size={16} /> Launch Campaign</>
             )}
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -1535,8 +1537,8 @@ function CampaignBuilder({ users, onLoadUsers, loadingUsers, setLoadingUsers, su
 // --------------------------------------------------------------
 // CAMPAIGN HISTORY
 // --------------------------------------------------------------
-function CampaignHistory({ history, loading, onNewCampaign }: {
-  history: any[]; loading: boolean; onNewCampaign: () => void
+function CampaignHistory({ history, loading, onNewCampaign, canCreate }: {
+  history: any[]; loading: boolean; onNewCampaign: () => void; canCreate?: boolean
 }) {
   if (loading) return (
     <div className="flex items-center justify-center py-16">
@@ -1548,11 +1550,11 @@ function CampaignHistory({ history, loading, onNewCampaign }: {
     <div className="flex flex-col items-center justify-center py-16 gap-3">
       <History size={36} style={{ color: C.muted }} />
       <p className="text-[15px] font-bold" style={{ color: C.dark }}>No campaigns yet</p>
-      <button onClick={onNewCampaign}
+      {canCreate && <button onClick={onNewCampaign}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold mt-2"
         style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
         <Send size={14} /> Start First Campaign
-      </button>
+      </button>}
     </div>
   )
 
@@ -1567,11 +1569,11 @@ function CampaignHistory({ history, loading, onNewCampaign }: {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="text-[14px] font-black" style={{ color: C.dark }}>{history.length} email{history.length !== 1 ? 's' : ''} sent</p>
-        <button onClick={onNewCampaign}
+        {canCreate && <button onClick={onNewCampaign}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold"
           style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <Send size={13} /> New Campaign
-        </button>
+        </button>}
       </div>
       {Object.entries(grouped).map(([date, rows]) => (
         <div key={date}>

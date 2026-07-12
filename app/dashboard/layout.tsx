@@ -38,7 +38,7 @@ import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
-  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -281,6 +281,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [showSettings,      setShowSettings]      = useState(false)
   const [showAffiliateMenu,  setShowAffiliateMenu]  = useState(false)
   const [sectionPerms, setSectionPerms] = useState<Record<string, boolean> | null>(null)
+  const [sidebarMode, setSidebarMode]   = useState<'hide' | 'ghost'>('hide')
   const [showMoreAnalytics,  setShowMoreAnalytics]  = useState(false)
   const [activeAdminTab,     setActiveAdminTab]     = useState<string | null>(searchParams.get('settings'))
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<string | null>(searchParams.get('analytics'))
@@ -349,6 +350,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             if (Object.keys(mergedPerms).length > 0) {
               setSectionPerms(mergedPerms)
             }
+            // Load sidebar mode
+            setSidebarMode((permsData?.sidebar_mode ?? 'hide') as 'hide' | 'ghost')
           } catch {}
         }
       }
@@ -518,7 +521,9 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 if (!sectionPerms || (profile as any)?.is_super_admin) return true
                 // If item has no permKey → always show
                 if (!(item as any).permKey) return true
-                // Only show if explicitly set to true
+                // Ghost mode — show all tabs
+                if (sidebarMode === 'ghost') return true
+                // Hide mode — only show if explicitly set to true
                 return sectionPerms[(item as any).permKey] === true
               }).map((item) => {
                 const isActive = (item as any).isAnalytics
@@ -526,6 +531,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                   : (item as any).isChild
                     ? activeAdminTab === String(item.tab) + '-child'
                     : activeAdminTab === String(item.tab)
+                const isLocked = sidebarMode === 'ghost' && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] !== true
                 if ((item as any).isChild && !showAffiliateMenu) return null
                 return (
                   <button key={item.label}
@@ -544,11 +550,17 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     }}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left group"
                     style={{ backgroundColor: 'transparent', paddingLeft: (item as any).isChild ? 24 : 12 }}>
-                    <item.icon size={15} style={{ color: isActive ? '#8FFF00' : 'rgba(255,255,255,1)', flexShrink:0, transition:'color 0.15s' }} className="group-hover:!text-lime" />
-                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isActive ? '#8FFF00' : 'rgba(255,255,255,1)', transition:'color 0.15s' }} className="group-hover:!text-lime">{item.label}</span>
+                    <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', flexShrink:0, transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'} />
+                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}>{item.label}</span>
                     {(item as any).hasChild && (
                       <ChevronDown size={13} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAffiliateMenu(v => !v) }}
                         style={{ color:'rgba(255,255,255,0.4)', transform: showAffiliateMenu ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }} />
+                    )}
+                    {!isActive && !(item as any).hasChild && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] === true && (
+                      <Eye size={10} style={{ color:'rgba(255,255,255,0.3)', flexShrink:0 }}/>
+                    )}
+                    {isLocked && (
+                      <Lock size={10} style={{ color:'rgba(255,255,255,0.3)', flexShrink:0 }}/>
                     )}
                     {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
                   </button>
