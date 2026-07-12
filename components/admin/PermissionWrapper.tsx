@@ -36,6 +36,18 @@ export default function PermissionWrapper({ children, viewOnly, tabLabel }: Prop
       
       {/* Content */}
       {children}
+      
+      {/* Overlay blocking clicks — only covers this content area */}
+      <div style={{
+        position:   'absolute',
+        top:        0,
+        left:       0,
+        right:      0,
+        bottom:     0,
+        zIndex:     9998,
+        cursor:     'default',
+        background: 'transparent',
+      }} onClick={e => e.preventDefault()}/>
     </div>
   )
 }
