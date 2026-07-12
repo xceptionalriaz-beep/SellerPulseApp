@@ -58,10 +58,11 @@ export function useTabPermissions(tabKey: string): TabPermResult {
 
   const can = (action: string): boolean => {
     if (isSuperAdmin) return true
-    if (access === 'none' || access === 'view') return false
     if (!perms) return true
     const key = `${tabKey}__${action}`
     const val = perms[key]
+    if (val === true) return true
+    if (access === 'none' || access === 'view') return false
     return val === undefined ? true : val === true
   }
 
