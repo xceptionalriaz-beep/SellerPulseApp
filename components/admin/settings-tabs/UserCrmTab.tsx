@@ -1243,16 +1243,18 @@ function ExportDropdown({ onExportPage, users }: {
   )
 }
 
-function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, segment, onSegment, activeTag, onTag, onAddUser, onRefresh, onExport, advFilters, onAdvFilters, pageSize, onPageSize, showing, total }: {
-  users:any[]; searchInput:string; onSearch:(v:string)=>void; onClear:()=>void
-  filter:string; onFilter:(f:string)=>void
-  segment:string|null; onSegment:(s:string|null)=>void
-  activeTag:string|null; onTag:(t:string|null)=>void
-  onAddUser?:()=>void; onRefresh:()=>void; onExport?:()=>void
-  advFilters: AdvancedFilters; onAdvFilters:(f:AdvancedFilters)=>void
-  pageSize:number; onPageSize:(n:number)=>void
-  showing:number; total:number
-}) {
+function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, segment, onSegment, activeTag, onTag, onAddUser, onRefresh, onExport, advFilters, onAdvFilters, pageSize, onPageSize, 
+showing, total, canDo = () => true }: {
+    users:any[]; searchInput:string; onSearch:(v:string)=>void; onClear:()=>void
+    filter:string; onFilter:(f:string)=>void
+    segment:string|null; onSegment:(s:string|null)=>void
+    activeTag:string|null; onTag:(t:string|null)=>void
+    onAddUser?:()=>void; onRefresh:()=>void; onExport?:()=>void
+    advFilters: AdvancedFilters; onAdvFilters:(f:AdvancedFilters)=>void
+    pageSize:number; onPageSize:(n:number)=>void
+    showing:number; total:number
+    canDo?: (action: string) => boolean
+  }) {
   const [focused,        setFocused]        = useState(false)
   const [showAdvFilters, setShowAdvFilters] = useState(false)
   const [refreshing,     setRefreshing]     = useState(false)
@@ -1300,10 +1302,10 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
              }}>
           <Search size={15} style={{ color: focused ? C.limeDeep : C.muted, flexShrink:0 }} />
           <input
-            value={searchInput}
-            onChange={e => onSearch(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+              value={searchInput}
+              onChange={e => canDo('filter_search') && onSearch(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
             placeholder="Search users by name or email..."
             className="flex-1 text-[13px] bg-transparent"
             style={{ color:C.text, outline:'none', border:'none', boxShadow:'none' }} />
@@ -1313,7 +1315,7 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
         </div>
 
         {/* Advanced filter button */}
-        <button onClick={() => setShowAdvFilters(true)}
+          <button onClick={() => canDo('filter_search') && setShowAdvFilters(true)}
           className="relative w-11 h-11 flex items-center justify-center rounded-xl border shrink-0 hover:opacity-80"
           title="Advanced Filters"
           style={{
@@ -1449,7 +1451,7 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
         {chips.map(ch => {
           const Icon = ch.icon; const isActive = filter === ch.label && !segment
           return (
-            <button key={ch.label} onClick={() => { onFilter(ch.label); onSegment(null) }}
+            <button key={ch.label} onClick={() => canDo('filter_search') && (onFilter(ch.label), onSegment(null))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
                 backgroundColor: isActive ? C.dark    : C.surface,
@@ -1500,7 +1502,7 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
           const isActive = segment === key
           return (
             <button key={key}
-              onClick={() => { onSegment(isActive ? null : key); onFilter('All') }}
+                onClick={() => canDo('filter_search') && (onSegment(isActive ? null : key), onFilter('All'))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
                 backgroundColor: isActive ? cfg.bg      : C.surface,
@@ -1534,7 +1536,7 @@ function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, 
           if (count === 0) return null
           return (
             <button key={key}
-              onClick={() => onTag(isActive ? null : key)}
+                onClick={() => canDo('filter_search') && onTag(isActive ? null : key)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
                 backgroundColor: isActive ? cfg.bg    : C.surface,
@@ -2789,8 +2791,9 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
           showToast(`Exported ${filtered.length} users to CSV`, 'success')
         } : undefined}
         showing={users.length}
-        total={total}
-      />
+          total={total}
+          canDo={canDo}
+        />
 
       <UserTable
           users={users}
