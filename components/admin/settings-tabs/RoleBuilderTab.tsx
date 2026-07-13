@@ -2320,23 +2320,31 @@ export default function RoleBuilderTab() {
       {activeTab === 'builder' && (
         <div className="flex gap-4" style={{ minHeight: 500 }}>
 
-          {/* Left — 35% role list */}
-          <div className="flex flex-col" style={{ width: '35%', minWidth: 240 }}>
-            <div className="mb-3">
-              <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>ROLES REGISTRY</p>
-              <p className="text-[11px]" style={{ color: C.muted }}>
-                {roles.filter(r => r.is_system_role).length} system · {roles.filter(r => !r.is_system_role).length} custom
-              </p>
+        {/* Left — 35% role list */}
+            <div className="flex flex-col" style={{ width: '35%', minWidth: 240 }}>
+              {can('view_roles') ? (
+                <>
+                  <div className="mb-3">
+                    <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>ROLES REGISTRY</p>
+                    <p className="text-[11px]" style={{ color: C.muted }}>
+                      {roles.filter(r => r.is_system_role).length} system · {roles.filter(r => !r.is_system_role).length} custom
+                    </p>
+                  </div>
+                  <RoleList
+                    roles={roles}
+                    allMembers={members}
+                    selectedId={isCreating ? '__new__' : selectedRole?.id ?? null}
+                    onSelect={handleSelectRole}
+                    onCreateNew={handleCreateNew}
+                    canCreate={can('create_role')}
+                  />
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                  <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view roles</p>
+                </div>
+              )}
             </div>
-            <RoleList
-              roles={roles}
-              allMembers={members}
-              selectedId={isCreating ? '__new__' : selectedRole?.id ?? null}
-              onSelect={handleSelectRole}
-              onCreateNew={handleCreateNew}
-              canCreate={can('create_role')}
-            />
-          </div>
 
           {/* Right — 65% permission matrix */}
           <div className="flex flex-col flex-1">
