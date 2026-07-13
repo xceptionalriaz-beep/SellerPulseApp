@@ -2370,16 +2370,22 @@ export default function RoleBuilderTab() {
         </div>
       )}
 
-      {/* Team Seats view */}
-      {activeTab === 'seats' && (
-        <TeamSeatsTab
-          members={members}
-          roles={roles}
-          onMemberUpdated={handleMemberUpdated}
-          showToast={showToast}
-          canManage={can('manage_team')}
-        />
-      )}
+     {/* Team Seats view */}
+        {activeTab === 'seats' && (
+          can('view_team') ? (
+            <TeamSeatsTab
+              members={members}
+              roles={roles}
+              onMemberUpdated={handleMemberUpdated}
+              showToast={showToast}
+              canManage={can('manage_team')}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: '#e8ede2', backgroundColor: '#f7f9f5' }}>
+              <p className="text-[13px] font-bold" style={{ color: '#8a9e78' }}>You don't have access to view team seats</p>
+            </div>
+          )
+        )}
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
       <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #e8ede2' }}>
