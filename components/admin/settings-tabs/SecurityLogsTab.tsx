@@ -535,20 +535,22 @@ function AdminActionLogs({ logs, loading, obscureEmail }: {
 // USER SECURITY EVENTS — Right column
 // --------------------------------------------------------------
 function UserSecurityEvents({
-  events,
-  loading,
-  onBlockIp,
-  dismissedIds,
-  founderIps,
-  blockedIps,
-}: {
-  events:       SecurityEvent[]
-  loading:      boolean
-  onBlockIp:    (ip: string, defaultReason: string) => void
-  dismissedIds: Set<string>
-  founderIps:   Set<string>
-  blockedIps:   Set<string>
-}) {
+    events,
+    loading,
+    onBlockIp,
+    dismissedIds,
+    founderIps,
+    blockedIps,
+    canBlock = true,
+  }: {
+    events:       SecurityEvent[]
+    loading:      boolean
+    onBlockIp:    (ip: string, defaultReason: string) => void
+    dismissedIds: Set<string>
+    founderIps:   Set<string>
+    blockedIps:   Set<string>
+    canBlock?:    boolean
+  }) {
   const visible = events.filter(e => !dismissedIds.has(e.id))
 
   return (
@@ -599,21 +601,21 @@ function UserSecurityEvents({
                   {timeAgo(event.created_at)}
                 </p>
                 {/* Block IP — hidden if founder IP, badge if already blocked */}
-                {isAlert && ipAddress && !founderIps.has(ipAddress) && (
-                  blockedIps.has(ipAddress) ? (
-                    <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0"
-                          style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                      <Ban size={10} /> Already Blocked
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => onBlockIp(ipAddress, `Security alert: ${event.event_title}`)}
-                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 hover:opacity-80"
-                      style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                      <Ban size={10} /> Block IP
-                    </button>
-                  )
-                )}
+                  {isAlert && ipAddress && !founderIps.has(ipAddress) && (
+                    blockedIps.has(ipAddress) ? (
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0"
+                            style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                        <Ban size={10} /> Already Blocked
+                      </span>
+                    ) : canBlock ? (
+                      <button
+                        onClick={() => onBlockIp(ipAddress, `Security alert: ${event.event_title}`)}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 hover:opacity-80"
+                        style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                        <Ban size={10} /> Block IP
+                      </button>
+                    ) : null
+                  )}
               </div>
             )
           })
@@ -627,18 +629,20 @@ function UserSecurityEvents({
 // LOGIN ANOMALIES TABLE
 // --------------------------------------------------------------
 function LoginAnomaliesTable({
-  logins,
-  loading,
-  onBlockIp,
-  blockedIps,
-  founderIps,
-}: {
-  logins:     LoginRecord[]
-  loading:    boolean
-  onBlockIp:  (ip: string, defaultReason: string) => void
-  blockedIps: Set<string>
-  founderIps: Set<string>
-}) {
+    logins,
+    loading,
+    onBlockIp,
+    blockedIps,
+    founderIps,
+    canBlock = true,
+  }: {
+    logins:     LoginRecord[]
+    loading:    boolean
+    onBlockIp:  (ip: string, defaultReason: string) => void
+    blockedIps: Set<string>
+    founderIps: Set<string>
+    canBlock?:  boolean
+  }) {
   const [page, setPage] = useState(0)
   const pageSize        = 20
   const totalPages      = Math.ceil(logins.length / pageSize)
@@ -750,14 +754,14 @@ function LoginAnomaliesTable({
                           style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
                       YOUR IP
                     </span>
-                  ) : login.ip_address ? (
-                    <button
-                      onClick={() => onBlockIp(login.ip_address!, `Manually blocked from login history`)}
-                      className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
-                      style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                      Block
-                    </button>
-                  ) : null}
+                  ) : login.ip_address && canBlock ? (
+                      <button
+                        onClick={() => onBlockIp(login.ip_address!, `Manually blocked from login history`)}
+                        className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
+                        style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                        Block
+                      </button>
+                    ) : null}
                 </div>
               </div>
             )
@@ -772,14 +776,16 @@ function LoginAnomaliesTable({
 // BLOCKED IPS MANAGEMENT
 // --------------------------------------------------------------
 function BlockedIpsPanel({
-  blockedIps,
-  loading,
-  onUnblock,
-}: {
-  blockedIps: BlockedIP[]
-  loading:    boolean
-  onUnblock:  (id: string) => void
-}) {
+    blockedIps,
+    loading,
+    onUnblock,
+    canUnblock = true,
+  }: {
+    blockedIps: BlockedIP[]
+    loading:    boolean
+    onUnblock:  (id: string) => void
+    canUnblock?: boolean
+  }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -831,12 +837,12 @@ function BlockedIpsPanel({
               {/* Time */}
               <p className="text-[10px]" style={{ color: C.muted }}>{timeAgo(entry.created_at)}</p>
               {/* Unblock */}
-              <button
-                onClick={() => onUnblock(entry.id)}
-                className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
-                style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                Unblock
-              </button>
+                {canUnblock && <button
+                  onClick={() => onUnblock(entry.id)}
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
+                  style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                  Unblock
+                </button>}
             </div>
           ))
         )}
@@ -1307,13 +1313,14 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
               obscureEmail={obscureEmail}
             />
             <UserSecurityEvents
-              events={filteredSecurityEvents}
-              loading={loading}
-              onBlockIp={openBlockIpModal}
-              dismissedIds={dismissedIds}
-              founderIps={currentUserIps}
-              blockedIps={blockedIpSet}
-            />
+                events={filteredSecurityEvents}
+                loading={loading}
+                onBlockIp={openBlockIpModal}
+                dismissedIds={dismissedIds}
+                founderIps={currentUserIps}
+                blockedIps={blockedIpSet}
+                canBlock={can('block_ip')}
+              />
           </div>
 
         </div>
@@ -1336,19 +1343,21 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
           {/* Login Anomalies Table */}
           <LoginAnomaliesTable
-            logins={filteredLogins}
-            loading={loading}
-            onBlockIp={openBlockIpModal}
-            blockedIps={blockedIpSet}
-            founderIps={currentUserIps}
-          />
+              logins={filteredLogins}
+              loading={loading}
+              onBlockIp={openBlockIpModal}
+              blockedIps={blockedIpSet}
+              founderIps={currentUserIps}
+              canBlock={can('block_ip')}
+            />
 
           {/* Blocked IPs Panel */}
           <BlockedIpsPanel
-            blockedIps={blockedIpsList}
-            loading={loading}
-            onUnblock={handleUnblockIp}
-          />
+              blockedIps={blockedIpsList}
+              loading={loading}
+              onUnblock={handleUnblockIp}
+              canUnblock={can('unblock_ip')}
+            />
 
         </div>
       )}
