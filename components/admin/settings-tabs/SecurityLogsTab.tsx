@@ -1338,16 +1338,17 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
           {/* Filters Bar */}
           <FiltersBar
-            eventFilter={eventFilter}       setEventFilter={setEventFilter}
-            timeFilter={timeFilter}         setTimeFilter={setTimeFilter}
-            searchQuery={searchQuery}       setSearchQuery={setSearchQuery}
-            isAutoRefresh={isAutoRefresh}
-            lastUpdated={lastUpdated}
-            onExport={handleExport}
-            onManualRefresh={() => loadData(false)}
-          />
+              eventFilter={eventFilter}       setEventFilter={setEventFilter}
+              timeFilter={timeFilter}         setTimeFilter={setTimeFilter}
+              searchQuery={searchQuery}       setSearchQuery={setSearchQuery}
+              isAutoRefresh={isAutoRefresh}
+              lastUpdated={lastUpdated}
+              onExport={handleExport}
+              onManualRefresh={() => loadData(false)}
+              canExport={can('export_logs')}
+            />
 
-          {/* Login Anomalies Table */}
+            {/* Login Anomalies Table */}
           <LoginAnomaliesTable
               logins={filteredLogins}
               loading={loading}
