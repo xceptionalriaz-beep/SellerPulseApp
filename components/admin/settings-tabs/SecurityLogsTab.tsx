@@ -1288,10 +1288,10 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
                 style={{
                   backgroundColor: isActive ? '#8fff00' : 'transparent',
-                  color:           isActive ? C.lime      : C.muted,
-                }}>
-                <Icon size={14} />
-                {tab.label}
+                    color:           isActive ? '#1a2410'      : C.muted,
+                  }}>
+                  <Icon size={14} style={{ color: isActive ? '#1a2410' : C.muted }} />
+                  {tab.label}
               </button>
             )
           })}
