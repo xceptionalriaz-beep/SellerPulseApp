@@ -1128,13 +1128,15 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
 // --------------------------------------------------------------
 // TEAM SEATS TAB
 // --------------------------------------------------------------
-function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = true, canView = true }: {
+function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = true, canView = true, canInvite = true, canRevoke = true }: {
     members:          TeamMember[]
     roles:            AdminRole[]
     onMemberUpdated:  (id: string, roleId: string | null) => void
     showToast:        (msg: string, type: 'success' | 'error' | 'info') => void
     canManage?:       boolean
     canView?:         boolean
+    canInvite?:       boolean
+    canRevoke?:       boolean
   }) {
   const supabase = createClient()
   const [loadingId,        setLoadingId]        = useState<string | null>(null)
@@ -1437,9 +1439,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
         </div>
         <p className="text-[14px] font-bold" style={{ color: C.text }}>No team seats assigned</p>
         <p className="text-[12px]" style={{ color: C.muted }}>Invite a team member to get started</p>
-        {canManage && <button onClick={() => setShowInvite(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
-          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+        {canInvite && <button onClick={() => setShowInvite(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
+            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <UserPlus size={14} /> Invite Member
         </button>}
         {showInvite && (
@@ -1478,10 +1480,10 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
               </button>
             )}
             {/* Invite Member */}
-            <div className="relative group">
-              {canManage && <button
-                onClick={() => !atLimit && setShowInvite(true)}
-                disabled={atLimit}
+              <div className="relative group">
+                {canInvite && <button
+                  onClick={() => !atLimit && setShowInvite(true)}
+                  disabled={atLimit}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
                 style={{
                   backgroundColor: atLimit ? C.border : C.dark,
@@ -1766,8 +1768,8 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
                     }}>
                     {historyLoading === member.id ? '...' : 'History'}
                   </button>
-                  {canManage && <button
-                    onClick={() => { setRevokeTarget(member); setRevokeConfirmText('') }}
+                  {canRevoke && <button
+                      onClick={() => { setRevokeTarget(member); setRevokeConfirmText('') }}
                     className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
                     style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
                     Revoke
@@ -1956,9 +1958,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
           </div>}
           
           {/* Bulk Revoke */}
-          {canManage && <button
-            onClick={() => setShowBulkRevoke(true)}
-            disabled={bulkLoading}
+            {canRevoke && <button
+              onClick={() => setShowBulkRevoke(true)}
+              disabled={bulkLoading}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-50"
             style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
             Revoke {selectedIds.size}
@@ -2380,6 +2382,8 @@ export default function RoleBuilderTab() {
             showToast={showToast}
             canManage={can('manage_team')}
             canView={can('view_team')}
+            canInvite={can('invite_member')}
+            canRevoke={can('revoke_access')}
           />
         )}
 
