@@ -748,11 +748,11 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                   const active = activeTab === t.key
                   return (
                     <button key={t.key}
-                      onClick={() => setActiveTab(t.key)}
-                      className="flex-1 py-2 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap"
-                      style={{
-                        backgroundColor: active ? C.dark   : C.bg,
-                        color:           active ? C.lime   : C.muted,
+                        onClick={() => setActiveTab(t.key)}
+                        className="flex-1 py-2 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap"
+                        style={{
+                          backgroundColor: active ? C.lime   : C.bg,
+                          color:           active ? '#1a2410'   : C.muted,
                       }}>
                       {t.label}
                     </button>

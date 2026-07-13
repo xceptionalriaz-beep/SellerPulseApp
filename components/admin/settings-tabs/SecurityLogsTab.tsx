@@ -283,16 +283,18 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
 // FRAUD SENTINEL BANNER
 // --------------------------------------------------------------
 function FraudSentinelBanner({
-  alerts,
-  onLockAccount,
-  onDismiss,
-  canLock = true,
-}: {
-  alerts:          SecurityEvent[]
-  onLockAccount:   (userId: string, eventId: string) => void
-  onDismiss:       (eventId: string) => void
-  canLock?:        boolean
-}) {
+    alerts,
+    onLockAccount,
+    onDismiss,
+    canLock = true,
+    canDismiss = true,
+  }: {
+    alerts:          SecurityEvent[]
+    onLockAccount:   (userId: string, eventId: string) => void
+    onDismiss:       (eventId: string) => void
+    canLock?:        boolean
+    canDismiss?:     boolean
+  }) {
   const criticalAlerts = alerts.filter(a =>
     a.event_title.toLowerCase().includes('impossible') ||
     a.event_title.toLowerCase().includes('multi') ||
@@ -328,11 +330,11 @@ function FraudSentinelBanner({
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Lock size={11} /> Lock Account
           </button>}
-          <button
-            onClick={() => onDismiss(alert.id)}
-            className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 shrink-0">
-            <X size={13} style={{ color: C.muted }} />
-          </button>
+          {canDismiss && <button
+              onClick={() => onDismiss(alert.id)}
+              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 shrink-0">
+              <X size={13} style={{ color: C.muted }} />
+            </button>}
         </div>
       ))}
     </div>
@@ -1278,11 +1280,12 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
           {/* Fraud Sentinel */}
           <FraudSentinelBanner
-            alerts={securityEvents.filter(e => !dismissedIds.has(e.id))}
-            onLockAccount={handleLockAccount}
-            onDismiss={handleDismissAlert}
-            canLock={can('clear_logs')}
-          />
+              alerts={securityEvents.filter(e => !dismissedIds.has(e.id))}
+              onLockAccount={handleLockAccount}
+              onDismiss={handleDismissAlert}
+              canLock={can('lock_account')}
+              canDismiss={can('dismiss_alert')}
+            />
 
           {/* Filters Bar */}
           <FiltersBar

@@ -1,6 +1,7 @@
 ﻿'use client'
-// components/admin/settings-tabs/RoleBuilderTab.tsx
+  // components/admin/settings-tabs/RoleBuilderTab.tsx
 import TeamMembersPanel from '@/components/admin/settings-tabs/TeamMembersPanel'
+import ProDropdown from '@/components/ui/ProDropdown'
 // --------------------------------------------------------------
 // RIAZIFY — Role Builder Tab
 // Split-view RBAC management with permission matrix,
@@ -12,10 +13,10 @@ import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
-  Shield, Lock, Plus, Trash2, Check, X, Users, AlertTriangle,
-  CheckCircle, RefreshCw, Activity, ChevronDown, UserPlus, Mail,
-  Settings, Key, BarChart2, Zap, Eye, Edit3, Save, Clock, Search,
-} from 'lucide-react'
+    Shield, Lock, Plus, Trash2, Check, X, Users, AlertTriangle,
+    CheckCircle, RefreshCw, Activity, ChevronDown, UserPlus, Mail,
+    Settings, Key, BarChart2, Zap, Eye, Edit3, Save, Clock, Search, Download,
+  } from 'lucide-react'
 
 // -- Brand tokens -----------------------------------------------
 const C = {
@@ -1476,10 +1477,10 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
             {/* Export CSV */}
             {members.length > 0 && (
               <button
-                onClick={exportRoster}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all border"
-                style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-                ? Export CSV
+               onClick={exportRoster}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all border"
+                  style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+                  <Download size={13} /> Export CSV
               </button>
             )}
             {/* Invite Member */}
@@ -1488,13 +1489,13 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
                   onClick={() => !atLimit && setShowInvite(true)}
                   disabled={atLimit}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
-                style={{
-                  backgroundColor: atLimit ? C.border : C.dark,
-                  color:           atLimit ? C.muted  : C.lime,
-                  cursor:          atLimit ? 'not-allowed' : 'pointer',
-                  opacity:         atLimit ? 0.6 : 1,
-                }}>
-                <UserPlus size={13} /> Invite Member
+                  style={{
+                    backgroundColor: atLimit ? C.border : C.lime,
+                    color:           atLimit ? C.muted  : C.dark,
+                    cursor:          atLimit ? 'not-allowed' : 'pointer',
+                    opacity:         atLimit ? 0.6 : 1,
+                  }}>
+                  <UserPlus size={13} /> Invite Member
               </button>
               {atLimit && (
                 <div className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1706,15 +1707,22 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
                       <span className="text-[11px]" style={{ color: C.muted }}>Updating...</span>
                     </div>
                   ) : (
-                    <RoleDropdown
-                        value={member.role_id}
-                        roles={roles}
-                        disabled={!canManage}
-                        onChange={newRoleId => {
-                        if (newRoleId === null) revokeAccess(member.id)
-                        else changeRole(member.id, newRoleId)
-                      }}
-                    />
+                    <div style={{ pointerEvents: canManage ? 'auto' : 'none', opacity: canManage ? 1 : 0.6 }}>
+                        <ProDropdown
+                          prefix=""
+                          currentValue={member.role_id ?? 'none'}
+                          options={[
+                            { val: 'none', label: 'No role', enabled: true },
+                            ...roles.map(r => ({ val: r.id, label: r.role_name, enabled: true })),
+                          ]}
+                          onChanged={newRoleId => {
+                            if (newRoleId === 'none') revokeAccess(member.id)
+                            else changeRole(member.id, newRoleId)
+                          }}
+                          width="full"
+                          maxItems={6}
+                        />
+                      </div>
                   )}
                 </div>
 
@@ -2296,23 +2304,23 @@ export default function RoleBuilderTab() {
           const isActive = activeTab === tab.key
           return (
             <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as 'builder' | 'seats')}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold transition-all"
-              style={{
-                backgroundColor: isActive ? C.dark    : C.surface,
-                borderColor: isActive ? '#8fff00' : C.border,
-                color:           isActive ? '#ffffff' : C.muted,
-              }}>
-              <tab.Icon size={14} style={{ color: isActive ? C.lime : C.muted }} />
-              {tab.label}
-              {tab.key === 'seats' && members.length > 0 && (
-                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
-                      style={{ backgroundColor: isActive ? C.lime : C.bg, color: isActive ? C.dark : C.limeDeep }}>
-                  {members.length}
-                </span>
-              )}
-            </button>
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as 'builder' | 'seats')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold transition-all"
+                style={{
+                  backgroundColor: isActive ? C.lime    : C.surface,
+                  borderColor: isActive ? C.lime : C.border,
+                  color:           isActive ? C.dark : C.muted,
+                }}>
+                <tab.Icon size={14} style={{ color: isActive ? C.dark : C.muted }} />
+                {tab.label}
+                {tab.key === 'seats' && members.length > 0 && (
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                        style={{ backgroundColor: isActive ? C.dark : C.bg, color: isActive ? C.lime : C.limeDeep }}>
+                    {members.length}
+                  </span>
+                )}
+              </button>
           )
         })}
 

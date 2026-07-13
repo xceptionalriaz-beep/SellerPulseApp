@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase'
+import ProDropdown from '@/components/ui/ProDropdown'
 
 // -- Inline presence helpers (from hooks/usePresence.ts) --------
 // If you've created hooks/usePresence.ts you can replace this
@@ -40,14 +41,14 @@ function getOnlineCount(users: any[]): number {
 }
 // --------------------------------------------------------------
 import {
-  UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
-  Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
-  AlertTriangle, Check, Search, RefreshCw, Users,
-  TimerOff, Headphones, MoreVertical, User, CloudOff,
-  CheckCircle, Plus, Shield, Key, Activity, TrendingDown,
-  Clock, Wifi, WifiOff, Zap, Gift, TrendingUp, XCircle,
-  Award, Globe, AtSign, Camera, PlayCircle, HelpCircle,
-  Link2, Wrench, BarChart2 as BarChart, MessageSquare, Filter, ArrowRight, SlidersHorizontal, FileText,
+    UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
+    Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
+    AlertTriangle, Check, Search, RefreshCw, Users,
+    TimerOff, Headphones, MoreVertical, User, CloudOff,
+    CheckCircle, Plus, Shield, Key, Activity, TrendingDown,
+    Clock, Wifi, WifiOff, Zap, Gift, TrendingUp, XCircle,
+    Award, Globe, AtSign, Camera, PlayCircle, HelpCircle,
+    Link2, Wrench, BarChart2 as BarChart, MessageSquare, Filter, ArrowRight, SlidersHorizontal, FileText, Download,
 } from 'lucide-react'
 
 import { UserDetailDrawer } from './UserDetailDrawer'
@@ -812,8 +813,8 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                       }))}
                     className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                     style={{
-                      backgroundColor: active ? C.dark : C.bg,
-                      borderColor:     active ? C.dark : C.border,
+                      backgroundColor: active ? C.lime : C.bg,
+                      borderColor:     active ? C.lime : C.border,
                       color:           active ? C.lime : C.muted,
                     }}>
                     {opt.label}
@@ -884,8 +885,8 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                       onClick={() => canDo('filter_search') && setDraft(d => ({ ...d, country: d.country === opt.value ? 'all' : opt.value }))}
                     className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                     style={{
-                      backgroundColor: draft.country === opt.value ? C.dark : C.bg,
-                      borderColor:     draft.country === opt.value ? C.dark : C.border,
+                      backgroundColor: draft.country === opt.value ? C.lime : C.bg,
+                      borderColor:     draft.country === opt.value ? C.lime : C.border,
                       color:           draft.country === opt.value ? C.lime : C.muted,
                     }}>
                     {opt.label}
@@ -1214,13 +1215,13 @@ function ExportDropdown({ onExportPage, users }: {
   return (
     <div className="relative shrink-0">
       <button onClick={() => setOpen(s => !s)}
-        className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold hover:opacity-80 border"
-        style={{ borderColor:C.border, backgroundColor:C.surface, color:C.muted }}>
-        {exporting
-          ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.limeDeep }} />
-          : '?'}
-        Export
-        <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition:'0.2s' }} />
+          className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold hover:opacity-80 border"
+          style={{ borderColor:C.border, backgroundColor:C.surface, color:C.muted }}>
+          {exporting
+              ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.limeDeep }} />
+              : <Download size={14} />}
+          Export
+          <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition:'0.2s' }} />
       </button>
 
       {open && (
@@ -1350,11 +1351,11 @@ showing, total, canDo = () => true }: {
         {/* Export dropdown */}
         {onExport && <ExportDropdown onExportPage={onExport} users={users} />}
         {onAddUser && (
-          <button onClick={onAddUser}
-            className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
-            style={{ backgroundColor:C.dark, color:C.lime }}>
-            <Plus size={14} /> Add New User
-          </button>
+         <button onClick={onAddUser}
+              className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
+              style={{ backgroundColor:C.lime, color:'#1a2410' }}>
+              <Plus size={14} /> Add New User
+            </button>
         )}
       </div>
 
@@ -1458,15 +1459,15 @@ showing, total, canDo = () => true }: {
             <button key={ch.label} onClick={() => canDo('filter_search') && (onFilter(ch.label), onSegment(null))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
-                backgroundColor: isActive ? C.dark    : C.surface,
-                borderColor: isActive ? '#8fff00' : C.border,
-                color:           isActive ? '#ffffff' : C.muted,
+                  backgroundColor: isActive ? C.lime    : C.surface,
+                  borderColor: isActive ? C.lime : C.border,
+                  color:           isActive ? C.dark : C.muted,
               }}>
-              <Icon size={12} style={{ color: isActive ? C.lime : C.muted }} />
-              {ch.label}
-              {ch.badge != null && ch.badge > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                      style={{ backgroundColor: isActive ? C.lime : C.red, color: isActive ? '#1a2410' : '#fff' }}>
+              <Icon size={12} style={{ color: isActive ? '#1a2410' : C.muted }} />
+                {ch.label}
+                {ch.badge != null && ch.badge > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
+                      style={{ backgroundColor: isActive ? '#1a2410' : C.red, color: isActive ? C.lime : '#fff' }}>
                   {ch.badge}
                 </span>
               )}
@@ -1482,12 +1483,12 @@ showing, total, canDo = () => true }: {
             <div className="flex items-center gap-1">
               {PAGE_SIZES.map(n => (
                 <button key={n} onClick={() => onPageSize(n)}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all"
-                  style={{
-                    backgroundColor: pageSize === n ? C.dark    : C.bg,
-                    color:           pageSize === n ? C.lime    : C.muted,
-                    border:          `1px solid ${pageSize === n ? C.dark : C.border}`,
-                  }}>
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all"
+                    style={{
+                      backgroundColor: pageSize === n ? C.lime    : C.bg,
+                      color:           pageSize === n ? '#1a2410' : C.muted,
+                      border:          `1px solid ${pageSize === n ? C.lime : C.border}`,
+                    }}>
                   {n}
                 </button>
               ))}
@@ -1578,8 +1579,8 @@ function Checkbox({ checked, onChange, indeterminate = false }: {
     <div onClick={onChange}
          className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer shrink-0 transition-all"
          style={{
-           backgroundColor: checked ? C.dark : 'transparent',
-           borderColor:     checked ? C.dark : C.border,
+           backgroundColor: checked ? C.lime : 'transparent',
+           borderColor:     checked ? C.lime : C.border,
          }}>
       {checked && <Check size={9} style={{ color: C.lime }} />}
       {indeterminate && !checked && (
@@ -1610,6 +1611,8 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
     catch { return new Set() }
   })
   const [showColMenu,   setShowColMenu]   = useState(false)
+    const [colMenuPos, setColMenuPos] = useState({ top: 0, right: 0 })
+    const colMenuBtnRef = useRef<HTMLButtonElement>(null)
 
   function toggleCol(col: string) {
     setHiddenCols(prev => {
@@ -1792,16 +1795,22 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
         {/* Column visibility toggle */}
         <div className="flex items-center justify-end gap-1 relative">
           <HeaderCell label="ACTIONS" />
-          <button onClick={() => setShowColMenu(s => !s)}
-            className="p-1 rounded-md hover:bg-gray-100 transition-colors ml-1"
-            title="Show/hide columns">
-            <SlidersHorizontal size={11} style={{ color: hiddenCols.size > 0 ? C.limeDeep : C.muted }} />
-          </button>
-          {showColMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
-              <div className="absolute top-full right-0 mt-1 z-50 rounded-2xl border shadow-xl overflow-hidden min-w-[160px]"
-                   style={{ backgroundColor:'#fff', borderColor:C.border }}>
+          <button ref={colMenuBtnRef} onClick={() => {
+                if (!showColMenu && colMenuBtnRef.current) {
+                  const rect = colMenuBtnRef.current.getBoundingClientRect()
+                  setColMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+                }
+                setShowColMenu(s => !s)
+              }}
+              className="p-1 rounded-md hover:bg-gray-100 transition-colors ml-1"
+              title="Show/hide columns">
+              <SlidersHorizontal size={11} style={{ color: hiddenCols.size > 0 ? C.limeDeep : C.muted }} />
+            </button>
+            {showColMenu && createPortal(
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
+                <div className="fixed z-50 rounded-2xl border shadow-xl overflow-hidden min-w-[160px]"
+                     style={{ backgroundColor:'#fff', borderColor:C.border, top: colMenuPos.top, right: colMenuPos.right }}>
                 <div className="px-3 py-2 border-b flex items-center justify-between"
                      style={{ borderColor:C.border, backgroundColor:C.bg }}>
                   <p className="text-[10px] font-black tracking-wider" style={{ color:C.muted }}>COLUMNS</p>
@@ -1815,22 +1824,23 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
                   )}
                 </div>
                 {TOGGLEABLE_COLS.map(col => (
-                  <button key={col} onClick={() => toggleCol(col)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors"
-                    style={{ borderBottom:`1px solid ${C.border}` }}>
-                    <div className="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0"
-                         style={{
-                           backgroundColor: !hiddenCols.has(col) ? C.dark    : 'transparent',
-                           borderColor:     !hiddenCols.has(col) ? C.dark    : C.border,
-                         }}>
-                      {!hiddenCols.has(col) && <Check size={8} style={{ color: C.lime }} />}
-                    </div>
-                    <span className="text-[11px] font-semibold" style={{ color:C.text }}>{col}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+                      <button key={col} onClick={() => toggleCol(col)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors"
+                        style={{ borderBottom:`1px solid ${C.border}` }}>
+                        <div className="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0"
+                             style={{
+                               backgroundColor: !hiddenCols.has(col) ? C.lime    : 'transparent',
+                               borderColor:     !hiddenCols.has(col) ? C.lime    : C.border,
+                             }}>
+                          {!hiddenCols.has(col) && <Check size={8} style={{ color: '#1a2410' }} />}
+                        </div>
+                      <span className="text-[11px] font-semibold" style={{ color:C.text }}>{col}</span>
+                    </button>
+                  ))}
+                </div>
+              </>,
+              document.body
+            )}
         </div>
       </div>
 
@@ -1906,10 +1916,10 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
 
             {/* Export Selected */}
             {canDo('export_csv') && <button onClick={bulkExport}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-              ? Export CSV
-            </button>}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                <Download size={13} /> Export CSV
+              </button>}
 
           {/* Suspend Selected */}
             {canDo('suspend_user') && <button onClick={() => setShowBulkSuspend(true)}
@@ -2264,7 +2274,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                 </div>
                 <div onClick={() => setNotify(s => !s)}
                      className="relative w-10 h-5 rounded-full cursor-pointer transition-colors"
-                     style={{ backgroundColor: notify ? C.dark : '#CBD5E1' }}>
+                     style={{ backgroundColor: notify ? C.lime : '#CBD5E1' }}>
                   <div className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
                        style={{ backgroundColor: notify ? C.lime : '#fff', left: notify ? '22px' : '2px' }} />
                 </div>
@@ -2416,13 +2426,16 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
             {/* Plan + Role */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>INITIAL PLAN</p>
-                <select value={plan} onChange={e => setPlan(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
-                  style={{ borderColor:C.border, backgroundColor:C.bg, color:C.text }}>
-                  {['Free Trial','Pro Plan','Elite Plan'].map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
+                  <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>INITIAL PLAN</p>
+                  <ProDropdown
+                    prefix=""
+                    currentValue={plan}
+                    options={['Free Trial','Pro Plan','Elite Plan'].map(p => ({ val: p, label: p, enabled: true }))}
+                    onChanged={setPlan}
+                    width="full"
+                    maxItems={3}
+                  />
+                </div>
               <div>
                 <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>ROLE</p>
                 <div className="flex gap-1.5 h-10">
@@ -2430,11 +2443,11 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
                     <button key={r} onClick={() => setRole(r)}
                       className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border text-[12px] font-bold transition-all"
                       style={{
-                        backgroundColor: role===r ? C.dark : C.bg,
-                        borderColor:     role===r ? C.dark : C.border,
-                        color:           role===r ? C.lime : C.muted,
-                      }}>
-                      {r === 'admin' ? <><Key size={11} /> Admin</> : <><User size={11} /> User</>}
+                          backgroundColor: role===r ? C.lime : C.bg,
+                          borderColor:     role===r ? C.lime : C.border,
+                          color:           role===r ? '#1a2410' : C.muted,
+                        }}>
+                        {r === 'admin' ? <><Key size={11} /> Admin</> : <><User size={11} /> User</>}
                     </button>
                   ))}
                 </div>
@@ -2465,11 +2478,11 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
                 <p className="text-[10px]" style={{ color:C.muted }}>Includes temporary password</p>
               </div>
               <div onClick={() => setSendWelcome(s => !s)}
-                   className="relative w-11 h-6 rounded-full cursor-pointer"
-                   style={{ backgroundColor: sendWelcome ? C.dark : '#CBD5E1' }}>
-                <div className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
-                     style={{ backgroundColor: sendWelcome ? C.lime : '#fff', left: sendWelcome ? '22px' : '2px' }} />
-              </div>
+                     className="relative w-11 h-6 rounded-full cursor-pointer"
+                     style={{ backgroundColor: sendWelcome ? C.lime : '#CBD5E1' }}>
+                  <div className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+                       style={{ backgroundColor: sendWelcome ? '#1a2410' : '#fff', left: sendWelcome ? '22px' : '2px' }} />
+                </div>
             </div>
             {/* Actions */}
             <div className="flex gap-2">
@@ -2987,7 +3000,7 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
           </button>
           <button onClick={save} disabled={!content.trim() || saving}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: content.trim() ? C.dark : C.border, color: C.lime }}>
+            style={{ backgroundColor: content.trim() ? C.lime : C.border, color: content.trim() ? C.dark : C.lime }}>
             {saving
               ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.lime }} />
               : <><Check size={11} /> Save</>}
