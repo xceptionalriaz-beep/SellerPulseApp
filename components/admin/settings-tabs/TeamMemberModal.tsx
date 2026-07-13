@@ -282,11 +282,11 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => setAll('full')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.greenBorder}`, background: C.greenBg, color: C.green, cursor: 'pointer' }}>All full</button>
-            <button onClick={() => setAll('view')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>All view</button>
-            <button onClick={() => setAll('none')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>Clear all</button>
+            {canEdit && <button onClick={() => setAll('full')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.greenBorder}`, background: C.greenBg, color: C.green, cursor: 'pointer' }}>All full</button>}
+            {canEdit && <button onClick={() => setAll('view')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}>All view</button>}
+            {canEdit && <button onClick={() => setAll('none')} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>Clear all</button>}
             <div style={{ position: 'relative' }}>
-              <button onClick={() => setShowCopyFrom(v => !v)} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>Copy from...</button>
+              {canEdit && <button onClick={() => setShowCopyFrom(v => !v)} style={{ fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, color: C.muted, cursor: 'pointer' }}>Copy from...</button>}
               {showCopyFrom && (
                 <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 9999, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 220, overflow: 'hidden', maxHeight: 300, overflowY: 'auto' }}>
                   {/* Copy from Role */}
@@ -369,7 +369,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
           </div>
         </div>
 
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative', pointerEvents: canEdit ? 'auto' : 'none', opacity: canEdit ? 1 : 0.6 }}>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
           {/* Left panel — role & settings */}
           <div style={{ width: 220, flexShrink: 0, borderRight: `1px solid ${C.border}`, padding: 20, display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto' }}>
@@ -377,6 +377,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
             {/* Role */}
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 10px' }}>Role</p>
+              <div style={{ pointerEvents: canEdit ? 'auto' : 'none', opacity: canEdit ? 1 : 0.6 }}>
               <ProDropdown
                 prefix=""
                 currentValue={selectedRoleId}
@@ -407,6 +408,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                 width="full"
                 maxItems={6}
               />
+              </div>
             </div>
 
             {/* Super admin toggle */}
@@ -416,7 +418,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                   <Shield size={14} style={{ color: C.limeDeep }}/>
                   <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0 }}>Super Admin</p>
                 </div>
-                <Toggle checked={isSuperAdmin} onChange={() => setIsSuperAdmin(v => !v)}/>
+                <Toggle checked={isSuperAdmin} onChange={() => canEdit && setIsSuperAdmin(v => !v)}/>
               </div>
               <p style={{ fontSize: 11, color: C.muted, margin: 0, lineHeight: 1.5 }}>Super admins bypass all permission checks and see everything.</p>
             </div>
@@ -426,7 +428,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
               <div style={{ background: C.bg, borderRadius: 12, padding: 14, border: `1px solid ${C.border}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0 }}>Ghost Mode</p>
-                  <Toggle checked={sidebarMode === 'ghost'} onChange={() => setSidebarMode(v => v === 'ghost' ? 'hide' : 'ghost')}/>
+                  <Toggle checked={sidebarMode === 'ghost'} onChange={() => canEdit && setSidebarMode(v => v === 'ghost' ? 'hide' : 'ghost')}/>
                 </div>
                 <p style={{ fontSize: 11, color: C.muted, margin: 0, lineHeight: 1.5 }}>No-access tabs show in the sidebar as locked, instead of being hidden.</p>
               </div>
@@ -462,7 +464,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                     return next
                   })},
                 ].map(preset => (
-                  <button key={preset.label} onClick={() => { preset.action(); showToast(`Applied ${preset.label} preset`) }}
+                    <button key={preset.label} onClick={() => { if (canEdit) { preset.action(); showToast(`Applied ${preset.label} preset`) } }}
                     style={{ textAlign: 'left', padding: '7px 10px', borderRadius: 8, border: `1px solid ${C.border}`, background: C.bg, cursor: 'pointer', width: '100%' }}>
                     <p style={{ fontSize: 12, fontWeight: 700, color: C.text, margin: '0 0 1px' }}>{preset.label}</p>
                     <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>{preset.desc}</p>
@@ -535,7 +537,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
               <div key={section} style={{ marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingBottom: 6, borderBottom: `1px solid ${C.border}` }}>
                   <p style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>{section}</p>
-                  {!isSuperAdmin && (
+                  {!isSuperAdmin && canEdit && (
                     <div style={{ display: 'flex', gap: 4 }}>
                       <button onClick={() => {
                         setTabPerms(prev => {
@@ -571,7 +573,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                         {/* Tab row */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', alignItems: 'center', padding: '8px 12px', borderRadius: isExpanded ? '8px 8px 0 0' : 8, background: level === 'full' ? C.greenBg : level === 'view' ? '#eff6ff' : 'transparent', gap: 10 }}>
                           <p style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0 }}>{tab.label}</p>
-                          <AccessBadge level={level} onClick={() => !isSuperAdmin && cycleAccess(tab.key)} disabled={isSuperAdmin}/>
+                          <AccessBadge level={level} onClick={() => !isSuperAdmin && canEdit && cycleAccess(tab.key)} disabled={isSuperAdmin || !canEdit}/>
                           {actions.length > 0 && (
                             <button onClick={() => setExpandedTab(isExpanded ? null : tab.key)}
                                     style={{ width: 24, height: 24, borderRadius: 6, border: `1px solid ${C.border}`, background: C.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
@@ -588,6 +590,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                               <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em', margin: 0 }}>Granular permissions</p>
                               <div style={{ display: 'flex', gap: 6 }}>
                                 <button onClick={() => {
+                                  if (!canEdit) return
                                   const updates: Record<string, boolean> = {}
                                   actions.forEach(a => { updates[`${tab.key}__${a.key}`] = true })
                                   setActionPerms(prev => ({ ...prev, ...updates }))
@@ -597,6 +600,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                                   All on
                                 </button>
                                 <button onClick={() => {
+                                  if (!canEdit) return
                                   const updates: Record<string, boolean> = {}
                                   actions.forEach(a => { updates[`${tab.key}__${a.key}`] = false })
                                   setActionPerms(prev => ({ ...prev, ...updates }))
@@ -623,14 +627,14 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
                                     <p style={{ fontSize: 11, color: C.muted, margin: '1px 0 0' }}>{action.desc}</p>
                                   </div>
                                   <Toggle checked={enabled} onChange={() => {
-                                    if (isSuperAdmin) return
+                                    if (isSuperAdmin || !canEdit) return
                                     const newVal = !actionPerms[actionKey]
                                     setActionPerms(prev => ({ ...prev, [actionKey]: newVal }))
                                     // Auto-set tab to full access if any action is turned on
                                     if (newVal && tabPerms[tab.key] === 'none') {
                                       setTabPerms(prev => ({ ...prev, [tab.key]: 'full' }))
                                     }
-                                  }} disabled={isSuperAdmin}/>
+                                  }} disabled={isSuperAdmin || !canEdit}/>
                                 </div>
                               )
                             })}
