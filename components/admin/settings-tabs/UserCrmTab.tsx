@@ -1899,11 +1899,11 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
             </div>}
 
             {/* Export Selected */}
-          <button onClick={bulkExport}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-            style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-            ? Export CSV
-          </button>
+            {canDo('export_csv') && <button onClick={bulkExport}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+              ? Export CSV
+            </button>}
 
           {/* Suspend Selected */}
             {canDo('suspend_user') && <button onClick={() => setShowBulkSuspend(true)}
@@ -3317,12 +3317,12 @@ function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isIn
                     </div>
                   )}
 
-                  {/* Note count badge */}
-                  {noteCount > 0 && (
-                    <button
-                      onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
-                      className="flex items-center gap-1 mt-1 hover:opacity-70"
-                      title={`${noteCount} note${noteCount !== 1 ? 's' : ''} — click to view`}>
+                 {/* Note count badge */}
+                    {noteCount > 0 && canDo('add_notes') && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
+                        className="flex items-center gap-1 mt-1 hover:opacity-70"
+                        title={`${noteCount} note${noteCount !== 1 ? 's' : ''} — click to view`}>
                       <FileText size={9} style={{ color: C.limeDeep }} />
                       <span className="text-[9px] font-bold" style={{ color: C.limeDeep }}>
                         {noteCount} note{noteCount !== 1 ? 's' : ''}
