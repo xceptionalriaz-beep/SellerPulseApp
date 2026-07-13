@@ -1128,13 +1128,14 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
 // --------------------------------------------------------------
 // TEAM SEATS TAB
 // --------------------------------------------------------------
-function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = true }: {
-  members:          TeamMember[]
-  roles:            AdminRole[]
-  onMemberUpdated:  (id: string, roleId: string | null) => void
-  showToast:        (msg: string, type: 'success' | 'error' | 'info') => void
-  canManage?:       boolean
-}) {
+function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = true, canView = true }: {
+    members:          TeamMember[]
+    roles:            AdminRole[]
+    onMemberUpdated:  (id: string, roleId: string | null) => void
+    showToast:        (msg: string, type: 'success' | 'error' | 'info') => void
+    canManage?:       boolean
+    canView?:         boolean
+  }) {
   const supabase = createClient()
   const [loadingId,        setLoadingId]        = useState<string | null>(null)
   const [revokeTarget,     setRevokeTarget]     = useState<TeamMember | null>(null)
@@ -1502,7 +1503,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       </div>
 
       {/* Pending invites section */}
-      {pendingInvites.length > 0 && (
+        {canView && pendingInvites.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>PENDING INVITES</p>
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
@@ -1582,7 +1583,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       )}
 
       {/* Active members table */}
-      {members.length > 0 && (
+        {canView && members.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>ACTIVE MEMBERS</p>
 
@@ -2372,19 +2373,14 @@ export default function RoleBuilderTab() {
 
      {/* Team Seats view */}
         {activeTab === 'seats' && (
-          can('view_team') ? (
-            <TeamSeatsTab
-              members={members}
-              roles={roles}
-              onMemberUpdated={handleMemberUpdated}
-              showToast={showToast}
-              canManage={can('manage_team')}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: '#e8ede2', backgroundColor: '#f7f9f5' }}>
-              <p className="text-[13px] font-bold" style={{ color: '#8a9e78' }}>You don't have access to view team seats</p>
-            </div>
-          )
+          <TeamSeatsTab
+            members={members}
+            roles={roles}
+            onMemberUpdated={handleMemberUpdated}
+            showToast={showToast}
+            canManage={can('manage_team')}
+            canView={can('view_team')}
+          />
         )}
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
