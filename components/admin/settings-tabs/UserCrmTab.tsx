@@ -803,12 +803,12 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                 const active = draft.joined === opt.value
                 return (
                   <button key={opt.value}
-                    onClick={() => setDraft(d => ({
-                      ...d,
-                      joined:     opt.value,
-                      joinedFrom: opt.value !== 'custom' ? '' : d.joinedFrom,
-                      joinedTo:   opt.value !== 'custom' ? '' : d.joinedTo,
-                    }))}
+                      onClick={() => canDo('filter_search') && setDraft(d => ({
+                        ...d,
+                        joined:     opt.value,
+                        joinedFrom: opt.value !== 'custom' ? '' : d.joinedFrom,
+                        joinedTo:   opt.value !== 'custom' ? '' : d.joinedTo,
+                      }))}
                     className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                     style={{
                       backgroundColor: active ? C.dark : C.bg,
@@ -827,9 +827,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                 <div>
                   <p className="text-[9px] font-black tracking-wider mb-1.5" style={{ color: C.limeDeep }}>FROM</p>
                   <input
-                    type="date"
-                    value={draft.joinedFrom}
-                    onChange={e => setDraft(d => ({ ...d, joinedFrom: e.target.value }))}
+                      type="date"
+                      value={draft.joinedFrom}
+                      onChange={e => canDo('filter_search') && setDraft(d => ({ ...d, joinedFrom: e.target.value }))}
                     className="w-full h-9 px-3 rounded-xl border text-[12px] font-semibold outline-none cursor-pointer"
                     style={{ borderColor: C.border, backgroundColor: '#fff', color: C.dark, colorScheme: 'light' }}
                   />
@@ -837,9 +837,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                 <div>
                   <p className="text-[9px] font-black tracking-wider mb-1.5" style={{ color: C.limeDeep }}>TO</p>
                   <input
-                    type="date"
-                    value={draft.joinedTo}
-                    onChange={e => setDraft(d => ({ ...d, joinedTo: e.target.value }))}
+                      type="date"
+                      value={draft.joinedTo}
+                      onChange={e => canDo('filter_search') && setDraft(d => ({ ...d, joinedTo: e.target.value }))}
                     className="w-full h-9 px-3 rounded-xl border text-[12px] font-semibold outline-none cursor-pointer"
                     style={{ borderColor: C.border, backgroundColor: '#fff', color: C.dark, colorScheme: 'light' }}
                   />
@@ -880,7 +880,7 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
               <div className="flex flex-wrap gap-1.5">
                 {[{ value:'all', label:'Any' }, ...countries.map(c => ({ value: c, label: c }))].map(opt => (
                   <button key={opt.value}
-                    onClick={() => setDraft(d => ({ ...d, country: d.country === opt.value ? 'all' : opt.value }))}
+                      onClick={() => canDo('filter_search') && setDraft(d => ({ ...d, country: d.country === opt.value ? 'all' : opt.value }))}
                     className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                     style={{
                       backgroundColor: draft.country === opt.value ? C.dark : C.bg,
@@ -902,9 +902,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
             style={{ borderColor: C.border, color: C.muted }}>
             Cancel
           </button>
-          <button onClick={() => { onApply(draft); onClose() }}
-            className="flex-[2] py-2.5 rounded-xl text-[13px] font-bold"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+          <button onClick={() => { canDo('filter_search') && onApply(draft); onClose() }}
+              className="flex-[2] py-2.5 rounded-xl text-[13px] font-bold"
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             Show {previewCount} user{previewCount !== 1 ? 's' : ''}
           </button>
         </div>
