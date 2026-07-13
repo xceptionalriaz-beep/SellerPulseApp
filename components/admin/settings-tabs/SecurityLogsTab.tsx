@@ -11,10 +11,10 @@ import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
-  Shield, AlertTriangle, Lock, Globe, RefreshCw,
-  Download, Ban, CheckCircle, Activity, Search, X,
-  ChevronDown,
-} from 'lucide-react'
+    Shield, AlertTriangle, Lock, Globe, RefreshCw,
+    Download, Ban, CheckCircle, Activity, Search, X,
+    ChevronDown, Trash2,
+  } from 'lucide-react'
 
 // -- Design tokens ----------------------------------------------
 const C = {
@@ -345,26 +345,30 @@ function FraudSentinelBanner({
 // FILTERS BAR
 // --------------------------------------------------------------
 function FiltersBar({
-  eventFilter,    setEventFilter,
-  timeFilter,     setTimeFilter,
-  searchQuery,    setSearchQuery,
-  isAutoRefresh,
-  lastUpdated,
-  onExport,
-  onManualRefresh,
-  canExport = true,
-}: {
-  eventFilter:      string
-  setEventFilter:   (v: string) => void
-  timeFilter:       string
-  setTimeFilter:    (v: string) => void
-  searchQuery:      string
-  setSearchQuery:   (v: string) => void
-  isAutoRefresh:    boolean
-  lastUpdated:      number
-  onExport:         () => void
-  onManualRefresh:  () => void
-  canExport?:       boolean
+    eventFilter,    setEventFilter,
+    timeFilter,     setTimeFilter,
+    searchQuery,    setSearchQuery,
+    isAutoRefresh,
+    lastUpdated,
+    onExport,
+    onManualRefresh,
+    canExport = true,
+    onClearLogs,
+    canClear = true,
+  }: {
+    eventFilter:      string
+    setEventFilter:   (v: string) => void
+    timeFilter:       string
+    setTimeFilter:    (v: string) => void
+    searchQuery:      string
+    setSearchQuery:   (v: string) => void
+    isAutoRefresh:    boolean
+    lastUpdated:      number
+    onExport:         () => void
+    onManualRefresh:  () => void
+    canExport?:       boolean
+    onClearLogs?:     () => void
+    canClear?:        boolean
 }) {
   const eventOptions = [
     { value: 'all',            label: 'All Events'       },
@@ -452,15 +456,21 @@ function FiltersBar({
       </button>
 
       {/* Export */}
-      {canExport && <button
-        onClick={onExport}
-        className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
-        style={{ backgroundColor: '#8fff00', color: '#1a2410', borderColor: C.dark }}>
-        <Download size={13} /> Export
-      </button>}
-    </div>
-  )
-}
+     {canExport && <button
+          onClick={onExport}
+          className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
+          style={{ backgroundColor: '#8fff00', color: '#1a2410', borderColor: C.dark }}>
+          <Download size={13} /> Export
+        </button>}
+        {canClear && onClearLogs && <button
+          onClick={onClearLogs}
+          className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
+          style={{ backgroundColor: '#FEF2F2', color: '#b91c1c', borderColor: '#FECACA' }}>
+          <Trash2 size={13} /> Clear Logs
+        </button>}
+      </div>
+    )
+  }
 
 // --------------------------------------------------------------
 // ADMIN ACTION LOGS — Left column
@@ -1151,8 +1161,33 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
   }
 
   // -- Export CSV ---------------------------------------------
-  function handleExport() {
-    const escape  = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
+  const [showClearLogs, setShowClearLogs] = useState(false)
+    const [clearConfirmText, setClearConfirmText] = useState('')
+    const [clearing, setClearing] = useState(false)
+
+    async function handleClearLogs() {
+      if (clearConfirmText !== 'DELETE' || clearing) return
+      setClearing(true)
+      try {
+        await Promise.all([
+          (supabase.from('admin_logs') as any).delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+          (supabase.from('audit_logs') as any).delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+          (supabase.from('user_events') as any).delete().in('event_type', ['security_alert', 'password_reset']),
+        ])
+        setAdminLogs([])
+        setSecurityEvents([])
+        showToast('Security logs cleared', 'success')
+        setShowClearLogs(false)
+        setClearConfirmText('')
+      } catch (e) {
+        console.error('[SecurityLogsTab] clearLogs error:', e)
+        showToast('Failed to clear logs', 'error')
+      }
+      setClearing(false)
+    }
+
+    function handleExport() {
+      const escape  = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
     const headers = ['Type', 'Action/Event', 'User', 'IP Address', 'Details', 'Time']
 
     const adminRows = adminLogs.map(log => [
@@ -1297,13 +1332,15 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
           <FiltersBar
             eventFilter={eventFilter}       setEventFilter={setEventFilter}
             timeFilter={timeFilter}         setTimeFilter={setTimeFilter}
-            searchQuery={searchQuery}       setSearchQuery={setSearchQuery}
-            isAutoRefresh={isAutoRefresh}
-            lastUpdated={lastUpdated}
-            onExport={handleExport}
-            onManualRefresh={() => loadData(false)}
-            canExport={can('export_logs')}
-          />
+           searchQuery={searchQuery}       setSearchQuery={setSearchQuery}
+              isAutoRefresh={isAutoRefresh}
+              lastUpdated={lastUpdated}
+              onExport={handleExport}
+              onManualRefresh={() => loadData(false)}
+              canExport={can('export_logs')}
+              onClearLogs={() => setShowClearLogs(true)}
+              canClear={can('clear_logs')}
+            />
 
           {/* Two column logs */}
             {can('view_logs') ? (
@@ -1437,16 +1474,71 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
                   style={{ backgroundColor: C.red, color: '#fff' }}>
                   {blocking
-                    ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
-                    : <><Ban size={14} /> Block IP</>}
-                </button>
+                      ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
+                      : <><Ban size={14} /> Block IP</>}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Toast notifications */}
+        {/* Clear Logs confirmation modal */}
+        {showClearLogs && (
+          <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
+               style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+               onClick={e => e.target === e.currentTarget && !clearing && setShowClearLogs(false)}>
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+                 style={{ border: `1px solid ${C.border}` }}>
+              <div className="flex items-center gap-3 px-6 py-4 border-b"
+                   style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                     style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+                  <Trash2 size={18} style={{ color: C.red }} />
+                </div>
+                <div>
+                  <p className="text-[15px] font-black" style={{ color: C.dark }}>Clear Security Logs</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>This cannot be undone</p>
+                </div>
+                <button onClick={() => { setShowClearLogs(false); setClearConfirmText('') }}
+                  className="ml-auto w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100">
+                  <X size={15} style={{ color: C.muted }} />
+                </button>
+              </div>
+              <div className="px-6 py-5 flex flex-col gap-4">
+                <p className="text-[13px]" style={{ color: C.muted }}>
+                  This permanently deletes all admin action logs and security alert history. Login and impersonation records elsewhere are not affected.
+                </p>
+                <div>
+                  <p className="text-[12px] font-bold mb-2" style={{ color: C.dark }}>
+                    Type <code style={{ backgroundColor: C.bg, padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace' }}>DELETE</code> to confirm:
+                  </p>
+                  <input value={clearConfirmText} onChange={e => setClearConfirmText(e.target.value.toUpperCase())}
+                    placeholder="DELETE" autoFocus
+                    className="w-full px-3 py-2.5 rounded-xl border text-[13px] outline-none"
+                    style={{ borderColor: C.border }} />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowClearLogs(false); setClearConfirmText('') }} disabled={clearing}
+                    className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
+                    style={{ borderColor: C.border, color: C.muted }}>
+                    Cancel
+                  </button>
+                  <button onClick={handleClearLogs}
+                    disabled={clearConfirmText !== 'DELETE' || clearing}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+                    style={{ backgroundColor: C.red, color: '#fff' }}>
+                    {clearing
+                      ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
+                      : <><Trash2 size={14} /> Clear Logs</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Toast notifications */}
       {toast && <SecurityToast msg={toast.msg} type={toast.type} />}
 
     </div>
