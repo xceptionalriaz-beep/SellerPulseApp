@@ -672,29 +672,31 @@ function applyAdvFilters(users: any[], f: AdvancedFilters): any[] {
 }
 
 // -- Advanced Filter Panel --------------------------------------
-function AdvancedFilterPanel({ users, filters, onApply, onClose }: {
-  users: any[]
-  filters: AdvancedFilters
-  onApply: (f: AdvancedFilters) => void
-  onClose: () => void
-}) {
-  const [draft, setDraft] = useState<AdvancedFilters>({ ...filters })
+function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => true }: {
+    users: any[]
+    filters: AdvancedFilters
+    onApply: (f: AdvancedFilters) => void
+    onClose: () => void
+    canDo?: (action: string) => boolean
+  }) {
+    const [draft, setDraft] = useState<AdvancedFilters>({ ...filters })
 
-  // Unique countries from data
-  const countries = Array.from(new Set(
-    users.map(u => u.country).filter(Boolean)
-  )).sort() as string[]
+    // Unique countries from data
+    const countries = Array.from(new Set(
+      users.map(u => u.country).filter(Boolean)
+    )).sort() as string[]
 
-  const previewCount = applyAdvFilters(users, draft).length
+    const previewCount = applyAdvFilters(users, draft).length
 
-  function toggle(field: keyof AdvancedFilters, val: string) {
-    if (field === 'plans' || field === 'statuses') {
-      const arr = draft[field] as string[]
-      setDraft(d => ({ ...d, [field]: arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val] }))
-    } else {
-      setDraft(d => ({ ...d, [field]: draft[field] === val ? 'all' : val }))
+    function toggle(field: keyof AdvancedFilters, val: string) {
+      if (!canDo('filter_search')) return
+      if (field === 'plans' || field === 'statuses') {
+        const arr = draft[field] as string[]
+        setDraft(d => ({ ...d, [field]: arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val] }))
+      } else {
+        setDraft(d => ({ ...d, [field]: draft[field] === val ? 'all' : val }))
+      }
     }
-  }
 
   const ChipRow = ({ label, field, options }: {
     label: string
@@ -1315,7 +1317,7 @@ showing, total, canDo = () => true }: {
         </div>
 
         {/* Advanced filter button */}
-          <button onClick={() => canDo('filter_search') && setShowAdvFilters(true)}
+          <button onClick={() => setShowAdvFilters(true)}
           className="relative w-11 h-11 flex items-center justify-center rounded-xl border shrink-0 hover:opacity-80"
           title="Advanced Filters"
           style={{
@@ -1438,12 +1440,13 @@ showing, total, canDo = () => true }: {
 
       {/* Advanced filter panel */}
       {showAdvFilters && (
-        <AdvancedFilterPanel
-          users={users}
-          filters={advFilters}
-          onApply={onAdvFilters}
-          onClose={() => setShowAdvFilters(false)}
-        />
+          <AdvancedFilterPanel
+            users={users}
+            filters={advFilters}
+            onApply={onAdvFilters}
+            onClose={() => setShowAdvFilters(false)}
+            canDo={canDo}
+          />
       )}
 
       {/* Row 2: filter chips + count */}
