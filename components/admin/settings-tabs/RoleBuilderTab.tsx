@@ -2375,7 +2375,7 @@ export default function RoleBuilderTab() {
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
       <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #e8ede2' }}>
-        <TeamMembersPanel />
+        <TeamMembersPanel canEdit={can('manage_team')} />
       </div>
     </div>
   )

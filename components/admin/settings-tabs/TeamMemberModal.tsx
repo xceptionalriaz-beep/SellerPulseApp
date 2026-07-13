@@ -87,6 +87,7 @@ interface Props {
   members: TeamMember[]
   onClose: () => void
   onSaved: () => void
+  canEdit?: boolean
 }
 
 function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
@@ -112,7 +113,7 @@ function AccessBadge({ level, onClick, disabled }: { level: AccessLevel; onClick
   )
 }
 
-export default function TeamMemberModal({ member, roles, members, onClose, onSaved }: Props) {
+export default function TeamMemberModal({ member, roles, members, onClose, onSaved, canEdit = true }: Props) {
   const supabase = createClient()
   const [saving, setSaving]             = useState(false)
   const [isSuperAdmin, setIsSuperAdmin] = useState(member.is_super_admin)
@@ -358,9 +359,9 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
               )}
               {showCopyFrom && <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onClick={() => setShowCopyFrom(false)}/>}
             </div>
-            <button onClick={save} disabled={saving}
-                    style={{ height: 36, padding: '0 18px', borderRadius: 8, border: 'none', background: saving ? C.border : C.lime, color: saving ? C.muted : C.dark, fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-              {saving ? <><RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }}/> Saving...</> : <><Check size={13}/> Save changes</>}
+            <button onClick={save} disabled={saving || !canEdit}
+                      style={{ height: 36, padding: '0 18px', borderRadius: 8, border: 'none', background: (saving || !canEdit) ? C.border : C.lime, color: (saving || !canEdit) ? C.muted : C.dark, fontSize: 13, fontWeight: 900, cursor: (saving || !canEdit) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {saving ? <><RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }}/> Saving...</> : <><Check size={13}/> {canEdit ? 'Save changes' : 'View only'}</>}
             </button>
             <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: C.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={15} style={{ color: C.muted }}/>
@@ -368,7 +369,7 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
           </div>
         </div>
 
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative', pointerEvents: canEdit ? 'auto' : 'none', opacity: canEdit ? 1 : 0.6 }}>
 
           {/* Left panel — role & settings */}
           <div style={{ width: 220, flexShrink: 0, borderRight: `1px solid ${C.border}`, padding: 20, display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto' }}>

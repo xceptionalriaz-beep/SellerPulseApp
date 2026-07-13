@@ -38,7 +38,7 @@ interface Role {
   role_name: string
 }
 
-export default function TeamMembersPanel() {
+export default function TeamMembersPanel({ canEdit = true }: { canEdit?: boolean }) {
   const supabase = createClient()
   const [members, setMembers]     = useState<TeamMember[]>([])
   const [roles, setRoles]         = useState<Role[]>([])
@@ -178,6 +178,7 @@ export default function TeamMembersPanel() {
           members={members}
           onClose={() => setSelected(null)}
           onSaved={() => load(true)}
+          canEdit={canEdit}
         />
       )}
 
