@@ -3,6 +3,7 @@
 // Complete production User CRM — security fixed, N+1 eliminated, full UI overhaul
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase'
 
 // -- Inline presence helpers (from hooks/usePresence.ts) --------
@@ -3007,7 +3008,7 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
   }) {
     const supabase = createClient()
     const [open, setOpen]           = useState(false)
-    const [openUp, setOpenUp]       = useState(false)
+    const [menuPos, setMenuPos]     = useState({ top: 0, left: 0, openUp: false })
     const btnRef = useRef<HTMLButtonElement>(null)
     const [loading, setLoading]     = useState(false)
     const [confirmDelete, setConfirmDelete] = useState(false)
@@ -3124,7 +3125,12 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
       <button ref={btnRef} onClick={() => {
             if (!open && btnRef.current) {
               const rect = btnRef.current.getBoundingClientRect()
-              setOpenUp(window.innerHeight - rect.bottom < 300)
+              const openUp = window.innerHeight - rect.bottom < 300
+              setMenuPos({
+                top:  openUp ? rect.top - 4 : rect.bottom + 4,
+                left: rect.right - 190,
+                openUp,
+              })
             }
             setOpen(s => !s)
           }}
@@ -3134,11 +3140,16 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
             ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.limeDeep }} />
             : <MoreVertical size={13} style={{ color:C.muted }} />}
         </button>
-        {open && (
+        {open && createPortal(
             <>
               <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-              <div className={`absolute right-0 z-50 bg-white rounded-2xl border shadow-xl overflow-hidden ${openUp ? 'bottom-full mb-1' : 'top-full mt-1'}`}
-                   style={{ borderColor:C.border, minWidth:190 }}>
+              <div className="fixed z-50 bg-white rounded-2xl border shadow-xl overflow-hidden"
+                   style={{
+                     borderColor:C.border, minWidth:190,
+                     top:  menuPos.openUp ? 'auto' : menuPos.top,
+                     bottom: menuPos.openUp ? window.innerHeight - menuPos.top : 'auto',
+                     left: menuPos.left,
+                   }}>
               {canDo('change_plan') && plans.map(p => (
                 <button key={p} onClick={() => changePlan(p)}
                   className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-gray-50 transition-colors"
@@ -3155,16 +3166,17 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
                   className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-green-50 transition-colors"
                   style={{ color:C.green }}>Reactivate Account</button>
               )}
-              {canDo('impersonate_user') && (
+              {canDo('delete_user') && (
                 <>
                   <div className="h-px" style={{ backgroundColor:C.border }} />
-                  <button onClick={handleImpersonate} disabled={impersonating}
-                    className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
-                    style={{ color:'#2563eb' }}>{impersonating ? 'Loading...' : 'Impersonate User'}</button>
+                  <button onClick={() => setConfirmDelete(true)}
+                    className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-red-50 transition-colors"
+                    style={{ color:'#b91c1c' }}>Delete Account</button>
                 </>
               )}
             </div>
-          </>
+          </>,
+          document.body
         )}
         {confirmDelete && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
