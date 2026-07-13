@@ -1306,25 +1306,31 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
           />
 
           {/* Two column logs */}
-          <div className="flex gap-4 items-start">
-            <AdminActionLogs
-              logs={filteredAdminLogs}
-              loading={loading}
-              obscureEmail={obscureEmail}
-            />
-            <UserSecurityEvents
-                events={filteredSecurityEvents}
-                loading={loading}
-                onBlockIp={openBlockIpModal}
-                dismissedIds={dismissedIds}
-                founderIps={currentUserIps}
-                blockedIps={blockedIpSet}
-                canBlock={can('block_ip')}
-              />
-          </div>
+            {can('view_logs') ? (
+              <div className="flex gap-4 items-start">
+                <AdminActionLogs
+                  logs={filteredAdminLogs}
+                  loading={loading}
+                  obscureEmail={obscureEmail}
+                />
+                <UserSecurityEvents
+                    events={filteredSecurityEvents}
+                    loading={loading}
+                    onBlockIp={openBlockIpModal}
+                    dismissedIds={dismissedIds}
+                    founderIps={currentUserIps}
+                    blockedIps={blockedIpSet}
+                    canBlock={can('block_ip')}
+                  />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view security logs</p>
+              </div>
+            )}
 
-        </div>
-      )}
+          </div>
+        )}
 
       {/* -- NETWORK GUARD ---------------------------------- */}
       {activeTab === 'network' && (
