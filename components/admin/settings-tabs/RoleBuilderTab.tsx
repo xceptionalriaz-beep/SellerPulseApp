@@ -804,11 +804,12 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCre
   )
 }
 
-function RoleDropdown({ value, roles, onChange }: {
-  value:    string | null
-  roles:    AdminRole[]
-  onChange: (roleId: string | null) => void
-}) {
+function RoleDropdown({ value, roles, onChange, disabled = false }: {
+    value:    string | null
+    roles:    AdminRole[]
+    onChange: (roleId: string | null) => void
+    disabled?: boolean
+  }) {
   const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -842,15 +843,16 @@ function RoleDropdown({ value, roles, onChange }: {
 
   return (
     <div className="relative">
-      <button
-        ref={triggerRef}
-        onClick={() => open ? setOpen(false) : openMenu()}
-        className="w-full flex items-center justify-between h-8 px-3 rounded-xl border text-[11px] font-semibold transition-all"
-        style={{
-          backgroundColor: C.surface,
-          borderColor:     open ? C.lime : C.border,
-          color:           C.text,
-        }}>
+        <button
+          ref={triggerRef}
+          disabled={disabled}
+          onClick={() => !disabled && (open ? setOpen(false) : openMenu())}
+          className="w-full flex items-center justify-between h-8 px-3 rounded-xl border text-[11px] font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: C.surface,
+            borderColor:     open ? C.lime : C.border,
+            color:           C.text,
+          }}>
         <span style={{ color: selected ? C.text : C.muted }}>
           {selected ? selected.role_name : 'No role'}
         </span>
@@ -1705,9 +1707,10 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
                     </div>
                   ) : (
                     <RoleDropdown
-                      value={member.role_id}
-                      roles={roles}
-                      onChange={newRoleId => {
+                        value={member.role_id}
+                        roles={roles}
+                        disabled={!canManage}
+                        onChange={newRoleId => {
                         if (newRoleId === null) revokeAccess(member.id)
                         else changeRole(member.id, newRoleId)
                       }}
