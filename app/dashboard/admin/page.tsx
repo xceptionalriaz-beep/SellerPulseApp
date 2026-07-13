@@ -1228,8 +1228,9 @@ function AdminPage() {
         canDo={(action: string) => {
           if (isSuperAdmin) return true
           if (!tabPermissions?.user_crm) return true
-          if (tabPermissions?.user_crm?.access === 'view') return false
           const key = `user_crm__${action}`
+          if (tabPermissions[key] === true) return true
+          if (tabPermissions?.user_crm?.access === 'view' || tabPermissions?.user_crm?.access === 'none') return false
           return tabPermissions[key] !== false
         }}
       />

@@ -45,15 +45,15 @@ export default function TeamMembersPanel() {
   const [loading, setLoading]     = useState(true)
   const [selected, setSelected]   = useState<TeamMember | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     const [{ data: admins }, { data: rolesList }] = await Promise.all([
       supabase.from('profiles').select('id, name, email, role, role_id, is_super_admin, avatar_url, tab_permissions, sidebar_mode').eq('role', 'admin').order('name'),
       (supabase.from('admin_roles') as any).select('id, role_name').order('role_name'),
     ])
     setMembers((admins ?? []) as TeamMember[])
     setRoles(rolesList ?? [])
-    setLoading(false)
+    if (!silent) setLoading(false)
   }, [supabase])
 
   useEffect(() => { load() }, [load])
@@ -91,7 +91,7 @@ export default function TeamMembersPanel() {
             <h2 style={{ fontSize: 18, fontWeight: 900, color: C.text, margin: '0 0 2px' }}>Team Members</h2>
             <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>{members.length} admin{members.length !== 1 ? 's' : ''} · click a row to manage permissions</p>
           </div>
-          <button onClick={load} style={{ fontSize: 12, color: C.muted, background: C.bg, border: `0.5px solid ${C.border}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+          <button onClick={() => load()} style={{ fontSize: 12, color: C.muted, background: C.bg, border: `0.5px solid ${C.border}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
             <RefreshCw size={12}/> Refresh
           </button>
         </div>
@@ -177,7 +177,7 @@ export default function TeamMembersPanel() {
           roles={roles}
           members={members}
           onClose={() => setSelected(null)}
-          onSaved={load}
+          onSaved={() => load(true)}
         />
       )}
 

@@ -246,11 +246,8 @@ export default function TeamMemberModal({ member, roles, members, onClose, onSav
       if (!res.ok) throw new Error(data.error ?? 'Failed to save')
       setInitialPerms({ ...tabPerms })
       setShowDiff(false)
-      const error = null
-
-      if (error) throw error
       showToast('Permissions saved!')
-      setTimeout(() => { onSaved(); onClose() }, 1000)
+      onSaved()
     } catch (e: any) { showToast(`Error: ${e.message}`) }
     setSaving(false)
   }

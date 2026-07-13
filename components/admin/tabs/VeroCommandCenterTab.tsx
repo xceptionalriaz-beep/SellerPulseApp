@@ -540,7 +540,7 @@ export default function VeroCommandCenterTab({ isMobile }: Props) {
             value={brandName}
             onChange={setBrandName}
             placeholder="Enter brand name..."
-            onKeyDown={e => e.key === 'Enter' && addNewBrand()}
+            onKeyDown={e => e.key === 'Enter' && can('add_brand') && addNewBrand()}
             className={isMobile ? 'w-full' : 'flex-[2]'}
           />
           <FocusInput

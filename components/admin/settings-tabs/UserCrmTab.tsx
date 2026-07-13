@@ -353,12 +353,13 @@ function Toast({ msg, type }: { msg:string; type:'success'|'error'|'info' }) {
 // --------------------------------------------------------------
 // BLOCK 1 — HUD METRIC DECK
 // --------------------------------------------------------------
-function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
-  users: any[]
-  onlineIds: Set<string>
-  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-  onGoToMarketing: (users: any[]) => void
-}) {
+function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => true }: {
+    users: any[]
+    onlineIds: Set<string>
+    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+    onGoToMarketing: (users: any[]) => void
+    canDo?: (action: string) => boolean
+  }) {
   const supabase = createClient()
   const total      = users.length
   const activeSubs = users.filter(u => mrrOf(u) > 0).length
@@ -494,8 +495,8 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing }: {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* -- Expiring Trials Alert Banner -- */}
-      {expiringTrials > 0 && (
+        {/* -- Expiring Trials Alert Banner -- */}
+        {expiringTrials > 0 && canDo('email_expiring') && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border"
              style={{ backgroundColor:'rgba(217,119,6,0.08)', borderColor:'rgba(217,119,6,0.3)' }}>
           <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
@@ -1582,14 +1583,15 @@ function Checkbox({ checked, onChange, indeterminate = false }: {
   )
 }
 
-function UserTable({ users, isInvestorMode, searchQuery, filter, segment, activeTag, advFilters, onlineIds, onDrawer, onUpdated, showToast, onGoToMarketing }: {
-  users:any[]; isInvestorMode:boolean; searchQuery:string; filter:string
-  segment:string|null; activeTag:string|null; advFilters: AdvancedFilters
-  onlineIds: Set<string>
-  onDrawer:(u:any)=>void; onUpdated:(id:string,field:string,val:any)=>void
-  showToast:(msg:string,type:'success'|'error'|'info')=>void
-  onGoToMarketing:(users:any[])=>void
-}) {
+function UserTable({ users, isInvestorMode, searchQuery, filter, segment, activeTag, advFilters, onlineIds, onDrawer, onUpdated, showToast, onGoToMarketing, canDo = () => true }: {
+    users:any[]; isInvestorMode:boolean; searchQuery:string; filter:string
+    segment:string|null; activeTag:string|null; advFilters: AdvancedFilters
+    onlineIds: Set<string>
+    onDrawer:(u:any)=>void; onUpdated:(id:string,field:string,val:any)=>void
+    showToast:(msg:string,type:'success'|'error'|'info')=>void
+    onGoToMarketing:(users:any[])=>void
+    canDo?: (action: string) => boolean
+  }) {
   const supabase = createClient()
   const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set())
   const [showPlanMenu,  setShowPlanMenu]  = useState(false)
@@ -1829,21 +1831,22 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
       {/* Rows */}
       <div className="flex flex-col divide-y" style={{ borderColor:'#f0f4ee' }}>
         {filtered.map((u, i) => (
-          <UserRow
-            key={u.id}
-            u={u}
-            i={i}
-            cols={cols}
-            onlineIds={onlineIds}
-            selectedIds={selectedIds}
-            toggleOne={toggleOne}
-            onDrawer={onDrawer}
-            isInvestorMode={isInvestorMode}
-            onUpdated={onUpdated}
-            showToast={showToast}
-            hiddenCols={hiddenCols}
-          />
-        ))}
+            <UserRow
+              key={u.id}
+              u={u}
+              i={i}
+              cols={cols}
+              onlineIds={onlineIds}
+              selectedIds={selectedIds}
+              toggleOne={toggleOne}
+              onDrawer={onDrawer}
+              isInvestorMode={isInvestorMode}
+              onUpdated={onUpdated}
+              showToast={showToast}
+              hiddenCols={hiddenCols}
+              canDo={canDo}
+            />
+          ))}
       </div>
 
       {/* -- Floating Bulk Action Bar ------------------------- */}
@@ -1868,8 +1871,8 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
           </div>
 
           {/* Change Plan dropdown */}
-          <div className="relative">
-            <button onClick={() => setShowPlanMenu(s => !s)} disabled={bulkLoading}
+            {canDo('bulk_change_plan') && <div className="relative">
+              <button onClick={() => setShowPlanMenu(s => !s)} disabled={bulkLoading}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-50"
               style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
               {bulkLoading
@@ -1891,11 +1894,11 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
                     </button>
                   ))}
                 </div>
-              </>
-            )}
-          </div>
+                </>
+              )}
+            </div>}
 
-          {/* Export Selected */}
+            {/* Export Selected */}
           <button onClick={bulkExport}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
             style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
@@ -1903,11 +1906,11 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
           </button>
 
           {/* Suspend Selected */}
-          <button onClick={() => setShowBulkSuspend(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-            style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
-            <Shield size={13} /> Suspend {selectedCount}
-          </button>
+            {canDo('suspend_user') && <button onClick={() => setShowBulkSuspend(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
+              style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
+              <Shield size={13} /> Suspend {selectedCount}
+            </button>}
 
           {/* Email All */}
           <button onClick={bulkEmail}
@@ -2740,7 +2743,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
       )}
       {/* Real content — hidden while skeleton loads */}
       {!loading && (<>
-      <HudDeck users={users} onlineIds={onlineIds} showToast={showToast} onGoToMarketing={onGoToMarketing ?? (() => {})} />
+      <HudDeck users={users} onlineIds={onlineIds} showToast={showToast} onGoToMarketing={onGoToMarketing ?? (() => {})} canDo={canDo} />
 
       <ControlsBar
         users={users}
@@ -2790,19 +2793,20 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
       />
 
       <UserTable
-        users={users}
-        isInvestorMode={isInvestorMode}
-        searchQuery={searchQuery}
-        filter={filter}
-        segment={segment}
-        activeTag={activeTag}
-        advFilters={advFilters}
-        onlineIds={onlineIds}
-        onDrawer={setDrawerUser}
-        onUpdated={onUpdated}
-        showToast={showToast}
-        onGoToMarketing={onGoToMarketing ?? (() => {})}
-      />
+          users={users}
+          isInvestorMode={isInvestorMode}
+          searchQuery={searchQuery}
+          filter={filter}
+          segment={segment}
+          activeTag={activeTag}
+          advFilters={advFilters}
+          onlineIds={onlineIds}
+          onDrawer={setDrawerUser}
+          onUpdated={onUpdated}
+          showToast={showToast}
+          onGoToMarketing={onGoToMarketing ?? (() => {})}
+          canDo={canDo}
+        />
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -2988,40 +2992,118 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
 }
 
 // -- ActionMenu -------------------------------------------------
-function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
-  u: any
-  onDrawer: (u: any) => void
-  onUpdated: (id: string, field: string, value: any) => void
-  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-}) {
-  const supabase = createClient()
-  const [open, setOpen]       = useState(false)
-  const [loading, setLoading] = useState(false)
-  const plan   = planOf(u)
-  const status = statusOf(u)
+function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
+    u: any
+    onDrawer: (u: any) => void
+    onUpdated: (id: string, field: string, value: any) => void
+    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+    canDo?: (action: string) => boolean
+  }) {
+    const supabase = createClient()
+    const [open, setOpen]           = useState(false)
+    const [loading, setLoading]     = useState(false)
+    const [confirmDelete, setConfirmDelete] = useState(false)
+    const [deleting, setDeleting]   = useState(false)
+    const [impersonating, setImpersonating] = useState(false)
+    const plan   = planOf(u)
+    const status = statusOf(u)
 
-  async function changePlan(newPlan: string) {
-    setLoading(true); setOpen(false)
-    onUpdated(u.id, 'plan_name', newPlan)
-    try {
-      await (supabase.from('profiles') as any).update({ plan_name: newPlan }).eq('id', u.id)
-      await (supabase.from('subscriptions') as any).update({ plan_name: newPlan }).eq('user_id', u.id)
-      showToast(`Plan changed to ${newPlan}`, 'success')
-    } catch { onUpdated(u.id, 'plan_name', plan); showToast('Failed to change plan', 'error') }
-    setLoading(false)
-  }
+    async function changePlan(newPlan: string) {
+      if (!canDo('change_plan')) return
+      setLoading(true); setOpen(false)
+      onUpdated(u.id, 'plan_name', newPlan)
+      try {
+        await (supabase.from('profiles') as any).update({ plan_name: newPlan }).eq('id', u.id)
+        await (supabase.from('subscriptions') as any).update({ plan_name: newPlan }).eq('user_id', u.id)
+        showToast(`Plan changed to ${newPlan}`, 'success')
+      } catch { onUpdated(u.id, 'plan_name', plan); showToast('Failed to change plan', 'error') }
+      setLoading(false)
+    }
 
-  async function changeStatus(newStatus: string) {
-    setLoading(true); setOpen(false)
-    onUpdated(u.id, 'account_status', newStatus)
-    try {
-      await (supabase.from('profiles') as any).update({ account_status: newStatus }).eq('id', u.id)
-      showToast(`Status set to ${newStatus}`, 'success')
-    } catch { showToast('Failed to update status', 'error') }
-    setLoading(false)
-  }
+    async function changeStatus(newStatus: string) {
+      if (!canDo('suspend_user')) return
+      setLoading(true); setOpen(false)
+      onUpdated(u.id, 'account_status', newStatus)
+      try {
+        await (supabase.from('profiles') as any).update({ account_status: newStatus }).eq('id', u.id)
+        showToast(`Status set to ${newStatus}`, 'success')
+      } catch { showToast('Failed to update status', 'error') }
+      setLoading(false)
+    }
 
-  const plans = ['Free Trial','Pro Plan','Elite Plan'].filter(p => p !== plan)
+    async function handleDelete() {
+      if (!canDo('delete_user')) return
+      setDeleting(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch('/api/admin/delete-user', {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ userId: u.id }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? 'Failed to delete user')
+        onUpdated(u.id, 'deleted', true)
+        showToast('User deleted', 'success')
+      } catch (e: any) {
+        showToast(e.message ?? 'Failed to delete user', 'error')
+      }
+      setDeleting(false)
+      setConfirmDelete(false)
+      setOpen(false)
+    }
+
+    async function handleImpersonate() {
+      if (!canDo('impersonate_user')) return
+      setImpersonating(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch('/api/admin/impersonate', {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ userId: u.id }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? 'Failed to impersonate')
+        window.open(data.magicLink, '_blank')
+        showToast(`Viewing as ${data.userName}`, 'success')
+      } catch (e: any) {
+        showToast(e.message ?? 'Failed to impersonate', 'error')
+      }
+      setImpersonating(false)
+      setOpen(false)
+    }
+
+    async function handleForceLogout() {
+      if (!canDo('force_logout')) return
+      setLoading(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch('/api/admin/force-logout', {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ userId: u.id }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? 'Failed to force logout')
+        showToast('User logged out from all devices', 'success')
+      } catch (e: any) {
+        showToast(e.message ?? 'Failed to force logout', 'error')
+      }
+      setLoading(false)
+      setOpen(false)
+    }
+
+    const plans = ['Free Trial','Pro Plan','Elite Plan'].filter(p => p !== plan)
 
   return (
     <div className="flex items-center justify-end gap-1.5 relative">
@@ -3039,45 +3121,76 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast }: {
           : <MoreVertical size={13} style={{ color:C.muted }} />}
       </button>
       {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-2xl border shadow-xl overflow-hidden"
-               style={{ borderColor:C.border, minWidth:190 }}>
-            {plans.map(p => (
-              <button key={p} onClick={() => changePlan(p)}
-                className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-gray-50 transition-colors"
-                style={{ color:C.text }}>Switch ? {p}</button>
-            ))}
-            <div className="h-px" style={{ backgroundColor:C.border }} />
-            {status !== 'Past Due' && (
-              <button onClick={() => changeStatus('Past Due')}
-                className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-amber-50 transition-colors"
-                style={{ color:C.amber }}>Suspend (Past Due)</button>
-            )}
-            {status !== 'Active' && (
-              <button onClick={() => changeStatus('Active')}
-                className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-green-50 transition-colors"
-                style={{ color:C.green }}>Reactivate Account</button>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-2xl border shadow-xl overflow-hidden"
+                 style={{ borderColor:C.border, minWidth:190 }}>
+              {canDo('change_plan') && plans.map(p => (
+                <button key={p} onClick={() => changePlan(p)}
+                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-gray-50 transition-colors"
+                  style={{ color:C.text }}>Switch ? {p}</button>
+              ))}
+              {canDo('change_plan') && <div className="h-px" style={{ backgroundColor:C.border }} />}
+              {canDo('suspend_user') && status !== 'Past Due' && (
+                <button onClick={() => changeStatus('Past Due')}
+                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-amber-50 transition-colors"
+                  style={{ color:C.amber }}>Suspend (Past Due)</button>
+              )}
+              {canDo('suspend_user') && status !== 'Active' && (
+                <button onClick={() => changeStatus('Active')}
+                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-green-50 transition-colors"
+                  style={{ color:C.green }}>Reactivate Account</button>
+              )}
+              {canDo('impersonate_user') && (
+                <>
+                  <div className="h-px" style={{ backgroundColor:C.border }} />
+                  <button onClick={handleImpersonate} disabled={impersonating}
+                    className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
+                    style={{ color:'#2563eb' }}>{impersonating ? 'Loading...' : 'Impersonate User'}</button>
+                </>
+              )}
+            </div>
+          </>
+        )}
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+               style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+               onClick={e => e.target === e.currentTarget && !deleting && setConfirmDelete(false)}>
+            <div className="bg-white rounded-2xl border p-6 w-full max-w-sm" style={{ borderColor: C.border }}>
+              <p className="text-[15px] font-bold mb-2" style={{ color: C.text }}>Delete this account?</p>
+              <p className="text-[13px] mb-5" style={{ color: C.muted }}>
+                This permanently deletes <strong>{u.name ?? u.email}</strong> and all their data. This cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <button onClick={() => setConfirmDelete(false)} disabled={deleting}
+                  className="flex-1 py-2 rounded-lg border text-[13px] font-semibold" style={{ borderColor: C.border, color: C.muted }}>
+                  Cancel
+                </button>
+                <button onClick={handleDelete} disabled={deleting}
+                  className="flex-1 py-2 rounded-lg text-[13px] font-bold text-white disabled:opacity-50" style={{ backgroundColor: '#b91c1c' }}>
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+            </div>
+          )}
+        </div>
+      )
+    }
 
 // -- UserRow — extracted so useState hooks are legal ------------
-function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isInvestorMode, onUpdated, showToast, hiddenCols = new Set() }: {
-  u: any; i: number; cols: string
-  onlineIds: Set<string>
-  selectedIds: Set<string>
-  toggleOne: (id: string) => void
-  onDrawer: (u: any) => void
-  isInvestorMode: boolean
-  onUpdated: (id: string, field: string, value: any) => void
-  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-  hiddenCols?: Set<string>
-}) {
+function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isInvestorMode, onUpdated, showToast, hiddenCols = new Set(), canDo = () => true }: {
+    u: any; i: number; cols: string
+    onlineIds: Set<string>
+    selectedIds: Set<string>
+    toggleOne: (id: string) => void
+    onDrawer: (u: any) => void
+    isInvestorMode: boolean
+    onUpdated: (id: string, field: string, value: any) => void
+    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+    hiddenCols?: Set<string>
+    canDo?: (action: string) => boolean
+  }) {
   const [showIpModal,    setShowIpModal]    = useState(false)
   const [showTeamModal,  setShowTeamModal]  = useState(false)
   const [showQuickNote,  setShowQuickNote]  = useState(false)
@@ -3362,12 +3475,12 @@ function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isIn
               )}
 
               {/* 7. IPs — unique login locations, click to see details */}
-              {!hiddenCols.has('IPS') && (
-              <div>
-                {uniqueIps === 0
-                  ? <span className="text-[11px]" style={{ color:C.muted }}>—</span>
-                  : <>
-                      <button onClick={() => setShowIpModal(true)}
+                {!hiddenCols.has('IPS') && (
+                <div>
+                  {uniqueIps === 0
+                    ? <span className="text-[11px]" style={{ color:C.muted }}>—</span>
+                    : <>
+                        <button onClick={() => canDo('view_security') && setShowIpModal(true)}
                         className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
                         style={{
                           backgroundColor: uniqueIps > 5 ? 'rgba(185,28,28,0.08)' : C.bg,
@@ -3464,17 +3577,17 @@ function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isIn
               {/* 10. Actions */}
               <div className="flex items-center justify-end gap-1">
                 {/* Quick note button */}
-                <button
-                  onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
+                  {canDo('add_notes') && <button
+                    onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
                   style={{
                     backgroundColor: showQuickNote ? C.limeTint : 'transparent',
                     border: showQuickNote ? `1px solid ${C.lime}` : '1px solid transparent',
                   }}
                   title="Quick note">
                   <FileText size={13} style={{ color: showQuickNote ? C.limeDeep : C.muted }} />
-                </button>
-                <ActionMenu u={u} onDrawer={onDrawer} onUpdated={onUpdated} showToast={showToast} />
+                  </button>}
+                  <ActionMenu u={u} onDrawer={onDrawer} onUpdated={onUpdated} showToast={showToast} canDo={canDo} />
               </div>
             </div>
 

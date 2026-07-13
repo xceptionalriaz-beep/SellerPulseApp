@@ -10,15 +10,15 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useTabPermissions } from '@/hooks/useTabPermissions'
 import {
-  UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
-  Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
-  AlertTriangle, Check, Search, RefreshCw, Users,
-  TimerOff, Headphones, MoreVertical, User, CloudOff,
-  CheckCircle, Plus, Shield, Key, Activity, TrendingDown,
-  Clock, Wifi, WifiOff, Zap, Gift, TrendingUp, XCircle,
-  Award, Globe, AtSign, Camera, PlayCircle, HelpCircle,
-  Link2, Wrench, MessageSquare,
-} from 'lucide-react'
+    UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
+    Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
+    AlertTriangle, Check, Search, RefreshCw, Users,
+    TimerOff, Headphones, MoreVertical, User, CloudOff,
+    CheckCircle, Plus, Shield, Key, Activity, TrendingDown,
+    Clock, Wifi, WifiOff, Zap, Gift, TrendingUp, XCircle,
+    Award, Globe, AtSign, Camera, PlayCircle, HelpCircle,
+    Link2, Wrench, MessageSquare, Edit2,
+  } from 'lucide-react'
 
 // ── Brand tokens ───────────────────────────────────────────────
 const C = {
@@ -496,9 +496,28 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
   const [resettingPass, setResettingPass] = useState(false)
   const [loggingOut,    setLoggingOut]    = useState(false)
   const [confirmLogout, setConfirmLogout] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleteText,    setDeleteText]    = useState('')
-  const [deleting,      setDeleting]      = useState(false)
+    const [confirmDelete, setConfirmDelete] = useState(false)
+    const [deleteText,    setDeleteText]    = useState('')
+    const [deleting,      setDeleting]      = useState(false)
+    const [editingDetails, setEditingDetails] = useState(false)
+    const [editName,       setEditName]       = useState(user.name ?? '')
+    const [editEmail,      setEditEmail]      = useState(user.email ?? '')
+    const [savingDetails,  setSavingDetails]  = useState(false)
+
+    async function saveDetails() {
+      if (!can('edit_details')) return
+      setSavingDetails(true)
+      try {
+        await (supabase.from('profiles') as any).update({ name: editName.trim(), email: editEmail.trim() }).eq('id', user.id)
+        onUpdated(user.id, 'name', editName.trim())
+        onUpdated(user.id, 'email', editEmail.trim())
+        showToast('Details updated', 'success')
+        setEditingDetails(false)
+      } catch {
+        showToast('Failed to update details', 'error')
+      }
+      setSavingDetails(false)
+    }
   const [activeTab,     setActiveTab]     = useState<'overview'|'actions'|'history'|'profile'>('overview')
   const [mounted,       setMounted]       = useState(false)
   // ── Moved from IIFEs to fix React Rules of Hooks ─────────────
@@ -659,27 +678,61 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
           </div>
 
           {/* Avatar + name + email */}
-          <div className="flex items-center gap-4 mb-4">
-            <Avatar
-              name={name} size={52}
-              avatarUrl={user.avatar_url ?? user.raw_user_meta_data?.avatar_url ?? null}
-            />
-            <div className="min-w-0">
-              <h2 className="text-[16px] font-black truncate" style={{ color:C.text }}>{name}</h2>
-              <div className="flex items-center gap-1">
-                <p className="text-[12px] truncate" style={{ color:C.muted }}>{email}</p>
-                <button onClick={() => navigator.clipboard.writeText(email)}>
-                  <Copy size={11} style={{ color:C.muted }} />
-                </button>
-              </div>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black"
-                      style={{ backgroundColor:pb.bg, color:pb.text }}>{currentPlan}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                      style={{ backgroundColor:sb.bg, color:sb.text }}>{currentStatus}</span>
+            <div className="flex items-center gap-4 mb-4">
+              <Avatar
+                name={name} size={52}
+                avatarUrl={user.avatar_url ?? user.raw_user_meta_data?.avatar_url ?? null}
+              />
+              <div className="min-w-0 flex-1">
+                {editingDetails ? (
+                  <div className="flex flex-col gap-2">
+                    <input value={editName} onChange={e => setEditName(e.target.value)}
+                      placeholder="Name"
+                      className="w-full px-2.5 py-1.5 rounded-lg border text-[13px] font-bold outline-none"
+                      style={{ borderColor: C.border, color: C.text }} />
+                    <input value={editEmail} onChange={e => setEditEmail(e.target.value)}
+                      placeholder="Email" type="email"
+                      className="w-full px-2.5 py-1.5 rounded-lg border text-[12px] outline-none"
+                      style={{ borderColor: C.border, color: C.text }} />
+                    <div className="flex gap-2">
+                      <button onClick={saveDetails} disabled={savingDetails || !editName.trim()}
+                        className="px-3 py-1 rounded-lg text-[11px] font-bold disabled:opacity-50"
+                        style={{ backgroundColor: C.dark, color: C.lime }}>
+                        {savingDetails ? 'Saving...' : 'Save'}
+                      </button>
+                      <button onClick={() => { setEditingDetails(false); setEditName(user.name ?? ''); setEditEmail(user.email ?? '') }}
+                        className="px-3 py-1 rounded-lg border text-[11px] font-semibold"
+                        style={{ borderColor: C.border, color: C.muted }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="text-[16px] font-black truncate" style={{ color:C.text }}>{name}</h2>
+                      {can('edit_details') && (
+                        <button onClick={() => setEditingDetails(true)} title="Edit details">
+                          <Edit2 size={12} style={{ color: C.muted }} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <p className="text-[12px] truncate" style={{ color:C.muted }}>{email}</p>
+                      <button onClick={() => navigator.clipboard.writeText(email)}>
+                        <Copy size={11} style={{ color:C.muted }} />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black"
+                            style={{ backgroundColor:pb.bg, color:pb.text }}>{currentPlan}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                            style={{ backgroundColor:sb.bg, color:sb.text }}>{currentStatus}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          </div>
 
           {/* ── Tab bar ── */}
           {(() => {
@@ -1818,14 +1871,21 @@ export function UserDetailDrawer({ user, onClose, onUpdated, showToast, viewOnly
                     </button>
                   )}
                   {/* Permanent ban (only for non-banned) */}
-                  {!isBanned && can('suspend_user') && (
-                    <button onClick={() => { setBanText(''); setConfirmBan(true) }}
-                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold hover:opacity-80 border"
-                      style={{ borderColor:'#fca5a5', color:'#7f1d1d', backgroundColor:'#FEF2F2' }}>
-                      <XCircle size={14} /> Permanently Ban
-                    </button>
-                  )}
-                </div>
+                    {!isBanned && can('suspend_user') && (
+                      <button onClick={() => { setBanText(''); setConfirmBan(true) }}
+                        className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold hover:opacity-80 border"
+                        style={{ borderColor:'#fca5a5', color:'#7f1d1d', backgroundColor:'#FEF2F2' }}>
+                        <XCircle size={14} /> Permanently Ban
+                      </button>
+                    )}
+                    {can('force_logout') && (
+                      <button onClick={() => setConfirmLogout(true)}
+                        className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold hover:opacity-80 disabled:opacity-50 border"
+                        style={{ borderColor:'#fde68a', color:C.amber, backgroundColor:'#FFFBEB' }}>
+                        <LogOut size={14} /> Force Logout
+                      </button>
+                    )}
+                  </div>
 
                 {/* Confirm Suspend */}
                 {confirmSuspend && (
