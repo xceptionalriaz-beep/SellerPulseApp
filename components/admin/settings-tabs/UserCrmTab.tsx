@@ -3113,12 +3113,12 @@ function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
 
   return (
     <div className="flex items-center justify-end gap-1.5 relative">
-      {canDo('view_profile') && <button onClick={() => onDrawer(u)}
+      <button onClick={() => onDrawer(u)}
           title="View Profile"
           className="w-8 h-8 flex items-center justify-center rounded-lg border hover:opacity-80"
           style={{ backgroundColor:C.limeTint, borderColor:C.lime }}>
           <User size={14} style={{ color:C.limeDeep }} />
-        </button>}
+        </button>
       <button onClick={() => setOpen(s => !s)}
         className="w-7 h-7 flex items-center justify-center rounded-lg border hover:bg-gray-50"
         style={{ borderColor:C.border }}>
