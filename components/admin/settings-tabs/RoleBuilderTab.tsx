@@ -958,12 +958,13 @@ function RoleDropdown({ value, roles, onChange }: {
 // --------------------------------------------------------------
 // INVITE MEMBER MODAL
 // --------------------------------------------------------------
-function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
-  roles:     AdminRole[]
-  onClose:   () => void
-  onInvited: () => void
-  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-}) {
+function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = true }: {
+    roles:     AdminRole[]
+    onClose:   () => void
+    onInvited: () => void
+    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+    canInvite?: boolean
+  }) {
   const supabase  = createClient()
   const [email,   setEmail]   = useState('')
   const [roleId,  setRoleId]  = useState<string>('')
@@ -1109,12 +1110,12 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast }: {
                 </button>
                 <button
                   onClick={handleInvite}
-                  disabled={!isValid || sending}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-                  style={{ backgroundColor: isValid ? C.lime : C.border, color: isValid ? C.dark : C.muted }}>
-                  {sending
-                    ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
-                    : <><UserPlus size={14} /> Send Invite</>}
+                  disabled={!isValid || sending || !canInvite}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+                    style={{ backgroundColor: (isValid && canInvite) ? C.lime : C.border, color: (isValid && canInvite) ? C.dark : C.muted }}>
+                    {sending
+                      ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
+                      : <><UserPlus size={14} /> {canInvite ? 'Send Invite' : 'View only'}</>}
                 </button>
               </div>
             </>
@@ -1439,15 +1440,15 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
         </div>
         <p className="text-[14px] font-bold" style={{ color: C.text }}>No team seats assigned</p>
         <p className="text-[12px]" style={{ color: C.muted }}>Invite a team member to get started</p>
-        {canInvite && <button onClick={() => setShowInvite(true)}
+        <button onClick={() => setShowInvite(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
           <UserPlus size={14} /> Invite Member
-        </button>}
+        </button>
         {showInvite && (
           <InviteMemberModal roles={roles} onClose={() => setShowInvite(false)}
-            onInvited={() => { setShowInvite(false); loadPendingInvites() }} showToast={showToast} />
-        )}
+              onInvited={() => { setShowInvite(false); loadPendingInvites() }} showToast={showToast} canInvite={canInvite} />
+          )}
       </div>
     )
   }
@@ -1481,7 +1482,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
             )}
             {/* Invite Member */}
               <div className="relative group">
-                {canInvite && <button
+                <button
                   onClick={() => !atLimit && setShowInvite(true)}
                   disabled={atLimit}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
@@ -1492,7 +1493,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
                   opacity:         atLimit ? 0.6 : 1,
                 }}>
                 <UserPlus size={13} /> Invite Member
-              </button>}
+              </button>
               {atLimit && (
                 <div className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                      style={{ backgroundColor: C.dark, color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
@@ -2116,12 +2117,13 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       {/* Invite modal */}
       {showInvite && (
         <InviteMemberModal
-          roles={roles}
-          onClose={() => setShowInvite(false)}
-          onInvited={() => { setShowInvite(false); loadPendingInvites() }}
-          showToast={showToast}
-        />
-      )}
+            roles={roles}
+            onClose={() => setShowInvite(false)}
+            onInvited={() => { setShowInvite(false); loadPendingInvites() }}
+            showToast={showToast}
+            canInvite={canInvite}
+          />
+        )}
 
       {/* Undo toast — shows after role change is confirmed */}
       {undoTimer > 0 && pendingChange && (
