@@ -478,7 +478,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
   }, [role?.id, role?.updated_at, isCreating])
 
   const isSystem   = role?.is_system_role ?? false
-  const isReadOnly = isSystem && !isCreating
+    const isReadOnly = (isSystem && !isCreating) || !canEdit
 
   function toggleScope(scope: AdminScope) {
     if (isReadOnly) return
