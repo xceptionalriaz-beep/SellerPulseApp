@@ -1396,14 +1396,20 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
             />
 
           {/* Blocked IPs Panel */}
-          <BlockedIpsPanel
-              blockedIps={blockedIpsList}
-              loading={loading}
-              onUnblock={handleUnblockIp}
-              canUnblock={can('unblock_ip')}
-            />
+          {can('view_blocked_ips') ? (
+              <BlockedIpsPanel
+                blockedIps={blockedIpsList}
+                loading={loading}
+                onUnblock={handleUnblockIp}
+                canUnblock={can('unblock_ip')}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view blocked IPs</p>
+              </div>
+            )}
 
-        </div>
+          </div>
       )}
 
       {/* Block IP confirmation modal */}
