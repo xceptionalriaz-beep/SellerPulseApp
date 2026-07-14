@@ -382,16 +382,18 @@ const PLAN_COLS = ['PLAN', 'MONTHLY', 'ANNUAL', 'SEARCHES', 'VERO', 'ORDERS', 'T
 
 // ── Plan Row ───────────────────────────────────────────────────
 function PlanRow({
-  plan,
-  isExpanded,
-  onToggle,
-  onToggleActive,
-}: {
-  plan:           PlanLimit
-  isExpanded:     boolean
-  onToggle:       () => void
-  onToggleActive: (plan: PlanLimit) => void
-}) {
+    plan,
+    isExpanded,
+    onToggle,
+    onToggleActive,
+    canActivate = true,
+  }: {
+    plan:           PlanLimit
+    isExpanded:     boolean
+    onToggle:       () => void
+    onToggleActive: (plan: PlanLimit) => void
+    canActivate?:   boolean
+  }) {
   const planColors: Record<string, { color: string; bg: string }> = {
     free:    { color: C.muted,    bg: C.bg                    },
     starter: { color: C.blue,     bg: 'rgba(29,78,216,0.08)'  },
@@ -536,10 +538,10 @@ function PlanRow({
         </span>
       </div>
 
-      {/* 20 — Active toggle */}
-      <div className="flex items-center justify-center" onClick={e => { e.stopPropagation(); onToggleActive(plan) }}>
-        <div className="relative w-9 h-5 rounded-full cursor-pointer transition-colors"
-             style={{ backgroundColor: plan.is_active ? C.dark : 'rgba(100,116,139,0.35)' }}>
+     {/* 20 — Active toggle */}
+        <div className="flex items-center justify-center" onClick={e => { e.stopPropagation(); canActivate && onToggleActive(plan) }}>
+          <div className="relative w-9 h-5 rounded-full transition-colors"
+               style={{ backgroundColor: plan.is_active ? C.dark : 'rgba(100,116,139,0.35)', cursor: canActivate ? 'pointer' : 'not-allowed', opacity: canActivate ? 1 : 0.5 }}>
           <div style={{
             position: 'absolute', top: '2px', left: '2px',
             width: '16px', height: '16px', borderRadius: '50%',
@@ -832,20 +834,22 @@ function EditPanel({
 
 // ── Feature Gating Matrix ──────────────────────────────────────
 function GatingMatrix({
-  plans,
-  expandedId,
-  onToggleExpand,
-  onPlanUpdated,
-  showToast,
-  canEdit = true,
-}: {
-  plans:          PlanLimit[]
-  expandedId:     string | null
-  onToggleExpand: (id: string) => void
-  onPlanUpdated:  (updated: PlanLimit) => void
-  showToast:      (msg: string, type: 'success' | 'error' | 'info') => void
-  canEdit?:       boolean
-}) {
+    plans,
+    expandedId,
+    onToggleExpand,
+    onPlanUpdated,
+    showToast,
+    canEdit = true,
+    canActivate = true,
+  }: {
+    plans:          PlanLimit[]
+    expandedId:     string | null
+    onToggleExpand: (id: string) => void
+    onPlanUpdated:  (updated: PlanLimit) => void
+    showToast:      (msg: string, type: 'success' | 'error' | 'info') => void
+    canEdit?:       boolean
+    canActivate?:   boolean
+  }) {
   const supabase = createClient()
   const [togglingActive, setTogglingActive] = useState<string | null>(null)
 
@@ -897,10 +901,11 @@ function GatingMatrix({
         <div key={plan.id}>
           <PlanRow
             plan={plan}
-            isExpanded={expandedId === plan.id}
-            onToggle={() => onToggleExpand(plan.id)}
-            onToggleActive={handleToggleActive}
-          />
+              isExpanded={expandedId === plan.id}
+              onToggle={() => onToggleExpand(plan.id)}
+              onToggleActive={handleToggleActive}
+              canActivate={canActivate}
+            />
           {expandedId === plan.id && (
             <EditPanel
               plan={plan}
@@ -1113,13 +1118,13 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {can('edit_limits') && <button onClick={() => setShowPricingEditor(true)}
+          {can('edit_pricing') && <button onClick={() => setShowPricingEditor(true)}
             className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
             title="Edit Landing Page Pricing">
             <Layout size={13} />
           </button>}
-          {can('view_limits') && <button onClick={exportPlansCSV}
+          {can('export_plans') && <button onClick={exportPlansCSV}
             className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
             style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
             title="Export plans as CSV">
@@ -1138,31 +1143,37 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
       <HudCards stats={hudStats} loading={loading} />
 
       {/* Matrix */}
-      {loading ? (
-        <div className="flex flex-col gap-2">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="h-14 rounded-2xl animate-pulse" style={{ backgroundColor: C.bg }} />
-          ))}
-        </div>
-      ) : plans.length === 0 ? (
-        <div className="flex flex-col items-center py-16 gap-3 rounded-2xl border"
-             style={{ borderColor: C.border, backgroundColor: C.surface }}>
-          <AlertTriangle size={24} style={{ color: C.border }} />
-          <p className="text-[14px] font-bold" style={{ color: C.text }}>No plan limits configured</p>
-          <p className="text-[12px]" style={{ color: C.muted }}>Run the SQL migration to populate plan limits</p>
-        </div>
-      ) : (
-        <GatingMatrix
-          plans={plans}
-          expandedId={expandedId}
-          onToggleExpand={handleToggleExpand}
-          onPlanUpdated={handlePlanUpdated}
-          showToast={showToast}
-          canEdit={can('edit_limits')}
-        />
-      )}
+        {!can('view_limits') ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view plan limits</p>
+          </div>
+        ) : loading ? (
+          <div className="flex flex-col gap-2">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="h-14 rounded-2xl animate-pulse" style={{ backgroundColor: C.bg }} />
+            ))}
+          </div>
+        ) : plans.length === 0 ? (
+          <div className="flex flex-col items-center py-16 gap-3 rounded-2xl border"
+               style={{ borderColor: C.border, backgroundColor: C.surface }}>
+            <AlertTriangle size={24} style={{ color: C.border }} />
+            <p className="text-[14px] font-bold" style={{ color: C.text }}>No plan limits configured</p>
+            <p className="text-[12px]" style={{ color: C.muted }}>Run the SQL migration to populate plan limits</p>
+          </div>
+        ) : (
+          <GatingMatrix
+            plans={plans}
+            expandedId={expandedId}
+            onToggleExpand={handleToggleExpand}
+            onPlanUpdated={handlePlanUpdated}
+            showToast={showToast}
+            canEdit={can('edit_limits')}
+            canActivate={can('activate_plan')}
+          />
+        )}
 
-      {/* Plan Change History */}
+        {can('view_history') && <>
+        {/* Plan Change History */}
       <div className="rounded-2xl border overflow-hidden"
            style={{ backgroundColor: C.surface, borderColor: C.border }}>
 
@@ -1280,18 +1291,19 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
                 <p className="text-[11px]" style={{ color: C.muted }}>{timeAgo}</p>
 
                 {/* DATE */}
-                <p className="text-[10px]" style={{ color: C.muted }}>
-                  {new Date(entry.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
-                </p>
+                  <p className="text-[10px]" style={{ color: C.muted }}>
+                    {new Date(entry.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                  </p>
 
-              </div>
-            )
-          })
-        )}
-      </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+        </>}
 
-      {/* Pricing Editor Modal */}
-      {showPricingEditor && (
+        {/* Pricing Editor Modal */}
+        {showPricingEditor && (
         <PricingEditorModal onClose={() => setShowPricingEditor(false)} />
       )}
 

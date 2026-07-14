@@ -1,5 +1,6 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 const C = {
@@ -43,22 +44,30 @@ export default function ProDropdown({ prefix, currentValue, options, onChanged, 
   maxItems?:    number
 }) {
   const [open, setOpen] = useState(false)
-
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
   const displayLabel = (() => {
     const match = options.find(o => o.val === currentValue)
     return match ? match.label : currentValue
   })()
-
   // Button width style
   const btnWidth = width === 'full' ? '100%' : width === 'half' ? '50%' : undefined
-
   // Dropdown menu width
   const menuWidth = width === 'full' || width === 'half' ? '100%' : width
+
+  function toggleOpen() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+    setOpen(s => !s)
+  }
 
   return (
     <div className="relative" style={{ width: btnWidth }}>
       <button
-        onClick={() => setOpen(s => !s)}
+        ref={btnRef}
+        onClick={toggleOpen}
         className="flex items-center gap-2 px-3 py-2 rounded-lg border text-[13px] font-semibold transition-all"
         style={{
           backgroundColor: open ? C.bg : '#fff',
@@ -72,11 +81,16 @@ export default function ProDropdown({ prefix, currentValue, options, onChanged, 
           ? <ChevronUp   size={15} style={{ color: C.lime, flexShrink: 0 }}/>
           : <ChevronDown size={15} style={{ color: C.muted, flexShrink: 0 }}/>}
       </button>
-      {open && (
+      {open && typeof document !== 'undefined' && createPortal(
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)}/>
-          <div className="absolute top-full mt-2 z-50 rounded-2xl border shadow-xl overflow-hidden"
-               style={{ width: menuWidth, backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 8px 20px rgba(0,0,0,0.08)' }}>
+          <div className="fixed inset-0 z-[10500]" onClick={() => setOpen(false)}/>
+          <div className="fixed z-[10501] rounded-2xl border shadow-xl overflow-hidden"
+               style={{
+                 top: menuPos.top,
+                 left: menuPos.left,
+                 width: typeof menuWidth === 'number' ? menuWidth : menuPos.width,
+                 backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+               }}>
             <div className="p-2 flex flex-col gap-1" style={{ maxHeight: maxItems * 38, overflowY: 'auto' }}>
               {options.map((o, i) => (
                 <DropdownPill key={i} option={o} isSelected={o.val === currentValue}
@@ -84,7 +98,8 @@ export default function ProDropdown({ prefix, currentValue, options, onChanged, 
               ))}
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )

@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import ProDropdown from '@/components/ui/ProDropdown'
 import {
   X, Download, ChevronLeft, ChevronRight,
   Filter, Activity, Calendar, User, RefreshCw,
@@ -380,26 +381,34 @@ export default function FullAuditLogModal({ tools, onClose }: Props) {
           <Filter size={12} style={{ color: C.muted }} />
 
           {/* Tool filter */}
-          <select value={filterTool} onChange={e => setFilterTool(e.target.value)}
-            className="h-8 px-2 rounded-lg border text-[11px] outline-none"
-            style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
-            <option value="all">All Tools</option>
-            {tools.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+            <ProDropdown
+              prefix=""
+              currentValue={filterTool}
+              options={[{ val: 'all', label: 'All Tools', enabled: true }, ...tools.map(t => ({ val: t, label: t, enabled: true }))]}
+              onChanged={setFilterTool}
+              width={200}
+              maxItems={8}
+            />
 
           {/* Action filter */}
-          <select value={filterAction} onChange={e => setFilterAction(e.target.value)}
-            className="h-8 px-2 rounded-lg border text-[11px] outline-none"
-            style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
-            {ACTION_FILTERS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
-          </select>
+            <ProDropdown
+              prefix=""
+              currentValue={filterAction}
+              options={ACTION_FILTERS.map(a => ({ val: a.value, label: a.label, enabled: true }))}
+              onChanged={setFilterAction}
+              width={160}
+              maxItems={8}
+            />
 
           {/* Date filter */}
-          <select value={filterDate} onChange={e => setFilterDate(e.target.value)}
-            className="h-8 px-2 rounded-lg border text-[11px] outline-none"
-            style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
-            {DATE_RANGES.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
-          </select>
+            <ProDropdown
+              prefix=""
+              currentValue={filterDate}
+              options={DATE_RANGES.map(d => ({ val: d.value, label: d.label, enabled: true }))}
+              onChanged={setFilterDate}
+              width={140}
+              maxItems={5}
+            />
 
           <button onClick={() => { setPage(1); loadEntries(1); loadStats() }}
             className="flex items-center gap-1 h-8 px-2 rounded-lg border text-[11px] hover:opacity-70"

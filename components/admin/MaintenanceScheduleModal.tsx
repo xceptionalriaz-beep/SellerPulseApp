@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { X, Calendar, Clock, Trash2, Plus, AlertTriangle } from 'lucide-react'
+import ProDropdown from '@/components/ui/ProDropdown'
 
 const C = {
   dark:     '#0a0d08',
@@ -296,32 +297,36 @@ export default function MaintenanceScheduleModal({ switchId, switchTitle, onClos
               </div>
 
               {/* Frequency */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold" style={{ color: C.muted }}>FREQUENCY</label>
-                <select
-                  value={form.frequency}
-                  onChange={e => setForm(f => ({ ...f, frequency: e.target.value }))}
-                  className="h-9 px-3 rounded-xl border text-[12px] outline-none"
-                  style={{ borderColor: C.border, backgroundColor: C.surface, color: C.dark }}>
-                  <option value="once">Once</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold" style={{ color: C.muted }}>FREQUENCY</label>
+                  <ProDropdown
+                    prefix=""
+                    currentValue={form.frequency}
+                    options={[
+                      { val: 'once', label: 'Once', enabled: true },
+                      { val: 'weekly', label: 'Weekly', enabled: true },
+                      { val: 'monthly', label: 'Monthly', enabled: true },
+                    ]}
+                    onChanged={v => setForm(f => ({ ...f, frequency: v }))}
+                    width="full"
+                    maxItems={3}
+                  />
+                </div>
 
               {/* Day selector */}
               {form.frequency === 'weekly' && (
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold" style={{ color: C.muted }}>DAY</label>
-                  <select
-                    value={form.day_of_week}
-                    onChange={e => setForm(f => ({ ...f, day_of_week: Number(e.target.value) }))}
-                    className="h-9 px-3 rounded-xl border text-[12px] outline-none"
-                    style={{ borderColor: C.border, backgroundColor: C.surface, color: C.dark }}>
-                    {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
-                  </select>
-                </div>
-              )}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold" style={{ color: C.muted }}>DAY</label>
+                    <ProDropdown
+                      prefix=""
+                      currentValue={String(form.day_of_week)}
+                      options={DAYS.map((d, i) => ({ val: String(i), label: d, enabled: true }))}
+                      onChanged={v => setForm(f => ({ ...f, day_of_week: Number(v) }))}
+                      width="full"
+                      maxItems={7}
+                    />
+                  </div>
+                )}
               {form.frequency === 'monthly' && (
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold" style={{ color: C.muted }}>DAY OF MONTH</label>
@@ -356,14 +361,15 @@ export default function MaintenanceScheduleModal({ switchId, switchTitle, onClos
               {/* Timezone */}
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold" style={{ color: C.muted }}>YOUR TIMEZONE</label>
-                <select
-                  value={form.timezone}
-                  onChange={e => setForm(f => ({ ...f, timezone: e.target.value }))}
-                  className="h-9 px-3 rounded-xl border text-[12px] outline-none"
-                  style={{ borderColor: C.border, backgroundColor: C.surface, color: C.dark }}>
-                  {TIMEZONES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-              </div>
+                  <ProDropdown
+                    prefix=""
+                    currentValue={form.timezone}
+                    options={TIMEZONES.map(t => ({ val: t.value, label: t.label, enabled: true }))}
+                    onChanged={v => setForm(f => ({ ...f, timezone: v }))}
+                    width="full"
+                    maxItems={6}
+                  />
+                </div>
 
               {/* User message */}
               <div className="flex flex-col gap-1">

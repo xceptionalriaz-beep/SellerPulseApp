@@ -12,6 +12,7 @@ import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import MaintenanceScheduleModal from '@/components/admin/MaintenanceScheduleModal'
+import ProDropdown from '@/components/ui/ProDropdown'
 import FullAuditLogModal from '@/components/admin/FullAuditLogModal'
 import {
   AlertTriangle, CheckCircle, X, RefreshCw,
@@ -616,15 +617,14 @@ function DisableConfirmModal({
             <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>
               AUTO RE-ENABLE <span style={{ color: C.muted, fontWeight: 400 }}>(optional)</span>
             </p>
-            <select
-              value={reEnableMinutes}
-              onChange={e => setReEnableMinutes(Number(e.target.value))}
-              className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
-              style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
-              {RE_ENABLE_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <ProDropdown
+                prefix=""
+                currentValue={String(reEnableMinutes)}
+                options={RE_ENABLE_OPTIONS.map(o => ({ val: String(o.value), label: o.label, enabled: true }))}
+                onChanged={v => setReEnableMinutes(Number(v))}
+                width="full"
+                maxItems={7}
+              />
             {reEnableMinutes > 0 && (
               <p className="text-[10px] mt-1" style={{ color: C.limeDeep }}>
                 Will automatically re-enable in {RE_ENABLE_OPTIONS.find(o => o.value === reEnableMinutes)?.label}
