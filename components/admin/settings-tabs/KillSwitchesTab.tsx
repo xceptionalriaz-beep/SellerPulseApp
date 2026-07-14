@@ -264,22 +264,25 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
 
 // ── Kill Switch Row (table row) ───────────────────────────────
 function KillSwitchRow({
-  sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount, canToggle = true,
-}: {
-  sw:                  KillSwitch
-  onDisable:           (sw: KillSwitch) => void
-  onEnable:            (sw: KillSwitch) => void
-  onToggleVisibility:  (sw: KillSwitch) => void
-  onToggleReadOnly:    (sw: KillSwitch) => void
-  onSchedule:          (sw: KillSwitch) => void
-  toggling:            string | null
-  visibilityToggling:  string | null
-  readOnlyToggling:    string | null
-  currentUserName:     string
-  scheduleCount:       number
-  incidentCount:       number
-  canToggle?:          boolean
-}) {
+    sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount, canToggle = true, canToggleVisibility = true, canToggleReadOnly = true, canSchedule = true,
+  }: {
+    sw:                  KillSwitch
+    onDisable:           (sw: KillSwitch) => void
+    onEnable:            (sw: KillSwitch) => void
+    onToggleVisibility:  (sw: KillSwitch) => void
+    onToggleReadOnly:    (sw: KillSwitch) => void
+    onSchedule:          (sw: KillSwitch) => void
+    toggling:            string | null
+    visibilityToggling:  string | null
+    readOnlyToggling:    string | null
+    currentUserName:     string
+    scheduleCount:       number
+    incidentCount:       number
+    canToggle?:          boolean
+    canToggleVisibility?: boolean
+    canToggleReadOnly?:   boolean
+    canSchedule?:         boolean
+  }) {
   const isOffline            = !sw.is_enabled
   const isHidden             = !sw.is_visible
   const isToggling           = toggling === sw.id
@@ -427,7 +430,7 @@ function KillSwitchRow({
         <VisibleToggle
           on={sw.is_visible}
           spinning={isVisibilityToggling}
-          onClick={() => canToggle ? onToggleVisibility(sw) : undefined}
+          onClick={() => canToggleVisibility ? onToggleVisibility(sw) : undefined}
         />
       </div>
 
@@ -440,9 +443,9 @@ function KillSwitchRow({
                  style={{ borderTopColor: C.amber }} />
           </div>
         ) : (
-          <div onClick={() => onToggleReadOnly(sw)}
-               className="relative w-11 h-6 rounded-full cursor-pointer"
-               style={{ backgroundColor: sw.is_read_only ? C.amber : 'rgba(100,116,139,0.35)', transition: 'background-color 0.25s ease' }}>
+            <div onClick={() => canToggleReadOnly && onToggleReadOnly(sw)}
+                 className="relative w-11 h-6 rounded-full cursor-pointer"
+                 style={{ backgroundColor: sw.is_read_only ? C.amber : 'rgba(100,116,139,0.35)', transition: 'background-color 0.25s ease', opacity: canToggleReadOnly ? 1 : 0.5, cursor: canToggleReadOnly ? 'pointer' : 'not-allowed' }}>
             <div style={{
               position: 'absolute', top: '2px', left: '2px',
               width: '20px', height: '20px', borderRadius: '50%',
@@ -479,21 +482,21 @@ function KillSwitchRow({
       </div>
 
       {/* SCHEDULE */}
-      <div className="flex items-center gap-1.5">
-        <button
-          onClick={() => onSchedule(sw)}
-          className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold hover:opacity-80 transition-opacity"
-          style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
-          <Calendar size={9} />
-          {scheduleCount > 0 ? `${scheduleCount}` : '+'}
-        </button>
+        {canSchedule && <div className="flex items-center gap-1.5">
+          <button
+              onClick={() => onSchedule(sw)}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold hover:opacity-80 transition-opacity"
+              style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
+              <Calendar size={9} />
+            {scheduleCount > 0 ? `${scheduleCount}` : '+'}
+          </button>
+        </div>}
+
       </div>
+    )
+  }
 
-    </div>
-  )
-}
-
-// ── Disable Confirmation Modal ─────────────────────────────────
+  // ── Disable Confirmation Modal ─────────────────────────────────
 function DisableConfirmModal({
   sw, onClose, onConfirm,
 }: {
@@ -1351,56 +1354,63 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
           )}
         </div>
 
-        {loading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-12 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
-          ))
-        ) : switches.length === 0 ? (
-          <div className="flex flex-col items-center py-10 gap-2">
-            <Shield size={22} style={{ color: C.border }} />
-            <p className="text-[13px]" style={{ color: C.muted }}>No kill switches configured</p>
+        {!can('view_switches') ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view kill switches</p>
           </div>
-        ) : (
-          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
-            {/* Table header */}
-            <div className="grid px-4 py-2 border-b"
-                 style={{
-                   gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
-                   gap: 12,
-                   borderColor: C.border,
-                   backgroundColor: C.bg,
-                 }}>
-              {['TOOL NAME', 'STATUS', 'OFFLINE FOR', 'DESCRIPTION', 'MAINTENANCE', 'VISIBLE', 'READ ONLY', 'LAST BY', 'REASON', 'SCHEDULE'].map(h => (
-                <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
-                  {h}
-                </span>
+        ) : loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-12 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
+            ))
+          ) : switches.length === 0 ? (
+            <div className="flex flex-col items-center py-10 gap-2">
+              <Shield size={22} style={{ color: C.border }} />
+              <p className="text-[13px]" style={{ color: C.muted }}>No kill switches configured</p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
+              {/* Table header */}
+              <div className="grid px-4 py-2 border-b"
+                   style={{
+                     gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
+                     gap: 12,
+                     borderColor: C.border,
+                     backgroundColor: C.bg,
+                   }}>
+                {['TOOL NAME', 'STATUS', 'OFFLINE FOR', 'DESCRIPTION', 'MAINTENANCE', 'VISIBLE', 'READ ONLY', 'LAST BY', 'REASON', 'SCHEDULE'].map(h => (
+                  <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
+                    {h}
+                  </span>
+                ))}
+              </div>
+              {/* Table rows */}
+              {switches.map(sw => (
+                <KillSwitchRow
+                  key={sw.id}
+                  sw={sw}
+                  onDisable={s => setDisableTarget(s)}
+                  onEnable={handleEnable}
+                  onToggleVisibility={handleToggleVisibility}
+                  onToggleReadOnly={handleToggleReadOnly}
+                  onSchedule={s => setScheduleTarget(s)}
+                    toggling={toggling}
+                    visibilityToggling={visibilityToggling}
+                    readOnlyToggling={readOnlyToggling}
+                    currentUserName={currentUserName}
+                    scheduleCount={scheduleCounts[sw.id] ?? 0}
+                    incidentCount={incidentCounts[sw.title] ?? 0}
+                  canToggle={can('toggle_switch')}
+                  canToggleVisibility={can('toggle_visibility')}
+                  canToggleReadOnly={can('toggle_readonly')}
+                  canSchedule={can('schedule_maintenance')}
+                />
               ))}
             </div>
-            {/* Table rows */}
-            {switches.map(sw => (
-              <KillSwitchRow
-                key={sw.id}
-                sw={sw}
-                onDisable={s => setDisableTarget(s)}
-                onEnable={handleEnable}
-                onToggleVisibility={handleToggleVisibility}
-                onToggleReadOnly={handleToggleReadOnly}
-                onSchedule={s => setScheduleTarget(s)}
-                toggling={toggling}
-                visibilityToggling={visibilityToggling}
-                readOnlyToggling={readOnlyToggling}
-                currentUserName={currentUserName}
-                scheduleCount={scheduleCounts[sw.id] ?? 0}
-                incidentCount={incidentCounts[sw.title] ?? 0}
-                canToggle={can('toggle_switch')}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Audit Trail */}
-      <AuditTrailPanel entries={auditEntries} loading={auditLoading} onViewHistory={() => setShowFullHistory(true)} />
+        {/* Audit Trail */}
+        {can('view_audit') && <AuditTrailPanel entries={auditEntries} loading={auditLoading} onViewHistory={() => can('view_history') && setShowFullHistory(true)} />}
 
       {/* Emergency Actions — collapsed by default to prevent accidental clicks */}
       <div className="rounded-2xl border overflow-hidden"
@@ -1442,10 +1452,10 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
                   Instantly disables all {activeCount} active feature{activeCount !== 1 ? 's' : ''} simultaneously for every user on the platform. Use only during a major outage.
                 </p>
               </div>
-              {can('toggle_switch') && <button
-                onClick={() => setShowKillAll(true)}
-                disabled={killingAll || activeCount === 0}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-black hover:opacity-80 disabled:opacity-40 shrink-0"
+              {can('kill_all') && <button
+                  onClick={() => setShowKillAll(true)}
+                  disabled={killingAll || activeCount === 0}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-black hover:opacity-80 disabled:opacity-40 shrink-0"
                 style={{ backgroundColor: C.red, color: '#fff' }}>
                 {killingAll
                   ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
