@@ -11,6 +11,7 @@
 import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import ProDropdown from '@/components/ui/ProDropdown'
 import {
   Mail, Zap, BarChart2, DollarSign, Play, Pause,
   ChevronDown, ChevronUp, X, Save, Plus, Trash2,
@@ -949,16 +950,16 @@ function DataRetentionSection({
               <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>RETENTION PERIOD</p>
               <div className="flex gap-2">
                 {[30, 60, 90, 180].map(d => (
-                  <button key={d} onClick={() => setRetDays(d)}
-                    className="flex-1 py-2 rounded-xl text-[12px] font-bold border transition-all"
-                    style={{
-                      backgroundColor: retDays === d ? C.dark : C.bg,
-                      color:           retDays === d ? C.lime : C.muted,
-                      borderColor:     retDays === d ? C.dark : C.border,
-                    }}>
-                    {d}d
-                  </button>
-                ))}
+                    <button key={d} onClick={() => setRetDays(d)}
+                      className="flex-1 py-2 rounded-xl text-[12px] font-bold border transition-all"
+                      style={{
+                        backgroundColor: retDays === d ? '#1a2410' : C.bg,
+                        color:           retDays === d ? C.lime : C.muted,
+                        borderColor:     retDays === d ? '#1a2410' : C.border,
+                      }}>
+                      {d}d
+                    </button>
+                  ))}
               </div>
             </div>
             <div>
@@ -1515,16 +1516,16 @@ export default function EmailAutomationsTab() {
           {/* Limit selector */}
           <div className="flex items-center gap-1">
             {[25, 50, 100].map(limit => (
-              <button key={limit} onClick={() => { setTelemetryLimit(limit); loadData() }}
-                className="px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all"
-                style={{
-                  backgroundColor: telemetryLimit === limit ? C.dark : C.bg,
-                  color:           telemetryLimit === limit ? C.lime : C.muted,
-                  border:          `1px solid ${telemetryLimit === limit ? C.dark : C.border}`,
-                }}>
-                {limit}
-              </button>
-            ))}
+                <button key={limit} onClick={() => { setTelemetryLimit(limit); loadData() }}
+                  className="px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all"
+                  style={{
+                    backgroundColor: telemetryLimit === limit ? C.lime : C.bg,
+                    color:           telemetryLimit === limit ? '#1a2410' : C.muted,
+                    border:          `1px solid ${telemetryLimit === limit ? C.lime : C.border}`,
+                  }}>
+                  {limit}
+                </button>
+              ))}
           </div>
           <p className="text-[10px] ml-1" style={{ color: C.muted }}>
             {telemetrySearch
@@ -1541,70 +1542,90 @@ export default function EmailAutomationsTab() {
               : `${telemetry.length}`} events
           </p>
           <button onClick={() => setShowFilters(p => !p)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold ml-1 hover:opacity-80"
-            style={{
-              backgroundColor: showFilters ? C.dark : C.bg,
-              color:           showFilters ? C.lime : C.muted,
-              border:          `1px solid ${showFilters ? C.dark : C.border}`,
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold ml-1 hover:opacity-80"
+              style={{
+                backgroundColor: showFilters ? C.lime : C.bg,
+                color:           showFilters ? '#1a2410' : C.muted,
+                border:          `1px solid ${showFilters ? C.lime : C.border}`,
             }}>
             <Filter size={11} /> Filters
           </button>
         </div>
 
         {/* Filter bar */}
-        {showFilters && (
-          <div className="grid grid-cols-4 gap-3 px-4 py-3 border-b"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
-            <CustomDropdown
-              label="DATE RANGE"
-              value={filterDateRange}
-              onChange={setFilterDateRange}
-              options={[
-                { value: 'all',       label: 'All time'      },
-                { value: 'today',     label: 'Today'         },
-                { value: 'yesterday', label: 'Yesterday'     },
-                { value: '7d',        label: 'Last 7 days'   },
-                { value: '30d',       label: 'Last 30 days'  },
-                { value: '3m',        label: 'Last 3 months' },
-              ]}
-            />
-            <CustomDropdown
-              label="FLOW"
-              value={filterFlow}
-              onChange={setFilterFlow}
-              options={[
-                { value: 'all', label: 'All flows' },
-                ...flows.map(f => ({ value: f.id, label: f.name })),
-              ]}
-            />
-            <CustomDropdown
-              label="EVENT TYPE"
-              value={filterEvent}
-              onChange={setFilterEvent}
-              options={[
-                { value: 'all',             label: 'All events' },
-                { value: 'sent',            label: 'Sent'       },
-                { value: 'email.delivered', label: 'Delivered'  },
-                { value: 'email.opened',    label: 'Opened'     },
-                { value: 'email.clicked',   label: 'Clicked'    },
-                { value: 'email.bounced',   label: 'Bounced'    },
-              ]}
-            />
-            <CustomDropdown
-              label="STATUS"
-              value={filterStatus}
-              onChange={setFilterStatus}
-              options={[
-                { value: 'all',       label: 'All statuses' },
-                { value: 'pending',   label: 'Pending'      },
-                { value: 'sent',      label: 'Sent'         },
-                { value: 'delivered', label: 'Delivered'    },
-                { value: 'failed',    label: 'Failed'       },
-                { value: 'cancelled', label: 'Cancelled'    },
-              ]}
-            />
-          </div>
-        )}
+          {showFilters && (
+            <div className="grid grid-cols-4 gap-3 px-4 py-3 border-b"
+                 style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <div>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>DATE RANGE</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={filterDateRange}
+                  options={[
+                    { val: 'all',       label: 'All time',      enabled: true },
+                    { val: 'today',     label: 'Today',         enabled: true },
+                    { val: 'yesterday', label: 'Yesterday',     enabled: true },
+                    { val: '7d',        label: 'Last 7 days',   enabled: true },
+                    { val: '30d',       label: 'Last 30 days',  enabled: true },
+                    { val: '3m',        label: 'Last 3 months', enabled: true },
+                  ]}
+                  onChanged={setFilterDateRange}
+                  width="full"
+                  maxItems={6}
+                />
+              </div>
+              <div>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>FLOW</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={filterFlow}
+                  options={[
+                    { val: 'all', label: 'All flows', enabled: true },
+                    ...flows.map(f => ({ val: f.id, label: f.name, enabled: true })),
+                  ]}
+                  onChanged={setFilterFlow}
+                  width="full"
+                  maxItems={6}
+                />
+              </div>
+              <div>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>EVENT TYPE</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={filterEvent}
+                  options={[
+                    { val: 'all',             label: 'All events', enabled: true },
+                    { val: 'sent',            label: 'Sent',       enabled: true },
+                    { val: 'email.delivered', label: 'Delivered',  enabled: true },
+                    { val: 'email.opened',    label: 'Opened',     enabled: true },
+                    { val: 'email.clicked',   label: 'Clicked',    enabled: true },
+                    { val: 'email.bounced',   label: 'Bounced',    enabled: true },
+                  ]}
+                  onChanged={setFilterEvent}
+                  width="full"
+                  maxItems={6}
+                />
+              </div>
+              <div>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>STATUS</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={filterStatus}
+                  options={[
+                    { val: 'all',       label: 'All statuses', enabled: true },
+                    { val: 'pending',   label: 'Pending',      enabled: true },
+                    { val: 'sent',      label: 'Sent',         enabled: true },
+                      { val: 'delivered', label: 'Delivered',    enabled: true },
+                      { val: 'failed',    label: 'Failed',       enabled: true },
+                      { val: 'cancelled', label: 'Cancelled',    enabled: true },
+                    ]}
+                  onChanged={setFilterStatus}
+                    width="full"
+                    maxItems={6}
+                  />
+              </div>
+            </div>
+          )}
 
         {/* Log header */}
         <div className="overflow-x-auto">
