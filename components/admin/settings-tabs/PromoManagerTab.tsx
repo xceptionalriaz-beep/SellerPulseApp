@@ -1442,7 +1442,7 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
     <div className="flex flex-col gap-5">
 
       {/* HUD Cards */}
-      <HudCards codes={codes} />
+      {can('view_analytics') && <HudCards codes={codes} />}
 
       {/* Action Bar */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -1513,26 +1513,32 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
         </button>}
       </div>
 
-      {/* Promo Codes Table */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>
-            PROMO CODES — {filteredCodes.length} {statusFilter !== 'all' ? statusFilter : 'total'}
-          </p>
-        </div>
-        <PromoCodesTable
-          codes={filteredCodes}
-          onEdit={code => setEditTarget(code)}
-          onToggle={handleToggle}
-          onDelete={code => setDeleteTarget(code)}
-          onCopy={handleCopy}
-          obscureCode={obscureCode}
-          obscureNumber={obscureNumber}
-          canEdit={can('edit_promo')}
-          canDelete={can('delete_promo')}
-          canToggle={can('toggle_promo')}
-        />
-      </div>
+     {/* Promo Codes Table */}
+        {can('view_promos') ? (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>
+                PROMO CODES — {filteredCodes.length} {statusFilter !== 'all' ? statusFilter : 'total'}
+              </p>
+            </div>
+            <PromoCodesTable
+              codes={filteredCodes}
+              onEdit={code => setEditTarget(code)}
+              onToggle={handleToggle}
+              onDelete={code => setDeleteTarget(code)}
+              onCopy={handleCopy}
+              obscureCode={obscureCode}
+              obscureNumber={obscureNumber}
+              canEdit={can('edit_promo')}
+              canDelete={can('delete_promo')}
+              canToggle={can('toggle_promo')}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view promo codes</p>
+          </div>
+        )}
 
       {/* A/B Pricing Engine */}
       <div>
