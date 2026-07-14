@@ -1500,10 +1500,10 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
         </div>
 
         {/* Export */}
-        {can('view_analytics') && <button onClick={exportCSV}
-          className="flex items-center gap-2 h-10 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
-          style={{ backgroundColor: C.surface, borderColor: C.border, color: C.muted }}>
-          <Download size={14} /> Export
+          {can('export_promos') && <button onClick={exportCSV}
+            className="flex items-center gap-2 h-10 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
+            style={{ backgroundColor: C.surface, borderColor: C.border, color: C.muted }}>
+            <Download size={14} /> Export
         </button>}
         {/* New Code */}
         {can('create_promo') && <button onClick={() => setShowCreate(true)}
@@ -1552,20 +1552,20 @@ export default function PromoManagerTab({ isInvestorMode = false }: { isInvestor
                 {abTests.filter(t => t.status === 'running').length} running
               </p>
             </div>
-            {canCreateTest && (
-              <button onClick={() => setShowCreateTest(true)}
-                className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
-                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-                <Plus size={13} /> New Test
-              </button>
+           {can('create_ab_test') && (
+                <button onClick={() => setShowCreateTest(true)}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
+                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                  <Plus size={13} /> New Test
+                </button>
             )}
           </div>
         </div>
         <AbPricingEngine
-          tests={abTests}
-          onDeclareWinner={(test, variant) => setWinnerModal({ test, variant })}
-          onDeleteTest={test => setDeleteTestTarget(test)}
-          canDelete={canCreateTest}
+            tests={abTests}
+            onDeclareWinner={(test, variant) => can('declare_winner') && setWinnerModal({ test, variant })}
+            onDeleteTest={test => setDeleteTestTarget(test)}
+            canDelete={can('delete_ab_test')}
         />
       </div>
 
