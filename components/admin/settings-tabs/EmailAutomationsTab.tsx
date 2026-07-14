@@ -179,12 +179,14 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
 
 // ── Step Editor Modal ──────────────────────────────────────────
 function StepEditorModal({
-  step, flowName, onClose, onSaved,
+  step, flowName, onClose, onSaved, canSendTest = true, canEdit = true,
 }: {
   step:     EmailStep
   flowName: string
   onClose:  () => void
   onSaved:  (updated: EmailStep) => void
+  canSendTest?: boolean
+  canEdit?:     boolean
 }) {
   const supabase = createClient()
   const [subject,  setSubject]  = useState(step.subject_line)
@@ -301,28 +303,28 @@ function StepEditorModal({
             style={{ borderColor: C.border, color: C.muted }}>
             Cancel
           </button>
-          <button onClick={async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session?.user?.email) return
-            const res = await fetch('/api/admin/email-queue/process', {
-              method:  'POST',
-              headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '' },
-              body:    JSON.stringify({ to_email: session.user.email, subject, html_body: body }),
-            })
-            if (res.ok) alert(`Test email sent to ${session.user.email}`)
-            else alert('Failed to send test email')
-          }}
-            className="flex items-center gap-1.5 py-2.5 px-3 rounded-xl border text-[13px] font-semibold hover:opacity-80"
-            style={{ borderColor: C.border, color: C.muted, backgroundColor: C.bg }}>
-            <Mail size={13} /> Send Test
-          </button>
-          <button onClick={handleSave} disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-            {saving ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> : <><Save size={14} /> Save Step</>}
-          </button>
+          {canSendTest && <button onClick={async () => {
+              const { data: { session } } = await supabase.auth.getSession()
+              if (!session?.user?.email) return
+              const res = await fetch('/api/admin/email-queue/process', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '' },
+                body:    JSON.stringify({ to_email: session.user.email, subject, html_body: body }),
+              })
+              if (res.ok) alert(`Test email sent to ${session.user.email}`)
+              else alert('Failed to send test email')
+            }}
+              className="flex items-center gap-1.5 py-2.5 px-3 rounded-xl border text-[13px] font-semibold hover:opacity-80"
+              style={{ borderColor: C.border, color: C.muted, backgroundColor: C.bg }}>
+              <Mail size={13} /> Send Test
+            </button>}
+            {canEdit && <button onClick={handleSave} disabled={saving}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+              {saving ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> : <><Save size={14} /> Save Step</>}
+            </button>}
+          </div>
         </div>
-      </div>
     </div>
   )
 }
@@ -330,7 +332,7 @@ function StepEditorModal({
 // ── Flow Row ───────────────────────────────────────────────────
 function FlowRow({
   flow, isExpanded, onToggle, onToggleActive, onEditStep,
-  onDeleteFlow, onAddStep, onDeleteStep, toggling, canManage = true,
+  onDeleteFlow, onAddStep, onDeleteStep, toggling, canManage = true, canToggle = true, canDelete = true, canAddStep = true, canDeleteStep = true,
 }: {
   flow:           EmailFlow
   isExpanded:     boolean
@@ -342,6 +344,10 @@ function FlowRow({
   onDeleteStep:   (stepId: string, flowId: string) => void
   toggling:       string | null
   canManage?:     boolean
+  canToggle?:     boolean
+  canDelete?:     boolean
+  canAddStep?:    boolean
+  canDeleteStep?: boolean
 }) {
   return (
     <div>
@@ -411,7 +417,7 @@ function FlowRow({
         </div>
 
         {/* Active toggle */}
-        <div onClick={e => { e.stopPropagation(); canManage && onToggleActive(flow) }}>
+        <div onClick={e => { e.stopPropagation(); canToggle && onToggleActive(flow) }}>
           {toggling === flow.id ? (
             <div className="w-10 h-5 flex items-center justify-center">
               <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
@@ -432,7 +438,7 @@ function FlowRow({
         </div>
 
         {/* Delete flow */}
-        <div className="flex justify-center" onClick={e => { e.stopPropagation(); canManage && onDeleteFlow(flow) }}>
+        <div className="flex justify-center" onClick={e => { e.stopPropagation(); canDelete && onDeleteFlow(flow) }}>
           <div className="w-7 h-7 flex items-center justify-center rounded-xl cursor-pointer hover:opacity-80"
                style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
             <Trash2 size={13} style={{ color: C.red }} />
@@ -471,7 +477,7 @@ function FlowRow({
 
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>EMAIL STEPS</p>
-            {canManage && <button onClick={() => onAddStep(flow.id)}
+            {canAddStep && <button onClick={() => onAddStep(flow.id)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:opacity-80"
               style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
               <Plus size={11} /> Add Step
@@ -503,7 +509,7 @@ function FlowRow({
                       onClick={() => onEditStep(step, flow.name)}>
                   Edit →
                 </span>
-                {canManage && <button onClick={() => onDeleteStep(step.id, flow.id)}
+                {canDeleteStep && <button onClick={() => onDeleteStep(step.id, flow.id)}
                   className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 shrink-0"
                   style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
                   <Trash2 size={11} style={{ color: C.red }} />
@@ -803,10 +809,11 @@ function AddStepModal({
 // ══════════════════════════════════════════════════════════════
 // ── Data Retention Section ─────────────────────────────────────
 function DataRetentionSection({
-  showToast, supabase,
+  showToast, supabase, canManage = true,
 }: {
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
   supabase:  any
+  canManage?: boolean
 }) {
   const [settings,      setSettings]      = useState<any>(null)
   const [queueCount,    setQueueCount]    = useState(0)
@@ -991,25 +998,25 @@ function DataRetentionSection({
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-3">
-            <button onClick={handleSaveSettings} disabled={saving}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-              style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-              {saving
-                ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.muted }} />
-                : <><Save size={13} /> Save Settings</>}
-            </button>
-            <button onClick={handleArchiveNow} disabled={archiving}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-              {archiving
-                ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
-                : <><RefreshCw size={13} /> Archive & Clean Now</>}
-            </button>
+            {canManage && <div className="flex gap-3">
+              <button onClick={handleSaveSettings} disabled={saving}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
+                style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+                {saving
+                  ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.muted }} />
+                  : <><Save size={13} /> Save Settings</>}
+              </button>
+              <button onClick={handleArchiveNow} disabled={archiving}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
+                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                {archiving
+                  ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
+                  : <><RefreshCw size={13} /> Archive & Clean Now</>}
+                </button>
+            </div>}
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
   )
 }
 
@@ -1345,7 +1352,7 @@ export default function EmailAutomationsTab() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {can('manage_flows') && <button onClick={() => setShowNewFlow(true)}
+          {can('create_flow') && <button onClick={() => setShowNewFlow(true)}
             className="flex items-center gap-2 h-9 px-3 rounded-xl text-[12px] font-bold hover:opacity-80"
             style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
             <Plus size={13} /> New Flow
@@ -1363,11 +1370,16 @@ export default function EmailAutomationsTab() {
       <HudCards stats={hudStats} loading={loading} />
 
       {/* Flow Matrix */}
-      <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-        {/* Header */}
-        <div className="grid px-4 py-2.5 border-b"
-             style={{ gridTemplateColumns: '1.4fr 0.9fr 0.4fr 0.4fr 0.5fr 0.5fr 0.5fr 0.8fr 0.4fr 0.3fr 0.3fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
-          {['FLOW NAME', 'TRIGGER', 'STEPS', 'SENT', 'OPEN%', 'CLICK%', 'QUEUE', 'LAST SENT', 'ACTIVE', '', ''].map((h, i) => (
+        {!can('manage_flows') ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view email flows</p>
+          </div>
+        ) : (
+        <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+          {/* Header */}
+          <div className="grid px-4 py-2.5 border-b"
+               style={{ gridTemplateColumns: '1.4fr 0.9fr 0.4fr 0.4fr 0.5fr 0.5fr 0.5fr 0.8fr 0.4fr 0.3fr 0.3fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
+            {['FLOW NAME', 'TRIGGER', 'STEPS', 'SENT', 'OPEN%', 'CLICK%', 'QUEUE', 'LAST SENT', 'ACTIVE', '', ''].map((h, i) => (
             <span key={i} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
           ))}
         </div>
@@ -1394,11 +1406,16 @@ export default function EmailAutomationsTab() {
               onAddStep={(flowId) => setAddingStep({ flowId, flowName: flow.name })}
               onDeleteStep={handleDeleteStep}
               toggling={toggling}
-              canManage={can('manage_flows')}
-            />
-          ))
+                canManage={can('manage_flows')}
+                canToggle={can('toggle_flow')}
+                canDelete={can('delete_flow')}
+                canAddStep={can('add_step')}
+                canDeleteStep={can('delete_step')}
+                />
+              ))
+            )}
+          </div>
         )}
-      </div>
 
       {/* Email Analytics */}
       {emailAnalytics && (
@@ -1760,16 +1777,18 @@ export default function EmailAutomationsTab() {
 
       {/* Step Editor Modal */}
       {editingStep && (
-        <StepEditorModal
-          step={editingStep.step}
-          flowName={editingStep.flowName}
-          onClose={() => setEditingStep(null)}
-          onSaved={handleStepSaved}
-        />
+       <StepEditorModal
+            step={editingStep.step}
+            flowName={editingStep.flowName}
+            onClose={() => setEditingStep(null)}
+            onSaved={handleStepSaved}
+            canSendTest={can('send_test')}
+            canEdit={can('edit_templates')}
+          />
       )}
 
       {/* Data Retention Section */}
-      <DataRetentionSection showToast={showToast} supabase={supabase} />
+      <DataRetentionSection showToast={showToast} supabase={supabase} canManage={can('manage_retention')} />
 
       {/* Toast */}
       {toast && <Toast msg={toast.msg} type={toast.type} />}
