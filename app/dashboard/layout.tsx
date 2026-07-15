@@ -55,14 +55,16 @@ import SecurityTab           from '@/app/dashboard/profile/tabs/SecurityTab'
 import AnnouncementBanner    from '@/components/dashboard/AnnouncementBanner'
 
 // -- Nav items (mirrors Dart sidebar exactly) -------------------
+const isInUserMode = typeof window !== 'undefined' && sessionStorage.getItem('riazify_usermode') === '1'
+
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard',           href: '/dashboard'                           },
-  { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'          },
-  { icon: Type,            label: 'Title Builder',       href: '/dashboard/title-builder'             },
-  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/profit-calculator'         },
-  { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'                 },
-  { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research'       },
-  { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                    },
+  { icon: LayoutDashboard, label: 'Dashboard',           href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard'  },
+  { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'                          },
+  { icon: Type,            label: 'Title Builder',       href: '/dashboard/title-builder'                             },
+  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/profit-calculator'                         },
+  { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'                                 },
+  { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research'                       },
+  { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                                    },
 ]
 
 // -- Kill switch ? nav label mapping ---------------------------
@@ -287,7 +289,11 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<string | null>(searchParams.get('analytics'))
   const [emailUnverified, setEmailUnverified] = useState(false)
 
-  const isAdmin = profile?.role === 'admin'
+  const isUserMode = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('usermode') === '1' ||
+    sessionStorage.getItem('riazify_usermode') === '1'
+  )
+  const isAdmin = profile?.role === 'admin' && !isUserMode
   const profileLoaded = profile !== null
   const [cachedIsAdmin, setCachedIsAdmin] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -296,9 +302,11 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     setMounted(true)
     const cookie = document.cookie.split(';').find(c => c.trim().startsWith('riazify_role='))
     const role = cookie ? cookie.split('=')[1].trim() : localStorage.getItem('riazify_role')
-    const isAdminCached = role === 'admin'
+    const isUserMode = new URLSearchParams(window.location.search).get('usermode') === '1'
+    if (isUserMode) sessionStorage.setItem('riazify_usermode', '1')
+    const isAdminCached = role === 'admin' && !isUserMode
     setCachedIsAdmin(isAdminCached)
-    if (isAdminCached && !window.location.pathname.startsWith('/dashboard/admin')) {
+    if (isAdminCached && !window.location.pathname.startsWith('/dashboard/admin') && !isUserMode) {
       router.push('/dashboard/admin')
     }
   }, [])
@@ -323,8 +331,9 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         setProfile(data as Profile)
         localStorage.setItem('riazify_role', (data as any).role || 'user')
         document.cookie = `riazify_role=${(data as any).role || 'user'};path=/;max-age=86400`
-        setCachedIsAdmin((data as any).role === 'admin')
-        if ((data as any).role === 'admin' && !window.location.pathname.startsWith('/dashboard/admin')) {
+        const isUserMode = new URLSearchParams(window.location.search).get('usermode') === '1' || sessionStorage.getItem('riazify_usermode') === '1'
+        setCachedIsAdmin((data as any).role === 'admin' && !isUserMode)
+        if ((data as any).role === 'admin' && !window.location.pathname.startsWith('/dashboard/admin') && !isUserMode) {
           router.push('/dashboard/admin')
         }
         // Load section permissions via API (bypasses RLS, always fresh)
@@ -407,15 +416,18 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   // -- Filter nav items based on kill switches --------------------
   const visibleNavItems = NAV_ITEMS.filter(item => {
     const switchTitle = KILL_SWITCH_MAP[item.label]
-    if (!switchTitle) return true // no kill switch = always show (Dashboard, Settings)
+    if (!switchTitle) return true
     return !disabledTools.has(switchTitle)
-  })
+  }).map(item => ({
+    ...item,
+    href: item.href === '/dashboard' && isUserMode ? '/dashboard?usermode=1' : item.href,
+  }))
 
   // -- Load notification count ------------------------------------
   const loadNotifCount = useCallback(async () => {
     if (!profile) return
     try {
-      if (profile.role === 'admin') {
+      if (profile.role === 'admin' && !isUserMode) {
         const { count } = await supabase
           .from('admin_notifications')
           .select('*', { count: 'exact', head: true })
@@ -461,14 +473,14 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-bg">
       {showNotifPanel && (
-        <NotificationsPanelOverlay onClose={() => setShowNotifPanel(false)} />
+        <NotificationsPanelOverlay onClose={() => setShowNotifPanel(false)} forceUser={isUserMode} />
       )}
       <div className="flex gap-0 h-screen">
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
         {!mounted ? (
           <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight:'100vh', backgroundColor:'#1a2410' }} />
-        ) : (cachedIsAdmin || isAdmin) ? (
+        ) : ((cachedIsAdmin || isAdmin) && !isUserMode) ? (
           /* -- ADMIN SIDEBAR -- */
           <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight:'100vh', backgroundColor:'#1a2410' }}>
             {/* Logo */}
@@ -596,7 +608,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           /* -- USER SIDEBAR -- */
           <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor:'#1a2410' }}>
             <div className="flex justify-center pt-[30px] pb-[35px]">
-              <button onClick={() => router.push('/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
+              <button onClick={() => router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
                 <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 24, height: 24 }} />
               </button>
             </div>
@@ -713,7 +725,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
           <div className="relative w-[250px] bg-dark flex flex-col z-10 animate-slide-right">
             <div className="pt-[50px] pb-[30px] flex flex-col items-center">
-              <button onClick={() => { router.push('/dashboard'); setMobileOpen(false) }}>
+              <button onClick={() => { router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard'); setMobileOpen(false) }}>
                 <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 36, height: 36 }} />
               </button>
               <span className="text-lime text-base font-extrabold tracking-wide mt-1.5">Riazify</span>

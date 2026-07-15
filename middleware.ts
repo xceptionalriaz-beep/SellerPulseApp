@@ -60,10 +60,19 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect admin users from /dashboard to /dashboard/admin
+  // BUT preserve usermode=1 param when redirecting
   if (user && request.nextUrl.pathname === '/dashboard') {
     const riazifyRole = request.cookies.get('riazify_role')?.value
-    if (riazifyRole === 'admin') {
+    const userMode    = request.nextUrl.searchParams.get('usermode')
+    if (riazifyRole === 'admin' && userMode !== '1') {
       return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+    }
+    // usermode=1 — let admin through to user dashboard
+    if (riazifyRole === 'admin' && userMode === '1') {
+      const url = new URL('/dashboard', request.url)
+      url.searchParams.delete('usermode')
+      const res = NextResponse.rewrite(url)
+      return res
     }
   }
 

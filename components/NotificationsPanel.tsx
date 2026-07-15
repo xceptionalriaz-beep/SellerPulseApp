@@ -185,7 +185,7 @@ function UserCard({ n, onRead }: { n: AppNotification; onRead: (id: string) => v
 }
 
 // â”€â”€ Main NotificationsPanel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-export function NotificationsPanel({ onClose }: { onClose: () => void }) {
+export function NotificationsPanel({ onClose, forceUser }: { onClose: () => void; forceUser?: boolean }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [isLoading,     setIsLoading]     = useState(true)
   const [isAdmin,       setIsAdmin]       = useState(false)
@@ -205,9 +205,9 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
       // Check admin role
       const { data: profile } = await supabase
         .from('profiles').select('role').eq('id', user.id).single()
-      const admin = (profile as any)?.role === 'admin'
+      const admin = (profile as any)?.role === 'admin' && !forceUser
       setIsAdmin(admin)
-
+      
       // Load notifications from Supabase
       const table = admin ? 'admin_notifications' : 'user_notifications'
       const { data } = await supabase.from(table).select('*')
@@ -404,7 +404,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
 }
 
 // â”€â”€ Slide-in panel wrapper (matches Dart showNotificationsPanel) â”€â”€
-export function NotificationsPanelOverlay({ onClose }: { onClose: () => void }) {
+export function NotificationsPanelOverlay({ onClose, forceUser }: { onClose: () => void; forceUser?: boolean }) {
   return (
     <div className="fixed inset-0 z-[9999] flex justify-end"
          style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
@@ -416,7 +416,7 @@ export function NotificationsPanelOverlay({ onClose }: { onClose: () => void }) 
              boxShadow: '-4px 0 30px rgba(0,0,0,0.12)',
              animation: 'slideInRight 300ms cubic-bezier(0.33,1,0.68,1)',
            }}>
-        <NotificationsPanel onClose={onClose} />
+        <NotificationsPanel onClose={onClose} forceUser={forceUser} />
       </div>
       <style>{`
         @keyframes slideInRight {

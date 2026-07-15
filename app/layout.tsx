@@ -40,8 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      default: `${brandName} - eBay Seller Tools`,
-      template: `%s | ${brandName}`,
+      default: `${brandName} \u2014 eBay Seller Tools`,
+      template: `%s \u2014 ${brandName}`,
     },
     description:
       'Riazify is the all-in-one SaaS tool for eBay sellers. Protect orders, calculate profits, research products, and grow your eBay business.',
@@ -57,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       locale: 'en_US',
-      title: `${brandName} - eBay Seller Tools`,
+      title: `${brandName} \u2014 eBay Seller Tools`,
       description: 'The all-in-one SaaS platform for serious eBay sellers.',
       siteName: brandName,
       images: [{ url: ogImage, width: 1200, height: 630, alt: brandName }],

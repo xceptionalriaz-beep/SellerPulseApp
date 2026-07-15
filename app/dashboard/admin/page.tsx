@@ -8,9 +8,9 @@ import { createClient } from '@/lib/supabase'
 import {
   Shield, BarChart2, Settings, ArrowLeft, Search,
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
-  Wrench, Trophy, Zap, UserPlus, Key, FileText, Image, Briefcase,
+  Wrench, Trophy, Zap, UserPlus, Key, FileText,
   Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail, CreditCard,
-  MessageCircle,
+  MessageCircle, ExternalLink, Briefcase,
 } from 'lucide-react'
 import PersistentSidebar   from '@/components/admin/PersistentSidebar'
 import AnalyticsHub        from '@/components/admin/AnalyticsHub'
@@ -1316,6 +1316,14 @@ function AdminPage() {
             </div>
           ))}
         </div>
+
+        {/* View User Dashboard */}
+         <button onClick={() => window.open('/dashboard?usermode=1', '_blank')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all hover:opacity-80"
+          style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.3)', color: C.lime }}>
+          <ExternalLink size={12} style={{ color: C.lime }} />
+          <span className="text-[11px] font-bold">User View</span>
+        </button>
 
         {/* CMD+K */}
         <button onClick={() => setShowCmdPalette(true)}
