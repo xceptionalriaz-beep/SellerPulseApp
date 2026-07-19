@@ -415,9 +415,9 @@ function EventsModal({
             <p className="text-[10px]" style={{ color: C.muted }}>{enabledCount}/{ALL_EVENTS.length} events active</p>
           </div>
           {/* Active toggle */}
-          <div onClick={() => onToggleActive(destination.id, !isActive)}
-            className="relative w-10 h-5 rounded-full cursor-pointer shrink-0"
-            style={{ backgroundColor: isActive ? C.dark : 'rgba(100,116,139,0.35)' }}>
+          <div onClick={() => canToggle && onToggleActive(destination.id, !isActive)}
+            className="relative w-10 h-5 rounded-full shrink-0"
+            style={{ backgroundColor: isActive ? C.dark : 'rgba(100,116,139,0.35)', cursor: canToggle ? 'pointer' : 'not-allowed', opacity: canToggle ? 1 : 0.5 }}>
             <div style={{
               position: 'absolute', top: 2, left: 2,
               width: 16, height: 16, borderRadius: '50%',
