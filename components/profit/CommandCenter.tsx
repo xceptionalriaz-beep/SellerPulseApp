@@ -1,84 +1,137 @@
 ﻿'use client'
 // components/profit/CommandCenter.tsx
-// Converted 1:1 from lib/pages/command_center.dart
+// Riazify brand colors applied throughout.
+// Searchable category dialog + speech bubble tooltips kept from original.
+// Payment Processor removed. US tiered fee fields + regulatory fee + advanced pro added.
 
 import { useState, useRef, useEffect } from 'react'
-import { Info, Search, X, ChevronUp, ChevronDown } from 'lucide-react'
+import { Info, Search, X, RotateCcw } from 'lucide-react'
 import { createPortal } from 'react-dom'
+import ProDropdown from '@/components/ui/ProDropdown'
 
-// â”€â”€ Design tokens (matches Dart _C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Brand palette (spec-exact) ─────────────────────────────────
 const C = {
-  dark:        '#0F172A',
-  lime:        '#8FFF00',
-  border:      '#E2E8F0',
-  bg:          '#F8FAFC',
-  textPrimary: '#0F172A',
-  textSecondary:'#475569',
-  textHint:    '#94A3B8',
-  labelColor:  '#64748B',
+  lime: '#8fff00',
+  dark: '#1a2410',
+  border: '#e8ede2',
+  muted: '#8a9e78',
+  surface: '#ffffff',
+  bg: '#f7f9f5',
+  text: '#1a2410',
+  red: '#b91c1c',
+  amber: '#d97706',
+  green: '#16a34a',
 }
 
-// â”€â”€ Props â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-interface CommandCenterProps {
-  currency:              string
-  categoryFees:          string[]
-  storeTiers:            string[]
-  sellerLevels:          string[]
-  processors:            string[]
-  isInternational:       boolean
-  selectedCategory:      string
-  selectedStoreTier:     string
-  selectedSellerLevel:   string
-  selectedProcessor:     string
-  salePriceValue?:       number
-  buyerShipValue?:       number
-  onItemCostChanged:     (v: number) => void
-  onShippingCostChanged: (v: number) => void
-  onSalePriceChanged:    (v: number) => void
-  onBuyerShippingChanged:(v: number) => void
-  onAdRateChanged:       (v: number) => void
-  onTaxRateChanged:      (v: number) => void
-  onCategoryChanged:     (v: string) => void
-  onStoreTierChanged:    (v: string) => void
-  onSellerLevelChanged:  (v: string) => void
-  onProcessorChanged:    (v: string) => void
-  onInternationalChanged:(v: boolean) => void
+// ── Props ──────────────────────────────────────────────────────
+export interface CommandCenterProps {
+  currency: string
+  country: string
+  // category + store + seller options
+  categoryOptions: { label: string; value: string }[]
+  storeTierOptions: { label: string; value: string }[]
+  sellerLevelOptions: { label: string; value: string }[]
+  // input values (controlled strings)
+  itemCost: string
+  shippingCost: string
+  sellingPrice: string
+  buyerPaidShipping: string
+  adRate: string
+  buyerTax: string
+  // select values
+  selectedCategory: string
+  selectedStoreTier: string
+  selectedSellerLevel: string
+  // toggles
+  isInternational: boolean
+  includeRegFee: boolean
+  regFeeConfirmed: boolean
+  regulatoryFeeRate: number
+  isAdvancedEnabled: boolean
+  // advanced values
+  sourcingTax: string
+  fxFee: string
+  defectRate: string
+  payoutFee: string
+  cashback: string
+  // callbacks
+  onItemCostChange: (v: string) => void
+  onShippingCostChange: (v: string) => void
+  onSellingPriceChange: (v: string) => void
+  onBuyerPaidShipChange: (v: string) => void
+  onAdRateChange: (v: string) => void
+  onBuyerTaxChange: (v: string) => void
+  onCategoryChange: (v: string) => void
+  onStoreTierChange: (v: string) => void
+  onSellerLevelChange: (v: string) => void
+  onInternationalChange: (v: boolean) => void
+  onRegFeeChange: (v: boolean) => void
+  onAdvancedChange: (v: boolean) => void
+  onSourcingTaxChange: (v: string) => void
+  onFxFeeChange: (v: string) => void
+  onDefectRateChange: (v: string) => void
+  onPayoutFeeChange: (v: string) => void
+  onCashbackChange: (v: string) => void
+  onReset: () => void
 }
 
-// â”€â”€ Speech bubble tooltip (matches Dart _TooltipSpeechBubbleShape) â”€â”€
+// ── Speech bubble tooltip (portal-based, hover-triggered) ──────
 function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
   const [show, setShow] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({ top: 0, left: 0 })
 
-  function handleClick() {
+  function updatePos() {
     if (!ref.current) return
     const r = ref.current.getBoundingClientRect()
-    setPos({ top: r.top - 10, left: r.left + r.width / 2 })
-    setShow(s => !s)
+    setPos({ top: r.top - 10 + window.scrollY, left: r.left + r.width / 2 })
   }
 
-  useEffect(() => {
-    function close(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setShow(false)
-    }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [])
+  function handleMouseEnter() {
+    updatePos()
+    setShow(true)
+  }
+
+  function handleMouseLeave() {
+    setShow(false)
+  }
 
   return (
-    <div ref={ref} className="relative inline-flex items-center">
-      <button type="button" onClick={handleClick}>
+    <div
+      ref={ref}
+      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <span style={{ display: 'flex', cursor: 'default' }}>
         {children}
-      </button>
+      </span>
       {show && typeof window !== 'undefined' && createPortal(
-        <div className="fixed z-[9999]" style={{ top: pos.top, left: pos.left, transform: 'translate(-50%, -100%)' }}>
-          <div className="relative px-3.5 py-2.5 rounded-lg max-w-[220px] text-[12px] leading-[1.4] font-medium text-white"
-               style={{ backgroundColor: C.dark }}>
+        <div style={{
+          position: 'fixed', zIndex: 9999,
+          top: pos.top, left: pos.left,
+          transform: 'translate(-50%, -100%)',
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            position: 'relative', padding: '8px 14px', borderRadius: 8,
+            display: 'table',
+            maxWidth: 200,
+            fontSize: 12, lineHeight: 1.5, fontWeight: 500,
+            color: '#ffffff', backgroundColor: C.dark,
+            fontFamily: "'Inter', sans-serif",
+            boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+            textAlign: 'center',
+            wordBreak: 'break-word',
+          }}>
             {text}
-            {/* Speech bubble arrow */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0"
-                 style={{ borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: `6px solid ${C.dark}` }} />
+            <div style={{
+              position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+              top: '100%', width: 0, height: 0,
+              borderLeft: '6px solid transparent',
+              borderRight: '6px solid transparent',
+              borderTop: `7px solid ${C.dark}`,
+            }} />
           </div>
         </div>,
         document.body
@@ -87,162 +140,184 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
   )
 }
 
-// â”€â”€ Label with help icon (matches Dart _buildLabelWithHelp) â”€â”€â”€
+// ── Label with tooltip icon ────────────────────────────────────
 function LabelWithHelp({ label, tooltip }: { label: string; tooltip: string }) {
   return (
-    <div className="flex items-center gap-1.5 min-w-0">
-      <span className="text-[12px] font-bold truncate" style={{ color: C.labelColor }}>{label}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+      <span style={{ fontSize: 11, fontWeight: 600, color: C.text }}>{label}</span>
       <Tooltip text={tooltip}>
-        <Info size={15} style={{ color: C.textHint }} />
+        <Info size={11} color={C.muted} />
       </Tooltip>
     </div>
   )
 }
 
-// â”€â”€ Input field (matches Dart _buildInput) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function Input({
-  label, tooltip, symbol, isSuffix = false, value, onChange
+// ── Controlled input field ─────────────────────────────────────
+function InputField({
+  label, tooltip, value, onChange, prefix, suffix,
 }: {
-  label:     string
-  tooltip:   string
-  symbol:    string
-  isSuffix?: boolean
-  value?:    number
-  onChange:  (v: number) => void
+  label: string
+  tooltip: string
+  value: string
+  onChange: (v: string) => void
+  prefix?: string
+  suffix?: string
 }) {
   const [focused, setFocused] = useState(false)
-  const [local, setLocal] = useState(value !== undefined && value > 0 ? String(value) : '')
-
-  useEffect(() => {
-    if (value !== undefined) setLocal(value > 0 ? String(value) : '')
-  }, [value])
-
   return (
-    <div className="flex flex-col gap-1.5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <LabelWithHelp label={label} tooltip={tooltip} />
-      <div className="flex items-center h-10 rounded-lg border px-3.5 gap-1 transition-all"
-           style={{
-             backgroundColor: C.bg,
-             borderColor: C.border,
-             boxShadow: focused ? '0 0 0 3px rgba(143, 255, 0, 0.2)' : 'none',
-           }}>
-        {!isSuffix && <span className="text-[14px] font-bold shrink-0" style={{ color: C.labelColor }}>{symbol}</span>}
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        height: 36, padding: '0 10px', gap: 4,
+        border: `1.5px solid ${focused ? C.lime : C.border}`,
+        borderRadius: 8, background: C.surface,
+        boxShadow: focused ? '0 0 0 3px rgba(143,255,0,0.15)' : 'none',
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+      }}>
+        {prefix && <span style={{ fontSize: 12, color: C.muted, flexShrink: 0 }}>{prefix}</span>}
         <input
-          type="number"
-          value={local}
-          onChange={e => {
-            setLocal(e.target.value)
-            onChange(parseFloat(e.target.value) || 0)
-          }}
-          className="flex-1 text-[14px] font-bold bg-transparent min-w-0"
-          style={{ color: C.textPrimary, outline: 'none' }}
+          type="text"
+          inputMode="decimal"
+          value={value}
+          onChange={e => onChange(e.target.value.replace(/[^0-9.]/g, ''))}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder="0.00"
-          step="0.01"
+          style={{
+            flex: 1, border: 'none', outline: 'none', minWidth: 0,
+            fontSize: 13, fontWeight: 600, color: C.text,
+            background: 'transparent',
+          }}
         />
-        {isSuffix && <span className="text-[14px] font-bold shrink-0" style={{ color: C.labelColor }}>{symbol}</span>}
+        {suffix && <span style={{ fontSize: 12, color: C.muted, flexShrink: 0 }}>{suffix}</span>}
       </div>
     </div>
   )
 }
 
-// â”€â”€ Dropdown (matches Dart _buildDropdown) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function Dropdown({
-  label, tooltip, value, items, onChange
+// ── Select field ───────────────────────────────────────────────
+// SelectField removed — using ProDropdown from @/components/ui/ProDropdown
+
+// ── Toggle ─────────────────────────────────────────────────────
+function Toggle({
+  label, tooltip, checked, onChange,
 }: {
-  label:    string
-  tooltip:  string
-  value:    string
-  items:    string[]
-  onChange: (v: string) => void
+  label: string
+  tooltip: string
+  checked: boolean
+  onChange: (v: boolean) => void
 }) {
-  const safeValue = items.includes(value) ? value : (items[0] ?? '')
   return (
-    <div className="flex flex-col gap-1.5">
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <LabelWithHelp label={label} tooltip={tooltip} />
-      <div className="h-10 rounded-lg border px-2.5"
-           style={{ backgroundColor: C.bg, borderColor: C.border }}>
-        <select
-          value={safeValue}
-          onChange={e => onChange(e.target.value)}
-          className="w-full h-full text-[12px] font-semibold outline-none bg-transparent cursor-pointer"
-          style={{ color: C.textPrimary }}>
-          {items.map(item => (
-            <option key={item} value={item}>{item}</option>
-          ))}
-        </select>
-      </div>
+      <button
+        onClick={() => onChange(!checked)}
+        style={{
+          position: 'relative', width: 38, height: 21,
+          borderRadius: 999, border: 'none', cursor: 'pointer',
+          background: checked ? C.lime : C.border,
+          transition: 'background 0.2s', flexShrink: 0,
+        }}>
+        <span style={{
+          position: 'absolute', top: 2.5,
+          left: checked ? 19 : 2,
+          width: 16, height: 16, borderRadius: '50%',
+          background: C.surface,
+          transition: 'left 0.2s',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+          display: 'block',
+        }} />
+      </button>
     </div>
   )
 }
 
-// â”€â”€ Searchable Category Dialog (matches Dart _showSearchDialog) â”€â”€
+// ── Searchable category dialog ─────────────────────────────────
 function SearchableCategoryDialog({
-  currentValue, items, onSelect, onClose
+  currentValue, options, onSelect, onClose,
 }: {
   currentValue: string
-  items:        string[]
-  onSelect:     (v: string) => void
-  onClose:      () => void
+  options: { label: string; value: string }[]
+  onSelect: (v: string) => void
+  onClose: () => void
 }) {
   const [query, setQuery] = useState('')
-  const filtered = items.filter(i => i.toLowerCase().includes(query.toLowerCase()))
+  const filtered = (options ?? []).filter(o =>
+    o.label.toLowerCase().includes(query.toLowerCase())
+  )
 
   if (typeof window === 'undefined') return null
   return createPortal(
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(15,23,42,0.4)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
-      {/* Scale+fade animation matches Dart transitionBuilder */}
-      <div className="bg-white rounded-2xl flex flex-col overflow-hidden animate-in zoom-in-95"
-           style={{ width: 450, height: 500, padding: 20 }}>
+    <div
+      onClick={e => e.target === e.currentTarget && onClose()}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9998,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16, backgroundColor: 'rgba(26,36,16,0.4)',
+      }}>
+      <div style={{
+        background: C.surface, borderRadius: 16,
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        width: 450, height: 500, padding: 20,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+      }}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-[18px] font-bold" style={{ color: C.textPrimary }}>Select eBay Category</span>
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all border"
-            style={{ borderColor: C.border }}
-            onMouseEnter={e => {
-              const b = e.currentTarget as HTMLButtonElement
-              b.style.backgroundColor = '#FEF2F2'
-              b.style.borderColor = '#F87171'
-              b.querySelectorAll('svg').forEach(s => s.style.stroke = '#F87171')
-            }}
-            onMouseLeave={e => {
-              const b = e.currentTarget as HTMLButtonElement
-              b.style.backgroundColor = 'transparent'
-              b.style.borderColor = C.border
-              b.querySelectorAll('svg').forEach(s => s.style.stroke = C.textHint)
-            }}>
-            <X size={15} style={{ color: C.textHint }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontSize: 18, fontWeight: 700, color: C.text }}>Select eBay Category</span>
+          <button onClick={onClose} style={{
+            width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`,
+            background: 'transparent', cursor: 'pointer', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+            <X size={15} color={C.muted} />
           </button>
         </div>
-        {/* Search field */}
-        <div className="flex items-center gap-2 px-3 h-10 rounded-lg mb-4"
-             style={{ backgroundColor: '#F1F5F9' }}>
-          <Search size={16} style={{ color: C.labelColor }} />
-          <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
-            className="flex-1 text-[13px] outline-none bg-transparent"
-            style={{ color: C.textPrimary }}
-            placeholder="Search (e.g., 'Watches', 'Shoes')" />
+
+        {/* Search input */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          height: 40, padding: '0 12px', borderRadius: 8,
+          background: C.bg, marginBottom: 12,
+        }}>
+          <Search size={15} color={C.muted} />
+          <input
+            autoFocus
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search categories..."
+            style={{
+              flex: 1, border: 'none', outline: 'none',
+              fontSize: 13, color: C.text, background: 'transparent',
+            }}
+          />
         </div>
-        {/* List â€” BouncingScrollPhysics = native scroll */}
-        <div className="flex-1 overflow-y-auto space-y-1">
-          {filtered.map(item => {
-            const isSel = item === currentValue
+
+        {/* List */}
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {filtered.map(o => {
+            const isSelected = o.value === currentValue
             return (
-              <button key={item} onClick={() => { onSelect(item); onClose() }}
-                className="w-full text-left px-4 py-3.5 rounded-lg text-[13px] transition-colors"
+              <button
+                key={o.value}
+                onClick={() => { onSelect(o.value); onClose() }}
                 style={{
-                  backgroundColor: isSel ? `${C.lime}28` : 'transparent',
-                  color:           isSel ? C.textPrimary : C.textSecondary,
-                  fontWeight:      isSel ? 700 : 500,
+                  width: '100%', textAlign: 'left', padding: '10px 14px',
+                  borderRadius: 8, border: 'none', cursor: 'pointer',
+                  fontSize: 13, fontWeight: isSelected ? 700 : 500,
+                  background: isSelected ? `${C.lime}28` : 'transparent',
+                  color: C.text,
+                  transition: 'background 0.1s',
                 }}>
-                {item}
+                {o.label}
               </button>
             )
           })}
+          {filtered.length === 0 && (
+            <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', padding: 20 }}>
+              No categories found
+            </p>
+          )}
         </div>
       </div>
     </div>,
@@ -250,30 +325,44 @@ function SearchableCategoryDialog({
   )
 }
 
-// â”€â”€ Searchable Category trigger (matches Dart _buildSearchableCategory) â”€â”€
+// ── Searchable category trigger button ─────────────────────────
 function SearchableCategory({
-  label, tooltip, currentValue, items, onChange
+  label, tooltip, currentValue, options, onChange,
 }: {
-  label:        string
-  tooltip:      string
+  label: string
+  tooltip: string
   currentValue: string
-  items:        string[]
-  onChange:     (v: string) => void
+  options: { label: string; value: string }[]
+  onChange: (v: string) => void
 }) {
   const [open, setOpen] = useState(false)
+  const currentLabel = (options ?? []).find(o => o.value === currentValue)?.label ?? currentValue
+
   return (
-    <div className="flex flex-col gap-1.5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <LabelWithHelp label={label} tooltip={tooltip} />
-      <button onClick={() => setOpen(true)}
-        className="h-10 w-full flex items-center justify-between px-3.5 rounded-lg border text-left transition-all"
-        style={{ backgroundColor: C.bg, borderColor: C.border }}>
-        <span className="text-[12px] font-semibold truncate flex-1" style={{ color: C.textPrimary }}>{currentValue}</span>
-        <Search size={16} style={{ color: C.labelColor }} />
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          height: 36, width: '100%', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 10px', borderRadius: 8,
+          border: `1.5px solid ${C.border}`,
+          background: C.surface, cursor: 'pointer',
+          textAlign: 'left',
+        }}>
+        <span style={{
+          fontSize: 12, fontWeight: 600, color: C.text,
+          flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {currentLabel}
+        </span>
+        <Search size={14} color={C.muted} style={{ flexShrink: 0, marginLeft: 6 }} />
       </button>
       {open && (
         <SearchableCategoryDialog
           currentValue={currentValue}
-          items={items}
+          options={options}
           onSelect={onChange}
           onClose={() => setOpen(false)}
         />
@@ -282,96 +371,189 @@ function SearchableCategory({
   )
 }
 
-// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Divider ────────────────────────────────────────────────────
+function Divider() {
+  return <div style={{ height: 1, background: C.border, margin: '2px 0' }} />
+}
+
+// ── Main Component ─────────────────────────────────────────────
 export default function CommandCenter({
-  currency, categoryFees, storeTiers, sellerLevels, processors,
-  isInternational, selectedCategory, selectedStoreTier, selectedSellerLevel, selectedProcessor,
-  salePriceValue, buyerShipValue,
-  onItemCostChanged, onShippingCostChanged, onSalePriceChanged, onBuyerShippingChanged,
-  onAdRateChanged, onTaxRateChanged, onCategoryChanged, onStoreTierChanged,
-  onSellerLevelChanged, onProcessorChanged, onInternationalChanged,
+  currency, country,
+  categoryOptions, storeTierOptions, sellerLevelOptions,
+  itemCost, shippingCost, sellingPrice, buyerPaidShipping,
+  adRate, buyerTax,
+  selectedCategory, selectedStoreTier, selectedSellerLevel,
+  isInternational, includeRegFee, regFeeConfirmed, regulatoryFeeRate,
+  isAdvancedEnabled,
+  sourcingTax, fxFee, defectRate, payoutFee, cashback,
+  onItemCostChange, onShippingCostChange, onSellingPriceChange, onBuyerPaidShipChange,
+  onAdRateChange, onBuyerTaxChange, onCategoryChange, onStoreTierChange,
+  onSellerLevelChange, onInternationalChange, onRegFeeChange, onAdvancedChange,
+  onSourcingTaxChange, onFxFeeChange, onDefectRateChange, onPayoutFeeChange,
+  onCashbackChange, onReset,
 }: CommandCenterProps) {
   return (
-    <div className="flex flex-col rounded-2xl border overflow-hidden"
-         style={{
-           backgroundColor: '#fff',
-           borderColor: C.border,
-           boxShadow: '0 4px 10px rgba(0,0,0,0.02)',
-         }}>
-      <div className="flex flex-col gap-3 p-5 overflow-y-auto"
-           style={{ scrollbarWidth: 'none' }}>
+    <div style={{
+      background: C.surface, border: `1px solid ${C.border}`,
+      borderRadius: 12, display: 'flex', flexDirection: 'column',
+      gap: 12, padding: 16, fontFamily: "'Inter', sans-serif",
+    }}>
 
-        {/* COMMAND CENTER label */}
-        <p className="text-[11px] font-bold tracking-[1.5px]" style={{ color: C.labelColor }}>
-          COMMAND CENTER
-        </p>
+      {/* Header */}
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.6px', color: C.muted }}>
+        COMMAND CENTER
+      </span>
 
-        {/* Row 1: Item Cost + Shipping Cost */}
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="Item Cost"     tooltip="How much you paid to buy this item."                          symbol={currency} onChange={onItemCostChanged} />
-          <Input label="Shipping Cost" tooltip="How much it costs YOU to ship this item to the buyer."       symbol={currency} onChange={onShippingCostChanged} />
-        </div>
-
-        {/* Row 2: Selling Price + Buyer Paid Ship */}
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="Selling Price"  tooltip="The price you will list this item for."                         symbol={currency} value={salePriceValue} onChange={onSalePriceChanged} />
-          <Input label="Buyer Paid Ship" tooltip="How much your customers are going to pay for shipping."        symbol={currency} value={buyerShipValue}  onChange={onBuyerShippingChanged} />
-        </div>
-
-        {/* Divider */}
-        <div className="h-px" style={{ backgroundColor: C.border }} />
-
-        {/* eBay Category â€” searchable */}
-        <SearchableCategory
-          label="eBay Category"
-          tooltip="What category does your product belong to? Search to find it faster."
-          currentValue={selectedCategory}
-          items={categoryFees}
-          onChange={onCategoryChanged}
-        />
-
-        {/* Row 3: Store Tier + Seller Level */}
-        <div className="grid grid-cols-2 gap-3">
-          <Dropdown label="Store Tier"   tooltip="Do you have a paid eBay Store subscription?"         value={selectedStoreTier}   items={storeTiers}   onChange={onStoreTierChanged} />
-          <Dropdown label="Seller Level" tooltip="Your current eBay seller rating level."              value={selectedSellerLevel} items={sellerLevels} onChange={onSellerLevelChanged} />
-        </div>
-
-        {/* Row 4: Promoted Ad Rate + Est. Buyer Tax */}
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="Promoted Ad Rate" tooltip="Are you paying eBay to promote this item? Put the % here." symbol="%" isSuffix onChange={onAdRateChanged} />
-          <Input label="Est. Buyer Tax"   tooltip="The average sales tax your buyer pays."                     symbol="%" isSuffix onChange={onTaxRateChanged} />
-        </div>
-
-        {/* Divider */}
-        <div className="h-px" style={{ backgroundColor: C.border }} />
-
-        {/* International Sale toggle */}
-        <div className="flex items-center justify-between">
-          <LabelWithHelp
-            label="International Sale"
-            tooltip="Turn ON if the buyer is in a different country. eBay adds a 1.65% cross-border fee."
-          />
-          <button onClick={() => onInternationalChanged(!isInternational)}
-            className="relative w-11 h-6 rounded-full transition-colors shrink-0"
-            style={{ backgroundColor: isInternational ? C.dark : '#CBD5E1' }}>
-            <span className="absolute top-1 h-4 w-4 rounded-full bg-white shadow transition-all"
-                  style={{
-                    left: isInternational ? '24px' : '4px',
-                    backgroundColor: isInternational ? C.lime : '#fff',
-                  }} />
-          </button>
-        </div>
-
-        {/* Payment Processor dropdown */}
-        <Dropdown
-          label="Payment Processor"
-          tooltip="Select 'Managed' if eBay pays you directly, or 'PayPal' if you use the old payment system."
-          value={selectedProcessor}
-          items={processors}
-          onChange={onProcessorChanged}
-        />
-
+      {/* Row 1: Item cost + Shipping cost */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <InputField
+          label="Item cost" tooltip="What you paid to source this item"
+          value={itemCost} prefix={currency} onChange={onItemCostChange} />
+        <InputField
+          label="Shipping cost" tooltip="What YOU pay the courier to ship to the buyer"
+          value={shippingCost} prefix={currency} onChange={onShippingCostChange} />
       </div>
+
+      {/* Row 2: Selling price + Buyer paid ship */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <InputField
+          label="Selling price" tooltip="Your eBay listing price"
+          value={sellingPrice} prefix={currency} onChange={onSellingPriceChange} />
+        <InputField
+          label="Buyer paid ship" tooltip="Shipping the buyer pays you — eBay charges FVF on this too"
+          value={buyerPaidShipping} prefix={currency} onChange={onBuyerPaidShipChange} />
+      </div>
+
+      <Divider />
+
+      {/* Searchable category */}
+      <SearchableCategory
+        label="eBay category"
+        tooltip="eBay final value fee varies by category. Use search to find yours faster."
+        currentValue={selectedCategory}
+        options={categoryOptions}
+        onChange={onCategoryChange}
+      />
+
+      {/* Row 3: Store tier + Seller level */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <LabelWithHelp label="Store tier" tooltip={country === 'US'
+            ? 'Basic store or higher unlocks lower fee rates across all categories'
+            : 'eBay Store subscriptions reduce your final value fee'} />
+          <ProDropdown
+            prefix=""
+            currentValue={selectedStoreTier}
+            options={(storeTierOptions ?? []).map(o => ({ val: o.value, label: o.label, enabled: true }))}
+            onChanged={onStoreTierChange}
+            width="full"
+            maxItems={6}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <LabelWithHelp label="Seller level" tooltip={country === 'US'
+            ? 'Top Rated Plus: 10% off FVF amount. Below Standard: +6% additional FVF.'
+            : 'Top Rated: discount on FVF. Below Standard: higher fees.'} />
+          <ProDropdown
+            prefix=""
+            currentValue={selectedSellerLevel}
+            options={(sellerLevelOptions ?? []).map(o => ({ val: o.value, label: o.label, enabled: true }))}
+            onChanged={onSellerLevelChange}
+            width="full"
+            maxItems={8}
+          />
+        </div>
+      </div>
+
+      {/* Row 4: Promoted ad rate + Est. buyer tax */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <InputField
+          label="Promoted ad rate"
+          tooltip="Promoted Listings rate. Stacks on top of FVF. Leave 0 if not running ads."
+          value={adRate} suffix="%" onChange={onAdRateChange} />
+        <InputField
+          label="Est. buyer tax"
+          tooltip="Sales tax / VAT % collected from buyer. eBay applies FVF to this amount too."
+          value={buyerTax} suffix="%" onChange={onBuyerTaxChange} />
+      </div>
+
+      <Divider />
+
+      {/* International sale toggle */}
+      <Toggle
+        label="International sale"
+        tooltip={`Adds eBay cross-border fee when your buyer is in a different country`}
+        checked={isInternational}
+        onChange={onInternationalChange} />
+
+      {/* Regulatory fee toggle */}
+      <Toggle
+        label={`Regulatory fee (${regulatoryFeeRate}%)`}
+        tooltip={regFeeConfirmed
+          ? `Confirmed for ${country} — verify exact rate on your seller invoice`
+          : `Unconfirmed for ${country} — check your eBay seller invoice before enabling`}
+        checked={includeRegFee}
+        onChange={onRegFeeChange} />
+      {!regFeeConfirmed && (
+        <p style={{ fontSize: 9, color: C.muted, margin: '-8px 0 0', lineHeight: 1.4 }}>
+          Unconfirmed for {country} — verify on your seller invoice.
+        </p>
+      )}
+
+      <Divider />
+
+      {/* Advanced pro toggle */}
+      <Toggle
+        label="Advanced pro factors"
+        tooltip="Adds sourcing tax, FX fees, return buffer, payout fees and cashback to your calculation"
+        checked={isAdvancedEnabled}
+        onChange={onAdvancedChange} />
+
+      {/* Advanced panel */}
+      {isAdvancedEnabled && (
+        <div style={{
+          background: C.bg, border: `1px solid ${C.border}`,
+          borderRadius: 10, padding: 12,
+          display: 'flex', flexDirection: 'column', gap: 10,
+        }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <InputField
+              label="Sourcing tax %" tooltip="Tax paid when buying stock from your supplier"
+              value={sourcingTax} suffix="%" onChange={onSourcingTaxChange} />
+            <InputField
+              label="Bank FX fee %" tooltip="Currency conversion fee on your sourcing cost"
+              value={fxFee} suffix="%" onChange={onFxFeeChange} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <InputField
+              label="Return buffer %" tooltip="Expected return/defect rate as a revenue loss buffer"
+              value={defectRate} suffix="%" onChange={onDefectRateChange} />
+            <InputField
+              label="Payout fee %" tooltip="PayPal: 3.49% | Stripe: 2.9% | Square: 2.6% | eBay managed: ~0.2% | Enter your processor's rate here"
+              value={payoutFee} suffix="%" onChange={onPayoutFeeChange} />
+          </div>
+          <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0', lineHeight: 1.4 }}>
+            💳 PayPal 3.49% · Stripe 2.9% · Square 2.6% · eBay managed ~0.2%
+          </p>
+          <InputField
+            label="Cashback / rewards %" tooltip="Cashback earned on sourcing cost — adds back to profit"
+            value={cashback} suffix="%" onChange={onCashbackChange} />
+        </div>
+      )}
+
+      {/* Reset button */}
+      <button
+        onClick={onReset}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          height: 36, borderRadius: 8, border: `1px solid ${C.border}`,
+          background: C.surface, color: C.muted,
+          fontSize: 12, fontWeight: 600, cursor: 'pointer',
+        }}>
+        <RotateCcw size={13} />
+        Reset to defaults
+      </button>
+
     </div>
   )
 }

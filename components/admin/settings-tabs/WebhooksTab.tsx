@@ -14,33 +14,33 @@ import {
 } from 'lucide-react'
 
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
+  dark: '#0a0d08',
+  lime: '#8fff00',
   limeDeep: '#4a8f00',
   limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  amber:    '#d97706',
-  green:    '#16a34a',
-  blue:     '#1d4ed8',
+  border: '#e8ede2',
+  bg: '#f7f9f5',
+  text: '#1a2410',
+  muted: '#8a9e78',
+  surface: '#ffffff',
+  red: '#b91c1c',
+  amber: '#d97706',
+  green: '#16a34a',
+  blue: '#1d4ed8',
 }
 
 // ── Event definitions ──────────────────────────────────────────
 const ALL_EVENTS = [
-  { key: 'user.signup',           label: 'New Signup',           category: 'Users'    },
-  { key: 'plan.upgraded',         label: 'Plan Upgraded',        category: 'Revenue'  },
-  { key: 'plan.cancelled',        label: 'Plan Cancelled',       category: 'Revenue'  },
-  { key: 'payment.failed',        label: 'Payment Failed',       category: 'Revenue'  },
-  { key: 'payment.recovered',     label: 'Payment Recovered',    category: 'Revenue'  },
-  { key: 'kill_switch.activated', label: 'Kill Switch',          category: 'System'   },
-  { key: 'high_risk_order',       label: 'High Risk Order',      category: 'Orders'   },
-  { key: 'api.failure',           label: 'API Failure',          category: 'System'   },
-  { key: 'user.limit_hit',        label: 'Limit Hit',            category: 'Users'    },
-  { key: 'admin.login',           label: 'Admin Login',          category: 'Security' },
+  { key: 'user.signup', label: 'New Signup', category: 'Users' },
+  { key: 'plan.upgraded', label: 'Plan Upgraded', category: 'Revenue' },
+  { key: 'plan.cancelled', label: 'Plan Cancelled', category: 'Revenue' },
+  { key: 'payment.failed', label: 'Payment Failed', category: 'Revenue' },
+  { key: 'payment.recovered', label: 'Payment Recovered', category: 'Revenue' },
+  { key: 'kill_switch.activated', label: 'Kill Switch', category: 'System' },
+  { key: 'high_risk_order', label: 'High Risk Order', category: 'Orders' },
+  { key: 'api.failure', label: 'API Failure', category: 'System' },
+  { key: 'user.limit_hit', label: 'Limit Hit', category: 'Users' },
+  { key: 'admin.login', label: 'Admin Login', category: 'Security' },
 ]
 
 // ── Payment event sources ──────────────────────────────────────
@@ -51,56 +51,56 @@ const ALL_EVENTS = [
 // alerts fire regardless of which processor you use
 
 const CATEGORY_COLORS: Record<string, { color: string; bg: string }> = {
-  Users:    { color: C.blue,     bg: 'rgba(29,78,216,0.08)'  },
-  Revenue:  { color: C.limeDeep, bg: C.limeTint              },
-  System:   { color: C.red,      bg: 'rgba(185,28,28,0.08)'  },
-  Orders:   { color: C.amber,    bg: 'rgba(217,119,6,0.08)'  },
-  Security: { color: C.muted,    bg: C.bg                    },
+  Users: { color: C.blue, bg: 'rgba(29,78,216,0.08)' },
+  Revenue: { color: C.limeDeep, bg: C.limeTint },
+  System: { color: C.red, bg: 'rgba(185,28,28,0.08)' },
+  Orders: { color: C.amber, bg: 'rgba(217,119,6,0.08)' },
+  Security: { color: C.muted, bg: C.bg },
 }
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
-  slack:   MessageSquare,
+  slack: MessageSquare,
   discord: Gamepad2,
-  custom:  Link2,
+  custom: Link2,
 }
 
 const TYPE_COLORS: Record<string, { color: string; bg: string }> = {
-  slack:   { color: '#4A154B', bg: 'rgba(74,21,75,0.08)'   },
+  slack: { color: '#4A154B', bg: 'rgba(74,21,75,0.08)' },
   discord: { color: '#5865F2', bg: 'rgba(88,101,242,0.08)' },
-  custom:  { color: C.limeDeep, bg: C.limeTint             },
+  custom: { color: C.limeDeep, bg: C.limeTint },
 }
 
 // ── Helpers ────────────────────────────────────────────────────
 function timeAgo(iso: string): string {
-  const diff  = Date.now() - new Date(iso).getTime()
-  const mins  = Math.floor(diff / 60000)
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
-  const days  = Math.floor(diff / 86400000)
-  if (mins  <  1) return 'Just now'
-  if (mins  < 60) return `${mins}m ago`
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
   if (hours < 24) return `${hours}h ago`
   return `${days}d ago`
 }
 
 function statusColor(status: string): { color: string; bg: string } {
-  if (status === 'delivered') return { color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
-  if (status === 'failed')    return { color: C.red,      bg: 'rgba(185,28,28,0.08)'  }
-  if (status === 'retrying')  return { color: C.amber,    bg: 'rgba(217,119,6,0.08)'  }
-  if (status === 'pending')   return { color: C.muted,    bg: C.bg                    }
+  if (status === 'delivered') return { color: C.green, bg: 'rgba(22,163,74,0.08)' }
+  if (status === 'failed') return { color: C.red, bg: 'rgba(185,28,28,0.08)' }
+  if (status === 'retrying') return { color: C.amber, bg: 'rgba(217,119,6,0.08)' }
+  if (status === 'pending') return { color: C.muted, bg: C.bg }
   return { color: C.muted, bg: C.bg }
 }
 
 // ── Toast ──────────────────────────────────────────────────────
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,     border: C.lime,   color: C.lime },
-    error:   { bg: '#FEF2F2',  border: '#FECACA', color: C.red  },
-    info:    { bg: C.bg,       border: C.border,  color: C.text },
+    success: { bg: C.dark, border: C.lime, color: C.lime },
+    error: { bg: '#FEF2F2', border: '#FECACA', color: C.red },
+    info: { bg: C.bg, border: C.border, color: C.text },
   }
   const t = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
+      style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
       <Check size={15} style={{ color: t.color }} />
       <p className="text-[13px] font-bold" style={{ color: t.color }}>{msg}</p>
     </div>
@@ -121,7 +121,7 @@ function JsonBlock({ data }: { data: any }) {
   return (
     <div className="relative rounded-xl overflow-hidden border" style={{ borderColor: C.border }}>
       <div className="flex items-center justify-between px-3 py-1.5 border-b"
-           style={{ borderColor: C.border, backgroundColor: C.dark }}>
+        style={{ borderColor: C.border, backgroundColor: C.dark }}>
         <span className="text-[10px] font-bold" style={{ color: C.muted }}>JSON</span>
         <button onClick={handleCopy}
           className="flex items-center gap-1 text-[10px] hover:opacity-70"
@@ -130,7 +130,7 @@ function JsonBlock({ data }: { data: any }) {
         </button>
       </div>
       <pre className="text-[11px] p-3 overflow-auto max-h-64 font-mono leading-relaxed"
-           style={{ backgroundColor: '#0d1117', color: '#e6edf3' }}>
+        style={{ backgroundColor: '#0d1117', color: '#e6edf3' }}>
         {str}
       </pre>
     </div>
@@ -149,18 +149,18 @@ function DeliveryDrawer({ log, onClose }: { log: any; onClose: () => void }) {
   return (
     <>
       <div className="fixed inset-0 z-[10400] bg-black/40"
-           style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}
-           onClick={handleClose} />
+        style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }}
+        onClick={handleClose} />
       <div className="fixed right-0 top-0 bottom-0 z-[10500] w-[480px] flex flex-col shadow-2xl overflow-hidden"
-           style={{
-             backgroundColor: C.surface,
-             transform: visible ? 'translateX(0)' : 'translateX(100%)',
-             transition: 'transform 0.3s ease',
-           }}>
+        style={{
+          backgroundColor: C.surface,
+          transform: visible ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 0.3s ease',
+        }}>
 
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b shrink-0"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <Activity size={16} style={{ color: C.limeDeep }} />
           <div className="flex-1">
             <p className="text-[14px] font-black" style={{ color: C.dark }}>Delivery Details</p>
@@ -169,7 +169,7 @@ function DeliveryDrawer({ log, onClose }: { log: any; onClose: () => void }) {
             </p>
           </div>
           <span className="text-[10px] font-black px-2 py-1 rounded-lg"
-                style={{ backgroundColor: st.bg, color: st.color }}>
+            style={{ backgroundColor: st.bg, color: st.color }}>
             {log.status.toUpperCase()}
           </span>
           <button onClick={handleClose}
@@ -183,13 +183,13 @@ function DeliveryDrawer({ log, onClose }: { log: any; onClose: () => void }) {
           {/* Meta */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'EVENT',         value: log.event_type             },
-              { label: 'STATUS CODE',   value: log.response_code ?? '—'   },
-              { label: 'DURATION',      value: log.duration_ms ? `${log.duration_ms}ms` : '—' },
-              { label: 'ATTEMPTS',      value: log.attempt_number ?? 1    },
+              { label: 'EVENT', value: log.event_type },
+              { label: 'STATUS CODE', value: log.response_code ?? '—' },
+              { label: 'DURATION', value: log.duration_ms ? `${log.duration_ms}ms` : '—' },
+              { label: 'ATTEMPTS', value: log.attempt_number ?? 1 },
             ].map(({ label, value }) => (
               <div key={label} className="p-3 rounded-xl border flex flex-col gap-1"
-                   style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                style={{ borderColor: C.border, backgroundColor: C.bg }}>
                 <p className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{label}</p>
                 <p className="text-[13px] font-bold" style={{ color: C.dark }}>{String(value)}</p>
               </div>
@@ -207,7 +207,7 @@ function DeliveryDrawer({ log, onClose }: { log: any; onClose: () => void }) {
             <div>
               <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>RESPONSE BODY</p>
               <div className="rounded-xl border p-3 text-[11px] font-mono overflow-auto max-h-40"
-                   style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
+                style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }}>
                 {log.response_body}
               </div>
             </div>
@@ -231,18 +231,18 @@ function DestinationModal({
   destination, onClose, onSaved,
 }: {
   destination?: any
-  onClose:      () => void
-  onSaved:      () => void
+  onClose: () => void
+  onSaved: () => void
 }) {
   const supabase = createClient()
-  const isEdit   = !!destination
+  const isEdit = !!destination
 
-  const [name,      setName]      = useState(destination?.name      ?? '')
-  const [type,      setType]      = useState(destination?.type      ?? 'slack')
-  const [url,       setUrl]       = useState(destination?.url       ?? '')
-  const [secret,    setSecret]    = useState(destination?.secret    ?? '')
-  const [saving,    setSaving]    = useState(false)
-  const [visible,   setVisible]   = useState(false)
+  const [name, setName] = useState(destination?.name ?? '')
+  const [type, setType] = useState(destination?.type ?? 'slack')
+  const [url, setUrl] = useState(destination?.url ?? '')
+  const [secret, setSecret] = useState(destination?.secret ?? '')
+  const [saving, setSaving] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
 
@@ -254,9 +254,9 @@ function DestinationModal({
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/webhooks/save', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: destination?.id, name, type, url, secret }),
+        body: JSON.stringify({ id: destination?.id, name, type, url, secret }),
       })
       if (res.ok) { onSaved(); handleClose() }
     } catch { /* silent */ }
@@ -264,26 +264,26 @@ function DestinationModal({
   }
 
   const TYPE_OPTIONS = [
-    { value: 'slack',   label: 'Slack',   Icon: MessageSquare },
-    { value: 'discord', label: 'Discord', Icon: Gamepad2      },
-    { value: 'custom',  label: 'Custom',  Icon: Link2         },
+    { value: 'slack', label: 'Slack', Icon: MessageSquare },
+    { value: 'discord', label: 'Discord', Icon: Gamepad2 },
+    { value: 'custom', label: 'Custom', Icon: Link2 },
   ]
 
   return (
     <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
-         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
-         onClick={handleClose}>
+      style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+      onClick={handleClose}>
       <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
-           style={{
-             backgroundColor: C.surface,
-             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
-             opacity:   visible ? 1 : 0,
-             transition: 'transform 0.25s ease, opacity 0.25s ease',
-           }}
-           onClick={e => e.stopPropagation()}>
+        style={{
+          backgroundColor: C.surface,
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+          opacity: visible ? 1 : 0,
+          transition: 'transform 0.25s ease, opacity 0.25s ease',
+        }}
+        onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center gap-3 px-5 py-4 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <Webhook size={16} style={{ color: C.limeDeep }} />
           <p className="text-[15px] font-black flex-1" style={{ color: C.dark }}>
             {isEdit ? 'Edit Destination' : 'New Webhook Destination'}
@@ -312,8 +312,8 @@ function DestinationModal({
                   className="flex items-center justify-center gap-1.5 py-2 rounded-xl border text-[12px] font-bold transition-all"
                   style={{
                     backgroundColor: type === opt.value ? C.dark : C.bg,
-                    color:           type === opt.value ? C.lime : C.muted,
-                    borderColor:     type === opt.value ? C.dark : C.border,
+                    color: type === opt.value ? C.lime : C.muted,
+                    borderColor: type === opt.value ? C.dark : C.border,
                   }}>
                   <opt.Icon size={13} />
                   {opt.label}
@@ -363,17 +363,18 @@ function DestinationModal({
 
 // ── Events Modal ───────────────────────────────────────────────
 function EventsModal({
-  destination, events, onClose, onToggleEvent, onToggleActive,
+  destination, events, onClose, onToggleEvent, onToggleActive, canToggle = true,
 }: {
-  destination:    any
-  events:         any[]
-  onClose:        () => void
-  onToggleEvent:  (destId: string, eventType: string, val: boolean) => void
+  destination: any
+  events: any[]
+  onClose: () => void
+  onToggleEvent: (destId: string, eventType: string, val: boolean) => void
   onToggleActive: (id: string, val: boolean) => void
+  canToggle?: boolean
 }) {
   const [visible, setVisible] = useState(false)
   const destEvents = events.filter(e => e.destination_id === destination.id)
-  const isActive   = destination.is_active
+  const isActive = destination.is_active
 
   useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
   function handleClose() { setVisible(false); setTimeout(onClose, 250) }
@@ -384,29 +385,29 @@ function EventsModal({
     return acc
   }, {} as Record<string, typeof ALL_EVENTS>)
 
-  const Icon      = TYPE_ICONS[destination.type] ?? Link2
+  const Icon = TYPE_ICONS[destination.type] ?? Link2
   const typeStyle = TYPE_COLORS[destination.type] ?? { color: C.muted, bg: C.bg }
   const enabledCount = destEvents.filter(e => e.is_enabled).length
 
   return (
     <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
-         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
-         onClick={handleClose}>
+      style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+      onClick={handleClose}>
       <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col"
-           style={{
-             backgroundColor: C.surface,
-             maxHeight: '85vh',
-             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
-             opacity:   visible ? 1 : 0,
-             transition: 'transform 0.25s ease, opacity 0.25s ease',
-           }}
-           onClick={e => e.stopPropagation()}>
+        style={{
+          backgroundColor: C.surface,
+          maxHeight: '85vh',
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+          opacity: visible ? 1 : 0,
+          transition: 'transform 0.25s ease, opacity 0.25s ease',
+        }}
+        onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b shrink-0"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-               style={{ backgroundColor: typeStyle.bg }}>
+            style={{ backgroundColor: typeStyle.bg }}>
             <Icon size={16} style={{ color: typeStyle.color }} />
           </div>
           <div className="flex-1 min-w-0">
@@ -415,8 +416,8 @@ function EventsModal({
           </div>
           {/* Active toggle */}
           <div onClick={() => onToggleActive(destination.id, !isActive)}
-               className="relative w-10 h-5 rounded-full cursor-pointer shrink-0"
-               style={{ backgroundColor: isActive ? C.dark : 'rgba(100,116,139,0.35)' }}>
+            className="relative w-10 h-5 rounded-full cursor-pointer shrink-0"
+            style={{ backgroundColor: isActive ? C.dark : 'rgba(100,116,139,0.35)' }}>
             <div style={{
               position: 'absolute', top: 2, left: 2,
               width: 16, height: 16, borderRadius: '50%',
@@ -435,7 +436,7 @@ function EventsModal({
         {/* Paused banner */}
         {!isActive && (
           <div className="flex items-center gap-2 px-4 py-2 border-b"
-               style={{ backgroundColor: 'rgba(100,116,139,0.08)', borderColor: C.border }}>
+            style={{ backgroundColor: 'rgba(100,116,139,0.08)', borderColor: C.border }}>
             <PauseCircle size={13} style={{ color: C.muted }} />
             <p className="text-[11px] font-bold" style={{ color: C.muted }}>
               This endpoint is paused — enable to activate events
@@ -450,7 +451,7 @@ function EventsModal({
             return (
               <div key={category}>
                 <span className="text-[9px] font-black px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: catStyle.bg, color: catStyle.color }}>
+                  style={{ backgroundColor: catStyle.bg, color: catStyle.color }}>
                   {category.toUpperCase()}
                 </span>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -459,17 +460,17 @@ function EventsModal({
                     const isEnabled = destEvent?.is_enabled ?? false
                     return (
                       <button key={ev.key}
-                        onClick={() => isActive && onToggleEvent(destination.id, ev.key, !isEnabled)}
+                        onClick={() => isActive && canToggle && onToggleEvent(destination.id, ev.key, !isEnabled)}
                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-bold transition-all"
                         style={{
-                          backgroundColor: isEnabled && isActive ? C.dark    : C.surface,
-                          color:           isEnabled && isActive ? C.lime    : C.muted,
-                          borderColor:     isEnabled && isActive ? C.dark    : C.border,
-                          cursor:          isActive              ? 'pointer' : 'default',
+                          backgroundColor: isEnabled && isActive ? C.dark : C.surface,
+                          color: isEnabled && isActive ? C.lime : C.muted,
+                          borderColor: isEnabled && isActive ? C.dark : C.border,
+                          cursor: isActive ? 'pointer' : 'default',
                         }}>
                         {isEnabled
                           ? <Check size={10} style={{ color: isActive ? C.lime : C.muted }} />
-                          : <X     size={10} style={{ color: C.muted }} />}
+                          : <X size={10} style={{ color: C.muted }} />}
                         {ev.label}
                       </button>
                     )
@@ -487,45 +488,48 @@ function EventsModal({
 // ── Destination Table Row ──────────────────────────────────────
 function DestinationRow({
   destination, events, onToggleActive, onToggleEvent,
-  onTest, onEdit, onDelete, onExpand, testing, canManage = true,
+  onTest, onEdit, onDelete, onExpand, testing, canManage = true, canToggle = true, canTest = true, canDelete = true,
 }: {
-  destination:    any
-  events:         any[]
+  destination: any
+  events: any[]
   onToggleActive: (id: string, val: boolean) => void
-  onToggleEvent:  (destId: string, eventType: string, val: boolean) => void
-  onTest:         (id: string, eventType: string) => void
-  onEdit:         (dest: any) => void
-  onDelete:       (id: string) => void
-  onExpand:       (dest: any) => void
-  testing:        string | null
-  canManage?:     boolean
+  onToggleEvent: (destId: string, eventType: string, val: boolean) => void
+  onTest: (id: string, eventType: string) => void
+  onEdit: (dest: any) => void
+  onDelete: (id: string) => void
+  onExpand: (dest: any) => void
+  testing: string | null
+  canManage?: boolean
+  canToggle?: boolean
+  canTest?: boolean
+  canDelete?: boolean
 }) {
   const [showTestMenu, setShowTestMenu] = useState(false)
-  const destEvents   = events.filter(e => e.destination_id === destination.id)
+  const destEvents = events.filter(e => e.destination_id === destination.id)
   const enabledCount = destEvents.filter(e => e.is_enabled).length
-  const isActive     = destination.is_active
+  const isActive = destination.is_active
 
-  const Icon      = TYPE_ICONS[destination.type] ?? Link2
+  const Icon = TYPE_ICONS[destination.type] ?? Link2
   const typeStyle = TYPE_COLORS[destination.type] ?? { color: C.muted, bg: C.bg }
 
   const TEST_EVENTS = [
-    { value: 'test.ping',             label: 'Generic Ping'         },
-    { value: 'user.signup',           label: 'Simulate New Signup'  },
-    { value: 'plan.upgraded',         label: 'Simulate Upgrade'     },
-    { value: 'payment.failed',        label: 'Simulate Payment Fail'},
+    { value: 'test.ping', label: 'Generic Ping' },
+    { value: 'user.signup', label: 'Simulate New Signup' },
+    { value: 'plan.upgraded', label: 'Simulate Upgrade' },
+    { value: 'payment.failed', label: 'Simulate Payment Fail' },
     { value: 'kill_switch.activated', label: 'Simulate Kill Switch' },
-    { value: 'high_risk_order',       label: 'Simulate Risk Order'  },
+    { value: 'high_risk_order', label: 'Simulate Risk Order' },
   ]
 
   return (
     <div className="grid items-center px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
-         style={{ gridTemplateColumns: '2fr 0.7fr 1.6fr 0.6fr 0.5fr 0.8fr', gap: 12, borderColor: C.border, opacity: isActive ? 1 : 0.6 }}>
+      style={{ gridTemplateColumns: '2fr 0.7fr 1.6fr 0.6fr 0.5fr 0.8fr', gap: 12, borderColor: C.border, opacity: isActive ? 1 : 0.6 }}>
 
       {/* Name + type icon — click to open events modal */}
       <div className="flex items-center gap-2.5 cursor-pointer min-w-0"
-           onClick={() => onExpand(destination)}>
+        onClick={() => onExpand(destination)}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-             style={{ backgroundColor: typeStyle.bg }}>
+          style={{ backgroundColor: typeStyle.bg }}>
           <Icon size={14} style={{ color: typeStyle.color }} />
         </div>
         <div className="min-w-0">
@@ -539,7 +543,7 @@ function DestinationRow({
       {/* Type badge */}
       <div>
         <span className="text-[9px] font-black px-2 py-1 rounded-lg capitalize"
-              style={{ backgroundColor: typeStyle.bg, color: typeStyle.color }}>
+          style={{ backgroundColor: typeStyle.bg, color: typeStyle.color }}>
           {destination.type}
         </span>
       </div>
@@ -548,10 +552,10 @@ function DestinationRow({
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => onExpand(destination)}>
         <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: C.border }}>
           <div className="h-full rounded-full transition-all"
-               style={{
-                 width:           `${(enabledCount / ALL_EVENTS.length) * 100}%`,
-                 backgroundColor: isActive ? C.lime : C.muted,
-               }} />
+            style={{
+              width: `${(enabledCount / ALL_EVENTS.length) * 100}%`,
+              backgroundColor: isActive ? C.lime : C.muted,
+            }} />
         </div>
         <span className="text-[10px] font-bold shrink-0" style={{ color: C.muted }}>
           {enabledCount}/{ALL_EVENTS.length}
@@ -559,9 +563,9 @@ function DestinationRow({
       </div>
 
       {/* Active toggle */}
-      <div onClick={() => onToggleActive(destination.id, !isActive)}
-           className="relative w-10 h-5 rounded-full cursor-pointer"
-           style={{ backgroundColor: isActive ? C.dark : 'rgba(100,116,139,0.35)' }}>
+      <div onClick={() => canToggle && onToggleActive(destination.id, !isActive)}
+        className="relative w-10 h-5 rounded-full"
+        style={{ backgroundColor: isActive ? C.dark : 'rgba(100,116,139,0.35)', cursor: canToggle ? 'pointer' : 'not-allowed', opacity: canToggle ? 1 : 0.5 }}>
         <div style={{
           position: 'absolute', top: 2, left: 2,
           width: 16, height: 16, borderRadius: '50%',
@@ -574,10 +578,10 @@ function DestinationRow({
       {/* Status */}
       <div>
         <span className="text-[9px] font-black px-2 py-1 rounded-lg"
-              style={{
-                backgroundColor: isActive ? 'rgba(22,163,74,0.08)' : C.bg,
-                color:           isActive ? C.green : C.muted,
-              }}>
+          style={{
+            backgroundColor: isActive ? 'rgba(22,163,74,0.08)' : C.bg,
+            color: isActive ? C.green : C.muted,
+          }}>
           {isActive ? 'LIVE' : 'PAUSED'}
         </span>
       </div>
@@ -597,20 +601,20 @@ function DestinationRow({
             <>
               <div className="fixed inset-0 z-[200]" onClick={() => setShowTestMenu(false)} />
               <div className="fixed z-[201] rounded-xl border shadow-xl overflow-hidden w-44"
-                   style={{ backgroundColor: C.surface, borderColor: C.border }}
-                   ref={(el) => {
-                     if (el) {
-                       const btn = el.previousElementSibling?.previousElementSibling as HTMLElement
-                       if (btn) {
-                         const rect = btn.getBoundingClientRect()
-                         el.style.top  = `${rect.bottom + 4}px`
-                         el.style.left = `${rect.left - 80}px`
-                       }
-                     }
-                   }}>
+                style={{ backgroundColor: C.surface, borderColor: C.border }}
+                ref={(el) => {
+                  if (el) {
+                    const btn = el.previousElementSibling?.previousElementSibling as HTMLElement
+                    if (btn) {
+                      const rect = btn.getBoundingClientRect()
+                      el.style.top = `${rect.bottom + 4}px`
+                      el.style.left = `${rect.left - 80}px`
+                    }
+                  }
+                }}>
                 {TEST_EVENTS.map(te => (
                   <button key={te.value}
-                    onClick={() => { onTest(destination.id, te.value); setShowTestMenu(false) }}
+                    onClick={() => { canTest && (onTest(destination.id, te.value), setShowTestMenu(false)) }}
                     className="w-full text-left px-3 py-2 text-[11px] font-semibold hover:bg-[#f4ffe6] transition-colors"
                     style={{ color: C.text }}>
                     {te.label}
@@ -629,7 +633,7 @@ function DestinationRow({
         </button>}
 
         {/* Delete */}
-        {canManage && <button onClick={() => onDelete(destination.id)}
+        {canDelete && <button onClick={() => onDelete(destination.id)}
           className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
           style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
           <Trash2 size={11} style={{ color: C.red }} />
@@ -643,13 +647,13 @@ function DestinationRow({
 function WebhookRetentionSection({
   supabase, showToast,
 }: {
-  supabase:  any
+  supabase: any
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
 }) {
-  const [logCount,   setLogCount]   = useState(0)
-  const [oldestLog,  setOldestLog]  = useState<string | null>(null)
-  const [archiving,  setArchiving]  = useState(false)
-  const [expanded,   setExpanded]   = useState(false)
+  const [logCount, setLogCount] = useState(0)
+  const [oldestLog, setOldestLog] = useState<string | null>(null)
+  const [archiving, setArchiving] = useState(false)
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -674,7 +678,7 @@ function WebhookRetentionSection({
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/email-archive', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Authorization': `Bearer ${session?.access_token}` },
       })
       const json = await res.json()
@@ -692,8 +696,8 @@ function WebhookRetentionSection({
     <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-2.5 cursor-pointer"
-           style={{ backgroundColor: C.bg }}
-           onClick={() => setExpanded(p => !p)}>
+        style={{ backgroundColor: C.bg }}
+        onClick={() => setExpanded(p => !p)}>
         <Clock size={13} style={{ color: C.muted }} />
         <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
           DATA RETENTION
@@ -703,7 +707,7 @@ function WebhookRetentionSection({
           <div className="flex items-center gap-1.5">
             <span className="text-[10px]" style={{ color: C.muted }}>Delivery logs:</span>
             <span className="text-[10px] font-black"
-                  style={{ color: logCount > 5000 ? C.red : C.text }}>
+              style={{ color: logCount > 5000 ? C.red : C.text }}>
               {logCount.toLocaleString()} rows
             </span>
           </div>
@@ -711,19 +715,19 @@ function WebhookRetentionSection({
             <div className="flex items-center gap-1.5">
               <span className="text-[10px]" style={{ color: C.muted }}>Oldest:</span>
               <span className="text-[10px] font-black"
-                    style={{ color: oldestDays > 30 ? C.amber : C.muted }}>
+                style={{ color: oldestDays > 30 ? C.amber : C.muted }}>
                 {oldestDays}d ago
                 {oldestDays > 30 && ' ⚠️'}
               </span>
             </div>
           )}
           <span className="text-[9px] font-black px-2 py-0.5 rounded-lg"
-                style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+            style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
             AUTO 30d
           </span>
         </div>
         {expanded
-          ? <ChevronUp   size={13} style={{ color: C.muted }} />
+          ? <ChevronUp size={13} style={{ color: C.muted }} />
           : <ChevronDown size={13} style={{ color: C.muted }} />}
       </div>
 
@@ -732,12 +736,12 @@ function WebhookRetentionSection({
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: 'DELIVERY LOGS',  value: logCount.toLocaleString(),              warn: logCount > 5000,   sub: 'webhook_delivery_log'  },
-              { label: 'OLDEST RECORD',  value: oldestDays > 0 ? `${oldestDays} days` : '—', warn: oldestDays > 30, sub: 'days since first log' },
-              { label: 'AUTO-CLEAN',     value: 'Every night',                          warn: false,             sub: 'via daily cron job'    },
+              { label: 'DELIVERY LOGS', value: logCount.toLocaleString(), warn: logCount > 5000, sub: 'webhook_delivery_log' },
+              { label: 'OLDEST RECORD', value: oldestDays > 0 ? `${oldestDays} days` : '—', warn: oldestDays > 30, sub: 'days since first log' },
+              { label: 'AUTO-CLEAN', value: 'Every night', warn: false, sub: 'via daily cron job' },
             ].map((s, i) => (
               <div key={i} className="p-3 rounded-xl border flex flex-col gap-1"
-                   style={{ borderColor: s.warn ? 'rgba(185,28,28,0.25)' : C.border, backgroundColor: s.warn ? 'rgba(185,28,28,0.04)' : C.bg }}>
+                style={{ borderColor: s.warn ? 'rgba(185,28,28,0.25)' : C.border, backgroundColor: s.warn ? 'rgba(185,28,28,0.04)' : C.bg }}>
                 <p className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{s.label}</p>
                 <p className="text-[18px] font-black" style={{ color: s.warn ? C.red : C.dark }}>{s.value}</p>
                 <p className="text-[10px]" style={{ color: C.muted }}>{s.sub}</p>
@@ -779,10 +783,10 @@ function DeleteConfirmModal({
   destination, onClose, onConfirm,
 }: {
   destination: any
-  onClose:     () => void
-  onConfirm:   () => void
+  onClose: () => void
+  onConfirm: () => void
 }) {
-  const [visible,  setVisible]  = useState(false)
+  const [visible, setVisible] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
@@ -794,27 +798,27 @@ function DeleteConfirmModal({
     handleClose()
   }
 
-  const Icon      = TYPE_ICONS[destination.type] ?? Link2
+  const Icon = TYPE_ICONS[destination.type] ?? Link2
   const typeStyle = TYPE_COLORS[destination.type] ?? { color: C.muted, bg: C.bg }
 
   return (
     <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
-         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
-         onClick={handleClose}>
+      style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+      onClick={handleClose}>
       <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
-           style={{
-             backgroundColor: C.surface,
-             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
-             opacity:   visible ? 1 : 0,
-             transition: 'transform 0.25s ease, opacity 0.25s ease',
-           }}
-           onClick={e => e.stopPropagation()}>
+        style={{
+          backgroundColor: C.surface,
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+          opacity: visible ? 1 : 0,
+          transition: 'transform 0.25s ease, opacity 0.25s ease',
+        }}
+        onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-               style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+            style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
             <Trash2 size={16} style={{ color: C.red }} />
           </div>
           <div className="flex-1">
@@ -831,9 +835,9 @@ function DeleteConfirmModal({
         {/* Destination info */}
         <div className="p-5 flex flex-col gap-4">
           <div className="flex items-center gap-3 p-3 rounded-xl border"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            style={{ borderColor: C.border, backgroundColor: C.bg }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                 style={{ backgroundColor: typeStyle.bg }}>
+              style={{ backgroundColor: typeStyle.bg }}>
               <Icon size={16} style={{ color: typeStyle.color }} />
             </div>
             <div className="min-w-0">
@@ -846,7 +850,7 @@ function DeleteConfirmModal({
 
           {/* Warning */}
           <div className="flex items-start gap-2.5 p-3 rounded-xl border"
-               style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.2)' }}>
+            style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.2)' }}>
             <AlertTriangle size={14} style={{ color: C.red, flexShrink: 0, marginTop: 1 }} />
             <div className="flex flex-col gap-1">
               <p className="text-[12px] font-bold" style={{ color: C.red }}>
@@ -891,16 +895,16 @@ export default function WebhooksTab() {
   const supabase = createClient()
 
   const [destinations, setDestinations] = useState<any[]>([])
-  const [events,       setEvents]       = useState<any[]>([])
-  const [logs,         setLogs]         = useState<any[]>([])
-  const [loading,      setLoading]      = useState(true)
-  const [refreshing,   setRefreshing]   = useState(false)
-  const [testing,      setTesting]      = useState<string | null>(null)
-  const [showAdd,      setShowAdd]      = useState(false)
-  const [editDest,     setEditDest]     = useState<any | null>(null)
-  const [selectedLog,  setSelectedLog]  = useState<any | null>(null)
-  const [toast,        setToast]        = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
-  const [logSearch,    setLogSearch]    = useState('')
+  const [events, setEvents] = useState<any[]>([])
+  const [logs, setLogs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [testing, setTesting] = useState<string | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [editDest, setEditDest] = useState<any | null>(null)
+  const [selectedLog, setSelectedLog] = useState<any | null>(null)
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [logSearch, setLogSearch] = useState('')
   const [expandedDest, setExpandedDest] = useState<any | null>(null)
   const [deletingDest, setDeletingDest] = useState<any | null>(null)
 
@@ -932,9 +936,9 @@ export default function WebhooksTab() {
     setDestinations(prev => prev.map(d => d.id === id ? { ...d, is_active: val } : d))
     const { data: { session } } = await supabase.auth.getSession()
     await fetch('/api/admin/webhooks/save', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-      body:    JSON.stringify({ id, is_active: val }),
+      body: JSON.stringify({ id, is_active: val }),
     })
     showToast(val ? 'Webhook activated' : 'Webhook deactivated', val ? 'success' : 'info')
   }
@@ -946,9 +950,9 @@ export default function WebhooksTab() {
     ))
     const { data: { session } } = await supabase.auth.getSession()
     await fetch('/api/admin/webhooks/save', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-      body:    JSON.stringify({ id: destId, events: { [eventType]: val } }),
+      body: JSON.stringify({ id: destId, events: { [eventType]: val } }),
     })
   }
 
@@ -957,15 +961,15 @@ export default function WebhooksTab() {
 
     // Instantly add mock row to delivery log
     const mockLog = {
-      id:             `mock-${Date.now()}`,
+      id: `mock-${Date.now()}`,
       destination_id: id,
-      event_type:     eventType,
-      status:         'pending',
+      event_type: eventType,
+      status: 'pending',
       attempt_number: 1,
-      payload:        { event: eventType, source: 'riazify', test: true },
-      response_code:  null,
-      duration_ms:    null,
-      created_at:     new Date().toISOString(),
+      payload: { event: eventType, source: 'riazify', test: true },
+      response_code: null,
+      duration_ms: null,
+      created_at: new Date().toISOString(),
       webhook_destinations: destinations.find(d => d.id === id),
     }
     setLogs(prev => [mockLog, ...prev])
@@ -973,9 +977,9 @@ export default function WebhooksTab() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/webhooks/test', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ destination_id: id, event_type: eventType }),
+        body: JSON.stringify({ destination_id: id, event_type: eventType }),
       })
       const json = await res.json()
 
@@ -1009,20 +1013,20 @@ export default function WebhooksTab() {
     setDeletingDest(null)
     const { data: { session } } = await supabase.auth.getSession()
     await fetch('/api/admin/webhooks/delete', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-      body:    JSON.stringify({ id }),
+      body: JSON.stringify({ id }),
     })
     setDestinations(prev => prev.filter(d => d.id !== id))
     showToast('Destination deleted', 'info')
   }
 
   // ── HUD stats ─────────────────────────────────────────────────
-  const now24h      = new Date(Date.now() - 86400000).toISOString()
-  const logs24h     = logs.filter(l => l.created_at > now24h)
+  const now24h = new Date(Date.now() - 86400000).toISOString()
+  const logs24h = logs.filter(l => l.created_at > now24h)
   const delivered24 = logs24h.filter(l => l.status === 'delivered').length
-  const failed24    = logs24h.filter(l => l.status === 'failed').length
-  const avgSpeed    = logs24h.length > 0
+  const failed24 = logs24h.filter(l => l.status === 'failed').length
+  const avgSpeed = logs24h.length > 0
     ? Math.round(logs24h.filter(l => l.duration_ms).reduce((s, l) => s + l.duration_ms, 0) / logs24h.filter(l => l.duration_ms).length)
     : 0
   const successRate = logs24h.length > 0 ? Math.round((delivered24 / logs24h.length) * 100) : 100
@@ -1068,21 +1072,21 @@ export default function WebhooksTab() {
       {/* HUD Cards */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { title: 'Dispatched 24h',  value: String(logs24h.length),      sub: 'total webhooks fired',    icon: Zap,           color: C.limeDeep, bg: C.limeTint             },
-          { title: 'Avg Speed',       value: avgSpeed ? `${avgSpeed}ms` : '—', sub: 'delivery latency',  icon: Clock,         color: C.blue,     bg: 'rgba(29,78,216,0.08)' },
-          { title: 'Success Rate',    value: `${successRate}%`,            sub: 'delivered successfully',  icon: CheckCircle,   color: C.green,    bg: 'rgba(22,163,74,0.08)' },
-          { title: 'Failed 24h',      value: String(failed24),             sub: 'failed deliveries',       icon: AlertTriangle, color: failed24 > 0 ? C.red : C.muted, bg: failed24 > 0 ? 'rgba(185,28,28,0.08)' : C.bg },
+          { title: 'Dispatched 24h', value: String(logs24h.length), sub: 'total webhooks fired', icon: Zap, color: C.limeDeep, bg: C.limeTint },
+          { title: 'Avg Speed', value: avgSpeed ? `${avgSpeed}ms` : '—', sub: 'delivery latency', icon: Clock, color: C.blue, bg: 'rgba(29,78,216,0.08)' },
+          { title: 'Success Rate', value: `${successRate}%`, sub: 'delivered successfully', icon: CheckCircle, color: C.green, bg: 'rgba(22,163,74,0.08)' },
+          { title: 'Failed 24h', value: String(failed24), sub: 'failed deliveries', icon: AlertTriangle, color: failed24 > 0 ? C.red : C.muted, bg: failed24 > 0 ? 'rgba(185,28,28,0.08)' : C.bg },
         ].map((card, i) => {
           const Icon = card.icon
           return (
             <div key={i} className="flex flex-col gap-3 p-4 rounded-2xl border"
-                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              style={{ backgroundColor: C.surface, borderColor: C.border }}>
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
                   {card.title.toUpperCase()}
                 </p>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                     style={{ backgroundColor: card.bg }}>
+                  style={{ backgroundColor: card.bg }}>
                   <Icon size={15} style={{ color: card.color }} />
                 </div>
               </div>
@@ -1100,11 +1104,11 @@ export default function WebhooksTab() {
       {/* Destinations Table */}
       {loading ? (
         <div className="flex flex-col gap-2 rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
-          {[0,1,2].map(i => <div key={i} className="h-14 animate-pulse" style={{ backgroundColor: C.bg }} />)}
+          {[0, 1, 2].map(i => <div key={i} className="h-14 animate-pulse" style={{ backgroundColor: C.bg }} />)}
         </div>
       ) : destinations.length === 0 ? (
         <div className="flex flex-col items-center py-16 gap-3 rounded-2xl border"
-             style={{ borderColor: C.border }}>
+          style={{ borderColor: C.border }}>
           <Webhook size={32} style={{ color: C.border }} />
           <p className="text-[14px] font-bold" style={{ color: C.muted }}>No webhook destinations configured</p>
           {can('create_webhook') && <button onClick={() => setShowAdd(true)}
@@ -1117,7 +1121,7 @@ export default function WebhooksTab() {
         <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
           {/* Table header */}
           <div className="grid px-4 py-2.5 border-b"
-               style={{ gridTemplateColumns: '2fr 0.7fr 1.6fr 0.6fr 0.5fr 0.8fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+            style={{ gridTemplateColumns: '2fr 0.7fr 1.6fr 0.6fr 0.5fr 0.8fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
             {['DESTINATION', 'TYPE', 'EVENTS', 'ACTIVE', 'STATUS', 'ACTIONS'].map(h => (
               <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
             ))}
@@ -1136,6 +1140,9 @@ export default function WebhooksTab() {
               onExpand={d => setExpandedDest(d)}
               testing={testing}
               canManage={can('edit_webhook')}
+              canToggle={can('toggle_webhook')}
+              canTest={can('test_webhook')}
+              canDelete={can('delete_webhook')}
             />
           ))}
         </div>
@@ -1144,7 +1151,7 @@ export default function WebhooksTab() {
       {/* Delivery Log */}
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
         <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <Activity size={13} style={{ color: C.muted }} />
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
             DELIVERY LOG
@@ -1163,7 +1170,7 @@ export default function WebhooksTab() {
 
         {/* Header */}
         <div className="grid px-4 py-2 border-b"
-             style={{ gridTemplateColumns: '0.7fr 1fr 1.2fr 0.6fr 0.6fr 0.5fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ gridTemplateColumns: '0.7fr 1fr 1.2fr 0.6fr 0.6fr 0.5fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
           {['STATUS', 'EVENT', 'DESTINATION', 'CODE', 'SPEED', 'TIME'].map(h => (
             <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
           ))}
@@ -1180,11 +1187,11 @@ export default function WebhooksTab() {
             const st = statusColor(log.status)
             return (
               <div key={log.id}
-                   className="grid items-center px-4 py-2.5 border-b last:border-b-0 hover:bg-[#fafcf8] cursor-pointer transition-colors"
-                   style={{ gridTemplateColumns: '0.7fr 1fr 1.2fr 0.6fr 0.6fr 0.5fr', gap: 10, borderColor: C.border }}
-                   onClick={() => setSelectedLog(log)}>
+                className="grid items-center px-4 py-2.5 border-b last:border-b-0 hover:bg-[#fafcf8] cursor-pointer transition-colors"
+                style={{ gridTemplateColumns: '0.7fr 1fr 1.2fr 0.6fr 0.6fr 0.5fr', gap: 10, borderColor: C.border }}
+                onClick={() => setSelectedLog(log)}>
                 <span className="text-[9px] font-black px-2 py-0.5 rounded-lg w-fit"
-                      style={{ backgroundColor: st.bg, color: st.color }}>
+                  style={{ backgroundColor: st.bg, color: st.color }}>
                   {log.status.toUpperCase()}
                 </span>
                 <p className="text-[11px] font-semibold truncate" style={{ color: C.text }}>
@@ -1225,6 +1232,7 @@ export default function WebhooksTab() {
           onClose={() => setExpandedDest(null)}
           onToggleEvent={handleToggleEvent}
           onToggleActive={handleToggleActive}
+          canToggle={can('toggle_webhook')}
         />
       )}
 

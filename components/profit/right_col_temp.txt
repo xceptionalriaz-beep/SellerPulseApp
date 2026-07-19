@@ -1,0 +1,660 @@
+﻿                            {/* ── RIGHT COLUMN: Price Optimizer + Scenarios ── */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                {/* ── PRICE OPTIMIZER ── */}
+                                {hasValidCosts && (
+                                    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                                            <SectionLabel>PRICE OPTIMIZER</SectionLabel>
+                                            <span style={{ fontSize: 9, fontWeight: 700, color: C.muted, background: C.bg, padding: '2px 8px', borderRadius: 999, border: `1px solid ${C.border}` }}>
+                                                MIN SELL PRICE
+                                            </span>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+
+                                            {/* Break-even */}
+                                            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '12px 14px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.red, flexShrink: 0 }} />
+                                                    <span style={{ fontSize: 9, fontWeight: 800, color: C.red, letterSpacing: '0.5px' }}>BREAK-EVEN</span>
+                                                </div>
+                                                <p style={{ fontSize: 20, fontWeight: 900, color: C.red, margin: '0 0 3px', lineHeight: 1 }}>
+                                                    {sym}{breakEven.toFixed(2)}
+                                                </p>
+                                                <p style={{ fontSize: 10, color: '#ef4444', margin: 0 }}>0% margin · covers all costs</p>
+                                                <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(185,28,28,0.08)', borderRadius: 6 }}>
+                                                    <p style={{ fontSize: 9, color: C.red, margin: 0, fontWeight: 600 }}>
+                                                        ⚠️ Below this = loss on every sale
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Min for 15% margin */}
+                                            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '12px 14px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.amber, flexShrink: 0 }} />
+                                                    <span style={{ fontSize: 9, fontWeight: 800, color: C.amber, letterSpacing: '0.5px' }}>SAFE FLOOR</span>
+                                                </div>
+                                                <p style={{ fontSize: 20, fontWeight: 900, color: C.amber, margin: '0 0 3px', lineHeight: 1 }}>
+                                                    {minFor15 > 0 ? `${sym}${minFor15.toFixed(2)}` : '—'}
+                                                </p>
+                                                <p style={{ fontSize: 10, color: '#d97706', margin: 0 }}>15% margin · recommended minimum</p>
+                                                {revenue > 0 && minFor15 > 0 && (
+                                                    <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(217,119,6,0.08)', borderRadius: 6 }}>
+                                                        <p style={{ fontSize: 9, color: C.amber, margin: 0, fontWeight: 600 }}>
+                                                            {revenue >= minFor15
+                                                                ? `✅ Your price is ${sym}${(revenue - minFor15).toFixed(2)} above floor`
+                                                                : `❌ Raise price by ${sym}${(minFor15 - revenue).toFixed(2)}`}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Min for 25% margin */}
+                                            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '12px 14px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
+                                                    <span style={{ fontSize: 9, fontWeight: 800, color: C.green, letterSpacing: '0.5px' }}>SWEET SPOT</span>
+                                                </div>
+                                                <p style={{ fontSize: 20, fontWeight: 900, color: C.green, margin: '0 0 3px', lineHeight: 1 }}>
+                                                    {minFor25 > 0 ? `${sym}${minFor25.toFixed(2)}` : '—'}
+                                                </p>
+                                                <p style={{ fontSize: 10, color: C.green, margin: 0 }}>25% margin · healthy profit zone</p>
+                                                {revenue > 0 && minFor25 > 0 && (
+                                                    <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(22,163,74,0.08)', borderRadius: 6 }}>
+                                                        <p style={{ fontSize: 9, color: C.green, margin: 0, fontWeight: 600 }}>
+                                                            {revenue >= minFor25
+                                                                ? `✅ You're in the sweet spot!`
+                                                                : `↑ Need ${sym}${(minFor25 - revenue).toFixed(2)} more to hit 25%`}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                        {/* Progress bar showing where current price sits */}
+                                        {breakEven > 0 && minFor25 > 0 && (
+                                            <div style={{ marginTop: 12 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: C.muted, marginBottom: 4 }}>
+                                                    <span>Loss zone</span>
+                                                    <span>Your price: {sym}{revenue.toFixed(2)}</span>
+                                                    <span>Sweet spot +</span>
+                                                </div>
+                                                <div style={{ position: 'relative', height: 6, borderRadius: 999, background: C.border, overflow: 'hidden' }}>
+                                                    {/* Zone colours */}
+                                                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.min((breakEven / poSliderMax) * 100, 40)}%`, background: '#fecaca' }} />
+                                                    <div style={{ position: 'absolute', left: `${Math.min((breakEven / poSliderMax) * 100, 40)}%`, top: 0, bottom: 0, width: `${Math.min(((minFor15 - breakEven) / poSliderMax) * 100, 25)}%`, background: '#fde68a' }} />
+                                                    <div style={{ position: 'absolute', left: `${Math.min((minFor15 / poSliderMax) * 100, 65)}%`, top: 0, bottom: 0, right: 0, background: '#bbf7d0' }} />
+                                                    {/* Current price marker */}
+                                                    <div style={{
+                                                        position: 'absolute', top: -2, bottom: -2,
+                                                        left: `${Math.min(Math.max((revenue / (poSliderMax)) * 100, 2), 98)}%`,
+                                                        width: 3, borderRadius: 2,
+                                                        background: profitColor(margin),
+                                                        boxShadow: `0 0 4px ${profitColor(margin)}`,
+                                                        transform: 'translateX(-50%)',
+                                                    }} />
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: C.muted, marginTop: 3 }}>
+                                                    <span style={{ color: C.red }}>{sym}{breakEven.toFixed(0)}</span>
+                                                    <span style={{ color: C.amber }}>{sym}{minFor15.toFixed(0)}</span>
+                                                    <span style={{ color: C.green }}>{sym}{minFor25.toFixed(0)}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ── Level 2: Reverse Price Calculator ── */}
+                                        {hasValidCosts && (
+                                            <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                                                    <p style={{ fontSize: 11, fontWeight: 700, color: C.text, margin: 0 }}>What price do I need?</p>
+                                                    {/* Mode toggle */}
+                                                    <div style={{ display: 'flex', background: C.bg, borderRadius: 8, padding: 2, border: `1px solid ${C.border}` }}>
+                                                        {(['margin', 'profit'] as const).map(mode => (
+                                                            <button key={mode} onClick={() => { setPoReverseMode(mode); setPoTargetMarginStr(''); setPoTargetProfitStr('') }}
+                                                                style={{
+                                                                    padding: '3px 10px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 700,
+                                                                    background: poReverseMode === mode ? C.lime : 'transparent',
+                                                                    color: poReverseMode === mode ? C.dark : C.muted,
+                                                                    transition: 'all 0.15s',
+                                                                }}>
+                                                                {mode === 'margin' ? 'By margin %' : `By profit ${sym}`}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignItems: 'end' }}>
+                                                    {/* Input */}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                        <label style={{ fontSize: 10, fontWeight: 600, color: C.muted }}>
+                                                            {poReverseMode === 'margin' ? 'Target margin %' : `Target profit (${sym})`}
+                                                        </label>
+                                                        <div style={{ display: 'flex', alignItems: 'center', border: `1.5px solid ${C.lime}`, borderRadius: 8, background: C.surface, padding: '0 10px', height: 36 }}>
+                                                            <input
+                                                                type="text" inputMode="decimal"
+                                                                placeholder={poReverseMode === 'margin' ? 'e.g. 20' : 'e.g. 5.00'}
+                                                                value={poReverseMode === 'margin' ? poTargetMarginStr : poTargetProfitStr}
+                                                                onChange={e => {
+                                                                    const v = e.target.value.replace(/[^0-9.]/g, '')
+                                                                    poReverseMode === 'margin' ? setPoTargetMarginStr(v) : setPoTargetProfitStr(v)
+                                                                }}
+                                                                style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontWeight: 700, color: C.text, background: 'transparent' }}
+                                                            />
+                                                            <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>
+                                                                {poReverseMode === 'margin' ? '%' : sym}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Output */}
+                                                    <div style={{
+                                                        padding: '10px 14px', borderRadius: 8,
+                                                        background: (() => {
+                                                            const result = poReverseMode === 'margin' ? minForTargetMargin : minForTargetProfit
+                                                            if (!result) return C.bg
+                                                            return result <= revenue ? '#f0fdf4' : '#fef2f2'
+                                                        })(),
+                                                        border: `1px solid ${(() => {
+                                                            const result = poReverseMode === 'margin' ? minForTargetMargin : minForTargetProfit
+                                                            if (!result) return C.border
+                                                            return result <= revenue ? '#bbf7d0' : '#fecaca'
+                                                        })()}`,
+                                                    }}>
+                                                        {(() => {
+                                                            const result = poReverseMode === 'margin' ? minForTargetMargin : minForTargetProfit
+                                                            const input = poReverseMode === 'margin' ? targetMargin : targetProfit
+                                                            if (!input) return (
+                                                                <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>Enter a target above →</p>
+                                                            )
+                                                            if (!result) return (
+                                                                <p style={{ fontSize: 11, color: C.red, margin: 0 }}>Not achievable at current costs</p>
+                                                            )
+                                                            const achievable = result <= revenue
+                                                            return (
+                                                                <>
+                                                                    <p style={{ fontSize: 9, fontWeight: 700, color: achievable ? C.green : C.red, margin: '0 0 2px', letterSpacing: '0.5px' }}>
+                                                                        {achievable ? '✅ MIN PRICE' : '📈 NEED TO LIST AT'}
+                                                                    </p>
+                                                                    <p style={{ fontSize: 18, fontWeight: 900, color: achievable ? C.green : C.red, margin: '0 0 2px', lineHeight: 1 }}>
+                                                                        {sym}{result.toFixed(2)}
+                                                                    </p>
+                                                                    <p style={{ fontSize: 9, color: achievable ? C.green : C.red, margin: 0 }}>
+                                                                        {achievable
+                                                                            ? `Your ${sym}${revenue.toFixed(2)} beats this by ${sym}${(revenue - result).toFixed(2)}`
+                                                                            : `Raise by ${sym}${(result - revenue).toFixed(2)} to hit target`}
+                                                                    </p>
+                                                                </>
+                                                            )
+                                                        })()}
+                                                    </div>
+                                                </div>
+
+                                                {/* Quick preset buttons */}
+                                                <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                                                    <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0', flexShrink: 0 }}>Quick targets:</p>
+                                                    {poReverseMode === 'margin'
+                                                        ? [10, 15, 20, 25, 30, 40].map(pct => (
+                                                            <button key={pct} onClick={() => setPoTargetMarginStr(String(pct))}
+                                                                style={{
+                                                                    padding: '3px 8px', borderRadius: 6, border: `1px solid ${C.border}`,
+                                                                    background: poTargetMarginStr === String(pct) ? C.lime : C.bg,
+                                                                    color: poTargetMarginStr === String(pct) ? C.dark : C.muted,
+                                                                    fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                                                                }}>
+                                                                {pct}%
+                                                            </button>
+                                                        ))
+                                                        : [2, 5, 10, 15, 20, 50].map(amt => (
+                                                            <button key={amt} onClick={() => setPoTargetProfitStr(String(amt))}
+                                                                style={{
+                                                                    padding: '3px 8px', borderRadius: 6, border: `1px solid ${C.border}`,
+                                                                    background: poTargetProfitStr === String(amt) ? C.lime : C.bg,
+                                                                    color: poTargetProfitStr === String(amt) ? C.dark : C.muted,
+                                                                    fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                                                                }}>
+                                                                {sym}{amt}
+                                                            </button>
+                                                        ))
+                                                    }
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ── Level 3: Interactive Price Slider ── */}
+                                        {hasValidCosts && breakEven > 0 && (
+                                            <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+
+                                                {/* Header with toggle */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                                                    <p style={{ fontSize: 11, fontWeight: 700, color: C.text, margin: 0 }}>
+                                                        🎚️ Live price slider
+                                                    </p>
+                                                    <button onClick={() => setPoSliderActive(s => !s)}
+                                                        style={{
+                                                            padding: '3px 10px', borderRadius: 6, border: `1px solid ${C.border}`,
+                                                            background: poSliderActive ? C.lime : C.bg,
+                                                            color: poSliderActive ? C.dark : C.muted,
+                                                            fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                                                        }}>
+                                                        {poSliderActive ? 'Hide slider' : 'Show slider'}
+                                                    </button>
+                                                </div>
+
+                                                {poSliderActive && (
+                                                    <>
+                                                        {/* Live readout */}
+                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
+                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                                                                <p style={{ fontSize: 9, color: C.muted, margin: '0 0 2px', fontWeight: 700 }}>SELL PRICE</p>
+                                                                <p style={{ fontSize: 16, fontWeight: 900, color: C.text, margin: 0, lineHeight: 1 }}>
+                                                                    {sym}{poSliderValue.toFixed(2)}
+                                                                </p>
+                                                            </div>
+                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: poSliderProfit >= 0 ? '#f0fdf4' : '#fef2f2', borderRadius: 8, border: `1px solid ${poSliderProfit >= 0 ? '#bbf7d0' : '#fecaca'}` }}>
+                                                                <p style={{ fontSize: 9, color: C.muted, margin: '0 0 2px', fontWeight: 700 }}>PROFIT</p>
+                                                                <p style={{ fontSize: 16, fontWeight: 900, color: poSliderProfit >= 0 ? C.green : C.red, margin: 0, lineHeight: 1 }}>
+                                                                    {poSliderProfit >= 0 ? '+' : ''}{sym}{Math.abs(poSliderProfit).toFixed(2)}
+                                                                </p>
+                                                            </div>
+                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: poSliderMargin >= 15 ? '#f0fdf4' : poSliderMargin >= 0 ? '#fffbeb' : '#fef2f2', borderRadius: 8, border: `1px solid ${poSliderMargin >= 15 ? '#bbf7d0' : poSliderMargin >= 0 ? '#fde68a' : '#fecaca'}` }}>
+                                                                <p style={{ fontSize: 9, color: C.muted, margin: '0 0 2px', fontWeight: 700 }}>MARGIN</p>
+                                                                <p style={{ fontSize: 16, fontWeight: 900, color: poSliderMargin >= 15 ? C.green : poSliderMargin >= 0 ? C.amber : C.red, margin: 0, lineHeight: 1 }}>
+                                                                    {poSliderMargin.toFixed(1)}%
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* The slider */}
+                                                        <div style={{ position: 'relative', padding: '0 4px' }}>
+                                                            {/* Zone background track */}
+                                                            <div style={{ position: 'relative', height: 8, borderRadius: 999, overflow: 'hidden', marginBottom: 6, background: C.border }}>
+                                                                {/* Red zone: poSliderMin → breakEven */}
+                                                                <div style={{
+                                                                    position: 'absolute', left: 0, top: 0, bottom: 0,
+                                                                    width: `${Math.min(((breakEven - poSliderMin) / (poSliderMax - poSliderMin)) * 100, 100)}%`,
+                                                                    background: 'linear-gradient(to right, #fca5a5, #fde68a)',
+                                                                }} />
+                                                                {/* Amber zone: breakEven → minFor15 */}
+                                                                <div style={{
+                                                                    position: 'absolute', top: 0, bottom: 0,
+                                                                    left: `${((breakEven - poSliderMin) / (poSliderMax - poSliderMin)) * 100}%`,
+                                                                    width: `${minFor15 > 0 ? ((minFor15 - breakEven) / (poSliderMax - poSliderMin)) * 100 : 10}%`,
+                                                                    background: 'linear-gradient(to right, #fde68a, #bbf7d0)',
+                                                                }} />
+                                                                {/* Green zone: minFor15 → poSliderMax */}
+                                                                <div style={{
+                                                                    position: 'absolute', top: 0, bottom: 0,
+                                                                    left: `${minFor15 > 0 ? ((minFor15 - poSliderMin) / (poSliderMax - poSliderMin)) * 100 : 40}%`,
+                                                                    right: 0,
+                                                                    background: 'linear-gradient(to right, #86efac, #4ade80)',
+                                                                }} />
+                                                            </div>
+
+                                                            {/* Native range input */}
+                                                            <input
+                                                                type="range"
+                                                                min={poSliderMin}
+                                                                max={poSliderMax}
+                                                                step={poSliderStep}
+                                                                value={poSliderValue}
+                                                                onChange={e => {
+                                                                    const v = parseFloat(e.target.value)
+                                                                    setSellPriceStr(v.toFixed(2))
+                                                                    patch({ sellingPrice: v })
+                                                                    setSimPrice(v)
+                                                                }}
+                                                                style={{
+                                                                    width: '100%', appearance: 'none', WebkitAppearance: 'none',
+                                                                    height: 8, borderRadius: 999, background: 'transparent',
+                                                                    outline: 'none', cursor: 'pointer', position: 'relative', zIndex: 2,
+                                                                    marginTop: -14,
+                                                                }}
+                                                            />
+
+                                                            {/* Zone labels */}
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                                                                <span style={{ fontSize: 9, color: C.red, fontWeight: 700 }}>LOSS</span>
+                                                                <span style={{ fontSize: 9, color: C.amber, fontWeight: 700 }}>THIN</span>
+                                                                <span style={{ fontSize: 9, color: C.green, fontWeight: 700 }}>PROFIT ✓</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Snap to key prices */}
+                                                        <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                                                            <span style={{ fontSize: 10, color: C.muted, fontWeight: 600 }}>Snap to:</span>
+                                                            {[
+                                                                { label: `Break-even ${sym}${breakEven.toFixed(2)}`, value: breakEven, color: C.red },
+                                                                { label: `15% floor ${sym}${minFor15.toFixed(2)}`, value: minFor15, color: C.amber },
+                                                                { label: `25% target ${sym}${minFor25.toFixed(2)}`, value: minFor25, color: C.green },
+                                                            ].filter(s => s.value > 0).map(snap => (
+                                                                <button key={snap.label}
+                                                                    onClick={() => {
+                                                                        setSellPriceStr(snap.value.toFixed(2))
+                                                                        patch({ sellingPrice: snap.value })
+                                                                        setSimPrice(snap.value)
+                                                                    }}
+                                                                    style={{
+                                                                        padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 700,
+                                                                        border: `1px solid ${snap.color}20`,
+                                                                        background: Math.abs(poSliderValue - snap.value) < 0.01 ? snap.color : `${snap.color}15`,
+                                                                        color: Math.abs(poSliderValue - snap.value) < 0.01 ? C.dark : snap.color,
+                                                                        cursor: 'pointer',
+                                                                    }}>
+                                                                    {snap.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Smart verdict */}
+                                                        <div style={{
+                                                            marginTop: 10, padding: '8px 12px', borderRadius: 8,
+                                                            background: poSliderMargin >= 25 ? '#f0fdf4'
+                                                                : poSliderMargin >= 15 ? '#fffbeb'
+                                                                    : poSliderMargin >= 0 ? '#fef2f2'
+                                                                        : '#fef2f2',
+                                                            border: `1px solid ${poSliderMargin >= 25 ? '#bbf7d0' : poSliderMargin >= 15 ? '#fde68a' : '#fecaca'}`,
+                                                        }}>
+                                                            <p style={{ fontSize: 11, fontWeight: 700, margin: 0, color: poSliderMargin >= 25 ? C.green : poSliderMargin >= 15 ? C.amber : C.red }}>
+                                                                {poSliderMargin >= 25 ? `🟢 Sweet spot — strong margin at ${sym}${poSliderValue.toFixed(2)}`
+                                                                    : poSliderMargin >= 15 ? `🟡 Acceptable — thin but positive at ${sym}${poSliderValue.toFixed(2)}`
+                                                                        : poSliderMargin >= 0 ? `🟠 Danger zone — barely covering costs`
+                                                                            : `🔴 Loss — you lose ${sym}${Math.abs(poSliderProfit).toFixed(2)} at this price`}
+                                                            </p>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+
+                                {/* ══════════════════════════════════════════════════════════════
+                SCENARIOS — Best Offer / Reverse Price / Return Impact
+                ══════════════════════════════════════════════════════════════ */}
+                                <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                        <SectionLabel>SCENARIOS</SectionLabel>
+                                        <span style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.3px' }}>PROFIT UNDER DIFFERENT CONDITIONS</span>
+                                    </div>
+
+                                    {/* Tab switcher */}
+                                    <div style={{ display: 'flex', gap: 4, background: C.bg, padding: 4, borderRadius: 10, marginBottom: 14 }}>
+                                        {[
+                                            { id: 'offer' as const, label: 'Best Offer' },
+                                            { id: 'reverse' as const, label: 'Reverse Price' },
+                                            { id: 'returns' as const, label: 'Returns Impact' },
+                                        ].map(tab => (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setScenarioTab(tab.id)}
+                                                style={{
+                                                    flex: 1, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
+                                                    fontSize: 12, fontWeight: 700, letterSpacing: '0.2px',
+                                                    background: scenarioTab === tab.id ? C.dark : 'transparent',
+                                                    color: scenarioTab === tab.id ? C.lime : C.muted,
+                                                    transition: 'all 0.15s',
+                                                }}
+                                            >
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* ── BEST OFFER TAB ── */}
+                                    {scenarioTab === 'offer' && (
+                                        <div>
+                                            <p style={{ fontSize: 11, color: C.muted, margin: '0 0 12px' }}>
+                                                A buyer offers you a lower price — is it still profitable? Drag the slider to test any offer.
+                                            </p>
+
+                                            {/* Big display of offer + resulting profit */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+                                                <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                                                    <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: 0 }}>BUYER OFFERS</p>
+                                                    <p style={{ fontSize: 26, fontWeight: 900, color: C.dark, margin: '4px 0 0', lineHeight: 1 }}>
+                                                        {formatNum(bestOfferPrice, sym)}
+                                                    </p>
+                                                    <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>
+                                                        {state.sellingPrice > 0 ? `${((bestOfferPrice / state.sellingPrice) * 100).toFixed(0)}%` : '0%'} of your listing ({formatNum(state.sellingPrice, sym)})
+                                                    </p>
+                                                </div>
+                                                <div style={{ background: profitColor(bestOfferNet) === C.green ? C.limeTint : profitColor(bestOfferNet) === C.red ? '#fee2e2' : C.bg, border: `1px solid ${profitColor(bestOfferNet)}`, borderRadius: 10, padding: 12 }}>
+                                                    <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: 0 }}>YOUR NET PROFIT</p>
+                                                    <p style={{ fontSize: 26, fontWeight: 900, color: profitColor(bestOfferNet), margin: '4px 0 0', lineHeight: 1 }}>
+                                                        {bestOfferNet >= 0 ? "+" : "-"}{formatNum(bestOfferNet, sym)}
+                                                    </p>
+                                                    <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>
+                                                        Margin: {formatPct(bestOfferMargin)} • ROI: {formatPct(bestOfferRoi)}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Slider */}
+                                            <div style={{ position: 'relative', width: '100%', height: 20, display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                                                <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 999, background: boGradient, pointerEvents: 'none' }} />
+                                                <input
+                                                    type="range"
+                                                    min={0.01}
+                                                    max={state.sellingPrice > 0 ? state.sellingPrice : 100}
+                                                    step={0.01}
+                                                    value={bestOfferPrice}
+                                                    onChange={e => setBestOfferPrice(parseFloat(e.target.value))}
+                                                    style={{ width: '100%', accentColor: C.lime, cursor: 'pointer', position: 'relative', background: 'transparent', appearance: 'none', WebkitAppearance: 'none', height: 20, margin: 0 }}
+                                                />
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 700 }}>
+                                                <span style={{ color: C.red }}>Break even: {formatNum(breakEven, sym)}</span>
+                                                <span style={{ color: C.dark }}>Your listing: {formatNum(state.sellingPrice, sym)}</span>
+                                            </div>
+
+                                            {/* Verdict banner */}
+                                            <div style={{
+                                                marginTop: 12,
+                                                background: bestOfferNet > 0 ? C.limeTint : bestOfferNet < 0 ? '#fee2e2' : C.bg,
+                                                border: `1px solid ${profitColor(bestOfferNet)}`,
+                                                borderRadius: 8, padding: 10,
+                                            }}>
+                                                <p style={{ fontSize: 12, fontWeight: 700, color: profitColor(bestOfferNet), margin: 0 }}>
+                                                    {bestOfferNet > originalNet * 0.7 ? 'Accept — solid profit'
+                                                        : bestOfferNet > 0 ? 'Marginal — accept only if you want the sale'
+                                                            : bestOfferNet === 0 ? 'Break even — no reason to accept'
+                                                                : 'Reject — you lose money at this price'}
+                                                </p>
+                                                {originalNet > 0 && bestOfferNet !== originalNet && (
+                                                    <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>
+                                                        {offerImpact < 0 ? 'Cuts your profit by ' : 'Boosts your profit by '}
+                                                        {Math.abs(offerImpact).toFixed(1)}% vs your listed price.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ── REVERSE PRICE TAB ── */}
+                                    {scenarioTab === 'reverse' && (
+                                        <div>
+                                            <p style={{ fontSize: 11, color: C.muted, margin: '0 0 12px' }}>
+                                                Enter your target profit or margin — get the minimum listing price you need to charge.
+                                            </p>
+
+                                            {/* Mode toggle */}
+                                            <div style={{ display: 'flex', gap: 4, background: C.bg, padding: 3, borderRadius: 999, marginBottom: 12, width: 'fit-content' }}>
+                                                {(['profit', 'margin'] as const).map(m => (
+                                                    <button
+                                                        key={m}
+                                                        onClick={() => setReverseMode(m)}
+                                                        style={{
+                                                            padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer',
+                                                            fontSize: 11, fontWeight: 700,
+                                                            background: reverseMode === m ? C.dark : 'transparent',
+                                                            color: reverseMode === m ? C.lime : C.muted,
+                                                        }}
+                                                    >
+                                                        Target {m === 'profit' ? 'Profit ($)' : 'Margin (%)'}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {/* Input */}
+                                            <div style={{ marginBottom: 14 }}>
+                                                <InputField
+                                                    label={reverseMode === 'profit' ? `Target net profit per unit` : `Target profit margin`}
+                                                    value={reverseMode === 'profit' ? targetProfitStr : targetMarginStr}
+                                                    prefix={reverseMode === 'profit' ? sym : undefined}
+                                                    suffix={poReverseMode === 'margin' ? '%' : undefined}
+                                                    tooltip={reverseMode === 'profit'
+                                                        ? 'How much profit you want to make on every sale'
+                                                        : 'Profit margin as % of selling price. 30% is healthy, 50%+ is excellent.'}
+                                                    onChange={v => reverseMode === 'profit' ? setTargetProfitStr(v) : setTargetMarginStr(v)}
+                                                />
+                                            </div>
+
+                                            {/* Result */}
+                                            {marginDenom <= 0 && poReverseMode === 'margin' ? (
+                                                <div style={{ background: '#fef3c7', border: `1px solid ${C.amber}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
+                                                    <p style={{ color: C.amber, fontWeight: 700, margin: 0 }}>Impossible target</p>
+                                                    <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
+                                                        eBay fees ({totalFeeRatePct.toFixed(1)}%) + your target margin ({targetMargin}%) exceeds 100%.
+                                                        Lower your target margin or reduce fees (Store tier, seller level).
+                                                    </p>
+                                                </div>
+                                            ) : reverseRequiredPrice > 0 ? (
+                                                <>
+                                                    {/* Big price hero */}
+                                                    <div style={{ background: C.dark, borderRadius: 12, padding: 16, textAlign: 'center', marginBottom: 10 }}>
+                                                        <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.5px', margin: 0 }}>
+                                                            YOU MUST LIST AT
+                                                        </p>
+                                                        <p style={{ fontSize: 38, fontWeight: 900, color: C.lime, margin: '4px 0 0', lineHeight: 1 }}>
+                                                            {formatNum(reverseRequiredPrice, sym)}
+                                                        </p>
+                                                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: '6px 0 0' }}>
+                                                            to achieve {reverseMode === 'profit' ? `${sym}${targetProfit.toFixed(2)} profit` : `${targetMargin}% margin`}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Gap vs current */}
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                                                        <div style={{ background: C.bg, borderRadius: 8, padding: 10 }}>
+                                                            <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: 0 }}>Currently listed at</p>
+                                                            <p style={{ fontSize: 16, fontWeight: 800, color: C.text, margin: '2px 0 0' }}>{formatNum(state.sellingPrice, sym)}</p>
+                                                        </div>
+                                                        <div style={{ background: C.bg, borderRadius: 8, padding: 10 }}>
+                                                            <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: 0 }}>Gap</p>
+                                                            <p style={{ fontSize: 16, fontWeight: 800, color: currentPriceGap > 0 ? C.red : C.green, margin: '2px 0 0' }}>
+                                                                {currentPriceGap >= 0 ? "+" : "-"}{formatNum(currentPriceGap, sym)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Verification */}
+                                                    <div style={{ background: C.limeTint, borderLeft: `3px solid ${C.lime}`, padding: '8px 10px', borderRadius: 4, fontSize: 11 }}>
+                                                        <p style={{ color: C.dark, margin: 0 }}>
+                                                            ✓ At {formatNum(reverseRequiredPrice, sym)}: net profit {formatNum(reverseVerifyProfit, sym)} ({reverseVerifyMargin.toFixed(1)}% margin)
+                                                        </p>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', padding: 20 }}>
+                                                    Enter a target above to calculate the required listing price.
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* ── RETURNS IMPACT TAB ── */}
+                                    {scenarioTab === 'returns' && (
+                                        <div>
+                                            <p style={{ fontSize: 11, color: C.muted, margin: '0 0 12px' }}>
+                                                Real returns eat into profit. Model your actual return rate + return shipping cost to see your true margin.
+                                            </p>
+
+                                            {/* Return rate slider + return shipping input */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 10, marginBottom: 14 }}>
+                                                <div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                                        <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Return rate</label>
+                                                        <span style={{ fontSize: 13, fontWeight: 800, color: returnRate <= 5 ? C.green : returnRate <= 15 ? C.amber : C.red }}>
+                                                            {returnRate}%
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ position: 'relative', width: '100%', height: 20, display: 'flex', alignItems: 'center' }}>
+                                                        <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 999, background: returnRateGradient, pointerEvents: 'none' }} />
+                                                        <input
+                                                            type="range" min={0} max={50} step={1}
+                                                            value={returnRate}
+                                                            onChange={e => setReturnRateStr(e.target.value)}
+                                                            style={{ width: '100%', accentColor: C.lime, cursor: 'pointer', background: 'transparent', appearance: 'none', WebkitAppearance: 'none', height: 20, margin: 0, position: 'relative' }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, fontWeight: 700, color: C.muted, marginTop: 2 }}>
+                                                        <span>0% Perfect</span>
+                                                        <span>5% Great</span>
+                                                        <span>15% Avg</span>
+                                                        <span>30%+ Poor</span>
+                                                    </div>
+                                                </div>
+                                                <InputField
+                                                    label="Return shipping"
+                                                    value={returnShippingStr}
+                                                    prefix={sym}
+                                                    tooltip="Cost YOU pay for return shipping label. eBay typically doesn't refund this to you."
+                                                    onChange={v => setReturnShippingStr(v)}
+                                                />
+                                            </div>
+
+                                            {/* Per 100 sales visualization */}
+                                            <div style={{ background: C.bg, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+                                                <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 8px' }}>PER 100 SALES</p>
+                                                <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', marginBottom: 6 }}>
+                                                    <div style={{ width: `${successCount}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {successCount >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{successCount} sold</span>}
+                                                    </div>
+                                                    <div style={{ width: `${returnCount}%`, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {returnCount >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{returnCount} returned</span>}
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
+                                                    <span style={{ color: C.green, fontWeight: 700 }}>+ {formatNum(totalSuccessProfit, sym)} from {successCount} sales</span>
+                                                    {returnCount > 0 && (
+                                                        <span style={{ color: C.red, fontWeight: 700 }}>– {formatNum(totalReturnLoss, sym)} from {returnCount} returns</span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Real per-unit profit */}
+                                            <div style={{ background: C.dark, borderRadius: 10, padding: 14 }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 11, marginBottom: 10 }}>
+                                                    <div>
+                                                        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)', fontWeight: 600, margin: 0, letterSpacing: '0.3px' }}>ORIGINAL PROFIT</p>
+                                                        <p style={{ fontSize: 18, fontWeight: 800, color: C.surface, margin: '2px 0 0' }}>{formatNum(originalNet, sym)}</p>
+                                                        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', margin: 0 }}>per unit (no returns)</p>
+                                                    </div>
+                                                    <div>
+                                                        <p style={{ fontSize: 9, color: C.lime, fontWeight: 600, margin: 0, letterSpacing: '0.3px' }}>EFFECTIVE PROFIT</p>
+                                                        <p style={{ fontSize: 18, fontWeight: 800, color: effectivePerUnit >= 0 ? C.lime : '#fca5a5', margin: '2px 0 0' }}>
+                                                            {effectivePerUnit >= 0 ? "" : "-"}{formatNum(effectivePerUnit, sym)}
+                                                        </p>
+                                                        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', margin: 0 }}>per unit (with returns)</p>
+                                                    </div>
+                                                </div>
+                                                {marginErosion > 0 && originalNet > 0 && (
+                                                    <p style={{ fontSize: 10, color: '#fca5a5', margin: 0, borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 8 }}>
+                                                        Returns erode your profit by <strong>{marginErosion.toFixed(1)}%</strong> — {formatNum(originalNet - effectivePerUnit, sym)} lost per unit on average.
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {returnRate > 15 && (
+                                                <div style={{ background: '#fef3c7', border: `1px solid ${C.amber}`, borderRadius: 8, padding: 10, marginTop: 10, fontSize: 11 }}>
+                                                    <strong style={{ color: C.amber }}>High return rate warning:</strong> <span style={{ color: C.text }}>{returnRate}% returns is above the eBay average. Review product quality, listing accuracy, or shipping method.</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                            </div>

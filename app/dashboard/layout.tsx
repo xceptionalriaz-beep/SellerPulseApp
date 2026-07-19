@@ -61,7 +61,7 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',           href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard'  },
   { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'                          },
   { icon: Type,            label: 'Title Builder',       href: '/dashboard/title-builder'                             },
-  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/profit-calculator'                         },
+  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/tools/profit-calculator'                         },
   { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'                                 },
   { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research'                       },
   { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                                    },
@@ -536,13 +536,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: Package,       label: 'Chrome Extension', tab: 24, permKey: 'chrome_extension' },
 
               ].filter(item => {
-                // Super admin or no permissions set → show all
+                // Super admin or no permissions set ? show all
                 if (!sectionPerms || (profile as any)?.is_super_admin) return true
-                // If item has no permKey → always show
+                // If item has no permKey ? always show
                 if (!(item as any).permKey) return true
-                // Ghost mode — show all tabs
+                // Ghost mode � show all tabs
                 if (sidebarMode === 'ghost') return true
-                // Hide mode — only show if explicitly set to true
+                // Hide mode � only show if explicitly set to true
                 return sectionPerms[(item as any).permKey] === true
               }).map((item) => {
                 const isActive = (item as any).isAnalytics
