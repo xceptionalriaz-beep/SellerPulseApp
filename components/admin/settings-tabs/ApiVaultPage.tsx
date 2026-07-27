@@ -14,47 +14,81 @@ import {
 } from 'lucide-react'
 
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
+  dark: '#0a0d08',
+  lime: '#8fff00',
   limeDeep: '#4a8f00',
   limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  amber:    '#d97706',
-  green:    '#16a34a',
-  blue:     '#1d4ed8',
-  purple:   '#7c3aed',
+  border: '#e8ede2',
+  bg: '#f7f9f5',
+  text: '#1a2410',
+  muted: '#8a9e78',
+  surface: '#ffffff',
+  red: '#b91c1c',
+  amber: '#d97706',
+  green: '#16a34a',
+  blue: '#1d4ed8',
+  purple: '#7c3aed',
 }
 
 // -- Category meta ----------------------------------------------
 const CATEGORY_META: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
-  catalog: { icon: ShoppingCart,  color: C.blue,   bg: 'rgba(29,78,216,0.08)',  label: 'CATALOG' },
-  payment: { icon: CreditCard,    color: C.green,  bg: 'rgba(22,163,74,0.08)',  label: 'PAYMENT' },
-  comms:   { icon: MessageSquare, color: C.purple, bg: 'rgba(124,58,237,0.08)', label: 'COMMS'   },
-  ai:      { icon: Brain,         color: C.amber,  bg: 'rgba(217,119,6,0.08)',  label: 'AI'      },
+  catalog: { icon: ShoppingCart, color: C.blue, bg: 'rgba(29,78,216,0.08)', label: 'CATALOG' },
+  payment: { icon: CreditCard, color: C.green, bg: 'rgba(22,163,74,0.08)', label: 'PAYMENT' },
+  comms: { icon: MessageSquare, color: C.purple, bg: 'rgba(124,58,237,0.08)', label: 'COMMS' },
+  ai: { icon: Brain, color: C.amber, bg: 'rgba(217,119,6,0.08)', label: 'AI' },
 }
 
 const PLATFORM_ICONS: Record<string, React.ElementType> = {
-  ebay:         ShoppingCart,
-  aliexpress:   ShoppingCart,
+  ebay: ShoppingCart,
+  aliexpress: ShoppingCart,
   amazon_spapi: ShoppingCart,
-  openai:       Brain,
-  resend:       Mail,
+  openai: Brain,
+  resend: Mail,
   lemonsqueezy: CreditCard,
-  stripe:       CreditCard,
+  stripe: CreditCard,
+}
+
+const PLATFORM_LOGOS: Record<string, string> = {
+  ebay: '/logos/ebay.png',
+  aliexpress: '/logos/aliexpress.png',
+  amazon_spapi: '/logos/amazon.png',
+  openai: '/logos/openai.png',
+  resend: '/logos/resend.png',
+  lemonsqueezy: '/logos/lemonsqueezy.png',
+  stripe: '/logos/stripe.png',
+  custom_api: '',
+}
+
+function PlatformLogo({ platformName, size = 20, fallbackIcon: FallbackIcon }: {
+  platformName: string
+  size?: number
+  fallbackIcon: React.ElementType
+}) {
+  // All ebay_* APIs use the eBay logo
+  const key = platformName.startsWith('ebay_') ? 'ebay' : platformName
+  const logo = PLATFORM_LOGOS[key]
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={platformName}
+        width={size}
+        height={size}
+        style={{ objectFit: 'contain', borderRadius: 4, display: 'block', imageRendering: 'crisp-edges' }}
+        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+      />
+    )
+  }
+  return <FallbackIcon size={size} style={{ color: '#64748b' }} />
 }
 
 // -- Helpers ----------------------------------------------------
 function statusMeta(status: string, isLocked: boolean): { color: string; bg: string; label: string; dot: string } {
-  if (isLocked)                  return { color: C.muted, bg: C.bg,                    label: 'LOCKED',  dot: '#94a3b8' }
-  if (status === 'connected')    return { color: C.green, bg: 'rgba(22,163,74,0.08)', label: 'LIVE',    dot: '#16a34a' }
-  if (status === 'disconnected') return { color: C.muted, bg: C.bg,                    label: 'EMPTY',   dot: '#94a3b8' }
-  if (status === 'error')        return { color: C.red,   bg: 'rgba(185,28,28,0.08)', label: 'ERROR',   dot: '#b91c1c' }
-  if (status === 'expired')      return { color: C.amber, bg: 'rgba(217,119,6,0.08)', label: 'EXPIRED', dot: '#d97706' }
+  if (isLocked) return { color: C.muted, bg: C.bg, label: 'LOCKED', dot: '#94a3b8' }
+  if (status === 'connected') return { color: C.green, bg: 'rgba(22,163,74,0.08)', label: 'LIVE', dot: '#16a34a' }
+  if (status === 'disconnected') return { color: C.muted, bg: C.bg, label: 'EMPTY', dot: '#94a3b8' }
+  if (status === 'error') return { color: C.red, bg: 'rgba(185,28,28,0.08)', label: 'ERROR', dot: '#b91c1c' }
+  if (status === 'expired') return { color: C.amber, bg: 'rgba(217,119,6,0.08)', label: 'EXPIRED', dot: '#d97706' }
   return { color: C.muted, bg: C.bg, label: status.toUpperCase(), dot: '#94a3b8' }
 }
 
@@ -65,16 +99,16 @@ function getDaysUntilExpiry(expires_at: string | null): number {
 
 function getHealthScore(api: any): number {
   if (!api || api.status === 'disconnected') return 0
-  if (api.status === 'expired')              return 0
-  if (api.status === 'error')                return 25
+  if (api.status === 'expired') return 0
+  if (api.status === 'error') return 25
   let score = 30
   const days = getDaysUntilExpiry(api.expires_at)
-  const pct  = api.rate_limit_total > 0 ? (api.rate_limit_used / api.rate_limit_total) * 100 : 0
+  const pct = api.rate_limit_total > 0 ? (api.rate_limit_used / api.rate_limit_total) * 100 : 0
   if (api.status === 'connected') score += 30
-  if (days === 0 || days > 30)    score += 20
-  else if (days > 7)              score += 10
-  if (pct < 70)                   score += 20
-  else if (pct < 85)              score += 10
+  if (days === 0 || days > 30) score += 20
+  else if (days > 7) score += 10
+  if (pct < 70) score += 20
+  else if (pct < 85) score += 10
   return Math.min(score, 100)
 }
 
@@ -89,7 +123,7 @@ function timeAgo(iso: string | null): string {
   if (!iso) return 'Never'
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1)  return 'Just now'
+  if (mins < 1) return 'Just now'
   if (mins < 60) return `${mins}m ago`
   const hours = Math.floor(diff / 3600000)
   if (hours < 24) return `${hours}h ago`
@@ -99,14 +133,14 @@ function timeAgo(iso: string | null): string {
 // -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,    border: C.lime,    color: C.lime },
-    error:   { bg: '#FEF2F2', border: '#FECACA', color: C.red  },
-    info:    { bg: C.bg,      border: C.border,  color: C.text },
+    success: { bg: C.dark, border: C.lime, color: C.lime },
+    error: { bg: '#FEF2F2', border: '#FECACA', color: C.red },
+    info: { bg: C.bg, border: C.border, color: C.text },
   }
   const t = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
+      style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
       <CheckCircle size={15} style={{ color: t.color }} />
       <p className="text-[13px] font-bold" style={{ color: t.color }}>{msg}</p>
     </div>
@@ -122,17 +156,17 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
   const warnings = apis.filter(a => {
     const days = getDaysUntilExpiry(a.expires_at)
     return (a.status === 'disconnected' && !a.is_locked) ||
-           (a.status === 'connected' && days > 7 && days <= 30)
+      (a.status === 'connected' && days > 7 && days <= 30)
   })
   const info = apis.filter(a => a.status === 'connected')
 
   return (
     <div className="fixed inset-0 z-[10500]" onClick={onClose}>
       <div className="absolute top-16 right-6 w-80 rounded-2xl border shadow-2xl overflow-hidden"
-           style={{ backgroundColor: C.surface, borderColor: C.border }}
-           onClick={e => e.stopPropagation()}>
+        style={{ backgroundColor: C.surface, borderColor: C.border }}
+        onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 py-3 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <p className="text-[13px] font-black" style={{ color: C.dark }}>API Notifications</p>
           <button onClick={onClose}><X size={14} style={{ color: C.muted }} /></button>
         </div>
@@ -145,7 +179,7 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
               </p>
               {critical.map((a: any) => (
                 <div key={a.platform_name} className="flex items-start gap-2 p-2 rounded-xl mb-1"
-                     style={{ backgroundColor: 'rgba(185,28,28,0.06)' }}>
+                  style={{ backgroundColor: 'rgba(185,28,28,0.06)' }}>
                   <AlertTriangle size={12} style={{ color: C.red, marginTop: 1, flexShrink: 0 }} />
                   <p className="text-[11px]" style={{ color: C.red }}>
                     {a.display_name} keys expire in {getDaysUntilExpiry(a.expires_at)} days
@@ -162,7 +196,7 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
               </p>
               {warnings.map((a: any) => (
                 <div key={a.platform_name} className="flex items-start gap-2 p-2 rounded-xl mb-1"
-                     style={{ backgroundColor: 'rgba(217,119,6,0.06)' }}>
+                  style={{ backgroundColor: 'rgba(217,119,6,0.06)' }}>
                   <AlertTriangle size={12} style={{ color: C.amber, marginTop: 1, flexShrink: 0 }} />
                   <p className="text-[11px]" style={{ color: C.amber }}>
                     {a.status === 'disconnected'
@@ -181,7 +215,7 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
               </p>
               {info.map((a: any) => (
                 <div key={a.platform_name} className="flex items-start gap-2 p-2 rounded-xl mb-1"
-                     style={{ backgroundColor: 'rgba(29,78,216,0.06)' }}>
+                  style={{ backgroundColor: 'rgba(29,78,216,0.06)' }}>
                   <CheckCircle size={12} style={{ color: C.blue, marginTop: 1, flexShrink: 0 }} />
                   <p className="text-[11px]" style={{ color: C.blue }}>
                     {a.display_name} connected — health {getHealthScore(a)}/100
@@ -207,8 +241,8 @@ function NotificationsPanel({ apis, onClose }: { apis: any[]; onClose: () => voi
 // -- Tool Usage Breakdown (Missing 3) --------------------------
 function ToolUsageBreakdown({ platformName }: { platformName: string }) {
   const [breakdown, setBreakdown] = useState<any[]>([])
-  const [total,     setTotal]     = useState(0)
-  const [loading,   setLoading]   = useState(true)
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const client = createClient()
@@ -227,7 +261,7 @@ function ToolUsageBreakdown({ platformName }: { platformName: string }) {
           data.forEach((row: any) => {
             const tool = row.tool_name ?? 'other'
             if (!grouped[tool]) grouped[tool] = { calls: 0, errors: 0, totalMs: 0 }
-            grouped[tool].calls  += (row.success_count ?? 0) + (row.error_count ?? 0)
+            grouped[tool].calls += (row.success_count ?? 0) + (row.error_count ?? 0)
             grouped[tool].errors += row.error_count ?? 0
             grouped[tool].totalMs += row.response_time_ms ?? 0
           })
@@ -236,29 +270,29 @@ function ToolUsageBreakdown({ platformName }: { platformName: string }) {
           setTotal(totalCalls)
 
           const TOOL_COLORS: Record<string, string> = {
-            orders:              C.blue,
-            title_builder:       C.purple,
-            profit_calculator:   '#ec4899',
+            orders: C.blue,
+            title_builder: C.purple,
+            profit_calculator: '#ec4899',
             competitor_research: C.amber,
-            product_research:    C.limeDeep,
-            other:               C.muted,
+            product_research: C.limeDeep,
+            other: C.muted,
           }
 
           setBreakdown(
             Object.entries(grouped)
-              .sort(([,a], [,b]) => b.calls - a.calls)
+              .sort(([, a], [, b]) => b.calls - a.calls)
               .map(([tool, stats]) => ({
                 tool,
-                label:   tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                calls:   stats.calls,
-                errors:  stats.errors,
-                avgMs:   stats.calls > 0 ? Math.round(stats.totalMs / stats.calls) : 0,
-                pct:     totalCalls > 0 ? Math.round((stats.calls / totalCalls) * 100) : 0,
-                color:   TOOL_COLORS[tool] ?? C.muted,
+                label: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                calls: stats.calls,
+                errors: stats.errors,
+                avgMs: stats.calls > 0 ? Math.round(stats.totalMs / stats.calls) : 0,
+                pct: totalCalls > 0 ? Math.round((stats.calls / totalCalls) * 100) : 0,
+                color: TOOL_COLORS[tool] ?? C.muted,
               }))
           )
         }
-      } catch {}
+      } catch { }
       setLoading(false)
     }
     load()
@@ -286,7 +320,7 @@ function ToolUsageBreakdown({ platformName }: { platformName: string }) {
       <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
         {breakdown.map((b, i) => (
           <div key={i} className="h-full rounded-full transition-all"
-               style={{ width: `${b.pct}%`, backgroundColor: b.color, minWidth: b.pct > 0 ? 4 : 0 }} />
+            style={{ width: `${b.pct}%`, backgroundColor: b.color, minWidth: b.pct > 0 ? 4 : 0 }} />
         ))}
       </div>
 
@@ -299,7 +333,7 @@ function ToolUsageBreakdown({ platformName }: { platformName: string }) {
             <p className="text-[11px] font-bold" style={{ color: C.muted }}>{b.calls} calls</p>
             {b.errors > 0 && (
               <p className="text-[10px] font-bold px-1.5 py-0.5 rounded-lg"
-                 style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
                 {b.errors} err
               </p>
             )}
@@ -317,20 +351,20 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
   api: any; onSaved: () => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
   canRevoke?: boolean
-  canEdit?:   boolean
+  canEdit?: boolean
 }) {
   // Fix 6: Create supabase once using useState to avoid new instance on every render
-  const [supabase]   = useState(() => createClient())
-  const [p1,      setP1]      = useState(api.primary_key_1 === 'EMPTY' ? '' : api.primary_key_1 ?? '')
-  const [p2,      setP2]      = useState(api.primary_key_2 === 'EMPTY' ? '' : api.primary_key_2 ?? '')
-  const [b1,      setB1]      = useState(api.backup_key_1  === 'EMPTY' ? '' : api.backup_key_1  ?? '')
-  const [b2,      setB2]      = useState(api.backup_key_2  === 'EMPTY' ? '' : api.backup_key_2  ?? '')
-  const [showP2,  setShowP2]  = useState(false)
-  const [showB2,  setShowB2]  = useState(false)
-  const [saving,       setSaving]       = useState(false)
-  const [testing,      setTesting]      = useState(false)
-  const [confirmRevoke,setConfirmRevoke] = useState(false)
-  const [env,          setEnv]          = useState<'production' | 'sandbox'>(api.environment ?? 'production')
+  const [supabase] = useState(() => createClient())
+  const [p1, setP1] = useState(api.primary_key_1 === 'EMPTY' ? '' : api.primary_key_1 ?? '')
+  const [p2, setP2] = useState(api.primary_key_2 === 'EMPTY' ? '' : api.primary_key_2 ?? '')
+  const [b1, setB1] = useState(api.backup_key_1 === 'EMPTY' ? '' : api.backup_key_1 ?? '')
+  const [b2, setB2] = useState(api.backup_key_2 === 'EMPTY' ? '' : api.backup_key_2 ?? '')
+  const [showP2, setShowP2] = useState(false)
+  const [showB2, setShowB2] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [confirmRevoke, setConfirmRevoke] = useState(false)
+  const [env, setEnv] = useState<'production' | 'sandbox'>(api.environment ?? 'production')
 
   // Save environment to DB when changed
   async function handleEnvChange(newEnv: 'production' | 'sandbox') {
@@ -345,10 +379,10 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
   }
 
   const scopes = api.scopes ?? [
-    { name: 'Read Catalog',    granted: true  },
-    { name: 'Search Items',    granted: true  },
+    { name: 'Read Catalog', granted: true },
+    { name: 'Search Items', granted: true },
     { name: 'Create Listings', granted: false },
-    { name: 'Issue Refunds',   granted: false },
+    { name: 'Issue Refunds', granted: false },
   ]
 
   async function handleSave() {
@@ -359,27 +393,27 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
       await (supabase.from('api_fleet_config') as any).update({
         primary_key_1: p1.trim(),
         primary_key_2: p2.trim() || 'EMPTY',
-        backup_key_1:  b1.trim() || 'EMPTY',
-        backup_key_2:  b2.trim() || 'EMPTY',
-        updated_at:    new Date().toISOString(),
-        status:        'connected',
-        expires_at:    newExpiry,
+        backup_key_1: b1.trim() || 'EMPTY',
+        backup_key_2: b2.trim() || 'EMPTY',
+        updated_at: new Date().toISOString(),
+        status: 'connected',
+        expires_at: newExpiry,
       }).eq('platform_name', api.platform_name)
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         try {
           await (supabase.from('api_key_history') as any).insert({
-            user_id:         user.id,
-            platform_name:   api.platform_name,
-            action:          'updated',
+            user_id: user.id,
+            platform_name: api.platform_name,
+            action: 'updated',
             key_fingerprint: p1.trim().substring(0, 8),
-            key_type:        'primary',
-            changed_by:      user.email ?? 'admin',
-            notes:           `Keys updated — expires ${new Date(newExpiry).toLocaleDateString()}`,
-            changed_at:      new Date().toISOString(),
+            key_type: 'primary',
+            changed_by: user.email ?? 'admin',
+            notes: `Keys updated — expires ${new Date(newExpiry).toLocaleDateString()}`,
+            changed_at: new Date().toISOString(),
           })
-        } catch {}
+        } catch { }
       }
       showToast('Keys saved to vault', 'success')
       onSaved()
@@ -393,23 +427,23 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
     const start = Date.now()
     try {
       let success = false
-      let ms      = 0
+      let ms = 0
 
       if (api.platform_name === 'ebay') {
         const result = await createClient().functions.invoke('ebay-proxy', {
           body: { appId: p1.trim(), certId: p2.trim(), testMode: true }
         })
-        ms      = Date.now() - start
+        ms = Date.now() - start
         success = (result.data as any)?.success === true
       } else if (api.platform_name === 'resend') {
         // For env: keys — test via server-side route
-        const res  = await fetch('/api/admin/test-connection', {
-          method:  'POST',
+        const res = await fetch('/api/admin/test-connection', {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ platform: 'resend' }),
+          body: JSON.stringify({ platform: 'resend' }),
         })
         const json = await res.json()
-        ms      = Date.now() - start
+        ms = Date.now() - start
         success = json.success === true
         if (!success) {
           showToast(json.message ?? 'Connection failed', 'error')
@@ -419,37 +453,37 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
       } else if (api.platform_name === 'lemonsqueezy') {
         // Use server-side route — key too long for client
         const lsRes = await fetch('/api/admin/test-connection', {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ platform: 'lemonsqueezy' }),
+          body: JSON.stringify({ platform: 'lemonsqueezy' }),
         })
         const lsData = await lsRes.json()
-        ms      = Date.now() - start
+        ms = Date.now() - start
         success = lsData.success
       } else if (api.platform_name === 'stripe') {
         // Fix 11: Real Stripe test — fetch balance
         const res = await fetch('https://api.stripe.com/v1/balance', {
           headers: { Authorization: `Bearer ${p1.trim()}` }
         })
-        ms      = Date.now() - start
+        ms = Date.now() - start
         success = res.ok
       } else if (api.platform_name === 'openai') {
         // Fix 11: Real OpenAI test — fetch models
         const res = await fetch('https://api.openai.com/v1/models', {
           headers: { Authorization: `Bearer ${p1.trim()}` }
         })
-        ms      = Date.now() - start
+        ms = Date.now() - start
         success = res.ok
       } else {
         await new Promise(r => setTimeout(r, 800))
-        ms      = Date.now() - start
+        ms = Date.now() - start
         success = true
       }
 
       await (supabase.from('api_fleet_config') as any).update({
-        status:          success ? 'connected' : 'error',
-        last_tested_at:  new Date().toISOString(),
-        last_used_at:    new Date().toISOString(),
+        status: success ? 'connected' : 'error',
+        last_tested_at: new Date().toISOString(),
+        last_used_at: new Date().toISOString(),
         last_request_at: new Date().toISOString(),
       }).eq('platform_name', api.platform_name)
 
@@ -457,15 +491,15 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
       if (user) {
         try {
           await (supabase.from('api_key_history') as any).insert({
-            user_id:       user.id,
+            user_id: user.id,
             platform_name: api.platform_name,
-            action:        'tested',
-            key_type:      'primary',
-            changed_by:    user.email ?? 'admin',
-            notes:         `Test ${success ? 'passed' : 'failed'} — ${ms}ms`,
-            changed_at:    new Date().toISOString(),
+            action: 'tested',
+            key_type: 'primary',
+            changed_by: user.email ?? 'admin',
+            notes: `Test ${success ? 'passed' : 'failed'} — ${ms}ms`,
+            changed_at: new Date().toISOString(),
           })
-        } catch {}
+        } catch { }
       }
 
       showToast(success ? `Connection OK — ${ms}ms` : 'Connection failed', success ? 'success' : 'error')
@@ -480,7 +514,7 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
     if (!confirmRevoke) { setConfirmRevoke(true); setTimeout(() => setConfirmRevoke(false), 3000); return }
     await (supabase.from('api_fleet_config') as any).update({
       primary_key_1: 'EMPTY', primary_key_2: 'EMPTY',
-      backup_key_1:  'EMPTY', backup_key_2:  'EMPTY',
+      backup_key_1: 'EMPTY', backup_key_2: 'EMPTY',
       status: 'disconnected', updated_at: new Date().toISOString(),
     }).eq('platform_name', api.platform_name)
     setP1(''); setP2(''); setB1(''); setB2('')
@@ -513,7 +547,7 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
 
         {isEnvKey ? (
           <div className="flex items-start gap-3 p-3 rounded-xl border"
-               style={{ backgroundColor: C.limeTint, borderColor: C.limeDeep + '40' }}>
+            style={{ backgroundColor: C.limeTint, borderColor: C.limeDeep + '40' }}>
             <Shield size={14} style={{ color: C.limeDeep, marginTop: 1, flexShrink: 0 }} />
             <div>
               <p className="text-[12px] font-bold" style={{ color: C.limeDeep }}>
@@ -524,8 +558,8 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
                 This is the most secure way to store API keys.
               </p>
               <a href="https://vercel.com/dashboard" target="_blank" rel="noreferrer"
-                 className="text-[11px] font-bold mt-1 inline-flex items-center gap-1 hover:opacity-70"
-                 style={{ color: C.limeDeep }}>
+                className="text-[11px] font-bold mt-1 inline-flex items-center gap-1 hover:opacity-70"
+                style={{ color: C.limeDeep }}>
                 <ExternalLink size={10} /> Manage in Vercel
               </a>
             </div>
@@ -536,9 +570,9 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
               <div className="flex items-center justify-between mb-1.5">
                 <p className="text-[10px] font-bold" style={{ color: C.muted }}>
                   {api.platform_name === 'lemonsqueezy' ? 'API Key' :
-                   api.platform_name === 'stripe'       ? 'Secret Key' :
-                   api.platform_name === 'openai'       ? 'API Key' :
-                   'Key 1 / App ID'}
+                    api.platform_name === 'stripe' ? 'Secret Key' :
+                      api.platform_name === 'openai' ? 'API Key' :
+                        'Key 1 / App ID'}
                 </p>
                 <button onClick={() => copyFP(p1, 'Key 1')}
                   className="flex items-center gap-1 text-[10px] hover:opacity-70"
@@ -549,9 +583,9 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
               <input value={p1} onChange={e => setP1(e.target.value)}
                 placeholder={
                   api.platform_name === 'lemonsqueezy' ? 'Paste LemonSqueezy API key...' :
-                  api.platform_name === 'stripe'       ? 'sk_live_...' :
-                  api.platform_name === 'openai'       ? 'sk-...' :
-                  'Paste key 1...'
+                    api.platform_name === 'stripe' ? 'sk_live_...' :
+                      api.platform_name === 'openai' ? 'sk-...' :
+                        'Paste key 1...'
                 }
                 className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
                 style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
@@ -560,8 +594,8 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
               <div className="flex items-center justify-between mb-1.5">
                 <p className="text-[10px] font-bold" style={{ color: C.muted }}>
                   {api.platform_name === 'lemonsqueezy' ? 'Webhook Secret' :
-                   api.platform_name === 'stripe'       ? 'Webhook Secret' :
-                   'Key 2 / Secret'}
+                    api.platform_name === 'stripe' ? 'Webhook Secret' :
+                      'Key 2 / Secret'}
                 </p>
                 <div className="flex items-center gap-2">
                   <button onClick={() => copyFP(p2, 'Key 2')}
@@ -578,8 +612,8 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
                 type={showP2 ? 'text' : 'password'}
                 placeholder={
                   api.platform_name === 'lemonsqueezy' ? 'Paste webhook signing secret...' :
-                  api.platform_name === 'stripe'       ? 'whsec_...' :
-                  'Paste key 2...'
+                    api.platform_name === 'stripe' ? 'whsec_...' :
+                      'Paste key 2...'
                 }
                 className="w-full h-10 px-3 rounded-xl border text-[12px] font-mono outline-none"
                 style={{ backgroundColor: C.surface, borderColor: C.border, color: C.text }} />
@@ -593,7 +627,7 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
         <div className="flex items-center gap-2">
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>FALLBACK KEYS</p>
           <span className="text-[9px] font-black px-1.5 py-0.5 rounded-lg"
-                style={{ backgroundColor: 'rgba(29,78,216,0.08)', color: C.blue }}>STANDBY</span>
+            style={{ backgroundColor: 'rgba(29,78,216,0.08)', color: C.blue }}>STANDBY</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <input value={b1} onChange={e => setB1(e.target.value)}
@@ -617,7 +651,7 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
       {/* LemonSqueezy specific info */}
       {api.platform_name === 'lemonsqueezy' && (
         <div className="p-4 rounded-xl border flex flex-col gap-3"
-             style={{ borderColor: 'rgba(99,102,241,0.2)', backgroundColor: 'rgba(99,102,241,0.04)' }}>
+          style={{ borderColor: 'rgba(99,102,241,0.2)', backgroundColor: 'rgba(99,102,241,0.04)' }}>
           <p className="text-[10px] font-black tracking-wider" style={{ color: '#6366f1' }}>
             LEMONSQUEEZY SETUP
           </p>
@@ -644,14 +678,14 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
           <div className="flex flex-wrap gap-2">
             {[
               { label: 'Starter Monthly', value: '1816372' },
-              { label: 'Starter Annual',  value: '1816460' },
-              { label: 'Growth Monthly',  value: '1816599' },
-              { label: 'Growth Annual',   value: '1816810' },
-              { label: 'Custom Monthly',  value: '1816827' },
-              { label: 'Custom Annual',   value: '1816837' },
+              { label: 'Starter Annual', value: '1816460' },
+              { label: 'Growth Monthly', value: '1816599' },
+              { label: 'Growth Annual', value: '1816810' },
+              { label: 'Custom Monthly', value: '1816827' },
+              { label: 'Custom Annual', value: '1816837' },
             ].map((v, i) => (
               <div key={i} className="px-2.5 py-1.5 rounded-lg border text-[10px]"
-                   style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                style={{ borderColor: C.border, backgroundColor: C.surface }}>
                 <span style={{ color: C.muted }}>{v.label}: </span>
                 <span className="font-mono font-bold" style={{ color: C.text }}>{v.value}</span>
               </div>
@@ -668,16 +702,16 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
             <button key={e} onClick={() => handleEnvChange(e)}
               className="px-3 py-2 rounded-xl border text-[12px] font-bold capitalize transition-all"
               style={{
-                backgroundColor: env === e ? C.dark    : C.surface,
-                borderColor:     env === e ? C.dark    : C.border,
-                color:           env === e ? C.lime    : C.muted,
+                backgroundColor: env === e ? C.lime : C.surface,
+                borderColor: env === e ? C.lime : C.border,
+                color: env === e ? '#1a2410' : C.muted,
               }}>
               {e}
             </button>
           ))}
           {env === 'sandbox' && (
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
-                 style={{ backgroundColor: 'rgba(217,119,6,0.08)', border: `1px solid rgba(217,119,6,0.2)` }}>
+              style={{ backgroundColor: 'rgba(217,119,6,0.08)', border: `1px solid rgba(217,119,6,0.2)` }}>
               <AlertTriangle size={11} style={{ color: C.amber }} />
               <span className="text-[10px] font-bold" style={{ color: C.amber }}>
                 Sandbox mode — fake data only
@@ -703,11 +737,11 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
           </div>
           <div className="h-2 rounded-full overflow-hidden mb-1" style={{ backgroundColor: C.border }}>
             <div className="h-full rounded-full transition-all"
-                 style={{
-                   width: `${Math.min(((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) * 100, 100)}%`,
-                   backgroundColor: ((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) > 0.85 ? C.red :
-                                    ((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) > 0.7  ? C.amber : C.lime,
-                 }} />
+              style={{
+                width: `${Math.min(((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) * 100, 100)}%`,
+                backgroundColor: ((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) > 0.85 ? C.red :
+                  ((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) > 0.7 ? C.amber : C.lime,
+              }} />
           </div>
           <p className="text-[10px]" style={{ color: C.muted }}>
             {Math.round(((api.rate_limit_used ?? 0) / Math.max(api.rate_limit_total ?? 1, 1)) * 100)}% used today
@@ -730,11 +764,11 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
           </div>
           <div className="h-2 rounded-full overflow-hidden mb-1" style={{ backgroundColor: C.border }}>
             <div className="h-full rounded-full transition-all"
-                 style={{
-                   width: `${Math.min(((api.monthly_used ?? 0) / Math.max(api.monthly_limit ?? 1, 1)) * 100, 100)}%`,
-                   backgroundColor: ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.85 ? C.red :
-                                    ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.7  ? C.amber : C.lime,
-                 }} />
+              style={{
+                width: `${Math.min(((api.monthly_used ?? 0) / Math.max(api.monthly_limit ?? 1, 1)) * 100, 100)}%`,
+                backgroundColor: ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.85 ? C.red :
+                  ((api.monthly_used ?? 0) / (api.monthly_limit ?? 1)) > 0.7 ? C.amber : C.lime,
+              }} />
           </div>
           <div className="flex items-center justify-between">
             <p className="text-[10px]" style={{ color: C.muted }}>
@@ -755,15 +789,15 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
         <div className="flex flex-wrap gap-2">
           {scopes.map((s: any, i: number) => (
             <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border"
-                 style={{
-                   backgroundColor: s.granted ? 'rgba(22,163,74,0.08)' : 'rgba(185,28,28,0.06)',
-                   borderColor:     s.granted ? 'rgba(22,163,74,0.2)'  : 'rgba(185,28,28,0.15)',
-                 }}>
+              style={{
+                backgroundColor: s.granted ? 'rgba(22,163,74,0.08)' : 'rgba(185,28,28,0.06)',
+                borderColor: s.granted ? 'rgba(22,163,74,0.2)' : 'rgba(185,28,28,0.15)',
+              }}>
               {s.granted
                 ? <CheckCircle size={10} style={{ color: C.green }} />
-                : <XCircle     size={10} style={{ color: C.red   }} />}
+                : <XCircle size={10} style={{ color: C.red }} />}
               <span className="text-[10px] font-bold"
-                    style={{ color: s.granted ? C.green : C.red }}>{s.name}</span>
+                style={{ color: s.granted ? C.green : C.red }}>{s.name}</span>
             </div>
           ))}
         </div>
@@ -776,7 +810,7 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
           <div className="flex flex-wrap gap-2">
             {api.used_by.map((tool: string, i: number) => (
               <span key={i} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold border"
-                    style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+                style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
                 {tool}
               </span>
             ))}
@@ -807,13 +841,13 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
         {/* Missing 7: Quick reconnect — opens docs/portal */}
         {api.docs_url && (
           <a href={
-            api.platform_name === 'ebay'         ? 'https://developer.ebay.com/my/keys' :
-            api.platform_name === 'resend'        ? 'https://resend.com/api-keys' :
-            api.platform_name === 'openai'        ? 'https://platform.openai.com/api-keys' :
-            api.platform_name === 'lemonsqueezy'  ? 'https://app.lemonsqueezy.com/settings/api' :
-            api.platform_name === 'stripe'        ? 'https://dashboard.stripe.com/apikeys' :
-            api.platform_name === 'aliexpress'    ? 'https://portals.aliexpress.com/developer/index.htm' :
-            api.docs_url
+            api.platform_name === 'ebay' ? 'https://developer.ebay.com/my/keys' :
+              api.platform_name === 'resend' ? 'https://resend.com/api-keys' :
+                api.platform_name === 'openai' ? 'https://platform.openai.com/api-keys' :
+                  api.platform_name === 'lemonsqueezy' ? 'https://app.lemonsqueezy.com/settings/api' :
+                    api.platform_name === 'stripe' ? 'https://dashboard.stripe.com/apikeys' :
+                      api.platform_name === 'aliexpress' ? 'https://portals.aliexpress.com/developer/index.htm' :
+                        api.docs_url
           } target="_blank" rel="noreferrer"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-bold hover:opacity-80 transition-all"
             style={{ borderColor: C.limeDeep + '40', backgroundColor: C.limeTint, color: C.limeDeep }}>
@@ -832,8 +866,8 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
         {canRevoke && <button onClick={handleRevoke}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all"
           style={{
-            backgroundColor: confirmRevoke ? C.red                   : 'rgba(185,28,28,0.08)',
-            color:           confirmRevoke ? '#ffffff'                : C.red,
+            backgroundColor: confirmRevoke ? C.red : 'rgba(185,28,28,0.08)',
+            color: confirmRevoke ? '#ffffff' : C.red,
           }}>
           <Trash2 size={13} />
           {confirmRevoke ? 'Click again to confirm revoke' : 'Revoke Keys'}
@@ -841,7 +875,7 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
       </div>
 
       <div className="flex items-start gap-2 p-3 rounded-xl border"
-           style={{ backgroundColor: C.limeTint, borderColor: 'rgba(143,255,0,0.4)' }}>
+        style={{ backgroundColor: C.limeTint, borderColor: 'rgba(143,255,0,0.4)' }}>
         <Info size={12} style={{ color: C.limeDeep, marginTop: 1, flexShrink: 0 }} />
         <p className="text-[11px]" style={{ color: C.dark }}>
           Saving keys auto-resets expiry to {api.rotation_days ?? 90} days. All keys encrypted via Supabase RLS.
@@ -853,10 +887,10 @@ function ConfigTab({ api, onSaved, showToast, canRevoke = true, canEdit = true }
 
 // -- Activity Tab -----------------------------------------------
 function ActivityTab({ api }: { api: any }) {
-  const [history,   setHistory]   = useState<any[]>([])
-  const [errors,    setErrors]    = useState<any[]>([])
+  const [history, setHistory] = useState<any[]>([])
+  const [errors, setErrors] = useState<any[]>([])
   const [usageLogs, setUsageLogs] = useState<any[]>([])
-  const [loading,   setLoading]   = useState(true)
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'keys' | 'errors' | 'calls'>('keys')
 
   useEffect(() => {
@@ -888,10 +922,10 @@ function ActivityTab({ api }: { api: any }) {
             .order('logged_at', { ascending: false })
             .limit(20),
         ])
-        setHistory(keyHistory   ?? [])
-        setErrors(errorLogs     ?? [])
-        setUsageLogs(apiCalls   ?? [])
-      } catch {}
+        setHistory(keyHistory ?? [])
+        setErrors(errorLogs ?? [])
+        setUsageLogs(apiCalls ?? [])
+      } catch { }
       setLoading(false)
     }
     load()
@@ -899,16 +933,16 @@ function ActivityTab({ api }: { api: any }) {
 
   function actionColor(action: string) {
     if (action === 'updated') return { color: C.limeDeep, bg: C.limeTint }
-    if (action === 'tested')  return { color: C.blue,     bg: 'rgba(29,78,216,0.08)' }
-    if (action === 'revoked') return { color: C.red,      bg: 'rgba(185,28,28,0.08)' }
-    if (action === 'created') return { color: C.purple,   bg: 'rgba(124,58,237,0.08)' }
+    if (action === 'tested') return { color: C.blue, bg: 'rgba(29,78,216,0.08)' }
+    if (action === 'revoked') return { color: C.red, bg: 'rgba(185,28,28,0.08)' }
+    if (action === 'created') return { color: C.purple, bg: 'rgba(124,58,237,0.08)' }
     return { color: C.muted, bg: C.bg }
   }
 
   const SUBTABS = [
-    { key: 'keys',   label: 'Key History',  count: history.length                              },
-    { key: 'errors', label: 'Error Log',    count: errors.length,  warn: errors.length > 0    },
-    { key: 'calls',  label: 'API Calls',    count: usageLogs.length                            },
+    { key: 'keys', label: 'Key History', count: history.length },
+    { key: 'errors', label: 'Error Log', count: errors.length, warn: errors.length > 0 },
+    { key: 'calls', label: 'API Calls', count: usageLogs.length },
   ]
 
   return (
@@ -920,17 +954,17 @@ function ActivityTab({ api }: { api: any }) {
           <button key={t.key} onClick={() => setActiveTab(t.key as any)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
             style={{
-              backgroundColor: activeTab === t.key ? '#8fff00'    : C.surface,
-              color: activeTab === t.key ? '#1a2410'    : C.muted,
-              border:          `1px solid ${activeTab === t.key ? C.dark : C.border}`,
+              backgroundColor: activeTab === t.key ? '#8fff00' : C.surface,
+              color: activeTab === t.key ? '#1a2410' : C.muted,
+              border: `1px solid ${activeTab === t.key ? C.dark : C.border}`,
             }}>
             {t.label}
             {t.count > 0 && (
               <span className="text-[9px] font-black px-1.5 py-0.5 rounded-lg"
-                    style={{
-                      backgroundColor: (t as any).warn ? C.red : activeTab === t.key ? C.lime : C.bg,
-                      color:           (t as any).warn ? '#fff' : activeTab === t.key ? C.dark : C.muted,
-                    }}>
+                style={{
+                  backgroundColor: (t as any).warn ? C.red : activeTab === t.key ? C.lime : C.bg,
+                  color: (t as any).warn ? '#fff' : activeTab === t.key ? C.dark : C.muted,
+                }}>
                 {t.count}
               </span>
             )}
@@ -940,7 +974,7 @@ function ActivityTab({ api }: { api: any }) {
 
       {loading ? (
         <div className="flex flex-col gap-2">
-          {[0,1,2].map(i => <div key={i} className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: C.border }} />)}
+          {[0, 1, 2].map(i => <div key={i} className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: C.border }} />)}
         </div>
       ) : (
         <>
@@ -954,7 +988,7 @@ function ActivityTab({ api }: { api: any }) {
             ) : (
               <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
                 <div className="grid px-4 py-2 border-b"
-                     style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
                   {['DATE', 'ACTION', 'BY', 'FINGERPRINT', 'NOTES'].map(h => (
                     <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
                   ))}
@@ -963,12 +997,12 @@ function ActivityTab({ api }: { api: any }) {
                   const ac = actionColor(h.action)
                   return (
                     <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
-                         style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border }}>
+                      style={{ gridTemplateColumns: '1.2fr 0.7fr 1fr 0.8fr 1.5fr', gap: 12, borderColor: C.border }}>
                       <span className="text-[11px]" style={{ color: C.muted }}>
                         {new Date(h.changed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
                       <span className="text-[9px] font-black px-2 py-0.5 rounded-lg w-fit capitalize"
-                            style={{ backgroundColor: ac.bg, color: ac.color }}>{h.action}</span>
+                        style={{ backgroundColor: ac.bg, color: ac.color }}>{h.action}</span>
                       <span className="text-[11px] truncate" style={{ color: C.text }}>{h.changed_by ?? '—'}</span>
                       <span className="text-[11px] font-mono" style={{ color: C.muted }}>
                         {h.key_fingerprint ? `${h.key_fingerprint}…` : '—'}
@@ -992,14 +1026,14 @@ function ActivityTab({ api }: { api: any }) {
             ) : (
               <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
                 <div className="grid px-4 py-2 border-b"
-                     style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.6fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.6fr 1.5fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
                   {['DATE', 'TOOL', 'CALL', 'ERRORS', 'MESSAGE'].map(h => (
                     <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
                   ))}
                 </div>
                 {errors.map((e: any, i: number) => (
                   <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
-                       style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.6fr 1.5fr', gap: 12, borderColor: C.border }}>
+                    style={{ gridTemplateColumns: '1.2fr 0.8fr 0.6fr 0.6fr 1.5fr', gap: 12, borderColor: C.border }}>
                     <span className="text-[11px]" style={{ color: C.muted }}>
                       {new Date(e.logged_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                       {' '}{new Date(e.logged_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
@@ -1028,14 +1062,14 @@ function ActivityTab({ api }: { api: any }) {
             ) : (
               <div className="rounded-xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
                 <div className="grid px-4 py-2 border-b"
-                     style={{ gridTemplateColumns: '1fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr 1.2fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                  style={{ gridTemplateColumns: '1fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr 1.2fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
                   {['DATE', 'TOOL', 'CALL', 'OK', 'ERR', 'MS', 'TO'].map(h => (
                     <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
                   ))}
                 </div>
                 {usageLogs.map((log: any, i: number) => (
                   <div key={i} className="grid items-center px-4 py-2.5 border-b last:border-b-0"
-                       style={{ gridTemplateColumns: '1fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr 1.2fr', gap: 12, borderColor: C.border }}>
+                    style={{ gridTemplateColumns: '1fr 0.8fr 0.6fr 0.4fr 0.4fr 0.5fr 1.2fr', gap: 12, borderColor: C.border }}>
                     <span className="text-[11px]" style={{ color: C.muted }}>
                       {new Date(log.logged_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                     </span>
@@ -1053,7 +1087,7 @@ function ActivityTab({ api }: { api: any }) {
                       {log.response_time_ms}ms
                     </span>
                     <span className="text-[10px] font-mono truncate" style={{ color: C.muted }}
-                          title={log.to_email ?? ''}>
+                      title={log.to_email ?? ''}>
                       {log.to_email ? log.to_email.replace(/(.{3}).*(@.*)/, '$1…$2') : '—'}
                     </span>
                   </div>
@@ -1073,19 +1107,19 @@ function SecurityTab({ api, onSaved, showToast }: {
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
 }) {
   // Fix 6: stable supabase instance
-  const [supabase]   = useState(() => createClient())
-  const [newIp,      setNewIp]      = useState('')
-  const [whitelist,  setWhitelist]  = useState<string[]>(api.ip_whitelist ?? [])
-  const [rotDays,    setRotDays]    = useState(String(api.rotation_days ?? 90))
-  const [saving,     setSaving]     = useState(false)
+  const [supabase] = useState(() => createClient())
+  const [newIp, setNewIp] = useState('')
+  const [whitelist, setWhitelist] = useState<string[]>(api.ip_whitelist ?? [])
+  const [rotDays, setRotDays] = useState(String(api.rotation_days ?? 90))
+  const [saving, setSaving] = useState(false)
   // Fix 4: alert toggles connected to webhook system
-  const [alertHealth,  setAlertHealth]  = useState(true)
-  const [alertExpiry,  setAlertExpiry]  = useState(true)
-  const [alertRate,    setAlertRate]    = useState(true)
+  const [alertHealth, setAlertHealth] = useState(true)
+  const [alertExpiry, setAlertExpiry] = useState(true)
+  const [alertRate, setAlertRate] = useState(true)
   const [alertUnusual, setAlertUnusual] = useState(true)
 
-  const days         = getDaysUntilExpiry(api.expires_at)
-  const lastRotated  = api.updated_at ? Math.floor((Date.now() - new Date(api.updated_at).getTime()) / 86400000) : null
+  const days = getDaysUntilExpiry(api.expires_at)
+  const lastRotated = api.updated_at ? Math.floor((Date.now() - new Date(api.updated_at).getTime()) / 86400000) : null
   const nextRotation = lastRotated !== null ? Math.max((api.rotation_days ?? 90) - lastRotated, 0) : null
 
   function addIp() {
@@ -1099,9 +1133,9 @@ function SecurityTab({ api, onSaved, showToast }: {
     try {
       await (supabase.from('api_fleet_config') as any)
         .update({
-          ip_whitelist:   whitelist,
-          rotation_days:  Number(rotDays),
-          updated_at:     new Date().toISOString(),
+          ip_whitelist: whitelist,
+          rotation_days: Number(rotDays),
+          updated_at: new Date().toISOString(),
         })
         .eq('platform_name', api.platform_name)
 
@@ -1110,21 +1144,21 @@ function SecurityTab({ api, onSaved, showToast }: {
         try {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
           await fetch(`${appUrl}/api/admin/webhooks`, {
-            method:  'POST',
+            method: 'POST',
             headers: {
-              'Content-Type':      'application/json',
+              'Content-Type': 'application/json',
               'x-internal-secret': process.env.NEXT_PUBLIC_INTERNAL_SECRET ?? '',
             },
             body: JSON.stringify({
               event_type: 'api.failure',
               data: {
-                api:     api.display_name,
-                issue:   `Keys expire in ${days} days`,
-                action:  'Rotate keys immediately',
+                api: api.display_name,
+                issue: `Keys expire in ${days} days`,
+                action: 'Rotate keys immediately',
               }
             }),
           })
-        } catch {}
+        } catch { }
       }
 
       showToast('Security settings saved', 'success')
@@ -1161,7 +1195,7 @@ function SecurityTab({ api, onSaved, showToast }: {
           <div className="flex flex-col gap-1.5">
             {whitelist.map((ip, i) => (
               <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl border"
-                   style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                style={{ borderColor: C.border, backgroundColor: C.surface }}>
                 <span className="text-[12px] font-mono" style={{ color: C.text }}>{ip}</span>
                 <button onClick={() => setWhitelist(p => p.filter((_, j) => j !== i))}
                   className="hover:opacity-70">
@@ -1180,22 +1214,22 @@ function SecurityTab({ api, onSaved, showToast }: {
           Fires to Discord #riazify-alerts via webhook system
         </p>
         <div className="flex flex-col gap-2 p-3 rounded-xl border"
-             style={{ borderColor: C.border, backgroundColor: C.surface }}>
+          style={{ borderColor: C.border, backgroundColor: C.surface }}>
           {[
-            { label: 'Alert when health drops below 50',    val: alertHealth,  set: setAlertHealth  },
-            { label: 'Alert when keys expire in 7 days',    val: alertExpiry,  set: setAlertExpiry  },
-            { label: 'Alert when rate limit exceeds 80%',   val: alertRate,    set: setAlertRate    },
+            { label: 'Alert when health drops below 50', val: alertHealth, set: setAlertHealth },
+            { label: 'Alert when keys expire in 7 days', val: alertExpiry, set: setAlertExpiry },
+            { label: 'Alert when rate limit exceeds 80%', val: alertRate, set: setAlertRate },
             { label: 'Alert when unusual activity detected', val: alertUnusual, set: setAlertUnusual },
           ].map((a, i) => (
             <div key={i} className="flex items-center justify-between gap-3">
               <p className="text-[11px]" style={{ color: C.text }}>{a.label}</p>
               <div onClick={() => a.set((s: boolean) => !s)}
-                   className="relative w-9 h-5 rounded-full cursor-pointer shrink-0"
-                   style={{ backgroundColor: a.val ? C.dark : 'rgba(100,116,139,0.3)' }}>
+                className="relative w-9 h-5 rounded-full cursor-pointer shrink-0"
+                style={{ backgroundColor: a.val ? C.lime : 'rgba(100,116,139,0.3)' }}>
                 <div style={{
                   position: 'absolute', top: 2, left: 2,
                   width: 16, height: 16, borderRadius: '50%',
-                  backgroundColor: a.val ? C.lime : '#fff',
+                  backgroundColor: a.val ? '#1a2410' : '#fff',
                   transform: a.val ? 'translateX(16px)' : 'translateX(0)',
                   transition: 'transform 0.2s ease',
                 }} />
@@ -1210,9 +1244,9 @@ function SecurityTab({ api, onSaved, showToast }: {
         <p className="text-[10px] font-black tracking-wider mb-3" style={{ color: C.muted }}>ROTATION SCHEDULE</p>
         <div className="grid grid-cols-3 gap-3 mb-3">
           {[
-            { label: 'Rotate every',   value: `${rotDays} days`                                        },
-            { label: 'Last rotated',   value: lastRotated !== null ? `${lastRotated} days ago` : 'Never' },
-            { label: 'Next rotation',  value: nextRotation !== null ? `${nextRotation} days`  : '—'     },
+            { label: 'Rotate every', value: `${rotDays} days` },
+            { label: 'Last rotated', value: lastRotated !== null ? `${lastRotated} days ago` : 'Never' },
+            { label: 'Next rotation', value: nextRotation !== null ? `${nextRotation} days` : '—' },
           ].map((s, i) => (
             <div key={i} className="p-3 rounded-xl border" style={{ borderColor: C.border, backgroundColor: C.surface }}>
               <p className="text-[9px] font-black tracking-wider mb-1" style={{ color: C.muted }}>{s.label.toUpperCase()}</p>
@@ -1231,10 +1265,10 @@ function SecurityTab({ api, onSaved, showToast }: {
       {/* Expiry warning */}
       {days > 0 && days <= 30 && (
         <div className="flex items-center gap-2 p-3 rounded-xl border"
-             style={{
-               backgroundColor: days <= 7 ? 'rgba(185,28,28,0.06)' : 'rgba(217,119,6,0.06)',
-               borderColor:     days <= 7 ? 'rgba(185,28,28,0.2)'  : 'rgba(217,119,6,0.2)',
-             }}>
+          style={{
+            backgroundColor: days <= 7 ? 'rgba(185,28,28,0.06)' : 'rgba(217,119,6,0.06)',
+            borderColor: days <= 7 ? 'rgba(185,28,28,0.2)' : 'rgba(217,119,6,0.2)',
+          }}>
           <AlertTriangle size={14} style={{ color: days <= 7 ? C.red : C.amber }} />
           <p className="text-[11px] font-bold" style={{ color: days <= 7 ? C.red : C.amber }}>
             Keys expire in {days} days — save new keys to reset expiry
@@ -1262,24 +1296,24 @@ function ExpandedRow({ api, onSaved, showToast, canRevoke = true }: {
   const [tab, setTab] = useState<'config' | 'activity' | 'security'>('config')
 
   const TABS = [
-    { key: 'config',   label: 'Configuration', icon: Settings  },
-    { key: 'activity', label: 'Activity',       icon: Activity  },
-    { key: 'security', label: 'Security',       icon: Shield    },
+    { key: 'config', label: 'Configuration', icon: Settings },
+    { key: 'activity', label: 'Activity', icon: Activity },
+    { key: 'security', label: 'Security', icon: Shield },
   ]
 
   return (
     <div>
       {/* Tab bar */}
       <div className="flex items-center gap-1 px-4 py-2 border-b"
-           style={{ borderColor: C.border, backgroundColor: C.surface }}>
+        style={{ borderColor: C.border, backgroundColor: C.surface }}>
         {TABS.map(t => {
           const TIcon = t.icon
           return (
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
               style={{
-                backgroundColor: tab === t.key ? '#8fff00'    : 'transparent',
-                color: tab === t.key ? '#1a2410'    : C.muted,
+                backgroundColor: tab === t.key ? '#8fff00' : 'transparent',
+                color: tab === t.key ? '#1a2410' : C.muted,
               }}>
               <TIcon size={11} />
               {t.label}
@@ -1296,7 +1330,7 @@ function ExpandedRow({ api, onSaved, showToast, canRevoke = true }: {
       </div>
 
       {/* Tab content */}
-      {tab === 'config'   && <ConfigTab   api={api} onSaved={onSaved} showToast={showToast} canRevoke={canRevoke} />}
+      {tab === 'config' && <ConfigTab api={api} onSaved={onSaved} showToast={showToast} canRevoke={canRevoke} />}
       {tab === 'activity' && <ActivityTab api={api} />}
       {tab === 'security' && <SecurityTab api={api} onSaved={onSaved} showToast={showToast} />}
     </div>
@@ -1305,19 +1339,19 @@ function ExpandedRow({ api, onSaved, showToast, canRevoke = true }: {
 
 // -- API Modal --------------------------------------------------
 function ApiModal({ api, onClose, onSaved, showToast, canRevoke = true }: {
-  api:        any
-  onClose:    () => void
-  onSaved:    (updatedApi: any) => void
-  showToast:  (msg: string, type: 'success' | 'error' | 'info') => void
+  api: any
+  onClose: () => void
+  onSaved: (updatedApi: any) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
   canRevoke?: boolean
 }) {
-  const [visible,    setVisible]    = useState(false)
+  const [visible, setVisible] = useState(false)
   // Fix 7: track live api data inside modal so header refreshes after save
-  const [liveApi,    setLiveApi]    = useState(api)
+  const [liveApi, setLiveApi] = useState(api)
 
-  const meta  = CATEGORY_META[liveApi.category] ?? { icon: Server, color: C.muted, bg: C.bg, label: '' }
+  const meta = CATEGORY_META[liveApi.category] ?? { icon: Server, color: C.muted, bg: C.bg, label: '' }
   const PIcon = PLATFORM_ICONS[liveApi.platform_name] ?? Server
-  const sm    = statusMeta(liveApi.status, liveApi.is_locked)
+  const sm = statusMeta(liveApi.status, liveApi.is_locked)
   const health = getHealthScore(liveApi)
 
   useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
@@ -1341,24 +1375,23 @@ function ApiModal({ api, onClose, onSaved, showToast, canRevoke = true }: {
 
   return (
     <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
-         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
-         onClick={handleClose}>
+      style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+      onClick={handleClose}>
       <div className="w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col"
-           style={{
-             backgroundColor: C.surface,
-             maxHeight: '90vh',
-             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
-             opacity:   visible ? 1 : 0,
-             transition: 'transform 0.25s ease, opacity 0.25s ease',
-           }}
-           onClick={e => e.stopPropagation()}>
+        style={{
+          backgroundColor: C.surface,
+          maxHeight: '90vh',
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+          opacity: visible ? 1 : 0,
+          transition: 'transform 0.25s ease, opacity 0.25s ease',
+        }}
+        onClick={e => e.stopPropagation()}>
 
         {/* Modal header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b shrink-0"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-               style={{ backgroundColor: meta.bg }}>
-            <PIcon size={18} style={{ color: meta.color }} />
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
+            <PlatformLogo platformName={liveApi.platform_name} size={32} fallbackIcon={PIcon} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -1366,7 +1399,7 @@ function ApiModal({ api, onClose, onSaved, showToast, canRevoke = true }: {
                 {api.display_name ?? api.platform_name}
               </p>
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg"
-                   style={{ backgroundColor: sm.bg }}>
+                style={{ backgroundColor: sm.bg }}>
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sm.dot }} />
                 <span className="text-[9px] font-black" style={{ color: sm.color }}>{sm.label}</span>
               </div>
@@ -1403,15 +1436,15 @@ export default function ApiVaultPage() {
   const { can } = useTabPermissions('api_vault')
   const supabase = createClient()
 
-  const [apis,         setApis]         = useState<any[]>([])
-  const [loading,      setLoading]      = useState(true)
-  const [refreshing,   setRefreshing]   = useState(false)
-  const [testing,      setTesting]      = useState(false)
-  const [selectedApi,  setSelectedApi]  = useState<any | null>(null)
-  const [search,       setSearch]       = useState('')
-  const [filter,       setFilter]       = useState<'all' | 'connected' | 'disconnected' | 'expiring'>('all')
-  const [showNotifs,   setShowNotifs]   = useState(false)
-  const [toast,        setToast]        = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [apis, setApis] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [selectedApi, setSelectedApi] = useState<any | null>(null)
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<'all' | 'connected' | 'disconnected' | 'expiring' | 'ebay'>('all')
+  const [showNotifs, setShowNotifs] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
 
   function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
     setToast({ msg, type })
@@ -1426,7 +1459,7 @@ export default function ApiVaultPage() {
         .order('category')
         .order('platform_name')
       setApis(data ?? [])
-    } catch {}
+    } catch { }
     setLoading(false)
     setRefreshing(false)
     setTesting(false)
@@ -1441,8 +1474,8 @@ export default function ApiVaultPage() {
     let failed = 0
 
     for (const api of apis.filter(a => a.status !== 'disconnected' && !a.is_locked)) {
-      const start  = Date.now()
-      let success  = false
+      const start = Date.now()
+      let success = false
       let newStatus = 'error'
 
       try {
@@ -1450,26 +1483,26 @@ export default function ApiVaultPage() {
           const result = await supabase.functions.invoke('ebay-proxy', {
             body: { appId: api.primary_key_1, certId: api.primary_key_2, testMode: true }
           })
-          success   = (result.data as any)?.success === true
+          success = (result.data as any)?.success === true
           newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'resend') {
           // Test via server-side route (key is in env var)
           const res = await fetch('/api/admin/test-connection', {
-            method:  'POST',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ platform: 'resend' }),
+            body: JSON.stringify({ platform: 'resend' }),
           })
-          success   = res.ok && (await res.json()).success === true
+          success = res.ok && (await res.json()).success === true
           newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'lemonsqueezy') {
           // Use server-side route — key too long for client
           const lsRes2 = await fetch('/api/admin/test-connection', {
-            method:  'POST',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ platform: 'lemonsqueezy' }),
+            body: JSON.stringify({ platform: 'lemonsqueezy' }),
           })
           const lsData2 = await lsRes2.json()
-          success   = lsData2.success
+          success = lsData2.success
           newStatus = success ? 'connected' : 'error'
         } else if (api.platform_name === 'stripe') {
           // Fix 11: Real Stripe test
@@ -1478,7 +1511,7 @@ export default function ApiVaultPage() {
             const res = await fetch('https://api.stripe.com/v1/balance', {
               headers: { Authorization: `Bearer ${p1}` }
             })
-            success   = res.ok
+            success = res.ok
             newStatus = success ? 'connected' : 'error'
           }
         } else if (api.platform_name === 'openai') {
@@ -1488,16 +1521,16 @@ export default function ApiVaultPage() {
             const res = await fetch('https://api.openai.com/v1/models', {
               headers: { Authorization: `Bearer ${p1}` }
             })
-            success   = res.ok
+            success = res.ok
             newStatus = success ? 'connected' : 'error'
           }
         } else {
           await new Promise(r => setTimeout(r, 500))
-          success   = api.status === 'connected'
+          success = api.status === 'connected'
           newStatus = api.status
         }
       } catch {
-        success   = false
+        success = false
         newStatus = 'error'
       }
 
@@ -1505,9 +1538,9 @@ export default function ApiVaultPage() {
 
       try {
         await (supabase.from('api_fleet_config') as any).update({
-          status:          newStatus,
-          last_tested_at:  new Date().toISOString(),
-          last_used_at:    new Date().toISOString(),
+          status: newStatus,
+          last_tested_at: new Date().toISOString(),
+          last_used_at: new Date().toISOString(),
           last_request_at: new Date().toISOString(),
         }).eq('platform_name', api.platform_name)
 
@@ -1515,16 +1548,16 @@ export default function ApiVaultPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await (supabase.from('api_key_history') as any).insert({
-            user_id:       user.id,
+            user_id: user.id,
             platform_name: api.platform_name,
-            action:        'tested',
-            key_type:      'primary',
-            changed_by:    user.email ?? 'admin',
-            notes:         `Test ${success ? 'passed' : 'failed'} — ${Date.now() - start}ms`,
-            changed_at:    new Date().toISOString(),
+            action: 'tested',
+            key_type: 'primary',
+            changed_by: user.email ?? 'admin',
+            notes: `Test ${success ? 'passed' : 'failed'} — ${Date.now() - start}ms`,
+            changed_at: new Date().toISOString(),
           })
         }
-      } catch {}
+      } catch { }
     }
 
     await loadApis()
@@ -1541,9 +1574,9 @@ export default function ApiVaultPage() {
         ...data.map((h: any) => `${h.created_at},${h.platform_name},${h.action},${h.changed_by},${h.key_fingerprint ?? ''},${h.notes ?? ''}`),
       ].join('\n')
       const blob = new Blob([csv], { type: 'text/csv' })
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href = url; a.download = `api-audit-log-${new Date().toISOString().slice(0,10)}.csv`; a.click()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = `api-audit-log-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
       // Fix 9: clean up object URL to prevent memory leak
       setTimeout(() => URL.revokeObjectURL(url), 1000)
       showToast('Audit log exported', 'success')
@@ -1551,17 +1584,22 @@ export default function ApiVaultPage() {
   }
 
   // -- Stats ----------------------------------------------------
-  const activeApis     = apis.filter(a => a.status === 'connected' && !a.is_locked).length
-  const totalApis      = apis.filter(a => !a.is_locked).length
-  const avgHealth      = activeApis > 0
+  const activeApis = apis.filter(a => a.status === 'connected' && !a.is_locked).length
+  const totalApis = apis.filter(a => !a.is_locked).length
+  const avgHealth = activeApis > 0
     ? Math.round(apis.filter(a => !a.is_locked && a.status === 'connected').reduce((s, a) => s + getHealthScore(a), 0) / activeApis)
     : 0
-  const ebayApi        = apis.find(a => a.platform_name === 'ebay')
-  const totalRateUsed  = ebayApi?.rate_limit_used  ?? 0
-  const totalRateLimit = ebayApi?.rate_limit_total  ?? 5000
-  const ratePct        = totalRateLimit > 0 ? Math.round((totalRateUsed / totalRateLimit) * 100) : 0
-  const expiringSoon   = apis.filter(a => { const d = getDaysUntilExpiry(a.expires_at); return d > 0 && d <= 30 }).length
-  const notifCount     = apis.filter(a => {
+  const ebayApi = apis.find(a => a.platform_name === 'ebay' &&
+    (!search || (a.display_name ?? 'eBay Developer').toLowerCase().includes(search.toLowerCase()))
+  )
+  const ebayAllApis = apis.filter(a => (a.platform_name === 'ebay' || a.platform_name.startsWith('ebay_')) &&
+    (!search || (a.display_name ?? a.platform_name).toLowerCase().includes(search.toLowerCase()))
+  )
+  const totalRateUsed = ebayApi?.rate_limit_used ?? 0
+  const totalRateLimit = ebayApi?.rate_limit_total ?? 5000
+  const ratePct = totalRateLimit > 0 ? Math.round((totalRateUsed / totalRateLimit) * 100) : 0
+  const expiringSoon = apis.filter(a => { const d = getDaysUntilExpiry(a.expires_at); return d > 0 && d <= 30 }).length
+  const notifCount = apis.filter(a => {
     const d = getDaysUntilExpiry(a.expires_at)
     return (a.status === 'disconnected' && !a.is_locked) || (d > 0 && d <= 30)
   }).length
@@ -1569,17 +1607,21 @@ export default function ApiVaultPage() {
   // -- Filter ----------------------------------------------------
   const filtered = apis.filter(a => {
     if (search && !a.display_name?.toLowerCase().includes(search.toLowerCase())) return false
-    if (filter === 'connected'    && a.status !== 'connected')    return false
-    if (filter === 'disconnected' && a.status === 'connected')    return false
+    if (filter === 'connected' && a.status !== 'connected') return false
+    if (filter === 'disconnected' && a.status === 'connected') return false
     if (filter === 'expiring') {
       const d = getDaysUntilExpiry(a.expires_at)
       if (!(d > 0 && d <= 30)) return false
     }
+    if (filter === 'ebay' && a.category !== 'catalog') return false
     return true
   })
 
+  // Separate eBay from other catalog APIs
+  const nonEbay = filtered.filter(a => a.platform_name !== 'ebay' && !a.platform_name.startsWith('ebay_'))
+
   const grouped: Record<string, any[]> = {}
-  filtered.forEach(a => {
+  nonEbay.forEach(a => {
     const cat = a.category ?? 'other'
     if (!grouped[cat]) grouped[cat] = []
     grouped[cat].push(a)
@@ -1597,6 +1639,7 @@ export default function ApiVaultPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+
           {/* Notification bell */}
           <button onClick={() => setShowNotifs(s => !s)}
             className="relative w-9 h-9 flex items-center justify-center rounded-xl border hover:opacity-80"
@@ -1604,7 +1647,7 @@ export default function ApiVaultPage() {
             <Bell size={15} style={{ color: notifCount > 0 ? C.amber : C.muted }} />
             {notifCount > 0 && (
               <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white"
-                   style={{ backgroundColor: C.red }}>
+                style={{ backgroundColor: C.red }}>
                 {notifCount}
               </div>
             )}
@@ -1621,21 +1664,21 @@ export default function ApiVaultPage() {
       {/* HUD Cards */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { title: 'APIs Active',     value: `${activeApis}/${totalApis}`,  icon: Server,        color: C.limeDeep, bg: C.limeTint              },
-          { title: 'Health Score',    value: `${avgHealth}/100`,             icon: Activity,      color: avgHealth >= 80 ? C.green : avgHealth >= 50 ? C.amber : C.red, bg: avgHealth >= 80 ? 'rgba(22,163,74,0.08)' : avgHealth >= 50 ? 'rgba(217,119,6,0.08)' : 'rgba(185,28,28,0.08)' },
+          { title: 'APIs Active', value: `${activeApis}/${totalApis}`, icon: Server, color: C.limeDeep, bg: C.limeTint },
+          { title: 'Health Score', value: `${avgHealth}/100`, icon: Activity, color: avgHealth >= 80 ? C.green : avgHealth >= 50 ? C.amber : C.red, bg: avgHealth >= 80 ? 'rgba(22,163,74,0.08)' : avgHealth >= 50 ? 'rgba(217,119,6,0.08)' : 'rgba(185,28,28,0.08)' },
           { title: 'Rate Limit Used', value: `${ratePct}%`, icon: Zap, color: ratePct > 85 ? C.red : ratePct > 70 ? C.amber : C.blue, bg: 'rgba(29,78,216,0.08)', sub: `${totalRateUsed.toLocaleString()}/${totalRateLimit.toLocaleString()} eBay calls today` },
-          { title: 'Expiring Soon',   value: String(expiringSoon),           icon: AlertTriangle, color: expiringSoon > 0 ? C.amber : C.muted, bg: expiringSoon > 0 ? 'rgba(217,119,6,0.08)' : C.bg },
+          { title: 'Expiring Soon', value: String(expiringSoon), icon: AlertTriangle, color: expiringSoon > 0 ? C.amber : C.muted, bg: expiringSoon > 0 ? 'rgba(217,119,6,0.08)' : C.bg },
         ].map((card, i) => {
           const Icon = card.icon
           return (
             <div key={i} className="flex flex-col gap-3 p-4 rounded-2xl border"
-                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              style={{ backgroundColor: C.surface, borderColor: C.border }}>
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
                   {card.title.toUpperCase()}
                 </p>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                     style={{ backgroundColor: card.bg }}>
+                  style={{ backgroundColor: card.bg }}>
                   <Icon size={15} style={{ color: card.color }} />
                 </div>
               </div>
@@ -1653,26 +1696,27 @@ export default function ApiVaultPage() {
       {/* Quick Actions Bar */}
       <div className="flex items-center gap-3">
         <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-xl border"
-             style={{ borderColor: C.border, backgroundColor: C.surface }}>
+          style={{ borderColor: C.border, backgroundColor: C.surface, outline: 'none' }}>
           <Search size={14} style={{ color: C.muted }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search APIs..."
-            className="flex-1 outline-none text-[13px]"
-            style={{ color: C.text }} />
+            className="flex-1 text-[13px]"
+            style={{ color: C.text, backgroundColor: 'transparent', outline: 'none', border: 'none', boxShadow: 'none' }} />
         </div>
         <div className="flex items-center gap-1 p-1 rounded-xl border"
-             style={{ borderColor: C.border, backgroundColor: C.surface }}>
+          style={{ borderColor: C.border, backgroundColor: C.surface }}>
           {[
-            { key: 'all',          label: 'All'      },
-            { key: 'connected',    label: 'Live'     },
-            { key: 'disconnected', label: 'Empty'    },
-            { key: 'expiring',     label: 'Expiring' },
+            { key: 'all', label: 'All' },
+            { key: 'ebay', label: 'eBay' },
+            { key: 'connected', label: 'Live' },
+            { key: 'disconnected', label: 'Empty' },
+            { key: 'expiring', label: 'Expiring' },
           ].map(f => (
             <button key={f.key} onClick={() => setFilter(f.key as any)}
               className="px-3 h-8 rounded-lg text-[11px] font-bold transition-all"
               style={{
-                backgroundColor: filter === f.key ? C.dark : 'transparent',
-                color:           filter === f.key ? C.lime : C.muted,
+                backgroundColor: filter === f.key ? C.lime : 'transparent',
+                color: filter === f.key ? '#1a2410' : C.muted,
               }}>
               {f.label}
             </button>
@@ -1692,26 +1736,156 @@ export default function ApiVaultPage() {
         </button>}
       </div>
 
+      {/* eBay Dedicated Section */}
+      {(ebayApi || ebayAllApis.length > 0) && (
+        <div className="rounded-2xl border overflow-hidden"
+          style={{ borderColor: C.lime, backgroundColor: C.surface }}>
+          <div className="flex items-center gap-2 px-4 py-3 border-b"
+            style={{ borderColor: C.border, backgroundColor: C.limeTint }}>
+            <ShoppingCart size={14} style={{ color: C.limeDeep }} />
+            <p className="text-[10px] font-black tracking-wider" style={{ color: C.limeDeep }}>EBAY DEVELOPER API</p>
+            <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-black"
+              style={{ backgroundColor: C.lime, color: C.dark }}>PRIMARY PLATFORM</span>
+          </div>
+          <div className="grid px-4 py-2 border-b"
+            style={{ gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+            {['API NAME', 'TYPE', 'STATUS', 'HEALTH', 'EXPIRES', 'LAST USED', ''].map(h => (
+              <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+            ))}
+          </div>
+          {/* eBay row — reuse same row rendering */}
+          {ebayApi ? (() => {
+            const api = ebayApi
+            const PIcon = PLATFORM_ICONS[api.platform_name] ?? Server
+            const sm = statusMeta(api.status, api.is_locked)
+            const health = getHealthScore(api)
+            const days = getDaysUntilExpiry(api.expires_at)
+            return (
+              <div className="grid items-center px-4 py-3"
+                style={{ gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr', gap: 12 }}>
+                <div className="flex items-center gap-2.5">
+                  <PlatformLogo platformName={api.platform_name} size={28} fallbackIcon={PIcon} />
+                  <div>
+                    <p className="text-[13px] font-bold" style={{ color: C.dark }}>{api.display_name ?? api.platform_name}</p>
+                    <p className="text-[10px] font-mono" style={{ color: C.muted }}>
+                      {api.primary_key_1 ? api.primary_key_1.slice(0, 10) + '…' : '—'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px]" style={{ color: C.muted }}>{api.category ?? '—'}</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sm.color }} />
+                  <span className="text-[10px] font-bold" style={{ color: sm.color }}>{sm.label}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: C.border }}>
+                    <div className="h-full rounded-full" style={{ width: `${health}%`, backgroundColor: health >= 80 ? C.green : health >= 50 ? C.amber : C.red }} />
+                  </div>
+                  <span className="text-[10px] font-bold" style={{ color: C.muted }}>{health}</span>
+                </div>
+                <span className="text-[11px]" style={{ color: days <= 30 ? C.amber : C.muted }}>
+                  {days > 0 ? `${days}d left` : 'No expiry'}
+                </span>
+                <span className="text-[11px]" style={{ color: C.muted }}>
+                  {api.last_used_at ? new Date(api.last_used_at).toLocaleDateString() : 'Never'}
+                </span>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setSelectedApi(api)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
+                    style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}
+                    onMouseEnter={e => {
+                      const btn = e.currentTarget
+                      btn.style.backgroundColor = C.limeTint
+                      btn.style.borderColor = C.limeDeep + '40'
+                      const icon = btn.querySelector('svg')
+                      if (icon) icon.style.color = C.limeDeep
+                    }}
+                    onMouseLeave={e => {
+                      const btn = e.currentTarget
+                      btn.style.backgroundColor = C.bg
+                      btn.style.borderColor = C.border
+                      const icon = btn.querySelector('svg')
+                      if (icon) icon.style.color = C.muted
+                    }}>
+                    <Plus size={13} style={{ color: C.muted }} />
+                  </button>
+                </div>
+              </div>
+            )
+          })() : null}
+
+          {/* All other eBay APIs */}
+          {
+            ebayAllApis.filter(a => a.platform_name !== 'ebay').map((api: any, idx: number) => {
+              const PIcon = PLATFORM_ICONS[api.platform_name] ?? Server
+              const sm = statusMeta(api.status, api.is_locked)
+              const health = getHealthScore(api)
+              const days = getDaysUntilExpiry(api.expires_at)
+              return (
+                <div key={api.platform_name}
+                  className="grid items-center px-4 py-3 border-t"
+                  style={{ gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr', gap: 12, borderColor: C.border }}>
+                  <div className="flex items-center gap-2.5">
+                    <PlatformLogo platformName="ebay" size={28} fallbackIcon={PIcon} />
+                    <div>
+                      <p className="text-[13px] font-bold" style={{ color: C.dark }}>{api.display_name ?? api.platform_name}</p>
+                      <p className="text-[10px]" style={{ color: C.muted }}>
+                        {api.primary_key_1 && api.primary_key_1 !== 'EMPTY' ? api.primary_key_1.slice(0, 10) + '…' : '—'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[11px]" style={{ color: C.muted }}>{api.category ?? '—'}</span>
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sm.color }} />
+                    <span className="text-[10px] font-bold" style={{ color: sm.color }}>{sm.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: C.border }}>
+                      <div className="h-full rounded-full" style={{ width: `${health}%`, backgroundColor: health >= 80 ? C.green : health >= 50 ? C.amber : C.red }} />
+                    </div>
+                    <span className="text-[10px] font-bold" style={{ color: C.muted }}>{health}</span>
+                  </div>
+                  <span className="text-[11px]" style={{ color: days <= 30 ? C.amber : C.muted }}>
+                    {days > 0 ? `${days}d left` : 'No expiry'}
+                  </span>
+                  <span className="text-[11px]" style={{ color: C.muted }}>
+                    {api.last_used_at ? new Date(api.last_used_at).toLocaleDateString() : 'Never'}
+                  </span>
+                  <div className="flex justify-end">
+                    <button onClick={() => setSelectedApi(api)}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg"
+                      style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                      <Plus size={13} style={{ color: C.muted }} />
+                    </button>
+                  </div>
+                </div>
+              )
+            })
+          }
+        </div>
+      )}
+
       {/* API Fleet Grid */}
       {loading ? (
         <div className="flex flex-col gap-2">
-          {[0,1,2].map(i => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ backgroundColor: C.bg }} />)}
+          {[0, 1, 2].map(i => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ backgroundColor: C.bg }} />)}
         </div>
       ) : Object.keys(grouped).length === 0 ? (
         <div className="flex flex-col items-center py-16 gap-3 rounded-2xl border"
-             style={{ borderColor: C.border, backgroundColor: C.surface }}>
+          style={{ borderColor: C.border, backgroundColor: C.surface }}>
           <Server size={32} style={{ color: C.border }} />
           <p className="text-[14px] font-bold" style={{ color: C.muted }}>No APIs match your filter</p>
         </div>
-      ) : Object.entries(grouped).map(([category, apiList]) => {
-        const meta    = CATEGORY_META[category] ?? { icon: Server, color: C.muted, bg: C.bg, label: category.toUpperCase() }
+      ) : filter === 'ebay' ? null : Object.entries(grouped).map(([category, apiList]) => {
+        const meta = CATEGORY_META[category] ?? { icon: Server, color: C.muted, bg: C.bg, label: category.toUpperCase() }
         const CatIcon = meta.icon
         return (
           <div key={category}>
             {/* Category label */}
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-                   style={{ backgroundColor: meta.bg }}>
+                style={{ backgroundColor: meta.bg }}>
                 <CatIcon size={12} style={{ color: meta.color }} />
               </div>
               <p className="text-[10px] font-black tracking-wider" style={{ color: meta.color }}>{meta.label}</p>
@@ -1722,34 +1896,33 @@ export default function ApiVaultPage() {
             <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
               {/* Table header */}
               <div className="grid px-4 py-2 border-b"
-                   style={{ gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+                style={{ gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
                 {['API NAME', 'TYPE', 'STATUS', 'HEALTH', 'EXPIRES', 'LAST USED', ''].map(h => (
                   <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
                 ))}
               </div>
 
               {apiList.map((api: any, idx: number) => {
-                const PIcon      = PLATFORM_ICONS[api.platform_name] ?? Server
-                const sm         = statusMeta(api.status, api.is_locked)
-                const health     = getHealthScore(api)
-                const days       = getDaysUntilExpiry(api.expires_at)
+                const PIcon = PLATFORM_ICONS[api.platform_name] ?? Server
+                const sm = statusMeta(api.status, api.is_locked)
+                const health = getHealthScore(api)
+                const days = getDaysUntilExpiry(api.expires_at)
 
                 return (
                   <div key={api.platform_name}>
                     {/* Row */}
                     <div className="grid items-center px-4 py-3 hover:bg-[#fafcf8] transition-colors"
-                         style={{
-                           gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr',
-                           gap:       12,
-                           borderTop: idx > 0 ? `1px solid ${C.border}` : 'none',
-                           opacity:   api.is_locked ? 0.55 : 1,
-                         }}>
+                      style={{
+                        gridTemplateColumns: '2fr 0.6fr 0.6fr 0.8fr 0.7fr 0.8fr 0.2fr',
+                        gap: 12,
+                        borderTop: idx > 0 ? `1px solid ${C.border}` : 'none',
+                        opacity: api.is_locked ? 0.55 : 1,
+                      }}>
 
                       {/* Name */}
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                             style={{ backgroundColor: meta.bg }}>
-                          <PIcon size={15} style={{ color: meta.color }} />
+                        <div className="w-9 h-9 flex items-center justify-center shrink-0">
+                          <PlatformLogo platformName={api.platform_name} size={28} fallbackIcon={PIcon} />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[13px] font-black truncate" style={{ color: C.dark }}>
@@ -1763,20 +1936,20 @@ export default function ApiVaultPage() {
 
                       {/* Type */}
                       <span className="text-[9px] font-black px-2 py-1 rounded-lg capitalize"
-                            style={{ backgroundColor: meta.bg, color: meta.color }}>
+                        style={{ backgroundColor: meta.bg, color: meta.color }}>
                         {category}
                       </span>
 
                       {/* Status dot + label */}
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full shrink-0"
-                             style={{ backgroundColor: sm.dot }} />
+                          style={{ backgroundColor: sm.dot }} />
                         <span className="text-[10px] font-bold" style={{ color: sm.color }}>
                           {sm.label}
                         </span>
                         {api.environment === 'sandbox' && (
                           <span className="text-[8px] font-black px-1 py-0.5 rounded"
-                                style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: C.amber }}>
+                            style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: C.amber }}>
                             SBX
                           </span>
                         )}
@@ -1786,20 +1959,20 @@ export default function ApiVaultPage() {
                       <div className="flex items-center gap-1.5">
                         <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: C.border }}>
                           <div className="h-full rounded-full transition-all"
-                               style={{
-                                 width:           `${health}%`,
-                                 backgroundColor: health >= 80 ? C.lime : health >= 50 ? C.amber : C.red,
-                               }} />
+                            style={{
+                              width: `${health}%`,
+                              backgroundColor: health >= 80 ? C.lime : health >= 50 ? C.amber : C.red,
+                            }} />
                         </div>
                         <span className="text-[10px] font-bold shrink-0"
-                              style={{ color: health >= 80 ? C.limeDeep : health >= 50 ? C.amber : health === 0 ? C.muted : C.red }}>
+                          style={{ color: health >= 80 ? C.limeDeep : health >= 50 ? C.amber : health === 0 ? C.muted : C.red }}>
                           {health}
                         </span>
                       </div>
 
                       {/* Expires */}
                       <span className="text-[11px]"
-                            style={{ color: days === 0 ? C.muted : days <= 7 ? C.red : days <= 30 ? C.amber : C.muted }}>
+                        style={{ color: days === 0 ? C.muted : days <= 7 ? C.red : days <= 30 ? C.amber : C.muted }}>
                         {days === 0 ? 'No expiry' : `${days}d left`}
                       </span>
 
@@ -1855,7 +2028,7 @@ export default function ApiVaultPage() {
           canRevoke={can('reset_key')}
         />
       )}
-      
+
       {/* Notifications panel */}
       {showNotifs && <NotificationsPanel apis={apis} onClose={() => setShowNotifs(false)} />}
 

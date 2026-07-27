@@ -110,6 +110,21 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             </p>
                         </div>
                     )}
+
+                    {/* UK reduced per-order fee info */}
+                    <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>
+                                Reduced per-order fee
+                            </span>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: C.green, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>
+                                AUTO
+                            </span>
+                        </div>
+                        <p style={{ fontSize: 10, color: C.muted, margin: 0, lineHeight: 1.5 }}>
+                            For orders <strong>£10 or under</strong>, eBay charges <strong>£0.10</strong> per order (instead of £0.30/£0.40) in select categories: Coins, Collectables, Home & DIY, Appliances, Furniture. This is applied automatically when your category and price match.
+                        </p>
+                    </div>
                 </div>
             )}
 

@@ -21,6 +21,16 @@ import {
     InsertionCategoryType,
     USCategoryKey,
     US_TIERED_FEES,
+    USStoreTier,
+    US_STORE_MONTHLY_FEE,
+    UKStoreTier,
+    UK_STORE_MONTHLY_FEE,
+    UK_STORE_FREE_LISTINGS,
+    UK_STORE_INSERTION_FEE,
+    US_STORE_FREE_LISTINGS,
+    US_STORE_INSERTION_FEE,
+    COUNTRY_INSERTION_FEE,
+    STANDARD_FREE_LISTINGS,
     calcTieredFVF,
     UKCategoryKey,
     UK_TIERED_FEES,
@@ -43,6 +53,7 @@ import {
 import { CountrySettings } from '@/components/profit/CountrySettings'
 import { CountryLedgerRows } from '@/components/profit/CountryLedgerRows'
 import { getCategoryOptions, getStoreTierOptions, getSellerLevelOptions } from '@/components/profit/CountryCategoryOptions'
+import { detectCategory } from '@/components/profit/CategoryDetector'
 
 // ──? Brand palette (spec-exact) ──────────────────────────────────────────────?
 const C = {
@@ -74,26 +85,45 @@ interface CountryMeta {
     perOrderThresh: number
     flag: string
     label: string
+    defaultPayoutFee: number   // eBay managed payments payout fee % for this country
 }
 
 const COUNTRIES: Record<CountryCode, CountryMeta> = {
     // ── North America ──────────────────────────────────────────────────────────
-    US: { symbol: '$', defaultCatFee: 13.25, crossBorderFee: 1.65, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.40, perOrderThresh: 10, flag: 'us', label: 'United States' },
-    CA: { symbol: 'C$', defaultCatFee: 13.6, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.40, perOrderThresh: 10, flag: 'ca', label: 'Canada' },
-    // ── Europe ────────────────────────────────────────────────────────────────?
-    UK: { symbol: '£', defaultCatFee: 12.8, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.30, perOrderHigh: 0.40, perOrderThresh: 10, flag: 'gb', label: 'United Kingdom' },
-    DE: { symbol: '€', defaultCatFee: 12.0, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'de', label: 'Germany' },
-    FR: { symbol: '€', defaultCatFee: 9.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.35, perOrderThresh: 0, flag: 'fr', label: 'France' },
-    IT: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.35, perOrderThresh: 0, flag: 'it', label: 'Italy' },
-    ES: { symbol: '€', defaultCatFee: 9.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'es', label: 'Spain' },
-    AT: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'at', label: 'Austria' },
-    BE: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'be', label: 'Belgium' },
-    IE: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'ie', label: 'Ireland' },
-    NL: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'nl', label: 'Netherlands' },
-    PL: { symbol: 'zł', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 1.35, perOrderHigh: 1.90, perOrderThresh: 45, flag: 'pl', label: 'Poland' },
-    CH: { symbol: 'CHF', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.55, perOrderHigh: 0.65, perOrderThresh: 10, flag: 'ch', label: 'Switzerland' },
+    US: { symbol: '$', defaultCatFee: 13.25, crossBorderFee: 1.65, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.40, perOrderThresh: 10, flag: 'us', label: 'United States', defaultPayoutFee: 0 },
+    CA: { symbol: 'C$', defaultCatFee: 13.6, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.40, perOrderThresh: 10, flag: 'ca', label: 'Canada', defaultPayoutFee: 0 },
+    // ── Europe ────────────────────────────────────────────────────────────────
+    UK: { symbol: '£', defaultCatFee: 12.8, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.30, perOrderHigh: 0.40, perOrderThresh: 10, flag: 'gb', label: 'United Kingdom', defaultPayoutFee: 0 },
+    DE: { symbol: '€', defaultCatFee: 12.0, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'de', label: 'Germany', defaultPayoutFee: 0 },
+    FR: { symbol: '€', defaultCatFee: 9.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.35, perOrderThresh: 0, flag: 'fr', label: 'France', defaultPayoutFee: 0 },
+    IT: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.35, perOrderThresh: 0, flag: 'it', label: 'Italy', defaultPayoutFee: 0 },
+    ES: { symbol: '€', defaultCatFee: 9.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'es', label: 'Spain', defaultPayoutFee: 0 },
+    AT: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'at', label: 'Austria', defaultPayoutFee: 0 },
+    BE: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'be', label: 'Belgium', defaultPayoutFee: 0 },
+    IE: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'ie', label: 'Ireland', defaultPayoutFee: 0 },
+    NL: { symbol: '€', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.35, perOrderHigh: 0.45, perOrderThresh: 10, flag: 'nl', label: 'Netherlands', defaultPayoutFee: 0 },
+    PL: { symbol: 'zł', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 1.35, perOrderHigh: 1.90, perOrderThresh: 45, flag: 'pl', label: 'Poland', defaultPayoutFee: 0 },
+    CH: { symbol: 'CHF', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.55, perOrderHigh: 0.65, perOrderThresh: 10, flag: 'ch', label: 'Switzerland', defaultPayoutFee: 0 },
     // ── Oceania ────────────────────────────────────────────────────────────────
-    AU: { symbol: 'A$', defaultCatFee: 13.4, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.30, perOrderThresh: 0, flag: 'au', label: 'Australia' },
+    AU: { symbol: 'A$', defaultCatFee: 13.4, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.30, perOrderThresh: 0, flag: 'au', label: 'Australia', defaultPayoutFee: 0 },
+}
+
+// Standard output VAT rates by country (0 = not applicable / not supported)
+const OUTPUT_VAT_RATE: Record<CountryCode, number> = {
+    US: 0,    // US sales tax is buyer-paid, not seller-remitted output VAT
+    CA: 0,    // GST/HST varies by province — too complex for a single rate
+    UK: 20,   // VAT standard rate
+    DE: 19,   // MwSt standard rate
+    FR: 20,   // TVA standard rate
+    IT: 22,   // IVA standard rate
+    ES: 21,   // IVA standard rate
+    AT: 20,   // MwSt standard rate
+    IE: 23,   // VAT standard rate
+    NL: 21,   // BTW standard rate
+    BE: 21,   // BTW/TVA standard rate
+    PL: 23,   // VAT standard rate
+    CH: 8.1,  // MWST standard rate (Switzerland, non-EU)
+    AU: 10,   // GST standard rate (handled separately via auGSTSaving)
 }
 
 
@@ -122,40 +152,71 @@ const CATEGORY_PRESETS: Record<CountryCode, { label: string; fee: number }[]> = 
         { label: 'Books and media ? 12%', fee: 12.0 },
     ],
     FR: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 9%', fee: 9.0 },
+        { label: 'Electronics devices — 5%', fee: 5.0 },
+        { label: 'Electronics accessories — 7.5%', fee: 7.5 },
+        { label: 'Watches & handbags — 12%', fee: 12.0 },
+        { label: 'Jewellery — 12%', fee: 12.0 },
+        { label: 'Fashion — 12%', fee: 12.0 },
+        { label: 'Tires & wheels — 5%', fee: 5.0 },
     ],
     IT: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech devices — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 8.5%', fee: 8.5 },
+        { label: 'Watches — 11%', fee: 11.0 },
+        { label: 'Jewellery — 11%', fee: 11.0 },
+        { label: 'Auto parts — 12.5%', fee: 12.5 },
+        { label: 'Tires & wheels — 6.5%', fee: 6.5 },
     ],
     ES: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 9%', fee: 9.0 },
+        { label: 'Tech devices — 5%', fee: 5.0 },
+        { label: 'Tech accessories — 7.5%', fee: 7.5 },
+        { label: 'Watches & jewellery — 9%', fee: 9.0 },
+        { label: 'Musical instruments — 9%', fee: 9.0 },
+        { label: 'Tires & wheels — 5%', fee: 5.0 },
     ],
     AT: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech devices — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 11%', fee: 11.0 },
+        { label: 'Watches & jewellery — 14%', fee: 14.0 },
+        { label: 'Auto parts — 12%', fee: 12.0 },
+        { label: 'Tires & wheels — 6.5%', fee: 6.5 },
     ],
     BE: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech core — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 6.5%', fee: 6.5 },
+        { label: 'Jewellery & watches — 11%', fee: 11.0 },
+        { label: 'Musical instruments — 11%', fee: 11.0 },
     ],
     IE: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech core — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 6.5%', fee: 6.5 },
+        { label: 'Jewellery & watches — 11%', fee: 11.0 },
+        { label: 'Musical instruments — 11%', fee: 11.0 },
     ],
     NL: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech core — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 6.5%', fee: 6.5 },
+        { label: 'Jewellery & watches — 11%', fee: 11.0 },
+        { label: 'Musical instruments — 11%', fee: 11.0 },
     ],
     PL: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech core — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 6.5%', fee: 6.5 },
+        { label: 'Jewellery & watches — 11%', fee: 11.0 },
     ],
     CH: [
-        { label: 'Other categories (default) ? 12%', fee: 12.0 },
-        { label: 'Electronics ? 6.5%', fee: 6.5 },
+        { label: 'Other categories (default) — 11%', fee: 11.0 },
+        { label: 'Tech core — 6.5%', fee: 6.5 },
+        { label: 'Tech accessories — 6.5%', fee: 6.5 },
+        { label: 'Jewellery & watches — 11%', fee: 11.0 },
     ],
 }
 
@@ -167,6 +228,7 @@ interface CalcState {
     buyerPaidShipping: number
     categoryFeePercent: number
     usCategoryKey: USCategoryKey
+    usStoreTier: USStoreTier
     hasStore: boolean
     storeDiscount: number
     sellerLevelAdj: number
@@ -178,7 +240,9 @@ interface CalcState {
     // UK-specific
     isVATRegistered: boolean
     ukCategoryKey: string
+    ukStoreTier: UKStoreTier
     ukIntlDestination: 'none' | 'eurozone' | 'us_canada' | 'other'
+    ukReducedPerOrder: boolean
     // CA-specific
     caCategoryKey: string
     caHasStore: boolean
@@ -238,6 +302,9 @@ interface CalcState {
     buyerTaxPercent: number
     isInternational: boolean
     includeRegFee: boolean
+    // Output VAT (sales VAT) — off by default, opt-in
+    outputVATEnabled: boolean
+    outputVATPercent: number
     // advanced
     isAdvancedEnabled: boolean
     sourcingTaxPercent: number
@@ -248,12 +315,13 @@ interface CalcState {
 }
 
 const DEFAULT_CALC_STATE: CalcState = {
-    sellingPrice: 20,
-    buyPrice: 5,
+    sellingPrice: 0,
+    buyPrice: 0,
     shippingCost: 0,
     buyerPaidShipping: 0,
-    categoryFeePercent: 13.6,
+    categoryFeePercent: 13.25,
     usCategoryKey: 'default' as USCategoryKey,
+    usStoreTier: 'none' as USStoreTier,
     hasStore: false,
     storeDiscount: 0,
     sellerLevelAdj: 0,
@@ -265,7 +333,9 @@ const DEFAULT_CALC_STATE: CalcState = {
     // UK
     isVATRegistered: true,
     ukCategoryKey: 'default',
+    ukStoreTier: 'none' as UKStoreTier,
     ukIntlDestination: 'none' as const,
+    ukReducedPerOrder: false,
     // CA
     caCategoryKey: 'default',
     caHasStore: false,
@@ -325,11 +395,13 @@ const DEFAULT_CALC_STATE: CalcState = {
     buyerTaxPercent: 0,
     isInternational: false,
     includeRegFee: false,
+    outputVATEnabled: false,
+    outputVATPercent: 0,
     isAdvancedEnabled: false,
     sourcingTaxPercent: DEFAULT_SETTINGS.sourcingTaxPercent,
     fxFeePercent: DEFAULT_SETTINGS.fxFeePercent,
     defectRatePercent: DEFAULT_SETTINGS.defectRatePercent,
-    payoutFeePercent: DEFAULT_SETTINGS.payoutFeePercent,
+    payoutFeePercent: 0,  // eBay managed payments — included in FVF
     cashbackPercent: DEFAULT_SETTINGS.cashbackPercent,
 }
 
@@ -365,12 +437,15 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
         isInternationalSale: s.isInternational,
         includeRegulatoryFee: s.includeRegFee,
         regulatoryFeePercent: meta.regulatoryFee,
+        outputVATEnabled: s.outputVATEnabled,
+        outputVATPercent: s.outputVATPercent,
         storeDiscountPercent: s.storeDiscount,
         sellerLevelAdjustPercent: 0, // handled via isTopRatedPlus / isBelowStandard below
         // US tiered fee fields
         isUSMarket: country === 'US',
         usCategoryKey: s.usCategoryKey,
-        hasStore: s.hasStore,
+        usStoreTier: s.usStoreTier,
+        hasStore: s.usStoreTier !== 'none' && s.usStoreTier !== 'starter',
         // For DE: isTopRatedPlus maps to Premium Service toggle OR Platin shop
         // Platin gets 10% off via deIsPlatinShop flag directly in engine
         isTopRatedPlus: country === 'DE' ? s.deIsPremiumService : s.isTopRatedPlus,
@@ -381,9 +456,10 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
         // UK fields
         isUKMarket: country === 'UK',
         ukCategoryKey: s.ukCategoryKey,
+        ukStoreTier: s.ukStoreTier,
         isVATRegistered: s.isVATRegistered,
         ukIntlDestination: s.ukIntlDestination,
-        ukReducedPerOrder: false,
+        ukReducedPerOrder: s.ukReducedPerOrder,
         // CA fields
         isCAMarket: country === 'CA',
         caCategoryKey: s.caCategoryKey,
@@ -463,10 +539,10 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
 
 // ──? Format large numbers for display ────────────────────────────────────────
 function formatNum(n: number, prefix = '', suffix = '', decimals = 2): string {
+    const sign = n < 0 ? '-' : ''
     const abs = Math.abs(n)
-    if (abs >= 1000000) return `${prefix}${(abs / 1000000).toFixed(1)}M${suffix}`
-    if (abs >= 10000) return `${prefix}${(abs / 1000).toFixed(1)}K${suffix}`
-    return `${prefix}${abs.toFixed(decimals)}${suffix}`
+    if (abs >= 1000000) return `${sign}${prefix}${(abs / 1000000).toFixed(1)}M${suffix}`
+    return `${sign}${prefix}${abs.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`
 }
 
 function formatPct(n: number): string {
@@ -538,6 +614,10 @@ function InputField({ label, value, onChange, prefix, suffix, tooltip }: {
     prefix?: string; suffix?: string; tooltip?: string
 }) {
     const [focused, setFocused] = useState(false)
+    // Format number with commas when not focused
+    const displayValue = !focused && value !== '' && !isNaN(parseFloat(value))
+        ? parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+        : value
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -547,7 +627,8 @@ function InputField({ label, value, onChange, prefix, suffix, tooltip }: {
             <div style={{ display: 'flex', alignItems: 'center', border: `1.5px solid ${focused ? C.lime : C.border}`, borderRadius: 8, background: C.surface, padding: '0 8px', transition: 'border-color 0.15s' }}>
                 {prefix && <span style={{ fontSize: 12, color: C.muted, marginRight: 2, flexShrink: 0 }}>{prefix}</span>}
                 <input
-                    type="text" inputMode="decimal" value={value}
+                    type="text" inputMode="decimal"
+                    value={displayValue}
                     onChange={e => onChange(e.target.value.replace(/[^0-9.]/g, ''))}
                     onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
                     style={{ flex: 1, height: 34, border: 'none', outline: 'none', fontSize: 13, color: C.text, background: 'transparent', minWidth: 0 }}
@@ -684,17 +765,17 @@ export default function ProfitCalculatorPage() {
     const [simResult, setSimResult] = useState<ProfitResult | null>(null)
 
     // Controlled string states for inputs
-    const [sellPriceStr, setSellPriceStr] = useState('20')
-    const [buyPriceStr, setBuyPriceStr] = useState('5')
+    const [sellPriceStr, setSellPriceStr] = useState('')
+    const [buyPriceStr, setBuyPriceStr] = useState('')
     const [shipCostStr, setShipCostStr] = useState('0.00')
     const [buyerShipStr, setBuyerShipStr] = useState('0.00')
     const [adRateStr, setAdRateStr] = useState('0.00')
     const [buyerTaxStr, setBuyerTaxStr] = useState('0.00')
-    const [catFeeStr, setCatFeeStr] = useState('13.6')
+    const [catFeeStr, setCatFeeStr] = useState('13.25')
     const [sourcingTaxStr, setSourcingTaxStr] = useState(String(DEFAULT_SETTINGS.sourcingTaxPercent))
     const [fxFeeStr, setFxFeeStr] = useState(String(DEFAULT_SETTINGS.fxFeePercent))
     const [defectRateStr, setDefectRateStr] = useState(String(DEFAULT_SETTINGS.defectRatePercent))
-    const [payoutFeeStr, setPayoutFeeStr] = useState(String(DEFAULT_SETTINGS.payoutFeePercent))
+    const [payoutFeeStr, setPayoutFeeStr] = useState('0')  // eBay managed payments — no separate payout fee
     const [cashbackStr, setCashbackStr] = useState(String(DEFAULT_SETTINGS.cashbackPercent))
 
     // Insertion fee state
@@ -724,6 +805,7 @@ export default function ProfitCalculatorPage() {
         last_viewed_at: string
     }
     const [productName, setProductName] = useState('')
+    const [fetchedItem, setFetchedItem] = useState<{ title: string; price: number; shipping: number; image: string; sold: number; currency: string; condition: string; seller: string; sellerFeedback: string; returns: boolean; returnPeriod: number; marketplace: CountryCode; selectedCountry: CountryCode; sellerCountry: string; category: string } | null>(null)
     const [savedItems, setSavedItems] = useState<SavedItem[]>([])
     const [historyOpen, setHistoryOpen] = useState(false)
     const [historySearch, setHistorySearch] = useState('')
@@ -771,11 +853,16 @@ export default function ProfitCalculatorPage() {
         const fee = COUNTRIES[country].defaultCatFee
         const meta = COUNTRIES[country]
         setCatFeeStr(String(fee))
+        setPayoutFeeStr(String(meta.defaultPayoutFee))
         setState(prev => ({
             ...prev,
             categoryFeePercent: fee,
+            usCategoryKey: 'default' as USCategoryKey,
+            usStoreTier: 'none' as USStoreTier,
+            hasStore: false,
             ukCategoryKey: 'default',
             ukIntlDestination: 'none' as const,
+            ukReducedPerOrder: false,
             caCategoryKey: 'default',
             caHasStore: false,
             caIntlDestination: 'none' as const,
@@ -821,6 +908,11 @@ export default function ProfitCalculatorPage() {
             chIntlDestination: 'none' as const,
             // UK regulatory fee is confirmed ? auto-enable when switching to UK
             includeRegFee: meta.regFeeConfirmed,
+            // Reset output VAT to country standard rate (disabled by default)
+            outputVATEnabled: false,
+            outputVATPercent: OUTPUT_VAT_RATE[country] ?? 0,
+            // Reset payout fee to country-specific eBay managed payments default
+            payoutFeePercent: meta.defaultPayoutFee,
             // Reset seller level when switching countries
             isTopRatedPlus: false,
             isBelowStandard: false,
@@ -853,11 +945,19 @@ export default function ProfitCalculatorPage() {
         return C.muted
     }
 
-    // ── Insertion fee ? via engine ──────────────────────────────────────────?
-    const FREE_ALLOWANCE: Record<string, number> = {
-        '0': 250, '0.5': 1000, '1': 10000, '1.5': Infinity, '2': Infinity,
-    }
-    const freeAllowance = FREE_ALLOWANCE[String(state.storeDiscount)] ?? 250
+    // ── Insertion fee — via engine ──────────────────────────────────────────
+    // US: use usStoreTier for correct free allowance + per-listing fee
+    // Non-US: 250 free listings (standard allowance), country-specific per-listing fee
+    const freeAllowance = country === 'US'
+        ? (US_STORE_FREE_LISTINGS[state.usStoreTier] ?? STANDARD_FREE_LISTINGS)
+        : country === 'UK'
+            ? (UK_STORE_FREE_LISTINGS[state.ukStoreTier] ?? 300)
+            : STANDARD_FREE_LISTINGS
+    const insertionFeePerListing = country === 'US'
+        ? (US_STORE_INSERTION_FEE[state.usStoreTier] ?? 0.35)
+        : country === 'UK'
+            ? (UK_STORE_INSERTION_FEE[state.ukStoreTier] ?? 0.30)
+            : (COUNTRY_INSERTION_FEE[country] ?? 0.35)
     const listingsUsed = parseInt(listingsUsedStr) || 0
     const unitsPerListingN = parseInt(unitsPerListing) || 1
 
@@ -865,7 +965,9 @@ export default function ProfitCalculatorPage() {
         listingsUsedThisMonth: listingsUsed,
         freeAllowance,
         unitsPerListing: unitsPerListingN,
-        categoryType: categoryType as InsertionCategoryType,
+        // Motors/RE category types only apply to US; non-US always uses regular
+        categoryType: country === 'US' ? categoryType as InsertionCategoryType : 'regular',
+        insertionFeePerListing,
     })
     const { feeApplies: insertionFeeApplies, feePerUnit: insertionFeePerUnit, isUnlimited } = insertionResult
 
@@ -1124,6 +1226,7 @@ export default function ProfitCalculatorPage() {
             ...DEFAULT_CALC_STATE,
             categoryFeePercent: defaultFee,
             usCategoryKey: 'default',
+            usStoreTier: 'none' as USStoreTier,
             hasStore: false,
             isTopRatedPlus: false,
             isBelowStandard: false,
@@ -1183,7 +1286,7 @@ export default function ProfitCalculatorPage() {
         setSourcingTaxStr(String(DEFAULT_SETTINGS.sourcingTaxPercent))
         setFxFeeStr(String(DEFAULT_SETTINGS.fxFeePercent))
         setDefectRateStr(String(DEFAULT_SETTINGS.defectRatePercent))
-        setPayoutFeeStr(String(DEFAULT_SETTINGS.payoutFeePercent))
+        setPayoutFeeStr(String(COUNTRIES[country]?.defaultPayoutFee ?? DEFAULT_SETTINGS.payoutFeePercent))
         setCashbackStr(String(DEFAULT_SETTINGS.cashbackPercent))
         setListingsUsedStr('0')
         setUnitsPerListing('1')
@@ -1298,8 +1401,11 @@ export default function ProfitCalculatorPage() {
         setCountry(item.country as CountryCode)
         setProductName(item.product_name)
 
-        // Restore full state
-        if (s.state) setState(s.state)
+        // Restore full state — but always re-derive includeRegFee from the
+        // loaded country's regFeeConfirmed so UK reg fee never bleeds to other countries
+        const loadedCountry = (item.country as CountryCode) ?? 'US'
+        const loadedMeta = COUNTRIES[loadedCountry]
+        if (s.state) setState({ ...s.state, includeRegFee: loadedMeta?.regFeeConfirmed ?? false })
         if (s.catFeeStr) setCatFeeStr(s.catFeeStr)
         if (s.listingsUsedStr !== undefined) setListingsUsedStr(s.listingsUsedStr)
         if (s.unitsPerListing !== undefined) setUnitsPerListing(s.unitsPerListing)
@@ -1455,12 +1561,122 @@ export default function ProfitCalculatorPage() {
 
                     {/* URL fetch bar ? real eBay API */}
                     <div style={{ flex: 1, minWidth: 200 }}>
-                        <EbaySearchBar onFetch={(price, shipping, categoryId, title, imageUrl, soldCount) => {
-                            setSellPriceStr(String(price))
-                            setShipCostStr(String(shipping))
-                            patch({ sellingPrice: price, shippingCost: shipping })
-                            if (title) setProductName(title)
-                        }} />
+                        <EbaySearchBar
+                            currentCountry={country}
+                            onFetch={(price, shipping, categoryId, title, imageUrl, soldCount, currency, itemUrl, condition, seller, sellerFeedback, returns, returnPeriod, site, sellerCountry) => {
+                                // Detect country — itemUrl is most reliable
+                                function detectCountryFromSite(site: string, itemUrl: string, currency: string, sellerCountry: string): CountryCode {
+                                    // 1. Check itemUrl first — most accurate
+                                    if (itemUrl.includes('ebay.co.uk')) return 'UK'
+                                    if (itemUrl.includes('ebay.com.au')) return 'AU'
+                                    if (itemUrl.includes('ebay.ca')) return 'CA'
+                                    if (itemUrl.includes('ebay.de')) return 'DE'
+                                    if (itemUrl.includes('ebay.fr')) return 'FR'
+                                    if (itemUrl.includes('ebay.it')) return 'IT'
+                                    if (itemUrl.includes('ebay.es')) return 'ES'
+                                    if (itemUrl.includes('ebay.at')) return 'AT'
+                                    if (itemUrl.includes('ebay.be')) return 'BE'
+                                    if (itemUrl.includes('ebay.ie')) return 'IE'
+                                    if (itemUrl.includes('ebay.nl')) return 'NL'
+                                    if (itemUrl.includes('ebay.pl')) return 'PL'
+                                    if (itemUrl.includes('ebay.ch')) return 'CH'
+                                    // 2. Check site field (skip EBAY_US as it's often wrong)
+                                    const siteMap: Record<string, CountryCode> = {
+                                        'EBAY_GB': 'UK', 'EBAY_DE': 'DE', 'EBAY_FR': 'FR',
+                                        'EBAY_IT': 'IT', 'EBAY_ES': 'ES', 'EBAY_AU': 'AU',
+                                        'EBAY_CA': 'CA', 'EBAY_AT': 'AT', 'EBAY_BE': 'BE',
+                                        'EBAY_NL': 'NL', 'EBAY_PL': 'PL', 'EBAY_CH': 'CH',
+                                        'EBAY_IE': 'IE',
+                                    }
+                                    if (site && siteMap[site]) return siteMap[site]
+                                    // 3. Currency fallback (only non-ambiguous ones)
+                                    if (currency === 'GBP') return 'UK'
+                                    if (currency === 'AUD') return 'AU'
+                                    if (currency === 'CAD') return 'CA'
+                                    if (currency === 'PLN') return 'PL'
+                                    if (currency === 'CHF') return 'CH'
+                                    // 4. Default to US
+                                    return 'US'
+                                }
+
+                                // All category detection via CategoryDetector.ts
+                                const detectedCountry = detectCountryFromSite(site, itemUrl, currency, sellerCountry)
+                                const detectedCategory = detectCategory(categoryId, 'US') as USCategoryKey
+                                const ukCategory = detectCategory(categoryId, 'UK')
+                                const caCategory = detectCategory(categoryId, 'CA')
+                                const deCategory = detectCategory(categoryId, 'DE')
+                                const frCategory = detectCategory(categoryId, 'FR')
+                                const itCategory = detectCategory(categoryId, 'IT')
+                                const esCategory = detectCategory(categoryId, 'ES')
+                                const atCategory = detectCategory(categoryId, 'AT')
+                                const ieCategory = detectCategory(categoryId, 'IE')
+                                const beCategory = detectCategory(categoryId, 'BE')
+                                const nlCategory2 = detectCategory(categoryId, 'NL')
+                                const plCategory2 = detectCategory(categoryId, 'PL')
+                                const chCategory2 = detectCategory(categoryId, 'CH')
+                                const auRaw = parseInt(detectCategory(categoryId, 'AU'))
+                                const auTier = ([1, 2, 3, 4, 5].includes(auRaw) ? auRaw : 2) as AUCategoryTier
+
+                                // Check if original pasted URL has a clear marketplace domain
+                                const pastedUrl = itemUrl.split('|')[1] ?? ''
+                                const urlCountryMap: Record<string, CountryCode> = {
+                                    'ebay.co.uk': 'UK', 'ebay.com.au': 'AU', 'ebay.ca': 'CA',
+                                    'ebay.de': 'DE', 'ebay.fr': 'FR', 'ebay.it': 'IT',
+                                    'ebay.es': 'ES', 'ebay.at': 'AT', 'ebay.be': 'BE',
+                                    'ebay.ie': 'IE', 'ebay.nl': 'NL', 'ebay.pl': 'PL',
+                                    'ebay.ch': 'CH', 'ebay.com': 'US',
+                                }
+                                const pastedCountry = Object.entries(urlCountryMap).find(([domain]) => pastedUrl.includes(domain))?.[1]
+
+                                // Only auto-switch for reliable signals
+                                const reliableCurrencies = ['GBP', 'AUD', 'CAD', 'CHF', 'PLN']
+                                const hasUrlSignal = !!pastedCountry
+                                const hasReliableCurrency = reliableCurrencies.includes(currency)
+                                const isUSItem = (site === 'EBAY_US' || itemUrl.includes('ebay.com')) && currency === 'USD'
+                                const shouldAutoSwitch = hasUrlSignal || hasReliableCurrency || isUSItem
+
+                                // If pasted URL has clear domain, use that country directly
+                                const finalCountry = pastedCountry ?? detectedCountry
+
+                                // Reset all fields first
+                                setFetchedItem(null)
+                                setState({ ...DEFAULT_CALC_STATE })
+                                setBuyPriceStr('')
+                                setShipCostStr(String(shipping))
+                                setSellPriceStr(String(price))
+                                setAdRateStr('0')
+                                setBuyerTaxStr('0')
+                                // Auto-select country only when reliable
+                                if (shouldAutoSwitch) {
+                                    setCountry(finalCountry)
+                                    // includeRegFee must match the new country — not DEFAULT_CALC_STATE false
+                                    patch({ includeRegFee: COUNTRIES[finalCountry]?.regFeeConfirmed ?? false })
+                                }
+                                // Fill with fetched data
+                                const targetCountry = shouldAutoSwitch ? finalCountry : country
+                                patch({
+                                    sellingPrice: price,
+                                    shippingCost: shipping,
+                                    buyPrice: 0,
+                                    usCategoryKey: detectedCategory,
+                                    ukCategoryKey: ukCategory,
+                                    caCategoryKey: caCategory,
+                                    deCategoryKey: deCategory,
+                                    frCategoryKey: frCategory,
+                                    itCategoryKey: itCategory,
+                                    esCategoryKey: esCategory,
+                                    atCategoryKey: atCategory,
+                                    beCategoryKey: beCategory,
+                                    ieCategoryKey: ieCategory,
+                                    nlCategoryKey: nlCategory2,
+                                    plCategoryKey: plCategory2,
+                                    chCategoryKey: chCategory2,
+                                    auCategoryTier: auTier,
+                                    categoryFeePercent: COUNTRIES[targetCountry]?.defaultCatFee ?? 13.25,
+                                })
+                                if (title) setProductName(title)
+                                setFetchedItem({ title, price, shipping, image: imageUrl, sold: parseInt(soldCount) || 0, currency, condition, seller, sellerFeedback, returns, returnPeriod, marketplace: finalCountry, selectedCountry: (country || 'US') as CountryCode, sellerCountry, category: categoryId.split('|').pop()?.trim() ?? '' })
+                            }} />
                     </div>
 
                     {/* Product name + Save + Save as new */}
@@ -1519,9 +1735,105 @@ export default function ProfitCalculatorPage() {
                     </button>
                 </div>
 
-                {/* ── Country flags row ? right aligned ── */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {/* ── Country flags row — item preview left, flags right ── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+
+                    {/* Left — fetched item preview */}
+                    {fetchedItem ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, marginRight: 16 }}>
+                            {fetchedItem.image && (
+                                <img src={fetchedItem.image} alt={fetchedItem.title}
+                                    style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 6, border: `1px solid ${C.border}`, flexShrink: 0 }} />
+                            )}
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                                {/* Line 1 — full title, single line with ellipsis */}
+                                <p style={{
+                                    fontSize: 12, fontWeight: 700, color: C.text,
+                                    margin: '0 0 3px',
+                                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                }}>
+                                    {fetchedItem.title}
+                                </p>
+                                {/* Line 2 — all details */}
+                                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'nowrap', overflow: 'hidden' }}>
+                                    {/* Listed marketplace badge */}
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: C.dark, background: C.lime, padding: '1px 6px', borderRadius: 4, flexShrink: 0 }}>
+                                        eBay {fetchedItem.marketplace}
+                                    </span>
+                                    {/* Price with correct currency symbol */}
+                                    <span style={{ fontSize: 12, fontWeight: 800, color: C.green, flexShrink: 0 }}>
+                                        {fetchedItem.currency === 'GBP' ? '£' : fetchedItem.currency === 'EUR' ? '€' : fetchedItem.currency === 'CHF' ? 'CHF ' : fetchedItem.currency === 'AUD' ? 'A$' : fetchedItem.currency === 'CAD' ? 'C$' : fetchedItem.currency === 'PLN' ? 'zł' : '$'}{fetchedItem.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </span>
+                                    {/* Shipping */}
+                                    {fetchedItem.shipping > 0 ? (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>
+                                            · +{fetchedItem.currency === 'GBP' ? '£' : fetchedItem.currency === 'EUR' ? '€' : fetchedItem.currency === 'CHF' ? 'CHF ' : fetchedItem.currency === 'AUD' ? 'A$' : fetchedItem.currency === 'CAD' ? 'C$' : fetchedItem.currency === 'PLN' ? 'zł' : '$'}{fetchedItem.shipping.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ship
+                                        </span>
+                                    ) : (
+                                        <span style={{ fontSize: 11, color: C.green, flexShrink: 0 }}>· Free shipping</span>
+                                    )}
+                                    {/* Condition */}
+                                    {fetchedItem.condition && (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>· {fetchedItem.condition}</span>
+                                    )}
+                                    {/* Sold count */}
+                                    {fetchedItem.sold > 0 && (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>· {fetchedItem.sold.toLocaleString()} sold</span>
+                                    )}
+                                    {/* Seller + feedback */}
+                                    {fetchedItem.seller && (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>
+                                            · {fetchedItem.seller}{fetchedItem.sellerFeedback ? ` (${fetchedItem.sellerFeedback}%)` : ''}
+                                        </span>
+                                    )}
+                                    {/* Returns */}
+                                    {fetchedItem.returns && Number(fetchedItem.returnPeriod) > 0 ? (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>· {fetchedItem.returnPeriod}d returns</span>
+                                    ) : !fetchedItem.returns ? (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>· No returns</span>
+                                    ) : null}
+                                    {/* Seller country */}
+                                    {fetchedItem.sellerCountry && (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>· Seller: {({
+                                            'US': 'United States', 'GB': 'United Kingdom', 'DE': 'Germany',
+                                            'FR': 'France', 'IT': 'Italy', 'ES': 'Spain', 'CA': 'Canada',
+                                            'AU': 'Australia', 'AT': 'Austria', 'BE': 'Belgium', 'NL': 'Netherlands',
+                                            'PL': 'Poland', 'CH': 'Switzerland', 'IE': 'Ireland', 'CN': 'China',
+                                            'JP': 'Japan', 'KR': 'South Korea', 'IN': 'India', 'IL': 'Israel',
+                                            'SG': 'Singapore', 'HK': 'Hong Kong', 'TW': 'Taiwan', 'TH': 'Thailand',
+                                            'MY': 'Malaysia', 'PH': 'Philippines', 'VN': 'Vietnam', 'PK': 'Pakistan',
+                                            'BR': 'Brazil', 'MX': 'Mexico', 'RU': 'Russia', 'UA': 'Ukraine',
+                                            'TR': 'Turkey', 'SA': 'Saudi Arabia', 'AE': 'UAE', 'ZA': 'South Africa',
+                                            'NG': 'Nigeria', 'EG': 'Egypt', 'AR': 'Argentina', 'CL': 'Chile',
+                                            'NZ': 'New Zealand', 'SE': 'Sweden', 'NO': 'Norway', 'DK': 'Denmark',
+                                            'FI': 'Finland', 'PT': 'Portugal', 'GR': 'Greece', 'CZ': 'Czech Republic',
+                                            'HU': 'Hungary', 'RO': 'Romania', 'BG': 'Bulgaria', 'HR': 'Croatia',
+                                        } as Record<string, string>)[fetchedItem.sellerCountry] ?? fetchedItem.sellerCountry}</span>
+                                    )}
+                                    {/* Category */}
+                                    {fetchedItem.category && (
+                                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>· {fetchedItem.category}</span>
+                                    )}
+                                </div>
+                                {/* Mismatch note — when selected marketplace differs from item's primary marketplace */}
+                                {fetchedItem.marketplace !== fetchedItem.selectedCountry && (
+                                    <p style={{ fontSize: 10, color: C.amber, fontWeight: 600, margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.amber, display: 'inline-block', flexShrink: 0 }} />
+                                        Primary listing is eBay {COUNTRIES[fetchedItem.marketplace]?.label ?? fetchedItem.marketplace} — auto-switched from eBay {COUNTRIES[fetchedItem.selectedCountry]?.label ?? fetchedItem.selectedCountry}. Select a different flag if needed.
+                                    </p>
+                                )}
+                            </div>
+                            <button onClick={() => setFetchedItem(null)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, flexShrink: 0, fontSize: 18, lineHeight: 1, padding: '0 4px' }}>
+                                ×
+                            </button>
+                        </div>
+                    ) : (
+                        <div style={{ flex: 1 }} />
+                    )}
+
+                    {/* Right — country flags */}
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                         {(Object.keys(COUNTRIES) as CountryCode[]).map(c => (
                             <div key={c} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                                 {country === c && (
@@ -1591,20 +1903,21 @@ export default function ProfitCalculatorPage() {
                                                                                         : catFeeStr
                             }
                             selectedStoreTier={
-                                country === 'US' ? (state.hasStore ? 'has_store' : 'no_store')
-                                    : country === 'CA' ? (state.caHasStore ? 'has_store' : 'no_store')
-                                        : country === 'AU' ? state.auProPlan
-                                            : country === 'DE' ? (state.deIsPlatinShop ? 'platin' : state.deHasShop ? 'has_shop' : 'no_shop')
-                                                : country === 'FR' ? '0'
-                                                    : country === 'IT' ? '0'
-                                                        : country === 'ES' ? '0'
-                                                            : country === 'AT' ? (state.atHasShop ? 'has_shop' : 'no_shop')
-                                                                : country === 'IE' ? '0'
-                                                                    : country === 'NL' ? '0'
-                                                                        : country === 'PL' ? '0'
-                                                                            : country === 'BE' ? '0'
-                                                                                : country === 'CH' ? '0'
-                                                                                    : String(state.storeDiscount)
+                                country === 'US' ? state.usStoreTier
+                                    : country === 'UK' ? state.ukStoreTier
+                                        : country === 'CA' ? (state.caHasStore ? 'has_store' : 'no_store')
+                                            : country === 'AU' ? state.auProPlan
+                                                : country === 'DE' ? (state.deIsPlatinShop ? 'platin' : state.deHasShop ? 'has_shop' : 'no_shop')
+                                                    : country === 'FR' ? '0'
+                                                        : country === 'IT' ? '0'
+                                                            : country === 'ES' ? '0'
+                                                                : country === 'AT' ? (state.atHasShop ? 'has_shop' : 'no_shop')
+                                                                    : country === 'IE' ? '0'
+                                                                        : country === 'NL' ? '0'
+                                                                            : country === 'PL' ? '0'
+                                                                                : country === 'BE' ? '0'
+                                                                                    : country === 'CH' ? '0'
+                                                                                        : String(state.storeDiscount)
                             }
                             selectedSellerLevel={
                                 (country === 'US' || country === 'UK' || country === 'CA' || country === 'AU' || country === 'DE' || country === 'FR' || country === 'IT' || country === 'ES' || country === 'AT' || country === 'IE' || country === 'NL' || country === 'PL' || country === 'BE' || country === 'CH')
@@ -1621,10 +1934,14 @@ export default function ProfitCalculatorPage() {
                             regFeeConfirmed={meta.regFeeConfirmed}
                             regulatoryFeeRate={meta.regulatoryFee}
                             isAdvancedEnabled={state.isAdvancedEnabled}
+                            outputVATEnabled={state.outputVATEnabled}
+                            outputVATPercent={state.outputVATPercent}
+                            hasOutputVATRate={OUTPUT_VAT_RATE[country] > 0}
                             sourcingTax={sourcingTaxStr}
                             fxFee={fxFeeStr}
                             defectRate={defectRateStr}
                             payoutFee={payoutFeeStr}
+                            defaultPayoutFee={meta.defaultPayoutFee}
                             cashback={cashbackStr}
                             onItemCostChange={v => { setBuyPriceStr(v); patch({ buyPrice: parseFloat(v) || 0 }) }}
                             onShippingCostChange={v => { setShipCostStr(v); patch({ shippingCost: parseFloat(v) || 0 }) }}
@@ -1667,7 +1984,14 @@ export default function ProfitCalculatorPage() {
                             }}
                             onStoreTierChange={v => {
                                 if (country === 'US') {
-                                    patch({ hasStore: v === 'has_store', storeDiscount: 0 })
+                                    const tier = v as USStoreTier
+                                    patch({
+                                        usStoreTier: tier,
+                                        hasStore: tier !== 'none' && tier !== 'starter',
+                                        storeDiscount: 0,
+                                    })
+                                } else if (country === 'UK') {
+                                    patch({ ukStoreTier: v as UKStoreTier, storeDiscount: 0 })
                                 } else if (country === 'CA') {
                                     patch({ caHasStore: v === 'has_store', storeDiscount: 0 })
                                 } else if (country === 'AU') {
@@ -1700,6 +2024,9 @@ export default function ProfitCalculatorPage() {
                                 // UK regulatory fee is mandatory ? cannot be disabled
                                 if (country === 'UK') return
                                 patch({ includeRegFee: v })
+                            }}
+                            onOutputVATChange={(enabled, percent) => {
+                                patch({ outputVATEnabled: enabled, outputVATPercent: percent })
                             }}
                             onAdvancedChange={v => patch({ isAdvancedEnabled: v })}
                             onSourcingTaxChange={v => { setSourcingTaxStr(v); patch({ sourcingTaxPercent: parseFloat(v) || 0 }) }}
@@ -1735,7 +2062,7 @@ export default function ProfitCalculatorPage() {
                                 <InputField
                                     label="Listings used this month"
                                     value={listingsUsedStr}
-                                    tooltip={`Your free allowance is ${isUnlimited ? 'unlimited' : freeAllowance.toLocaleString()} listings/month based on your store tier`}
+                                    tooltip={`Your free allowance is ${freeAllowance.toLocaleString()} listings/month. Extra listings cost ${sym}${insertionFeePerListing.toFixed(2)} each.`}
                                     onChange={v => setListingsUsedStr(v.replace(/[^0-9]/g, ''))}
                                 />
                                 <InputField
@@ -1745,24 +2072,27 @@ export default function ProfitCalculatorPage() {
                                     onChange={v => setUnitsPerListing(v.replace(/[^0-9]/g, ''))}
                                 />
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                    <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Listing category type</label>
-                                    <Tooltip text="Motors and Real Estate always charge an insertion fee regardless of your free allowance"><Info size={10} color={C.muted} /></Tooltip>
+                            {/* Motors/RE category type — US only (non-US always regular) */}
+                            {country === 'US' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Listing category type</label>
+                                        <Tooltip text="Motors and Real Estate always charge an insertion fee regardless of your free allowance"><Info size={10} color={C.muted} /></Tooltip>
+                                    </div>
+                                    <ProDropdown
+                                        prefix=""
+                                        currentValue={categoryType}
+                                        options={[
+                                            { val: 'regular', label: 'Regular listing', enabled: true },
+                                            { val: 'motors', label: 'eBay Motors (vehicles)', enabled: true },
+                                            { val: 'realestate', label: 'Real Estate', enabled: true },
+                                        ]}
+                                        onChanged={v => setCategoryType(v)}
+                                        width="full"
+                                        maxItems={3}
+                                    />
                                 </div>
-                                <ProDropdown
-                                    prefix=""
-                                    currentValue={categoryType}
-                                    options={[
-                                        { val: 'regular', label: 'Regular listing', enabled: true },
-                                        { val: 'motors', label: 'eBay Motors (vehicles)', enabled: true },
-                                        { val: 'realestate', label: 'Real Estate', enabled: true },
-                                    ]}
-                                    onChanged={v => setCategoryType(v)}
-                                    width="full"
-                                    maxItems={3}
-                                />
-                            </div>
+                            )}
                             {!isUnlimited && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
@@ -1784,10 +2114,10 @@ export default function ProfitCalculatorPage() {
                                     </div>
                                     {insertionFeeApplies && (
                                         <p style={{ fontSize: 10, color: C.red, margin: 0, fontWeight: 600 }}>
-                                            {categoryType === 'regular'
-                                                ? `Exceeded free allowance by ${(listingsUsed - freeAllowance).toLocaleString()} listings ? $0.35 fee applies`
-                                                : `${categoryType === 'motors' ? 'Motors' : 'Real Estate'} listings always charge an insertion fee`
-                                            } ? split across {unitsPerListingN} unit{unitsPerListingN > 1 ? 's' : ''} = {sym}{insertionFeePerUnit.toFixed(4)}/unit
+                                            {country === 'US' && categoryType !== 'regular'
+                                                ? `${categoryType === 'motors' ? 'Motors' : 'Real Estate'} listings always charge an insertion fee`
+                                                : `Exceeded free allowance by ${(listingsUsed - freeAllowance).toLocaleString()} listings — ${sym}${insertionFeePerListing.toFixed(2)}/listing fee applies`
+                                            } — split across {unitsPerListingN} unit{unitsPerListingN > 1 ? 's' : ''} = {sym}{insertionFeePerUnit.toFixed(4)}/unit
                                         </p>
                                     )}
                                 </div>
@@ -1816,7 +2146,7 @@ export default function ProfitCalculatorPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
                                     <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 16px', position: 'relative', textAlign: 'center' }}>
                                         <div style={{ position: 'absolute', top: 8, right: 8 }}>
-                                            <Tooltip text={`Exact: ${adjustedNetProfit >= 0 ? '+' : '-'}${sym}${Math.abs(adjustedNetProfit).toFixed(4)}`}><Info size={10} color={C.muted} /></Tooltip>
+                                            <Tooltip text={`Exact: ${adjustedNetProfit >= 0 ? '+' : '-'}${sym}${Math.abs(adjustedNetProfit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}><Info size={10} color={C.muted} /></Tooltip>
                                         </div>
                                         <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.5px', margin: '0 0 6px' }}>NET PROFIT</p>
                                         <p style={{ fontSize: 22, fontWeight: 800, color: profitColor(adjustedNetProfit), margin: 0, lineHeight: 1 }}>
@@ -1824,24 +2154,24 @@ export default function ProfitCalculatorPage() {
                                         </p>
                                         {hourlyRate > 0 && (
                                             <p style={{ fontSize: 10, color: C.limeDeep, margin: '4px 0 0', fontWeight: 700 }}>
-                                                ⏱ {sym}{hourlyRate.toFixed(2)}/hour
+                                                {sym}{hourlyRate.toFixed(2)}/hr
                                             </p>
                                         )}
                                     </div>
                                     <StatCard label="MARGIN"
                                         value={`${margin >= 0 ? '' : '-'}${formatPct(margin)}`}
                                         color={profitColor(margin)}
-                                        tooltip={`Profit margin: how much of each sale you keep after all costs and fees. Exact: ${margin.toFixed(4)}%`}
+                                        tooltip={`Profit margin: how much of each sale you keep after all costs and fees. Exact: ${margin.toFixed(2)}%`}
                                     />
                                     <StatCard label="ROI"
                                         value={`${roi >= 0 ? '' : '-'}${formatPct(roi)}`}
                                         color={profitColor(roi)}
-                                        tooltip={`Return on investment: profit as % of your total costs. Exact: ${roi.toFixed(4)}%`}
+                                        tooltip={`Return on investment: profit as % of your total costs. Exact: ${roi.toFixed(2)}%`}
                                     />
                                     <StatCard label="BREAK EVEN"
                                         value={`${formatNum(breakEven, sym)}`}
                                         color={C.amber}
-                                        tooltip={`Minimum sell price to cover all costs with 0% profit. Exact: ${sym}${breakEven.toFixed(4)}`}
+                                        tooltip={`Minimum sell price to cover all costs with 0% profit. Exact: ${sym}${breakEven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                     />
                                 </div>
                                 {/* Revenue split + Ledger */}
@@ -1882,6 +2212,9 @@ export default function ProfitCalculatorPage() {
                                                 )}
                                                 {state.includeRegFee && regFeeAmt > 0 && (
                                                     <LedgerRow label="Regulatory operating fee" amount={-regFeeAmt} color={C.amber} symbol={sym} />
+                                                )}
+                                                {state.outputVATEnabled && (result?.outputVATOwed ?? 0) > 0 && (
+                                                    <LedgerRow label={`Output VAT (${state.outputVATPercent}%) on sales`} amount={-(result?.outputVATOwed ?? 0)} color={C.amber} symbol={sym} />
                                                 )}
                                                 {adFee > 0 && (
                                                     <LedgerRow label="Promoted ad fee" amount={-adFee} color={C.amber} symbol={sym} />
@@ -2025,10 +2358,11 @@ export default function ProfitCalculatorPage() {
                                                 <p style={{ fontSize: 20, fontWeight: 900, color: C.red, margin: '0 0 3px', lineHeight: 1 }}>
                                                     {sym}{breakEven.toFixed(2)}
                                                 </p>
-                                                <p style={{ fontSize: 10, color: '#ef4444', margin: 0 }}>0% margin ? covers all costs</p>
+                                                <p style={{ fontSize: 10, color: '#ef4444', margin: 0 }}>0% margin — covers all costs</p>
                                                 <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(185,28,28,0.08)', borderRadius: 6 }}>
-                                                    <p style={{ fontSize: 9, color: C.red, margin: 0, fontWeight: 600 }}>
-                                                        ⚠️ Below this = loss on every sale
+                                                    <p style={{ fontSize: 9, color: C.red, margin: 0, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.red, flexShrink: 0, display: 'inline-block' }} />
+                                                        Below this = loss on every sale
                                                     </p>
                                                 </div>
                                             </div>
@@ -2042,12 +2376,12 @@ export default function ProfitCalculatorPage() {
                                                 <p style={{ fontSize: 20, fontWeight: 900, color: C.amber, margin: '0 0 3px', lineHeight: 1 }}>
                                                     {minFor15 > 0 ? `${sym}${minFor15.toFixed(2)}` : '€'}
                                                 </p>
-                                                <p style={{ fontSize: 10, color: '#d97706', margin: 0 }}>15% margin ? recommended minimum</p>
+                                                <p style={{ fontSize: 10, color: '#d97706', margin: 0 }}>15% margin — recommended minimum</p>
                                                 {revenue > 0 && minFor15 > 0 && (
                                                     <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(217,119,6,0.08)', borderRadius: 6 }}>
                                                         <p style={{ fontSize: 9, color: C.amber, margin: 0, fontWeight: 600 }}>
                                                             {revenue >= minFor15
-                                                                ? `? Your price is ${sym}${(revenue - minFor15).toFixed(2)} above floor`
+                                                                ? `✓ Your price is ${sym}${(revenue - minFor15).toFixed(2)} above floor`
                                                                 : `? Raise price by ${sym}${(minFor15 - revenue).toFixed(2)}`}
                                                         </p>
                                                     </div>
@@ -2063,12 +2397,12 @@ export default function ProfitCalculatorPage() {
                                                 <p style={{ fontSize: 20, fontWeight: 900, color: C.green, margin: '0 0 3px', lineHeight: 1 }}>
                                                     {minFor25 > 0 ? `${sym}${minFor25.toFixed(2)}` : '€'}
                                                 </p>
-                                                <p style={{ fontSize: 10, color: C.green, margin: 0 }}>25% margin ? healthy profit zone</p>
+                                                <p style={{ fontSize: 10, color: C.green, margin: 0 }}>25% margin — healthy profit zone</p>
                                                 {revenue > 0 && minFor25 > 0 && (
                                                     <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(22,163,74,0.08)', borderRadius: 6 }}>
                                                         <p style={{ fontSize: 9, color: C.green, margin: 0, fontWeight: 600 }}>
                                                             {revenue >= minFor25
-                                                                ? `? You're in the sweet spot!`
+                                                                ? `✓ You're in the sweet spot!`
                                                                 : `? Need ${sym}${(minFor25 - revenue).toFixed(2)} more to hit 25%`}
                                                         </p>
                                                     </div>
@@ -2179,7 +2513,7 @@ export default function ProfitCalculatorPage() {
                                                             return (
                                                                 <>
                                                                     <p style={{ fontSize: 9, fontWeight: 700, color: achievable ? C.green : C.red, margin: '0 0 2px', letterSpacing: '0.5px' }}>
-                                                                        {achievable ? '✅ MIN PRICE' : '📈 NEED TO LIST AT'}
+                                                                        {achievable ? 'MIN PRICE' : 'NEED TO LIST AT'}
                                                                     </p>
                                                                     <p style={{ fontSize: 18, fontWeight: 900, color: achievable ? C.green : C.red, margin: '0 0 2px', lineHeight: 1 }}>
                                                                         {sym}{result.toFixed(2)}
@@ -2233,7 +2567,7 @@ export default function ProfitCalculatorPage() {
                                                 {/* Header with toggle */}
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                                                     <p style={{ fontSize: 11, fontWeight: 700, color: C.text, margin: 0 }}>
-                                                        🎚️ Live price slider
+                                                        Live price slider
                                                     </p>
                                                     <button onClick={() => setPoSliderActive(s => !s)}
                                                         style={{
@@ -2361,10 +2695,10 @@ export default function ProfitCalculatorPage() {
                                                             border: `1px solid ${poSliderMargin >= 25 ? '#bbf7d0' : poSliderMargin >= 15 ? '#fde68a' : '#fecaca'}`,
                                                         }}>
                                                             <p style={{ fontSize: 11, fontWeight: 700, margin: 0, color: poSliderMargin >= 25 ? C.green : poSliderMargin >= 15 ? C.amber : C.red }}>
-                                                                {poSliderMargin >= 25 ? `🟢 Sweet spot ? strong margin at ${sym}${poSliderValue.toFixed(2)}`
-                                                                    : poSliderMargin >= 15 ? `🟡 Acceptable ? thin but positive at ${sym}${poSliderValue.toFixed(2)}`
-                                                                        : poSliderMargin >= 0 ? `🟠 Danger zone ? barely covering costs`
-                                                                            : `🔴 Loss ? you lose ${sym}${Math.abs(poSliderProfit).toFixed(2)} at this price`}
+                                                                {poSliderMargin >= 25 ? `Sweet spot — strong margin at ${sym}${poSliderValue.toFixed(2)}`
+                                                                    : poSliderMargin >= 15 ? `Acceptable — thin but positive at ${sym}${poSliderValue.toFixed(2)}`
+                                                                        : poSliderMargin >= 0 ? `Danger zone — barely covering costs`
+                                                                            : `Loss — you lose ${sym}${Math.abs(poSliderProfit).toFixed(2)} at this price`}
                                                             </p>
                                                         </div>
                                                     </>
@@ -2411,7 +2745,7 @@ export default function ProfitCalculatorPage() {
                                     {scenarioTab === 'offer' && (
                                         <div>
                                             <p style={{ fontSize: 11, color: C.muted, margin: '0 0 12px' }}>
-                                                A buyer offers you a lower price ? is it still profitable? Drag the slider to test any offer.
+                                                A buyer offers you a lower price — is it still profitable? Drag the slider to test any offer.
                                             </p>
 
                                             {/* Big display of offer + resulting profit */}
@@ -2431,7 +2765,7 @@ export default function ProfitCalculatorPage() {
                                                         {bestOfferNet >= 0 ? "+" : "-"}{formatNum(bestOfferNet, sym)}
                                                     </p>
                                                     <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>
-                                                        Margin: {formatPct(bestOfferMargin)} ? ROI: {formatPct(bestOfferRoi)}
+                                                        Margin: {formatPct(bestOfferMargin)} · ROI: {formatPct(bestOfferRoi)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -2462,7 +2796,7 @@ export default function ProfitCalculatorPage() {
                                                 borderRadius: 8, padding: 10,
                                             }}>
                                                 <p style={{ fontSize: 12, fontWeight: 700, color: profitColor(bestOfferNet), margin: 0 }}>
-                                                    {bestOfferNet > originalNet * 0.7 ? 'Accept ? solid profit'
+                                                    {bestOfferNet > originalNet * 0.7 ? 'Accept — solid profit'
                                                         : bestOfferNet > 0 ? 'Marginal ? accept only if you want the sale'
                                                             : bestOfferNet === 0 ? 'Break even ? no reason to accept'
                                                                 : 'Reject ? you lose money at this price'}
@@ -2481,7 +2815,7 @@ export default function ProfitCalculatorPage() {
                                     {scenarioTab === 'reverse' && (
                                         <div>
                                             <p style={{ fontSize: 11, color: C.muted, margin: '0 0 12px' }}>
-                                                Enter your target profit or margin ? get the minimum listing price you need to charge.
+                                                Enter your target profit or margin — get the minimum listing price you need to charge.
                                             </p>
 
                                             {/* Mode toggle */}
@@ -2775,17 +3109,17 @@ export default function ProfitCalculatorPage() {
                                     {/* Warning banners */}
                                     {showLowSellThroughWarning && (
                                         <div style={{ background: '#fef3c7', border: '1px solid #d97706', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
-                                            <strong style={{ color: C.amber }}>⚠️ Low sell-through warning:</strong> <span style={{ color: C.text }}>at {sellThroughPct.toFixed(0)}%, {unitsDeadStock} of {unitsPurchased} units will stay unsold ({formatNum(deadStockLoss, sym)} loss).</span>
+                                            <strong style={{ color: C.amber }}>Low sell-through:</strong> <span style={{ color: C.text }}>at {sellThroughPct.toFixed(0)}%, {unitsDeadStock} of {unitsPurchased} units will stay unsold ({formatNum(deadStockLoss, sym)} loss).</span>
                                         </div>
                                     )}
                                     {showSlowVelocityWarning && (
                                         <div style={{ background: '#fef3c7', border: '1px solid #d97706', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
-                                            <strong style={{ color: C.amber }}>⚠️ Slow velocity:</strong> <span style={{ color: C.text }}>{timeToSellDays} days is a long hold — your capital is tied up for {monthsToClear.toFixed(1)} months.</span>
+                                            <strong style={{ color: C.amber }}>Slow velocity:</strong> <span style={{ color: C.text }}>{timeToSellDays} days is a long hold — your capital is tied up for {monthsToClear.toFixed(1)} months.</span>
                                         </div>
                                     )}
                                     {showDeadCapitalWarning && (
                                         <div style={{ background: '#fee2e2', border: '1px solid #b91c1c', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
-                                            <strong style={{ color: C.red }}>⚠️ Poor return on capital:</strong> <span style={{ color: C.text }}>you&apos;re earning only {formatNum(dollarPerDollarPerMonth, sym)} per {sym}1 invested per month. Consider a faster-moving product.</span>
+                                            <strong style={{ color: C.red }}>Poor return on capital:</strong> <span style={{ color: C.text }}>you&apos;re earning only {formatNum(dollarPerDollarPerMonth, sym)} per {sym}1 invested per month. Consider a faster-moving product.</span>
                                         </div>
                                     )}
 
@@ -3341,7 +3675,7 @@ export default function ProfitCalculatorPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16 }}>
                     <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
                     <p style={{ fontSize: 10, color: C.muted, margin: 0, fontWeight: 600 }}>
-                        Fees for {country} last verified February 2026 ? {meta.regFeeConfirmed ? 'regulatory fee confirmed' : 'regulatory fee unconfirmed, verify on your seller invoice'}
+                        Fees for {country} last verified February 2026 — {meta.regFeeConfirmed ? 'regulatory fee confirmed' : 'regulatory fee unconfirmed, verify on your seller invoice'}
                     </p>
                 </div>
 

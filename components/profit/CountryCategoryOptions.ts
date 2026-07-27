@@ -121,14 +121,18 @@ export function getCategoryOptions(country: string, state: any): { label: string
 export function getStoreTierOptions(country: string): { label: string; value: string }[] {
     switch (country) {
         case 'US': return [
-            { label: 'No store / Starter', value: 'no_store' },
-            { label: 'Basic / Premium / Anchor / Enterprise', value: 'has_store' },
+            { label: 'No Store — 250 free listings/mo', value: 'none' },
+            { label: 'Starter — $7.95/mo — 250 free, $0.30/listing', value: 'starter' },
+            { label: 'Basic — $27.95/mo — 1,000 free, $0.25/listing', value: 'basic' },
+            { label: 'Premium — $74.95/mo — 10,000 free, $0.10/listing', value: 'premium' },
+            { label: 'Anchor — $349.95/mo — 25,000 free, $0.05/listing', value: 'anchor' },
+            { label: 'Enterprise — $2,999.95/mo — 100,000 free', value: 'enterprise' },
         ]
         case 'UK': return [
-            { label: 'No Shop (pay as you sell)', value: '0' },
-            { label: 'Basic Shop — £27/mo', value: '0' },
-            { label: 'Featured Shop — £77/mo', value: '0' },
-            { label: 'Anchor Shop — £437/mo', value: '0' },
+            { label: 'No Shop — 300 free listings, £0.30/listing', value: 'none' },
+            { label: 'Basic — £27/mo — 250 free, £0.10/listing', value: 'basic' },
+            { label: 'Featured — £77/mo — 1,500 free, £0.05/listing', value: 'featured' },
+            { label: 'Anchor — £437/mo — Unlimited free listings', value: 'anchor' },
         ]
         case 'CA': return [
             { label: 'No store', value: 'no_store' },

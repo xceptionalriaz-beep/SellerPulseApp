@@ -34,7 +34,8 @@ export interface ProfitSettings {
 
   // --- US tiered fee fields ---
   usCategoryKey: string   // key into US_TIERED_FEES
-  hasStore: boolean  // true = Basic/Premium/Anchor/Enterprise
+  hasStore: boolean  // true = Basic/Premium/Anchor/Enterprise (legacy, derived from usStoreTier)
+  usStoreTier: USStoreTier  // 'none'|'starter'|'basic'|'premium'|'anchor'|'enterprise'
   isTopRatedPlus: boolean  // true = 10% off FVF amount (not the %)
   isUSMarket: boolean  // true = use US tiered fee calc
 
@@ -47,6 +48,7 @@ export interface ProfitSettings {
   // --- UK-specific fields ---
   isUKMarket: boolean
   ukCategoryKey: string
+  ukStoreTier: UKStoreTier  // 'none'|'basic'|'featured'|'anchor'
   isVATRegistered: boolean
   ukIntlDestination: 'eurozone' | 'us_canada' | 'other' | 'none'
   ukReducedPerOrder: boolean
@@ -59,7 +61,7 @@ export interface ProfitSettings {
   // AU fields
   isAUMarket: boolean
   auProPlan: 'starter' | 'basic' | 'featured' | 'anchor'
-  auCategoryTier: 1 | 2 | 3 | 4
+  auCategoryTier: 1 | 2 | 3 | 4 | 5
   isGSTRegistered: boolean
   auIsInternational: boolean
 
@@ -129,6 +131,13 @@ export interface ProfitSettings {
   chCategoryKey: string
   chIsVATRegistered: boolean   // false = all fees x 1.081 (Swiss VAT is 8.1%)
   chIntlDestination: 'none' | 'europe_other' | 'us_canada' | 'uk_other'
+
+  // Output VAT (sales VAT) — toggle off by default
+  // When enabled: seller must remit VAT on sales to tax authority
+  // netRevenue = sellingPrice / (1 + outputVATPercent/100)
+  // outputVATOwed = sellingPrice - netRevenue
+  outputVATEnabled: boolean
+  outputVATPercent: number    // e.g. 20 for UK, 19 for DE, 22 for IT
 }
 
 export const DEFAULT_SETTINGS: ProfitSettings = {
@@ -152,6 +161,7 @@ export const DEFAULT_SETTINGS: ProfitSettings = {
   sellerLevelAdjustPercent: 0,
   usCategoryKey: 'default',
   hasStore: false,
+  usStoreTier: 'none' as USStoreTier,
   isTopRatedPlus: false,
   isUSMarket: false,
   isBelowStandard: false,
@@ -161,6 +171,7 @@ export const DEFAULT_SETTINGS: ProfitSettings = {
   // UK fields
   isUKMarket: false,
   ukCategoryKey: 'default',
+  ukStoreTier: 'none' as UKStoreTier,
   isVATRegistered: true,
   ukIntlDestination: 'none',
   ukReducedPerOrder: false,
@@ -231,6 +242,9 @@ export const DEFAULT_SETTINGS: ProfitSettings = {
   chCategoryKey: 'default',
   chIsVATRegistered: true,
   chIntlDestination: 'none',
+  // Output VAT defaults — off, 0%
+  outputVATEnabled: false,
+  outputVATPercent: 0,
 }
 
 export interface ProfitResult {
@@ -278,12 +292,44 @@ export interface ProfitResult {
   beVATOnFees: number   // BE only: 21% VAT
   chIntlFee: number   // CH only
   chVATOnFees: number   // CH only: 8.1% Swiss VAT
+  outputVATOwed: number   // output VAT seller must remit (0 if disabled)
 }
 
 // =============================================================================
 // US TIERED FEE TABLE
 // Verified against official eBay US fee page (ebay.com/help/selling/fees)
 // =============================================================================
+
+// US Store subscription tier — determines FVF rates and insertion allowances
+// Starter = same FVF as noStore; Basic/Premium/Anchor/Enterprise = hasStore rates
+export type USStoreTier = 'none' | 'starter' | 'basic' | 'premium' | 'anchor' | 'enterprise'
+
+export const US_STORE_INSERTION_FEE: Record<USStoreTier, number> = {
+  none: 0.35,
+  starter: 0.30,
+  basic: 0.25,
+  premium: 0.10,
+  anchor: 0.05,
+  enterprise: 0.05,
+}
+
+export const US_STORE_FREE_LISTINGS: Record<USStoreTier, number> = {
+  none: 250,
+  starter: 250,
+  basic: 1000,
+  premium: 10000,
+  anchor: 25000,
+  enterprise: 100000,
+}
+
+export const US_STORE_MONTHLY_FEE: Record<USStoreTier, number> = {
+  none: 0,
+  starter: 7.95,
+  basic: 27.95,
+  premium: 74.95,
+  anchor: 349.95,
+  enterprise: 2999.95,
+}
 
 export type USCategoryKey =
   | 'default'
@@ -298,6 +344,31 @@ export type USCategoryKey =
   | 'athletic_shoes'
   | 'nfts'
   | 'heavy_equipment'
+  | 'computers_general'
+  | 'computers_specific'
+  | 'mobiles_general'
+  | 'mobiles_phones'
+  | 'cameras_general'
+  | 'cameras_specific'
+  | 'clothes_general'
+  | 'health_beauty'
+  | 'home_general'
+  | 'home_appliances'
+  | 'home_furniture'
+  | 'home_power_strips'
+  | 'sporting_goods'
+  | 'sports_memorabilia'
+  | 'toys_games'
+  | 'vehicle_parts_general'
+  | 'vehicle_parts_specific'
+  | 'musical_instruments'
+  | 'video_games'
+  | 'video_game_consoles'
+  | 'pet_supplies'
+  | 'crafts'
+  | 'baby'
+  | 'antiques'
+  | 'garden_patio'
 
 // Bracket structure: array of { upTo, rate } where upTo = Infinity for the last bracket
 // FVF = sum of (rate × portion of sale within each bracket)
@@ -345,20 +416,21 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
   books_movies_music: {
     label: 'Books, movies, music',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 15.3 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 15.3 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 15.3 }, { upTo: Infinity, rate: 2.35 }] },
   },
 
   coins: {
     label: 'Coins & paper money (non-bullion)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.25 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 13.25 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 4000, rate: 9.0 }, { upTo: Infinity, rate: 2.35 }] },
   },
 
   coins_bullion: {
     label: 'Coins & paper money > Bullion',
-    // Rate switches based on total sale (not progressive)
+    // noStore: rate switches based on total sale (not progressive)
     noStore: { type: 'switch', threshold: 7500, rateBelow: 13.6, rateAbove: 7.0, noPerOrder: false },
-    hasStore: { type: 'switch', threshold: 7500, rateBelow: 13.6, rateAbove: 7.0, noPerOrder: false },
+    // hasStore: 3-bracket progressive (verified against store fees page)
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1500, rate: 7.5 }, { upTo: 10000, rate: 5.0 }, { upTo: Infinity, rate: 4.5 }] },
   },
 
   collectibles_trading_cards: {
@@ -378,7 +450,7 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
     label: 'Jewelry & watches (non-watch)',
     // Rate switches based on total sale
     noStore: { type: 'switch', threshold: 5000, rateBelow: 15.0, rateAbove: 9.0, noPerOrder: false },
-    hasStore: { type: 'switch', threshold: 5000, rateBelow: 15.0, rateAbove: 9.0, noPerOrder: false },
+    hasStore: { type: 'switch', threshold: 5000, rateBelow: 13.0, rateAbove: 7.0, noPerOrder: false },
   },
 
   watches: {
@@ -410,9 +482,10 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
 
   athletic_shoes: {
     label: "Athletic shoes (men's & women's)",
-    // 8% if sale >= $150 (no per order fee), 13.6% if sale < $150
+    // noStore: 8% if sale >= $150 (no per order fee), 13.6% if <$150
     noStore: { type: 'switch', threshold: 150, rateBelow: 13.6, rateAbove: 8.0, noPerOrder: true },
-    hasStore: { type: 'switch', threshold: 150, rateBelow: 13.6, rateAbove: 8.0, noPerOrder: true },
+    // hasStore: 7% if sale >= $150 (no per order fee), 12.7% if <$150
+    hasStore: { type: 'switch', threshold: 150, rateBelow: 12.7, rateAbove: 7.0, noPerOrder: true },
   },
 
   nfts: {
@@ -424,7 +497,133 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
   heavy_equipment: {
     label: 'Heavy equipment, commercial printing, food trucks',
     noStore: { type: 'progressive', brackets: [{ upTo: 15000, rate: 3.0 }, { upTo: Infinity, rate: 0.5 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 15000, rate: 3.0 }, { upTo: Infinity, rate: 0.5 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 15000, rate: 2.5 }, { upTo: Infinity, rate: 0.5 }] },
+  },
+
+  computers_general: {
+    label: 'Computers, Tablets & Networking (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  computers_specific: {
+    label: 'Computers — Desktops/Laptops/Tablets/Drives/Monitors',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+  },
+  mobiles_general: {
+    label: 'Cell Phones & Accessories (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  mobiles_phones: {
+    label: 'Cell Phones & Smartphones',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+  },
+  cameras_general: {
+    label: 'Cameras & Photo (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  cameras_specific: {
+    label: 'Cameras — Digital/Film/Lenses/Camcorders',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+  },
+  clothes_general: {
+    label: 'Clothing, Shoes & Accessories (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  health_beauty: {
+    label: 'Health & Beauty',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  home_general: {
+    label: 'Home & Garden (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  home_appliances: {
+    label: 'Home — Appliances',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  home_furniture: {
+    label: 'Home — Furniture',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  home_power_strips: {
+    label: 'Home — Power Strips & Surge Protectors',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  sporting_goods: {
+    label: 'Sporting Goods',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  sports_memorabilia: {
+    label: 'Sports Memorabilia, Cards & Fan Shop',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  toys_games: {
+    label: 'Toys & Hobbies',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  vehicle_parts_general: {
+    label: 'eBay Motors — Parts & Accessories (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 750, rate: 9.5 }, { upTo: Infinity, rate: 3.0 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 11.5 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  vehicle_parts_specific: {
+    label: 'eBay Motors — Tires, Wheels & GPS',
+    noStore: { type: 'progressive', brackets: [{ upTo: 750, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 9.5 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  musical_instruments: {
+    label: 'Musical Instruments & Gear (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 10.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  video_games: {
+    label: 'Video Games & Consoles (general)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  video_game_consoles: {
+    label: 'Video Game Consoles',
+    noStore: { type: 'progressive', brackets: [{ upTo: 400, rate: 6.9 }, { upTo: Infinity, rate: 2.0 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 7.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  pet_supplies: {
+    label: 'Pet Supplies',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  crafts: {
+    label: 'Crafts',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  baby: {
+    label: 'Baby',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  antiques: {
+    label: 'Antiques',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  garden_patio: {
+    label: 'Garden & Patio',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
 }
 
@@ -548,6 +747,36 @@ export const UK_TIERED_FEES: Record<UKCategoryKey, UKCategoryFee> = {
 }
 
 // UK international fee rates by destination
+
+// =============================================================================
+// UK STORE TIER CONSTANTS
+// Verified against official eBay UK business seller fee page (Feb 2026)
+// KEY: FVF rates are IDENTICAL for all tiers — only insertion fees differ
+// =============================================================================
+
+export type UKStoreTier = 'none' | 'basic' | 'featured' | 'anchor'
+
+export const UK_STORE_MONTHLY_FEE: Record<UKStoreTier, number> = {
+  none: 0,
+  basic: 27,
+  featured: 77,
+  anchor: 437,
+}
+
+export const UK_STORE_FREE_LISTINGS: Record<UKStoreTier, number> = {
+  none: 300,     // 300 free/mo for no-shop sellers
+  basic: 250,     // 250 fixed price free/mo
+  featured: 1500,    // 1,500 fixed price free/mo
+  anchor: Infinity, // Unlimited fixed price
+}
+
+export const UK_STORE_INSERTION_FEE: Record<UKStoreTier, number> = {
+  none: 0.30,    // £0.30/listing after 300 free
+  basic: 0.10,    // £0.10/listing after allowance
+  featured: 0.05,    // £0.05/listing after allowance
+  anchor: 0.00,    // Free for fixed price listings
+}
+
 export const UK_INTL_FEES = {
   none: 0,
   eurozone: 1.05,
@@ -783,19 +1012,25 @@ export function calcCAFVF(
 // =============================================================================
 
 export type AUProPlan = 'starter' | 'basic' | 'featured' | 'anchor'
-export type AUCategoryTier = 1 | 2 | 3 | 4
+export type AUCategoryTier = 1 | 2 | 3 | 4 | 5  // 5 = NFTs (5.5% flat, all plans)
 
 // AU_FVF_TABLE[tier][plan] = FVF % (incl. GST) up to A$4,000
 // All rates verified from official eBay AU Pro fee page
 export const AU_FVF_TABLE: Record<AUCategoryTier, Record<AUProPlan, number>> = {
   // Tier 1: Home Appliances & Technology Devices
+  // Doc: Starter=13.4% | Basic=8.03% | Featured=7.26% | Anchor=6.82%
   1: { starter: 13.4, basic: 8.03, featured: 7.26, anchor: 6.82 },
   // Tier 2: All other categories (default)
+  // Doc: Starter=13.4% | Basic=11.44% | Featured=10.34% | Anchor=9.68%
   2: { starter: 13.4, basic: 11.44, featured: 10.34, anchor: 9.68 },
   // Tier 3: Vehicle Parts & Accessories
-  3: { starter: 12.43, basic: 11.22, featured: 11.22, anchor: 10.56 },
+  // Doc: Starter=13.4% | Basic=12.43% | Featured=11.22% | Anchor=10.56%
+  3: { starter: 13.4, basic: 12.43, featured: 11.22, anchor: 10.56 },
   // Tier 4: Business & Industrial, Collectables, Fashion, Media, Sporting Goods, Tech Accessories
-  4: { starter: 13.09, basic: 11.77, featured: 11.77, anchor: 11.11 },
+  // Doc: Starter=13.4% | Basic=13.09% | Featured=11.77% | Anchor=11.11%
+  4: { starter: 13.4, basic: 13.09, featured: 11.77, anchor: 11.11 },
+  // Tier 5: NFTs — flat 5.5% (incl. GST), all plans, no threshold
+  5: { starter: 5.5, basic: 5.5, featured: 5.5, anchor: 5.5 },
 }
 
 // Above A$4,000 rate by plan
@@ -820,6 +1055,7 @@ export const AU_CATEGORY_TIERS: Record<AUCategoryTier, string> = {
   2: 'Tier 2 — All other categories (default)',
   3: 'Tier 3 — Vehicle Parts & Accessories',
   4: 'Tier 4 — Business & Industrial, Collectables, Fashion, Media, Sporting Goods, Tech Accessories',
+  5: 'Tier 5 — NFTs (5.5% flat)',
 }
 
 // AU Pro plan labels for UI
@@ -841,6 +1077,11 @@ export function calcAUFVF(
   tier: AUCategoryTier,
   plan: AUProPlan,
 ): { fvfAmount: number; orderFee: number } {
+
+  // Tier 5 = NFTs: flat 5.5% (incl. GST), no threshold, all plans same
+  if (tier === 5) {
+    return { fvfAmount: totalRevenue * 0.055, orderFee: AU_ORDER_FEE[plan] }
+  }
 
   const belowRate = AU_FVF_TABLE[tier][plan] / 100
   const aboveRate = AU_ABOVE_THRESHOLD_RATE[plan] / 100
@@ -955,21 +1196,21 @@ export const DE_TIERED_FEES: Record<DECategoryKey, DECategoryFee> = {
   },
   // Garden/Home/Business
   business_industrial: {
-    label: 'Business & Industrial',
-    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
-    hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'Business & Industrial (incl. Office & Stationery)',
+    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 14.0 }, { upTo: Infinity, rate: 3.0 }] },
+    hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 14.0 }, { upTo: Infinity, rate: 3.0 }] },
     isTech: false,
   },
   garden_patio: {
-    label: 'Garden & Patio',
-    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
-    hasShop: { type: 'progressive', brackets: [{ upTo: 200, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'Garden & Terrace',
+    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 13.0 }, { upTo: Infinity, rate: 3.0 }] },
+    hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 13.0 }, { upTo: Infinity, rate: 3.0 }] },
     isTech: false,
   },
   home_improvement: {
     label: 'Home improvement & DIY',
-    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
-    hasShop: { type: 'progressive', brackets: [{ upTo: 400, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
+    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 13.0 }, { upTo: Infinity, rate: 3.0 }] },
+    hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 13.0 }, { upTo: Infinity, rate: 3.0 }] },
     isTech: false,
   },
   // Fashion/Watches/Jewelry/Coins
@@ -1043,11 +1284,11 @@ export const DE_TIERED_FEES: Record<DECategoryKey, DECategoryFee> = {
     hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 11.0 }, { upTo: Infinity, rate: 3.0 }] },
     isTech: false,
   },
-  // Default 12%
+  // Default 14%
   default: {
-    label: 'Other categories (default) — Antiques, Beauty, Baby, Pets, Toys, Sports, etc.',
-    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
-    hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 12.0 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'Other categories (default) — Sport, Travel, Baby, Crafts, Gourmet, Pets, Furniture, etc.',
+    noShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 14.0 }, { upTo: Infinity, rate: 3.0 }] },
+    hasShop: { type: 'progressive', brackets: [{ upTo: 990, rate: 14.0 }, { upTo: Infinity, rate: 3.0 }] },
     isTech: false,
   },
 }
@@ -1066,14 +1307,26 @@ export const DE_INTL_FEES = {
 export const DE_BELOW_STANDARD_RATES = {
   standard: { upTo990: 20, above: 14 },  // default categories
   recommerce: { upTo990: 11, above: 5 },  // re-commerce standard
-  tech: { upTo990: 11, above: 3 },  // tech categories
+  tech: { upTo990: 13, above: 7 },  // tech devices: 13% to €990 / 7% above
   fashion_jewelry: { upTo990: 18, above: 3 },  // clothing/watches/jewelry/coins
 }
 
-// DE Very High INAD override rates
+// DE Very High INAD override rates (verified from official penalty page July 2026)
+// +1% on both rates if Very High INAD for 4+ consecutive months
 export const DE_INAD_RATES = {
-  standard: { upTo990: 17, above: 3 },
-  auto_parts: { upTo990: 16, above: 3 },
+  standard: { upTo990: 18, above: 14 },  // sport/baby/pets/crafts/furniture/food: 18%/14%
+  standard_media: { upTo990: 16, above: 3 },  // media/antiques/beauty/stamps/toys/collectibles: 16%/3%
+  tech_devices: { upTo990: 11, above: 7 },  // computers/phones/cameras/TV/appliances: 11%/7%
+  tech_access: { upTo990: 16, above: 12 },  // tech accessories: 16%/12%
+  auto_parts: { upTo990: 16, above: 3 },  // auto parts: 16%/3%
+  auto_electronics: { upTo990: 10, above: 3 },  // auto elec (no shop avg): 10.5%/3%
+  auto_tires: { upTo990: 10, above: 3 },  // tires/rims: 10.5%/3%
+  auto_clothing: { upTo990: 15, above: 3 },  // auto clothing/oil: 15%/3%
+  clothing: { upTo990: 16, above: 3 },  // clothing: 16%/3%
+  sneakers: { upTo990: 11, above: 3 },  // sneakers ≥€100: 11%/3%
+  coins: { upTo990: 10, above: 3 },  // coins: 10.5%/3%
+  musical_inst: { upTo990: 15, above: 11 },  // musical instruments: 15%/11%
+  nfts: { upTo990: 9, above: 0 },  // NFTs: 9% flat
 }
 
 // =============================================================================
@@ -2119,10 +2372,15 @@ export function calcTieredFVF(
   totalRevenue: number,
   categoryKey: USCategoryKey,
   hasStore: boolean,
+  storeTier?: USStoreTier,
 ): { fvfAmount: number; noPerOrder: boolean } {
 
+  // Starter store gets noStore FVF rates; Basic/Premium/Anchor/Enterprise get hasStore rates
+  const effectiveHasStore = storeTier
+    ? (storeTier !== 'none' && storeTier !== 'starter')
+    : hasStore
   const cat = US_TIERED_FEES[categoryKey] ?? US_TIERED_FEES['default']
-  const structure = hasStore ? cat.hasStore : cat.noStore
+  const structure = effectiveHasStore ? cat.hasStore : cat.noStore
 
   if (structure.type === 'flat') {
     return { fvfAmount: totalRevenue * (structure.rate / 100), noPerOrder: false }
@@ -2155,6 +2413,35 @@ export function calcTieredFVF(
   return { fvfAmount, noPerOrder: false }
 }
 
+
+// =============================================================================
+// INSERTION FEE CONSTANTS — ALL COUNTRIES
+// Per-listing fee charged after the free allowance is exhausted.
+// Source: Official eBay fee pages for each market (verified July 2026)
+// All amounts in the country's native currency.
+// Free allowance is 250 listings/month for all non-store sellers in every market.
+// =============================================================================
+
+export const COUNTRY_INSERTION_FEE: Record<string, number> = {
+  US: 0.35,   // USD — $0.35/listing (overridden by US_STORE_INSERTION_FEE for store tiers)
+  UK: 0.35,   // GBP — £0.35/listing
+  CA: 0.35,   // CAD — C$0.35/listing
+  AU: 0.50,   // AUD — A$0.50/listing
+  DE: 0.35,   // EUR — €0.35/listing
+  FR: 0.35,   // EUR — €0.35/listing
+  IT: 0.35,   // EUR — €0.35/listing
+  ES: 0.35,   // EUR — €0.35/listing
+  AT: 0.35,   // EUR — €0.35/listing
+  IE: 0.35,   // EUR — €0.35/listing
+  NL: 0.35,   // EUR — €0.35/listing
+  BE: 0.35,   // EUR — €0.35/listing
+  PL: 1.35,   // PLN — zł1.35/listing
+  CH: 0.50,   // CHF — CHF 0.50/listing
+}
+
+// Standard free listing allowance for non-store sellers — 250/month in all markets
+export const STANDARD_FREE_LISTINGS = 250
+
 // =============================================================================
 // TYPES — ProfitEngine.calcInsertion()
 // =============================================================================
@@ -2166,6 +2453,7 @@ export interface InsertionFeeSettings {
   freeAllowance: number
   unitsPerListing: number
   categoryType: InsertionCategoryType
+  insertionFeePerListing?: number  // override per-listing fee (US store tiers: $0.05–$0.35)
 }
 
 export interface InsertionFeeResult {
@@ -2295,6 +2583,7 @@ export class ProfitEngine {
         inadPenalty: 0, vatOnFees: 0, ukIntlFee: 0, caIntlFee: 0,
         auIntlFee: 0, auGSTSaving: 0, deIntlFee: 0, deVATOnFees: 0,
         frIntlFee: 0, frVATOnFees: 0, itIntlFee: 0, itVATOnFees: 0, esIntlFee: 0, esVATOnFees: 0, atIntlFee: 0, atVATOnFees: 0, ieIntlFee: 0, ieVATOnFees: 0, nlIntlFee: 0, nlVATOnFees: 0, plIntlFee: 0, plVATOnFees: 0, beIntlFee: 0, beVATOnFees: 0, chIntlFee: 0, chVATOnFees: 0,
+        outputVATOwed: 0,
       }
     }
 
@@ -2322,7 +2611,7 @@ export class ProfitEngine {
     if (settings.isUSMarket) {
       // US: use tiered fee lookup with hasStore variant
       const key = (settings.usCategoryKey ?? 'default') as USCategoryKey
-      const tiered = calcTieredFVF(totalRevenue, key, settings.hasStore ?? false)
+      const tiered = calcTieredFVF(totalRevenue, key, settings.hasStore ?? false, settings.usStoreTier)
       rawFVF = tiered.fvfAmount
       noPerOrder = tiered.noPerOrder
       effectiveCatFeePercent = totalRevenue > 0 ? (rawFVF / totalRevenue) * 100 : 0
@@ -2478,12 +2767,15 @@ export class ProfitEngine {
         inadPenalty = totalRevenue * (inadPoints / 100)
       }
     } else if (settings.isCAMarket) {
-      // CA: % OF FVF amount, INAD flat +5% no scaling
+      // CA: % OF FVF amount
+      // Below Standard: +6% of FVF (1-3mo) / +7% (4+mo)
+      // Very High INAD: +5% of FVF (1-3mo) / +6% (4+mo)
       if (isBelowStd) {
         const bsRate = bsMonths >= 4 ? 0.07 : 0.06
         belowStandardPenalty = fvfAfterTRP * bsRate
       } else if (isHighINAD) {
-        inadPenalty = fvfAfterTRP * 0.05
+        const inadRate = iMonths >= 4 ? 0.06 : 0.05
+        inadPenalty = fvfAfterTRP * inadRate
       }
     } else if (settings.isAUMarket) {
       // AU: % of TOTAL SALE AMOUNT (different from all other markets)
@@ -2734,14 +3026,27 @@ export class ProfitEngine {
 
     const advancedDeductions = defectCost + payoutCost
 
-    // ── 11. Final truth equation ──────────────────────────────────────────────
+    // ── 11. Output VAT (sales VAT) ───────────────────────────────────────────
+    // When enabled, the seller collected VAT on behalf of the tax authority.
+    // VAT is embedded in the sale price (inc-VAT pricing), so:
+    //   netRevenue = totalRevenue / (1 + rate)
+    //   outputVATOwed = totalRevenue - netRevenue
+    // eBay fees are still charged on the full inc-VAT amount (totalRevenue).
+    // AU GST is handled separately via auGSTSaving — don't double-count.
+    let outputVATOwed = 0
+    if (settings.outputVATEnabled && settings.outputVATPercent > 0) {
+      const rate = settings.outputVATPercent / 100
+      outputVATOwed = totalRevenue * rate / (1 + rate)
+    }
+
+    // ── 12. Final truth equation ──────────────────────────────────────────────
     const netProfit =
-      totalRevenue - totalCosts - totalEbayFees - advancedDeductions + totalCashback
+      totalRevenue - totalCosts - totalEbayFees - advancedDeductions + totalCashback - outputVATOwed
 
     const roi = trueBuyCost > 0 ? (netProfit / trueBuyCost) * 100 : 0
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0
 
-    // ── 12. Break-even price ─────────────────────────────────────────────────
+    // ── 13. Break-even price ─────────────────────────────────────────────────
     // For US tiered categories this is approximate — exact break-even
     // requires iterative solving since FVF rate changes with price.
     // We use the effective rate at current price as a close approximation.
@@ -2756,7 +3061,7 @@ export class ProfitEngine {
     )
     const breakEvenPrice = (totalCosts + perOrderFee) / (1 - totalFeeRateFraction)
 
-    // ── 13. Max safe ad rate ──────────────────────────────────────────────────
+    // ── 14. Max safe ad rate ──────────────────────────────────────────────────
     const profitBeforeAds = netProfit + promotedAdFee
     const maxSafeAdRatePercent = totalRevenue > 0 ? (profitBeforeAds / totalRevenue) * 100 : 0
 
@@ -2805,6 +3110,7 @@ export class ProfitEngine {
       beVATOnFees,
       chIntlFee,
       chVATOnFees,
+      outputVATOwed,
     }
   }
 
@@ -2824,7 +3130,13 @@ export class ProfitEngine {
     const feeApplies =
       !isUnlimited &&
       (s.listingsUsedThisMonth > s.freeAllowance || s.categoryType !== 'regular')
-    const feeFlat = feeApplies ? ProfitEngine.INSERTION_FEES[s.categoryType] : 0
+    // Use per-listing fee override if provided (US store tiers: $0.05–$0.35)
+    // otherwise fall back to category-type default
+    const basePerListing = s.insertionFeePerListing ?? ProfitEngine.INSERTION_FEES[s.categoryType]
+    // Motors ($7.50) and Real Estate ($35) always use their fixed fee regardless of tier
+    const feeFlat = feeApplies
+      ? (s.categoryType !== 'regular' ? ProfitEngine.INSERTION_FEES[s.categoryType] : basePerListing)
+      : 0
     const feePerUnit = feeFlat / unitsPerListing
     return { feeApplies, feeFlat, feePerUnit, listingsOver, isUnlimited }
   }

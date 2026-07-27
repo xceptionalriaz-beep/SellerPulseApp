@@ -48,35 +48,35 @@ import type { Profile } from '@/types/database'
 
 // -- Presence system --------------------------------------------
 import { useHeartbeat } from '@/hooks/useHeartbeat'
-import { usePresence }  from '@/hooks/usePresence'
+import { usePresence } from '@/hooks/usePresence'
 import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
-import SupportModal          from '@/components/dashboard/SupportModal'
-import SecurityTab           from '@/app/dashboard/profile/tabs/SecurityTab'
-import AnnouncementBanner    from '@/components/dashboard/AnnouncementBanner'
+import SupportModal from '@/components/dashboard/SupportModal'
+import SecurityTab from '@/app/dashboard/profile/tabs/SecurityTab'
+import AnnouncementBanner from '@/components/dashboard/AnnouncementBanner'
 
 // -- Nav items (mirrors Dart sidebar exactly) -------------------
 const isInUserMode = typeof window !== 'undefined' && sessionStorage.getItem('riazify_usermode') === '1'
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard',           href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard'  },
-  { icon: Search,          label: 'Product Research',    href: '/dashboard/product-research'                          },
-  { icon: Type,            label: 'Title Builder',       href: '/dashboard/title-builder'                             },
-  { icon: Calculator,      label: 'Profit Calculator',   href: '/dashboard/tools/profit-calculator'                         },
-  { icon: Package,         label: 'Inventory',           href: '/dashboard/inventory'                                 },
-  { icon: Radar,           label: 'Competitor Research', href: '/dashboard/competitor-research'                       },
-  { icon: ShieldCheck,     label: 'Orders',              href: '/dashboard/orders'                                    },
+  { icon: LayoutDashboard, label: 'Dashboard', href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard' },
+  { icon: Search, label: 'Product Research', href: '/dashboard/product-research' },
+  { icon: Type, label: 'Title Builder', href: '/dashboard/title-builder' },
+  { icon: Calculator, label: 'Profit Calculator', href: '/dashboard/tools/profit-calculator' },
+  { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
+  { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
+  { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
 ]
 
 // -- Kill switch ? nav label mapping ---------------------------
 // Maps kill_switches.title ? NAV_ITEMS label
 // When a switch is OFF ? that nav item is hidden from sidebar
 const KILL_SWITCH_MAP: Record<string, string> = {
-  'Title Builder':       'Title Builder',
-  'Product Research':    'eBay Product Research Tool',
-  'Profit Calculator':   'Profit Calculator',
-  'Inventory':           'Inventory Manager',
+  'Title Builder': 'Title Builder',
+  'Product Research': 'eBay Product Research Tool',
+  'Profit Calculator': 'Profit Calculator',
+  'Inventory': 'Inventory Manager',
   'Competitor Research': 'Competitor Research',
-  'Orders':              'Orders Management',
+  'Orders': 'Orders Management',
 }
 
 // -- Sidebar Item -----------------------------------------------
@@ -139,8 +139,8 @@ function NotificationBell({
         size={22}
         className={cn(
           'transition-colors duration-200',
-          hovering  ? 'text-limeDeep' :
-          count > 0 ? 'text-red-700'  : 'text-[#8A9E78]'
+          hovering ? 'text-limeDeep' :
+            count > 0 ? 'text-red-700' : 'text-[#8A9E78]'
         )}
       />
       {count > 0 && (
@@ -162,10 +162,10 @@ function UserAvatar({
   onClick: () => void
 }) {
   const STYLE_BG: Record<string, string> = {
-    'avataaars':  'b6e3f4', 'big-smile':  'ffd5dc',
+    'avataaars': 'b6e3f4', 'big-smile': 'ffd5dc',
     'adventurer': 'c0aede', 'notionists': 'd1fae5',
-    'lorelei':    'ffdfbf', 'micah':      'dbeafe',
-    'open-peeps': 'fde68a', 'personas':   'e0e7ff',
+    'lorelei': 'ffdfbf', 'micah': 'dbeafe',
+    'open-peeps': 'fde68a', 'personas': 'e0e7ff',
   }
   const AVATAR_COLORS = [
     { bg: '#8fff00', text: '#0a0d08' }, { bg: '#0ea5e9', text: '#ffffff' },
@@ -173,14 +173,14 @@ function UserAvatar({
     { bg: '#ec4899', text: '#ffffff' }, { bg: '#14b8a6', text: '#ffffff' },
     { bg: '#ef4444', text: '#ffffff' }, { bg: '#6366f1', text: '#ffffff' },
   ]
-  const name        = profile?.name || profile?.email || 'U'
-  const seed        = encodeURIComponent(profile?.id || profile?.email || 'default')
-  const styleKey    = STYLE_BG[profile?.avatar_url || ''] ? (profile?.avatar_url || 'avataaars') : 'avataaars'
-  const bg          = STYLE_BG[styleKey] ?? 'b6e3f4'
+  const name = profile?.name || profile?.email || 'U'
+  const seed = encodeURIComponent(profile?.id || profile?.email || 'default')
+  const styleKey = STYLE_BG[profile?.avatar_url || ''] ? (profile?.avatar_url || 'avataaars') : 'avataaars'
+  const bg = STYLE_BG[styleKey] ?? 'b6e3f4'
   const dicebearUrl = `https://api.dicebear.com/9.x/${styleKey}/svg?seed=${seed}&backgroundColor=${bg}&backgroundType=solid`
-  const hash        = Math.abs(name.split('').reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0)) % 8
-  const colors      = AVATAR_COLORS[hash]
-  const ini         = initials(name)
+  const hash = Math.abs(name.split('').reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0)) % 8
+  const colors = AVATAR_COLORS[hash]
+  const ini = initials(name)
   const [imgError, setImgError] = useState(false)
 
   return (
@@ -261,31 +261,31 @@ function NotifToast({
 // DASHBOARD LAYOUT
 // --------------------------------------------------------------
 function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
-  const router       = useRouter()
-  const pathname     = usePathname()
+  const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const toast    = useToast()
+  const toast = useToast()
   const supabase = createClient()
   const { brand } = useBrand()
   const [showAdminSettings, setShowAdminSettings] = useState(false)
 
-  const [profile,        setProfile]        = useState<Profile | null>(null)
-  const [mobileOpen,     setMobileOpen]     = useState(false)
-  const [notifCount,     setNotifCount]     = useState(0)
-  const [prevCount,      setPrevCount]      = useState(0)
-  const [bellPulsing,    setBellPulsing]    = useState(false)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [notifCount, setNotifCount] = useState(0)
+  const [prevCount, setPrevCount] = useState(0)
+  const [bellPulsing, setBellPulsing] = useState(false)
   const [showNotifPanel, setShowNotifPanel] = useState(false)
-  const [toasts,         setToasts]         = useState<Array<{id: string; title: string; message: string}>>([])
+  const [toasts, setToasts] = useState<Array<{ id: string; title: string; message: string }>>([])
 
   // -- Kill switch visibility state -------------------------------
-  const [disabledTools,  setDisabledTools]  = useState<Set<string>>(new Set())
-  const [showSupport,    setShowSupport]    = useState(false)
-  const [showSettings,      setShowSettings]      = useState(false)
-  const [showAffiliateMenu,  setShowAffiliateMenu]  = useState(false)
+  const [disabledTools, setDisabledTools] = useState<Set<string>>(new Set())
+  const [showSupport, setShowSupport] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showAffiliateMenu, setShowAffiliateMenu] = useState(false)
   const [sectionPerms, setSectionPerms] = useState<Record<string, boolean> | null>(null)
-  const [sidebarMode, setSidebarMode]   = useState<'hide' | 'ghost'>('hide')
-  const [showMoreAnalytics,  setShowMoreAnalytics]  = useState(false)
-  const [activeAdminTab,     setActiveAdminTab]     = useState<string | null>(searchParams.get('settings'))
+  const [sidebarMode, setSidebarMode] = useState<'hide' | 'ghost'>('hide')
+  const [showMoreAnalytics, setShowMoreAnalytics] = useState(false)
+  const [activeAdminTab, setActiveAdminTab] = useState<string | null>(searchParams.get('settings'))
   const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<string | null>(searchParams.get('analytics'))
   const [emailUnverified, setEmailUnverified] = useState(false)
 
@@ -360,8 +360,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               setSectionPerms(mergedPerms)
             }
             // Load sidebar mode
-              setSidebarMode(((data as any)?.sidebar_mode ?? 'hide') as 'hide' | 'ghost')
-          } catch {}
+            setSidebarMode(((data as any)?.sidebar_mode ?? 'hide') as 'hide' | 'ghost')
+          } catch { }
         }
       }
       if (user && !user.email_confirmed_at) setEmailUnverified(true)
@@ -391,7 +391,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           const userPerms = permsData?.section_permissions ?? {}
           if (Object.keys(userPerms).length > 0) setSectionPerms(userPerms)
         }
-      } catch {}
+      } catch { }
     }, 300000) // 5 minutes
     return () => clearInterval(interval)
   }, [])
@@ -451,7 +451,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         setPrevCount(n)
         setNotifCount(n)
       }
-    } catch {}
+    } catch { }
   }, [profile, prevCount])
 
   useEffect(() => {
@@ -479,61 +479,61 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
         {!mounted ? (
-          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight:'100vh', backgroundColor:'#1a2410' }} />
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: '100vh', backgroundColor: '#1a2410' }} />
         ) : ((cachedIsAdmin || isAdmin) && !isUserMode) ? (
           /* -- ADMIN SIDEBAR -- */
-          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight:'100vh', backgroundColor:'#1a2410' }}>
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: '100vh', backgroundColor: '#1a2410' }}>
             {/* Logo */}
             <button
               onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null); router.push('/dashboard/admin') }}
               className="flex items-center gap-2.5 px-5 pt-6 pb-4 hover:opacity-80 transition-opacity w-full text-left"
-              style={{ borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#8FFF00' }}>
                 <ShieldAlert size={16} className="text-dark" />
               </div>
               <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
             </button>
 
-            <div className="flex flex-col flex-1 px-2 py-3 gap-0.5 overflow-y-auto scrollbar-none" style={{ scrollbarWidth:'none' }}>
+            <div className="flex flex-col flex-1 px-2 py-3 gap-0.5 overflow-y-auto scrollbar-none" style={{ scrollbarWidth: 'none' }}>
               {/* Dashboard */}
               <Link href="/dashboard/admin" scroll={false}
                 onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null) }}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-transparent group"
                 style={{ color: pathname === '/dashboard/admin' && !searchParams.has('settings') && !searchParams.has('analytics') && !activeAdminTab && !activeAnalyticsTab ? '#8FFF00' : 'rgba(255,255,255,1)' }}>
                 <LayoutDashboard size={16} className="group-hover:!text-lime transition-colors" style={{ color: 'inherit' }} />
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500 }} className="group-hover:!text-lime transition-colors">Dashboard</span>
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }} className="group-hover:!text-lime transition-colors">Dashboard</span>
               </Link>
 
               {/* Admin Settings */}
-              <div style={{ height:8 }} />
+              <div style={{ height: 8 }} />
               {[
-                { icon: Users,         label: 'User CRM',         tab: 0,  permKey: 'user_crm'        },
-                { icon: BarChart2,     label: 'Revenue',          tab: 0,  permKey: 'founder_ops',    key: 'revenue', isAnalytics: true },
-                { icon: MessageCircle, label: 'Tickets',          tab: 14, permKey: 'tickets'         },
-                { icon: CreditCard,    label: 'Payments',         tab: 13, permKey: 'payments'        },
-                { icon: DollarSign,    label: 'Promos & Codes',   tab: 3,  permKey: 'promos'          },
-                { icon: Power,         label: 'Kill Switches',    tab: 4,  permKey: 'kill_switches'   },
-                { icon: Settings,      label: 'Plan Limits',      tab: 5,  permKey: 'plan_limits'     },
-                { icon: FileText,      label: 'Emails',           tab: 6,  permKey: 'emails'          },
-                { icon: Zap,           label: 'Webhooks',         tab: 7,  permKey: 'webhooks'        },
-                { icon: Shield,        label: 'Role Builder',     tab: 1,  permKey: 'role_builder'    },
-                { icon: Key,           label: 'Security Logs',    tab: 2,  permKey: 'security_logs'   },
-                { icon: Trophy,        label: 'Gamification',     tab: 8,  permKey: 'gamification'    },
-                { icon: Key,           label: 'API Vault',        tab: 9,  permKey: 'api_vault'       },
-                { icon: DollarSign,    label: 'Affiliate Center', tab: 3,  permKey: 'affiliate_vault', key: 'affiliate', hasChild: true, isAnalytics: true },
-                { icon: DollarSign,    label: 'Affiliate Vault',  tab: 10, permKey: 'affiliate_vault', isChild: true },
-                { icon: BarChart2,     label: 'Founder Ops',      tab: 11, permKey: 'founder_ops'     },
-                { icon: Mail,          label: 'Marketing',        tab: 12, permKey: 'marketing'       },
-                { icon: BookOpen,      label: 'Blog',             tab: 15, permKey: 'blog'            },
-                { icon: Wrench,        label: 'Changelog',        tab: 16, permKey: 'changelog'       },
-                { icon: Briefcase,     label: 'Careers',          tab: 17, permKey: 'careers'         },
-                { icon: FileText,      label: 'Page Editor',      tab: 18, permKey: 'page_editor'     },
-                { icon: Zap,           label: 'API Fleet',        tab: 19, permKey: 'api_fleet'        },
-                { icon: Trophy,        label: 'Feature Roadmap',  tab: 20, permKey: 'feature_roadmap'  },
-                { icon: Shield,        label: 'VeRO Command Center', tab: 21, permKey: 'vero_center'   },
-                { icon: BarChart2,     label: 'Infrastructure Monitor', tab: 22, permKey: 'infra_monitor' },
-                { icon: Search,        label: 'Competitor X-Ray', tab: 23, permKey: 'competitor_xray'  },
-                { icon: Package,       label: 'Chrome Extension', tab: 24, permKey: 'chrome_extension' },
+                { icon: Users, label: 'User CRM', tab: 0, permKey: 'user_crm' },
+                { icon: BarChart2, label: 'Revenue', tab: 0, permKey: 'founder_ops', key: 'revenue', isAnalytics: true },
+                { icon: MessageCircle, label: 'Tickets', tab: 14, permKey: 'tickets' },
+                { icon: CreditCard, label: 'Payments', tab: 13, permKey: 'payments' },
+                { icon: DollarSign, label: 'Promos & Codes', tab: 3, permKey: 'promos' },
+                { icon: Power, label: 'Kill Switches', tab: 4, permKey: 'kill_switches' },
+                { icon: Settings, label: 'Plan Limits', tab: 5, permKey: 'plan_limits' },
+                { icon: FileText, label: 'Emails', tab: 6, permKey: 'emails' },
+                { icon: Zap, label: 'Webhooks', tab: 7, permKey: 'webhooks' },
+                { icon: Shield, label: 'Role Builder', tab: 1, permKey: 'role_builder' },
+                { icon: Key, label: 'Security Logs', tab: 2, permKey: 'security_logs' },
+                { icon: Trophy, label: 'Gamification', tab: 8, permKey: 'gamification' },
+                { icon: Key, label: 'API Vault', tab: 9, permKey: 'api_vault' },
+                { icon: DollarSign, label: 'Affiliate Center', tab: 25, permKey: 'affiliate_center', key: 'affiliate', hasChild: true },
+                { icon: DollarSign, label: 'Affiliate Vault', tab: 10, permKey: 'affiliate_vault', isChild: true, key: 'affiliate' },
+                { icon: BarChart2, label: 'Founder Ops', tab: 11, permKey: 'founder_ops' },
+                { icon: Mail, label: 'Marketing', tab: 12, permKey: 'marketing' },
+                { icon: BookOpen, label: 'Blog', tab: 15, permKey: 'blog' },
+                { icon: Wrench, label: 'Changelog', tab: 16, permKey: 'changelog' },
+                { icon: Briefcase, label: 'Careers', tab: 17, permKey: 'careers' },
+                { icon: FileText, label: 'Page Editor', tab: 18, permKey: 'page_editor' },
+                { icon: Zap, label: 'API Fleet', tab: 19, permKey: 'api_fleet' },
+                { icon: Trophy, label: 'Feature Roadmap', tab: 20, permKey: 'feature_roadmap' },
+                { icon: Shield, label: 'VeRO Command Center', tab: 21, permKey: 'vero_center' },
+                { icon: BarChart2, label: 'Infrastructure Monitor', tab: 22, permKey: 'infra_monitor' },
+                { icon: Search, label: 'Competitor X-Ray', tab: 23, permKey: 'competitor_xray' },
+                { icon: Package, label: 'Chrome Extension', tab: 24, permKey: 'chrome_extension' },
 
               ].filter(item => {
                 // Super admin or no permissions set ? show all
@@ -569,44 +569,44 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     }}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left group"
                     style={{ backgroundColor: 'transparent', paddingLeft: (item as any).isChild ? 24 : 12 }}>
-                    <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', flexShrink:0, transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'} />
-                    <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight: isActive ? 700 : 500, flex:1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', transition:'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}>{item.label}</span>
+                    <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', flexShrink: 0, transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'} />
+                    <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: isActive ? 700 : 500, flex: 1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}>{item.label}</span>
                     {(item as any).hasChild && (
                       <ChevronDown size={13} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAffiliateMenu(v => !v) }}
-                        style={{ color:'rgba(255,255,255,0.4)', transform: showAffiliateMenu ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }} />
+                        style={{ color: 'rgba(255,255,255,0.4)', transform: showAffiliateMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                     )}
                     {!isActive && !(item as any).hasChild && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] === true && (
-                      <Eye size={10} style={{ color:'rgba(255,255,255,0.3)', flexShrink:0 }}/>
+                      <Eye size={10} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
                     )}
                     {isLocked && (
-                      <Lock size={10} style={{ color:'rgba(255,255,255,0.3)', flexShrink:0 }}/>
+                      <Lock size={10} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
                     )}
-                    {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width:4, height:4, borderRadius:'50%', backgroundColor:'#8FFF00' }} />}
+                    {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#8FFF00' }} />}
                   </button>
                 )
               })}
-              </div>
+            </div>
 
             {/* Settings + Logout */}
-            <div className="px-2 pb-6" style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:12 }}>
+            <div className="px-2 pb-6" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 12 }}>
               <button
                 onClick={() => setShowAdminSettings(true)}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
-                style={{ color:'rgba(255,255,255,0.5)' }}>
+                style={{ color: 'rgba(255,255,255,0.5)' }}>
                 <Settings size={15} />
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500 }}>Settings</span>
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }}>Settings</span>
               </button>
               <button onClick={handleLogout}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
-                style={{ color:'rgba(255,255,255,0.5)' }}>
+                style={{ color: 'rgba(255,255,255,0.5)' }}>
                 <LogOut size={15} />
-                <span style={{ fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500 }}>Log Out</span>
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }}>Log Out</span>
               </button>
             </div>
           </aside>
         ) : (
           /* -- USER SIDEBAR -- */
-          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor:'#1a2410' }}>
+          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor: '#1a2410' }}>
             <div className="flex justify-center pt-[30px] pb-[35px]">
               <button onClick={() => router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
                 <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 24, height: 24 }} />
@@ -646,25 +646,25 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               const hour = new Date().getHours()
               const timeGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
                 : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
-                : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
-                : `Good night, ${firstName}!`
-              const isMain   = pathname === '/dashboard'
+                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                    : `Good night, ${firstName}!`
+              const isMain = pathname === '/dashboard'
               const isOrders = pathname === '/dashboard/orders'
               const isAdminP = pathname.startsWith('/dashboard/admin')
               const adminGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
                 : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
-                : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
-                : `Working late, ${firstName}!`
+                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                    : `Working late, ${firstName}!`
               const desktopMsg = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
-              const mobileMsg  = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
+              const mobileMsg = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
               return (
                 <div className="flex flex-col min-w-0">
                   <span className="hidden lg:block font-extrabold tracking-tight truncate"
-                        style={{ fontSize: 22, color: '#1A2410', fontFamily: 'var(--font-space-grotesk)' }}>
+                    style={{ fontSize: 22, color: '#1A2410', fontFamily: 'var(--font-space-grotesk)' }}>
                     {desktopMsg}
                   </span>
                   <span className="lg:hidden font-extrabold tracking-tight truncate"
-                        style={{ fontSize: 18, color: '#1A2410', fontFamily: 'var(--font-space-grotesk)' }}>
+                    style={{ fontSize: 18, color: '#1A2410', fontFamily: 'var(--font-space-grotesk)' }}>
                     {mobileMsg}
                   </span>
                 </div>
@@ -685,7 +685,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           <main className="flex-1 overflow-auto min-h-0">
             {emailUnverified && (
               <div className="flex items-center justify-between px-4 py-2.5"
-                   style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
+                style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
                 <span style={{ color: '#92400e', fontSize: 13 }}>
                   ?? Please verify your email to unlock all features
                 </span>

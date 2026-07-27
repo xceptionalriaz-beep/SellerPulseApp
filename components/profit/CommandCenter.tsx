@@ -48,11 +48,16 @@ export interface CommandCenterProps {
   regFeeConfirmed: boolean
   regulatoryFeeRate: number
   isAdvancedEnabled: boolean
+  // Output VAT
+  outputVATEnabled: boolean
+  outputVATPercent: number
+  hasOutputVATRate: boolean   // true if country has a known VAT rate
   // advanced values
   sourcingTax: string
   fxFee: string
   defectRate: string
   payoutFee: string
+  defaultPayoutFee: number   // country-specific eBay managed payments default
   cashback: string
   // callbacks
   onItemCostChange: (v: string) => void
@@ -66,6 +71,7 @@ export interface CommandCenterProps {
   onSellerLevelChange: (v: string) => void
   onInternationalChange: (v: boolean) => void
   onRegFeeChange: (v: boolean) => void
+  onOutputVATChange: (enabled: boolean, percent: number) => void
   onAdvancedChange: (v: boolean) => void
   onSourcingTaxChange: (v: string) => void
   onFxFeeChange: (v: string) => void
@@ -164,6 +170,9 @@ function InputField({
   suffix?: string
 }) {
   const [focused, setFocused] = useState(false)
+  const displayValue = !focused && value !== '' && !isNaN(parseFloat(value))
+    ? parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+    : value
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <LabelWithHelp label={label} tooltip={tooltip} />
@@ -179,7 +188,7 @@ function InputField({
         <input
           type="text"
           inputMode="decimal"
-          value={value}
+          value={displayValue}
           onChange={e => onChange(e.target.value.replace(/[^0-9.]/g, ''))}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -384,11 +393,12 @@ export default function CommandCenter({
   adRate, buyerTax,
   selectedCategory, selectedStoreTier, selectedSellerLevel,
   isInternational, includeRegFee, regFeeConfirmed, regulatoryFeeRate,
+  outputVATEnabled, outputVATPercent, hasOutputVATRate,
   isAdvancedEnabled,
-  sourcingTax, fxFee, defectRate, payoutFee, cashback,
+  sourcingTax, fxFee, defectRate, payoutFee, defaultPayoutFee, cashback,
   onItemCostChange, onShippingCostChange, onSellingPriceChange, onBuyerPaidShipChange,
   onAdRateChange, onBuyerTaxChange, onCategoryChange, onStoreTierChange,
-  onSellerLevelChange, onInternationalChange, onRegFeeChange, onAdvancedChange,
+  onSellerLevelChange, onInternationalChange, onRegFeeChange, onOutputVATChange, onAdvancedChange,
   onSourcingTaxChange, onFxFeeChange, onDefectRateChange, onPayoutFeeChange,
   onCashbackChange, onReset,
 }: CommandCenterProps) {
@@ -500,6 +510,22 @@ export default function CommandCenter({
         </p>
       )}
 
+      {/* Output VAT toggle — only show for countries with a known VAT rate */}
+      {hasOutputVATRate && (
+        <>
+          <Toggle
+            label={`Output VAT on sales (${outputVATPercent}%)`}
+            tooltip={`VAT-registered sellers must remit ${outputVATPercent}% of the sale price to the tax authority. Enabling this shows your real post-VAT profit. Toggle off if you list prices ex-VAT (B2B).`}
+            checked={outputVATEnabled}
+            onChange={v => onOutputVATChange(v, outputVATPercent)} />
+          {outputVATEnabled && (
+            <p style={{ fontSize: 9, color: C.amber, margin: '-8px 0 0', lineHeight: 1.4 }}>
+              Prices assumed inc-VAT. Net revenue = sale price ÷ {(1 + outputVATPercent / 100).toFixed(4)}
+            </p>
+          )}
+        </>
+      )}
+
       <Divider />
 
       {/* Advanced pro toggle */}
@@ -529,11 +555,11 @@ export default function CommandCenter({
               label="Return buffer %" tooltip="Expected return/defect rate as a revenue loss buffer"
               value={defectRate} suffix="%" onChange={onDefectRateChange} />
             <InputField
-              label="Payout fee %" tooltip="PayPal: 3.49% | Stripe: 2.9% | Square: 2.6% | eBay managed: ~0.2% | Enter your processor's rate here"
+              label="Payout fee %" tooltip={`eBay managed payments default for this country: ${defaultPayoutFee}%. Override if you use a different processor. PayPal: 3.49% | Stripe: 2.9% | Square: 2.6%`}
               value={payoutFee} suffix="%" onChange={onPayoutFeeChange} />
           </div>
           <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0', lineHeight: 1.4 }}>
-            💳 PayPal 3.49% · Stripe 2.9% · Square 2.6% · eBay managed ~0.2%
+            💳 eBay managed: {defaultPayoutFee}% (this country) · PayPal: 3.49% · Stripe: 2.9% · Square: 2.6%
           </p>
           <InputField
             label="Cashback / rewards %" tooltip="Cashback earned on sourcing cost — adds back to profit"

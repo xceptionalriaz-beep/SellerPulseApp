@@ -12,49 +12,49 @@ import {
 } from 'lucide-react'
 
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
+  dark: '#0a0d08',
+  lime: '#8fff00',
   limeDeep: '#4a8f00',
   limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  amber:    '#d97706',
-  green:    '#16a34a',
-  blue:     '#1d4ed8',
-  purple:   '#7c3aed',
+  border: '#e8ede2',
+  bg: '#f7f9f5',
+  text: '#1a2410',
+  muted: '#8a9e78',
+  surface: '#ffffff',
+  red: '#b91c1c',
+  amber: '#d97706',
+  green: '#16a34a',
+  blue: '#1d4ed8',
+  purple: '#7c3aed',
 }
 
 // -- Constants --------------------------------------------------
 const LEVEL_NAMES = ['', 'Beginner', 'Rising', 'Smart', 'Pro', 'Elite']
-const LEVEL_COLORS  = ['', C.muted, C.blue, C.amber, C.purple, C.limeDeep]
-const LEVEL_BG      = ['', C.bg, 'rgba(29,78,216,0.08)', 'rgba(217,119,6,0.08)', 'rgba(124,58,237,0.08)', C.limeTint]
-const LEVEL_LUCIDE  = ['', Star, Star, Flame, Crown, Crown]
-const LEVEL_XP    = [0, 0, 100, 300, 600, 1000]
+const LEVEL_COLORS = ['', C.muted, C.blue, C.amber, C.purple, C.limeDeep]
+const LEVEL_BG = ['', C.bg, 'rgba(29,78,216,0.08)', 'rgba(217,119,6,0.08)', 'rgba(124,58,237,0.08)', C.limeTint]
+const LEVEL_LUCIDE = ['', Star, Star, Flame, Crown, Crown]
+const LEVEL_XP = [0, 0, 100, 300, 600, 1000]
 
 const CATEGORIES = ['onboarding', 'engagement', 'revenue']
 const REWARD_TYPES = ['badge', 'trial_extension', 'credits', 'feature', 'content', 'call', 'discount']
 const ACTION_TYPES = ['search', 'title_built', 'order_protected', 'login_streak', 'referral', 'plan_upgraded', 'ebay_connected', 'profit_calc', 'manual']
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  trophy:       Trophy,
-  search:       Search,
-  shield:       Shield,
+  trophy: Trophy,
+  search: Search,
+  shield: Shield,
   'shield-check': Shield,
   'shield-alert': Shield,
-  flame:        Flame,
-  star:         Star,
-  zap:          Zap,
-  users:        Users,
-  crown:        Crown,
-  award:        Award,
-  target:       Target,
-  type:         Edit,
-  calculator:   BarChart2,
-  store:        Target,
+  flame: Flame,
+  star: Star,
+  zap: Zap,
+  users: Users,
+  crown: Crown,
+  award: Award,
+  target: Target,
+  type: Edit,
+  calculator: BarChart2,
+  store: Target,
   'trending-up': BarChart2,
 }
 
@@ -64,43 +64,43 @@ function getIcon(name: string): React.ElementType {
 
 // -- Helpers ----------------------------------------------------
 function timeAgo(iso: string): string {
-  const diff  = Date.now() - new Date(iso).getTime()
-  const mins  = Math.floor(diff / 60000)
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
-  const days  = Math.floor(diff / 86400000)
-  if (mins  <  1) return 'Just now'
-  if (mins  < 60) return `${mins}m ago`
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
   if (hours < 24) return `${hours}h ago`
   return `${days}d ago`
 }
 
 function categoryColor(cat: string) {
-  if (cat === 'onboarding') return { color: C.blue,   bg: 'rgba(29,78,216,0.08)'  }
-  if (cat === 'engagement') return { color: C.amber,  bg: 'rgba(217,119,6,0.08)'  }
-  if (cat === 'revenue')    return { color: C.limeDeep, bg: C.limeTint             }
+  if (cat === 'onboarding') return { color: C.blue, bg: 'rgba(29,78,216,0.08)' }
+  if (cat === 'engagement') return { color: C.amber, bg: 'rgba(217,119,6,0.08)' }
+  if (cat === 'revenue') return { color: C.limeDeep, bg: C.limeTint }
   return { color: C.muted, bg: C.bg }
 }
 
 function rewardColor(type: string) {
-  if (type === 'trial_extension') return { color: C.limeDeep, bg: C.limeTint              }
-  if (type === 'badge')           return { color: C.purple,   bg: 'rgba(124,58,237,0.08)' }
-  if (type === 'call')            return { color: C.blue,     bg: 'rgba(29,78,216,0.08)'  }
-  if (type === 'content')         return { color: C.amber,    bg: 'rgba(217,119,6,0.08)'  }
-  if (type === 'discount')        return { color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
+  if (type === 'trial_extension') return { color: C.limeDeep, bg: C.limeTint }
+  if (type === 'badge') return { color: C.purple, bg: 'rgba(124,58,237,0.08)' }
+  if (type === 'call') return { color: C.blue, bg: 'rgba(29,78,216,0.08)' }
+  if (type === 'content') return { color: C.amber, bg: 'rgba(217,119,6,0.08)' }
+  if (type === 'discount') return { color: C.green, bg: 'rgba(22,163,74,0.08)' }
   return { color: C.muted, bg: C.bg }
 }
 
 // -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,    border: C.lime,   color: C.lime },
-    error:   { bg: '#FEF2F2', border: '#FECACA', color: C.red  },
-    info:    { bg: C.bg,      border: C.border,  color: C.text },
+    success: { bg: C.dark, border: C.lime, color: C.lime },
+    error: { bg: '#FEF2F2', border: '#FECACA', color: C.red },
+    info: { bg: C.bg, border: C.border, color: C.text },
   }
   const t = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
+      style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
       <Check size={15} style={{ color: t.color }} />
       <p className="text-[13px] font-bold" style={{ color: t.color }}>{msg}</p>
     </div>
@@ -128,7 +128,7 @@ function CustomDropdown({ value, onChange, options, label }: {
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
             <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border shadow-xl overflow-hidden z-20"
-                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              style={{ backgroundColor: C.surface, borderColor: C.border }}>
               {options.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
                   className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f4ffe6] transition-colors"
@@ -150,19 +150,19 @@ function QuestModal({ quest, onClose, onSaved }: {
   quest?: any; onClose: () => void; onSaved: (q: any) => void
 }) {
   const supabase = createClient()
-  const isEdit   = !!quest
+  const isEdit = !!quest
 
-  const [title,        setTitle]        = useState(quest?.title        ?? '')
-  const [description,  setDescription]  = useState(quest?.description  ?? '')
-  const [rewardText,   setRewardText]   = useState(quest?.reward_text  ?? '')
-  const [rewardType,   setRewardType]   = useState(quest?.reward_type  ?? 'badge')
-  const [rewardValue,  setRewardValue]  = useState(String(quest?.reward_value  ?? 0))
-  const [targetCount,  setTargetCount]  = useState(String(quest?.target_count  ?? 1))
-  const [actionType,   setActionType]   = useState(quest?.action_type  ?? 'manual')
-  const [xpReward,     setXpReward]     = useState(String(quest?.xp_reward     ?? 50))
-  const [category,     setCategory]     = useState(quest?.category     ?? 'onboarding')
-  const [saving,       setSaving]       = useState(false)
-  const [visible,      setVisible]      = useState(false)
+  const [title, setTitle] = useState(quest?.title ?? '')
+  const [description, setDescription] = useState(quest?.description ?? '')
+  const [rewardText, setRewardText] = useState(quest?.reward_text ?? '')
+  const [rewardType, setRewardType] = useState(quest?.reward_type ?? 'badge')
+  const [rewardValue, setRewardValue] = useState(String(quest?.reward_value ?? 0))
+  const [targetCount, setTargetCount] = useState(String(quest?.target_count ?? 1))
+  const [actionType, setActionType] = useState(quest?.action_type ?? 'manual')
+  const [xpReward, setXpReward] = useState(String(quest?.xp_reward ?? 50))
+  const [category, setCategory] = useState(quest?.category ?? 'onboarding')
+  const [saving, setSaving] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
   function handleClose() { setVisible(false); setTimeout(onClose, 250) }
@@ -173,9 +173,9 @@ function QuestModal({ quest, onClose, onSaved }: {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/gamification/quest/save', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           id: quest?.id, title, description, reward_text: rewardText,
           reward_type: rewardType, reward_value: Number(rewardValue),
           target_count: Number(targetCount), action_type: actionType,
@@ -190,16 +190,18 @@ function QuestModal({ quest, onClose, onSaved }: {
 
   return (
     <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
-         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
-         onClick={handleClose}>
+      style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+      onClick={handleClose}>
       <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col"
-           style={{ backgroundColor: C.surface, maxHeight: '90vh',
-             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
-             opacity: visible ? 1 : 0, transition: 'transform 0.25s ease, opacity 0.25s ease' }}
-           onClick={e => e.stopPropagation()}>
+        style={{
+          backgroundColor: C.surface, maxHeight: '90vh',
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+          opacity: visible ? 1 : 0, transition: 'transform 0.25s ease, opacity 0.25s ease'
+        }}
+        onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center gap-3 px-5 py-4 border-b shrink-0"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <Trophy size={16} style={{ color: C.limeDeep }} />
           <p className="text-[15px] font-black flex-1" style={{ color: C.dark }}>
             {isEdit ? 'Edit Quest' : 'New Quest'}
@@ -233,7 +235,7 @@ function QuestModal({ quest, onClose, onSaved }: {
               style={{ borderColor: C.border, backgroundColor: C.bg, color: C.text }} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <CustomDropdown label="CATEGORY"    value={category}   onChange={setCategory}
+            <CustomDropdown label="CATEGORY" value={category} onChange={setCategory}
               options={CATEGORIES.map(c => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))} />
             <CustomDropdown label="REWARD TYPE" value={rewardType} onChange={setRewardType}
               options={REWARD_TYPES.map(r => ({ value: r, label: r.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) }))} />
@@ -286,10 +288,10 @@ function QuestModal({ quest, onClose, onSaved }: {
 function FulfillModal({ item, onClose, onFulfilled }: {
   item: any; onClose: () => void; onFulfilled: (id: string) => void
 }) {
-  const supabase   = createClient()
-  const [note,     setNote]     = useState('')
-  const [saving,   setSaving]   = useState(false)
-  const [visible,  setVisible]  = useState(false)
+  const supabase = createClient()
+  const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => { const t = setTimeout(() => setVisible(true), 10); return () => clearTimeout(t) }, [])
   function handleClose() { setVisible(false); setTimeout(onClose, 250) }
@@ -299,9 +301,9 @@ function FulfillModal({ item, onClose, onFulfilled }: {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/gamification/fulfill', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ progress_id: item.id, note }),
+        body: JSON.stringify({ progress_id: item.id, note }),
       })
       if (res.ok) { onFulfilled(item.id); handleClose() }
     } catch { /* silent */ }
@@ -310,16 +312,18 @@ function FulfillModal({ item, onClose, onFulfilled }: {
 
   return (
     <div className="fixed inset-0 z-[10500] flex items-center justify-center p-4"
-         style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
-         onClick={handleClose}>
+      style={{ backgroundColor: `rgba(0,0,0,${visible ? 0.6 : 0})`, transition: 'background-color 0.25s ease' }}
+      onClick={handleClose}>
       <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
-           style={{ backgroundColor: C.surface,
-             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
-             opacity: visible ? 1 : 0, transition: 'transform 0.25s ease, opacity 0.25s ease' }}
-           onClick={e => e.stopPropagation()}>
+        style={{
+          backgroundColor: C.surface,
+          transform: visible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(16px)',
+          opacity: visible ? 1 : 0, transition: 'transform 0.25s ease, opacity 0.25s ease'
+        }}
+        onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center gap-3 px-5 py-4 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <CheckCircle size={16} style={{ color: C.limeDeep }} />
           <p className="text-[15px] font-black flex-1" style={{ color: C.dark }}>Fulfill Reward</p>
           <button onClick={handleClose} className="w-8 h-8 flex items-center justify-center rounded-xl hover:opacity-70"
@@ -373,12 +377,12 @@ function BadgeManagerSection({ badges }: { badges: any[] }) {
   const PAGE_SIZE = 6
   const [page, setPage] = useState(0)
   const totalPages = Math.ceil(badges.length / PAGE_SIZE)
-  const paginated  = badges.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const paginated = badges.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   return (
     <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
       <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-           style={{ borderColor: C.border, backgroundColor: C.bg }}>
+        style={{ borderColor: C.border, backgroundColor: C.bg }}>
         <Award size={13} style={{ color: C.limeDeep }} />
         <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>BADGE MANAGER</p>
         <p className="text-[10px]" style={{ color: C.muted }}>{badges.length} badges total</p>
@@ -386,13 +390,13 @@ function BadgeManagerSection({ badges }: { badges: any[] }) {
 
       <div className="grid grid-cols-2 gap-3 p-4">
         {paginated.map(badge => {
-          const BIcon      = getIcon(badge.icon)
+          const BIcon = getIcon(badge.icon)
           const earnedCount = badge.user_badges?.length ?? 0
           return (
             <div key={badge.id} className="flex items-center gap-3 p-3 rounded-xl border"
-                 style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              style={{ borderColor: C.border, backgroundColor: C.bg }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                   style={{ backgroundColor: C.limeTint }}>
+                style={{ backgroundColor: C.limeTint }}>
                 <BIcon size={18} style={{ color: C.limeDeep }} />
               </div>
               <div className="flex-1 min-w-0">
@@ -400,7 +404,7 @@ function BadgeManagerSection({ badges }: { badges: any[] }) {
                 <p className="text-[10px] truncate" style={{ color: C.muted }}>{badge.description}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg"
-                        style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                    style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
                     +{badge.xp_reward} XP
                   </span>
                   <span className="text-[9px]" style={{ color: earnedCount > 0 ? C.limeDeep : C.muted }}>
@@ -416,7 +420,7 @@ function BadgeManagerSection({ badges }: { badges: any[] }) {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <p className="text-[10px]" style={{ color: C.muted }}>
             Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, badges.length)} of {badges.length}
           </p>
@@ -448,19 +452,20 @@ export default function GamificationTab() {
   const { can } = useTabPermissions('gamification')
   const supabase = createClient()
 
-  const [quests,       setQuests]       = useState<any[]>([])
-  const [badges,       setBadges]       = useState<any[]>([])
-  const [leaderboard,  setLeaderboard]  = useState<any[]>([])
+  const [quests, setQuests] = useState<any[]>([])
+  const [badges, setBadges] = useState<any[]>([])
+  const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [fulfillments, setFulfillments] = useState<any[]>([])
-  const [stats,        setStats]        = useState<any>(null)
-  const [loading,      setLoading]      = useState(true)
-  const [refreshing,   setRefreshing]   = useState(false)
+  const [stats, setStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [showNewQuest, setShowNewQuest] = useState(false)
-  const [editQuest,    setEditQuest]    = useState<any | null>(null)
-  const [fulfillItem,  setFulfillItem]  = useState<any | null>(null)
-  const [deletingId,   setDeletingId]   = useState<string | null>(null)
+  const [editQuest, setEditQuest] = useState<any | null>(null)
+  const [fulfillItem, setFulfillItem] = useState<any | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [rebuilding, setRebuilding] = useState(false)
   const [activeSection, setActiveSection] = useState<'quests' | 'fulfillments' | 'leaderboard' | 'badges'>('quests')
-  const [toast,        setToast]        = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
 
   function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
     setToast({ msg, type })
@@ -493,9 +498,9 @@ export default function GamificationTab() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       await fetch('/api/admin/gamification/quest/delete', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id }),
+        body: JSON.stringify({ id }),
       })
       setQuests(prev => prev.filter(q => q.id !== id))
       showToast('Quest deleted', 'info')
@@ -507,17 +512,37 @@ export default function GamificationTab() {
     setQuests(prev => prev.map(q => q.id === id ? { ...q, is_active: val } : q))
     const { data: { session } } = await supabase.auth.getSession()
     await fetch('/api/admin/gamification/quest/save', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-      body:    JSON.stringify({ id, is_active: val }),
+      body: JSON.stringify({ id, is_active: val }),
     })
   }
 
+  async function handleRebuildLeaderboard() {
+    setRebuilding(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/gamification/leaderboard/rebuild-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+      })
+      if (res.ok) {
+        showToast('Leaderboard rebuilt', 'success')
+        loadData()
+      } else {
+        showToast('Failed to rebuild leaderboard', 'error')
+      }
+    } catch {
+      showToast('Failed to rebuild leaderboard', 'error')
+    }
+    setRebuilding(false)
+  }
+
   const SECTION_TABS = [
-    { key: 'quests',       label: 'Quest Matrix',        count: quests.length          },
-    { key: 'fulfillments', label: 'Fulfillment Queue',   count: fulfillments.length, warn: fulfillments.length > 0 },
-    { key: 'leaderboard',  label: 'Leaderboard',         count: null                   },
-    { key: 'badges',       label: 'Badge Manager',       count: badges.length          },
+    { key: 'quests', label: 'Quest Matrix', count: quests.length },
+    { key: 'fulfillments', label: 'Fulfillment Queue', count: fulfillments.length, warn: fulfillments.length > 0 },
+    { key: 'leaderboard', label: 'Leaderboard', count: null },
+    { key: 'badges', label: 'Badge Manager', count: badges.length },
   ]
 
   return (
@@ -549,21 +574,21 @@ export default function GamificationTab() {
       {/* HUD Cards */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { title: 'Active Quests',        value: stats?.activeQuests        ?? '—', icon: Trophy,       color: C.limeDeep, bg: C.limeTint              },
-          { title: 'Completions Today',    value: stats?.completionsToday    ?? '—', icon: CheckCircle,  color: C.green,    bg: 'rgba(22,163,74,0.08)'  },
-          { title: 'Avg Seller Level',     value: stats?.avgLevel            ?? '—', icon: Star,         color: C.amber,    bg: 'rgba(217,119,6,0.08)'  },
+          { title: 'Active Quests', value: stats?.activeQuests ?? '—', icon: Trophy, color: C.limeDeep, bg: C.limeTint },
+          { title: 'Completions Today', value: stats?.completionsToday ?? '—', icon: CheckCircle, color: C.green, bg: 'rgba(22,163,74,0.08)' },
+          { title: 'Avg Seller Level', value: stats?.avgLevel ?? '—', icon: Star, color: C.amber, bg: 'rgba(217,119,6,0.08)' },
           { title: 'Pending Fulfillments', value: stats?.pendingFulfillments ?? '—', icon: AlertTriangle, color: (stats?.pendingFulfillments ?? 0) > 0 ? C.red : C.muted, bg: (stats?.pendingFulfillments ?? 0) > 0 ? 'rgba(185,28,28,0.08)' : C.bg },
         ].map((card, i) => {
           const Icon = card.icon
           return (
             <div key={i} className="flex flex-col gap-3 p-4 rounded-2xl border"
-                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              style={{ backgroundColor: C.surface, borderColor: C.border }}>
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
                   {card.title.toUpperCase()}
                 </p>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                     style={{ backgroundColor: card.bg }}>
+                  style={{ backgroundColor: card.bg }}>
                   <Icon size={15} style={{ color: card.color }} />
                 </div>
               </div>
@@ -578,18 +603,18 @@ export default function GamificationTab() {
       {/* Level guide */}
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
         <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <Crown size={13} style={{ color: C.limeDeep }} />
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>SELLER LEVELS</p>
         </div>
         <div className="grid grid-cols-5 gap-0">
-          {[1,2,3,4,5].map(level => {
+          {[1, 2, 3, 4, 5].map(level => {
             const LIcon = LEVEL_LUCIDE[level] as React.ElementType
             return (
               <div key={level} className="flex flex-col items-center gap-1 p-3 border-r last:border-r-0"
-                   style={{ borderColor: C.border }}>
+                style={{ borderColor: C.border }}>
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                     style={{ backgroundColor: LEVEL_BG[level] }}>
+                  style={{ backgroundColor: LEVEL_BG[level] }}>
                   <LIcon size={16} style={{ color: LEVEL_COLORS[level] }} />
                 </div>
                 <p className="text-[11px] font-black" style={{ color: C.dark }}>{LEVEL_NAMES[level]}</p>
@@ -609,16 +634,16 @@ export default function GamificationTab() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all h-9"
             style={{
               backgroundColor: activeSection === tab.key ? '#8fff00' : C.surface,
-              color:           activeSection === tab.key ? C.lime : C.muted,
-              border:          `1px solid ${activeSection === tab.key ? C.dark : C.border}`,
+              color: activeSection === tab.key ? C.lime : C.muted,
+              border: `1px solid ${activeSection === tab.key ? C.dark : C.border}`,
             }}>
             {tab.label}
             {tab.count !== null && (
               <span className="text-[10px] font-black px-1.5 py-0.5 rounded-lg"
-                    style={{
-                      backgroundColor: tab.warn ? C.red : activeSection === tab.key ? C.lime : C.bg,
-                      color:           tab.warn ? '#fff'  : activeSection === tab.key ? C.dark : C.muted,
-                    }}>
+                style={{
+                  backgroundColor: tab.warn ? C.red : activeSection === tab.key ? C.lime : C.bg,
+                  color: tab.warn ? '#fff' : activeSection === tab.key ? C.dark : C.muted,
+                }}>
                 {tab.count}
               </span>
             )}
@@ -628,236 +653,257 @@ export default function GamificationTab() {
 
       {/* -- QUEST MATRIX --------------------------------------- */}
       {activeSection === 'quests' && (
-        <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-          <div className="grid px-4 py-2.5 border-b"
-               style={{ gridTemplateColumns: '2fr 0.8fr 1.2fr 0.6fr 0.5fr 0.5fr 0.4fr 0.4fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
-            {['QUEST', 'CATEGORY', 'REWARD', 'TARGET', 'COMPLETED', 'XP', 'ACTIVE', ''].map(h => (
-              <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
-            ))}
+        !can('view_quests') ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view quests</p>
           </div>
-
-          {loading ? (
-            <div className="flex flex-col gap-2 p-4">
-              {[0,1,2].map(i => <div key={i} className="h-12 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />)}
+        ) :
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+            <div className="grid px-4 py-2.5 border-b"
+              style={{ gridTemplateColumns: '2fr 0.8fr 1.2fr 0.6fr 0.5fr 0.5fr 0.4fr 0.4fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
+              {['QUEST', 'CATEGORY', 'REWARD', 'TARGET', 'COMPLETED', 'XP', 'ACTIVE', ''].map(h => (
+                <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+              ))}
             </div>
-          ) : quests.map(quest => {
-            const catStyle = categoryColor(quest.category)
-            const rwdStyle = rewardColor(quest.reward_type)
-            const QIcon    = getIcon(quest.icon)
-            const completedCount  = (quest.quest_progress ?? []).filter((p: any) => p.completed).length
-            const totalUsers      = (quest.quest_progress ?? []).length
-            const avgProgress     = totalUsers > 0
-              ? Math.round((quest.quest_progress ?? []).reduce((sum: number, p: any) => sum + (p.current_count ?? 0), 0) / totalUsers)
-              : 0
 
-            return (
-              <div key={quest.id}
-                   className="grid items-center px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
-                   style={{ gridTemplateColumns: '2fr 0.8fr 1.2fr 0.6fr 0.5fr 0.5fr 0.4fr 0.4fr', gap: 10, borderColor: C.border }}>
+            {loading ? (
+              <div className="flex flex-col gap-2 p-4">
+                {[0, 1, 2].map(i => <div key={i} className="h-12 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />)}
+              </div>
+            ) : quests.map(quest => {
+              const catStyle = categoryColor(quest.category)
+              const rwdStyle = rewardColor(quest.reward_type)
+              const QIcon = getIcon(quest.icon)
+              const completedCount = (quest.quest_progress ?? []).filter((p: any) => p.completed).length
+              const totalUsers = (quest.quest_progress ?? []).length
+              const avgProgress = totalUsers > 0
+                ? Math.round((quest.quest_progress ?? []).reduce((sum: number, p: any) => sum + (p.current_count ?? 0), 0) / totalUsers)
+                : 0
 
-                {/* Quest name */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                       style={{ backgroundColor: catStyle.bg }}>
-                    <QIcon size={13} style={{ color: catStyle.color }} />
+              return (
+                <div key={quest.id}
+                  className="grid items-center px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
+                  style={{ gridTemplateColumns: '2fr 0.8fr 1.2fr 0.6fr 0.5fr 0.5fr 0.4fr 0.4fr', gap: 10, borderColor: C.border }}>
+
+                  {/* Quest name */}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: catStyle.bg }}>
+                      <QIcon size={13} style={{ color: catStyle.color }} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-black truncate" style={{ color: C.dark }}>{quest.title}</p>
+                      {quest.description && (
+                        <p className="text-[10px] truncate" style={{ color: C.muted }}>{quest.description}</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[12px] font-black truncate" style={{ color: C.dark }}>{quest.title}</p>
-                    {quest.description && (
-                      <p className="text-[10px] truncate" style={{ color: C.muted }}>{quest.description}</p>
+
+                  {/* Category */}
+                  <span className="text-[9px] font-black px-2 py-1 rounded-lg capitalize w-fit"
+                    style={{ backgroundColor: catStyle.bg, color: catStyle.color }}>
+                    {quest.category}
+                  </span>
+
+                  {/* Reward */}
+                  <span className="text-[9px] font-black px-2 py-1 rounded-lg capitalize w-fit truncate"
+                    style={{ backgroundColor: rwdStyle.bg, color: rwdStyle.color }}>
+                    {quest.reward_type?.replace('_', ' ')}
+                  </span>
+
+                  {/* Target */}
+                  <span className="text-[12px] font-bold" style={{ color: C.text }}>
+                    {quest.target_count}x
+                  </span>
+
+                  {/* Completed — fractional ratio */}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[12px] font-bold" style={{ color: completedCount > 0 ? C.limeDeep : C.muted }}>
+                      {completedCount}
+                      <span className="text-[10px] font-normal" style={{ color: C.muted }}> done</span>
+                    </span>
+                    {quest.target_count > 1 && totalUsers > 0 && (
+                      <span className="text-[9px]" style={{ color: C.muted }}>
+                        avg {avgProgress}/{quest.target_count}
+                      </span>
                     )}
                   </div>
-                </div>
 
-                {/* Category */}
-                <span className="text-[9px] font-black px-2 py-1 rounded-lg capitalize w-fit"
-                      style={{ backgroundColor: catStyle.bg, color: catStyle.color }}>
-                  {quest.category}
-                </span>
-
-                {/* Reward */}
-                <span className="text-[9px] font-black px-2 py-1 rounded-lg capitalize w-fit truncate"
-                      style={{ backgroundColor: rwdStyle.bg, color: rwdStyle.color }}>
-                  {quest.reward_type?.replace('_', ' ')}
-                </span>
-
-                {/* Target */}
-                <span className="text-[12px] font-bold" style={{ color: C.text }}>
-                  {quest.target_count}x
-                </span>
-
-                {/* Completed — fractional ratio */}
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[12px] font-bold" style={{ color: completedCount > 0 ? C.limeDeep : C.muted }}>
-                    {completedCount}
-                    <span className="text-[10px] font-normal" style={{ color: C.muted }}> done</span>
+                  {/* XP */}
+                  <span className="text-[12px] font-bold" style={{ color: C.amber }}>
+                    +{quest.xp_reward}
                   </span>
-                  {quest.target_count > 1 && totalUsers > 0 && (
-                    <span className="text-[9px]" style={{ color: C.muted }}>
-                      avg {avgProgress}/{quest.target_count}
-                    </span>
-                  )}
-                </div>
 
-                {/* XP */}
-                <span className="text-[12px] font-bold" style={{ color: C.amber }}>
-                  +{quest.xp_reward}
-                </span>
+                  {/* Active toggle */}
+                  <div onClick={() => can('toggle_quest') && handleToggleQuest(quest.id, !quest.is_active)}
+                    className="relative w-10 h-5 rounded-full"
+                    style={{ backgroundColor: quest.is_active ? C.dark : 'rgba(100,116,139,0.35)', cursor: can('toggle_quest') ? 'pointer' : 'not-allowed', opacity: can('toggle_quest') ? 1 : 0.5 }}>
+                    <div style={{
+                      position: 'absolute', top: 2, left: 2,
+                      width: 16, height: 16, borderRadius: '50%',
+                      backgroundColor: quest.is_active ? C.lime : '#fff',
+                      transform: quest.is_active ? 'translateX(20px)' : 'translateX(0)',
+                      transition: 'transform 0.25s ease',
+                    }} />
+                  </div>
 
-                {/* Active toggle */}
-                <div onClick={() => can('edit_quest') && handleToggleQuest(quest.id, !quest.is_active)}
-                     className="relative w-10 h-5 rounded-full cursor-pointer"
-                     style={{ backgroundColor: quest.is_active ? C.dark : 'rgba(100,116,139,0.35)' }}>
-                  <div style={{
-                    position: 'absolute', top: 2, left: 2,
-                    width: 16, height: 16, borderRadius: '50%',
-                    backgroundColor: quest.is_active ? C.lime : '#fff',
-                    transform: quest.is_active ? 'translateX(20px)' : 'translateX(0)',
-                    transition: 'transform 0.25s ease',
-                  }} />
+                  {/* Actions */}
+                  <div className="flex items-center gap-1">
+                    {can('edit_quest') && <button onClick={() => setEditQuest(quest)}
+                      className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70"
+                      style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                      <Edit size={10} style={{ color: C.muted }} />
+                    </button>}
+                    {can('delete_quest') && <button onClick={() => handleDeleteQuest(quest.id)} disabled={deletingId === quest.id}
+                      className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 disabled:opacity-40"
+                      style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+                      {deletingId === quest.id
+                        ? <div className="w-3 h-3 rounded-full border border-transparent animate-spin" style={{ borderTopColor: C.red }} />
+                        : <Trash2 size={10} style={{ color: C.red }} />}
+                    </button>}
+                  </div>
                 </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1">
-                  {can('edit_quest') && <button onClick={() => setEditQuest(quest)}
-                    className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70"
-                    style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
-                    <Edit size={10} style={{ color: C.muted }} />
-                  </button>}
-                  {can('delete_quest') && <button onClick={() => handleDeleteQuest(quest.id)} disabled={deletingId === quest.id}
-                    className="w-6 h-6 flex items-center justify-center rounded-lg hover:opacity-70 disabled:opacity-40"
-                    style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
-                    {deletingId === quest.id
-                      ? <div className="w-3 h-3 rounded-full border border-transparent animate-spin" style={{ borderTopColor: C.red }} />
-                      : <Trash2 size={10} style={{ color: C.red }} />}
-                  </button>}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
       )}
 
       {/* -- FULFILLMENT QUEUE ----------------------------------- */}
       {activeSection === 'fulfillments' && (
-        <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
-            <AlertTriangle size={13} style={{ color: fulfillments.length > 0 ? C.red : C.muted }} />
-            <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
-              MANUAL FULFILLMENT QUEUE
-            </p>
-            {fulfillments.length > 0 && (
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-lg"
-                    style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                {fulfillments.length} pending
-              </span>
+        !can('view_rewards') ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view pending rewards</p>
+          </div>
+        ) :
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b"
+              style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <AlertTriangle size={13} style={{ color: fulfillments.length > 0 ? C.red : C.muted }} />
+              <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
+                MANUAL FULFILLMENT QUEUE
+              </p>
+              {fulfillments.length > 0 && (
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-lg"
+                  style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                  {fulfillments.length} pending
+                </span>
+              )}
+            </div>
+
+            {fulfillments.length === 0 ? (
+              <div className="flex flex-col items-center py-12 gap-2">
+                <CheckCircle size={24} style={{ color: C.limeDeep }} />
+                <p className="text-[13px] font-bold" style={{ color: C.muted }}>All caught up!</p>
+                <p className="text-[11px]" style={{ color: C.muted }}>No manual rewards pending fulfillment</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid px-4 py-2 border-b"
+                  style={{ gridTemplateColumns: '1.5fr 1.5fr 1fr 0.8fr 0.6fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
+                  {['USER', 'QUEST', 'REWARD', 'COMPLETED', 'ACTION'].map(h => (
+                    <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+                  ))}
+                </div>
+                {fulfillments.map(item => (
+                  <div key={item.id}
+                    className="grid items-center px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8]"
+                    style={{ gridTemplateColumns: '1.5fr 1.5fr 1fr 0.8fr 0.6fr', gap: 10, borderColor: C.border }}>
+                    <div>
+                      <p className="text-[12px] font-bold" style={{ color: C.dark }}>
+                        {item.profiles?.name ?? '—'}
+                      </p>
+                      <p className="text-[10px]" style={{ color: C.muted }}>{item.profiles?.email}</p>
+                    </div>
+                    <p className="text-[11px] font-semibold truncate" style={{ color: C.text }}>
+                      {item.quests?.title}
+                    </p>
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-lg truncate"
+                      style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                      {item.quests?.reward_text}
+                    </span>
+                    <p className="text-[10px]" style={{ color: C.muted }}>
+                      {item.completed_at ? timeAgo(item.completed_at) : '—'}
+                    </p>
+                    {can('fulfill_reward') && <button onClick={() => setFulfillItem(item)}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold hover:opacity-80"
+                      style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                      <CheckCircle size={10} /> Fulfill
+                    </button>}
+                  </div>
+                ))}
+              </>
             )}
           </div>
-
-          {fulfillments.length === 0 ? (
-            <div className="flex flex-col items-center py-12 gap-2">
-              <CheckCircle size={24} style={{ color: C.limeDeep }} />
-              <p className="text-[13px] font-bold" style={{ color: C.muted }}>All caught up!</p>
-              <p className="text-[11px]" style={{ color: C.muted }}>No manual rewards pending fulfillment</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid px-4 py-2 border-b"
-                   style={{ gridTemplateColumns: '1.5fr 1.5fr 1fr 0.8fr 0.6fr', gap: 10, borderColor: C.border, backgroundColor: C.bg }}>
-                {['USER', 'QUEST', 'REWARD', 'COMPLETED', 'ACTION'].map(h => (
-                  <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
-                ))}
-              </div>
-              {fulfillments.map(item => (
-                <div key={item.id}
-                     className="grid items-center px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8]"
-                     style={{ gridTemplateColumns: '1.5fr 1.5fr 1fr 0.8fr 0.6fr', gap: 10, borderColor: C.border }}>
-                  <div>
-                    <p className="text-[12px] font-bold" style={{ color: C.dark }}>
-                      {item.profiles?.name ?? '—'}
-                    </p>
-                    <p className="text-[10px]" style={{ color: C.muted }}>{item.profiles?.email}</p>
-                  </div>
-                  <p className="text-[11px] font-semibold truncate" style={{ color: C.text }}>
-                    {item.quests?.title}
-                  </p>
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-lg truncate"
-                        style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                    {item.quests?.reward_text}
-                  </span>
-                  <p className="text-[10px]" style={{ color: C.muted }}>
-                    {item.completed_at ? timeAgo(item.completed_at) : '—'}
-                  </p>
-                  {can('fulfill_reward') && <button onClick={() => setFulfillItem(item)}
-                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold hover:opacity-80"
-                    style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-                    <CheckCircle size={10} /> Fulfill
-                  </button>}
-                </div>
-              ))}
-            </>
-          )}
-        </div>
       )}
-
       {/* -- LEADERBOARD ----------------------------------------- */}
       {activeSection === 'leaderboard' && (
-        <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
-            <Crown size={13} style={{ color: C.limeDeep }} />
-            <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
-              MONTHLY LEADERBOARD
-            </p>
-            <p className="text-[10px]" style={{ color: C.muted }}>
-              {new Date().toLocaleString('en', { month: 'long', year: 'numeric' })}
-            </p>
+        !can('view_leaderboard') ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view the leaderboard</p>
           </div>
-
-          {leaderboard.length === 0 ? (
-            <div className="flex flex-col items-center py-12 gap-2">
-              <Crown size={24} style={{ color: C.border }} />
-              <p className="text-[13px] font-bold" style={{ color: C.muted }}>No leaderboard data yet</p>
-              <p className="text-[11px]" style={{ color: C.muted }}>Rebuilds nightly via cron job</p>
+        ) :
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b"
+              style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <Crown size={13} style={{ color: C.limeDeep }} />
+              <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
+                MONTHLY LEADERBOARD
+              </p>
+              <p className="text-[10px]" style={{ color: C.muted }}>
+                {new Date().toLocaleString('en', { month: 'long', year: 'numeric' })}
+              </p>
+              {can('rebuild_leaderboard') && <button onClick={handleRebuildLeaderboard} disabled={rebuilding}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold hover:opacity-80 disabled:opacity-50"
+                style={{ backgroundColor: C.lime, color: '#1a2410' }}>
+                {rebuilding
+                  ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#1a2410' }} />
+                  : <><RefreshCw size={11} /> Rebuild</>}
+              </button>}
             </div>
-          ) : leaderboard.map((entry, idx) => (
-            <div key={entry.id}
-                 className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8]"
-                 style={{ borderColor: C.border }}>
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                   style={{
-                     backgroundColor: idx === 0 ? 'rgba(251,191,36,0.15)' : idx === 1 ? 'rgba(148,163,184,0.15)' : idx === 2 ? 'rgba(180,83,9,0.15)' : C.bg,
-                   }}>
-                <span className="text-[13px] font-black"
-                      style={{ color: idx === 0 ? '#F59E0B' : idx === 1 ? '#94A3B8' : idx === 2 ? '#B45309' : C.muted }}>
-                  {idx < 3 ? `#${idx + 1}` : `#${entry.rank}`}
-                </span>
+
+            {leaderboard.length === 0 ? (
+              <div className="flex flex-col items-center py-12 gap-2">
+                <Crown size={24} style={{ color: C.border }} />
+                <p className="text-[13px] font-bold" style={{ color: C.muted }}>No leaderboard data yet</p>
+                <p className="text-[11px]" style={{ color: C.muted }}>Rebuilds nightly via cron job</p>
               </div>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[12px] font-black"
-                   style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                {(entry.display_name ?? '?')[0].toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-black truncate" style={{ color: C.dark }}>
-                  {entry.display_name}
-                </p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  {(() => {
-                    const LIcon = LEVEL_LUCIDE[entry.seller_level ?? 1] as React.ElementType
-                    return <LIcon size={10} style={{ color: LEVEL_COLORS[entry.seller_level ?? 1] }} />
-                  })()}
-                  <p className="text-[10px]" style={{ color: LEVEL_COLORS[entry.seller_level ?? 1] }}>
-                    {LEVEL_NAMES[entry.seller_level ?? 1]}
+            ) : leaderboard.map((entry, idx) => (
+              <div key={entry.id}
+                className="flex items-center gap-3 px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8]"
+                style={{ borderColor: C.border }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                  style={{
+                    backgroundColor: idx === 0 ? 'rgba(251,191,36,0.15)' : idx === 1 ? 'rgba(148,163,184,0.15)' : idx === 2 ? 'rgba(180,83,9,0.15)' : C.bg,
+                  }}>
+                  <span className="text-[13px] font-black"
+                    style={{ color: idx === 0 ? '#F59E0B' : idx === 1 ? '#94A3B8' : idx === 2 ? '#B45309' : C.muted }}>
+                    {idx < 3 ? `#${idx + 1}` : `#${entry.rank}`}
+                  </span>
+                </div>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[12px] font-black"
+                  style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                  {(entry.display_name ?? '?')[0].toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-black truncate" style={{ color: C.dark }}>
+                    {entry.display_name}
                   </p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    {(() => {
+                      const LIcon = LEVEL_LUCIDE[entry.seller_level ?? 1] as React.ElementType
+                      return <LIcon size={10} style={{ color: LEVEL_COLORS[entry.seller_level ?? 1] }} />
+                    })()}
+                    <p className="text-[10px]" style={{ color: LEVEL_COLORS[entry.seller_level ?? 1] }}>
+                      {LEVEL_NAMES[entry.seller_level ?? 1]}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-[14px] font-black" style={{ color: C.limeDeep }}>{entry.total_xp} XP</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-[14px] font-black" style={{ color: C.limeDeep }}>{entry.total_xp} XP</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
       )}
 
       {activeSection === 'badges' && (

@@ -1,44 +1,74 @@
 ﻿'use client'
 // components/profit/EbaySearchBar.tsx
-// Updated: uses real eBay API via /api/ebay/item
+// Calls /api/ebay/fetch-item — returns full item data
 
 import { useState } from 'react'
-import { Link, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Link, CheckCircle, AlertTriangle, X } from 'lucide-react'
+
+const C = {
+  lime: '#8fff00',
+  dark: '#1a2410',
+  border: '#e8ede2',
+  muted: '#8a9e78',
+  surface: '#ffffff',
+  bg: '#f7f9f5',
+  text: '#1a2410',
+  red: '#b91c1c',
+  green: '#16a34a',
+  amber: '#d97706',
+}
+
+interface FetchedItem {
+  itemId: string
+  title: string
+  price: number
+  currency: string
+  shippingCost: number
+  freeShipping: boolean
+  condition: string
+  categoryId: string
+  categoryName: string
+  imageUrl: string
+  itemUrl: string
+  seller: string
+  sellerFeedback: string
+  location: string
+  quantity: number
+  sold: number
+  returns: boolean
+  returnPeriod: number
+  brand: string
+  site: string
+  sellerCountry: string
+}
 
 interface EbaySearchBarProps {
+  currentCountry: string
   onFetch: (
-    price:      number,
-    shipping:   number,
+    price: number,
+    shipping: number,
     categoryId: string,
-    title:      string,
-    imageUrl:   string,
-    soldCount:  string,
+    title: string,
+    imageUrl: string,
+    soldCount: string,
+    currency: string,
+    itemUrl: string,
+    condition: string,
+    seller: string,
+    sellerFeedback: string,
+    returns: boolean,
+    returnPeriod: number,
+    site: string,
+    sellerCountry: string,
   ) => void
 }
 
-// ── Extract item ID from URL or raw ID ────────────────────────
-function extractItemId(input: string): string {
-  const trimmed = input.trim()
-  if (/^\d+$/.test(trimmed)) return trimmed
-  const patterns = [
-    /\/itm\/(?:[^\/]+\/)?(\d{10,13})/,
-    /\/p\/(\d{10,13})/,
-    /item=(\d{10,13})/,
-    /(\d{12,13})/,
-  ]
-  for (const pattern of patterns) {
-    const match = trimmed.match(pattern)
-    if (match) return match[1]
-  }
-  return trimmed
-}
-
-export default function EbaySearchBar({ onFetch }: EbaySearchBarProps) {
-  const [url,        setUrl]        = useState('')
+export default function EbaySearchBar({ currentCountry, onFetch }: EbaySearchBarProps) {
+  const [url, setUrl] = useState('')
   const [isFetching, setIsFetching] = useState(false)
-  const [focused,    setFocused]    = useState(false)
-  const [status,     setStatus]     = useState<'idle' | 'success' | 'error'>('idle')
-  const [errorMsg,   setErrorMsg]   = useState('')
+  const [focused, setFocused] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
 
   async function handleFetch() {
     if (!url.trim()) return
@@ -46,42 +76,64 @@ export default function EbaySearchBar({ onFetch }: EbaySearchBarProps) {
     setStatus('idle')
     setErrorMsg('')
 
+
     try {
-      const itemId = extractItemId(url)
-
-      if (!itemId || itemId.length < 6) {
-        setStatus('error')
-        setErrorMsg('Invalid eBay item ID or URL')
-        setIsFetching(false)
-        return
+      // For bare Item IDs, use currently selected country as marketplace
+      const isBareId = /^\d{9,13}$/.test(url.trim())
+      const countryToMarketplace: Record<string, string> = {
+        'UK': 'EBAY_GB', 'DE': 'EBAY_DE', 'FR': 'EBAY_FR', 'IT': 'EBAY_IT',
+        'ES': 'EBAY_ES', 'AU': 'EBAY_AU', 'CA': 'EBAY_CA', 'AT': 'EBAY_AT',
+        'BE': 'EBAY_BE', 'IE': 'EBAY_IE', 'NL': 'EBAY_NL', 'PL': 'EBAY_PL',
+        'CH': 'EBAY_CH', 'US': 'EBAY_US',
       }
-
-      // ── Real eBay API call ─────────────────────────────────
-      const res  = await fetch(`/api/ebay/item?id=${encodeURIComponent(itemId)}&purpose=profit`)
+      const marketplaceParam = isBareId ? (countryToMarketplace[currentCountry] ?? 'EBAY_US') : ''
+      const fetchUrl = marketplaceParam
+        ? `/api/ebay/fetch-item?item=${encodeURIComponent(url.trim())}&marketplace=${marketplaceParam}`
+        : `/api/ebay/fetch-item?item=${encodeURIComponent(url.trim())}`
+      const res = await fetch(fetchUrl)
       const data = await res.json()
 
-      if (!res.ok || data.error) {
+      if (!res.ok || !data.success) {
         setStatus('error')
-        setErrorMsg(data.error ?? 'Item not found')
+        setErrorMsg(data.error ?? 'Item not found — check the URL or Item ID')
         setIsFetching(false)
         return
       }
 
-      // ── Pass real data to profit calculator ────────────────
+      const fetched: FetchedItem = data.item
+      setStatus('success')
+
       onFetch(
-        data.price      ?? 0,
-        data.shipping   ?? 0,
-        data.categoryId ?? '',
-        data.title      ?? '',
-        data.imageUrl   ?? '',
-        data.soldCount?.toString() ?? '0',
+        fetched.price ?? 0,
+        fetched.shippingCost ?? 0,
+        fetched.categoryName ?? fetched.categoryId ?? '',
+        fetched.title ?? '',
+        fetched.imageUrl ?? '',
+        fetched.sold?.toString() ?? '0',
+        fetched.currency ?? 'USD',
+        (fetched.itemUrl ?? '') + '|' + url.trim(),
+        (() => {
+          const map: Record<string, string> = {
+            'Gebraucht': 'Used', 'Neu': 'New', 'Generalüberholt': 'Refurbished',
+            'Sehr gut': 'Very Good', 'Gut': 'Good', 'Akzeptabel': 'Acceptable',
+            'Neuf': 'New', 'Occasion': 'Used', 'Reconditionné': 'Refurbished',
+            'Nuovo': 'New', 'Usato': 'Used', 'Ricondizionato': 'Refurbished',
+            'Nuevo': 'New', 'Usado': 'Used', 'Reacondicionado': 'Refurbished',
+            'Nieuw': 'New', 'Gebruikt': 'Used', 'Gereviseerd': 'Refurbished',
+            'Nowy': 'New', 'Używany': 'Used', 'Odnowiony': 'Refurbished',
+          }
+          const c = fetched.condition ?? ''
+          return map[c] ?? c
+        })(),
+        fetched.seller ?? '',
+        fetched.sellerFeedback ?? '',
+        fetched.returns ?? false,
+        fetched.returnPeriod ?? 0,
+        fetched.site ?? 'EBAY_US',
+        fetched.sellerCountry ?? '',
       )
 
-      setStatus('success')
-      setUrl('')
-      showToast(`Product fetched — ${data.title?.slice(0, 40)}...`)
-
-    } catch (e: any) {
+    } catch (_) {
       setStatus('error')
       setErrorMsg('Failed to fetch — check your connection')
     }
@@ -89,66 +141,97 @@ export default function EbaySearchBar({ onFetch }: EbaySearchBarProps) {
     setIsFetching(false)
   }
 
+  function handleClear() {
+    setUrl('')
+    setStatus('idle')
+    setErrorMsg('')
+  }
+
+  const borderColor =
+    status === 'error' ? C.red :
+      status === 'success' ? C.green :
+        focused ? C.lime : C.border
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+
+      {/* Search row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
         {/* Input */}
-        <div className="flex-1 flex items-center gap-2 h-10 px-3 rounded-lg border bg-white transition-all"
-             style={{
-               borderColor: status === 'error'   ? '#FECACA'
-                          : status === 'success' ? '#BBF7D0'
-                          : focused              ? '#8FFF00'
-                          : '#E2E8F0',
-               boxShadow: focused ? '0 0 0 3px rgba(143,255,0,0.15)' : 'none',
-             }}>
-          <Link size={15} style={{ color: '#94A3B8', flexShrink: 0 }} />
+        <div style={{
+          flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+          height: 36, padding: '0 12px',
+          borderRadius: 8, border: `1.5px solid ${borderColor}`,
+          background: C.surface,
+          boxShadow: focused ? '0 0 0 3px rgba(143,255,0,0.15)' : 'none',
+          transition: 'border-color 0.15s, box-shadow 0.15s',
+        }}>
+          <Link size={14} color={C.muted} style={{ flexShrink: 0 }} />
           <input
             type="text"
             value={url}
-            onChange={e => { setUrl(e.target.value); setStatus('idle') }}
+            onChange={e => { setUrl(e.target.value); setStatus('idle'); }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={e => e.key === 'Enter' && handleFetch()}
             placeholder="Paste eBay URL or Item ID..."
-            className="flex-1 text-[13px] bg-transparent outline-none"
-            style={{ color: '#0F172A' }}
+            style={{
+              flex: 1, border: 'none', outline: 'none',
+              fontSize: 13, color: C.text, background: 'transparent',
+            }}
           />
-          {status === 'success' && <CheckCircle size={14} style={{ color: '#16a34a', flexShrink: 0 }} />}
-          {status === 'error'   && <AlertTriangle size={14} style={{ color: '#b91c1c', flexShrink: 0 }} />}
+          {status === 'success' && <CheckCircle size={14} color={C.green} style={{ flexShrink: 0 }} />}
+          {status === 'error' && <AlertTriangle size={14} color={C.red} style={{ flexShrink: 0 }} />}
+          {url && (
+            <button onClick={handleClear} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: C.muted }}>
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         {/* Fetch button */}
         <button
           onClick={handleFetch}
           disabled={isFetching || !url.trim()}
-          className="h-10 px-4 rounded-lg text-[13px] font-bold flex items-center justify-center shrink-0 disabled:opacity-40 transition-all"
-          style={{ backgroundColor: '#8fff00', color: '#1a2410', minWidth: 70 }}>
-          {isFetching
-            ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#8FFF00' }} />
-            : 'Fetch'}
+          style={{
+            height: 36, padding: '0 16px', borderRadius: 8,
+            border: 'none', background: C.lime, color: C.dark,
+            fontSize: 13, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: 70, flexShrink: 0,
+            cursor: isFetching || !url.trim() ? 'not-allowed' : 'pointer',
+            opacity: isFetching || !url.trim() ? 0.5 : 1,
+            transition: 'opacity 0.15s',
+          }}>
+          {isFetching ? (
+            <div style={{
+              width: 16, height: 16, borderRadius: '50%',
+              border: '2px solid transparent',
+              borderTopColor: C.dark,
+              animation: 'spin 0.7s linear infinite',
+            }} />
+          ) : 'Fetch'}
         </button>
       </div>
 
-      {/* Error message */}
+      {/* Loading state */}
+      {isFetching && (
+        <p style={{ fontSize: 11, color: C.muted, margin: 0, fontWeight: 600 }}>
+          Fetching item from eBay...
+        </p>
+      )}
+
+      {/* Error */}
       {status === 'error' && errorMsg && (
-        <p className="text-[11px] font-semibold" style={{ color: '#b91c1c' }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: C.red, margin: 0 }}>
           {errorMsg}
         </p>
       )}
+
+      <style>{`
+        @keyframes spin    { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   )
-}
-
-// ── Toast notification ─────────────────────────────────────────
-function showToast(message: string) {
-  const el        = document.createElement('div')
-  el.textContent  = message
-  el.style.cssText = `
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: #0a0d08; color: #8fff00; padding: 12px 20px; border-radius: 12px;
-    font-size: 13px; font-weight: 600; z-index: 9999;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  `
-  document.body.appendChild(el)
-  setTimeout(() => el.remove(), 3000)
 }
