@@ -5,7 +5,7 @@
 // Payment Processor removed. US tiered fee fields + regulatory fee + advanced pro added.
 
 import { useState, useRef, useEffect } from 'react'
-import { Info, Search, X, RotateCcw } from 'lucide-react'
+import { Info, Search, X, RotateCcw, RefreshCw, Loader } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import ProDropdown from '@/components/ui/ProDropdown'
 
@@ -37,6 +37,10 @@ export interface CommandCenterProps {
   sellingPrice: string
   buyerPaidShipping: string
   adRate: string
+  cpcEnabled: boolean
+  cpcBid: string
+  cpcCTR: string
+  cpcCVR: string
   buyerTax: string
   // select values
   selectedCategory: string
@@ -55,16 +59,29 @@ export interface CommandCenterProps {
   // advanced values
   sourcingTax: string
   fxFee: string
+  buyCurrency: string
+  fxRate: string
+  fxEnabled: boolean
+  sellCurrencySymbol: string   // e.g. '£', '€', '$'
+  sellCurrencyCode: string   // e.g. 'GBP', 'EUR', 'USD'
   defectRate: string
   payoutFee: string
   defaultPayoutFee: number   // country-specific eBay managed payments default
   cashback: string
+  // paypal
+  paypalEnabled: boolean
+  paypalType: string
+  paypalRate: string
   // callbacks
   onItemCostChange: (v: string) => void
   onShippingCostChange: (v: string) => void
   onSellingPriceChange: (v: string) => void
   onBuyerPaidShipChange: (v: string) => void
   onAdRateChange: (v: string) => void
+  onCpcEnabledChange: (v: boolean) => void
+  onCpcBidChange: (v: string) => void
+  onCpcCTRChange: (v: string) => void
+  onCpcCVRChange: (v: string) => void
   onBuyerTaxChange: (v: string) => void
   onCategoryChange: (v: string) => void
   onStoreTierChange: (v: string) => void
@@ -75,9 +92,15 @@ export interface CommandCenterProps {
   onAdvancedChange: (v: boolean) => void
   onSourcingTaxChange: (v: string) => void
   onFxFeeChange: (v: string) => void
+  onBuyCurrencyChange: (v: string) => void
+  onFxRateChange: (v: string) => void
+  onFxEnabledChange: (v: boolean) => void
   onDefectRateChange: (v: string) => void
   onPayoutFeeChange: (v: string) => void
   onCashbackChange: (v: string) => void
+  onPaypalEnabledChange: (v: boolean) => void
+  onPaypalTypeChange: (v: string) => void
+  onPaypalRateChange: (v: string) => void
   onReset: () => void
 }
 
@@ -160,7 +183,7 @@ function LabelWithHelp({ label, tooltip }: { label: string; tooltip: string }) {
 
 // ── Controlled input field ─────────────────────────────────────
 function InputField({
-  label, tooltip, value, onChange, prefix, suffix,
+  label, tooltip, value, onChange, prefix, suffix, max,
 }: {
   label: string
   tooltip: string
@@ -168,6 +191,7 @@ function InputField({
   onChange: (v: string) => void
   prefix?: string
   suffix?: string
+  max?: number
 }) {
   const [focused, setFocused] = useState(false)
   const displayValue = !focused && value !== '' && !isNaN(parseFloat(value))
@@ -189,7 +213,12 @@ function InputField({
           type="text"
           inputMode="decimal"
           value={displayValue}
-          onChange={e => onChange(e.target.value.replace(/[^0-9.]/g, ''))}
+          onChange={e => {
+            const raw = e.target.value.replace(/[^0-9.]/g, '')
+            const num = parseFloat(raw)
+            if (max !== undefined && !isNaN(num) && num > max) return
+            onChange(raw)
+          }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder="0.00"
@@ -390,17 +419,18 @@ export default function CommandCenter({
   currency, country,
   categoryOptions, storeTierOptions, sellerLevelOptions,
   itemCost, shippingCost, sellingPrice, buyerPaidShipping,
-  adRate, buyerTax,
+  adRate, cpcEnabled, cpcBid, cpcCTR, cpcCVR, buyerTax,
   selectedCategory, selectedStoreTier, selectedSellerLevel,
   isInternational, includeRegFee, regFeeConfirmed, regulatoryFeeRate,
   outputVATEnabled, outputVATPercent, hasOutputVATRate,
   isAdvancedEnabled,
-  sourcingTax, fxFee, defectRate, payoutFee, defaultPayoutFee, cashback,
+  sourcingTax, fxFee, buyCurrency, fxRate, fxEnabled, sellCurrencySymbol, sellCurrencyCode, defectRate, payoutFee, defaultPayoutFee, cashback,
   onItemCostChange, onShippingCostChange, onSellingPriceChange, onBuyerPaidShipChange,
-  onAdRateChange, onBuyerTaxChange, onCategoryChange, onStoreTierChange,
+  onAdRateChange, onCpcEnabledChange, onCpcBidChange, onCpcCTRChange, onCpcCVRChange, onBuyerTaxChange, onCategoryChange, onStoreTierChange,
   onSellerLevelChange, onInternationalChange, onRegFeeChange, onOutputVATChange, onAdvancedChange,
-  onSourcingTaxChange, onFxFeeChange, onDefectRateChange, onPayoutFeeChange,
-  onCashbackChange, onReset,
+  onSourcingTaxChange, onFxFeeChange, onBuyCurrencyChange, onFxRateChange, onFxEnabledChange, onDefectRateChange, onPayoutFeeChange,
+  onCashbackChange, onReset, onPaypalEnabledChange, onPaypalTypeChange, onPaypalRateChange,
+  paypalEnabled, paypalType, paypalRate,
 }: CommandCenterProps) {
   return (
     <div style={{
@@ -418,20 +448,20 @@ export default function CommandCenter({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <InputField
           label="Item cost" tooltip="What you paid to source this item"
-          value={itemCost} prefix={currency} onChange={onItemCostChange} />
+          value={itemCost} prefix={currency} onChange={onItemCostChange} max={999999.99} />
         <InputField
           label="Shipping cost" tooltip="What YOU pay the courier to ship to the buyer"
-          value={shippingCost} prefix={currency} onChange={onShippingCostChange} />
+          value={shippingCost} prefix={currency} onChange={onShippingCostChange} max={9999.99} />
       </div>
 
       {/* Row 2: Selling price + Buyer paid ship */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <InputField
           label="Selling price" tooltip="Your eBay listing price"
-          value={sellingPrice} prefix={currency} onChange={onSellingPriceChange} />
+          value={sellingPrice} prefix={currency} onChange={onSellingPriceChange} max={999999.99} />
         <InputField
           label="Buyer paid ship" tooltip="Shipping the buyer pays you — eBay charges FVF on this too"
-          value={buyerPaidShipping} prefix={currency} onChange={onBuyerPaidShipChange} />
+          value={buyerPaidShipping} prefix={currency} onChange={onBuyerPaidShipChange} max={9999.99} />
       </div>
 
       <Divider />
@@ -475,16 +505,77 @@ export default function CommandCenter({
         </div>
       </div>
 
-      {/* Row 4: Promoted ad rate + Est. buyer tax */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <InputField
-          label="Promoted ad rate"
-          tooltip="Promoted Listings rate. Stacks on top of FVF. Leave 0 if not running ads."
-          value={adRate} suffix="%" onChange={onAdRateChange} />
-        <InputField
-          label="Est. buyer tax"
-          tooltip="Sales tax / VAT % collected from buyer. eBay applies FVF to this amount too."
-          value={buyerTax} suffix="%" onChange={onBuyerTaxChange} />
+      {/* Row 4: Promoted Listings (PLS + CPC) + buyer tax */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+        {/* Promoted Listings section */}
+        <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>Promoted Listings</span>
+
+          {/* PLS row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <InputField
+              label="PLS rate %"
+              tooltip="Promoted Listings Standard — % of sale price charged only when buyer clicks your ad and purchases. Stacks on top of FVF."
+              value={adRate} suffix="%" onChange={onAdRateChange} />
+            <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 4 }}>
+              <p style={{ fontSize: 10, color: C.muted, margin: 0, lineHeight: 1.5 }}>Pay-on-sale. eBay suggests 2–15%.</p>
+            </div>
+          </div>
+
+          {/* CPC toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: C.text }}>+ PLA (CPC) — Promoted Listings Advanced</span>
+              <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>Pay per click regardless of sale — estimates cost from bid × CTR × CVR</p>
+            </div>
+            <button onClick={() => onCpcEnabledChange(!cpcEnabled)} style={{ position: 'relative', width: 38, height: 21, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0, background: cpcEnabled ? C.lime : C.border, transition: 'background 0.2s' }}>
+              <span style={{ position: 'absolute', top: 2.5, left: cpcEnabled ? 19 : 2, width: 16, height: 16, borderRadius: '50%', background: C.surface, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)', display: 'block' }} />
+            </button>
+          </div>
+
+          {/* CPC inputs */}
+          {cpcEnabled && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}>
+                <div>
+                  <p style={{ fontSize: 9, fontWeight: 600, color: C.text, margin: '0 0 2px' }}>Max CPC bid</p>
+                  <div style={{ display: 'flex', alignItems: 'center', height: 26, padding: '0 4px', gap: 2, border: `1.5px solid ${C.border}`, borderRadius: 6, background: C.surface }}>
+                    <span style={{ fontSize: 10, color: C.muted }}>{sellCurrencySymbol}</span>
+                    <input type="text" inputMode="decimal" value={cpcBid} onChange={e => onCpcBidChange(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="0.00"
+                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 11, fontWeight: 600, color: C.text, background: 'transparent', minWidth: 0 }} />
+                  </div>
+                </div>
+                <div>
+                  <p style={{ fontSize: 9, fontWeight: 600, color: C.text, margin: '0 0 2px' }}>Est. CTR %</p>
+                  <div style={{ display: 'flex', alignItems: 'center', height: 26, padding: '0 4px', gap: 2, border: `1.5px solid ${C.border}`, borderRadius: 6, background: C.surface }}>
+                    <input type="text" inputMode="decimal" value={cpcCTR} onChange={e => onCpcCTRChange(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="0.0"
+                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 11, fontWeight: 600, color: C.text, background: 'transparent', minWidth: 0 }} />
+                    <span style={{ fontSize: 10, color: C.muted }}>%</span>
+                  </div>
+                </div>
+                <div>
+                  <p style={{ fontSize: 9, fontWeight: 600, color: C.text, margin: '0 0 2px' }}>Est. CVR %</p>
+                  <div style={{ display: 'flex', alignItems: 'center', height: 26, padding: '0 4px', gap: 2, border: `1.5px solid ${C.border}`, borderRadius: 6, background: C.surface }}>
+                    <input type="text" inputMode="decimal" value={cpcCVR} onChange={e => onCpcCVRChange(e.target.value.replace(/[^0-9.]/g, ''))} placeholder="0.0"
+                      style={{ flex: 1, border: 'none', outline: 'none', fontSize: 11, fontWeight: 600, color: C.text, background: 'transparent', minWidth: 0 }} />
+                    <span style={{ fontSize: 10, color: C.muted }}>%</span>
+                  </div>
+                </div>
+              </div>
+              <p style={{ fontSize: 10, color: C.muted, margin: 0, lineHeight: 1.5 }}>
+                💡 Est. cost per sale ≈ {sellCurrencySymbol}{(parseFloat(cpcBid) > 0 && parseFloat(cpcCTR) > 0 && parseFloat(cpcCVR) > 0 ? (parseFloat(cpcBid) / ((parseFloat(cpcCTR) / 100) * (parseFloat(cpcCVR) / 100))).toFixed(2) : '—')} · Electronics CTR~1.8%/CVR~2.5% · Fashion CTR~2.2%/CVR~3% · Collectibles CTR~2.5%/CVR~4%
+              </p>
+            </>
+          )}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <InputField
+            label="Est. buyer tax"
+            tooltip="Sales tax / VAT % collected from buyer. eBay applies FVF to this amount too."
+            value={buyerTax} suffix="%" onChange={onBuyerTaxChange} />
+        </div>
       </div>
 
       <Divider />
@@ -546,9 +637,146 @@ export default function CommandCenter({
             <InputField
               label="Sourcing tax %" tooltip="Tax paid when buying stock from your supplier"
               value={sourcingTax} suffix="%" onChange={onSourcingTaxChange} />
-            <InputField
-              label="Bank FX fee %" tooltip="Currency conversion fee on your sourcing cost"
-              value={fxFee} suffix="%" onChange={onFxFeeChange} />
+            <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: 8, background: C.surface, borderRadius: 8, padding: 10, border: `1px solid ${C.border}` }}>
+              {/* FX toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>Cross-currency sourcing</span>
+                  <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>
+                    {fxEnabled
+                      ? `Buying in ${buyCurrency}, selling in ${sellCurrencyCode} — rate applied to buy cost`
+                      : `Enable if you source in a different currency to your eBay market (${sellCurrencyCode})`}
+                  </p>
+                </div>
+                <button onClick={() => onFxEnabledChange(!fxEnabled)} style={{ position: 'relative', width: 38, height: 21, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0, background: fxEnabled ? C.lime : C.border, transition: 'background 0.2s' }}>
+                  <span style={{ position: 'absolute', top: 2.5, left: fxEnabled ? 19 : 2, width: 16, height: 16, borderRadius: '50%', background: C.surface, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)', display: 'block' }} />
+                </button>
+              </div>
+              {fxEnabled && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: C.text }}>Buy currency</label>
+                    <ProDropdown
+                      prefix=""
+                      currentValue={buyCurrency}
+                      options={[
+                        { val: 'USD', label: 'USD — US Dollar', flagCode: 'us', enabled: true },
+                        { val: 'GBP', label: 'GBP — British Pound', flagCode: 'gb', enabled: true },
+                        { val: 'EUR', label: 'EUR — Euro', flagCode: 'eu', enabled: true },
+                        { val: 'CAD', label: 'CAD — Canadian Dollar', flagCode: 'ca', enabled: true },
+                        { val: 'AUD', label: 'AUD — Australian Dollar', flagCode: 'au', enabled: true },
+                        { val: 'CNY', label: 'CNY — Chinese Yuan', flagCode: 'cn', enabled: true },
+                        { val: 'JPY', label: 'JPY — Japanese Yen', flagCode: 'jp', enabled: true },
+                        { val: 'HKD', label: 'HKD — Hong Kong Dollar', flagCode: 'hk', enabled: true },
+                        { val: 'SGD', label: 'SGD — Singapore Dollar', flagCode: 'sg', enabled: true },
+                        { val: 'CHF', label: 'CHF — Swiss Franc', flagCode: 'ch', enabled: true },
+                        { val: 'PLN', label: 'PLN — Polish Złoty', flagCode: 'pl', enabled: true },
+                        { val: 'INR', label: 'INR — Indian Rupee', flagCode: 'in', enabled: true },
+                        { val: 'MXN', label: 'MXN — Mexican Peso', flagCode: 'mx', enabled: true },
+                        { val: 'BRL', label: 'BRL — Brazilian Real', flagCode: 'br', enabled: true },
+                        { val: 'AED', label: 'AED — UAE Dirham', flagCode: 'ae', enabled: true },
+                        { val: 'KRW', label: 'KRW — South Korean Won', flagCode: 'kr', enabled: true },
+                        { val: 'THB', label: 'THB — Thai Baht', flagCode: 'th', enabled: true },
+                        { val: 'TRY', label: 'TRY — Turkish Lira', flagCode: 'tr', enabled: true },
+                        { val: 'NZD', label: 'NZD — New Zealand Dollar', flagCode: 'nz', enabled: true },
+                        { val: 'SEK', label: 'SEK — Swedish Krona', flagCode: 'se', enabled: true },
+                        { val: 'NOK', label: 'NOK — Norwegian Krone', flagCode: 'no', enabled: true },
+                        { val: 'DKK', label: 'DKK — Danish Krone', flagCode: 'dk', enabled: true },
+                        { val: 'ZAR', label: 'ZAR — South African Rand', flagCode: 'za', enabled: true },
+                        { val: 'TWD', label: 'TWD — Taiwan Dollar', flagCode: 'tw', enabled: true },
+                        { val: 'MYR', label: 'MYR — Malaysian Ringgit', flagCode: 'my', enabled: true },
+                        { val: 'IDR', label: 'IDR — Indonesian Rupiah', flagCode: 'id', enabled: true },
+                        { val: 'VND', label: 'VND — Vietnamese Dong', flagCode: 'vn', enabled: true },
+                        { val: 'BDT', label: 'BDT — Bangladeshi Taka', flagCode: 'bd', enabled: true },
+                        { val: 'PKR', label: 'PKR — Pakistani Rupee', flagCode: 'pk', enabled: true },
+                        { val: 'LKR', label: 'LKR — Sri Lankan Rupee', flagCode: 'lk', enabled: true },
+                      ]}
+                      onChanged={onBuyCurrencyChange}
+                      width="full"
+                      maxItems={8}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <LabelWithHelp
+                      label={`Rate (1 ${buyCurrency} = ? ${sellCurrencyCode})`}
+                      tooltip={`Enter how many ${sellCurrencyCode} you get for 1 ${buyCurrency}. Example: if 1 USD = 0.92 EUR, enter 0.92`}
+                    />
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <div style={{
+                        flex: 1, display: 'flex', alignItems: 'center',
+                        height: 36, padding: '0 10px', gap: 4,
+                        border: `1.5px solid ${C.border}`, borderRadius: 8, background: C.surface,
+                      }}>
+                        <input
+                          type="text" inputMode="decimal"
+                          value={fxRate}
+                          onChange={e => onFxRateChange(e.target.value.replace(/[^0-9.]/g, ''))}
+                          placeholder="0.00"
+                          style={{ flex: 1, border: 'none', outline: 'none', fontSize: 13, fontWeight: 600, color: C.text, background: 'transparent', minWidth: 0 }}
+                        />
+                        <span style={{ fontSize: 11, color: C.muted, flexShrink: 0 }}>{sellCurrencyCode}</span>
+                        <button
+                          onClick={async () => {
+                            try {
+                              onFxRateChange('Loading...')
+                              const res = await fetch(`https://open.er-api.com/v6/latest/${buyCurrency}`)
+                              const data = await res.json()
+                              const rate = data?.rates?.[sellCurrencyCode]
+                              if (rate) {
+                                onFxRateChange(rate.toFixed(4))
+                              } else {
+                                onFxRateChange('')
+                                alert('Could not fetch rate. Please enter manually.')
+                              }
+                            } catch {
+                              onFxRateChange('')
+                              alert('Failed to fetch rate. Please enter manually.')
+                            }
+                          }}
+                          title="Get live exchange rate"
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            padding: '2px 4px', borderRadius: 4, flexShrink: 0,
+                            display: 'flex', alignItems: 'center',
+                            color: fxRate === 'Loading...' ? C.muted : C.dark,
+                            fontSize: 14, fontWeight: 700,
+                          }}
+                        >
+                          {fxRate === 'Loading...' ? <Loader size={13} color={C.muted} style={{ animation: 'spin 1s linear infinite' }} /> : <RefreshCw size={13} color={C.dark} />}
+                        </button>
+                      </div>
+                    </div>
+                    {fxRate && fxRate !== 'Loading...' && parseFloat(fxRate) > 0 && (
+                      <p style={{ fontSize: 9, color: C.muted, margin: '2px 0 0' }}>
+                        1 {buyCurrency} = {fxRate} {sellCurrencyCode} · {(1 / parseFloat(fxRate)).toFixed(4)} {buyCurrency} = 1 {sellCurrencyCode}
+                      </p>
+                    )}
+                  </div>
+                  <InputField
+                    label="Bank FX fee %"
+                    tooltip="Extra % your bank or payment processor charges on top of the conversion (e.g. 1.5% for Wise, 2-3% for credit cards)"
+                    value={fxFee}
+                    suffix="%"
+                    onChange={onFxFeeChange}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 4 }}>
+                    <p style={{ fontSize: 10, color: C.muted, margin: 0, lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: 4 }}>
+                      <Info size={10} color={C.muted} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <span><strong>Wise:</strong> ~0.5–1% · <strong>Revolut:</strong> ~0% · <strong>Credit card:</strong> 2–3%</span>
+                    </p>
+                  </div>
+                </div>
+              )}
+              {!fxEnabled && (
+                <InputField
+                  label="Bank FX fee %"
+                  tooltip="Currency conversion fee on your sourcing cost (same currency)"
+                  value={fxFee}
+                  suffix="%"
+                  onChange={onFxFeeChange}
+                />
+              )}
+            </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <InputField
@@ -558,12 +786,67 @@ export default function CommandCenter({
               label="Payout fee %" tooltip={`eBay managed payments default for this country: ${defaultPayoutFee}%. Override if you use a different processor. PayPal: 3.49% | Stripe: 2.9% | Square: 2.6%`}
               value={payoutFee} suffix="%" onChange={onPayoutFeeChange} />
           </div>
-          <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0', lineHeight: 1.4 }}>
-            💳 eBay managed: {defaultPayoutFee}% (this country) · PayPal: 3.49% · Stripe: 2.9% · Square: 2.6%
+          <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0', lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 4 }}>
+            <Info size={10} color={C.muted} style={{ flexShrink: 0, marginTop: 2 }} />
+            <span>eBay managed: {defaultPayoutFee}% (this country) · PayPal: 3.49% · Stripe: 2.9% · Square: 2.6%</span>
           </p>
           <InputField
             label="Cashback / rewards %" tooltip="Cashback earned on sourcing cost — adds back to profit"
             value={cashback} suffix="%" onChange={onCashbackChange} />
+
+          {/* PayPal fee toggle */}
+          <div style={{ background: C.surface, borderRadius: 8, padding: 10, border: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>PayPal fee</span>
+                <p style={{ fontSize: 10, color: C.muted, margin: '2px 0 0' }}>
+                  {paypalEnabled ? 'Deducted from profit in ledger' : 'Enable if buyer pays via PayPal'}
+                </p>
+              </div>
+              <button onClick={() => onPaypalEnabledChange(!paypalEnabled)} style={{ position: 'relative', width: 38, height: 21, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0, background: paypalEnabled ? C.lime : C.border, transition: 'background 0.2s' }}>
+                <span style={{ position: 'absolute', top: 2.5, left: paypalEnabled ? 19 : 2, width: 16, height: 16, borderRadius: '50%', background: C.surface, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.25)', display: 'block' }} />
+              </button>
+            </div>
+            {paypalEnabled && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: C.text }}>Transaction type</label>
+                    <ProDropdown
+                      prefix=""
+                      currentValue={paypalType}
+                      options={[
+                        { val: 'goods', label: 'Goods & Services (3.49%)', enabled: true },
+                        { val: 'micropayment', label: 'Micropayment <$10 (5%)', enabled: true },
+                        { val: 'international', label: 'International (4.99%)', enabled: true },
+                        { val: 'custom', label: 'Custom rate', enabled: true },
+                      ]}
+                      onChanged={onPaypalTypeChange}
+                      width="full"
+                      maxItems={4}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: C.text }}>Rate %</label>
+                    <div style={{ height: 34, border: `1.5px solid ${C.border}`, borderRadius: 8, padding: '0 8px', background: paypalType === 'custom' ? C.surface : C.bg, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <input
+                        type="text" inputMode="decimal"
+                        value={paypalRate}
+                        onChange={e => onPaypalRateChange(e.target.value.replace(/[^0-9.]/g, ''))}
+                        readOnly={paypalType !== 'custom'}
+                        style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, fontWeight: 600, color: paypalType === 'custom' ? C.text : C.muted, background: 'transparent' }}
+                      />
+                      <span style={{ fontSize: 11, color: C.muted }}>%</span>
+                    </div>
+                  </div>
+                </div>
+                <p style={{ fontSize: 9, color: C.muted, margin: 0, lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: 4 }}>
+                  <Info size={9} color={C.muted} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>Goods & Services:</strong> 3.49% + $0.49 · <strong>International:</strong> 4.99% + fixed · <strong>Micropayment:</strong> 5% + $0.05</span>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -579,6 +862,8 @@ export default function CommandCenter({
         <RotateCcw size={13} />
         Reset to defaults
       </button>
+
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
 
     </div>
   )

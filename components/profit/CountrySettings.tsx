@@ -8,6 +8,7 @@ import ProDropdown from '@/components/ui/ProDropdown'
 // ── Brand palette (must match page.tsx) ───────────────────────
 const C = {
     lime: '#8fff00',
+    limeDeep: '#4a7c00',
     dark: '#1a2410',
     border: '#e8ede2',
     muted: '#8a9e78',
@@ -17,6 +18,81 @@ const C = {
     red: '#b91c1c',
     amber: '#d97706',
     green: '#16a34a',
+}
+
+// VAT/GST registration thresholds
+const VAT_THRESHOLD: Record<string, { amount: number; label: string; rate: number; name: string; sym: string }> = {
+    UK: { amount: 90000, label: '£90,000', rate: 20, name: 'VAT', sym: '£' },
+    CA: { amount: 30000, label: 'C$30,000', rate: 5, name: 'GST', sym: 'C$' },
+    DE: { amount: 22000, label: '€22,000', rate: 19, name: 'MwSt', sym: '€' },
+    FR: { amount: 85800, label: '€85,800', rate: 20, name: 'TVA', sym: '€' },
+    IT: { amount: 85000, label: '€85,000', rate: 22, name: 'IVA', sym: '€' },
+    ES: { amount: 85000, label: '€85,000', rate: 21, name: 'IVA', sym: '€' },
+    AT: { amount: 42000, label: '€42,000', rate: 20, name: 'MwSt', sym: '€' },
+    IE: { amount: 80000, label: '€80,000', rate: 23, name: 'VAT', sym: '€' },
+    BE: { amount: 25000, label: '€25,000', rate: 21, name: 'BTW', sym: '€' },
+    NL: { amount: 20000, label: '€20,000', rate: 21, name: 'BTW', sym: '€' },
+    PL: { amount: 200000, label: '200,000 zł', rate: 23, name: 'VAT', sym: 'zł' },
+    CH: { amount: 100000, label: 'CHF 100,000', rate: 8.1, name: 'MWST', sym: 'CHF' },
+    AU: { amount: 75000, label: 'A$75,000', rate: 10, name: 'GST', sym: 'A$' },
+}
+
+// ── Reusable VAT Threshold Warning ──────────────────────────────────────────
+function VATThresholdWarning({ country, state, patch }: { country: string; state: any; patch: (u: any) => void }) {
+    const data = VAT_THRESHOLD[country]
+    if (!data) return null
+    const annualRev = state.annualRevenue || 0
+    const pct = annualRev > 0 ? Math.min((annualRev / data.amount) * 100, 130) : 0
+    const status = pct >= 100 ? 'exceeded' : pct >= 85 ? 'approaching' : 'safe'
+    const headroom = Math.max(data.amount - annualRev, 0)
+    const overage = Math.max(annualRev - data.amount, 0)
+    const barColor = status === 'exceeded' ? C.red : status === 'approaching' ? C.amber : C.green
+    const bgColor = status === 'exceeded' ? '#fef2f2' : status === 'approaching' ? '#fffbeb' : C.bg
+    const bdrColor = status === 'exceeded' ? C.red : status === 'approaching' ? C.amber : C.border
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>{data.name} Threshold Monitor</span>
+                <span style={{ fontSize: 9, color: C.muted }}>Threshold: {data.label}/yr</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: C.text }}>Est. annual {country} eBay sales ({data.sym})</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: C.muted }}>{data.sym}</span>
+                    <input
+                        type="text" inputMode="numeric"
+                        value={annualRev || ''}
+                        placeholder="0"
+                        onChange={e => patch({ annualRevenue: parseFloat(e.target.value) || 0 })}
+                        style={{ flex: 1, height: 34, borderRadius: 6, border: '1px solid ' + C.border, background: C.bg, color: C.text, fontSize: 12, padding: '0 8px' }}
+                    />
+                </div>
+                <p style={{ fontSize: 9, color: C.muted, margin: 0 }}>For threshold monitoring only — doesn't affect fee calculations</p>
+            </div>
+            {annualRev > 0 && (
+                <div style={{ background: bgColor, border: '1px solid ' + bdrColor, borderRadius: 8, padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: barColor }}>
+                            {status === 'exceeded' ? 'THRESHOLD EXCEEDED' : status === 'approaching' ? 'APPROACHING THRESHOLD' : 'SAFE'}
+                        </span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: barColor }}>{Math.min(pct, 100).toFixed(0)}%</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 999, background: C.border, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: Math.min(pct, 100) + '%', background: barColor, borderRadius: 999, transition: 'width 0.3s' }} />
+                    </div>
+                    {status === 'safe' && <p style={{ fontSize: 10, color: C.green, margin: 0 }}>{data.sym}{headroom.toLocaleString()} headroom before {data.name} registration required.</p>}
+                    {status === 'approaching' && <p style={{ fontSize: 10, color: C.amber, margin: 0 }}>Only {data.sym}{headroom.toLocaleString()} until the {data.label} threshold. Consider registering now.</p>}
+                    {status === 'exceeded' && (
+                        <div>
+                            <p style={{ fontSize: 10, color: C.red, fontWeight: 600, margin: '0 0 3px' }}>Exceeded by {data.sym}{overage.toLocaleString()} — {data.name} registration required.</p>
+                            <p style={{ fontSize: 10, color: C.red, margin: 0 }}>Must charge {data.rate}% {data.name} on sales. Enable Output {data.name} above to see profit impact.</p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    )
 }
 
 function SectionLabel({ children }: { children: string }) {
@@ -57,7 +133,7 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             <span style={{ fontSize: 10, color: C.muted }}>
                                 {state.isVATRegistered
                                     ? 'VAT registered — no 20% VAT surcharge on your eBay fees'
-                                    : '⚠️ Not VAT registered — eBay adds 20% VAT to all your fees'}
+                                    : 'Not VAT registered — eBay adds 20% VAT to all your fees'}
                             </span>
                         </div>
                         <button
@@ -111,6 +187,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                         </div>
                     )}
 
+                    {/* UK VAT Threshold Warning */}
+                    <VATThresholdWarning country="UK" state={state} patch={patch} />
+
                     {/* UK reduced per-order fee info */}
                     <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -160,13 +239,16 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                         />
                     </div>
 
+                    {/* CA GST Threshold Warning */}
+                    <VATThresholdWarning country="CA" state={state} patch={patch} />
+
                     {/* CA INAD note */}
                     <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 8, padding: 10 }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: C.amber, margin: '0 0 3px' }}>
-                            CA INAD penalty is flat +5% — no scaling
+                            CA INAD penalty: +5% (1-3mo) / +6% (4+mo)
                         </p>
                         <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>
-                            Unlike US/UK where the INAD penalty increases after 4+ months, Canada uses a flat +5 percentage points regardless of duration.
+                            Very High INAD adds 5% of FVF for 1-3 months, escalating to 6% after 4+ consecutive months. Select the seller level above to apply the correct penalty.
                         </p>
                     </div>
                 </div>
@@ -204,6 +286,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>As a GST-registered business you can claim back the 10% GST included in all eBay AU fees. The ledger shows your true net cost after reclaim.</p>
                         </div>
                     )}
+
+                    {/* AU GST Threshold Warning */}
+                    <VATThresholdWarning country="AU" state={state} patch={patch} />
                 </div>
             )}
 
@@ -275,6 +360,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             />
                         </div>
                     )}
+                    {/* DE MwSt Threshold Warning */}
+                    <VATThresholdWarning country="DE" state={state} patch={patch} />
+
                     {!state.deIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>19% German VAT added to all eBay fees</p>
@@ -317,6 +405,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* CH Threshold Warning */}
+                    <VATThresholdWarning country="CH" state={state} patch={patch} />
+
                     {!state.chIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>8.1% Schweizer MWST auf alle eBay-Gebühren</p>
@@ -359,6 +450,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* BE Threshold Warning */}
+                    <VATThresholdWarning country="BE" state={state} patch={patch} />
+
                     {!state.beIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>21% Belgian VAT (TVA/BTW) added to all eBay fees</p>
@@ -405,6 +499,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                         <p style={{ fontSize: 11, fontWeight: 700, color: C.amber, margin: '0 0 3px' }}>Status Nie spełnia standardów: tylko +6 punktów</p>
                         <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>Polska nie stosuje podwyższenia do +7 punktów po 4 miesiącach — zawsze obowiązuje +6 punktów procentowych.</p>
                     </div>
+                    {/* PL Threshold Warning */}
+                    <VATThresholdWarning country="PL" state={state} patch={patch} />
+
                     {!state.plIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>23% polskiego VAT doliczony do wszystkich opłat eBay</p>
@@ -447,6 +544,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* NL Threshold Warning */}
+                    <VATThresholdWarning country="NL" state={state} patch={patch} />
+
                     {!state.nlIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>21% Nederlandse BTW toegevoegd aan alle eBay-kosten</p>
@@ -489,6 +589,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* IE Threshold Warning */}
+                    <VATThresholdWarning country="IE" state={state} patch={patch} />
+
                     {!state.ieIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>23% Irish VAT added to all eBay fees</p>
@@ -531,6 +634,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* AT Threshold Warning */}
+                    <VATThresholdWarning country="AT" state={state} patch={patch} />
+
                     {!state.atIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>20% Austrian VAT (USt) added to all eBay fees</p>
@@ -573,6 +679,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* ES Threshold Warning */}
+                    <VATThresholdWarning country="ES" state={state} patch={patch} />
+
                     {!state.esIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>21% Spanish VAT (IVA) added to all eBay fees</p>
@@ -615,6 +724,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* IT Threshold Warning */}
+                    <VATThresholdWarning country="IT" state={state} patch={patch} />
+
                     {!state.itIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>22% Italian VAT (IVA) added to all eBay fees</p>
@@ -657,6 +769,9 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             maxItems={8}
                         />
                     </div>
+                    {/* FR Threshold Warning */}
+                    <VATThresholdWarning country="FR" state={state} patch={patch} />
+
                     {!state.frIsVATRegistered && (
                         <div style={{ background: '#fef2f2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 10 }}>
                             <p style={{ fontSize: 11, color: C.red, fontWeight: 600, margin: 0 }}>20% French VAT (TVA) added to all eBay fees</p>

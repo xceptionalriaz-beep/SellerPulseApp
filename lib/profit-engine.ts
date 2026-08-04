@@ -11,11 +11,21 @@ export interface ProfitSettings {
   // --- Core Settings ---
   categoryFeePercent: number   // eBay FVF % for chosen category
   fixedFee: number   // Per-order fee ($0.30 ≤$10, $0.40 >$10)
-  adRatePercent: number   // Promoted Listings %
+  adRatePercent: number   // Promoted Listings Standard % (of sale price)
+  // Promoted Listings Advanced (CPC) fields
+  cpcEnabled: boolean  // true = use CPC model instead of/alongside PLS
+  cpcBid: number   // max cost-per-click bid in sell currency
+  cpcCTR: number   // estimated click-through rate % (impressions → clicks)
+  cpcCVR: number   // estimated conversion rate % (clicks → sales)
   sourcingTaxPercent: number   // Tax paid when sourcing stock (advanced only)
   defaultShipping: number   // What seller pays to ship
+  lotSize: number   // Units in the lot being sourced (buy cost ÷ lotSize = cost per unit)
+  sellQuantity: number   // How many times this listing sells (total profit = perUnit × sellQuantity)
   intlFeePercent: number   // eBay cross-border fee % (default 1.65%)
   fxFeePercent: number   // Bank currency conversion fee (advanced only)
+  buyCurrency: string   // Currency used to buy stock (e.g. 'USD', 'GBP', 'EUR')
+  fxRate: number   // How many sell-currency units = 1 buy-currency unit (e.g. 0.92 means 1 USD = 0.92 EUR)
+  fxEnabled: boolean  // true if buy currency != sell currency
 
   // --- Advanced Settings ---
   isAdvancedEnabled: boolean
@@ -56,6 +66,7 @@ export interface ProfitSettings {
   isCAMarket: boolean
   caCategoryKey: string
   caHasStore: boolean
+  caStoreTier: 'none' | 'basic' | 'premium' | 'anchor'  // CA store tier
   caIntlDestination: 'none' | 'us' | 'other'
 
   // AU fields
@@ -69,6 +80,7 @@ export interface ProfitSettings {
   isDEMarket: boolean
   deCategoryKey: string
   deHasShop: boolean
+  deShopTier: 'none' | 'basis' | 'top' | 'premium' | 'platin'  // DE shop tier
   deIsPlatinShop: boolean   // 10% off ALL FVF incl. fixed per-order
   deIsPremiumService: boolean   // 10% off variable FVF only
   deIsVATRegistered: boolean   // false = all fees × 1.19
@@ -138,16 +150,30 @@ export interface ProfitSettings {
   // outputVATOwed = sellingPrice - netRevenue
   outputVATEnabled: boolean
   outputVATPercent: number    // e.g. 20 for UK, 19 for DE, 22 for IT
+
+  // PayPal fee fields
+  paypalEnabled: boolean
+  paypalType: string    // 'goods' | 'micropayment' | 'international' | 'custom'
+  paypalRate: number    // % fee e.g. 3.49
 }
 
 export const DEFAULT_SETTINGS: ProfitSettings = {
   categoryFeePercent: 13.6,
   fixedFee: 0.40,
   adRatePercent: 0,
-  sourcingTaxPercent: 7.0,
+  cpcEnabled: false,
+  cpcBid: 0.20,
+  cpcCTR: 1.8,
+  cpcCVR: 3.0,
+  sourcingTaxPercent: 0,
   defaultShipping: 0,
+  lotSize: 1,   // default = single item (no lot)
+  sellQuantity: 1,   // default = single sale
   intlFeePercent: 1.65,
   fxFeePercent: 2.0,
+  buyCurrency: 'USD',
+  fxRate: 1.0,
+  fxEnabled: false,
   isAdvancedEnabled: false,
   defectRatePercent: 2.0,
   payoutFeePercent: 1.5,
@@ -179,6 +205,7 @@ export const DEFAULT_SETTINGS: ProfitSettings = {
   isCAMarket: false,
   caCategoryKey: 'default',
   caHasStore: false,
+  caStoreTier: 'none' as const,
   caIntlDestination: 'none',
   // AU fields
   isAUMarket: false,
@@ -190,6 +217,7 @@ export const DEFAULT_SETTINGS: ProfitSettings = {
   isDEMarket: false,
   deCategoryKey: 'default',
   deHasShop: false,
+  deShopTier: 'none' as const,
   deIsPlatinShop: false,
   deIsPremiumService: false,
   deIsVATRegistered: true,
@@ -245,6 +273,10 @@ export const DEFAULT_SETTINGS: ProfitSettings = {
   // Output VAT defaults — off, 0%
   outputVATEnabled: false,
   outputVATPercent: 0,
+  // PayPal defaults — off
+  paypalEnabled: false,
+  paypalType: 'goods',
+  paypalRate: 3.49,
 }
 
 export interface ProfitResult {
@@ -256,7 +288,17 @@ export interface ProfitResult {
   totalRevenue: number
   totalEbayFees: number
   finalValueFeeOnly: number   // FVF before ad/regulatory/cross-border
-  promotedAdFee: number
+  promotedAdFee: number   // PLS fee (% of sale)
+  cpcAdFee: number   // PLA fee (cost per click × clicks per sale)
+  fxCost: number   // FX conversion cost
+  paypalFee: number   // PayPal transaction fee
+  // Lot size / multi-quantity
+  costPerUnit: number   // buyPrice ÷ lotSize
+  profitPerUnit: number   // netProfit per unit sold
+  totalProfit: number   // netProfit × sellQuantity
+  totalRevenue_qty: number   // totalRevenue × sellQuantity
+  totalFees_qty: number   // totalEbayFees × sellQuantity
+  sellQuantity: number   // echo back for display
   regulatoryFee: number
   crossBorderFee: number
   advancedDeductions: number
@@ -369,6 +411,12 @@ export type USCategoryKey =
   | 'baby'
   | 'antiques'
   | 'garden_patio'
+  | 'dj_pro_audio'
+  | 'consumer_electronics'
+  | 'consumer_accessories'
+  | 'stamps'
+  | 'vehicle_apparel'
+  | 'vehicle_gps'
 
 // Bracket structure: array of { upTo, rate } where upTo = Infinity for the last bracket
 // FVF = sum of (rate × portion of sale within each bracket)
@@ -410,7 +458,7 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
   default: {
     label: 'Other categories (default)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
 
   books_movies_music: {
@@ -436,7 +484,7 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
   collectibles_trading_cards: {
     label: 'Comics, trading cards & collectibles',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.25 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
 
   handbags: {
@@ -503,127 +551,163 @@ export const US_TIERED_FEES: Record<USCategoryKey, USCategoryFee> = {
   computers_general: {
     label: 'Computers, Tablets & Networking (general)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   computers_specific: {
-    label: 'Computers — Desktops/Laptops/Tablets/Drives/Monitors',
-    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'Computers — Desktops/Laptops/Tablets/CPUs/RAM/Drives/Monitors/Printers (specific)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 7.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
   mobiles_general: {
-    label: 'Cell Phones & Accessories (general)',
+    label: 'Cell Phones & Smartphones + most Cell Phone Accessories',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
   mobiles_phones: {
-    label: 'Cell Phones & Smartphones',
-    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'Cell Phone Accessories (excl. memory cards) — hasStore 12.7%',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   cameras_general: {
-    label: 'Cameras & Photo (general)',
+    label: 'Cameras & Photo (general — cameras, camcorders, lenses)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
   cameras_specific: {
-    label: 'Cameras — Digital/Film/Lenses/Camcorders',
-    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'Camera, Drone & Photo Accessories (excl. memory cards) + Replacement Parts + Tripods + Other',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   clothes_general: {
     label: 'Clothing, Shoes & Accessories (general)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   health_beauty: {
     label: 'Health & Beauty',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   home_general: {
     label: 'Home & Garden (general)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   home_appliances: {
     label: 'Home — Appliances',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   home_furniture: {
     label: 'Home — Furniture',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   home_power_strips: {
     label: 'Home — Power Strips & Surge Protectors',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   sporting_goods: {
     label: 'Sporting Goods',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   sports_memorabilia: {
     label: 'Sports Memorabilia, Cards & Fan Shop',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   toys_games: {
     label: 'Toys & Hobbies',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   vehicle_parts_general: {
-    label: 'eBay Motors — Parts & Accessories (general)',
-    noStore: { type: 'progressive', brackets: [{ upTo: 750, rate: 9.5 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'eBay Motors — Parts & Accessories (Automotive Tools, Safety & Security, general Parts)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 11.5 }, { upTo: Infinity, rate: 2.35 }] },
     hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 11.5 }, { upTo: Infinity, rate: 2.35 }] },
   },
   vehicle_parts_specific: {
-    label: 'eBay Motors — Tires, Wheels & GPS',
-    noStore: { type: 'progressive', brackets: [{ upTo: 750, rate: 6.9 }, { upTo: Infinity, rate: 3.0 }] },
+    label: 'eBay Motors — Tires (all vehicle types)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 9.5 }, { upTo: Infinity, rate: 2.35 }] },
     hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 9.5 }, { upTo: Infinity, rate: 2.35 }] },
   },
   musical_instruments: {
-    label: 'Musical Instruments & Gear (general)',
+    label: 'Musical Instruments & Gear (general — most categories)',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
     hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 10.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
-  video_games: {
-    label: 'Video Games & Consoles (general)',
+
+  dj_pro_audio: {
+    label: 'Musical Instruments & Gear — DJ Equipment & Pro Audio',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+
+  consumer_electronics: {
+    label: 'Consumer Electronics (most categories — TV, headphones, VR, vehicle electronics)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+
+  consumer_accessories: {
+    label: 'Consumer Electronics — Accessories (batteries, portable audio accessories, TV accessories, GPS accessories)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+  video_games: {
+    label: 'Video Games & Consoles (most categories — games, accessories, parts)',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
   video_game_consoles: {
     label: 'Video Game Consoles',
-    noStore: { type: 'progressive', brackets: [{ upTo: 400, rate: 6.9 }, { upTo: Infinity, rate: 2.0 }] },
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
     hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 7.35 }, { upTo: Infinity, rate: 2.35 }] },
   },
   pet_supplies: {
     label: 'Pet Supplies',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
+  stamps: {
+    label: 'Stamps',
+    noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 9.7 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+
+  vehicle_apparel: {
+    label: 'eBay Motors — Apparel, Protective Gear & Merchandise',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+
+  vehicle_gps: {
+    label: 'eBay Motors — In-Car Technology, GPS & Security',
+    noStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 1000, rate: 9.35 }, { upTo: Infinity, rate: 2.35 }] },
+  },
+
   crafts: {
     label: 'Crafts',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   baby: {
     label: 'Baby',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   antiques: {
     label: 'Antiques',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   garden_patio: {
     label: 'Garden & Patio',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.6 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
 }
 
@@ -851,7 +935,7 @@ export const CA_TIERED_FEES: Record<CACategoryKey, CACategoryFee> = {
   collectibles_cards: {
     label: 'Comics, trading cards & collectibles',
     noStore: { type: 'progressive', brackets: [{ upTo: 7500, rate: 13.25 }, { upTo: Infinity, rate: 2.35 }] },
-    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.35 }, { upTo: Infinity, rate: 2.35 }] },
+    hasStore: { type: 'progressive', brackets: [{ upTo: 2500, rate: 12.7 }, { upTo: Infinity, rate: 2.35 }] },
   },
   guitars: {
     label: 'Musical instruments > Guitars & basses',
@@ -954,6 +1038,57 @@ export const CA_INTL_FEES = {
 // Two tables (noStore / hasStore) — CA store tier DOES change FVF rates
 // Returns { fvfAmount, noPerOrder }
 // =============================================================================
+
+// CA Store tiers — verified from official eBay CA store fees page
+export type CAStoreTier = 'none' | 'basic' | 'premium' | 'anchor'
+
+export const CA_STORE_MONTHLY_FEE: Record<CAStoreTier, number> = {
+  none: 0,
+  basic: 19.95,
+  premium: 59.95,
+  anchor: 299.95,
+}
+
+export const CA_STORE_FREE_LISTINGS: Record<CAStoreTier, number> = {
+  none: 250,
+  basic: 1000,
+  premium: 10000,
+  anchor: 25000,
+}
+
+export const CA_STORE_INSERTION_FEE: Record<CAStoreTier, number> = {
+  none: 0.30,
+  basic: 0.20,
+  premium: 0.10,
+  anchor: 0.05,
+}
+
+// DE Shop tiers — verified from official eBay DE shop fees page
+export type DEShopTier = 'none' | 'basis' | 'top' | 'premium' | 'platin'
+
+export const DE_SHOP_MONTHLY_FEE: Record<DEShopTier, number> = {
+  none: 0,
+  basis: 39.95,
+  top: 79.95,
+  premium: 299.95,
+  platin: 4999.95,
+}
+
+export const DE_SHOP_FREE_LISTINGS: Record<DEShopTier, number> = {
+  none: 0,
+  basis: 400,
+  top: 2500,
+  premium: 99999,  // Unlimited
+  platin: 99999,  // Unlimited
+}
+
+export const DE_SHOP_INSERTION_FEE: Record<DEShopTier, number> = {
+  none: 0.35,
+  basis: 0.10,
+  top: 0.05,
+  premium: 0,
+  platin: 0,
+}
 
 export function calcCAFVF(
   totalRevenue: number,
@@ -2528,6 +2663,7 @@ export interface ScenarioSettings {
   returnRatePercent: number
   returnShippingCost: number
   buyerPaidShipping: number
+  monthlySalesVolume: number   // actual sales count — replaces hardcoded 100
 }
 
 export interface ScenarioResult {
@@ -2584,22 +2720,42 @@ export class ProfitEngine {
         auIntlFee: 0, auGSTSaving: 0, deIntlFee: 0, deVATOnFees: 0,
         frIntlFee: 0, frVATOnFees: 0, itIntlFee: 0, itVATOnFees: 0, esIntlFee: 0, esVATOnFees: 0, atIntlFee: 0, atVATOnFees: 0, ieIntlFee: 0, ieVATOnFees: 0, nlIntlFee: 0, nlVATOnFees: 0, plIntlFee: 0, plVATOnFees: 0, beIntlFee: 0, beVATOnFees: 0, chIntlFee: 0, chVATOnFees: 0,
         outputVATOwed: 0,
+        cpcAdFee: 0,
+        fxCost: 0,
+        paypalFee: 0,
+        costPerUnit: 0, profitPerUnit: 0, totalProfit: 0,
+        totalRevenue_qty: 0, totalFees_qty: 0, sellQuantity: 1,
       }
     }
-
-    const actualShipping = shippingCost ?? settings.defaultShipping
 
     // ── 1. Revenue base ──────────────────────────────────────────────────────
     const buyerPaidShip = settings.buyerPaidShipping ?? 0
     const preTaxRevenue = sellingPrice + buyerPaidShip
     const taxCollected = preTaxRevenue * ((settings.buyerTaxPercent ?? 0) / 100)
     const totalRevenue = preTaxRevenue + taxCollected
+    const actualShipping = shippingCost ?? settings.defaultShipping
 
     // ── 2. True sourcing cost ────────────────────────────────────────────────
     const taxCost = settings.isAdvancedEnabled ? buyPrice * (settings.sourcingTaxPercent / 100) : 0
     const baseBuyCost = buyPrice + taxCost
-    const fxCost = settings.isAdvancedEnabled ? baseBuyCost * (settings.fxFeePercent / 100) : 0
-    const trueBuyCost = baseBuyCost + fxCost
+    // FX cost = bank conversion fee % + real rate difference cost
+    // If fxEnabled: buyCost in sell-currency = buyCost * fxRate
+    // Then fxFeePercent is applied on top of that converted amount
+    let fxCost = 0
+    if (settings.isAdvancedEnabled && settings.fxEnabled && settings.fxRate > 0 && settings.fxRate !== 1) {
+      // Convert buy cost to sell currency then apply bank fee
+      const convertedBuyCost = baseBuyCost * settings.fxRate
+      fxCost = convertedBuyCost * (settings.fxFeePercent / 100)
+    }
+    // ── Lot size: divide sourcing cost across units in the lot ──────────────
+    const lotSize = Math.max(1, Math.round(settings.lotSize || 1))
+    const sellQty = Math.max(1, Math.round(settings.sellQuantity || 1))
+    // If FX enabled, use converted buy cost (in sell currency) + bank fee
+    const effectiveBuyCost = (settings.isAdvancedEnabled && settings.fxEnabled && settings.fxRate > 0 && settings.fxRate !== 1)
+      ? (baseBuyCost * settings.fxRate) + fxCost
+      : baseBuyCost + fxCost
+    const costPerUnit = effectiveBuyCost / lotSize
+    const trueBuyCost = costPerUnit  // engine calculates per-unit profit
     const totalCosts = trueBuyCost + actualShipping
 
     // ── 3. Final Value Fee ───────────────────────────────────────────────────
@@ -2854,6 +3010,18 @@ export class ProfitEngine {
     // ── 7. Promoted Listings ─────────────────────────────────────────────────
     const promotedAdFee = totalRevenue * (settings.adRatePercent / 100)
 
+    // ── Promoted Listings Advanced (CPC) ─────────────────────────────────────
+    // Formula: cost per sale = cpcBid × (1 / CVR%) × (1 / CTR%)
+    // = cpcBid × clicks needed per sale = cpcBid / (CTR/100 × CVR/100)
+    // We model this as the estimated CPC cost for one sale
+    let cpcAdFee = 0
+    if (settings.cpcEnabled && settings.cpcBid > 0 && settings.cpcCTR > 0 && settings.cpcCVR > 0) {
+      const clicksPerImpression = settings.cpcCTR / 100
+      const salesPerClick = settings.cpcCVR / 100
+      const clicksPerSale = 1 / salesPerClick
+      cpcAdFee = settings.cpcBid * clicksPerSale
+    }
+
     // ── 8. Regulatory fee ────────────────────────────────────────────────────
     const regulatoryFee = (settings.includeRegulatoryFee && settings.regulatoryFeePercent)
       ? totalRevenue * (settings.regulatoryFeePercent / 100)
@@ -3007,7 +3175,7 @@ export class ProfitEngine {
       auGSTSaving = totalFeesInclGST - (totalFeesInclGST / 1.1)
     }
 
-    const totalEbayFees = finalValueFeeOnly + promotedAdFee + regulatoryFee
+    const totalEbayFees = finalValueFeeOnly + promotedAdFee + cpcAdFee + regulatoryFee
       + crossBorderFee + ukIntlFee + caIntlFee + auIntlFee + deIntlFee + frIntlFee + itIntlFee + esIntlFee + atIntlFee + ieIntlFee + nlIntlFee + plIntlFee + beIntlFee + chIntlFee
       + vatOnFees + deVATOnFees + frVATOnFees + itVATOnFees + esVATOnFees + atVATOnFees + ieVATOnFees + nlVATOnFees + plVATOnFees + beVATOnFees + chVATOnFees
       - auGSTSaving
@@ -3039,9 +3207,18 @@ export class ProfitEngine {
       outputVATOwed = totalRevenue * rate / (1 + rate)
     }
 
+    // ── PayPal fee ────────────────────────────────────────────────────────────
+    let paypalFee = 0
+    if (settings.paypalEnabled) {
+      const paypalFixedFee = settings.paypalType === 'micropayment' ? 0.05
+        : settings.paypalType === 'international' ? 0.49
+          : 0.49  // goods & services + custom
+      paypalFee = (totalRevenue * (settings.paypalRate / 100)) + paypalFixedFee
+    }
+
     // ── 12. Final truth equation ──────────────────────────────────────────────
     const netProfit =
-      totalRevenue - totalCosts - totalEbayFees - advancedDeductions + totalCashback - outputVATOwed
+      totalRevenue - totalCosts - totalEbayFees - advancedDeductions + totalCashback - outputVATOwed - paypalFee
 
     const roi = trueBuyCost > 0 ? (netProfit / trueBuyCost) * 100 : 0
     const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0
@@ -3056,6 +3233,8 @@ export class ProfitEngine {
         + (settings.includeRegulatoryFee ? (settings.regulatoryFeePercent ?? 0) : 0)
         + (settings.isInternationalSale ? settings.intlFeePercent : 0)
         + (settings.isAdvancedEnabled ? settings.defectRatePercent : 0)
+        + (settings.isAdvancedEnabled ? settings.payoutFeePercent : 0)
+        + (settings.paypalEnabled ? settings.paypalRate : 0)
       ) / 100,
       0.95
     )
@@ -3111,6 +3290,15 @@ export class ProfitEngine {
       chIntlFee,
       chVATOnFees,
       outputVATOwed,
+      cpcAdFee,
+      fxCost,
+      paypalFee,
+      costPerUnit,
+      profitPerUnit: netProfit,
+      totalProfit: netProfit * sellQty,
+      totalRevenue_qty: totalRevenue * sellQty,
+      totalFees_qty: totalEbayFees * sellQty,
+      sellQuantity: sellQty,
     }
   }
 
@@ -3232,7 +3420,7 @@ export class ProfitEngine {
 
     // Return Impact
     const returnRate = Math.min(Math.max(s.returnRatePercent, 0), 100)
-    const salesCount = 100
+    const salesCount = Math.max(1, Math.round(s.monthlySalesVolume || 100))
     const returnCount = Math.round(salesCount * (returnRate / 100))
     const successCount = salesCount - returnCount
     const revenueLost = s.sellingPrice + s.buyerPaidShipping

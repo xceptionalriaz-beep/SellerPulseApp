@@ -4,9 +4,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
-import TbTopBar        from './components/TbTopBar'
-import TbStudio        from './components/TbStudio'
-import TbProHud        from './components/TbProHud'
+import TbTopBar from './components/TbTopBar'
+import TbStudio from './components/TbStudio'
+import TbProHud from './components/TbProHud'
 import TbKeywordTables from './components/TbKeywordTables'
 import TbSettingsPanel from './components/TbSettingsPanel'
 import KillSwitchGate from '@/components/KillSwitchGate'
@@ -15,54 +15,131 @@ const supabase = createClient()
 
 export default function TitleBuilderPage() {
 
-  // â”€â”€ Title state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [title,       setTitle]       = useState('')
-  const [charCount,   setCharCount]   = useState(0)
-  const [flaggedVero, setFlaggedVero] = useState<string[]>([])
+  // ── Title state ──────────────────────────────────────────────
+  const [title, setTitle] = useState('')
+  const [charCount, setCharCount] = useState(0)
   const [flaggedDups, setFlaggedDups] = useState<string[]>([])
-  const [veroDb,      setVeroDb]      = useState<any[]>([])
+  // Richer VeRO type — carries risk_level + evidence_url so the UI
+  // can show the seller exactly which brand fired and how serious it is
+  interface VeroFlag { name: string; risk_level: string; evidence_url: string | null }
+  const [veroDb, setVeroDb] = useState<any[]>([])
+  const [flaggedVero, setFlaggedVero] = useState<VeroFlag[]>([])
 
-  // â”€â”€ Master filters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Plan limits + usage (fix 3 + 4) ─────────────────────────
+  const [planLimits, setPlanLimits] = useState<any>(null)
+  const [usageCounts, setUsageCounts] = useState({ ai_optimize: 0, keyword_search: 0, competitor_extract: 0 })
+  const limitRef = useRef({ ai_optimize: 0, keyword_search: 0, competitor_extract: 0 })
+
+  // ── Master filters ───────────────────────────────────────────
   const [activeTimeframe, setActiveTimeframe] = useState('30D')
-  const [activeMarket,    setActiveMarket]    = useState('eBay')
-  const [activeLocation,  setActiveLocation]  = useState('US')
+  const [activeMarket, setActiveMarket] = useState('eBay')
+  const [activeLocation, setActiveLocation] = useState('US')
 
-  // â”€â”€ Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Settings ─────────────────────────────────────────────────
   const [autoCapitalize, setAutoCapitalize] = useState(true)
-  const [autoCopy,       setAutoCopy]       = useState(false)
-  const [veroMode,       setVeroMode]       = useState('Strict')
-  const [showSettings,   setShowSettings]   = useState(false)
+  const [autoCopy, setAutoCopy] = useState(false)
+  const [veroMode, setVeroMode] = useState('Strict')
+  const [showSettings, setShowSettings] = useState(false)
 
-  // â”€â”€ Keyword data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [isFetching,       setIsFetching]       = useState(false)
+  // ── Keyword data ─────────────────────────────────────────────
+  const [isFetching, setIsFetching] = useState(false)
   const [longTailKeywords, setLongTailKeywords] = useState<any[]>([])
-  const [genericKeywords,  setGenericKeywords]  = useState<any[]>([])
+  const [genericKeywords, setGenericKeywords] = useState<any[]>([])
+  const [categoryName, setCategoryName] = useState('') // from eBay Extract — drives spin category awareness
 
-  // â”€â”€ MarketProvider data (replaces Dart Consumer<MarketProvider>) â”€â”€
+  // ── MarketProvider data (replaces Dart Consumer<MarketProvider>) ──
   const [saturScore, setSaturScore] = useState(0)
-  const [trendData,  setTrendData]  = useState<number[]>([])
+  const [trendData, setTrendData] = useState<number[]>([])
   const [marketLoading, setMarketLoading] = useState(false)
 
-  // â”€â”€ Load VeRO database on mount â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Load VeRO DB + plan limits + current usage on mount ──────
   useEffect(() => {
-    async function loadVeroDb() {
+    async function loadOnMount() {
       try {
-        const { data } = await supabase.from('vero_brands').select('brand_name, risk_level')
-        if (data) setVeroDb(data as any[])
+        // Fix 1+2: fetch keywords + evidence_url alongside brand_name + risk_level
+        const { data: brands } = await supabase
+          .from('vero_brands')
+          .select('brand_name, risk_level, keywords, evidence_url')
+        if (brands) setVeroDb(brands as any[])
       } catch (e) { console.error('VeRO Load Error:', e) }
+
+      try {
+        // Fix 3: load plan limits for this user's tier
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { data: profile } = await (supabase.from('profiles') as any)
+          .select('subscription_tier')
+          .eq('id', user.id)
+          .single()
+        const tier = (profile as any)?.subscription_tier ?? 'free'
+        const { data: limits } = await (supabase.from('plan_limits') as any)
+          .select('max_ai_optimize, max_keyword_searches, max_competitor_extract, max_title_generations')
+          .eq('tier', tier)
+          .single()
+        if (limits) setPlanLimits(limits as any)
+
+        // Fix 4: load current month usage from user_tool_usage
+        const now = new Date()
+        const { data: usageRows } = await (supabase.from('user_tool_usage') as any)
+          .select('tool_name, usage_count')
+          .eq('user_id', user.id)
+          .in('tool_name', ['title_builder_ai_optimize', 'title_builder_search', 'title_builder_extract'])
+        if (usageRows) {
+          const counts = { ai_optimize: 0, keyword_search: 0, competitor_extract: 0 }
+          for (const row of usageRows as any[]) {
+            if (row.tool_name === 'title_builder_ai_optimize') counts.ai_optimize = row.usage_count
+            if (row.tool_name === 'title_builder_search') counts.keyword_search = row.usage_count
+            if (row.tool_name === 'title_builder_extract') counts.competitor_extract = row.usage_count
+          }
+          setUsageCounts(counts)
+          limitRef.current = counts
+        }
+      } catch (e) { console.error('Plan/usage load error:', e) }
     }
-    loadVeroDb()
+    loadOnMount()
   }, [])
 
-  // â”€â”€ Analyze title on change (matches Dart _analyzeTitle) â”€â”€â”€â”€â”€
+  // ── Helper: increment a usage counter (fix 4) ────────────────
+  async function trackUsage(toolName: 'title_builder_ai_optimize' | 'title_builder_search' | 'title_builder_extract') {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      // Upsert: increment if row exists, insert with count 1 if not
+      await (supabase.from('user_tool_usage') as any).upsert({
+        user_id: user.id,
+        tool_name: toolName,
+        usage_count: (toolName === 'title_builder_ai_optimize'
+          ? limitRef.current.ai_optimize
+          : toolName === 'title_builder_search'
+            ? limitRef.current.keyword_search
+            : limitRef.current.competitor_extract) + 1,
+        last_used_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,tool_name' })
+    } catch { /* non-critical */ }
+  }
+
+  // ── Helper: check if user has quota left (fix 3) ─────────────
+  function isAtLimit(type: 'ai_optimize' | 'keyword_search' | 'competitor_extract'): boolean {
+    if (!planLimits) return false // limits not loaded yet — allow through
+    const limit = type === 'ai_optimize'
+      ? planLimits.max_ai_optimize
+      : type === 'keyword_search'
+        ? planLimits.max_keyword_searches
+        : planLimits.max_competitor_extract
+    if (limit === -1) return false // -1 = unlimited (growth/custom tier)
+    return limitRef.current[type] >= limit
+  }
+
+  // ── Analyze title on change (matches Dart _analyzeTitle) ─────
+  // Fix 1: respect veroMode — Strict flags all 3 tiers, Relaxed skips Caution
+  // Fix 2: also test brand.keywords (comma-separated) against the title
   useEffect(() => {
-    const text  = title
+    const text = title
     const words = text.toLowerCase().split(/\s+/).filter(Boolean)
 
-    const newDups:  string[] = []
-    const newVero:  string[] = []
+    const newDups: string[] = []
     const seen = new Set<string>()
-    const skipWords = new Set(['for','with','and','the','in','on','a','to','of'])
+    const skipWords = new Set(['for', 'with', 'and', 'the', 'in', 'on', 'a', 'to', 'of'])
 
     for (const word of words) {
       if (skipWords.has(word)) continue
@@ -70,11 +147,34 @@ export default function TitleBuilderPage() {
       seen.add(word)
     }
 
+    const newVero: VeroFlag[] = []
     if (veroDb.length > 0) {
       for (const brand of veroDb) {
-        const name = brand.brand_name?.toString() ?? ''
-        if (new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'i').test(text)) {
-          newVero.push(name)
+        const riskLevel = brand.risk_level ?? 'High Risk'
+
+        // Fix 1: veroMode filter
+        // Strict  → flag Critical Ban + High Risk + Caution (all)
+        // Relaxed → flag Critical Ban + High Risk only, skip Caution
+        if (veroMode === 'Relaxed' && riskLevel === 'Caution') continue
+
+        const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+        // Fix 2a: always check brand_name
+        const nameHit = new RegExp(`\\b${escape(brand.brand_name ?? '')}\\b`, 'i').test(text)
+
+        // Fix 2b: also check each comma-separated keyword in brand.keywords
+        let keywordsHit = false
+        if (brand.keywords) {
+          const kws = (brand.keywords as string).split(',').map((k: string) => k.trim()).filter(Boolean)
+          keywordsHit = kws.some((kw: string) => new RegExp(`\\b${escape(kw)}\\b`, 'i').test(text))
+        }
+
+        if ((nameHit || keywordsHit) && !newVero.find(f => f.name === brand.brand_name)) {
+          newVero.push({
+            name: brand.brand_name,
+            risk_level: riskLevel,
+            evidence_url: brand.evidence_url ?? null,
+          })
         }
       }
     }
@@ -83,21 +183,30 @@ export default function TitleBuilderPage() {
     setFlaggedVero(newVero)
     setFlaggedDups(newDups)
 
-    // Auto-copy at 80 chars (matches Dart autoCopy setting)
     if (autoCopy && text.length === 80) {
       navigator.clipboard.writeText(text)
     }
-  }, [title, veroDb, autoCopy])
+  }, [title, veroDb, autoCopy, veroMode])
 
-  // â”€â”€ Extract item ID â€” real eBay API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Extract item ID — real eBay API ──────────────────────────
   async function handleExtract(itemId: string) {
     if (!itemId) return
+    // Fix 3: enforce competitor_extract plan limit
+    if (isAtLimit('competitor_extract')) {
+      alert(`You've reached your plan limit for Competitor Extracts. Upgrade to get more.`)
+      return
+    }
     setIsFetching(true)
     try {
-      const res  = await fetch(`/api/ebay/item?id=${encodeURIComponent(itemId)}&purpose=title`)
+      const res = await fetch(`/api/ebay/item?id=${encodeURIComponent(itemId)}&purpose=title`)
       const data = await res.json()
       if (res.ok && data.title) {
         setTitle(data.title)
+        if (data.categoryName) setCategoryName(data.categoryName) // for spin category awareness
+        // Fix 4: track usage
+        limitRef.current.competitor_extract += 1
+        setUsageCounts(p => ({ ...p, competitor_extract: p.competitor_extract + 1 }))
+        trackUsage('title_builder_extract')
       } else {
         console.error('[title-builder] Extract failed:', data.error)
       }
@@ -105,18 +214,27 @@ export default function TitleBuilderPage() {
     setIsFetching(false)
   }
 
-  // â”€â”€ Search keyword â€” real eBay API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Search keyword — real eBay API ────────────────────────────
   async function handleSearch(keyword: string) {
     if (!keyword) return
+    // Fix 3: enforce keyword_search plan limit
+    if (isAtLimit('keyword_search')) {
+      alert(`You've reached your plan limit for Keyword Searches. Upgrade to get more.`)
+      return
+    }
     setMarketLoading(true)
     setIsFetching(true)
     try {
-      const marketplace = activeMarket === 'eBay UK' ? 'EBAY_GB'
-        : activeMarket === 'eBay AU' ? 'EBAY_AU'
-        : activeMarket === 'eBay DE' ? 'EBAY_DE'
-        : 'EBAY_US'
+      // Map the Location dropdown (US/UK/CA/AU/All) to eBay's marketplace IDs.
+      // NOTE: activeMarket is a separate "platform" selector (eBay/Amazon/Walmart);
+      // Amazon/Walmart are disabled placeholders, so eBay is the only live platform.
+      // The country targeting actually comes from activeLocation, not activeMarket.
+      const marketplace = activeLocation === 'UK' ? 'EBAY_GB'
+        : activeLocation === 'CA' ? 'EBAY_CA'
+          : activeLocation === 'AU' ? 'EBAY_AU'
+            : 'EBAY_US' // covers 'US' and 'All' (Browse API has no true multi-marketplace query)
 
-      const res  = await fetch(
+      const res = await fetch(
         `/api/ebay/search?keyword=${encodeURIComponent(keyword)}&marketplace=${marketplace}&limit=20`
       )
       const data = await res.json()
@@ -126,6 +244,10 @@ export default function TitleBuilderPage() {
         setSaturScore(data.saturScore ?? 0)
         setLongTailKeywords(data.longTailKeywords ?? [])
         setGenericKeywords(data.genericKeywords ?? [])
+        // Fix 4: track usage
+        limitRef.current.keyword_search += 1
+        setUsageCounts(p => ({ ...p, keyword_search: p.keyword_search + 1 }))
+        trackUsage('title_builder_search')
       } else {
         console.error('[title-builder] Search failed:', data.error)
       }
@@ -134,14 +256,14 @@ export default function TitleBuilderPage() {
     setIsFetching(false)
   }
 
-  // â”€â”€ Inject keyword (matches Dart injectKeyword) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Inject keyword (matches Dart injectKeyword) ───────────────
   function injectKeyword(kw: string) {
     const separator = (!title || title.endsWith(' ')) ? '' : ' '
-    const newText   = `${title}${separator}${kw} `
+    const newText = `${title}${separator}${kw} `
     setTitle(newText)
   }
 
-  // â”€â”€ Award XP when title is copied â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Award XP when title is copied ─────────────────────────────
   async function handleTitleCopy() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -153,20 +275,22 @@ export default function TitleBuilderPage() {
       await (supabase.from('profiles') as any)
         .update({
           titles_count: ((profile as any)?.titles_count ?? 0) + 1,
-          total_xp:     ((profile as any)?.total_xp     ?? 0) + 3,
+          total_xp: ((profile as any)?.total_xp ?? 0) + 3,
         } as any)
         .eq('id', user.id)
     } catch { /* non-critical */ }
   }
 
-  // â”€â”€ Title change handler with auto-capitalize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Title change handler with auto-capitalize ─────────────────
   function handleTitleChange(val: string) {
+    // Hard cap at 110 chars — applies to both textarea input and
+    // programmatic changes from Clean / Spin / AI Optimize / inject
+    const capped = val.slice(0, 110)
     // Auto-capitalize if setting is on (matches Dart autoCapitalize)
     if (autoCapitalize) {
-      const capitalized = val.replace(/\b\w/g, c => c.toUpperCase())
-      setTitle(capitalized)
+      setTitle(capped.replace(/\b\w/g, c => c.toUpperCase()))
     } else {
-      setTitle(val)
+      setTitle(capped)
     }
   }
 
@@ -182,9 +306,9 @@ export default function TitleBuilderPage() {
 
           {/* Top bar */}
           <TbTopBar
-            selectedTimeframe={activeTimeframe}   onTimeframeChanged={setActiveTimeframe}
-            selectedMarket={activeMarket}         onMarketChanged={setActiveMarket}
-            selectedLocation={activeLocation}     onLocationChanged={setActiveLocation}
+            selectedTimeframe={activeTimeframe} onTimeframeChanged={setActiveTimeframe}
+            selectedMarket={activeMarket} onMarketChanged={setActiveMarket}
+            selectedLocation={activeLocation} onLocationChanged={setActiveLocation}
             onExtract={handleExtract}
             onSearch={handleSearch}
             onOpenSettings={() => setShowSettings(true)}
@@ -197,19 +321,30 @@ export default function TitleBuilderPage() {
                 value={title}
                 onChange={handleTitleChange}
                 charCount={charCount}
-                veroCount={flaggedVero.length}
+                flaggedVero={flaggedVero}
                 duplicateCount={flaggedDups.length}
                 onCopy={handleTitleCopy}
+                keywordContext={[...genericKeywords, ...longTailKeywords].map(k => k.kw)}
+                aiOptimizeLimit={planLimits?.max_ai_optimize ?? null}
+                aiOptimizeUsed={usageCounts.ai_optimize}
+                categoryName={categoryName}
+                activeLocation={activeLocation}
+                onAiOptimizeUsed={() => {
+                  limitRef.current.ai_optimize += 1
+                  setUsageCounts(p => ({ ...p, ai_optimize: p.ai_optimize + 1 }))
+                  trackUsage('title_builder_ai_optimize')
+                }}
               />
             </div>
             <div style={{ flex: 35 }}>
               <TbProHud
-                veroCount={flaggedVero.length}
+                flaggedVero={flaggedVero}
                 currentTitle={title}
                 timeframe={activeTimeframe}
                 saturScore={saturScore}
                 trendData={trendData}
                 isLoading={marketLoading}
+                topWords={genericKeywords.slice(0, 2).map(g => ({ word: g.kw, percent: `${g.comp}%` }))}
               />
             </div>
           </div>
@@ -229,9 +364,9 @@ export default function TitleBuilderPage() {
         {/* Settings panel */}
         {showSettings && (
           <TbSettingsPanel
-            autoCapitalize={autoCapitalize}  onAutoCapitalizeChanged={setAutoCapitalize}
-            autoCopy={autoCopy}              onAutoCopyChanged={setAutoCopy}
-            veroMode={veroMode}              onVeroModeChanged={setVeroMode}
+            autoCapitalize={autoCapitalize} onAutoCapitalizeChanged={setAutoCapitalize}
+            autoCopy={autoCopy} onAutoCopyChanged={setAutoCopy}
+            veroMode={veroMode} onVeroModeChanged={setVeroMode}
             onClose={() => setShowSettings(false)}
           />
         )}

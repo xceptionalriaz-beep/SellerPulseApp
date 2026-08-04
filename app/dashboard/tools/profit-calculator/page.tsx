@@ -38,6 +38,10 @@ import {
     CACategoryKey,
     CA_TIERED_FEES,
     CA_INTL_FEES,
+    CAStoreTier,
+    CA_STORE_MONTHLY_FEE,
+    CA_STORE_FREE_LISTINGS,
+    CA_STORE_INSERTION_FEE,
     AUProPlan,
     AUCategoryTier,
     AU_FVF_TABLE,
@@ -49,11 +53,18 @@ import {
     DECategoryKey,
     DE_TIERED_FEES,
     DE_INTL_FEES,
+    DEShopTier,
+    DE_SHOP_MONTHLY_FEE,
+    DE_SHOP_FREE_LISTINGS,
+    DE_SHOP_INSERTION_FEE,
 } from '@/lib/profit-engine'
 import { CountrySettings } from '@/components/profit/CountrySettings'
 import { CountryLedgerRows } from '@/components/profit/CountryLedgerRows'
 import { getCategoryOptions, getStoreTierOptions, getSellerLevelOptions } from '@/components/profit/CountryCategoryOptions'
 import { detectCategory } from '@/components/profit/CategoryDetector'
+import { CalculatorProfiles } from '@/components/profit/CalculatorProfiles'
+import { SharedLinksPanel } from '@/components/profit/SharedLinksPanel'
+import { ExportButton } from '@/components/profit/ExportButton'
 
 // ──? Brand palette (spec-exact) ──────────────────────────────────────────────?
 const C = {
@@ -106,6 +117,25 @@ const COUNTRIES: Record<CountryCode, CountryMeta> = {
     CH: { symbol: 'CHF', defaultCatFee: 11.0, crossBorderFee: 0, regulatoryFee: 0.35, regFeeConfirmed: true, perOrderLow: 0.55, perOrderHigh: 0.65, perOrderThresh: 10, flag: 'ch', label: 'Switzerland', defaultPayoutFee: 0 },
     // ── Oceania ────────────────────────────────────────────────────────────────
     AU: { symbol: 'A$', defaultCatFee: 13.4, crossBorderFee: 0, regulatoryFee: 0, regFeeConfirmed: false, perOrderLow: 0.30, perOrderHigh: 0.30, perOrderThresh: 0, flag: 'au', label: 'Australia', defaultPayoutFee: 0 },
+}
+
+// VAT registration thresholds by country (annual revenue in local currency)
+// 0 = no threshold (must register from first sale) or not applicable
+const VAT_THRESHOLD: Record<CountryCode, { amount: number; currency: string; label: string }> = {
+    US: { amount: 0, currency: 'USD', label: '' },          // State sales tax — too complex
+    CA: { amount: 30000, currency: 'CAD', label: 'C$30,000' },  // GST small supplier threshold
+    UK: { amount: 90000, currency: 'GBP', label: '£90,000' },   // VAT registration threshold
+    DE: { amount: 22000, currency: 'EUR', label: '€22,000' },   // Kleinunternehmerregelung
+    FR: { amount: 85800, currency: 'EUR', label: '€85,800' },   // Micro-entreprise
+    IT: { amount: 85000, currency: 'EUR', label: '€85,000' },   // Regime forfettario
+    ES: { amount: 85000, currency: 'EUR', label: '€85,000' },   // Régimen simplificado
+    AT: { amount: 42000, currency: 'EUR', label: '€42,000' },   // Kleinunternehmer (2024 updated)
+    IE: { amount: 80000, currency: 'EUR', label: '€80,000' },   // Small business relief
+    BE: { amount: 25000, currency: 'EUR', label: '€25,000' },   // Franchise de base
+    NL: { amount: 20000, currency: 'EUR', label: '€20,000' },   // KOR
+    PL: { amount: 200000, currency: 'PLN', label: '200,000 zł' },// Zwolnienie podmiotowe
+    CH: { amount: 100000, currency: 'CHF', label: 'CHF 100,000' },// Umsatzsteuer
+    AU: { amount: 75000, currency: 'AUD', label: 'A$75,000' },  // GST registration
 }
 
 // Standard output VAT rates by country (0 = not applicable / not supported)
@@ -246,6 +276,7 @@ interface CalcState {
     // CA-specific
     caCategoryKey: string
     caHasStore: boolean
+    caStoreTier: 'none' | 'basic' | 'premium' | 'anchor'
     caIntlDestination: 'none' | 'us' | 'other'
     // AU-specific
     auProPlan: AUProPlan
@@ -256,6 +287,7 @@ interface CalcState {
     deCategoryKey: string
     deHasShop: boolean
     deIsPlatinShop: boolean
+    deShopTier: 'none' | 'basis' | 'top' | 'premium' | 'platin'
     deIsPremiumService: boolean
     deIsVATRegistered: boolean
     deIntlDestination: 'none' | 'eurozone' | 'europe_other' | 'uk' | 'other'
@@ -299,19 +331,34 @@ interface CalcState {
     chIsVATRegistered: boolean
     chIntlDestination: 'none' | 'europe_other' | 'us_canada' | 'uk_other'
     adRatePercent: number
+    cpcEnabled: boolean
+    cpcBid: number
+    cpcCTR: number
+    cpcCVR: number
     buyerTaxPercent: number
     isInternational: boolean
     includeRegFee: boolean
     // Output VAT (sales VAT) — off by default, opt-in
     outputVATEnabled: boolean
     outputVATPercent: number
+    annualRevenue: number    // estimated annual eBay sales in this country (for VAT threshold warning)
     // advanced
     isAdvancedEnabled: boolean
     sourcingTaxPercent: number
     fxFeePercent: number
+    buyCurrency: string
+    fxRate: number
+    fxEnabled: boolean
     defectRatePercent: number
     payoutFeePercent: number
     cashbackPercent: number
+    // PayPal
+    paypalEnabled: boolean
+    paypalType: string
+    paypalRate: number
+    // Lot size / multi-quantity
+    lotSize: number
+    sellQuantity: number
 }
 
 const DEFAULT_CALC_STATE: CalcState = {
@@ -339,6 +386,7 @@ const DEFAULT_CALC_STATE: CalcState = {
     // CA
     caCategoryKey: 'default',
     caHasStore: false,
+    caStoreTier: 'none' as CAStoreTier,
     caIntlDestination: 'none' as const,
     // AU
     auProPlan: 'starter' as AUProPlan,
@@ -349,6 +397,7 @@ const DEFAULT_CALC_STATE: CalcState = {
     deCategoryKey: 'default',
     deHasShop: false,
     deIsPlatinShop: false,
+    deShopTier: 'none' as DEShopTier,
     deIsPremiumService: false,
     deIsVATRegistered: true,
     deIntlDestination: 'none' as const,
@@ -392,17 +441,30 @@ const DEFAULT_CALC_STATE: CalcState = {
     chIsVATRegistered: true,
     chIntlDestination: 'none' as const,
     adRatePercent: 0,
+    cpcEnabled: false,
+    cpcBid: 0.20,
+    cpcCTR: 1.8,
+    cpcCVR: 3.0,
     buyerTaxPercent: 0,
     isInternational: false,
     includeRegFee: false,
     outputVATEnabled: false,
     outputVATPercent: 0,
+    annualRevenue: 0,    // 0 = not set
     isAdvancedEnabled: false,
     sourcingTaxPercent: DEFAULT_SETTINGS.sourcingTaxPercent,
     fxFeePercent: DEFAULT_SETTINGS.fxFeePercent,
+    buyCurrency: 'USD',
+    fxRate: 1.0,
+    fxEnabled: false,
     defectRatePercent: DEFAULT_SETTINGS.defectRatePercent,
     payoutFeePercent: 0,  // eBay managed payments — included in FVF
     cashbackPercent: DEFAULT_SETTINGS.cashbackPercent,
+    paypalEnabled: false,
+    paypalType: 'goods',
+    paypalRate: 3.49,
+    lotSize: 1,
+    sellQuantity: 1,
 }
 
 // ──? Map CalcState ? ProfitEngine.calculate() params ────────────────────────?
@@ -422,10 +484,17 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
         categoryFeePercent: baseCatFee,
         fixedFee: perOrderFee,
         adRatePercent: s.adRatePercent,
+        cpcEnabled: s.cpcEnabled,
+        cpcBid: s.cpcBid,
+        cpcCTR: s.cpcCTR,
+        cpcCVR: s.cpcCVR,
         sourcingTaxPercent: s.sourcingTaxPercent,
         defaultShipping: s.shippingCost,
         intlFeePercent: s.isInternational ? meta.crossBorderFee : 0,
         fxFeePercent: s.fxFeePercent,
+        buyCurrency: s.buyCurrency,
+        fxRate: s.fxRate,
+        fxEnabled: s.fxEnabled,
         // Advanced
         isAdvancedEnabled: s.isAdvancedEnabled,
         defectRatePercent: s.defectRatePercent,
@@ -439,6 +508,10 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
         regulatoryFeePercent: meta.regulatoryFee,
         outputVATEnabled: s.outputVATEnabled,
         outputVATPercent: s.outputVATPercent,
+        // PayPal
+        paypalEnabled: s.paypalEnabled,
+        paypalType: s.paypalType,
+        paypalRate: s.paypalRate,
         storeDiscountPercent: s.storeDiscount,
         sellerLevelAdjustPercent: 0, // handled via isTopRatedPlus / isBelowStandard below
         // US tiered fee fields
@@ -464,6 +537,7 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
         isCAMarket: country === 'CA',
         caCategoryKey: s.caCategoryKey,
         caHasStore: s.caHasStore,
+        caStoreTier: s.caStoreTier,
         caIntlDestination: s.caIntlDestination,
         // AU fields
         isAUMarket: country === 'AU',
@@ -522,11 +596,15 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
         deCategoryKey: s.deCategoryKey,
         deHasShop: s.deHasShop,
         deIsPlatinShop: s.deIsPlatinShop,
+        deShopTier: s.deShopTier,
         deIsPremiumService: s.deIsPremiumService,
         deIsVATRegistered: s.deIsVATRegistered,
         deIntlDestination: s.deIntlDestination,
         deBelowStdCategoryGroup: s.deBelowStdGroup,
         deINADCategoryGroup: s.deINADGroup,
+        // Lot size / multi-quantity
+        lotSize: Math.max(1, s.lotSize || 1),
+        sellQuantity: Math.max(1, s.sellQuantity || 1),
     }
 
     return ProfitEngine.calculate({
@@ -541,14 +619,16 @@ function runEngine(s: CalcState, meta: CountryMeta, country: CountryCode, overri
 function formatNum(n: number, prefix = '', suffix = '', decimals = 2): string {
     const sign = n < 0 ? '-' : ''
     const abs = Math.abs(n)
-    if (abs >= 1000000) return `${sign}${prefix}${(abs / 1000000).toFixed(1)}M${suffix}`
+    if (abs >= 1000000000000) return `${sign}${prefix}${(abs / 1000000000000).toFixed(2)}T${suffix}`
+    if (abs >= 1000000000) return `${sign}${prefix}${(abs / 1000000000).toFixed(2)}B${suffix}`
+    if (abs >= 1000000) return `${sign}${prefix}${(abs / 1000000).toFixed(2)}M${suffix}`
     return `${sign}${prefix}${abs.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`
 }
 
 function formatPct(n: number): string {
     const abs = Math.abs(n)
-    if (abs >= 10000) return `${(abs / 1000).toFixed(1)}K%`
-    if (abs >= 1000) return `${abs.toFixed(0)}%`
+    if (abs >= 999) return `999%+`
+    if (abs >= 100) return `${abs.toFixed(0)}%`
     return `${abs.toFixed(1)}%`
 }
 function SectionLabel({ children }: { children: string }) {
@@ -677,7 +757,7 @@ function StatCard({ label, value, color, tooltip }: { label: string; value: stri
             {tooltip && <div style={{ position: 'absolute', top: 8, right: 8 }}><Tooltip text={tooltip}><Info size={10} color={C.muted} /></Tooltip></div>}
             <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.5px', margin: '0 0 6px' }}>{label}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                <p style={{ fontSize: 22, fontWeight: 800, color, margin: 0, lineHeight: 1, opacity: visible ? 1 : 0, transition: 'opacity 0.12s ease' }}>{displayed}</p>
+                <p style={{ fontSize: displayed.length > 12 ? 13 : displayed.length > 9 ? 16 : displayed.length > 7 ? 19 : 22, fontWeight: 800, color, margin: 0, lineHeight: 1, opacity: visible ? 1 : 0, transition: 'opacity 0.12s ease' }}>{displayed}</p>
             </div>
         </div>
     )
@@ -712,12 +792,14 @@ function LedgerRow({ label, amount, color, symbol }: { label: string; amount: nu
     )
 }
 
-function DonutChart({ revenue, profit, costs, fees }: { revenue: number; profit: number; costs: number; fees: number }) {
-    const cx = 65, cy = 65, r = 44, sw = 26
+function DonutChart({ revenue, profit, costs, fees, sym }: { revenue: number; profit: number; costs: number; fees: number; sym: string }) {
+    const cx = 65, cy = 65, r = 44, sw = 18
     const circ = 2 * Math.PI * r
     if (revenue <= 0) return (
-        <svg width="130" height="130" viewBox="0 0 130 130">
+        <svg width="155" height="155" viewBox="0 0 130 130">
             <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.border} strokeWidth={sw} />
+            <text x={cx} y={cx - 4} textAnchor="middle" fontSize={9} fill={C.muted} fontFamily="sans-serif">Total rev</text>
+            <text x={cx} y={cx + 10} textAnchor="middle" fontSize={13} fontWeight={900} fill={C.text} fontFamily="sans-serif">{sym}0.00</text>
         </svg>
     )
     const profitPct = Math.max(profit, 0) / revenue
@@ -735,9 +817,13 @@ function DonutChart({ revenue, profit, costs, fees }: { revenue: number; profit:
     if (costsPct > 0.005) { segs.push(arc(costsPct, off, C.red)); off += costsPct }
     if (feesPct > 0.005) { segs.push(arc(feesPct, off, C.amber)) }
     return (
-        <svg width="130" height="130" viewBox="0 0 130 130">
+        <svg width="155" height="155" viewBox="0 0 130 130">
             <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.border} strokeWidth={sw} />
             {segs}
+            <text x={cx} y={cy - 5} textAnchor="middle" fontSize={7} fill={C.muted} fontFamily="sans-serif">Total rev</text>
+            <text x={cx} y={cy + 10} textAnchor="middle" fontSize={revenue >= 1000000000 ? 10 : revenue >= 1000000 ? 11 : revenue >= 10000 ? 12 : 14} fontWeight="bold" fill={profit > 0 ? C.green : profit < 0 ? C.red : C.text} fontFamily="'Inter', sans-serif" style={{ fontWeight: 900 }}>
+                {sym}{revenue >= 1000000000 ? `${(revenue / 1000000000).toFixed(1)}B` : revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M` : revenue >= 10000 ? `${(revenue / 1000).toFixed(1)}K` : revenue.toFixed(2)}
+            </text>
         </svg>
     )
 }
@@ -770,10 +856,14 @@ export default function ProfitCalculatorPage() {
     const [shipCostStr, setShipCostStr] = useState('0.00')
     const [buyerShipStr, setBuyerShipStr] = useState('0.00')
     const [adRateStr, setAdRateStr] = useState('0.00')
+    const [cpcBidStr, setCpcBidStr] = useState('0.20')
+    const [cpcCTRStr, setCpcCTRStr] = useState('1.8')
+    const [cpcCVRStr, setCpcCVRStr] = useState('3.0')
     const [buyerTaxStr, setBuyerTaxStr] = useState('0.00')
     const [catFeeStr, setCatFeeStr] = useState('13.25')
     const [sourcingTaxStr, setSourcingTaxStr] = useState(String(DEFAULT_SETTINGS.sourcingTaxPercent))
     const [fxFeeStr, setFxFeeStr] = useState(String(DEFAULT_SETTINGS.fxFeePercent))
+    const [fxRateStr, setFxRateStr] = useState('1.0')
     const [defectRateStr, setDefectRateStr] = useState(String(DEFAULT_SETTINGS.defectRatePercent))
     const [payoutFeeStr, setPayoutFeeStr] = useState('0')  // eBay managed payments — no separate payout fee
     const [cashbackStr, setCashbackStr] = useState(String(DEFAULT_SETTINGS.cashbackPercent))
@@ -781,6 +871,10 @@ export default function ProfitCalculatorPage() {
     // Insertion fee state
     const [listingsUsedStr, setListingsUsedStr] = useState('0')
     const [unitsPerListing, setUnitsPerListing] = useState('1')
+    const [lotSizeStr, setLotSizeStr] = useState('1')
+    const [sliderPrice, setSliderPrice] = useState<number | null>(null)
+    const [annualRevenueStr, setAnnualRevenueStr] = useState('0')  // null = follow current price
+    const [sellQtyStr, setSellQtyStr] = useState('1')
     const [categoryType, setCategoryType] = useState('regular') // regular | motors | realestate
 
     // Bulk & volume analysis state
@@ -808,6 +902,10 @@ export default function ProfitCalculatorPage() {
     const [fetchedItem, setFetchedItem] = useState<{ title: string; price: number; shipping: number; image: string; sold: number; currency: string; condition: string; seller: string; sellerFeedback: string; returns: boolean; returnPeriod: number; marketplace: CountryCode; selectedCountry: CountryCode; sellerCountry: string; category: string } | null>(null)
     const [savedItems, setSavedItems] = useState<SavedItem[]>([])
     const [historyOpen, setHistoryOpen] = useState(false)
+    const [paypalEnabled, setPaypalEnabled] = useState(false)
+    const [paypalType, setPaypalType] = useState('goods')
+    const [paypalRate, setPaypalRate] = useState('3.49')
+    const [historyDrawerTab, setHistoryDrawerTab] = useState<'saved' | 'shared'>('saved')
     const [historySearch, setHistorySearch] = useState('')
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
     const [undoItem, setUndoItem] = useState<SavedItem | null>(null)
@@ -820,6 +918,7 @@ export default function ProfitCalculatorPage() {
     const [reverseMode, setReverseMode] = useState<'profit' | 'margin'>('profit')
     const [returnRateStr, setReturnRateStr] = useState('10')
     const [returnShippingStr, setReturnShippingStr] = useState('5.00')
+    const [salesVolumeStr, setSalesVolumeStr] = useState('100')  // monthly sales volume
 
     // ── History multi-select & compare ──────────────────────────────────────?
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -865,6 +964,7 @@ export default function ProfitCalculatorPage() {
             ukReducedPerOrder: false,
             caCategoryKey: 'default',
             caHasStore: false,
+            caStoreTier: 'none' as CAStoreTier,
             caIntlDestination: 'none' as const,
             auProPlan: 'starter' as AUProPlan,
             auCategoryTier: 2 as AUCategoryTier,
@@ -873,6 +973,7 @@ export default function ProfitCalculatorPage() {
             deCategoryKey: 'default',
             deHasShop: false,
             deIsPlatinShop: false,
+            deShopTier: 'none' as DEShopTier,
             deIsPremiumService: false,
             deIsVATRegistered: true,
             deIntlDestination: 'none' as const,
@@ -911,6 +1012,7 @@ export default function ProfitCalculatorPage() {
             // Reset output VAT to country standard rate (disabled by default)
             outputVATEnabled: false,
             outputVATPercent: OUTPUT_VAT_RATE[country] ?? 0,
+            annualRevenue: 0,
             // Reset payout fee to country-specific eBay managed payments default
             payoutFeePercent: meta.defaultPayoutFee,
             // Reset seller level when switching countries
@@ -1050,6 +1152,45 @@ export default function ProfitCalculatorPage() {
 
     // Ad danger zone
     const adFee = result?.promotedAdFee ?? 0
+    const cpcFee = result?.cpcAdFee ?? 0
+    // ── VAT Threshold Warning ───────────────────────────────────────────────
+    const vatThresholdData = VAT_THRESHOLD[country]
+    const vatThresholdAmt = vatThresholdData?.amount ?? 0
+    const annualRev = state.annualRevenue || 0
+    const showVATWarning = vatThresholdAmt > 0 && annualRev > 0
+    const vatPct = vatThresholdAmt > 0 ? Math.min((annualRev / vatThresholdAmt) * 100, 130) : 0
+    const vatStatus = vatPct >= 100 ? 'exceeded' : vatPct >= 85 ? 'approaching' : 'safe'
+    const vatHeadroom = Math.max(vatThresholdAmt - annualRev, 0)
+    const vatOverage = Math.max(annualRev - vatThresholdAmt, 0)
+    const vatOutputRate = OUTPUT_VAT_RATE[country] ?? 0
+
+    // ── Price Explorer ──────────────────────────────────────────────────────
+    const explorerPrice = sliderPrice ?? state.sellingPrice
+    const sliderMin = breakEven > 0 ? Math.max(breakEven * 0.5, 0.01) : Math.max(state.sellingPrice * 0.3, 0.01)
+    const sliderMax = Math.max(state.sellingPrice * 2.5, breakEven * 3, 10)
+    const breakEvenPct = sliderMax > sliderMin ? Math.min(Math.max(((breakEven - sliderMin) / (sliderMax - sliderMin)) * 100, 0), 100) : 20
+    const explorerPct = sliderMax > sliderMin ? Math.min(Math.max(((explorerPrice - sliderMin) / (sliderMax - sliderMin)) * 100, 0), 100) : 50
+    const explorerResult = runEngine({ ...state, sellingPrice: explorerPrice }, meta, country)
+    const explorerProfit = explorerResult?.netProfit ?? 0
+    const explorerMargin = explorerResult?.profitMargin ?? 0
+    const explorerROI = explorerResult?.roi ?? 0
+    // Price ladder — 5 price points
+    const ladderPrices = [
+        breakEven > 0 ? parseFloat((breakEven * 1.05).toFixed(2)) : null,
+        state.sellingPrice,
+        parseFloat((state.sellingPrice * 1.15).toFixed(2)),
+        parseFloat((state.sellingPrice * 1.30).toFixed(2)),
+        parseFloat((state.sellingPrice * 1.50).toFixed(2)),
+    ].filter((p, i, arr) => p !== null && p > 0 && arr.indexOf(p) === i) as number[]
+
+    const lotSizeN = Math.max(1, parseInt(lotSizeStr) || 1)
+    const sellQtyN = Math.max(1, parseInt(sellQtyStr) || 1)
+    const costPerUnit = result?.costPerUnit ?? 0
+    const totalProfit = result?.totalProfit ?? 0
+    const totalRevQty = result?.totalRevenue_qty ?? 0
+    const totalFeesQty = result?.totalFees_qty ?? 0
+    const isMultiLot = lotSizeN > 1
+    const isMultiQty = sellQtyN > 1
     const regFeeAmt = result?.regulatoryFee ?? 0
     const adDangerProgress = maxSafeAdRate > 0
         ? Math.min((state.adRatePercent / maxSafeAdRate) * 100, 100)
@@ -1137,6 +1278,7 @@ export default function ProfitCalculatorPage() {
         reverseMode,
         returnRatePercent: parseFloat(returnRateStr) || 0,
         returnShippingCost: parseFloat(returnShippingStr) || 0,
+        monthlySalesVolume: parseFloat(salesVolumeStr) || 100,
         buyerPaidShipping: state.buyerPaidShipping,
     })
 
@@ -1172,13 +1314,13 @@ export default function ProfitCalculatorPage() {
     const simMargin = simResult?.profitMargin ?? 0
     const simRoi = simResult?.roi ?? 0
     const simFees = simResult?.totalEbayFees ?? 0
-    const sliderMax = Math.max(state.sellingPrice * 3, 50)
+    const wifSliderMax = Math.max(state.sellingPrice * 3, 50)
 
     // ── Smart slider gradients ────────────────────────────────────────────────
 
     // 1. What-If Forecaster ? red below break-even, yellow marginal, lime healthy
     const wifMin = 1
-    const wifMax = sliderMax
+    const wifMax = wifSliderMax
     const wifBreakEvenPct = wifMax > wifMin ? Math.min(((breakEven - wifMin) / (wifMax - wifMin)) * 100, 95) : 10
     const wifMarginalPct = Math.min(wifBreakEvenPct + 10, 90)
     const wifGradient = `linear-gradient(to right,
@@ -1285,6 +1427,8 @@ export default function ProfitCalculatorPage() {
         setCatFeeStr(String(defaultFee))
         setSourcingTaxStr(String(DEFAULT_SETTINGS.sourcingTaxPercent))
         setFxFeeStr(String(DEFAULT_SETTINGS.fxFeePercent))
+        patch({ fxEnabled: false, fxRate: 1.0 })
+        setFxRateStr('1.0')
         setDefectRateStr(String(DEFAULT_SETTINGS.defectRatePercent))
         setPayoutFeeStr(String(COUNTRIES[country]?.defaultPayoutFee ?? DEFAULT_SETTINGS.payoutFeePercent))
         setCashbackStr(String(DEFAULT_SETTINGS.cashbackPercent))
@@ -1340,6 +1484,8 @@ export default function ProfitCalculatorPage() {
                 catFeeStr,
                 listingsUsedStr,
                 unitsPerListing,
+                lotSizeStr,
+                sellQtyStr,
                 categoryType,
                 bulkEnabled,
                 unitsPurchasedStr,
@@ -1349,6 +1495,7 @@ export default function ProfitCalculatorPage() {
                 bulkShipOverrideStr,
                 sourcingTaxStr,
                 fxFeeStr,
+                fxRateStr,
                 defectRateStr,
                 payoutFeeStr,
                 cashbackStr,
@@ -1409,6 +1556,8 @@ export default function ProfitCalculatorPage() {
         if (s.catFeeStr) setCatFeeStr(s.catFeeStr)
         if (s.listingsUsedStr !== undefined) setListingsUsedStr(s.listingsUsedStr)
         if (s.unitsPerListing !== undefined) setUnitsPerListing(s.unitsPerListing)
+        if (s.lotSizeStr !== undefined) setLotSizeStr(s.lotSizeStr)
+        if (s.sellQtyStr !== undefined) setSellQtyStr(s.sellQtyStr)
         if (s.categoryType) setCategoryType(s.categoryType)
         if (s.bulkEnabled !== undefined) setBulkEnabled(s.bulkEnabled)
         if (s.unitsPurchasedStr !== undefined) setUnitsPurchasedStr(s.unitsPurchasedStr)
@@ -1418,6 +1567,7 @@ export default function ProfitCalculatorPage() {
         if (s.bulkShipOverrideStr !== undefined) setBulkShipOverrideStr(s.bulkShipOverrideStr)
         if (s.sourcingTaxStr !== undefined) setSourcingTaxStr(s.sourcingTaxStr)
         if (s.fxFeeStr !== undefined) setFxFeeStr(s.fxFeeStr)
+        if (s.fxRateStr !== undefined) setFxRateStr(s.fxRateStr)
         if (s.defectRateStr !== undefined) setDefectRateStr(s.defectRateStr)
         if (s.payoutFeeStr !== undefined) setPayoutFeeStr(s.payoutFeeStr)
         if (s.cashbackStr !== undefined) setCashbackStr(s.cashbackStr)
@@ -1544,7 +1694,7 @@ export default function ProfitCalculatorPage() {
 
     return (
         <KillSwitchBanner toolKey="profit_calculator">
-            <div style={{ fontFamily: "'Inter', sans-serif", background: C.bg, minHeight: '100vh', padding: '24px', color: C.text }}>
+            <div style={{ fontFamily: "'Inter', sans-serif", background: C.bg, minHeight: '100vh', padding: '0 24px 24px', color: C.text }}>
 
                 {/* ── Page header + search bar + save + history all in one row ── */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -1715,24 +1865,80 @@ export default function ProfitCalculatorPage() {
                         )}
                     </div>
 
-                    {/* History button */}
-                    <button
-                        onClick={() => setHistoryOpen(true)}
-                        style={{
-                            height: 36, padding: '0 14px', borderRadius: 8, flexShrink: 0,
-                            border: `1px solid ${C.border}`, background: C.surface, color: C.text,
-                            fontWeight: 700, fontSize: 12, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: 6,
-                        }}
-                    >
-                        <History size={14} />
-                        History
-                        {savedItems.length > 0 && (
-                            <span style={{ background: C.lime, color: C.dark, padding: '1px 7px', borderRadius: 999, fontSize: 10, fontWeight: 800 }}>
-                                {savedItems.length}
-                            </span>
-                        )}
-                    </button>
+                    {/* Profiles + History buttons — right side */}
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <CalculatorProfiles
+                            currentCountry={country}
+                            currentState={state}
+                            onApply={(profileCountry, patches) => {
+                                setCountry(profileCountry as CountryCode)
+                                setState(prev => ({ ...prev, ...patches }))
+                                // Sync string states so all input boxes update visually
+                                if (patches.shippingCost !== undefined) setShipCostStr(String(patches.shippingCost))
+                                if (patches.sourcingTaxPercent !== undefined) setSourcingTaxStr(String(patches.sourcingTaxPercent))
+                                if (patches.payoutFeePercent !== undefined) setPayoutFeeStr(String(patches.payoutFeePercent))
+                                if (patches.cashbackPercent !== undefined) setCashbackStr(String(patches.cashbackPercent))
+                                if (patches.adRatePercent !== undefined) setAdRateStr(String(patches.adRatePercent))
+                                if (patches.defectRatePercent !== undefined) setDefectRateStr(String(patches.defectRatePercent))
+                                if (patches.buyerTaxPercent !== undefined) setBuyerTaxStr(String(patches.buyerTaxPercent))
+                                if (patches.annualRevenue !== undefined) setAnnualRevenueStr(String(patches.annualRevenue))
+                                // Sync category fee display
+                                if (patches.categoryFeePercent !== undefined) setCatFeeStr(String(patches.categoryFeePercent))
+                            }}
+                        />
+
+                        <ExportButton state={state} result={result ?? undefined} country={country} meta={meta} sym={sym} />
+                        {/* Clear button */}
+                        <button
+                            onClick={() => {
+                                setState({ ...DEFAULT_CALC_STATE })
+                                setBuyPriceStr('0')
+                                setSellPriceStr('0')
+                                setShipCostStr('0')
+                                setBuyerShipStr('0')
+                                setSourcingTaxStr('0')
+                                setPayoutFeeStr('0')
+                                setCashbackStr('0')
+                                setAdRateStr('0')
+                                setCpcBidStr('0')
+                                setCpcCTRStr('0')
+                                setCpcCVRStr('0')
+                                setDefectRateStr('0')
+                                setBuyerTaxStr('0')
+                                setAnnualRevenueStr('0')
+                                setCatFeeStr('0')
+                                setSimPrice(20)
+                                setSliderPrice(null)
+                            }}
+                            style={{
+                                height: 36, padding: '0 14px', borderRadius: 8, flexShrink: 0,
+                                border: `1px solid ${C.border}`, background: C.surface, color: C.red,
+                                fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: 6,
+                            }}
+                        >
+                            Clear
+                        </button>
+
+                        {/* History button */}
+                        <button
+                            onClick={() => setHistoryOpen(true)}
+                            style={{
+                                height: 36, padding: '0 14px', borderRadius: 8, flexShrink: 0,
+                                border: `1px solid ${C.border}`, background: C.surface, color: C.text,
+                                fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: 6,
+                            }}
+                        >
+                            <History size={14} />
+                            History
+                            {savedItems.length > 0 && (
+                                <span style={{ background: C.lime, color: C.dark, padding: '1px 7px', borderRadius: 999, fontSize: 10, fontWeight: 800 }}>
+                                    {savedItems.length}
+                                </span>
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* ── Country flags row — item preview left, flags right ── */}
@@ -1884,6 +2090,10 @@ export default function ProfitCalculatorPage() {
                             sellingPrice={sellPriceStr}
                             buyerPaidShipping={buyerShipStr}
                             adRate={adRateStr}
+                            cpcEnabled={state.cpcEnabled}
+                            cpcBid={cpcBidStr}
+                            cpcCTR={cpcCTRStr}
+                            cpcCVR={cpcCVRStr}
                             buyerTax={buyerTaxStr}
                             selectedCategory={
                                 country === 'US' ? state.usCategoryKey
@@ -1905,9 +2115,9 @@ export default function ProfitCalculatorPage() {
                             selectedStoreTier={
                                 country === 'US' ? state.usStoreTier
                                     : country === 'UK' ? state.ukStoreTier
-                                        : country === 'CA' ? (state.caHasStore ? 'has_store' : 'no_store')
+                                        : country === 'CA' ? state.caStoreTier
                                             : country === 'AU' ? state.auProPlan
-                                                : country === 'DE' ? (state.deIsPlatinShop ? 'platin' : state.deHasShop ? 'has_shop' : 'no_shop')
+                                                : country === 'DE' ? state.deShopTier
                                                     : country === 'FR' ? '0'
                                                         : country === 'IT' ? '0'
                                                             : country === 'ES' ? '0'
@@ -1939,6 +2149,11 @@ export default function ProfitCalculatorPage() {
                             hasOutputVATRate={OUTPUT_VAT_RATE[country] > 0}
                             sourcingTax={sourcingTaxStr}
                             fxFee={fxFeeStr}
+                            buyCurrency={state.buyCurrency}
+                            fxRate={fxRateStr}
+                            fxEnabled={state.fxEnabled}
+                            sellCurrencySymbol={meta.symbol}
+                            sellCurrencyCode={country === 'UK' ? 'GBP' : country === 'US' ? 'USD' : country === 'CA' ? 'CAD' : country === 'AU' ? 'AUD' : country === 'PL' ? 'PLN' : country === 'CH' ? 'CHF' : 'EUR'}
                             defectRate={defectRateStr}
                             payoutFee={payoutFeeStr}
                             defaultPayoutFee={meta.defaultPayoutFee}
@@ -1948,6 +2163,10 @@ export default function ProfitCalculatorPage() {
                             onSellingPriceChange={v => { setSellPriceStr(v); const n = parseFloat(v) || 0; patch({ sellingPrice: n }); setSimPrice(n) }}
                             onBuyerPaidShipChange={v => { setBuyerShipStr(v); patch({ buyerPaidShipping: parseFloat(v) || 0 }) }}
                             onAdRateChange={v => { setAdRateStr(v); patch({ adRatePercent: parseFloat(v) || 0 }) }}
+                            onCpcEnabledChange={v => patch({ cpcEnabled: v })}
+                            onCpcBidChange={v => { setCpcBidStr(v); patch({ cpcBid: parseFloat(v) || 0 }) }}
+                            onCpcCTRChange={v => { setCpcCTRStr(v); patch({ cpcCTR: parseFloat(v) || 1.8 }) }}
+                            onCpcCVRChange={v => { setCpcCVRStr(v); patch({ cpcCVR: parseFloat(v) || 3.0 }) }}
                             onBuyerTaxChange={v => { setBuyerTaxStr(v); patch({ buyerTaxPercent: parseFloat(v) || 0 }) }}
                             onCategoryChange={v => {
                                 if (country === 'US') {
@@ -1993,13 +2212,23 @@ export default function ProfitCalculatorPage() {
                                 } else if (country === 'UK') {
                                     patch({ ukStoreTier: v as UKStoreTier, storeDiscount: 0 })
                                 } else if (country === 'CA') {
-                                    patch({ caHasStore: v === 'has_store', storeDiscount: 0 })
+                                    const caTier = v as CAStoreTier
+                                    patch({
+                                        caStoreTier: caTier,
+                                        caHasStore: caTier !== 'none',
+                                        storeDiscount: 0,
+                                    })
                                 } else if (country === 'AU') {
                                     patch({ auProPlan: v as AUProPlan })
                                 } else if (country === 'AT') {
                                     patch({ atHasShop: v === 'has_shop' })
                                 } else if (country === 'DE') {
-                                    patch({ deHasShop: v === 'has_shop' || v === 'platin', deIsPlatinShop: v === 'platin' })
+                                    const deTier = v as DEShopTier
+                                    patch({
+                                        deShopTier: deTier,
+                                        deHasShop: deTier !== 'none',
+                                        deIsPlatinShop: deTier === 'platin',
+                                    })
                                 } else {
                                     patch({ storeDiscount: parseFloat(v) || 0, hasStore: parseFloat(v) > 0 })
                                 }
@@ -2031,9 +2260,23 @@ export default function ProfitCalculatorPage() {
                             onAdvancedChange={v => patch({ isAdvancedEnabled: v })}
                             onSourcingTaxChange={v => { setSourcingTaxStr(v); patch({ sourcingTaxPercent: parseFloat(v) || 0 }) }}
                             onFxFeeChange={v => { setFxFeeStr(v); patch({ fxFeePercent: parseFloat(v) || 0 }) }}
+                            onBuyCurrencyChange={v => { patch({ buyCurrency: v }) }}
+                            onFxRateChange={v => { setFxRateStr(v); patch({ fxRate: parseFloat(v) || 1.0 }) }}
+                            onFxEnabledChange={v => { patch({ fxEnabled: v, fxRate: v ? (parseFloat(fxRateStr) || 1.0) : 1.0 }) }}
                             onDefectRateChange={v => { setDefectRateStr(v); patch({ defectRatePercent: parseFloat(v) || 0 }) }}
                             onPayoutFeeChange={v => { setPayoutFeeStr(v); patch({ payoutFeePercent: parseFloat(v) || 0 }) }}
                             onCashbackChange={v => { setCashbackStr(v); patch({ cashbackPercent: parseFloat(v) || 0 }) }}
+                            paypalEnabled={paypalEnabled}
+                            paypalType={paypalType}
+                            paypalRate={paypalRate}
+                            onPaypalEnabledChange={v => { setPaypalEnabled(v); patch({ paypalEnabled: v }) }}
+                            onPaypalTypeChange={v => {
+                                setPaypalType(v)
+                                const rate = v === 'goods' ? '3.49' : v === 'micropayment' ? '5.00' : v === 'international' ? '4.99' : paypalRate
+                                setPaypalRate(rate)
+                                patch({ paypalType: v, paypalRate: parseFloat(rate) })
+                            }}
+                            onPaypalRateChange={v => { setPaypalRate(v); patch({ paypalRate: parseFloat(v) || 3.49 }) }}
                             onReset={resetAll}
                         />
 
@@ -2068,8 +2311,20 @@ export default function ProfitCalculatorPage() {
                                 <InputField
                                     label="Units per listing"
                                     value={unitsPerListing}
-                                    tooltip="How many units are listed under this single listing. Fee is split across all units."
+                                    tooltip="How many units are listed under this single listing. Insertion fee is split across all units."
                                     onChange={v => setUnitsPerListing(v.replace(/[^0-9]/g, ''))}
+                                />
+                                <InputField
+                                    label="Lot size (units bought)"
+                                    value={lotSizeStr}
+                                    tooltip="How many units in the lot you sourced. Buy cost is divided by this number to get cost per unit. Set to 1 for single items."
+                                    onChange={v => { const n = v.replace(/[^0-9]/g, ''); setLotSizeStr(n); patch({ lotSize: Math.max(1, parseInt(n) || 1) }) }}
+                                />
+                                <InputField
+                                    label="Sell quantity"
+                                    value={sellQtyStr}
+                                    tooltip="How many times this listing sells. Total profit = per-unit profit × sell quantity. Set to 1 for a single sale."
+                                    onChange={v => { const n = v.replace(/[^0-9]/g, ''); setSellQtyStr(n); patch({ sellQuantity: Math.max(1, parseInt(n) || 1) }) }}
                                 />
                             </div>
                             {/* Motors/RE category type — US only (non-US always regular) */}
@@ -2149,7 +2404,7 @@ export default function ProfitCalculatorPage() {
                                             <Tooltip text={`Exact: ${adjustedNetProfit >= 0 ? '+' : '-'}${sym}${Math.abs(adjustedNetProfit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}><Info size={10} color={C.muted} /></Tooltip>
                                         </div>
                                         <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.5px', margin: '0 0 6px' }}>NET PROFIT</p>
-                                        <p style={{ fontSize: 22, fontWeight: 800, color: profitColor(adjustedNetProfit), margin: 0, lineHeight: 1 }}>
+                                        <p style={{ fontSize: formatNum(adjustedNetProfit, sym).length > 10 ? 14 : formatNum(adjustedNetProfit, sym).length > 7 ? 18 : 22, fontWeight: 800, color: profitColor(adjustedNetProfit), margin: 0, lineHeight: 1 }}>
                                             {adjustedNetProfit >= 0 ? '+' : '-'}{formatNum(adjustedNetProfit, sym)}
                                         </p>
                                         {hourlyRate > 0 && (
@@ -2174,18 +2429,58 @@ export default function ProfitCalculatorPage() {
                                         tooltip={`Minimum sell price to cover all costs with 0% profit. Exact: ${sym}${breakEven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                     />
                                 </div>
+
+                                {/* Lot size / Multi-quantity summary panel */}
+                                {(isMultiLot || isMultiQty) && (
+                                    <div style={{ background: C.surface, border: `1px solid ${C.lime}`, borderRadius: 12, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ fontSize: 11, fontWeight: 800, color: C.text, letterSpacing: '0.4px' }}>
+                                                {isMultiLot ? `LOT OF ${lotSizeN}` : ''}{isMultiLot && isMultiQty ? ' · ' : ''}{isMultiQty ? `${sellQtyN}× SALES` : ''}
+                                            </span>
+                                            <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>MULTI</span>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                                            {isMultiLot && (
+                                                <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                                                    <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>COST PER UNIT</p>
+                                                    <p style={{ fontSize: 16, fontWeight: 800, color: C.red, margin: 0 }}>{formatNum(costPerUnit, sym)}</p>
+                                                    <p style={{ fontSize: 9, color: C.muted, margin: '3px 0 0' }}>from lot of {lotSizeN}</p>
+                                                </div>
+                                            )}
+                                            <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                                                <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>PROFIT PER UNIT</p>
+                                                <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(adjustedNetProfit), margin: 0 }}>{adjustedNetProfit >= 0 ? '+' : ''}{formatNum(adjustedNetProfit, sym)}</p>
+                                                <p style={{ fontSize: 9, color: C.muted, margin: '3px 0 0' }}>per sale</p>
+                                            </div>
+                                            {isMultiQty && (
+                                                <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                                                    <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>TOTAL PROFIT</p>
+                                                    <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(totalProfit), margin: 0 }}>{totalProfit >= 0 ? '+' : ''}{formatNum(totalProfit, sym)}</p>
+                                                    <p style={{ fontSize: 9, color: C.muted, margin: '3px 0 0' }}>across {sellQtyN} sales</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {isMultiQty && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                                <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                                                    <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>TOTAL REVENUE ({sellQtyN}× sales)</p>
+                                                    <p style={{ fontSize: 13, fontWeight: 800, color: C.green, margin: 0 }}>{formatNum(totalRevQty, sym)}</p>
+                                                </div>
+                                                <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
+                                                    <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>TOTAL EBAY FEES ({sellQtyN}× sales)</p>
+                                                    <p style={{ fontSize: 13, fontWeight: 800, color: C.amber, margin: 0 }}>{formatNum(totalFeesQty, sym)}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* Revenue split + Ledger */}
-                                <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: '170px 1fr', gap: 20 }}>
+                                <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: '8px 16px', display: 'grid', gridTemplateColumns: '180px 1fr', gap: 20 }}>
                                     <div>
                                         <SectionLabel>REVENUE SPLIT</SectionLabel>
-                                        <div style={{ position: 'relative', width: 130, height: 130, marginTop: 10 }}>
-                                            <DonutChart revenue={revenue} profit={netProfit} costs={totalCosts} fees={fvf + adFee + regFeeAmt} />
-                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', gap: 2 }}>
-                                                <span style={{ fontSize: 9, color: C.muted, display: 'block', lineHeight: 1 }}>Total rev</span>
-                                                <span title={`${sym}${revenue.toFixed(2)}`} style={{ fontSize: revenue >= 10000 ? 10 : 13, fontWeight: 900, color: C.text, display: 'block', lineHeight: 1 }}>
-                                                    {sym}{revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M` : revenue >= 10000 ? `${(revenue / 1000).toFixed(1)}K` : revenue.toFixed(2)}
-                                                </span>
-                                            </div>
+                                        <div style={{ position: 'relative', width: 155, height: 155, marginTop: 0 }}>
+                                            <DonutChart revenue={revenue} profit={netProfit} costs={totalCosts} fees={fvf + adFee + regFeeAmt} sym={sym} />
                                         </div>
                                     </div>
 
@@ -2206,6 +2501,11 @@ export default function ProfitCalculatorPage() {
                                                 <LedgerRow label="Revenue (price + ship)" amount={revenue} color={C.green} symbol={sym} />
                                                 <div style={{ height: 1, background: C.border }} />
                                                 <LedgerRow label="Item and shipping costs" amount={-totalCosts} color={C.red} symbol={sym} />
+                                                {isMultiLot && (
+                                                    <p style={{ fontSize: 9, color: C.muted, margin: '-4px 0 2px', paddingLeft: 2 }}>
+                                                        ↳ Lot of {lotSizeN} @ {sym}{formatNum(costPerUnit, '')} per unit (buy cost ÷ {lotSizeN})
+                                                    </p>
+                                                )}
                                                 <LedgerRow label="eBay final value fee" amount={-fvf} color={C.amber} symbol={sym} />
                                                 {insertionFeeApplies && (
                                                     <LedgerRow label={`Insertion fee (${unitsPerListingN} units)`} amount={-insertionFeePerUnit} color={C.amber} symbol={sym} />
@@ -2216,8 +2516,20 @@ export default function ProfitCalculatorPage() {
                                                 {state.outputVATEnabled && (result?.outputVATOwed ?? 0) > 0 && (
                                                     <LedgerRow label={`Output VAT (${state.outputVATPercent}%) on sales`} amount={-(result?.outputVATOwed ?? 0)} color={C.amber} symbol={sym} />
                                                 )}
+                                                {country === 'US' && state.usStoreTier !== 'none' && US_STORE_MONTHLY_FEE[state.usStoreTier] > 0 && (
+                                                    <LedgerRow label={`US Store (${state.usStoreTier}) monthly fee`} amount={-US_STORE_MONTHLY_FEE[state.usStoreTier]} color={C.amber} symbol={sym} />
+                                                )}
+                                                {country === 'CA' && state.caStoreTier !== 'none' && CA_STORE_MONTHLY_FEE[state.caStoreTier] > 0 && (
+                                                    <LedgerRow label={`CA Store (${state.caStoreTier}) monthly fee`} amount={-CA_STORE_MONTHLY_FEE[state.caStoreTier]} color={C.amber} symbol={sym} />
+                                                )}
+                                                {country === 'DE' && state.deShopTier !== 'none' && DE_SHOP_MONTHLY_FEE[state.deShopTier] > 0 && (
+                                                    <LedgerRow label={`DE Shop (${state.deShopTier}) monthly fee`} amount={-DE_SHOP_MONTHLY_FEE[state.deShopTier]} color={C.amber} symbol={sym} />
+                                                )}
                                                 {adFee > 0 && (
-                                                    <LedgerRow label="Promoted ad fee" amount={-adFee} color={C.amber} symbol={sym} />
+                                                    <LedgerRow label="Promoted Listings Standard (PLS)" amount={-adFee} color={C.amber} symbol={sym} />
+                                                )}
+                                                {cpcFee > 0 && (
+                                                    <LedgerRow label={`Promoted Listings Advanced CPC (~${(cpcFee / (result?.totalRevenue ?? 1) * 100).toFixed(2)}% of sale)`} amount={-cpcFee} color={C.amber} symbol={sym} />
                                                 )}
                                                 {state.isInternational && (
                                                     <LedgerRow label={`Cross-border fee (${meta.crossBorderFee}%)`} amount={-(revenue * meta.crossBorderFee / 100)} color={C.amber} symbol={sym} />
@@ -2272,10 +2584,16 @@ export default function ProfitCalculatorPage() {
                                                     />
                                                 )}
                                                 {state.isAdvancedEnabled && advDeduct > 0 && (
-                                                    <LedgerRow label="Advanced deductions" amount={-advDeduct} color={C.red} symbol={sym} />
+                                                    <LedgerRow label="Advanced deductions (payout + FX)" amount={-advDeduct} color={C.red} symbol={sym} />
+                                                )}
+                                                {state.isAdvancedEnabled && state.fxEnabled && state.fxRate !== 1.0 && (
+                                                    <LedgerRow label={`FX conversion (1 ${state.buyCurrency} = ${state.fxRate} ${country === 'UK' ? 'GBP' : country === 'US' ? 'USD' : country === 'CA' ? 'CAD' : country === 'AU' ? 'AUD' : country === 'PL' ? 'PLN' : country === 'CH' ? 'CHF' : 'EUR'})`} amount={-(result?.fxCost ?? 0)} color={C.amber} symbol={sym} />
                                                 )}
                                                 {state.isAdvancedEnabled && cashbackVal > 0 && (
                                                     <LedgerRow label="Cashback / rewards" amount={cashbackVal} color={C.green} symbol={sym} />
+                                                )}
+                                                {state.paypalEnabled && (result?.paypalFee ?? 0) > 0 && (
+                                                    <LedgerRow label={`PayPal fee (${state.paypalType === 'goods' ? 'Goods & Services' : state.paypalType === 'micropayment' ? 'Micropayment' : state.paypalType === 'international' ? 'International' : 'Custom'} ${state.paypalRate}%)`} amount={-(result?.paypalFee ?? 0)} color={C.red} symbol={sym} />
                                                 )}
                                             </div>
                                         </div>
@@ -2303,20 +2621,20 @@ export default function ProfitCalculatorPage() {
                                         </div>
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 12 }}>
-                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${C.lime}`, borderRadius: 8, padding: 10 }}>
+                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${C.lime}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>Sim price</p>
                                             <p style={{ fontSize: 16, fontWeight: 800, color: C.text, margin: 0 }}>{formatNum(simPrice, sym)}</p>
                                             <p style={{ fontSize: 9, color: C.muted, margin: '2px 0 0' }}>Total fees: {sym}{simFees >= 10000 ? formatNum(simFees, sym) : simFees.toFixed(2)}</p>
                                         </div>
-                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simNet)}`, borderRadius: 8, padding: 10 }}>
+                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simNet)}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>Est. profit</p>
                                             <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(simNet), margin: 0 }}>{simNet >= 0 ? '+' : '-'}{formatNum(simNet, sym)}</p>
                                         </div>
-                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simRoi)}`, borderRadius: 8, padding: 10 }}>
+                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simRoi)}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>ROI</p>
                                             <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(simRoi), margin: 0 }}>{formatPct(simRoi)}</p>
                                         </div>
-                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simMargin)}`, borderRadius: 8, padding: 10 }}>
+                                        <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simMargin)}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>Margin</p>
                                             <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(simMargin), margin: 0 }}>{formatPct(simMargin)}</p>
                                         </div>
@@ -2332,6 +2650,79 @@ export default function ProfitCalculatorPage() {
                                         <span style={{ color: C.green }}>High profit area</span>
                                     </div>
                                 </div>
+
+                                {/* ── Price Explorer ─────────────────────────────────── */}
+                                {breakEven > 0 && state.sellingPrice > 0 && (
+                                    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <SectionLabel>PRICE EXPLORER</SectionLabel>
+                                                <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>DRAG</span>
+                                            </div>
+                                            {sliderPrice !== null && (
+                                                <button onClick={() => setSliderPrice(null)} style={{ fontSize: 9, fontWeight: 700, color: C.muted, background: 'none', border: `1px solid ${C.border}`, borderRadius: 6, padding: '2px 8px', cursor: 'pointer' }}>
+                                                    Reset to current
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div style={{ position: 'relative', paddingTop: 8 }}>
+                                            <div style={{ position: 'absolute', top: -2, left: `${breakEvenPct}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 3, pointerEvents: 'none' }}>
+                                                <span style={{ fontSize: 8, fontWeight: 800, color: C.red, letterSpacing: '0.3px', whiteSpace: 'nowrap', position: 'relative', left: `${Math.min(Math.max(breakEvenPct, 8), 88) - breakEvenPct}%` }}>BREAK-EVEN {formatNum(breakEven, sym)}</span>
+                                                <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: `8px solid ${C.red}`, marginTop: 2 }} />
+                                            </div>
+                                            <div style={{ height: 10, borderRadius: 999, position: 'relative', overflow: 'hidden', marginTop: 20, background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${breakEvenPct}%, #22c55e ${breakEvenPct}%, #22c55e 100%)`, transition: 'background 0.05s ease' }}>
+                                                <div style={{ position: 'absolute', top: '50%', left: `${explorerPct}%`, transform: 'translate(-50%, -50%)', width: 16, height: 16, borderRadius: '50%', background: explorerProfit >= 0 ? C.lime : C.red, border: `2px solid ${C.surface}`, boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, transition: 'left 0.05s ease, background 0.2s ease' }} />
+                                            </div>
+                                            <input type="range" min={sliderMin} max={sliderMax} step={0.01} value={explorerPrice}
+                                                onChange={e => setSliderPrice(parseFloat(e.target.value))}
+                                                style={{ position: 'absolute', top: 20, left: 0, width: '100%', opacity: 0, cursor: 'pointer', height: 10, zIndex: 10 }} />
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+                                                <span style={{ fontSize: 9, color: C.muted }}>{formatNum(sliderMin, sym)}</span>
+                                                <span style={{ fontSize: 10, fontWeight: 800, color: explorerProfit >= 0 ? C.limeDeep : C.red }}>
+                                                    {formatNum(explorerPrice, sym)}
+                                                    {sliderPrice !== null && sliderPrice !== state.sellingPrice && (
+                                                        <span style={{ fontSize: 9, color: C.muted, fontWeight: 400 }}> (exploring)</span>
+                                                    )}
+                                                </span>
+                                                <span style={{ fontSize: 9, color: C.muted }}>{formatNum(sliderMax, sym)}</span>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                                            <div style={{ background: C.bg, borderRadius: 8, padding: 8, textAlign: 'center' }}>
+                                                <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 3px' }}>PROFIT</p>
+                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitColor(explorerProfit), margin: 0, transition: 'color 0.2s ease' }}>{explorerProfit >= 0 ? '+' : ''}{formatNum(explorerProfit, sym)}</p>
+                                            </div>
+                                            <div style={{ background: C.bg, borderRadius: 8, padding: 8, textAlign: 'center' }}>
+                                                <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 3px' }}>MARGIN</p>
+                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitColor(explorerMargin), margin: 0 }}>{explorerMargin >= 0 ? '' : '-'}{formatPct(explorerMargin)}</p>
+                                            </div>
+                                            <div style={{ background: C.bg, borderRadius: 8, padding: 8, textAlign: 'center' }}>
+                                                <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 3px' }}>ROI</p>
+                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitColor(explorerROI), margin: 0 }}>{explorerROI >= 0 ? '' : '-'}{formatPct(explorerROI)}</p>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                            <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>PRICE LADDER</p>
+                                            {ladderPrices.map((price, i) => {
+                                                const r = runEngine({ ...state, sellingPrice: price }, meta, country)
+                                                const p = r?.netProfit ?? 0
+                                                const m = r?.profitMargin ?? 0
+                                                const isCurrentPrice = Math.abs(price - state.sellingPrice) < 0.01
+                                                const isExploring = sliderPrice !== null && Math.abs(price - explorerPrice) < 0.01
+                                                return (
+                                                    <div key={i} onClick={() => setSliderPrice(price)} style={{ display: 'grid', gridTemplateColumns: '70px 1fr 60px 60px', gap: 6, alignItems: 'center', padding: '5px 8px', borderRadius: 6, cursor: 'pointer', background: isExploring ? C.surface : isCurrentPrice ? C.bg : 'transparent', border: `1px solid ${isCurrentPrice ? C.lime : isExploring ? C.border : 'transparent'}` }}>
+                                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>{formatNum(price, sym)}</span>
+                                                        <div style={{ height: 4, borderRadius: 999, background: C.border, overflow: 'hidden' }}>
+                                                            <div style={{ height: '100%', width: `${Math.min(Math.max(m, 0), 50) * 2}%`, background: p >= 0 ? C.lime : C.red, borderRadius: 999 }} />
+                                                        </div>
+                                                        <span style={{ fontSize: 10, fontWeight: 700, color: profitColor(p), textAlign: 'right' }}>{p >= 0 ? '+' : ''}{formatNum(p, sym)}</span>
+                                                        <span style={{ fontSize: 10, color: C.muted, textAlign: 'right' }}>{m >= 0 ? '' : '-'}{formatPct(Math.abs(m))}</span>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
 
                             </div>
 
@@ -2356,7 +2747,7 @@ export default function ProfitCalculatorPage() {
                                                     <span style={{ fontSize: 9, fontWeight: 800, color: C.red, letterSpacing: '0.5px' }}>BREAK-EVEN</span>
                                                 </div>
                                                 <p style={{ fontSize: 20, fontWeight: 900, color: C.red, margin: '0 0 3px', lineHeight: 1 }}>
-                                                    {sym}{breakEven.toFixed(2)}
+                                                    {formatNum(breakEven, sym)}
                                                 </p>
                                                 <p style={{ fontSize: 10, color: '#ef4444', margin: 0 }}>0% margin — covers all costs</p>
                                                 <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(185,28,28,0.08)', borderRadius: 6 }}>
@@ -2374,15 +2765,15 @@ export default function ProfitCalculatorPage() {
                                                     <span style={{ fontSize: 9, fontWeight: 800, color: C.amber, letterSpacing: '0.5px' }}>SAFE FLOOR</span>
                                                 </div>
                                                 <p style={{ fontSize: 20, fontWeight: 900, color: C.amber, margin: '0 0 3px', lineHeight: 1 }}>
-                                                    {minFor15 > 0 ? `${sym}${minFor15.toFixed(2)}` : '€'}
+                                                    {minFor15 > 0 ? formatNum(minFor15, sym) : '—'}
                                                 </p>
                                                 <p style={{ fontSize: 10, color: '#d97706', margin: 0 }}>15% margin — recommended minimum</p>
                                                 {revenue > 0 && minFor15 > 0 && (
                                                     <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(217,119,6,0.08)', borderRadius: 6 }}>
                                                         <p style={{ fontSize: 9, color: C.amber, margin: 0, fontWeight: 600 }}>
                                                             {revenue >= minFor15
-                                                                ? `✓ Your price is ${sym}${(revenue - minFor15).toFixed(2)} above floor`
-                                                                : `? Raise price by ${sym}${(minFor15 - revenue).toFixed(2)}`}
+                                                                ? `✓ Your price is ${formatNum(revenue - minFor15, sym)} above floor`
+                                                                : `? Raise price by ${formatNum(minFor15 - revenue, sym)}`}
                                                         </p>
                                                     </div>
                                                 )}
@@ -2395,7 +2786,7 @@ export default function ProfitCalculatorPage() {
                                                     <span style={{ fontSize: 9, fontWeight: 800, color: C.green, letterSpacing: '0.5px' }}>SWEET SPOT</span>
                                                 </div>
                                                 <p style={{ fontSize: 20, fontWeight: 900, color: C.green, margin: '0 0 3px', lineHeight: 1 }}>
-                                                    {minFor25 > 0 ? `${sym}${minFor25.toFixed(2)}` : '€'}
+                                                    {minFor25 > 0 ? formatNum(minFor25, sym) : '—'}
                                                 </p>
                                                 <p style={{ fontSize: 10, color: C.green, margin: 0 }}>25% margin — healthy profit zone</p>
                                                 {revenue > 0 && minFor25 > 0 && (
@@ -2403,7 +2794,7 @@ export default function ProfitCalculatorPage() {
                                                         <p style={{ fontSize: 9, color: C.green, margin: 0, fontWeight: 600 }}>
                                                             {revenue >= minFor25
                                                                 ? `✓ You're in the sweet spot!`
-                                                                : `? Need ${sym}${(minFor25 - revenue).toFixed(2)} more to hit 25%`}
+                                                                : `? Need ${formatNum(minFor25 - revenue, sym)} more to hit 25%`}
                                                         </p>
                                                     </div>
                                                 )}
@@ -2416,7 +2807,7 @@ export default function ProfitCalculatorPage() {
                                             <div style={{ marginTop: 12 }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: C.muted, marginBottom: 4 }}>
                                                     <span>Loss zone</span>
-                                                    <span>Your price: {sym}{revenue.toFixed(2)}</span>
+                                                    <span>Your price: {formatNum(revenue, sym)}</span>
                                                     <span>Sweet spot +</span>
                                                 </div>
                                                 <div style={{ position: 'relative', height: 6, borderRadius: 999, background: C.border, overflow: 'hidden' }}>
@@ -2435,9 +2826,9 @@ export default function ProfitCalculatorPage() {
                                                     }} />
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: C.muted, marginTop: 3 }}>
-                                                    <span style={{ color: C.red }}>{sym}{breakEven.toFixed(0)}</span>
-                                                    <span style={{ color: C.amber }}>{sym}{minFor15.toFixed(0)}</span>
-                                                    <span style={{ color: C.green }}>{sym}{minFor25.toFixed(0)}</span>
+                                                    <span style={{ color: C.red }}>{formatNum(breakEven, sym)}</span>
+                                                    <span style={{ color: C.amber }}>{formatNum(minFor15, sym)}</span>
+                                                    <span style={{ color: C.green }}>{formatNum(minFor25, sym)}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -2942,23 +3333,30 @@ export default function ProfitCalculatorPage() {
                                                     tooltip="Cost YOU pay for return shipping label. eBay typically doesn't refund this to you."
                                                     onChange={v => setReturnShippingStr(v)}
                                                 />
+                                                <InputField
+                                                    label="Monthly sales volume"
+                                                    value={salesVolumeStr}
+                                                    suffix="units"
+                                                    tooltip="How many units you sell per month. Used to calculate real return impact — e.g. 5% returns on 500 sales = 25 returns, not 5."
+                                                    onChange={v => setSalesVolumeStr(v)}
+                                                />
                                             </div>
 
                                             {/* Per 100 sales visualization */}
                                             <div style={{ background: C.bg, borderRadius: 10, padding: 12, marginBottom: 10 }}>
-                                                <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 8px' }}>PER 100 SALES</p>
+                                                <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 8px' }}>PER {Math.max(1, Math.round(parseFloat(salesVolumeStr) || 100)).toLocaleString()} SALES / MONTH</p>
                                                 <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', marginBottom: 6 }}>
-                                                    <div style={{ width: `${successCount}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        {successCount >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{successCount} sold</span>}
+                                                    <div style={{ width: `${(successCount / (successCount + returnCount || 1) * 100).toFixed(1)}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {(successCount / (successCount + returnCount || 1) * 100) >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{successCount.toLocaleString()} sold</span>}
                                                     </div>
-                                                    <div style={{ width: `${returnCount}%`, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        {returnCount >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{returnCount} returned</span>}
+                                                    <div style={{ width: `${(returnCount / (successCount + returnCount || 1) * 100).toFixed(1)}%`, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {(returnCount / (successCount + returnCount || 1) * 100) >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{returnCount.toLocaleString()} returned</span>}
                                                     </div>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                                                    <span style={{ color: C.green, fontWeight: 700 }}>+ {formatNum(totalSuccessProfit, sym)} from {successCount} sales</span>
+                                                    <span style={{ color: C.green, fontWeight: 700 }}>+ {formatNum(totalSuccessProfit, sym)} from {successCount.toLocaleString()} sales</span>
                                                     {returnCount > 0 && (
-                                                        <span style={{ color: C.red, fontWeight: 700 }}>▼ {formatNum(totalReturnLoss, sym)} from {returnCount} returns</span>
+                                                        <span style={{ color: C.red, fontWeight: 700 }}>▼ {formatNum(totalReturnLoss, sym)} from {returnCount.toLocaleString()} returns</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -2997,347 +3395,349 @@ export default function ProfitCalculatorPage() {
 
                             </div>
 
-                        </div>
-                        {/* ── END 2-COLUMN LAYOUT ── */}
 
-                        {/* ── BULK & VOLUME ANALYSIS ──────────────────────────────────? */}
-                        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: bulkEnabled ? 14 : 0 }}>
-                                <SectionLabel>BULK &amp; VOLUME ANALYSIS</SectionLabel>
-                                <Toggle
-                                    label={bulkEnabled ? 'ON' : 'Turn on'}
-                                    checked={bulkEnabled}
-                                    onChange={setBulkEnabled}
-                                    tooltip="Enable to model buying and selling multiple units ? bulk discounts, sell-through, profit velocity"
-                                />
-                            </div>
+                            {/* ── BULK & VOLUME ANALYSIS ────────────────────────────── */}
+                            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: bulkEnabled ? 14 : 0 }}>
+                                    <SectionLabel>BULK &amp; VOLUME ANALYSIS</SectionLabel>
+                                    <Toggle
+                                        label={bulkEnabled ? 'ON' : 'Turn on'}
+                                        checked={bulkEnabled}
+                                        onChange={setBulkEnabled}
+                                        tooltip="Enable to model buying and selling multiple units ? bulk discounts, sell-through, profit velocity"
+                                    />
+                                </div>
 
-                            {bulkEnabled && (
-                                <>
-                                    {/* Mode toggle */}
-                                    <div style={{ display: 'flex', gap: 6, background: C.bg, padding: 4, borderRadius: 999, marginBottom: 14, width: 'fit-content' }}>
-                                        {(['simple', 'realistic'] as const).map(m => (
-                                            <button
-                                                key={m}
-                                                onClick={() => setBulkMode(m)}
-                                                style={{
-                                                    padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer',
-                                                    fontSize: 11, fontWeight: 700, letterSpacing: '0.3px',
-                                                    background: bulkMode === m ? C.dark : 'transparent',
-                                                    color: bulkMode === m ? C.lime : C.muted,
-                                                    transition: 'all 0.15s',
-                                                }}
-                                            >
-                                                {m === 'simple' ? 'SIMPLE' : 'REALISTIC'}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Row 1 ? Units purchased + auto totals */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
-                                        <InputField
-                                            label="Units purchased"
-                                            value={unitsPurchasedStr}
-                                            tooltip="How many units did you buy from your supplier"
-                                            onChange={v => setUnitsPurchasedStr(v.replace(/[^0-9]/g, ''))}
-                                        />
-                                        <div>
-                                            <label style={{ fontSize: 11, fontWeight: 600, color: C.text, display: 'block', marginBottom: 4 }}>Cost per unit</label>
-                                            <div style={{ height: 34, border: `1.5px solid ${C.border}`, borderRadius: 8, padding: '0 8px', background: C.bg, display: 'flex', alignItems: 'center', fontSize: 13, color: C.text, fontWeight: 600 }}>
-                                                {formatNum(state.buyPrice, sym)}
-                                            </div>
+                                {bulkEnabled && (
+                                    <>
+                                        {/* Mode toggle */}
+                                        <div style={{ display: 'flex', gap: 6, background: C.bg, padding: 4, borderRadius: 999, marginBottom: 14, width: 'fit-content' }}>
+                                            {(['simple', 'realistic'] as const).map(m => (
+                                                <button
+                                                    key={m}
+                                                    onClick={() => setBulkMode(m)}
+                                                    style={{
+                                                        padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer',
+                                                        fontSize: 11, fontWeight: 700, letterSpacing: '0.3px',
+                                                        background: bulkMode === m ? C.dark : 'transparent',
+                                                        color: bulkMode === m ? C.lime : C.muted,
+                                                        transition: 'all 0.15s',
+                                                    }}
+                                                >
+                                                    {m === 'simple' ? 'SIMPLE' : 'REALISTIC'}
+                                                </button>
+                                            ))}
                                         </div>
-                                        <div>
-                                            <label style={{ fontSize: 11, fontWeight: 600, color: C.text, display: 'block', marginBottom: 4 }}>Total investment</label>
-                                            <div style={{ height: 34, border: `1.5px solid ${C.border}`, borderRadius: 8, padding: '0 8px', background: C.bg, display: 'flex', alignItems: 'center', fontSize: 13, color: C.text, fontWeight: 700 }}>
-                                                {formatNum(totalInvestment, sym)}
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    {/* Realistic-mode extras */}
-                                    {bulkMode === 'realistic' && (
-                                        <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-                                            {/* Sell-through slider */}
+                                        {/* Row 1 ? Units purchased + auto totals */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
+                                            <InputField
+                                                label="Units purchased"
+                                                value={unitsPurchasedStr}
+                                                tooltip="How many units did you buy from your supplier"
+                                                onChange={v => setUnitsPurchasedStr(v.replace(/[^0-9]/g, ''))}
+                                            />
                                             <div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                                                    <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Expected sell-through rate</label>
-                                                    <span style={{ fontSize: 13, fontWeight: 800, color: sellThroughPct >= 75 ? C.green : sellThroughPct >= 60 ? C.amber : C.red }}>
-                                                        {sellThroughPct.toFixed(0)}%
-                                                    </span>
+                                                <label style={{ fontSize: 11, fontWeight: 600, color: C.text, display: 'block', marginBottom: 4 }}>Cost per unit</label>
+                                                <div style={{ height: 34, border: `1.5px solid ${C.border}`, borderRadius: 8, padding: '0 8px', background: C.bg, display: 'flex', alignItems: 'center', fontSize: 13, color: C.text, fontWeight: 600 }}>
+                                                    {formatNum(state.buyPrice, sym)}
                                                 </div>
-                                                <div style={{ position: 'relative', width: '100%', height: 20, display: 'flex', alignItems: 'center' }}>
-                                                    <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 999, background: sellThroughGradient, pointerEvents: 'none' }} />
-                                                    <input
-                                                        type="range" min={30} max={100} step={1}
-                                                        value={sellThroughPct}
-                                                        onChange={e => setSellThroughStr(e.target.value)}
-                                                        style={{ width: '100%', accentColor: C.lime, cursor: 'pointer', background: 'transparent', appearance: 'none', WebkitAppearance: 'none', height: 20, margin: 0, position: 'relative' }}
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: 11, fontWeight: 600, color: C.text, display: 'block', marginBottom: 4 }}>Total investment</label>
+                                                <div style={{ height: 34, border: `1.5px solid ${C.border}`, borderRadius: 8, padding: '0 8px', background: C.bg, display: 'flex', alignItems: 'center', fontSize: 13, color: C.text, fontWeight: 700 }}>
+                                                    {formatNum(totalInvestment, sym)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Realistic-mode extras */}
+                                        {bulkMode === 'realistic' && (
+                                            <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+                                                {/* Sell-through slider */}
+                                                <div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                                        <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Expected sell-through rate</label>
+                                                        <span style={{ fontSize: 13, fontWeight: 800, color: sellThroughPct >= 75 ? C.green : sellThroughPct >= 60 ? C.amber : C.red }}>
+                                                            {sellThroughPct.toFixed(0)}%
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ position: 'relative', width: '100%', height: 20, display: 'flex', alignItems: 'center' }}>
+                                                        <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 999, background: sellThroughGradient, pointerEvents: 'none' }} />
+                                                        <input
+                                                            type="range" min={30} max={100} step={1}
+                                                            value={sellThroughPct}
+                                                            onChange={e => setSellThroughStr(e.target.value)}
+                                                            style={{ width: '100%', accentColor: C.lime, cursor: 'pointer', background: 'transparent', appearance: 'none', WebkitAppearance: 'none', height: 20, margin: 0, position: 'relative' }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, fontWeight: 700, color: C.muted, marginTop: 2 }}>
+                                                        <span>30% Poor</span>
+                                                        <span>60% Avg</span>
+                                                        <span>75% Good</span>
+                                                        <span>90%+ Top</span>
+                                                    </div>
+                                                    <p style={{ fontSize: 10, color: C.muted, margin: '6px 0 0' }}>
+                                                        You&apos;ll sell <strong style={{ color: C.text }}>{unitsExpectedToSell}</strong> units. {unitsDeadStock > 0 && <>Dead stock: <strong style={{ color: C.red }}>{unitsDeadStock} units ({formatNum(deadStockLoss, sym)} loss)</strong></>}
+                                                    </p>
+                                                </div>
+
+                                                {/* Time to sell + bulk shipping */}
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                                    <InputField
+                                                        label="Time to sell all (days)"
+                                                        value={timeToSellStr}
+                                                        tooltip="Realistic estimate ? how many days until you sell your expected units"
+                                                        onChange={v => setTimeToSellStr(v.replace(/[^0-9]/g, ''))}
+                                                    />
+                                                    <InputField
+                                                        label="Bulk shipping (override)"
+                                                        value={bulkShipOverrideStr}
+                                                        prefix={sym}
+                                                        tooltip="Optional lower per-unit shipping rate when shipping in volume. Leave blank to use regular rate. Requires eBay-generated labels + managed payments for real commercial rates."
+                                                        onChange={v => setBulkShipOverrideStr(v)}
                                                     />
                                                 </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8, fontWeight: 700, color: C.muted, marginTop: 2 }}>
-                                                    <span>30% Poor</span>
-                                                    <span>60% Avg</span>
-                                                    <span>75% Good</span>
-                                                    <span>90%+ Top</span>
+                                            </div>
+                                        )}
+
+                                        {/* Warning banners */}
+                                        {showLowSellThroughWarning && (
+                                            <div style={{ background: '#fef3c7', border: '1px solid #d97706', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
+                                                <strong style={{ color: C.amber }}>Low sell-through:</strong> <span style={{ color: C.text }}>at {sellThroughPct.toFixed(0)}%, {unitsDeadStock} of {unitsPurchased} units will stay unsold ({formatNum(deadStockLoss, sym)} loss).</span>
+                                            </div>
+                                        )}
+                                        {showSlowVelocityWarning && (
+                                            <div style={{ background: '#fef3c7', border: '1px solid #d97706', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
+                                                <strong style={{ color: C.amber }}>Slow velocity:</strong> <span style={{ color: C.text }}>{timeToSellDays} days is a long hold — your capital is tied up for {monthsToClear.toFixed(1)} months.</span>
+                                            </div>
+                                        )}
+                                        {showDeadCapitalWarning && (
+                                            <div style={{ background: '#fee2e2', border: '1px solid #b91c1c', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
+                                                <strong style={{ color: C.red }}>Poor return on capital:</strong> <span style={{ color: C.text }}>you&apos;re earning only {formatNum(dollarPerDollarPerMonth, sym)} per {sym}1 invested per month. Consider a faster-moving product.</span>
+                                            </div>
+                                        )}
+
+                                        {/* Profit Reality box */}
+                                        <div style={{ background: C.dark, borderRadius: 12, padding: 16, color: C.surface, marginBottom: 10 }}>
+                                            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: C.lime, margin: '0 0 12px' }}>PROFIT REALITY</p>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, marginBottom: 12 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>Per-unit profit</span>
+                                                    <span style={{ fontWeight: 700 }}>{formatNum(bulkAdjustedProfitPerUnit, sym)}</span>
                                                 </div>
-                                                <p style={{ fontSize: 10, color: C.muted, margin: '6px 0 0' }}>
-                                                    You&apos;ll sell <strong style={{ color: C.text }}>{unitsExpectedToSell}</strong> units. {unitsDeadStock > 0 && <>Dead stock: <strong style={{ color: C.red }}>{unitsDeadStock} units ({formatNum(deadStockLoss, sym)} loss)</strong></>}
-                                                </p>
-                                            </div>
-
-                                            {/* Time to sell + bulk shipping */}
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                                                <InputField
-                                                    label="Time to sell all (days)"
-                                                    value={timeToSellStr}
-                                                    tooltip="Realistic estimate ? how many days until you sell your expected units"
-                                                    onChange={v => setTimeToSellStr(v.replace(/[^0-9]/g, ''))}
-                                                />
-                                                <InputField
-                                                    label="Bulk shipping (override)"
-                                                    value={bulkShipOverrideStr}
-                                                    prefix={sym}
-                                                    tooltip="Optional lower per-unit shipping rate when shipping in volume. Leave blank to use regular rate. Requires eBay-generated labels + managed payments for real commercial rates."
-                                                    onChange={v => setBulkShipOverrideStr(v)}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Warning banners */}
-                                    {showLowSellThroughWarning && (
-                                        <div style={{ background: '#fef3c7', border: '1px solid #d97706', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
-                                            <strong style={{ color: C.amber }}>Low sell-through:</strong> <span style={{ color: C.text }}>at {sellThroughPct.toFixed(0)}%, {unitsDeadStock} of {unitsPurchased} units will stay unsold ({formatNum(deadStockLoss, sym)} loss).</span>
-                                        </div>
-                                    )}
-                                    {showSlowVelocityWarning && (
-                                        <div style={{ background: '#fef3c7', border: '1px solid #d97706', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
-                                            <strong style={{ color: C.amber }}>Slow velocity:</strong> <span style={{ color: C.text }}>{timeToSellDays} days is a long hold — your capital is tied up for {monthsToClear.toFixed(1)} months.</span>
-                                        </div>
-                                    )}
-                                    {showDeadCapitalWarning && (
-                                        <div style={{ background: '#fee2e2', border: '1px solid #b91c1c', borderRadius: 8, padding: 10, marginBottom: 10, fontSize: 11 }}>
-                                            <strong style={{ color: C.red }}>Poor return on capital:</strong> <span style={{ color: C.text }}>you&apos;re earning only {formatNum(dollarPerDollarPerMonth, sym)} per {sym}1 invested per month. Consider a faster-moving product.</span>
-                                        </div>
-                                    )}
-
-                                    {/* Profit Reality box */}
-                                    <div style={{ background: C.dark, borderRadius: 12, padding: 16, color: C.surface, marginBottom: 10 }}>
-                                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: C.lime, margin: '0 0 12px' }}>PROFIT REALITY</p>
-
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, marginBottom: 12 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ color: 'rgba(255,255,255,0.6)' }}>Per-unit profit</span>
-                                                <span style={{ fontWeight: 700 }}>{formatNum(bulkAdjustedProfitPerUnit, sym)}</span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ color: 'rgba(255,255,255,0.6)' }}>✓ {unitsExpectedToSell} sold</span>
-                                                <span style={{ fontWeight: 700 }}>{formatNum(grossBulkProfit, sym)}</span>
-                                            </div>
-                                            {bulkMode === 'realistic' && deadStockLoss > 0 && (
-                                                <>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>✗ Dead stock</span>
-                                                        <span style={{ fontWeight: 700, color: '#fca5a5' }}>-{formatNum(deadStockLoss, sym)}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>Investment</span>
-                                                        <span style={{ fontWeight: 700 }}>{formatNum(totalInvestment, sym)}</span>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-
-                                        {/* Real profit hero */}
-                                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 12 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                                <span style={{ fontSize: 12, fontWeight: 700, color: C.lime, letterSpacing: '0.5px' }}>REAL PROFIT</span>
-                                                <span style={{ fontSize: 26, fontWeight: 900, color: realBulkProfit >= 0 ? C.lime : '#fca5a5', lineHeight: 1 }}>
-                                                    {realBulkProfit >= 0 ? "+" : "-"}{formatNum(realBulkProfit, sym)}
-                                                </span>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 6, color: 'rgba(255,255,255,0.7)' }}>
-                                                <span>ROI: <strong style={{ color: C.surface }}>{formatPct(bulkROI)}</strong></span>
-                                                {bulkMode === 'realistic' && breakEvenDay > 0 && (
-                                                    <span>Break-even: <strong style={{ color: C.surface }}>Day {breakEvenDay}</strong></span>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span style={{ color: 'rgba(255,255,255,0.6)' }}>✓ {unitsExpectedToSell} sold</span>
+                                                    <span style={{ fontWeight: 700 }}>{formatNum(grossBulkProfit, sym)}</span>
+                                                </div>
+                                                {bulkMode === 'realistic' && deadStockLoss > 0 && (
+                                                    <>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span style={{ color: 'rgba(255,255,255,0.6)' }}>✗ Dead stock</span>
+                                                            <span style={{ fontWeight: 700, color: '#fca5a5' }}>-{formatNum(deadStockLoss, sym)}</span>
+                                                        </div>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span style={{ color: 'rgba(255,255,255,0.6)' }}>Investment</span>
+                                                            <span style={{ fontWeight: 700 }}>{formatNum(totalInvestment, sym)}</span>
+                                                        </div>
+                                                    </>
                                                 )}
-                                                <span>Sales/day: <strong style={{ color: C.surface }}>{salesPerDay.toFixed(2)}</strong></span>
+                                            </div>
+
+                                            {/* Real profit hero */}
+                                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 12 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                                    <span style={{ fontSize: 12, fontWeight: 700, color: C.lime, letterSpacing: '0.5px' }}>REAL PROFIT</span>
+                                                    <span style={{ fontSize: 26, fontWeight: 900, color: realBulkProfit >= 0 ? C.lime : '#fca5a5', lineHeight: 1 }}>
+                                                        {realBulkProfit >= 0 ? "+" : "-"}{formatNum(realBulkProfit, sym)}
+                                                    </span>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 6, color: 'rgba(255,255,255,0.7)' }}>
+                                                    <span>ROI: <strong style={{ color: C.surface }}>{formatPct(bulkROI)}</strong></span>
+                                                    {bulkMode === 'realistic' && breakEvenDay > 0 && (
+                                                        <span>Break-even: <strong style={{ color: C.surface }}>Day {breakEvenDay}</strong></span>
+                                                    )}
+                                                    <span>Sales/day: <strong style={{ color: C.surface }}>{salesPerDay.toFixed(2)}</strong></span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* ── BREAK-EVEN LADDER ──────────────────────────────? */}
-                                    {unitsPurchased > 1 && (
-                                        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 14, marginBottom: 10 }}>
-                                            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.5px', color: C.muted, margin: '0 0 12px' }}>BREAK-EVEN LADDER</p>
+                                        {/* ── BREAK-EVEN LADDER ──────────────────────────────? */}
+                                        {unitsPurchased > 1 && (
+                                            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 14, marginBottom: 10 }}>
+                                                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.5px', color: C.muted, margin: '0 0 12px' }}>BREAK-EVEN LADDER</p>
 
-                                            {!isProfitable ? (
-                                                <div style={{ background: '#fee2e2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
-                                                    <p style={{ color: C.red, fontWeight: 700, margin: 0 }}>Impossible ? per-unit profit is negative</p>
-                                                    <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
-                                                        You&apos;d lose {formatNum(bulkAdjustedProfitPerUnit, sym)} on every unit sold.
-                                                        Raise the selling price or lower your costs before buying in bulk.
-                                                    </p>
-                                                </div>
-                                            ) : currentBreakEven <= 1 ? (
-                                                <div style={{ background: C.limeTint, border: `1px solid ${C.lime}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
-                                                    <p style={{ color: C.limeDeep, fontWeight: 700, margin: 0 }}>Break-even in 1 sale</p>
-                                                    <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
-                                                        Your per-unit profit ({formatNum(bulkAdjustedProfitPerUnit, sym)}) covers your total investment ({formatNum(totalInvestment, sym)}) in a single unit.
-                                                    </p>
-                                                </div>
-                                            ) : currentBreakEven > unitsPurchased ? (
-                                                <div style={{ background: '#fef3c7', border: `1px solid ${C.amber}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
-                                                    <p style={{ color: C.amber, fontWeight: 700, margin: 0 }}>Break-even impossible at this quantity</p>
-                                                    <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
-                                                        You&apos;d need to sell {currentBreakEven} units to recover investment, but only bought {unitsPurchased}.
-                                                        Reduce costs or buy fewer units.
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    {/* Headline number */}
-                                                    <div style={{ textAlign: 'center', marginBottom: 14 }}>
-                                                        <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>You&apos;ll break even after selling</p>
-                                                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 8, marginTop: 4 }}>
-                                                            <span style={{ fontSize: 34, fontWeight: 900, color: C.dark, lineHeight: 1 }}>{currentBreakEven}</span>
-                                                            <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>of {unitsPurchased} units</span>
-                                                        </div>
-                                                        {bulkMode === 'realistic' && realisticBreakEvenUnits !== optimisticBreakEvenUnits && (
-                                                            <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>
-                                                                Optimistic (no dead stock): {optimisticBreakEvenUnits} units
-                                                            </p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Segmented bar */}
-                                                    <div style={{ display: 'flex', width: '100%', height: 24, borderRadius: 6, overflow: 'hidden', background: C.border, marginBottom: 8 }}>
-                                                        <div style={{ width: `${recoveryPct}%`, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                            {recoveryPct >= 15 && (
-                                                                <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{recoveryUnits}</span>
-                                                            )}
-                                                        </div>
-                                                        <div style={{ width: `${profitPct2}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                            {profitPct2 >= 15 && (
-                                                                <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{profitUnits}</span>
-                                                            )}
-                                                        </div>
-                                                        <div style={{ width: `${deadStockPct}%`, background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                            {deadStockPct >= 15 && (
-                                                                <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{deadStockUnits}</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Legend */}
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 12 }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                            <div style={{ width: 8, height: 8, background: C.red, borderRadius: 2 }} />
-                                                            <span style={{ color: C.muted, fontWeight: 600 }}>Recover cost</span>
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                            <div style={{ width: 8, height: 8, background: C.lime, borderRadius: 2 }} />
-                                                            <span style={{ color: C.muted, fontWeight: 600 }}>Pure profit</span>
-                                                        </div>
-                                                        {deadStockUnits > 0 && (
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                                <div style={{ width: 8, height: 8, background: C.dark, borderRadius: 2 }} />
-                                                                <span style={{ color: C.muted, fontWeight: 600 }}>Dead stock</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Insight message */}
-                                                    <div style={{ background: C.limeTint, borderLeft: `3px solid ${C.lime}`, padding: '8px 10px', borderRadius: 4, marginBottom: 10 }}>
-                                                        <p style={{ fontSize: 11, color: C.dark, margin: 0, fontWeight: 600 }}>
-                                                            ? Every sale after unit {currentBreakEven} = pure profit
+                                                {!isProfitable ? (
+                                                    <div style={{ background: '#fee2e2', border: `1px solid ${C.red}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
+                                                        <p style={{ color: C.red, fontWeight: 700, margin: 0 }}>Impossible ? per-unit profit is negative</p>
+                                                        <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
+                                                            You&apos;d lose {formatNum(bulkAdjustedProfitPerUnit, sym)} on every unit sold.
+                                                            Raise the selling price or lower your costs before buying in bulk.
                                                         </p>
                                                     </div>
-
-                                                    {/* Detailed breakdown */}
-                                                    <div style={{ background: C.bg, borderRadius: 8, padding: 10, fontSize: 11 }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
-                                                            <span>Recover investment (units 1 ? {currentBreakEven})</span>
-                                                            <span style={{ color: C.red, fontWeight: 700 }}>-{formatNum(totalInvestment, sym)}</span>
-                                                        </div>
-                                                        {profitUnits > 0 && (
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
-                                                                <span>Pure profit (units {currentBreakEven + 1} ? {recoveryUnits + profitUnits})</span>
-                                                                <span style={{ color: C.green, fontWeight: 700 }}>+{formatNum(pureProfitValue, sym)}</span>
-                                                            </div>
-                                                        )}
-                                                        {bulkMode === 'realistic' && deadStockUnits > 0 && (
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
-                                                                <span>Dead stock loss ({deadStockUnits} units unsold)</span>
-                                                                <span style={{ color: C.red, fontWeight: 700 }}>-{formatNum(deadStockValue, sym)}</span>
-                                                            </div>
-                                                        )}
-                                                        <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 6, paddingTop: 6, display: 'flex', justifyContent: 'space-between' }}>
-                                                            <span style={{ fontWeight: 700, color: C.text }}>Real net</span>
-                                                            <span style={{ fontWeight: 800, color: realBulkProfit >= 0 ? C.green : C.red }}>
-                                                                {realBulkProfit >= 0 ? "+" : "-"}{formatNum(realBulkProfit, sym)}
-                                                            </span>
-                                                        </div>
+                                                ) : currentBreakEven <= 1 ? (
+                                                    <div style={{ background: C.limeTint, border: `1px solid ${C.lime}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
+                                                        <p style={{ color: C.limeDeep, fontWeight: 700, margin: 0 }}>Break-even in 1 sale</p>
+                                                        <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
+                                                            Your per-unit profit ({formatNum(bulkAdjustedProfitPerUnit, sym)}) covers your total investment ({formatNum(totalInvestment, sym)}) in a single unit.
+                                                        </p>
                                                     </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
+                                                ) : currentBreakEven > unitsPurchased ? (
+                                                    <div style={{ background: '#fef3c7', border: `1px solid ${C.amber}`, borderRadius: 8, padding: 12, fontSize: 12 }}>
+                                                        <p style={{ color: C.amber, fontWeight: 700, margin: 0 }}>Break-even impossible at this quantity</p>
+                                                        <p style={{ color: C.text, margin: '4px 0 0', fontSize: 11 }}>
+                                                            You&apos;d need to sell {currentBreakEven} units to recover investment, but only bought {unitsPurchased}.
+                                                            Reduce costs or buy fewer units.
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {/* Headline number */}
+                                                        <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                                                            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>You&apos;ll break even after selling</p>
+                                                            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 8, marginTop: 4 }}>
+                                                                <span style={{ fontSize: 34, fontWeight: 900, color: C.dark, lineHeight: 1 }}>{currentBreakEven}</span>
+                                                                <span style={{ fontSize: 14, color: C.muted, fontWeight: 600 }}>of {unitsPurchased} units</span>
+                                                            </div>
+                                                            {bulkMode === 'realistic' && realisticBreakEvenUnits !== optimisticBreakEvenUnits && (
+                                                                <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>
+                                                                    Optimistic (no dead stock): {optimisticBreakEvenUnits} units
+                                                                </p>
+                                                            )}
+                                                        </div>
 
-                                    {/* Star metric ? $/$/month */}
-                                    {bulkMode === 'realistic' && totalInvestment > 0 && (
-                                        <div style={{ background: `linear-gradient(135deg, ${C.limeTint} 0%, ${C.surface} 100%)`, border: `1.5px solid ${C.lime}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <p style={{ fontSize: 10, fontWeight: 700, color: C.limeDeep, margin: 0, letterSpacing: '0.5px' }}>? PER {sym}1 INVESTED PER MONTH</p>
-                                                    <p style={{ fontSize: 22, fontWeight: 900, color: C.dark, margin: '2px 0 0' }}>{formatNum(dollarPerDollarPerMonth, sym)}</p>
-                                                </div>
-                                                <div style={{ background: velocityTier.color, color: C.surface, padding: '5px 12px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>
-                                                    {velocityTier.label}
+                                                        {/* Segmented bar */}
+                                                        <div style={{ display: 'flex', width: '100%', height: 24, borderRadius: 6, overflow: 'hidden', background: C.border, marginBottom: 8 }}>
+                                                            <div style={{ width: `${recoveryPct}%`, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {recoveryPct >= 15 && (
+                                                                    <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{recoveryUnits}</span>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ width: `${profitPct2}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {profitPct2 >= 15 && (
+                                                                    <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{profitUnits}</span>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ width: `${deadStockPct}%`, background: C.dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                {deadStockPct >= 15 && (
+                                                                    <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{deadStockUnits}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Legend */}
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 12 }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                <div style={{ width: 8, height: 8, background: C.red, borderRadius: 2 }} />
+                                                                <span style={{ color: C.muted, fontWeight: 600 }}>Recover cost</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                <div style={{ width: 8, height: 8, background: C.lime, borderRadius: 2 }} />
+                                                                <span style={{ color: C.muted, fontWeight: 600 }}>Pure profit</span>
+                                                            </div>
+                                                            {deadStockUnits > 0 && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                    <div style={{ width: 8, height: 8, background: C.dark, borderRadius: 2 }} />
+                                                                    <span style={{ color: C.muted, fontWeight: 600 }}>Dead stock</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Insight message */}
+                                                        <div style={{ background: C.limeTint, borderLeft: `3px solid ${C.lime}`, padding: '8px 10px', borderRadius: 4, marginBottom: 10 }}>
+                                                            <p style={{ fontSize: 11, color: C.dark, margin: 0, fontWeight: 600 }}>
+                                                                ? Every sale after unit {currentBreakEven} = pure profit
+                                                            </p>
+                                                        </div>
+
+                                                        {/* Detailed breakdown */}
+                                                        <div style={{ background: C.bg, borderRadius: 8, padding: 10, fontSize: 11 }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
+                                                                <span>Recover investment (units 1 ? {currentBreakEven})</span>
+                                                                <span style={{ color: C.red, fontWeight: 700 }}>-{formatNum(totalInvestment, sym)}</span>
+                                                            </div>
+                                                            {profitUnits > 0 && (
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
+                                                                    <span>Pure profit (units {currentBreakEven + 1} ? {recoveryUnits + profitUnits})</span>
+                                                                    <span style={{ color: C.green, fontWeight: 700 }}>+{formatNum(pureProfitValue, sym)}</span>
+                                                                </div>
+                                                            )}
+                                                            {bulkMode === 'realistic' && deadStockUnits > 0 && (
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
+                                                                    <span>Dead stock loss ({deadStockUnits} units unsold)</span>
+                                                                    <span style={{ color: C.red, fontWeight: 700 }}>-{formatNum(deadStockValue, sym)}</span>
+                                                                </div>
+                                                            )}
+                                                            <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 6, paddingTop: 6, display: 'flex', justifyContent: 'space-between' }}>
+                                                                <span style={{ fontWeight: 700, color: C.text }}>Real net</span>
+                                                                <span style={{ fontWeight: 800, color: realBulkProfit >= 0 ? C.green : C.red }}>
+                                                                    {realBulkProfit >= 0 ? "+" : "-"}{formatNum(realBulkProfit, sym)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Star metric ? $/$/month */}
+                                        {bulkMode === 'realistic' && totalInvestment > 0 && (
+                                            <div style={{ background: `linear-gradient(135deg, ${C.limeTint} 0%, ${C.surface} 100%)`, border: `1.5px solid ${C.lime}`, borderRadius: 10, padding: 12, marginBottom: 10 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <p style={{ fontSize: 10, fontWeight: 700, color: C.limeDeep, margin: 0, letterSpacing: '0.5px' }}>? PER {sym}1 INVESTED PER MONTH</p>
+                                                        <p style={{ fontSize: 22, fontWeight: 900, color: C.dark, margin: '2px 0 0' }}>{formatNum(dollarPerDollarPerMonth, sym)}</p>
+                                                    </div>
+                                                    <div style={{ background: velocityTier.color, color: C.surface, padding: '5px 12px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>
+                                                        {velocityTier.label}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* Bulk vs Single comparison */}
-                                    {unitsPurchased > 1 && (
-                                        <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
-                                            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.5px', color: C.muted, margin: '0 0 10px' }}>BULK VS SINGLE SALE</p>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', gap: 8, fontSize: 11 }}>
-                                                <div></div>
-                                                <div style={{ textAlign: 'center', fontWeight: 700, color: C.muted, fontSize: 10 }}>SINGLE SALE</div>
-                                                <div style={{ textAlign: 'center', fontWeight: 700, color: C.lime, fontSize: 10 }}>BUY {unitsPurchased}</div>
+                                        {/* Bulk vs Single comparison */}
+                                        {unitsPurchased > 1 && (
+                                            <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                                                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.5px', color: C.muted, margin: '0 0 10px' }}>BULK VS SINGLE SALE</p>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', gap: 8, fontSize: 11 }}>
+                                                    <div></div>
+                                                    <div style={{ textAlign: 'center', fontWeight: 700, color: C.muted, fontSize: 10 }}>SINGLE SALE</div>
+                                                    <div style={{ textAlign: 'center', fontWeight: 700, color: C.lime, fontSize: 10 }}>BUY {unitsPurchased}</div>
 
-                                                <div style={{ color: C.muted }}>Per-unit profit</div>
-                                                <div style={{ textAlign: 'center' }}>{sym}{singleSaleProfit.toFixed(2)}</div>
-                                                <div style={{ textAlign: 'center', fontWeight: 700 }}>{formatNum(bulkAdjustedProfitPerUnit, sym)}</div>
+                                                    <div style={{ color: C.muted }}>Per-unit profit</div>
+                                                    <div style={{ textAlign: 'center' }}>{sym}{singleSaleProfit.toFixed(2)}</div>
+                                                    <div style={{ textAlign: 'center', fontWeight: 700 }}>{formatNum(bulkAdjustedProfitPerUnit, sym)}</div>
 
-                                                <div style={{ color: C.muted }}>Investment</div>
-                                                <div style={{ textAlign: 'center' }}>{formatNum(state.buyPrice, sym)}</div>
-                                                <div style={{ textAlign: 'center', fontWeight: 700 }}>{formatNum(totalInvestment, sym)}</div>
+                                                    <div style={{ color: C.muted }}>Investment</div>
+                                                    <div style={{ textAlign: 'center' }}>{formatNum(state.buyPrice, sym)}</div>
+                                                    <div style={{ textAlign: 'center', fontWeight: 700 }}>{formatNum(totalInvestment, sym)}</div>
 
-                                                <div style={{ color: C.muted }}>Total profit</div>
-                                                <div style={{ textAlign: 'center' }}>{sym}{singleSaleProfit.toFixed(2)}</div>
-                                                <div style={{ textAlign: 'center', fontWeight: 700, color: C.green }}>{formatNum(realBulkProfit, sym)}</div>
+                                                    <div style={{ color: C.muted }}>Total profit</div>
+                                                    <div style={{ textAlign: 'center' }}>{sym}{singleSaleProfit.toFixed(2)}</div>
+                                                    <div style={{ textAlign: 'center', fontWeight: 700, color: C.green }}>{formatNum(realBulkProfit, sym)}</div>
+                                                </div>
+
+                                                {shippingSavingPerUnit > 0.01 && (
+                                                    <p style={{ fontSize: 10, color: C.green, margin: '10px 0 0', fontWeight: 600 }}>
+                                                        Bulk shipping saves you {sym}{shippingSavingPerUnit.toFixed(2)} per unit ({sym}{(shippingSavingPerUnit * unitsExpectedToSell).toFixed(2)} total)
+                                                    </p>
+                                                )}
+                                                {bulkVsSingleDiff !== 0 && singleSaleProfit > 0 && (
+                                                    <p style={{ fontSize: 11, textAlign: 'center', margin: '10px 0 0', fontWeight: 700, color: bulkVsSingleDiff > 0 ? C.green : C.red }}>
+                                                        Bulk {bulkVsSingleDiff > 0 ? 'wins' : 'loses'} by {Math.abs(bulkVsSingleDiff).toFixed(1)}% per unit
+                                                    </p>
+                                                )}
                                             </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                            {/* ── end right column ── */}
 
-                                            {shippingSavingPerUnit > 0.01 && (
-                                                <p style={{ fontSize: 10, color: C.green, margin: '10px 0 0', fontWeight: 600 }}>
-                                                    Bulk shipping saves you {sym}{shippingSavingPerUnit.toFixed(2)} per unit ({sym}{(shippingSavingPerUnit * unitsExpectedToSell).toFixed(2)} total)
-                                                </p>
-                                            )}
-                                            {bulkVsSingleDiff !== 0 && singleSaleProfit > 0 && (
-                                                <p style={{ fontSize: 11, textAlign: 'center', margin: '10px 0 0', fontWeight: 700, color: bulkVsSingleDiff > 0 ? C.green : C.red }}>
-                                                    Bulk {bulkVsSingleDiff > 0 ? 'wins' : 'loses'} by {Math.abs(bulkVsSingleDiff).toFixed(1)}% per unit
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-                                </>
-                            )}
                         </div>
+                        {/* ── END 2-COLUMN LAYOUT ── */}
 
                     </div>
                 </div>
@@ -3363,183 +3763,197 @@ export default function ProfitCalculatorPage() {
                             {/* Header */}
                             <div style={{ padding: 20, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
                                 <div>
-                                    <p style={{ fontSize: 14, fontWeight: 800, color: C.text, margin: 0 }}>Saved calculations</p>
-                                    <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0' }}>{savedItems.length} total</p>
+                                    <p style={{ fontSize: 14, fontWeight: 800, color: C.text, margin: 0 }}>
+                                        {historyDrawerTab === 'saved' ? 'Saved calculations' : 'Shared links'}
+                                    </p>
+                                    <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0' }}>
+                                        {historyDrawerTab === 'saved' ? `${savedItems.length} total` : 'Links you shared — valid for 7 days'}
+                                    </p>
                                 </div>
                                 <button onClick={() => setHistoryOpen(false)}
                                     style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, color: C.muted, display: 'flex' }}>
                                     <X size={20} />
                                 </button>
                             </div>
-
-                            {/* Search */}
-                            <div style={{ padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
-                                <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.border}`, borderRadius: 8, padding: '0 10px', background: C.bg }}>
-                                    <Search size={13} color={C.muted} />
-                                    <input
-                                        placeholder="Search saved products..."
-                                        value={historySearch}
-                                        onChange={e => setHistorySearch(e.target.value)}
-                                        style={{ flex: 1, height: 32, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, marginLeft: 8, color: C.text }}
-                                    />
-                                </div>
+                            {/* Tabs */}
+                            <div style={{ display: 'flex', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+                                {(['Calculations', 'Shared Links'] as const).map(tab => (
+                                    <button key={tab} onClick={() => setHistoryDrawerTab(tab === 'Calculations' ? 'saved' : 'shared')}
+                                        style={{ flex: 1, padding: '10px 0', fontSize: 11, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', color: (tab === 'Calculations' ? historyDrawerTab === 'saved' : historyDrawerTab === 'shared') ? C.text : C.muted, borderBottom: (tab === 'Calculations' ? historyDrawerTab === 'saved' : historyDrawerTab === 'shared') ? `2px solid ${C.lime}` : '2px solid transparent' }}>
+                                        {tab}
+                                    </button>
+                                ))}
                             </div>
-
-                            {/* List */}
-                            <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                                {filteredHistory.length === 0 && (
-                                    <div style={{ textAlign: 'center', padding: '40px 20px', color: C.muted, fontSize: 12 }}>
-                                        {savedItems.length === 0
-                                            ? 'No saved calculations yet. Type a product name above and click Save to keep your research.'
-                                            : 'No matches for that search.'}
+                            {historyDrawerTab === 'shared' && <SharedLinksPanel C={C} />}
+                            {historyDrawerTab === 'saved' && <>
+                                {/* Search */}
+                                <div style={{ padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.border}`, borderRadius: 8, padding: '0 10px', background: C.bg }}>
+                                        <Search size={13} color={C.muted} />
+                                        <input
+                                            placeholder="Search saved products..."
+                                            value={historySearch}
+                                            onChange={e => setHistorySearch(e.target.value)}
+                                            style={{ flex: 1, height: 32, border: 'none', outline: 'none', background: 'transparent', fontSize: 12, marginLeft: 8, color: C.text }}
+                                        />
                                     </div>
-                                )}
-                                {filteredHistory.map(item => {
-                                    const isSelected = selectedIds.has(item.id)
-                                    return (
-                                        <div key={item.id} style={{
-                                            border: `1px solid ${isSelected ? C.lime : C.border}`,
-                                            borderRadius: 10, padding: 12, marginBottom: 10,
-                                            background: isSelected ? C.limeTint : C.surface,
-                                            transition: 'all 0.15s',
-                                            boxShadow: isSelected ? `0 0 0 1px ${C.lime}` : 'none',
-                                        }}>
-                                            {/* Header row */}
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 8 }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={isSelected}
-                                                    onChange={() => toggleSelect(item.id)}
-                                                    disabled={!isSelected && selectedIds.size >= 3}
-                                                    style={{ width: 16, height: 16, accentColor: C.lime, cursor: 'pointer', flexShrink: 0 }}
-                                                />
-                                                <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {item.product_name}
-                                                </p>
-                                                <span style={{ fontSize: 10, color: C.muted, flexShrink: 0 }}>
-                                                    {timeAgo(item.last_viewed_at)}
-                                                </span>
-                                            </div>
+                                </div>
 
-                                            {/* Country + prices */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                                                <span
-                                                    className={`fi fi-${COUNTRIES[item.country as CountryCode]?.flag ?? 'us'}`}
-                                                    style={{ width: 16, height: 16, borderRadius: '50%', display: 'inline-block', backgroundSize: 'cover' }}
-                                                />
-                                                <span style={{ fontSize: 10, fontWeight: 700, color: C.muted }}>{item.country}</span>
-                                                <span style={{ fontSize: 10, color: C.muted }}>·</span>
-                                                <span style={{ fontSize: 10, color: C.muted }}>
-                                                    Sell {COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Number(item.sell_price).toFixed(2)}
-                                                </span>
-                                                <span style={{ fontSize: 10, color: C.muted }}>·</span>
-                                                <span style={{ fontSize: 10, color: C.muted }}>
-                                                    Buy {COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Number(item.buy_price).toFixed(2)}
-                                                </span>
-                                            </div>
-
-                                            {/* Metrics */}
-                                            <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
-                                                <div>
-                                                    <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>PROFIT</p>
-                                                    <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.net_profit) >= 0 ? C.green : C.red, margin: 0 }}>
-                                                        {Number(item.net_profit) >= 0 ? '+' : '-'}{COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Math.abs(Number(item.net_profit)).toFixed(2)}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>MARGIN</p>
-                                                    <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.margin) >= 0 ? C.green : C.red, margin: 0 }}>
-                                                        {Number(item.margin).toFixed(1)}%
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>ROI</p>
-                                                    <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.roi) >= 0 ? C.green : C.red, margin: 0 }}>
-                                                        {Number(item.roi).toFixed(1)}%
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Action buttons */}
-                                            <div style={{ display: 'flex', gap: 6 }}>
-                                                <button
-                                                    onClick={() => loadCalculation(item)}
-                                                    style={{ flex: 1, height: 30, border: 'none', borderRadius: 6, background: C.lime, color: C.dark, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}
-                                                >
-                                                    Load
-                                                </button>
-                                                <button
-                                                    onClick={() => deleteCalculation(item)}
-                                                    title="Delete"
-                                                    style={{ width: 30, height: 30, border: `1px solid ${C.border}`, borderRadius: 6, background: C.surface, color: C.red, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                >
-                                                    <Trash2 size={13} />
-                                                </button>
-                                            </div>
+                                {/* List */}
+                                <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+                                    {filteredHistory.length === 0 && (
+                                        <div style={{ textAlign: 'center', padding: '40px 20px', color: C.muted, fontSize: 12 }}>
+                                            {savedItems.length === 0
+                                                ? 'No saved calculations yet. Type a product name above and click Save to keep your research.'
+                                                : 'No matches for that search.'}
                                         </div>
-                                    )
-                                })}
-                            </div>
+                                    )}
+                                    {filteredHistory.map(item => {
+                                        const isSelected = selectedIds.has(item.id)
+                                        return (
+                                            <div key={item.id} style={{
+                                                border: `1px solid ${isSelected ? C.lime : C.border}`,
+                                                borderRadius: 10, padding: 12, marginBottom: 10,
+                                                background: isSelected ? C.limeTint : C.surface,
+                                                transition: 'all 0.15s',
+                                                boxShadow: isSelected ? `0 0 0 1px ${C.lime}` : 'none',
+                                            }}>
+                                                {/* Header row */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 8 }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => toggleSelect(item.id)}
+                                                        disabled={!isSelected && selectedIds.size >= 3}
+                                                        style={{ width: 16, height: 16, accentColor: C.lime, cursor: 'pointer', flexShrink: 0 }}
+                                                    />
+                                                    <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {item.product_name}
+                                                    </p>
+                                                    <span style={{ fontSize: 10, color: C.muted, flexShrink: 0 }}>
+                                                        {timeAgo(item.last_viewed_at)}
+                                                    </span>
+                                                </div>
 
-                            {/* Bottom action bar */}
-                            <div style={{ padding: 12, borderTop: `1px solid ${C.border}`, background: C.bg, display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                                {selectedIds.size > 0 ? (
-                                    <>
-                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.dark }}>
-                                            {selectedIds.size} selected
-                                        </span>
-                                        <button
-                                            onClick={clearSelection}
-                                            style={{ background: 'transparent', border: 'none', color: C.muted, fontSize: 11, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
-                                        >
-                                            Clear
-                                        </button>
-                                        <div style={{ flex: 1 }} />
-                                        <button
-                                            onClick={() => exportCSV(selectedItems)}
-                                            style={{ height: 30, padding: '0 12px', border: `1px solid ${C.border}`, borderRadius: 6, background: C.surface, color: C.text, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}
-                                        >
-                                            Export CSV
-                                        </button>
-                                        <button
-                                            onClick={() => setCompareOpen(true)}
-                                            disabled={selectedIds.size < 2}
-                                            style={{
-                                                height: 30, padding: '0 14px', border: 'none', borderRadius: 6,
-                                                background: selectedIds.size >= 2 ? C.lime : C.border,
-                                                color: selectedIds.size >= 2 ? C.dark : C.muted,
-                                                fontWeight: 700, fontSize: 11,
-                                                cursor: selectedIds.size >= 2 ? 'pointer' : 'not-allowed',
-                                            }}
-                                        >
-                                            Compare ({selectedIds.size})
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <p style={{ fontSize: 10, color: C.muted, margin: 0, flex: 1 }}>
-                                            Select 2-3 items to compare, or click Export All CSV
-                                        </p>
-                                        <button
-                                            onClick={() => exportCSV(savedItems)}
-                                            disabled={savedItems.length === 0}
-                                            style={{
-                                                height: 30, padding: '0 12px', border: `1px solid ${C.border}`, borderRadius: 6,
-                                                background: savedItems.length > 0 ? C.surface : C.bg,
-                                                color: savedItems.length > 0 ? C.text : C.muted,
-                                                fontWeight: 700, fontSize: 11,
-                                                cursor: savedItems.length > 0 ? 'pointer' : 'not-allowed',
-                                            }}
-                                        >
-                                            Export all CSV
-                                        </button>
-                                    </>
-                                )}
-                            </div>
+                                                {/* Country + prices */}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                                                    <span
+                                                        className={`fi fi-${COUNTRIES[item.country as CountryCode]?.flag ?? 'us'}`}
+                                                        style={{ width: 16, height: 16, borderRadius: '50%', display: 'inline-block', backgroundSize: 'cover' }}
+                                                    />
+                                                    <span style={{ fontSize: 10, fontWeight: 700, color: C.muted }}>{item.country}</span>
+                                                    <span style={{ fontSize: 10, color: C.muted }}>·</span>
+                                                    <span style={{ fontSize: 10, color: C.muted }}>
+                                                        Sell {COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Number(item.sell_price).toFixed(2)}
+                                                    </span>
+                                                    <span style={{ fontSize: 10, color: C.muted }}>·</span>
+                                                    <span style={{ fontSize: 10, color: C.muted }}>
+                                                        Buy {COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Number(item.buy_price).toFixed(2)}
+                                                    </span>
+                                                </div>
+
+                                                {/* Metrics */}
+                                                <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+                                                    <div>
+                                                        <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>PROFIT</p>
+                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.net_profit) >= 0 ? C.green : C.red, margin: 0 }}>
+                                                            {Number(item.net_profit) >= 0 ? '+' : '-'}{COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Math.abs(Number(item.net_profit)).toFixed(2)}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>MARGIN</p>
+                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.margin) >= 0 ? C.green : C.red, margin: 0 }}>
+                                                            {Number(item.margin).toFixed(1)}%
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>ROI</p>
+                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.roi) >= 0 ? C.green : C.red, margin: 0 }}>
+                                                            {Number(item.roi).toFixed(1)}%
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action buttons */}
+                                                <div style={{ display: 'flex', gap: 6 }}>
+                                                    <button
+                                                        onClick={() => loadCalculation(item)}
+                                                        style={{ flex: 1, height: 30, border: 'none', borderRadius: 6, background: C.lime, color: C.dark, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}
+                                                    >
+                                                        Load
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteCalculation(item)}
+                                                        title="Delete"
+                                                        style={{ width: 30, height: 30, border: `1px solid ${C.border}`, borderRadius: 6, background: C.surface, color: C.red, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+
+                                {/* Bottom action bar */}
+                                <div style={{ padding: 12, borderTop: `1px solid ${C.border}`, background: C.bg, display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                                    {selectedIds.size > 0 ? (
+                                        <>
+                                            <span style={{ fontSize: 11, fontWeight: 700, color: C.dark }}>
+                                                {selectedIds.size} selected
+                                            </span>
+                                            <button
+                                                onClick={clearSelection}
+                                                style={{ background: 'transparent', border: 'none', color: C.muted, fontSize: 11, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                                            >
+                                                Clear
+                                            </button>
+                                            <div style={{ flex: 1 }} />
+                                            <button
+                                                onClick={() => exportCSV(selectedItems)}
+                                                style={{ height: 30, padding: '0 12px', border: `1px solid ${C.border}`, borderRadius: 6, background: C.surface, color: C.text, fontWeight: 700, fontSize: 11, cursor: 'pointer' }}
+                                            >
+                                                Export CSV
+                                            </button>
+                                            <button
+                                                onClick={() => setCompareOpen(true)}
+                                                disabled={selectedIds.size < 2}
+                                                style={{
+                                                    height: 30, padding: '0 14px', border: 'none', borderRadius: 6,
+                                                    background: selectedIds.size >= 2 ? C.lime : C.border,
+                                                    color: selectedIds.size >= 2 ? C.dark : C.muted,
+                                                    fontWeight: 700, fontSize: 11,
+                                                    cursor: selectedIds.size >= 2 ? 'pointer' : 'not-allowed',
+                                                }}
+                                            >
+                                                Compare ({selectedIds.size})
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p style={{ fontSize: 10, color: C.muted, margin: 0, flex: 1 }}>
+                                                Select 2-3 items to compare, or click Export All CSV
+                                            </p>
+                                            <button
+                                                onClick={() => exportCSV(savedItems)}
+                                                disabled={savedItems.length === 0}
+                                                style={{
+                                                    height: 30, padding: '0 12px', border: `1px solid ${C.border}`, borderRadius: 6,
+                                                    background: savedItems.length > 0 ? C.surface : C.bg,
+                                                    color: savedItems.length > 0 ? C.text : C.muted,
+                                                    fontWeight: 700, fontSize: 11,
+                                                    cursor: savedItems.length > 0 ? 'pointer' : 'not-allowed',
+                                                }}
+                                            >
+                                                Export all CSV
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </>}
                         </div>
                     </>
                 )}
-
                 {/* ── COMPARE MODAL ──────────────────────────────────────────────? */}
                 {compareOpen && selectedItems.length >= 2 && (
                     <>
@@ -3564,7 +3978,6 @@ export default function ProfitCalculatorPage() {
                                     <X size={20} />
                                 </button>
                             </div>
-
                             {/* Table */}
                             <div style={{ padding: 20 }}>
                                 {(() => {
@@ -3652,7 +4065,6 @@ export default function ProfitCalculatorPage() {
                         </div>
                     </>
                 )}
-
                 {/* ── Undo delete toast ── */}
                 {undoItem && (
                     <div style={{

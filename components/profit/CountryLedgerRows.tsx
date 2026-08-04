@@ -10,7 +10,7 @@ const C = {
 }
 
 function LedgerRow({ label, amount, color, symbol }: { label: string; amount: number; color: string; symbol: string }) {
-    const fmt = (n: number) => symbol + Math.abs(n).toFixed(2)
+    const fmt = (n: number) => symbol + Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
             <span style={{ fontSize: 11, color: '#64748b' }}>{label}</span>

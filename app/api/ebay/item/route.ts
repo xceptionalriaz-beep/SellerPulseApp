@@ -11,18 +11,18 @@ const adminClient = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
-// â”€â”€ Get app-level OAuth token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Get app-level OAuth token ──────────────────────────────────
 async function getAppToken(): Promise<string | null> {
   try {
-    const clientId     = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
+    const clientId = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
     const clientSecret = process.env.EBAY_CLIENT_SECRET!
-    const credentials  = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
 
     const res = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
-      method:  'POST',
+      method: 'POST',
       headers: {
         'Authorization': `Basic ${credentials}`,
-        'Content-Type':  'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: 'grant_type=client_credentials&scope=https%3A%2F%2Fapi.ebay.com%2Foauth%2Fapi_scope',
     })
@@ -33,7 +33,7 @@ async function getAppToken(): Promise<string | null> {
   } catch { return null }
 }
 
-// â”€â”€ Extract item ID from URL or raw ID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Extract item ID from URL or raw ID ────────────────────────
 function extractItemId(input: string): string | null {
   input = input.trim()
 
@@ -61,29 +61,29 @@ function extractItemId(input: string): string | null {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const input       = searchParams.get('id') ?? searchParams.get('url') ?? ''
+  const input = searchParams.get('id') ?? searchParams.get('url') ?? ''
   const marketplace = searchParams.get('marketplace') ?? 'EBAY_US'
-  const purpose     = searchParams.get('purpose') ?? 'title' // 'title' | 'profit'
+  const purpose = searchParams.get('purpose') ?? 'title' // 'title' | 'profit'
 
   if (!input) return NextResponse.json({ error: 'id or url required' }, { status: 400 })
 
-  // â”€â”€ Extract item ID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Extract item ID ─────────────────────────────────────────
   const itemId = extractItemId(input)
   if (!itemId) return NextResponse.json({ error: 'Invalid eBay item ID or URL' }, { status: 400 })
 
   const start = Date.now()
 
   try {
-    // â”€â”€ Get app token â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Get app token ───────────────────────────────────────
     const token = await getAppToken()
     if (!token) return NextResponse.json({ error: 'Failed to get eBay token' }, { status: 500 })
 
-    // â”€â”€ Fetch item from eBay Browse API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Fetch item from eBay Browse API ──────────────────────
     const itemRes = await fetch(
       `https://api.ebay.com/buy/browse/v1/item/v1|${itemId}|0`,
       {
         headers: {
-          'Authorization':           `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'X-EBAY-C-MARKETPLACE-ID': marketplace,
         }
       }
@@ -107,13 +107,13 @@ export async function GET(req: NextRequest) {
       }
 
       const shoppingData = await shoppingRes.json()
-      const item         = shoppingData.Item
+      const item = shoppingData.Item
 
       if (!item) return NextResponse.json({ error: 'Item not found' }, { status: 404 })
 
-      const price       = parseFloat(item.CurrentPrice?.Value ?? 0)
-      const shipping    = parseFloat(item.ShippingCostSummary?.ShippingServiceCost?.Value ?? 0)
-      const categoryId  = item.PrimaryCategoryID ?? ''
+      const price = parseFloat(item.CurrentPrice?.Value ?? 0)
+      const shipping = parseFloat(item.ShippingCostSummary?.ShippingServiceCost?.Value ?? 0)
+      const categoryId = item.PrimaryCategoryID ?? ''
       const categoryName = item.PrimaryCategoryName ?? ''
 
       const responseTime = Date.now() - start
@@ -121,17 +121,17 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json({
         itemId,
-        title:        item.Title ?? '',
+        title: item.Title ?? '',
         price,
         shipping,
         categoryId,
         categoryName,
-        condition:    item.ConditionDisplayName ?? '',
-        imageUrl:     item.PictureURL?.[0] ?? '',
-        soldCount:    item.QuantitySold ?? 0,
-        watchers:     item.WatchCount ?? 0,
-        seller:       item.Seller?.UserID ?? '',
-        itemUrl:      item.ViewItemURL ?? '',
+        condition: item.ConditionDisplayName ?? '',
+        imageUrl: item.PictureURL?.[0] ?? '',
+        soldCount: item.QuantitySold ?? 0,
+        watchers: item.WatchCount ?? 0,
+        seller: item.Seller?.UserID ?? '',
+        itemUrl: item.ViewItemURL ?? '',
         purpose,
         responseTime,
       })
@@ -139,15 +139,15 @@ export async function GET(req: NextRequest) {
 
     const item = await itemRes.json()
 
-    // â”€â”€ Extract data for both Title Builder and Profit Calculator
-    const price       = parseFloat(item.price?.value ?? 0)
-    const shipping    = parseFloat(item.shippingOptions?.[0]?.shippingCost?.value ?? 0)
-    const categoryId  = item.categoryPath?.split('|')?.[0] ?? ''
+    // ── Extract data for both Title Builder and Profit Calculator
+    const price = parseFloat(item.price?.value ?? 0)
+    const shipping = parseFloat(item.shippingOptions?.[0]?.shippingCost?.value ?? 0)
+    const categoryId = item.categoryPath?.split('|')?.[0] ?? ''
     const categoryName = item.categoryPath ?? ''
-    const condition   = item.condition ?? ''
-    const imageUrl    = item.image?.imageUrl ?? item.thumbnailImages?.[0]?.imageUrl ?? ''
-    const soldCount   = item.estimatedAvailabilities?.[0]?.estimatedAvailableQuantity ?? 0
-    const watchers    = item.watchCount ?? 0
+    const condition = item.condition ?? ''
+    const imageUrl = item.image?.imageUrl ?? item.thumbnailImages?.[0]?.imageUrl ?? ''
+    const soldCount = item.estimatedAvailabilities?.[0]?.estimatedAvailableQuantity ?? 0
+    const watchers = item.watchCount ?? 0
 
     const responseTime = Date.now() - start
     await logUsage(
@@ -158,7 +158,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       itemId,
-      title:       item.title ?? '',
+      title: item.title ?? '',
       price,
       shipping,
       categoryId,
@@ -167,8 +167,8 @@ export async function GET(req: NextRequest) {
       imageUrl,
       soldCount,
       watchers,
-      seller:      item.seller?.username ?? '',
-      itemUrl:     item.itemWebUrl ?? '',
+      seller: item.seller?.username ?? '',
+      itemUrl: item.itemWebUrl ?? '',
       purpose,
       responseTime,
     })
@@ -179,7 +179,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// â”€â”€ Log API usage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Log API usage ──────────────────────────────────────────────
 async function logUsage(toolName: string, callName: string, responseTimeMs: number) {
   try {
     const { data: curr } = await (adminClient.from('api_fleet_config') as any)
@@ -187,22 +187,22 @@ async function logUsage(toolName: string, callName: string, responseTimeMs: numb
       .eq('platform_name', 'ebay').single()
 
     await (adminClient.from('api_fleet_config') as any).update({
-      last_used_at:    new Date().toISOString(),
+      last_used_at: new Date().toISOString(),
       last_request_at: new Date().toISOString(),
-      status:          'connected',
+      status: 'connected',
       rate_limit_used: ((curr as any)?.rate_limit_used ?? 0) + 1,
-      requests_today:  ((curr as any)?.requests_today  ?? 0) + 1,
+      requests_today: ((curr as any)?.requests_today ?? 0) + 1,
     }).eq('platform_name', 'ebay')
 
     await (adminClient.from('api_usage_logs') as any).insert({
-      platform_name:    'ebay',
-      tool_name:        toolName,
-      call_name:        callName,
-      endpoint:         'buy/browse/v1/item',
-      success_count:    1,
-      error_count:      0,
+      platform_name: 'ebay',
+      tool_name: toolName,
+      call_name: callName,
+      endpoint: 'buy/browse/v1/item',
+      success_count: 1,
+      error_count: 0,
       response_time_ms: responseTimeMs,
-      logged_at:        new Date().toISOString(),
+      logged_at: new Date().toISOString(),
     })
-  } catch {}
+  } catch { }
 }

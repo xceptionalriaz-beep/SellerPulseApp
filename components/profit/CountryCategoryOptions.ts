@@ -42,7 +42,8 @@ export function getCategoryOptions(country: string, state: any): { label: string
     }
     if (country === 'CA') {
         return (Object.keys(CA_TIERED_FEES) as CACategoryKey[]).map(key => {
-            const structure = state.caHasStore ? CA_TIERED_FEES[key].hasStore : CA_TIERED_FEES[key].noStore
+            const hasStore = state.caStoreTier !== 'none'
+            const structure = hasStore ? CA_TIERED_FEES[key].hasStore : CA_TIERED_FEES[key].noStore
             const rateDisplay = structure.type === 'flat'
                 ? `${(structure as any).rate}% flat`
                 : structure.type === 'switch'
@@ -59,7 +60,8 @@ export function getCategoryOptions(country: string, state: any): { label: string
     }
     if (country === 'DE') {
         return (Object.keys(DE_TIERED_FEES) as DECategoryKey[]).map(key => {
-            const s = state.deHasShop ? DE_TIERED_FEES[key].hasShop : DE_TIERED_FEES[key].noShop
+            const hasShop = state.deShopTier !== 'none'
+            const s = hasShop ? DE_TIERED_FEES[key].hasShop : DE_TIERED_FEES[key].noShop
             const rateDisplay = s.type === 'flat'
                 ? `${(s as any).rate}% flat`
                 : `${(s as any).brackets[0].rate}%+`
@@ -135,20 +137,20 @@ export function getStoreTierOptions(country: string): { label: string; value: st
             { label: 'Anchor — £437/mo — Unlimited free listings', value: 'anchor' },
         ]
         case 'CA': return [
-            { label: 'No store', value: 'no_store' },
-            { label: 'Basic — C$19.95/mo', value: 'has_store' },
-            { label: 'Premium — C$59.95/mo', value: 'has_store' },
-            { label: 'Anchor — C$299.95/mo', value: 'has_store' },
+            { label: 'No store — 250 free listings, C$0.30/listing', value: 'none' },
+            { label: 'Basic — C$19.95/mo — 1,000 free, C$0.20/listing', value: 'basic' },
+            { label: 'Premium — C$59.95/mo — 10,000 free, C$0.10/listing', value: 'premium' },
+            { label: 'Anchor — C$299.95/mo — 25,000 free, C$0.05/listing', value: 'anchor' },
         ]
         case 'AU': return (Object.keys(AU_PRO_PLAN_LABELS) as AUProPlan[]).map(plan => ({
             label: AU_PRO_PLAN_LABELS[plan], value: plan,
         }))
         case 'DE': return [
-            { label: 'No shop', value: 'no_shop' },
-            { label: 'Basis-Shop — €39.95/mo', value: 'has_shop' },
-            { label: 'Top-Shop — €79.95/mo', value: 'has_shop' },
-            { label: 'Premium-Shop — €299.95/mo', value: 'has_shop' },
-            { label: 'Platin-Shop — €4,999.95/mo', value: 'platin' },
+            { label: 'Kein Shop — €0.35/listing', value: 'none' },
+            { label: 'Basis-Shop — €39.95/mo — 400 free, €0.10/listing', value: 'basis' },
+            { label: 'Top-Shop — €79.95/mo — 2,500 free, €0.05/listing', value: 'top' },
+            { label: 'Premium-Shop — €299.95/mo — Unlimited free', value: 'premium' },
+            { label: 'Platin-Shop — €4,999.95/mo — Unlimited + 10% off FVF', value: 'platin' },
         ]
         case 'FR': return [
             { label: 'No Boutique', value: '0' },

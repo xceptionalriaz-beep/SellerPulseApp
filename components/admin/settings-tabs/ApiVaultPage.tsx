@@ -56,6 +56,8 @@ const PLATFORM_LOGOS: Record<string, string> = {
   resend: '/logos/resend.png',
   lemonsqueezy: '/logos/lemonsqueezy.png',
   stripe: '/logos/stripe.png',
+  gemini: '/logos/gemini.png',
+  anthropic: '/logos/anthropic.png',
   custom_api: '',
 }
 
