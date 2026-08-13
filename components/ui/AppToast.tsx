@@ -45,16 +45,16 @@ interface ToastItem {
 }
 
 interface ToastContextValue {
-  show:       (message: string, icon?: React.ReactNode, duration?: number) => void
-  error:      (message: string, icon?: React.ReactNode, duration?: number) => void
-  warning:    (message: string, icon?: React.ReactNode, duration?: number) => void
-  info:       (message: string, icon?: React.ReactNode, duration?: number) => void
-  copied:     () => void
-  saved:      () => void
-  deleted:    (item?: string) => void
-  sending:    () => void
+  show: (message: string, icon?: React.ReactNode, duration?: number) => void
+  error: (message: string, icon?: React.ReactNode, duration?: number) => void
+  warning: (message: string, icon?: React.ReactNode, duration?: number) => void
+  info: (message: string, icon?: React.ReactNode, duration?: number) => void
+  copied: () => void
+  saved: () => void
+  deleted: (item?: string) => void
+  sending: () => void
   noInternet: () => void
-  loading:    () => void
+  loading: () => void
 }
 
 // â”€â”€ Context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -69,10 +69,10 @@ export function useToast(): ToastContextValue {
 
 // â”€â”€ Colors (matches Dart exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const TOAST_STYLES: Record<ToastType, { bg: string; text: string; border: string }> = {
-  success: { bg: '#8FFF00', text: '#0A0D08', border: '#6FCC00' }, // Lime â€” dark text
-  error:   { bg: '#EF4444', text: '#FFFFFF', border: '#DC2626' }, // Red
-  warning: { bg: '#F59E0B', text: '#0A0D08', border: '#D97706' }, // Amber â€” dark text
-  info:    { bg: '#0F172A', text: '#FFFFFF', border: '#1E293B' }, // Dark navy
+  success: { bg: '#7530fb', text: '#1e1535', border: '#6020e0' }, // Lime â€” dark text
+  error: { bg: '#EF4444', text: '#FFFFFF', border: '#DC2626' }, // Red
+  warning: { bg: '#F59E0B', text: '#1e1535', border: '#D97706' }, // Amber â€” dark text
+  info: { bg: '#0F172A', text: '#FFFFFF', border: '#1E293B' }, // Dark navy
 }
 
 // â”€â”€ Single Toast Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -84,11 +84,22 @@ function ToastBubble({
   onRemove: (id: string) => void
 }) {
   const styles = TOAST_STYLES[item.type]
+  const [removing, setRemoving] = useState(false)
+
+  function dismiss() {
+    setRemoving(true)
+    setTimeout(() => onRemove(item.id), 280)
+  }
 
   return (
     <div
-      className="animate-slide-down pointer-events-auto"
-      style={{ animation: 'toastIn 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+      className="pointer-events-auto"
+      style={{
+        animation: removing
+          ? 'toastOut 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          : 'toastIn 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        overflow: 'hidden',
+      }}
     >
       <div
         className="flex items-center gap-2 px-4 py-2.5 rounded-full shadow-panel"
@@ -100,18 +111,21 @@ function ToastBubble({
           minWidth: '160px',
         }}
       >
-        {/* Icon */}
         <span className="shrink-0" style={{ color: styles.text }}>
           {item.icon}
         </span>
-
-        {/* Message */}
         <span
           className="text-[13px] font-semibold leading-snug line-clamp-2"
           style={{ fontFamily: 'var(--font-inter)', color: styles.text }}
         >
           {item.message}
         </span>
+        <button
+          onClick={dismiss}
+          className="shrink-0 ml-1 opacity-60 hover:opacity-100 transition-opacity"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: styles.text, padding: 0 }}
+          aria-label="Dismiss"
+        >×</button>
       </div>
     </div>
   )
@@ -177,13 +191,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       addToast(msg, 'info', icon ?? <Info size={15} />, dur),
 
     // Shortcuts
-    copied:     () => addToast('Copied to clipboard',    'success', <Copy size={15} />,    2000),
-    saved:      () => addToast('Saved successfully',     'success', <Save size={15} />,    2000),
-    deleted:    (item = 'Item') =>
-                     addToast(`${item} deleted`,         'success', <Trash2 size={15} />,  2000),
-    sending:    () => addToast('Sending...',             'info',    <Send size={15} />,     2000),
-    noInternet: () => addToast('No internet connection', 'error',   <WifiOff size={15} />, 3000),
-    loading:    () => addToast('Loading...',             'info',    <Loader2 size={15} />, 2000),
+    copied: () => addToast('Copied to clipboard', 'success', <Copy size={15} />, 2000),
+    saved: () => addToast('Saved successfully', 'success', <Save size={15} />, 2000),
+    deleted: (item = 'Item') =>
+      addToast(`${item} deleted`, 'success', <Trash2 size={15} />, 2000),
+    sending: () => addToast('Sending...', 'info', <Send size={15} />, 2000),
+    noInternet: () => addToast('No internet connection', 'error', <WifiOff size={15} />, 3000),
+    loading: () => addToast('Loading...', 'info', <Loader2 size={15} />, 2000),
   }
 
   return (

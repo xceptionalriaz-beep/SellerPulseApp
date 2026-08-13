@@ -39,10 +39,12 @@ import {
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock,
+  Globe, History,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
 import { useToast } from '@/components/ui/AppToast'
+import ProDropdown from '@/components/ui/ProDropdown'
 import { cn, initials } from '@/lib/utils'
 import type { Profile } from '@/types/database'
 
@@ -79,6 +81,182 @@ const KILL_SWITCH_MAP: Record<string, string> = {
   'Orders': 'Orders Management',
 }
 
+// ── SearchBar — handles focus border state ─────────────────────
+function SearchBar({ onGenerate, searchInput, setSearchInput }: {
+  onGenerate: () => void
+  searchInput: string
+  setSearchInput: (v: string) => void
+}) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className="flex items-center h-9 rounded-lg border overflow-hidden w-full transition-all duration-150"
+      style={{
+        borderColor: focused ? '#7530fb' : '#ede9fe',
+        backgroundColor: '#f8f7ff',
+        boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
+      }}>
+      <div className="flex items-center px-3">
+        <Search size={14} style={{ color: focused ? '#7530fb' : '#9ca3af' }} />
+      </div>
+      <input
+        value={searchInput}
+        onChange={e => setSearchInput(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && onGenerate()}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder="Paste Competitor ID or Keyword..."
+        className="flex-1 h-full bg-transparent text-[13px] outline-none"
+        style={{ color: '#1e1535', outline: 'none', boxShadow: 'none' }}
+      />
+      <button onClick={onGenerate}
+        className="px-4 h-full text-[13px] font-bold"
+        style={{ backgroundColor: '#7530fb', color: '#ffffff' }}>
+        Generate
+      </button>
+    </div>
+  )
+}
+
+// ── ExcludeInput — handles focus border state ──────────────────
+function ExcludeInput({ exclude, setExclude }: {
+  exclude: string
+  setExclude: (v: string) => void
+}) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className="flex items-center h-9 rounded-lg border px-3 gap-2 transition-all duration-150"
+      style={{
+        borderColor: focused ? '#7530fb' : exclude ? '#7530fb' : '#ede9fe',
+        backgroundColor: '#ffffff',
+        minWidth: 160,
+        boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
+      }}>
+      <input
+        type="text"
+        placeholder="Exclude Phrase..."
+        value={exclude}
+        onChange={e => setExclude(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className="flex-1 bg-transparent text-[13px] font-semibold outline-none"
+        style={{ color: '#1e1535', outline: 'none', boxShadow: 'none' }}
+      />
+      {exclude && (
+        <button onClick={() => setExclude('')} style={{ color: '#9ca3af', flexShrink: 0 }}>
+          <X size={13} />
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── TitleBuilderTopBar ─────────────────────────────────────────
+// Renders inside the shared dashboard header when on /dashboard/title-builder.
+// Uses ProDropdown for all filter selectors — consistent with the rest of the app.
+function TitleBuilderTopBar({ pathname }: { pathname: string }) {
+
+  const [searchInput, setSearchInput] = useState('')
+
+  // Filter values
+  const [shipFrom, setShipFrom] = useState('')
+  const [condition, setCondition] = useState('')
+  const [category, setCategory] = useState('')
+  const [exclude, setExclude] = useState('')
+
+  // Listen for auto-detected category from search results
+  useEffect(() => {
+    function onCategoryDetected(e: Event) {
+      const { category: detected } = (e as CustomEvent).detail
+      if (detected) setCategory(detected)
+    }
+    window.addEventListener('tb:categoryDetected', onCategoryDetected)
+    return () => window.removeEventListener('tb:categoryDetected', onCategoryDetected)
+  }, [])
+
+  function handleGenerate() {
+    const input = searchInput.trim()
+    if (!input) return
+    window.dispatchEvent(new CustomEvent('tb:generate', {
+      detail: { input, shipFrom, condition, category, exclude }
+    }))
+  }
+
+  const activeCount = [shipFrom, condition, category, exclude].filter(Boolean).length
+
+  return (
+    <div className="flex items-center gap-2 flex-1 min-w-0">
+
+      {/* Brand */}
+      <div className="flex items-center gap-1 h-full shrink-0">
+        <span className="text-[17px] font-extrabold mr-2" style={{ color: '#7530fb' }}>TitleMaster AI</span>
+        <span className="px-3 h-[60px] text-[12px] font-medium relative flex items-center"
+          style={{ color: '#1e1535' }}>
+          Title Builder
+          <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#7530fb' }} />
+        </span>
+      </div>
+
+      {/* Search bar */}
+      <div className="flex flex-1 max-w-lg">
+        <SearchBar onGenerate={handleGenerate} searchInput={searchInput} setSearchInput={setSearchInput} />
+      </div>
+
+      {/* ── FILTER DROPDOWNS ── */}
+      <div className="flex items-center gap-1.5 shrink-0">
+
+        <ProDropdown prefix="Ships From:" currentValue={shipFrom || '__all'} width={190}
+          options={[
+            { val: '__all', label: 'All Locations', enabled: true },
+            { val: 'US', label: 'United States', enabled: true, flagCode: 'us' },
+            { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
+            { val: 'CN', label: 'China', enabled: true, flagCode: 'cn' },
+            { val: 'DE', label: 'Germany', enabled: true, flagCode: 'de' },
+            { val: 'AU', label: 'Australia', enabled: true, flagCode: 'au' },
+            { val: 'CA', label: 'Canada', enabled: true, flagCode: 'ca' },
+          ]}
+          onChanged={v => setShipFrom(v === '__all' ? '' : v)} />
+
+        <ProDropdown prefix="Condition:" currentValue={condition || '__all'} width={175}
+          options={[
+            { val: '__all', label: 'All Conditions', enabled: true },
+            { val: 'NEW', label: 'New', enabled: true },
+            { val: 'USED', label: 'Used', enabled: true },
+            { val: 'REFURBISHED', label: 'Refurbished', enabled: true },
+          ]}
+          onChanged={v => setCondition(v === '__all' ? '' : v)} />
+
+        <ProDropdown prefix="Category:" currentValue={category || '__auto'} width={200}
+          options={[
+            { val: '__auto', label: 'Auto-Detect', enabled: true },
+            { val: 'electronics', label: 'Electronics', enabled: true },
+            { val: 'clothing', label: 'Clothing & Fashion', enabled: true },
+            { val: 'automotive', label: 'Automotive', enabled: true },
+            { val: 'homeGarden', label: 'Home & Garden', enabled: true },
+            { val: 'sports', label: 'Sports & Outdoors', enabled: true },
+            { val: 'toys', label: 'Toys & Games', enabled: true },
+            { val: 'health', label: 'Health & Beauty', enabled: true },
+            { val: 'collectibles', label: 'Collectibles', enabled: true },
+            { val: 'pets', label: 'Pet Supplies', enabled: true },
+            { val: 'baby', label: 'Baby', enabled: true },
+          ]}
+          onChanged={v => setCategory(v === '__auto' ? '' : v)} />
+
+        <ExcludeInput exclude={exclude} setExclude={setExclude} />
+
+        {activeCount > 0 && (
+          <button onClick={() => { setShipFrom(''); setCondition(''); setCategory(''); setExclude('') }}
+            className="flex items-center gap-1 px-2 h-8 rounded-full text-[10px] font-black whitespace-nowrap"
+            style={{ backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+            ✕ {activeCount} filter{activeCount > 1 ? 's' : ''}
+          </button>
+        )}
+
+      </div>
+    </div>
+  )
+}
+
+
 // -- Sidebar Item -----------------------------------------------
 function SidebarItem({
   icon: Icon, label, href, isActive, onClick
@@ -97,12 +275,12 @@ function SidebarItem({
       className="relative flex items-center justify-center w-[60px] h-[52px] group"
     >
       {isActive && (
-        <div className="absolute left-0 w-[3px] h-6 bg-lime rounded-r-[10px]" />
+        <div className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-[10px]" />
       )}
       <div className={cn(
         'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-250',
         isActive
-          ? 'bg-lime scale-100'
+          ? 'bg-accent scale-100'
           : 'bg-transparent group-hover:bg-white/10 scale-95 group-hover:scale-100'
       )}>
         <Icon
@@ -131,16 +309,16 @@ function NotificationBell({
       onMouseLeave={() => setHovering(false)}
       className="relative p-2 rounded-full transition-all duration-200"
       style={{
-        backgroundColor: hovering ? 'rgba(143,255,0,0.15)' : 'rgba(255,255,255,0.8)',
-        animation: isPulsing ? 'pulseLime 0.6s ease-in-out 3' : 'none',
+        backgroundColor: hovering ? 'rgba(117,48,251,0.15)' : 'rgba(255,255,255,0.8)',
+        animation: isPulsing ? 'pulsePrimary 0.6s ease-in-out 3' : 'none',
       }}
     >
       <Bell
         size={22}
         className={cn(
           'transition-colors duration-200',
-          hovering ? 'text-limeDeep' :
-            count > 0 ? 'text-red-700' : 'text-[#8A9E78]'
+          hovering ? 'text-accentDeep' :
+            count > 0 ? 'text-red-700' : 'text-[#9ca3af]'
         )}
       />
       {count > 0 && (
@@ -168,7 +346,7 @@ function UserAvatar({
     'open-peeps': 'fde68a', 'personas': 'e0e7ff',
   }
   const AVATAR_COLORS = [
-    { bg: '#8fff00', text: '#0a0d08' }, { bg: '#0ea5e9', text: '#ffffff' },
+    { bg: '#7530fb', text: '#1e1535' }, { bg: '#0ea5e9', text: '#ffffff' },
     { bg: '#8b5cf6', text: '#ffffff' }, { bg: '#f97316', text: '#ffffff' },
     { bg: '#ec4899', text: '#ffffff' }, { bg: '#14b8a6', text: '#ffffff' },
     { bg: '#ef4444', text: '#ffffff' }, { bg: '#6366f1', text: '#ffffff' },
@@ -224,23 +402,23 @@ function NotifToast({
 
   return (
     <div
-      className="fixed z-50 w-[320px] rounded-[14px] overflow-hidden border border-lime/25 shadow-[0_8px_20px_rgba(0,0,0,0.3)] animate-slide-up cursor-pointer"
-      style={{ right: 20, bottom: 20 + bottomOffset, backgroundColor: '#1a2410' }}
+      className="fixed z-50 w-[320px] rounded-[14px] overflow-hidden border border-primary/25 shadow-[0_8px_20px_rgba(0,0,0,0.3)] animate-slide-up cursor-pointer"
+      style={{ right: 20, bottom: 20 + bottomOffset, backgroundColor: '#1e1535' }}
       onClick={onTap}
     >
       <div className="flex items-start gap-3 p-3.5 pr-3">
-        <div className="w-9 h-9 rounded-[10px] bg-lime/12 flex items-center justify-center shrink-0">
-          <Bell size={18} className="text-lime" />
+        <div className="w-9 h-9 rounded-[10px] bg-accent/12 flex items-center justify-center shrink-0">
+          <Bell size={18} className="text-accent" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-white text-[13px] font-bold truncate">{title}</span>
-            <span className="text-[8px] font-extrabold text-lime bg-lime/15 px-1.5 py-0.5 rounded-full tracking-wide shrink-0">NEW</span>
+            <span className="text-[8px] font-extrabold text-accent bg-accent/15 px-1.5 py-0.5 rounded-full tracking-wide shrink-0">NEW</span>
           </div>
           <p className="text-white/55 text-[11px] leading-relaxed line-clamp-2">{message}</p>
           <div className="flex items-center justify-between mt-1.5">
             <span className="text-white/30 text-[10px]">Just now</span>
-            <span className="text-lime/70 text-[10px] font-semibold">Tap to view</span>
+            <span className="text-accent/70 text-[10px] font-semibold">Tap to view</span>
           </div>
         </div>
         <button
@@ -251,7 +429,7 @@ function NotifToast({
         </button>
       </div>
       <div className="h-[3px] bg-white/5">
-        <div className="h-full bg-lime transition-all duration-100" style={{ width: `${progress}%` }} />
+        <div className="h-full bg-accent transition-all duration-100" style={{ width: `${progress}%` }} />
       </div>
     </div>
   )
@@ -471,24 +649,24 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   function removeToast(id: string) { setToasts(prev => prev.filter(t => t.id !== id)) }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg, #f8f7ff)' }}>
       {showNotifPanel && (
         <NotificationsPanelOverlay onClose={() => setShowNotifPanel(false)} forceUser={isUserMode} />
       )}
-      <div className="flex gap-0 h-screen">
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
         {!mounted ? (
-          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: '100vh', backgroundColor: '#1a2410' }} />
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: 0, backgroundColor: '#1e1535' }} />
         ) : ((cachedIsAdmin || isAdmin) && !isUserMode) ? (
           /* -- ADMIN SIDEBAR -- */
-          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: '100vh', backgroundColor: '#1a2410' }}>
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: 0, backgroundColor: '#1e1535' }}>
             {/* Logo */}
             <button
               onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null); router.push('/dashboard/admin') }}
               className="flex items-center gap-2.5 px-5 pt-6 pb-4 hover:opacity-80 transition-opacity w-full text-left"
               style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#8FFF00' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#7530fb' }}>
                 <ShieldAlert size={16} className="text-dark" />
               </div>
               <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
@@ -499,9 +677,9 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               <Link href="/dashboard/admin" scroll={false}
                 onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null) }}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-transparent group"
-                style={{ color: pathname === '/dashboard/admin' && !searchParams.has('settings') && !searchParams.has('analytics') && !activeAdminTab && !activeAnalyticsTab ? '#8FFF00' : 'rgba(255,255,255,1)' }}>
-                <LayoutDashboard size={16} className="group-hover:!text-lime transition-colors" style={{ color: 'inherit' }} />
-                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }} className="group-hover:!text-lime transition-colors">Dashboard</span>
+                style={{ color: pathname === '/dashboard/admin' && !searchParams.has('settings') && !searchParams.has('analytics') && !activeAdminTab && !activeAnalyticsTab ? '#7530fb' : 'rgba(255,255,255,1)' }}>
+                <LayoutDashboard size={16} className="group-hover:!text-accent transition-colors" style={{ color: 'inherit' }} />
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }} className="group-hover:!text-accent transition-colors">Dashboard</span>
               </Link>
 
               {/* Admin Settings */}
@@ -569,8 +747,8 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     }}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left group"
                     style={{ backgroundColor: 'transparent', paddingLeft: (item as any).isChild ? 24 : 12 }}>
-                    <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', flexShrink: 0, transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'} />
-                    <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: isActive ? 700 : 500, flex: 1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#8FFF00' : 'rgba(255,255,255,1)', transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-lime'}>{item.label}</span>
+                    <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#7530fb' : 'rgba(255,255,255,1)', flexShrink: 0, transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-accent'} />
+                    <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: isActive ? 700 : 500, flex: 1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#7530fb' : 'rgba(255,255,255,1)', transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-accent'}>{item.label}</span>
                     {(item as any).hasChild && (
                       <ChevronDown size={13} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAffiliateMenu(v => !v) }}
                         style={{ color: 'rgba(255,255,255,0.4)', transform: showAffiliateMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -581,7 +759,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     {isLocked && (
                       <Lock size={10} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
                     )}
-                    {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#8FFF00' }} />}
+                    {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#7530fb' }} />}
                   </button>
                 )
               })}
@@ -606,7 +784,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </aside>
         ) : (
           /* -- USER SIDEBAR -- */
-          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor: '#1a2410' }}>
+          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor: '#1e1535' }}>
             <div className="flex justify-center pt-[30px] pb-[35px]">
               <button onClick={() => router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
                 <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 24, height: 24 }} />
@@ -633,45 +811,65 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         )}
 
         {/* -- MAIN CONTENT -- */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
 
           {/* -- TOP NAVBAR -- */}
-          <header className="h-[60px] flex items-center px-6 shrink-0">
+          <header className="h-[60px] flex items-center px-6 shrink-0 border-b"
+            style={{ borderColor: '#ede9fe', backgroundColor: '#ffffff' }}>
             <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
               <Menu size={28} />
             </button>
 
-            {(() => {
-              const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
-              const hour = new Date().getHours()
-              const timeGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
-                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
-                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
-                    : `Good night, ${firstName}!`
-              const isMain = pathname === '/dashboard'
-              const isOrders = pathname === '/dashboard/orders'
-              const isAdminP = pathname.startsWith('/dashboard/admin')
-              const adminGreeting = hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
-                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
-                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
-                    : `Working late, ${firstName}!`
-              const desktopMsg = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
-              const mobileMsg = isMain ? timeGreeting : isOrders ? `Welcome back, ${firstName}!` : isAdminP ? adminGreeting : `Hi, ${firstName}!`
-              return (
-                <div className="flex flex-col min-w-0">
-                  <span className="hidden lg:block font-extrabold tracking-tight truncate"
-                    style={{ fontSize: 22, color: '#1A2410', fontFamily: 'var(--font-space-grotesk)' }}>
-                    {desktopMsg}
-                  </span>
-                  <span className="lg:hidden font-extrabold tracking-tight truncate"
-                    style={{ fontSize: 18, color: '#1A2410', fontFamily: 'var(--font-space-grotesk)' }}>
-                    {mobileMsg}
-                  </span>
-                </div>
-              )
-            })()}
+            {pathname.startsWith('/dashboard/title-builder') ? (
+              /* ── Title Builder top bar ── */
+              <TitleBuilderTopBar pathname={pathname} />
+            ) : (
+              /* ── Default greeting (main dashboard only shows time greeting) ── */
+              (() => {
+                const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
+                const hour = new Date().getHours()
+                const isMain = pathname === '/dashboard'
+                const isOrders = pathname === '/dashboard/orders'
+                const isAdminP = pathname.startsWith('/dashboard/admin')
+                const greeting = isMain
+                  ? (hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
+                    : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
+                      : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                        : `Good night, ${firstName}!`)
+                  : isOrders ? `Welcome back, ${firstName}!`
+                    : isAdminP ? (hour >= 17 && hour < 21 ? `Good evening, ${firstName}!` : `Working late, ${firstName}!`)
+                      : null  // ← all other tool pages show nothing in the greeting slot
+                return greeting ? (
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-extrabold tracking-tight truncate"
+                      style={{ fontSize: 22, color: '#1e1535', fontFamily: 'Inter, sans-serif' }}>
+                      {greeting}
+                    </span>
+                  </div>
+                ) : <div className="flex-1" />
+              })()
+            )}
 
-            <div className="flex-1" />
+            {!pathname.startsWith('/dashboard/title-builder') && <div className="flex-1" />}
+
+            {/* Title Builder extra icons — sit between market selector and notification bell */}
+            {pathname.startsWith('/dashboard/title-builder') && (
+              <>
+                <button title="History"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+                  style={{ borderColor: '#ede9fe', color: '#9ca3af' }}>
+                  <History size={15} />
+                </button>
+                <div className="w-1.5" />
+                <button title="Settings"
+                  onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+                  style={{ borderColor: '#ede9fe', color: '#9ca3af' }}>
+                  <Settings size={15} />
+                </button>
+                <div className="w-3" />
+              </>
+            )}
 
             <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
             <div className="w-[15px]" />
@@ -682,7 +880,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           <TeamSwitcherBanner />
 
           {/* -- PAGE CONTENT -- */}
-          <main className="flex-1 overflow-auto min-h-0">
+          <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: pathname.startsWith('/dashboard/title-builder') ? 'hidden' : 'auto' }}>
             {emailUnverified && (
               <div className="flex items-center justify-between px-4 py-2.5"
                 style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
@@ -711,7 +909,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             )}
-            <div>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
               <AnnouncementBanner />
               {children}
             </div>
@@ -728,7 +926,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               <button onClick={() => { router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard'); setMobileOpen(false) }}>
                 <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 36, height: 36 }} />
               </button>
-              <span className="text-lime text-base font-extrabold tracking-wide mt-1.5">Riazify</span>
+              <span className="text-accent text-base font-extrabold tracking-wide mt-1.5">Riazify</span>
             </div>
 
             <nav className="flex-1 px-4 space-y-0.5">
@@ -743,7 +941,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
-                      isActive ? 'bg-lime text-dark' : 'text-white hover:bg-white/10'
+                      isActive ? 'bg-accent text-dark' : 'text-white hover:bg-white/10'
                     )}
                   >
                     <Icon size={20} />

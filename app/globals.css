@@ -5,31 +5,64 @@
 
 /* ─── CSS Custom Properties (Design Tokens) ─────────────────────────────── */
 :root {
-  /* Brand */
-  --lime:        #8FFF00;
-  --lime-deep:   #4A8F00;
-  --lime-tint:   #F4FFE6;
-  --lime-muted:  #D4FF80;
+  /* Core Brand */
+  --primary: #7530fb;
+  --primary-hover: #6020e0;
+  --primary-light: #f3eeff;
+  --accent: #b8fa33;
+  --accent-hover: #a3e635;
+  --dark: #1e1535;
+  --dark-hover: #2d1f4e;
 
-  /* Base */
-  --dark:        #0A0D08;
-  --surface:     #FFFFFF;
-  --bg:          #F7F9F5;
-  --border:      #E8EDE2;
+  /* Backgrounds */
+  --bg-app: #f8f7ff;
+  --bg-white: #ffffff;
+  --bg-tint: #f3eeff;
 
-  /* Admin */
-  --admin-dark:  #0F172A;
+  /* Legacy aliases */
+  --bg: #f8f7ff;
+  --surface: #ffffff;
+
+  /* Text */
+  --text-primary: #1f1d2e;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-white: #ffffff;
+  --text-purple: #7530fb;
+
+  /* Borders */
+  --border: #ede9fe;
+  --border-input: #e5e0f5;
+  --border-focus: #7530fb;
+
+  /* Status Colors */
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+  --warning: #d97706;
+  --warning-bg: #fef3c7;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --info: #0ea5e9;
+  --info-bg: #e0f2fe;
 
   /* Risk */
-  --risk-high:     #FF0000;
-  --risk-high-bg:  #FFEEEE;
-  --risk-med:      #92400E;
-  --risk-med-bg:   #FFFBEA;
-  --risk-low:      #2D6A00;
-  --risk-low-bg:   #F4FFE6;
+  --risk-high: #b91c1c;
+  --risk-high-bg: #fee2e2;
+  --risk-med: #92400e;
+  --risk-med-bg: #fef3c7;
+  --risk-low: #166534;
+  --risk-low-bg: #dcfce7;
 
   /* Sidebar */
+  --sidebar-bg: #1e1535;
+  --sidebar-active-bg: #2d1f4e;
+  --sidebar-text: #a89cc8;
+  --sidebar-active: #ffffff;
+  --sidebar-indicator: #b8fa33;
   --sidebar-width: 60px;
+
+  /* Admin */
+  --admin-dark: #1e1535;
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────────────────── */
@@ -46,12 +79,12 @@ html {
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--dark);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
   font-family: var(--font-inter), sans-serif;
 }
 
-/* ─── Scrollbar (Lime Theme) ─────────────────────────────────────────────── */
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -62,12 +95,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--lime-deep);
+  background: var(--primary);
   border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lime);
+  background: var(--primary-hover);
 }
 
 /* ─── Sidebar Scrollbar (Hidden) ─────────────────────────────────────────── */
@@ -82,35 +115,35 @@ body {
 
 /* ─── Selection Color ─────────────────────────────────────────────────────── */
 ::selection {
-  background-color: rgba(143, 255, 0, 0.3);
+  background-color: rgba(117, 48, 251, 0.15);
   color: var(--dark);
 }
 
-/* ─── Focus Ring (Lime) ──────────────────────────────────────────────────── */
+/* ─── Focus Ring ─────────────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--lime);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 /* ─── Utility Classes ─────────────────────────────────────────────────────── */
 @layer utilities {
   .text-gradient-lime {
-    background: linear-gradient(135deg, #8FFF00 0%, #4A8F00 100%);
+    background: linear-gradient(135deg, #7530fb 0%, #b8fa33 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .bg-lime-gradient {
-    background: linear-gradient(135deg, #8FFF00 0%, #4A8F00 100%);
+    background: linear-gradient(135deg, #7530fb 0%, #b8fa33 100%);
   }
 
   .glow-lime {
-    box-shadow: 0 0 20px rgba(143, 255, 0, 0.3);
+    box-shadow: 0 0 20px rgba(117, 48, 251, 0.3);
   }
 
   .glow-lime-strong {
-    box-shadow: 0 0 40px rgba(143, 255, 0, 0.5);
+    box-shadow: 0 0 40px rgba(117, 48, 251, 0.5);
   }
 
   .sidebar-rail {
@@ -121,35 +154,89 @@ body {
 
 /* ─── Component Layer ─────────────────────────────────────────────────────── */
 @layer components {
-  /* Card base */
   .card {
-    @apply bg-surface rounded-lg border border-border shadow-card;
+    @apply bg-white rounded-xl border shadow-sm;
+    border-color: var(--border);
+    box-shadow: 0 1px 4px rgba(117, 48, 251, 0.06);
   }
 
-  /* Lime button */
   .btn-lime {
-    @apply bg-lime text-dark font-semibold px-4 py-2 rounded-lg
-           hover:shadow-lime transition-all duration-200
-           active:scale-[0.98] cursor-pointer;
+    @apply font-semibold px-4 py-2 rounded-lg transition-all duration-200 active:scale-[0.98] cursor-pointer;
+    background-color: var(--accent);
+    color: var(--dark);
   }
 
-  /* Ghost button */
   .btn-ghost {
-    @apply bg-transparent text-dark border border-border px-4 py-2 rounded-lg
-           hover:bg-border transition-all duration-200 cursor-pointer;
+    @apply bg-transparent px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer font-medium;
+    color: var(--primary);
+    border: 1px solid var(--primary);
   }
 
-  /* Risk badge */
-  .badge-high   { @apply text-xs font-bold px-2 py-0.5 rounded; background: #FFEEEE; color: #FF0000; }
-  .badge-medium { @apply text-xs font-bold px-2 py-0.5 rounded; background: #FFFBEA; color: #92400E; }
-  .badge-low    { @apply text-xs font-bold px-2 py-0.5 rounded; background: #F4FFE6; color: #2D6A00; }
+  .btn-ghost:hover {
+    background-color: var(--primary-light);
+  }
 
-  /* Input base */
+  .badge-high {
+    @apply text-xs font-bold px-2 py-0.5 rounded;
+    background: var(--risk-high-bg);
+    color: var(--risk-high);
+  }
+
+  .badge-medium {
+    @apply text-xs font-bold px-2 py-0.5 rounded;
+    background: var(--risk-med-bg);
+    color: var(--risk-med);
+  }
+
+  .badge-low {
+    @apply text-xs font-bold px-2 py-0.5 rounded;
+    background: var(--risk-low-bg);
+    color: var(--risk-low);
+  }
+
   .input-base {
-    @apply w-full px-3 py-2 rounded-lg border border-border bg-surface
-           text-dark placeholder:text-gray-400
-           focus:outline-none focus:ring-2 focus:ring-lime focus:border-transparent
-           transition-all duration-200;
+    @apply w-full px-3 py-2 rounded-lg transition-all duration-200 text-sm;
+    background: var(--bg-white);
+    border: 1px solid var(--border-input);
+    color: var(--text-primary);
+  }
+
+  .input-base::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input-base:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(117, 48, 251, 0.12);
   }
 }
 
+/* ─── Toast Animations ───────────────────────────────────────────────────── */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    max-height: 60px;
+    margin-bottom: 0;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    max-height: 0;
+    margin-bottom: -8px;
+  }
+}

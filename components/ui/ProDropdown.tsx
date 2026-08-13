@@ -4,14 +4,13 @@ import { createPortal } from 'react-dom'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 const C = {
-  border: '#E2E8F0',
-  bg: '#F1F5F9',
-  text: '#1E293B',
-  muted: '#94A3B8',
-  lime: '#8FFF00',
-  dark: '#1a2410',
+  border: '#ede9fe',
+  bg: '#f3eeff',
+  text: '#1f1d2e',
+  muted: '#9ca3af',
+  lime: '#7530fb',
+  dark: '#f3eeff',
 }
-
 export interface DropdownOption {
   val: string
   label: string
