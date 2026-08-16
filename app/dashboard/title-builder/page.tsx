@@ -69,6 +69,7 @@ export default function TitleBuilderPage() {
   const [activeCategory, setActiveCategory] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [isFetching, setIsFetching] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
 
   // Use refs so event handlers always have fresh access to latest functions
   const handleExtractRef = useRef<(id: string) => void>(() => { })
@@ -94,13 +95,24 @@ export default function TitleBuilderPage() {
     function onRefilter() {
       if (lastKeywordRef.current) handleSearchRef.current(lastKeywordRef.current)
     }
+    function onReset() {
+      setTitle('')
+      setLongTailKeywords([])
+      setGenericKeywords([])
+      setCompetingListings([])
+      setTotalListings(0)
+      setHasSearched(false)
+      lastKeywordRef.current = ''
+    }
     window.addEventListener('tb:generate', onGenerate)
     window.addEventListener('tb:settings', onSettings)
     window.addEventListener('tb:refilter', onRefilter)
+    window.addEventListener('tb:reset', onReset)
     return () => {
       window.removeEventListener('tb:generate', onGenerate)
       window.removeEventListener('tb:settings', onSettings)
       window.removeEventListener('tb:refilter', onRefilter)
+      window.removeEventListener('tb:reset', onReset)
     }
   }, [])
 
@@ -241,6 +253,7 @@ export default function TitleBuilderPage() {
     if (!itemId) return
     if (isAtLimit('competitor_extract')) { alert(`Competitor Extract limit reached. Upgrade to get more.`); return }
     setIsFetching(true)
+    setHasSearched(true)
     try {
       const res = await fetch(`/api/ebay/item?id=${encodeURIComponent(itemId)}&purpose=title`)
       const data = await res.json()
@@ -261,6 +274,7 @@ export default function TitleBuilderPage() {
     if (isAtLimit('keyword_search')) { alert(`Keyword Search limit reached. Upgrade to get more.`); return }
     setMarketLoading(true)
     setIsFetching(true)
+    setHasSearched(true)
     try {
       const marketplace = activeLocation === 'UK' ? 'EBAY_GB'
         : activeLocation === 'CA' ? 'EBAY_CA'
@@ -357,6 +371,9 @@ export default function TitleBuilderPage() {
                 duplicateCount={flaggedDups.length}
                 onCopy={handleTitleCopy}
                 keywordContext={[...genericKeywords, ...longTailKeywords].map(k => k.kw)}
+                genericKeywords={genericKeywords}
+                longTailKeywords={longTailKeywords}
+                competingListings={competingListings}
                 aiOptimizeLimit={planLimits?.max_ai_optimize ?? null}
                 aiOptimizeUsed={usageCounts.ai_optimize}
                 categoryName={categoryName}
@@ -409,6 +426,7 @@ export default function TitleBuilderPage() {
               onLoadMore={() => handleSearch(lastKeywordSearched.current, searchOffset + 50)}
               isLoading={isFetching}
               filterExclude={filterExclude}
+              hasSearched={hasSearched}
             />
           </section>
 

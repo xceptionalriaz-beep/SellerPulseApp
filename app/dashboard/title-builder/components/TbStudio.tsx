@@ -6,7 +6,9 @@ import { useState, useEffect } from 'react'
 import { Copy, CheckCircle, RotateCcw, Sparkles, Wand2, Lightbulb, AlertCircle, AlertTriangle, Info, Scissors, XCircle, MinusCircle, ArrowLeftRight } from 'lucide-react'
 import { TitleCleanerEngine } from './engines/titleCleanerEngine'
 import { TitleSpinnerEngine, SpinMode, DiffToken } from './engines/titleSpinnerEngine'
+import { buildTitle, type BuildResult } from './engines/titleBuilderEngine'
 import { AIButton, SecondaryButton, GhostButton, PillButton, PrimaryButton } from '@/components/ui/Buttons'
+import { Zap } from 'lucide-react'
 
 const C = {
   border: '#E2E8F0', text: '#0F172A', muted: '#9CA3AF',
@@ -30,6 +32,9 @@ interface Props {
   duplicateCount: number
   onCopy?: () => void
   keywordContext?: string[]
+  genericKeywords?: { kw: string; search: string; comp: string; avgSearches?: number }[]
+  longTailKeywords?: { kw: string; search: string; comp: string; avgSearches?: number }[]
+  competingListings?: { kw: string; fullTitle?: string; search: string; comp: string; image?: string; url?: string }[]
   aiOptimizeLimit: number | null
   aiOptimizeUsed: number
   onAiOptimizeUsed: () => void
@@ -40,7 +45,8 @@ interface Props {
 }
 export default function TbStudio({
   value, onChange, charCount, flaggedVero, duplicateCount, onCopy,
-  keywordContext = [], aiOptimizeLimit, aiOptimizeUsed, onAiOptimizeUsed,
+  keywordContext = [], genericKeywords = [], longTailKeywords = [], competingListings = [],
+  aiOptimizeLimit, aiOptimizeUsed, onAiOptimizeUsed,
   categoryName = '', activeLocation = 'US',
   recentTitles = [], onRestoreTitle,
 }: Props) {
@@ -75,6 +81,14 @@ export default function TbStudio({
   // No-change feedback — shown when the engine can't improve the title in the selected mode
   const [spinNoChange, setSpinNoChange] = useState<string | null>(null)
 
+  // ── Step 14: Title Builder state ──────────────────────────────────────────
+  const [isBuilding, setIsBuilding] = useState(false)
+  const [buildResult, setBuildResult] = useState<BuildResult | null>(null)
+  const [buildVariantIdx, setBuildVariantIdx] = useState<number | null>(null)
+  const [buildCopied, setBuildCopied] = useState(false)
+  const [buildNoImprovement, setBuildNoImprovement] = useState(false)
+  const [showFullReasoning, setShowFullReasoning] = useState(false)
+
   // Mode-specific no-change messages — tells the seller WHY and what to do instead
   const NO_CHANGE_MSG: Record<SpinMode, string> = {
     DUPLICATE_SAFE: 'Your title has too few words to shuffle into a meaningfully different order. Try adding more keywords first, then spin again.',
@@ -101,6 +115,8 @@ export default function TbStudio({
     }
     if (spinNoChange !== null) setSpinNoChange(null)
     if (aiNeedsInfo !== null) setAiNeedsInfo(null) // clear pre-call panel on edit
+    // Fix 3: clear build result when user manually edits title
+    if (buildResult !== null) { setBuildResult(null); setBuildNoImprovement(false); setShowFullReasoning(false) }
   }, [value])
 
   const aiAtLimit = aiOptimizeLimit !== null && aiOptimizeLimit !== -1 && aiOptimizeUsed >= aiOptimizeLimit
@@ -118,6 +134,84 @@ export default function TbStudio({
       setCleanNoChange(false)
     }
   }, [value])
+
+  // ── Step 14: Build title from scratch ────────────────────────────────────────
+  // Fix 2: use setTimeout so setIsBuilding(true) renders before heavy computation
+  function handleBuildTitle() {
+    if (isBuilding) return
+    setIsBuilding(true)
+    setBuildResult(null)
+    setBuildVariantIdx(null)
+    setBuildNoImprovement(false)
+
+    setTimeout(() => {
+      // Fix 1: map competingListings — use fullTitle when available, else use kw
+      // kw alone is not a full title — only use as fallback if fullTitle missing
+      const rawGeneric = genericKeywords.map(k => ({
+        kw: k.kw, search: k.search, comp: k.comp,
+        avgSearches: k.avgSearches ?? 0,
+      }))
+      const rawLongTail = longTailKeywords.map(k => ({
+        kw: k.kw, search: k.search, comp: k.comp,
+        avgSearches: k.avgSearches ?? 0,
+      }))
+      // Only include competing listings that have a real full title
+      const rawCompeting = competingListings
+        .filter(l => l.fullTitle && l.fullTitle.length > 10)
+        .map(l => ({ kw: l.kw, fullTitle: l.fullTitle!, search: l.search, comp: l.comp }))
+
+      try {
+        const result = buildTitle({
+          genericKeywords: rawGeneric,
+          longTailKeywords: rawLongTail,
+          competingListings: rawCompeting,
+          existingTitle: value || '',
+          categoryName,
+          locale: (activeLocation as any) ?? 'US',
+        })
+        setBuildResult(result)
+
+        if (!result.title) {
+          // Engine returned empty — no data to work with
+          setIsBuilding(false)
+          return
+        }
+
+        // Fix 15: if not improved, show feedback instead of silently returning same title
+        if (!result.improved && value) {
+          setBuildNoImprovement(true)
+        } else if (result.title && (!value || result.improved)) {
+          onChange(result.title)
+        }
+      } catch (e) {
+        console.error('Build title error:', e)
+      }
+      setIsBuilding(false)
+    }, 50)  // 50ms delay — enough for React to render loading state
+  }
+
+  function handleSelectVariant(idx: number) {
+    if (!buildResult) return
+    const variant = buildResult.variants[idx]
+    if (!variant) return
+    setBuildVariantIdx(idx)
+    onChange(variant.title)
+    // Show char count feedback in title area naturally via charCount prop
+  }
+
+  function handleUseBuildTitle() {
+    // Fix 41: clear panel after explicit 'Use This' confirmation
+    setBuildResult(null)
+    setBuildVariantIdx(null)
+    setBuildNoImprovement(false)
+    setShowFullReasoning(false)
+  }
+
+  function handleDismissBuild() {
+    setBuildResult(null)
+    setBuildVariantIdx(null)
+    setBuildCopied(false)
+  }
 
   // 🚀 Clean trigger
   function cleanTitle() {
@@ -138,7 +232,7 @@ export default function TbStudio({
     if (!value.trim()) return
     setSpinNoChange(null) // clear any previous no-change message
     const original = value
-    const res = TitleSpinnerEngine.spin(value, 3, spinMode, categoryName, activeLocation)
+    const res = TitleSpinnerEngine.spin(value, 3, spinMode, categoryName, activeLocation, genericKeywords, longTailKeywords, competingListings)
 
     // Engine returned empty — something went wrong
     if (!res.title) {
@@ -172,7 +266,7 @@ export default function TbStudio({
   // Try Again: push current to history (with its diff), get a new result
   function handleSpinAgain() {
     if (!spinOriginal) return
-    const res = TitleSpinnerEngine.spin(spinOriginal, 3, spinMode, categoryName, activeLocation)
+    const res = TitleSpinnerEngine.spin(spinOriginal, 3, spinMode, categoryName, activeLocation, genericKeywords, longTailKeywords, competingListings)
     if (res.title && res.title !== spinSuggestion) {
       if (spinSuggestion) {
         setSpinHistory(prev => [{ title: spinSuggestion, diff: spinDiff }, ...prev].slice(0, 3))
@@ -464,51 +558,246 @@ export default function TbStudio({
           </div>
         )}
 
-        {/* ── ACTIONS ROW — Spin Mode pills slide in when Spin clicked ── */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] font-bold shrink-0" style={{ color: C.muted }}>Actions:</span>
+        {/* ── STEP 14: BUILD RESULT PANEL ── */}
+        {buildResult && (
+          <div className="mb-3 rounded-lg border overflow-hidden" style={{ borderColor: '#ede9fe' }}>
+            {/* Header */}
+            <div className="px-3 py-2 flex items-center justify-between" style={{ backgroundColor: '#f3eeff' }}>
+              <div className="flex items-center gap-2">
+                <Zap size={12} style={{ color: '#7530fb' }} />
+                <span className="text-[11px] font-bold" style={{ color: '#1e1535' }}>
+                  Title Builder
+                </span>
+                {/* Score badge */}
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                  style={{
+                    backgroundColor: buildResult.builtScore >= 80 ? '#dcfce7' : buildResult.builtScore >= 60 ? '#fef3c7' : '#fee2e2',
+                    color: buildResult.builtScore >= 80 ? '#16a34a' : buildResult.builtScore >= 60 ? '#d97706' : '#ef4444',
+                  }}>
+                  {buildResult.scoreBreakdown.grade} · {buildResult.builtScore}/100
+                </span>
+                {buildResult.improved && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}>
+                    +{buildResult.improvement}pts
+                  </span>
+                )}
+                {buildResult.brandConfidence === 'medium' && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded"
+                    style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
+                    ⚠ Verify brand
+                  </span>
+                )}
+              </div>
+              <button onClick={handleDismissBuild}
+                className="text-[14px] hover:opacity-60" style={{ color: DC.muted }}>×</button>
+            </div>
+
+            {/* Built title */}
+            <div className="px-3 py-2.5" style={{ backgroundColor: '#ffffff' }}>
+              <div className="flex items-start gap-2">
+                <p className="flex-1 text-[13px] font-semibold leading-relaxed" style={{ color: '#1e1535' }}>
+                  {buildResult.title}
+                </p>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(buildResult.title); setBuildCopied(true); setTimeout(() => setBuildCopied(false), 1500) }}
+                  className="shrink-0 p-1 rounded-lg transition-all hover:opacity-70"
+                  style={{ backgroundColor: buildCopied ? '#f3eeff' : '#f8f7ff', border: `1px solid ${DC.border}` }}>
+                  {buildCopied
+                    ? <CheckCircle size={11} style={{ color: '#16a34a' }} />
+                    : <Copy size={11} style={{ color: '#7530fb' }} />}
+                </button>
+              </div>
+
+              {/* Score breakdown — all 6 metrics */}
+              <div className="flex gap-2 mt-2 flex-wrap">
+                {[
+                  { label: 'Keywords', val: buildResult.scoreBreakdown.breakdown.keywordCoverage, max: 25 },
+                  { label: 'Mobile', val: buildResult.scoreBreakdown.breakdown.mobileWindow, max: 25 },
+                  { label: 'Length', val: buildResult.scoreBreakdown.breakdown.lengthEfficiency, max: 20 },
+                  { label: 'Order', val: buildResult.scoreBreakdown.breakdown.wordOrder, max: 15 },
+                  { label: 'Condition', val: buildResult.scoreBreakdown.breakdown.conditionScore, max: 10 },
+                  { label: 'Locale', val: buildResult.scoreBreakdown.breakdown.localeScore, max: 5 },
+                ].map(({ label, val, max }) => (
+                  <div key={label} className="flex items-center gap-1">
+                    <span className="text-[10px]" style={{ color: DC.muted }}>{label}</span>
+                    <span className="text-[10px] font-bold" style={{ color: val >= max * 0.7 ? '#16a34a' : '#d97706' }}>
+                      {val}/{max}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Search DNA chips */}
+              {buildResult.searchDNA.topBuyerTerms.length > 0 && (
+                <div className="flex gap-1.5 mt-2 flex-wrap">
+                  <span className="text-[10px]" style={{ color: DC.muted }}>Top searches:</span>
+                  {buildResult.searchDNA.topBuyerTerms.slice(0, 4).map((term, i) => (
+                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded"
+                      style={{ backgroundColor: '#f3eeff', color: '#7530fb' }}>
+                      {term}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Fix 15: No improvement message */}
+            {buildNoImprovement && (
+              <div className="border-t px-3 py-2" style={{ borderColor: '#ede9fe', backgroundColor: '#f3eeff' }}>
+                <p className="text-[11px] font-medium" style={{ color: '#7530fb' }}>
+                  ✅ Your title is already well optimised — the engine couldn't improve it by 10+ points.
+                  Try a variant below, or add more competing listings for better data.
+                </p>
+              </div>
+            )}
+
+            {/* Fix 41: Use This button */}
+            <div className="border-t px-3 py-2 flex items-center gap-2" style={{ borderColor: '#ede9fe' }}>
+              <button onClick={handleUseBuildTitle}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:opacity-90"
+                style={{ backgroundColor: '#b8fa33', color: '#1e1535' }}>
+                <CheckCircle size={11} /> Use This Title
+              </button>
+              <button onClick={handleDismissBuild}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium hover:opacity-70"
+                style={{ backgroundColor: '#ffffff', color: DC.muted, border: `1px solid ${DC.border}` }}>
+                Dismiss
+              </button>
+            </div>
+
+            {/* Variants */}
+            {buildResult.variants.length > 0 && (
+              <div className="border-t px-3 py-2" style={{ borderColor: '#ede9fe', backgroundColor: '#fafafa' }}>
+                <span className="text-[10px] font-bold tracking-widest uppercase block mb-1.5" style={{ color: DC.muted }}>
+                  Variants
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  {buildResult.variants.map((v, i) => (
+                    <button key={i}
+                      onClick={() => handleSelectVariant(i)}
+                      className="text-left px-2.5 py-2 rounded-lg border text-[11px] transition-all hover:opacity-80"
+                      style={{
+                        backgroundColor: buildVariantIdx === i ? '#f3eeff' : '#ffffff',
+                        borderColor: buildVariantIdx === i ? '#7530fb' : DC.border,
+                        color: '#1e1535',
+                      }}>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="font-bold text-[10px]" style={{ color: '#7530fb' }}>{v.focus}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px]" style={{
+                            color: v.title.length > 80 ? '#ef4444' : v.title.length >= 65 ? '#16a34a' : '#d97706'
+                          }}>{v.title.length}/80</span>
+                          <span className="text-[10px]" style={{ color: DC.muted }}>{v.score}/100</span>
+                        </div>
+                      </div>
+                      <span className="font-medium leading-snug">{v.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Reasoning — first item + expand */}
+            {buildResult.reasoning.length > 0 && (
+              <div className="border-t px-3 py-1.5" style={{ borderColor: '#ede9fe' }}>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[10px] flex-1" style={{ color: DC.muted }}>
+                    💡 {buildResult.reasoning[0]}
+                  </p>
+                  {buildResult.reasoning.length > 1 && (
+                    <button onClick={() => setShowFullReasoning(r => !r)}
+                      className="text-[10px] shrink-0 font-bold hover:opacity-70"
+                      style={{ color: '#7530fb' }}>
+                      {showFullReasoning ? 'Less ▲' : `+${buildResult.reasoning.length - 1} more ▼`}
+                    </button>
+                  )}
+                </div>
+                {showFullReasoning && buildResult.reasoning.slice(1).map((r, i) => (
+                  <p key={i} className="text-[10px] mt-1" style={{ color: DC.muted }}>• {r}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── ACTIONS ROW — all buttons + mode pills in one row ── */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[10px] font-bold shrink-0" style={{ color: C.muted }}>Actions:</span>
+
+          {/* Build Title */}
+          <button
+            onClick={handleBuildTitle}
+            disabled={isBuilding || (genericKeywords.length === 0 && longTailKeywords.length === 0 && competingListings.length === 0)}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold transition-all hover:opacity-90 disabled:opacity-40"
+            style={{ backgroundColor: '#7530fb', color: '#ffffff' }}
+            title={genericKeywords.length === 0 && longTailKeywords.length === 0 && competingListings.length === 0 ? 'Search for keywords first' : 'Build optimal title from real search data'}>
+            <style>{`
+              @keyframes zapFlash {
+                0%,100% { color: #b8fa33; }
+                50%      { color: #ffffff; }
+              }
+              @keyframes zapSpin {
+                0%   { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
+            <Zap
+              size={11}
+              fill="currentColor"
+              style={{
+                animation: isBuilding
+                  ? 'zapSpin 0.6s linear infinite'
+                  : (genericKeywords.length > 0 || longTailKeywords.length > 0 || competingListings.length > 0)
+                    ? 'zapFlash 1.2s ease-in-out infinite'
+                    : 'none',
+                color: '#b8fa33',
+              }}
+            />
+            {isBuilding ? 'Building...' : !value ? 'Build' : 'Rebuild'}
+          </button>
+
+          {/* AI Optimize */}
           <AIButton onClick={runAIOptimize} disabled={aiAtLimit} loading={aiLoading}>
-            {aiAtLimit ? 'AI Optimize (Limit)' : 'AI Optimize'}
+            {aiAtLimit ? 'AI Limit' : 'AI Optimize'}
           </AIButton>
+
+          {/* Clean */}
           <SecondaryButton onClick={() => { setIsCutting(true); setTimeout(() => setIsCutting(false), 400); cleanTitle() }}
-            icon={<Scissors size={13} style={{ transition: 'transform 0.2s', transform: isCutting ? 'rotate(-20deg) scale(0.8)' : 'rotate(0deg) scale(1)' }} />}>
+            icon={<Scissors size={11} style={{ transition: 'transform 0.2s', transform: isCutting ? 'rotate(-20deg) scale(0.8)' : 'rotate(0deg) scale(1)' }} />}>
             Clean
           </SecondaryButton>
+
+          {/* Spin */}
           <SecondaryButton
-            onClick={() => {
-              setIsSpinning(true)
-              setTimeout(() => setIsSpinning(false), 600)
-              spinTitle()
-            }}
-            icon={<RotateCcw size={13} style={{
+            onClick={() => { setIsSpinning(true); setTimeout(() => setIsSpinning(false), 600); spinTitle() }}
+            icon={<RotateCcw size={11} style={{
               transition: isSpinning ? 'transform 0.6s cubic-bezier(0.4,0,0.2,1)' : 'none',
               transform: isSpinning ? 'rotate(-360deg)' : 'rotate(0deg)',
             }} />}>
             Spin
           </SecondaryButton>
 
-          {/* Vertical divider */}
-          <div style={{ width: 1, height: 24, backgroundColor: C.border, flexShrink: 0 }} />
+          {/* Thin divider */}
+          <div style={{ width: 1, height: 18, backgroundColor: C.border, flexShrink: 0 }} />
 
-          {/* Mode pills — always visible */}
-          <div className="flex gap-1.5 flex-wrap">
-            {([
-              { mode: 'DUPLICATE_SAFE', label: 'Duplicate Safe' },
-              { mode: 'AB_TEST', label: 'A/B Test' },
-              { mode: 'FILL_TO_80', label: 'Fill to 80' },
-              { mode: 'CLEAN_TIGHTEN', label: 'Clean & Tighten' },
-            ] as const).map(({ mode, label }) => (
-              <PillButton key={mode} active={spinMode === mode}
-                onClick={() => { setSpinMode(mode); setSpinNoChange(null) }}>
-                {label}
-              </PillButton>
-            ))}
-          </div>
+          {/* Mode pills — same row */}
+          {([
+            { mode: 'DUPLICATE_SAFE', label: 'Dup Safe' },
+            { mode: 'AB_TEST', label: 'A/B Test' },
+            { mode: 'FILL_TO_80', label: 'Fill to 80' },
+            { mode: 'CLEAN_TIGHTEN', label: 'Polish' },
+          ] as const).map(({ mode, label }) => (
+            <PillButton key={mode} active={spinMode === mode}
+              onClick={() => { setSpinMode(mode); setSpinNoChange(null) }}>
+              {label}
+            </PillButton>
+          ))}
         </div>
 
-        {/* Mode description */}
-        <p className="text-[11px] mt-1.5 flex items-start gap-1.5" style={{ color: C.muted }}>
-          <Lightbulb size={12} style={{ color: '#d97706', flexShrink: 0 }} />
+        {/* Mode description — compact */}
+        <p className="text-[10px] mt-1 flex items-start gap-1" style={{ color: C.muted }}>
+          <Lightbulb size={11} style={{ color: '#d97706', flexShrink: 0 }} />
           <span>{SPIN_MODE_DESC[spinMode]}</span>
         </p>
 

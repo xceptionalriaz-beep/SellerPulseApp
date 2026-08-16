@@ -550,7 +550,7 @@ export function ToggleButton({ value, onChanged, disabled }: ToggleButtonProps) 
                 width: 44,
                 height: 24,
                 borderRadius: 999,
-                backgroundColor: value ? T.lime : '#e8ede2',
+                backgroundColor: value ? T.lime : '#e5e0f5',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 opacity: disabled ? 0.5 : 1,
                 transition: 'background-color 0.2s ease',
@@ -564,8 +564,8 @@ export function ToggleButton({ value, onChanged, disabled }: ToggleButtonProps) 
                 width: 20,
                 height: 20,
                 borderRadius: '50%',
-                backgroundColor: value ? '#1a2410' : '#8a9e78',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.20)',
                 transition: 'left 0.2s ease, background-color 0.2s ease',
             }} />
         </div>

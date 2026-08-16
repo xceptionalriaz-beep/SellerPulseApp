@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { formatSearches, formatSales } from '@/src/utils/keywordParser'
 import Tooltip from '@/components/ui/Tooltip'
 import { InjectButton } from '@/components/ui/Buttons'
-import { Target, Lightbulb, ChevronLeft, ChevronRight, ArrowDown, ArrowUp, ChevronsUpDown, Plus, Check, Info, AlertTriangle } from 'lucide-react'
+import { Target, Lightbulb, ChevronLeft, ChevronRight, ArrowDown, ArrowUp, ChevronsUpDown, Plus, Check, Info, AlertTriangle, Search } from 'lucide-react'
 
 const C = {
   dark: '#1e1535', lime: '#7530fb', border: '#D1D5DB',
@@ -286,6 +286,7 @@ interface Props {
   hasMore: boolean
   onLoadMore: () => void
   isLoading: boolean
+  hasSearched: boolean
   filterExclude: string
 }
 
@@ -298,7 +299,7 @@ const DC = {
 export default function TbKeywordTables({
   currentTitle, onInject, veroDatabase,
   longTailData, genericData, competingData,
-  totalListings, hasMore, onLoadMore, isLoading,
+  totalListings, hasMore, onLoadMore, isLoading, hasSearched,
   filterExclude,
 }: Props) {
   const [activeTab, setActiveTab] = useState<'longtail' | 'generic' | 'competing'>('longtail')
@@ -385,6 +386,24 @@ export default function TbKeywordTables({
   function handleSort(col: string) {
     if (sortCol === col) setSortAsc(p => !p)
     else { setSortCol(col); setSortAsc(true) }
+  }
+
+  // ── Welcome state — shown before first search or after reset ────
+  if (!hasSearched && !isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ backgroundColor: '#f3eeff' }}>
+          <Search size={20} style={{ color: '#7530fb' }} />
+        </div>
+        <p className="text-[13px] font-semibold" style={{ color: '#1e1535' }}>
+          Search a keyword to get started
+        </p>
+        <p className="text-[12px]" style={{ color: '#9ca3af' }}>
+          Paste a keyword or competitor ID above and click Generate
+        </p>
+      </div>
+    )
   }
 
   if (isLoading) {

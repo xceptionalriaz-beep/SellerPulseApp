@@ -970,21 +970,68 @@ export const AMBIGUOUS_WORDS: Record<string, { contextWords: string[]; category:
 
 // ── Size system detection ─────────────────────────────────────────────────────
 // Detects clothing and shoe sizes so engine knows these are specs
+// Handles: "Size 10", "UK 10", "US 10", "EU 44", "10", "XL", "Large" etc.
 export const SIZE_PATTERNS = {
+    // Explicit size keyword — "Size 10", "Size Large", "Size XL"
+    explicitSize: /\bsize\s*\d+\.?\d*\b|\bsize\s*(xs|s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|6xl)\b/i,
+    // Letter sizes standalone — XS S M L XL XXL etc.
+    letterSize: /\b(xs|s|m|l|xl|xxl|xxxl|2xl|3xl|4xl|5xl|6xl)\b/i,
+    // Word sizes — Small Medium Large etc.
+    wordSize: /\b(extra\s*small|small|medium|large|extra\s*large|plus\s*size|petite|regular|slim|slim\s*fit|regular\s*fit)\b/i,
+    // UK shoe sizes — "UK 10", "UK Size 10", "UK9", or just "Size 10" in footwear context
+    ukShoe: /\buk\s*(?:size\s*)?(\d+\.?\d*)\b/i,
+    // US shoe sizes — "US 10", "US Size 10"
+    usShoe: /\bus\s*(?:size\s*)?(4|4\.5|5|5\.5|6|6\.5|7|7\.5|8|8\.5|9|9\.5|10|10\.5|11|11\.5|12|12\.5|13|13\.5|14)\b/i,
+    // EU shoe sizes — "EU 44", "EU Size 44"
+    euShoe: /\beu\s*(?:size\s*)?(3[5-9]|4[0-9]|50)\b/i,
+    // UK clothing sizes — numeric
     ukClothing: /\b(size\s*)?(4|6|8|10|12|14|16|18|20|22|24)\b/i,
-    usClothing: /\b(size\s*)?(0|2|4|6|8|10|12|14|16)\b/i,
-    euClothing: /\b(size\s*)?(32|34|36|38|40|42|44|46|48|50)\b/i,
-    ukShoe: /\b(uk\s*)(3|4|5|6|7|8|9|10|11|12|13)\b/i,
-    usShoe: /\b(us\s*)(4|5|6|7|8|9|10|11|12|13|14)\b/i,
-    euShoe: /\b(eu\s*)(35|36|37|38|39|40|41|42|43|44|45|46|47)\b/i,
+    // US clothing sizes — numeric
+    usClothing: /\b(size\s*)?(0|2|4|6|8|10|12|14|16|18)\b/i,
+    // EU clothing sizes
+    euClothing: /\b(size\s*)?(32|34|36|38|40|42|44|46|48|50|52)\b/i,
+    // Waist/leg measurements — "32W 32L", "W32 L32", "32x32"
+    waistLeg: /\b(w\s*\d{2}\s*l?\s*\d{0,2}|\d{2}\s*[wx]\s*\d{2}|\d{2}\/\d{2})\b/i,
+    // Kids age ranges
     kidsAge: /\b(\d+[-–]\d+\s*(month|months|year|years|m|y|yr)s?)\b/i,
     kidsAgeWord: /\b(newborn|infant|baby|toddler|teen|teenager)\b/i,
+    // Generic numeric size with "Size" keyword — catches "Size 10", "Size 42" etc.
+    genericNumeric: /\bsize\s+\d+\.?\d*\b/i,
 }
 
 export function detectSizeSystem(title: string): string | null {
-    for (const [system, pattern] of Object.entries(SIZE_PATTERNS)) {
+    // Priority order — most specific first
+    const priority = [
+        'explicitSize', 'ukShoe', 'usShoe', 'euShoe',
+        'waistLeg', 'ukClothing', 'usClothing', 'euClothing',
+        'letterSize', 'wordSize', 'kidsAge', 'kidsAgeWord', 'genericNumeric',
+    ]
+    for (const system of priority) {
+        const pattern = SIZE_PATTERNS[system as keyof typeof SIZE_PATTERNS]
         if (pattern.test(title)) return system
     }
+    return null
+}
+
+// ── Extract the actual size value from a title ────────────────────────────────
+// Returns the size string found e.g. "10", "XL", "32W 32L", "EU 44"
+export function extractSizeValue(title: string): string | null {
+    // Explicit "Size X" — most reliable
+    const explicit = title.match(/\bsize\s*(\d+\.?\d*|xs|s|m|l|xl|xxl|xxxl|2xl|3xl)\b/i)
+    if (explicit) return explicit[1].toUpperCase()
+
+    // UK/US/EU prefixed
+    const prefixed = title.match(/\b(uk|us|eu)\s*(?:size\s*)?(\d+\.?\d*)\b/i)
+    if (prefixed) return `${prefixed[1].toUpperCase()} ${prefixed[2]}`
+
+    // Letter sizes standalone
+    const letter = title.match(/\b(xs|s|m|l|xl|xxl|xxxl|2xl|3xl|4xl)\b/i)
+    if (letter) return letter[1].toUpperCase()
+
+    // Waist/leg
+    const waist = title.match(/\b(w?\d{2}\s*[xl]\d{2}|\d{2}\/\d{2})\b/i)
+    if (waist) return waist[1]
+
     return null
 }
 

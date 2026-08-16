@@ -2156,44 +2156,814 @@ const DICT: Record<string, Partial<Record<Category, number>>> = {
 }
 
 // ── Subcategory mapping ────────────────────────────────────────────────────────
+// ── Subcategory mapping ────────────────────────────────────────────────────────
+// Maps specific words → subcategory within their parent category
+// This teaches the engine: ring light = photography (not just electronics)
+// Format: { parentCategory: { triggerWord: 'subcategory-name' } }
+// Subcategory names use kebab-case for consistency
 const SUBCATEGORY_MAP: Partial<Record<Category, Record<string, string>>> = {
+
+    // ── ELECTRONICS ────────────────────────────────────────────────────────────
     electronics: {
-        iphone: 'phone', samsung: 'phone', huawei: 'phone', oneplus: 'phone',
-        smartphone: 'phone', mobile: 'phone', phone: 'phone',
-        laptop: 'computing', macbook: 'computing', computer: 'computing',
-        tablet: 'computing', ipad: 'computing', keyboard: 'computing',
-        gaming: 'gaming', playstation: 'gaming', xbox: 'gaming', nintendo: 'gaming',
-        airpods: 'audio', earbuds: 'audio', headphones: 'audio', speaker: 'audio',
-        camera: 'photography', tripod: 'photography', ringlight: 'photography',
-        charger: 'phone-accessories', cable: 'phone-accessories', case: 'phone-accessories',
+        // Phones
+        iphone: 'smartphones', samsung: 'smartphones', huawei: 'smartphones',
+        oneplus: 'smartphones', xiaomi: 'smartphones', pixel: 'smartphones',
+        motorola: 'smartphones', nokia: 'smartphones', oppo: 'smartphones',
+        smartphone: 'smartphones', mobile: 'smartphones', phone: 'smartphones',
+        // Tablets
+        ipad: 'tablets', tablet: 'tablets', surface: 'tablets',
+        // TV & Display
+        television: 'tv-display', tv: 'tv-display', smarttv: 'tv-display',
+        oled: 'tv-display', qled: 'tv-display', monitor: 'tv-display',
+        projector: 'tv-display', screen: 'tv-display',
+        // Phone accessories
+        charger: 'phone-accessories', cable: 'phone-accessories',
+        case: 'phone-accessories', powerbank: 'phone-accessories',
+        magsafe: 'phone-accessories', protector: 'phone-accessories',
+        cover: 'phone-accessories', lightning: 'phone-accessories',
+        // Smart home
+        alexa: 'smart-home', echo: 'smart-home', nest: 'smart-home',
+        hive: 'smart-home', tado: 'smart-home', smarthome: 'smart-home',
+        thermostat: 'smart-home', doorbell: 'smart-home', arlo: 'smart-home',
+        blink: 'smart-home', ring: 'smart-home',
+        // Networking
+        router: 'networking', modem: 'networking', ethernet: 'networking',
+        wifi: 'networking', hub: 'networking', switch: 'networking',
+        // Wearables
+        smartwatch: 'wearables', watch: 'wearables', fitbit: 'wearables',
+        garmin: 'wearables', apple: 'wearables',
     },
+
+    // ── COMPUTING ──────────────────────────────────────────────────────────────
+    computing: {
+        // Laptops
+        laptop: 'laptops', macbook: 'laptops', chromebook: 'laptops',
+        notebook: 'laptops', thinkpad: 'laptops',
+        // Desktops
+        desktop: 'desktops', imac: 'desktops', macmini: 'desktops', tower: 'desktops',
+        // Components
+        gpu: 'components', cpu: 'components', ram: 'components',
+        motherboard: 'components', nvme: 'components',
+        pcie: 'components', ddr: 'components',
+        // Storage
+        drive: 'storage', hdd: 'storage', ssd: 'storage',
+        // Peripherals
+        keyboard: 'peripherals', mouse: 'peripherals', webcam: 'peripherals',
+        headset: 'peripherals', monitor: 'peripherals',
+        // Printing
+        printer: 'printing', scanner: 'printing', ink: 'printing',
+        cartridge: 'printing', toner: 'printing',
+        // Networking
+        nas: 'networking', synology: 'networking', raspberry: 'diy-computing',
+        arduino: 'diy-computing', microbit: 'diy-computing',
+    },
+
+    // ── GAMING ─────────────────────────────────────────────────────────────────
+    gaming: {
+        // Consoles
+        playstation: 'console', ps5: 'console', ps4: 'console', ps3: 'console',
+        xbox: 'console', nintendo: 'console', switch: 'console', wii: 'console',
+        dreamcast: 'retro-gaming', atari: 'retro-gaming', sega: 'retro-gaming',
+        n64: 'retro-gaming', snes: 'retro-gaming', nes: 'retro-gaming',
+        // Handheld
+        psp: 'handheld', gba: 'handheld', gbc: 'handheld', gameboy: 'handheld',
+        // PC gaming
+        steam: 'pc-gaming', steamdeck: 'pc-gaming', gaming: 'pc-gaming',
+        // Accessories
+        controller: 'gaming-accessories', headset: 'gaming-accessories',
+        joystick: 'gaming-accessories', gamepad: 'gaming-accessories',
+        // VR
+        vr: 'virtual-reality', oculus: 'virtual-reality', quest: 'virtual-reality',
+        // Collectibles
+        amiibo: 'gaming-collectibles', pokemon: 'gaming-collectibles',
+        yugioh: 'gaming-collectibles', lorcana: 'gaming-collectibles',
+    },
+
+    // ── PHOTOGRAPHY ────────────────────────────────────────────────────────────
+    photography: {
+        // Cameras
+        dslr: 'cameras', mirrorless: 'cameras', camera: 'cameras',
+        canon: 'cameras', nikon: 'cameras', sony: 'cameras',
+        fujifilm: 'cameras', leica: 'cameras', olympus: 'cameras',
+        polaroid: 'instant-cameras', instax: 'instant-cameras',
+        // Action & drone
+        gopro: 'action-cameras', drone: 'drones', dji: 'drones', fpv: 'drones',
+        // Lenses
+        lens: 'lenses', sigma: 'lenses', tamron: 'lenses', tokina: 'lenses',
+        // Lighting — key case: ring light → photography NOT electronics
+        ringlight: 'studio-lighting', ring: 'studio-lighting',
+        godox: 'studio-lighting', profoto: 'studio-lighting',
+        flash: 'studio-lighting', strobe: 'studio-lighting',
+        softbox: 'studio-lighting', lightbox: 'studio-lighting',
+        backdrop: 'studio-lighting', studio: 'studio-lighting',
+        led: 'studio-lighting', continuous: 'studio-lighting',
+        panel: 'studio-lighting', octabox: 'studio-lighting',
+        // Support
+        tripod: 'camera-support', monopod: 'camera-support',
+        gimbal: 'camera-support', stabiliser: 'camera-support',
+        manfrotto: 'camera-support', benro: 'camera-support',
+        // Instant/film
+        film: 'film-photography', darkroom: 'film-photography',
+    },
+
+    // ── AUDIO ──────────────────────────────────────────────────────────────────
+    audio: {
+        // Headphones
+        headphones: 'headphones', earbuds: 'headphones', earphones: 'headphones',
+        airpods: 'headphones', beats: 'headphones', sennheiser: 'headphones',
+        // Speakers
+        speaker: 'speakers', soundbar: 'speakers', subwoofer: 'speakers',
+        jbl: 'speakers', bose: 'speakers', sonos: 'speakers',
+        // Hi-Fi
+        amplifier: 'hifi', receiver: 'hifi', preamp: 'hifi',
+        turntable: 'hifi', vinyl: 'hifi', hifi: 'hifi',
+        nad: 'hifi', marantz: 'hifi', denon: 'hifi',
+        // Recording
+        microphone: 'recording', condenser: 'recording', dynamic: 'recording',
+        interface: 'recording', audio: 'recording',
+    },
+
+    // ── AUTOMOTIVE ─────────────────────────────────────────────────────────────
+    automotive: {
+        // Parts
+        engine: 'car-parts', gearbox: 'car-parts', clutch: 'car-parts',
+        brake: 'car-parts', suspension: 'car-parts', alternator: 'car-parts',
+        radiator: 'car-parts', exhaust: 'car-parts', turbo: 'car-parts',
+        cambelt: 'car-parts', sparkplug: 'car-parts',
+        // Tyres & wheels
+        tyre: 'tyres-wheels', tire: 'tyres-wheels', wheel: 'tyres-wheels',
+        rim: 'tyres-wheels', alloy: 'tyres-wheels',
+        // Accessories
+        dashcam: 'car-accessories', satnav: 'car-accessories',
+        carmat: 'car-accessories', seatcover: 'car-accessories',
+        // Detailing
+        polish: 'car-care', wax: 'car-care', detailing: 'car-care',
+        chamois: 'car-care', ceramic: 'car-care',
+        // Motorcycles
+        motorbike: 'motorcycles', motorcycle: 'motorcycles',
+        moped: 'motorcycles', harley: 'motorcycles', kawasaki: 'motorcycles',
+        ducati: 'motorcycles', triumph: 'motorcycles',
+        // Caravans
+        caravan: 'caravans', motorhome: 'caravans', campervan: 'caravans',
+        // Lighting
+        headlight: 'car-lighting', taillight: 'car-lighting', foglamp: 'car-lighting',
+    },
+
+    // ── CLOTHING ───────────────────────────────────────────────────────────────
     clothing: {
+        // Tops
         shirt: 'tops', tshirt: 'tops', hoodie: 'tops', jumper: 'tops',
-        dress: 'dresses', skirt: 'dresses',
-        jeans: 'bottoms', trousers: 'bottoms', shorts: 'bottoms', leggings: 'bottoms',
+        sweatshirt: 'tops', blouse: 'tops', polo: 'tops', vest: 'tops',
+        cardigan: 'tops', turtleneck: 'tops', crewneck: 'tops',
+        // Bottoms
+        jeans: 'bottoms', trousers: 'bottoms', shorts: 'bottoms',
+        leggings: 'bottoms', joggers: 'bottoms', chinos: 'bottoms',
+        skirt: 'bottoms', culottes: 'bottoms',
+        // Dresses & jumpsuits
+        dress: 'dresses', jumpsuit: 'dresses', playsuit: 'dresses',
+        // Outerwear
         jacket: 'outerwear', coat: 'outerwear', puffer: 'outerwear',
+        parka: 'outerwear', anorak: 'outerwear', mac: 'outerwear',
+        windbreaker: 'outerwear', fleece: 'outerwear', gilet: 'outerwear',
+        // Underwear & nightwear
         bra: 'underwear', underwear: 'underwear', boxers: 'underwear',
-        swimsuit: 'swimwear', bikini: 'swimwear',
-        nike: 'sportswear', adidas: 'sportswear',
+        briefs: 'underwear', knickers: 'underwear', thong: 'underwear',
+        pyjamas: 'nightwear', robe: 'nightwear', nightdress: 'nightwear',
+        // Swimwear
+        swimsuit: 'swimwear', bikini: 'swimwear', trunks: 'swimwear',
+        // Suits & formal
+        suit: 'formal', blazer: 'formal', waistcoat: 'formal',
+        // Sportswear
+        nike: 'sportswear', adidas: 'sportswear', gymshark: 'sportswear',
+        lululemon: 'sportswear', tracksuit: 'sportswear',
+        // Accessories
+        scarf: 'accessories', hat: 'accessories', beanie: 'accessories',
+        gloves: 'accessories', belt: 'accessories',
+        // Socks & tights
+        socks: 'hosiery', tights: 'hosiery',
     },
-    sports: {
-        gym: 'gym', dumbbell: 'gym', barbell: 'gym', kettlebell: 'gym',
-        yoga: 'yoga', football: 'football', soccer: 'football',
-        tennis: 'racket-sports', badminton: 'racket-sports', squash: 'racket-sports',
-        golf: 'golf', swimming: 'swimming', cycling: 'cycling',
-        boxing: 'combat', mma: 'combat', karate: 'combat',
-        running: 'running', hiking: 'outdoor', climbing: 'outdoor',
-        skiing: 'winter-sports', snowboard: 'winter-sports',
+
+    // ── FOOTWEAR ───────────────────────────────────────────────────────────────
+    footwear: {
+        // Trainers/sneakers
+        trainers: 'trainers', sneakers: 'trainers', airforce: 'trainers',
+        airjordan: 'trainers', yeezy: 'trainers', converse: 'trainers',
+        nike: 'trainers', adidas: 'trainers', vans: 'trainers',
+        // Boots
+        boots: 'boots', chelsea: 'boots', desert: 'boots',
+        chukka: 'boots', ankle: 'boots', knee: 'boots',
+        ugg: 'boots', timberland: 'boots',
+        // Formal shoes
+        oxford: 'formal-shoes', derby: 'formal-shoes', brogues: 'formal-shoes',
+        loafers: 'formal-shoes', monk: 'formal-shoes',
+        // Heels
+        heels: 'heels', stiletto: 'heels', wedges: 'heels',
+        platform: 'heels', peeptoe: 'heels', kitten: 'heels',
+        // Casual
+        sandals: 'sandals', slippers: 'slippers', flipflops: 'sandals',
+        mule: 'sandals', espadrilles: 'sandals',
+        crocs: 'casual', moccasins: 'casual', clogs: 'casual',
+        // Sports
+        running: 'sports-shoes', hoka: 'sports-shoes', asics: 'sports-shoes',
+        brooks: 'sports-shoes', mizuno: 'sports-shoes',
+        // Safety
+        safety: 'safety-footwear', steel: 'safety-footwear', rigger: 'safety-footwear',
+        // Kids
+        wellies: 'boots',
     },
+
+    // ── JEWELLERY ──────────────────────────────────────────────────────────────
+    jewellery: {
+        // Types
+        ring: 'rings', signet: 'rings', engagement: 'rings', wedding: 'rings',
+        necklace: 'necklaces', chain: 'necklaces', pendant: 'necklaces',
+        choker: 'necklaces', locket: 'necklaces',
+        bracelet: 'bracelets', bangle: 'bracelets', anklet: 'bracelets',
+        earring: 'earrings', stud: 'earrings', hoop: 'earrings',
+        brooch: 'brooches', cufflinks: 'cufflinks',
+        // Materials
+        diamond: 'fine-jewellery', gold: 'fine-jewellery', platinum: 'fine-jewellery',
+        silver: 'silver-jewellery', sterling: 'silver-jewellery',
+        // Brands
+        pandora: 'branded-jewellery', tiffany: 'branded-jewellery',
+        swarovski: 'crystal-jewellery', crystal: 'crystal-jewellery',
+        // Stones
+        sapphire: 'gemstone', ruby: 'gemstone', emerald: 'gemstone',
+        opal: 'gemstone', topaz: 'gemstone', amethyst: 'gemstone',
+    },
+
+    // ── PETS ───────────────────────────────────────────────────────────────────
+    pets: {
+        // Dogs
+        dog: 'dogs', puppy: 'dogs', lead: 'dogs', collar: 'dogs',
+        harness: 'dogs', kennel: 'dogs', muzzle: 'dogs',
+        pedigree: 'dog-food', chappie: 'dog-food', butchers: 'dog-food',
+        // Cats
+        cat: 'cats', kitten: 'cats', catnip: 'cats', scratching: 'cats',
+        whiskas: 'cat-food', felix: 'cat-food', dreamies: 'cat-treats',
+        // Fish
+        aquarium: 'fish', fish: 'fish', aquatic: 'fish', vivarium: 'reptiles',
+        // Small animals
+        rabbit: 'small-animals', hamster: 'small-animals',
+        guinea: 'small-animals', hutch: 'small-animals',
+        // Birds
+        parrot: 'birds', bird: 'birds', cage: 'birds', perch: 'birds',
+        // Reptiles
+        reptile: 'reptiles', snake: 'reptiles', tortoise: 'reptiles',
+        // Grooming
+        grooming: 'grooming', shampoo: 'grooming', brush: 'grooming',
+        // Health
+        flea: 'pet-health', wormer: 'pet-health', microchip: 'pet-health',
+    },
+
+    // ── BABY ───────────────────────────────────────────────────────────────────
+    baby: {
+        // Travel
+        pram: 'prams-pushchairs', pushchair: 'prams-pushchairs',
+        stroller: 'prams-pushchairs', buggy: 'prams-pushchairs',
+        bugaboo: 'prams-pushchairs', graco: 'prams-pushchairs',
+        icandy: 'prams-pushchairs',
+        // Sleeping
+        cot: 'nursery', crib: 'nursery', moses: 'nursery',
+        mattress: 'nursery', sleeping: 'nursery',
+        // Feeding
+        bottle: 'feeding', steriliser: 'feeding', sterilizer: 'feeding',
+        weaning: 'feeding', formula: 'feeding', avent: 'feeding',
+        medela: 'feeding', tommee: 'feeding',
+        // Clothing
+        babygrow: 'baby-clothing', romper: 'baby-clothing',
+        muslins: 'baby-clothing', swaddle: 'baby-clothing',
+        // Toys & development
+        teether: 'baby-toys', rattle: 'baby-toys', playmat: 'baby-toys',
+        bouncer: 'bouncers-rockers',
+        // Safety
+        babygate: 'baby-safety', monitor: 'baby-safety',
+        carrier: 'carriers', sling: 'carriers',
+        // Hygiene
+        nappy: 'nappies', diaper: 'nappies', wipes: 'nappies',
+    },
+
+    // ── TOYS ───────────────────────────────────────────────────────────────────
+    toys: {
+        // Building
+        lego: 'building-toys', meccano: 'building-toys', magnetic: 'building-toys',
+        // Dolls & figures
+        doll: 'dolls', barbie: 'dolls', action: 'action-figures',
+        figurine: 'action-figures', funko: 'action-figures',
+        // Games
+        boardgame: 'board-games', puzzle: 'board-games', chess: 'board-games',
+        // RC & vehicles
+        remote: 'rc-toys', rc: 'rc-toys', drone: 'rc-toys',
+        // Outdoor
+        nerf: 'outdoor-toys', kite: 'outdoor-toys', frisbee: 'outdoor-toys',
+        // Creative
+        playdoh: 'creative-toys', slime: 'creative-toys', colouring: 'creative-toys',
+        // Licensed
+        pokemon: 'trading-cards', lorcana: 'trading-cards', digimon: 'trading-cards',
+        peppa: 'character-toys', bluey: 'character-toys', disney: 'character-toys',
+        // Ride-ons
+        scooter: 'ride-ons', bicycle: 'ride-ons', balance: 'ride-ons',
+        // Educational
+        vtech: 'educational', leapfrog: 'educational',
+    },
+
+    // ── HOME ───────────────────────────────────────────────────────────────────
     home: {
-        sofa: 'furniture', chair: 'furniture', table: 'furniture', bed: 'furniture',
-        mattress: 'bedding', pillow: 'bedding', duvet: 'bedding', blanket: 'bedding',
-        curtain: 'window', blind: 'window',
-        lamp: 'lighting', bulb: 'lighting',
-        vacuum: 'cleaning', mop: 'cleaning',
+        // Furniture
+        sofa: 'furniture', couch: 'furniture', chair: 'furniture',
+        table: 'furniture', desk: 'furniture', shelf: 'furniture',
+        cabinet: 'furniture', wardrobe: 'furniture', sideboard: 'furniture',
+        bookcase: 'furniture', ottoman: 'furniture',
+        // Bedroom
+        bed: 'bedroom', mattress: 'bedroom', pillow: 'bedding',
+        duvet: 'bedding', blanket: 'bedding', headboard: 'bedroom',
+        // Window
+        curtain: 'window-treatments', blind: 'window-treatments',
+        // Lighting
+        lamp: 'lighting', chandelier: 'lighting', spotlight: 'lighting',
+        downlight: 'lighting', bulb: 'lighting', dimmer: 'lighting',
+        // Bathroom
+        toilet: 'bathroom', basin: 'bathroom', shower: 'bathroom',
+        bath: 'bathroom', towel: 'bathroom', towelrail: 'bathroom',
+        // Rugs & flooring
+        rug: 'rugs-flooring', carpet: 'rugs-flooring', tile: 'rugs-flooring',
+        // Storage
+        basket: 'storage', box: 'storage', organiser: 'storage',
+        // Décor
+        mirror: 'decor', clock: 'decor', vase: 'decor', candle: 'decor',
+        frame: 'decor', artwork: 'decor',
+        // Heating & cooling
+        heater: 'heating-cooling', radiator: 'heating-cooling', fan: 'heating-cooling',
+        aircon: 'heating-cooling', stove: 'heating-cooling',
+        // Cleaning
+        vacuum: 'cleaning', mop: 'cleaning', dyson: 'cleaning',
+        // Appliances
         kettle: 'kitchen-appliances', toaster: 'kitchen-appliances',
+        microwave: 'kitchen-appliances', fridge: 'large-appliances',
+        washer: 'large-appliances', dryer: 'large-appliances',
+    },
+
+    // ── GARDEN ─────────────────────────────────────────────────────────────────
+    garden: {
+        // Lawn care
+        mower: 'lawn-care', strimmer: 'lawn-care', scarifier: 'lawn-care',
+        aerator: 'lawn-care', edger: 'lawn-care',
+        // Hand tools
+        spade: 'hand-tools', fork: 'hand-tools', rake: 'hand-tools',
+        trowel: 'hand-tools', secateurs: 'hand-tools', loppers: 'hand-tools',
+        shears: 'hand-tools', pruner: 'hand-tools',
+        // Watering
+        hose: 'watering', sprinkler: 'watering', watering: 'watering',
+        waterbutt: 'watering',
+        // Planting
+        pot: 'planting', planter: 'planting', seed: 'planting',
+        compost: 'planting', fertiliser: 'planting', growbag: 'planting',
+        // Structure
+        greenhouse: 'garden-structures', polytunnel: 'garden-structures',
+        pergola: 'garden-structures', gazebo: 'garden-structures',
+        trellis: 'garden-structures', fence: 'garden-structures',
+        // Outdoor living
+        barbecue: 'outdoor-living', bbq: 'outdoor-living', smoker: 'outdoor-living',
+        chiminea: 'outdoor-living', firepit: 'outdoor-living',
+        parasol: 'outdoor-living', furniture: 'outdoor-living',
+        // Wildlife
+        birdfeeder: 'wildlife', birdbath: 'wildlife', hedgehog: 'wildlife',
+        // Decking & paving
+        decking: 'hard-landscaping', paving: 'hard-landscaping',
+        gravel: 'hard-landscaping', bark: 'hard-landscaping',
+    },
+
+    // ── TOOLS ──────────────────────────────────────────────────────────────────
+    tools: {
+        // Power tools
+        drill: 'power-tools', saw: 'power-tools', sander: 'power-tools',
+        grinder: 'power-tools', jigsaw: 'power-tools', router: 'power-tools',
+        dewalt: 'power-tools', makita: 'power-tools', bosch: 'power-tools',
+        milwaukee: 'power-tools', ryobi: 'power-tools', hikoki: 'power-tools',
+        festool: 'power-tools', cordless: 'power-tools',
+        // Hand tools
+        hammer: 'hand-tools', screwdriver: 'hand-tools', wrench: 'hand-tools',
+        spanner: 'hand-tools', pliers: 'hand-tools', chisel: 'hand-tools',
+        // Measuring
+        level: 'measuring', tape: 'measuring', laser: 'measuring',
+        // Plumbing
+        plumbing: 'plumbing', pipe: 'plumbing', fitting: 'plumbing',
+        // Welding
+        welding: 'welding', soldering: 'welding',
+        // Storage
+        toolbox: 'tool-storage', workbench: 'tool-storage',
+        // Safety
+        clamp: 'workholding',
+    },
+
+    // ── KITCHEN ────────────────────────────────────────────────────────────────
+    kitchen: {
+        // Cooking
+        pan: 'cookware', wok: 'cookware', casserole: 'cookware',
+        knife: 'knives', chopping: 'knives',
+        // Baking
+        baking: 'bakeware', tin: 'bakeware', mould: 'bakeware',
+        // Small appliances
+        blender: 'small-appliances', mixer: 'small-appliances',
+        airfryer: 'small-appliances', slowcooker: 'small-appliances',
+        instantpot: 'small-appliances', nutribullet: 'small-appliances',
+        // Coffee
+        nespresso: 'coffee', cafetiere: 'coffee', aeropress: 'coffee',
+        chemex: 'coffee', delonghi: 'coffee', jura: 'coffee',
+        // Drinkware
+        mug: 'drinkware', cup: 'drinkware', glass: 'drinkware',
+        flask: 'drinkware', bottle: 'drinkware',
+        // Tableware
+        plate: 'tableware', bowl: 'tableware', cutlery: 'tableware',
+        // Storage
+        tupperware: 'food-storage', lunchbox: 'food-storage',
+        // Scales & measuring
+        scales: 'measuring', thermometer: 'measuring',
+    },
+
+    // ── SPORTS ─────────────────────────────────────────────────────────────────
+    sports: {
+        // Gym
+        dumbbell: 'gym-weights', barbell: 'gym-weights', kettlebell: 'gym-weights',
+        bench: 'gym-equipment', treadmill: 'cardio', rowing: 'cardio',
+        // Ball sports
+        football: 'football', soccer: 'football', basketball: 'basketball',
+        cricket: 'cricket', baseball: 'baseball', rugby: 'rugby',
+        // Racket sports
+        tennis: 'racket-sports', badminton: 'racket-sports',
+        squash: 'racket-sports', pingpong: 'racket-sports',
+        // Golf
+        golf: 'golf', titleist: 'golf', callaway: 'golf',
+        // Combat
+        boxing: 'combat-sports', mma: 'combat-sports', karate: 'combat-sports',
+        judo: 'combat-sports', wrestling: 'combat-sports',
+        // Yoga & wellness
+        yoga: 'yoga-pilates', pilates: 'yoga-pilates', meditation: 'yoga-pilates',
+        // Water sports
+        swimming: 'water-sports', surfboard: 'water-sports', kayak: 'water-sports',
+        wetsuit: 'water-sports', scuba: 'water-sports',
+        // Winter sports
+        skiing: 'winter-sports', snowboard: 'winter-sports',
+        // Running
+        running: 'running', marathon: 'running',
+        // Outdoor
+        hiking: 'outdoor-sports', climbing: 'outdoor-sports',
+        // Target sports
+        archery: 'target-sports', darts: 'target-sports',
+        // Snooker & billiards
+        snooker: 'snooker-pool', billiards: 'snooker-pool', cue: 'snooker-pool',
+    },
+
+    // ── HEALTH ─────────────────────────────────────────────────────────────────
+    health: {
+        // Vitamins & supplements
+        vitamin: 'vitamins-supplements', supplement: 'vitamins-supplements',
+        omega: 'vitamins-supplements', probiotic: 'vitamins-supplements',
+        collagen: 'vitamins-supplements', turmeric: 'vitamins-supplements',
+        magnesium: 'vitamins-supplements', zinc: 'vitamins-supplements',
+        // Medical devices
+        cpap: 'medical-devices', nebuliser: 'medical-devices',
+        oximeter: 'medical-devices', thermometer: 'medical-devices',
+        bloodpressure: 'medical-devices', defibrillator: 'medical-devices',
+        // Mobility
+        wheelchair: 'mobility', crutches: 'mobility', rollator: 'mobility',
+        zimmer: 'mobility', walking: 'mobility', stairlift: 'mobility',
+        // Braces & supports
+        brace: 'braces-supports', compression: 'braces-supports',
+        support: 'braces-supports', insoles: 'braces-supports',
+        // Dental
+        dental: 'dental', toothbrush: 'dental', whitening: 'dental',
+        // Eye care
+        glasses: 'eye-care', contact: 'eye-care', lens: 'eye-care',
+        // Massage & recovery
+        massager: 'massage-recovery', theragun: 'massage-recovery',
+        foam: 'massage-recovery', tens: 'massage-recovery',
+        // Family health
+        pregnancy: 'family-health', fertility: 'family-health',
+        ovulation: 'family-health',
+    },
+
+    // ── BEAUTY ─────────────────────────────────────────────────────────────────
+    beauty: {
+        // Skincare
+        moisturiser: 'skincare', serum: 'skincare', cleanser: 'skincare',
+        toner: 'skincare', spf: 'skincare', retinol: 'skincare',
+        hyaluronic: 'skincare', niacinamide: 'skincare', cerave: 'skincare',
+        // Makeup
+        foundation: 'makeup', concealer: 'makeup', mascara: 'makeup',
+        eyeliner: 'makeup', eyeshadow: 'makeup', lipstick: 'makeup',
+        primer: 'makeup', contour: 'makeup', blush: 'makeup',
+        // Hair
+        shampoo: 'haircare', conditioner: 'haircare', hairdryer: 'haircare',
+        straightener: 'hair-styling', curler: 'hair-styling',
+        ghd: 'hair-styling', babyliss: 'hair-styling',
+        // Fragrance
+        perfume: 'fragrance', cologne: 'fragrance', eau: 'fragrance',
+        // Body
+        deodorant: 'body-care', razor: 'shaving', trimmer: 'shaving',
+        // Nails
+        nail: 'nails', gel: 'nails', shellac: 'nails', acrylic: 'nails',
+        // Tools & devices
+        epilator: 'hair-removal', ipl: 'hair-removal', laser: 'hair-removal',
+        guasha: 'beauty-tools', dermaroller: 'beauty-tools',
+        // Brushes
+        brush: 'brushes-applicators', sponge: 'brushes-applicators',
+    },
+
+    // ── COLLECTIBLES ───────────────────────────────────────────────────────────
+    collectibles: {
+        // Coins & stamps
+        coin: 'coins', stamp: 'stamps', banknote: 'coins', bullion: 'coins',
+        sovereign: 'coins', numismatic: 'coins',
+        // Cards
+        pokemon: 'trading-cards', yugioh: 'trading-cards', mtg: 'trading-cards',
+        lorcana: 'trading-cards', topps: 'sports-cards', panini: 'sports-cards',
+        // Toys & figures
+        diecast: 'diecast', dinky: 'diecast', corgi: 'diecast', matchbox: 'diecast',
+        funko: 'pop-figures', nendoroid: 'pop-figures', figma: 'pop-figures',
+        warhammer: 'miniatures', citadel: 'miniatures',
+        // Comics & media
+        comic: 'comics-books', manga: 'comics-books',
+        // Memorabilia
+        signed: 'sports-memorabilia', autograph: 'memorabilia',
+        memorabilia: 'memorabilia',
+        // Vintage
+        vintage: 'vintage-antique', antique: 'vintage-antique',
+        ephemera: 'paper-ephemera', postcard: 'paper-ephemera',
+        // Militaria
+        militaria: 'militaria', medal: 'militaria', badge: 'militaria',
+        // Breweriana
+        breweriana: 'breweriana', railwayana: 'railwayana',
+    },
+
+    // ── MUSIC ──────────────────────────────────────────────────────────────────
+    music: {
+        // Guitars
+        guitar: 'guitars', fender: 'guitars', gibson: 'guitars',
+        stratocaster: 'guitars', telecaster: 'guitars', epiphone: 'guitars',
+        bass: 'bass-guitars', ukulele: 'ukulele', banjo: 'banjo',
+        // Keyboards & piano
+        piano: 'keyboards-pianos', keyboard: 'keyboards-pianos',
+        synthesiser: 'keyboards-pianos', korg: 'keyboards-pianos',
+        // Drums
+        drum: 'drums', snare: 'drums', cymbal: 'drums', hihat: 'drums',
+        // Wind instruments
+        trumpet: 'brass', saxophone: 'woodwind', flute: 'woodwind',
+        clarinet: 'woodwind', oboe: 'woodwind',
+        // String instruments
+        violin: 'strings', cello: 'strings', viola: 'strings',
+        // DJ & production
+        dj: 'dj-equipment', turntable: 'dj-equipment', mixer: 'dj-equipment',
+        midi: 'music-production', interface: 'music-production',
+        // Amplifiers & effects
+        amplifier: 'amplifiers', amp: 'amplifiers', cabinet: 'amplifiers',
+        pedal: 'effects-pedals', pedalboard: 'effects-pedals',
+        // Accessories
+        capo: 'accessories', pick: 'accessories', plectrum: 'accessories',
+        strings: 'accessories', strap: 'accessories',
+    },
+
+    // ── ARTS & CRAFTS ──────────────────────────────────────────────────────────
+    arts: {
+        // Painting
+        paint: 'painting', canvas: 'painting', easel: 'painting',
+        acrylic: 'painting', watercolour: 'painting', oil: 'painting',
+        // Drawing
+        pencil: 'drawing', charcoal: 'drawing', graphite: 'drawing',
+        sketchbook: 'drawing',
+        // Knitting & crochet
+        yarn: 'knitting-crochet', wool: 'knitting-crochet',
+        knitting: 'knitting-crochet', crochet: 'knitting-crochet',
+        // Sewing & embroidery
+        sewing: 'sewing', fabric: 'sewing', embroidery: 'needlecraft',
+        cross: 'needlecraft',
+        // Resin & sculpting
+        resin: 'resin-craft', epoxy: 'resin-craft',
+        clay: 'sculpting', pottery: 'sculpting', polymer: 'sculpting',
+        // Cutting & vinyl
+        cricut: 'die-cutting', silhouette: 'die-cutting', vinyl: 'die-cutting',
+        stencil: 'stencilling',
+        // Candle & soap
+        candlemaking: 'candle-soap', soapmaking: 'candle-soap',
+        // Pyrography
+        pyrography: 'pyrography', woodburning: 'pyrography',
+        // Jewellery making
+        beads: 'jewellery-making', wire: 'jewellery-making',
+        macrame: 'textile-crafts', weaving: 'textile-crafts', felting: 'textile-crafts',
+    },
+
+    // ── BOOKS ──────────────────────────────────────────────────────────────────
+    books: {
+        // Fiction genres
+        thriller: 'fiction', mystery: 'fiction', horror: 'fiction',
+        romance: 'fiction', fantasy: 'fiction', scifi: 'fiction',
+        // Non-fiction
+        biography: 'non-fiction', autobiography: 'non-fiction', memoir: 'non-fiction',
+        cookbook: 'cookbooks',
+        // Children's
+        childrens: 'childrens-books', picture: 'childrens-books',
+        board: 'childrens-books',
+        // Educational
+        textbook: 'textbooks', revision: 'textbooks',
+        // Formats
+        hardback: 'book-formats', paperback: 'book-formats',
+        // Media
+        dvd: 'dvd-bluray', bluray: 'dvd-bluray', cd: 'music-media',
+        vinyl: 'music-media', vhs: 'dvd-bluray',
+        // Magazines
+        magazine: 'magazines', comic: 'comics',
+    },
+
+    // ── DIGITAL ────────────────────────────────────────────────────────────────
+    digital: {
+        // Software
+        windows: 'software', microsoft: 'software', adobe: 'software',
+        office: 'software', antivirus: 'software', norton: 'software',
+        // Games
+        steam: 'game-keys', gamepass: 'subscriptions', psn: 'subscriptions',
+        // Subscriptions
+        spotify: 'subscriptions', netflix: 'subscriptions',
+        // Design
+        canva: 'design-resources', font: 'design-resources',
+        template: 'templates', mockup: 'templates',
+        // Printables
+        printable: 'printables', pdf: 'printables',
+    },
+
+    // ── TRAVEL ─────────────────────────────────────────────────────────────────
+    travel: {
+        // Luggage
+        suitcase: 'luggage', samsonite: 'luggage', rimowa: 'luggage',
+        // Bags
+        backpack: 'travel-bags', rucksack: 'travel-bags', holdall: 'travel-bags',
+        duffel: 'travel-bags', weekender: 'travel-bags',
+        // Camping
+        tent: 'camping', sleeping: 'camping', camping: 'camping',
+        hammock: 'camping',
+        // Travel accessories
+        adapter: 'travel-accessories', padlock: 'travel-accessories',
+        packingcube: 'travel-accessories', passport: 'travel-accessories',
+        // Outdoor clothing
+        arcteryx: 'outdoor-clothing', berghaus: 'outdoor-clothing',
+        osprey: 'outdoor-clothing', rab: 'outdoor-clothing',
+    },
+
+    // ── FOOD & DRINK ───────────────────────────────────────────────────────────
+    food: {
+        // Hot drinks
+        coffee: 'hot-drinks', tea: 'hot-drinks', matcha: 'hot-drinks',
+        // Alcohol
+        whisky: 'spirits', whiskey: 'spirits', gin: 'spirits',
+        vodka: 'spirits', rum: 'spirits', bourbon: 'spirits',
+        wine: 'wine', prosecco: 'wine', champagne: 'wine',
+        beer: 'beer-cider', ale: 'beer-cider', stout: 'beer-cider',
+        cider: 'beer-cider',
+        // Chocolate & sweets
+        chocolate: 'confectionery', fudge: 'confectionery',
+        toffee: 'confectionery', truffle: 'confectionery',
+        // Hampers
+        hamper: 'hampers',
+        // Health food
+        vegan: 'health-food', organic: 'health-food',
+        protein: 'sports-nutrition', shake: 'sports-nutrition',
+    },
+
+    // ── PARTY ──────────────────────────────────────────────────────────────────
+    party: {
+        // Balloons
+        balloon: 'balloons', helium: 'balloons', foil: 'balloons',
+        // Decorations
+        banner: 'decorations', bunting: 'decorations',
+        confetti: 'decorations', streamers: 'decorations',
+        // Halloween
+        halloween: 'halloween', costume: 'costumes', mask: 'costumes',
+        // Christmas
+        christmas: 'christmas', tinsel: 'christmas', bauble: 'christmas',
+        advent: 'christmas', wreath: 'christmas',
+        // Tableware
+        tablecloth: 'tableware', napkin: 'tableware',
+        // Giftwrap
+        wrapping: 'gift-wrap', ribbon: 'gift-wrap', gifttag: 'gift-wrap',
+    },
+
+    // ── EQUESTRIAN ─────────────────────────────────────────────────────────────
+    equestrian: {
+        // Saddles & tack
+        saddle: 'saddles', bridle: 'bridles', numnah: 'saddle-pads',
+        saddlepad: 'saddle-pads', girth: 'girths',
+        stirrup: 'stirrups', bit: 'bits',
+        breastplate: 'schooling-equipment', martingale: 'schooling-equipment',
+        lunge: 'schooling-equipment', whip: 'schooling-equipment',
+        // Headgear
+        browband: 'headcollars-headgear', noseband: 'headcollars-headgear',
+        headcollar: 'headcollars-headgear', leadrope: 'headcollars-headgear',
+        // Rugs
+        rug: 'rugs', weatherbeeta: 'rugs', rambo: 'rugs', amigo: 'rugs',
+        horseware: 'rugs',
+        // Rider clothing
+        jodhpur: 'rider-clothing', riding: 'rider-clothing',
+        helmet: 'riding-hats',
+        // Boots
+        boot: 'boots', tendon: 'boots', overreach: 'boots',
+        // Grooming
+        grooming: 'grooming', hoofpick: 'grooming', mane: 'grooming',
+        // Stable
+        haynet: 'stable-supplies', bucket: 'stable-supplies',
+        // Brands
+        lemieux: 'saddle-pads', shires: 'equestrian-brands',
+        wintec: 'saddles',
+        // Health
+        supplement: 'horse-supplements', electrolyte: 'horse-supplements',
+        hoof: 'hoof-care',
+    },
+
+
+    // ── FISHING ────────────────────────────────────────────────────────────────
+    fishing: {
+        // Rods & reels
+        rod: 'rods-reels', reel: 'rods-reels',
+        daiwa: 'rods-reels', shimano: 'rods-reels', abu: 'rods-reels',
+        penn: 'rods-reels', okuma: 'rods-reels',
+        // Terminal tackle
+        hook: 'terminal-tackle', swivel: 'terminal-tackle',
+        lure: 'terminal-tackle', float: 'terminal-tackle',
+        // Carp fishing
+        carp: 'carp-fishing', bivvy: 'carp-fishing', boilie: 'carp-fishing',
+        korda: 'carp-fishing', nash: 'carp-fishing', fox: 'carp-fishing',
+        bankstick: 'carp-fishing', buzzer: 'carp-fishing',
+        hooklink: 'carp-fishing', spod: 'carp-fishing',
+        // Fly fishing
+        fly: 'fly-fishing', flytying: 'fly-fishing',
+        // Sea fishing
+        pike: 'predator-fishing', catfish: 'predator-fishing',
+        // Bait
+        bait: 'bait', groundbait: 'bait', maggot: 'bait', pellet: 'bait',
+        // Clothing & accessories
+        waders: 'fishing-clothing', jacket: 'fishing-clothing',
+        // Bite indication
+        indicator: 'bite-indication', swinger: 'bite-indication',
+        // Shelter
+        trakker: 'fishing-shelter', wychwood: 'fishing-shelter',
+        // Fish finder
+        fishfinder: 'fish-finders', baitboat: 'fish-finders',
+    },
+
+
+    // ── CYCLING ────────────────────────────────────────────────────────────────
+    cycling: {
+        // Bike types
+        bike: 'bikes', bicycle: 'bikes', ebike: 'bikes',
+        mtb: 'mountain-bikes', roadbike: 'road-bikes', bmx: 'bmx',
+        fixie: 'road-bikes', gravel: 'road-bikes',
+        specialized: 'bikes', trek: 'bikes', giant: 'bikes',
+        cannondale: 'bikes', bianchi: 'bikes',
+        // Components
+        derailleur: 'components', crankset: 'components',
+        cassette: 'components', chainring: 'components',
+        shimano: 'components', sram: 'components', campagnolo: 'components',
+        // Wheels
+        wheel: 'wheels', tyre: 'tyres', tube: 'tyres',
+        mavic: 'wheels', zipp: 'wheels',
+        // Saddle & bars
+        saddle: 'saddle-bars', handlebar: 'saddle-bars',
+        stem: 'saddle-bars', seatpost: 'saddle-bars',
+        // Clothing
+        jersey: 'cycling-clothing', bib: 'cycling-clothing',
+        shorts: 'cycling-clothing', gilet: 'cycling-clothing',
+        overshoe: 'cycling-clothing', rapha: 'cycling-clothing',
+        castelli: 'cycling-clothing',
+        // Accessories
+        helmet: 'helmets', bikelight: 'lights', bikelock: 'security',
+        bikepump: 'tools-maintenance', garmin: 'computers-gps',
+        wahoo: 'computers-gps', zwift: 'turbo-trainers',
+        turbotrainer: 'turbo-trainers', tacx: 'turbo-trainers',
+        // Bags
+        pannier: 'bike-bags', bikebag: 'bike-bags',
+    },
+
+
+    // ── OFFICE ─────────────────────────────────────────────────────────────────
+    office: {
+        // Furniture
+        desk: 'office-furniture', chair: 'office-furniture',
+        standing: 'office-furniture',
+        // Stationery
+        pen: 'stationery', pencil: 'stationery', ruler: 'stationery',
+        stapler: 'stationery', scissors: 'stationery',
+        // Filing
+        folder: 'filing', binder: 'filing', ringbinder: 'filing',
+        // Organisation
+        planner: 'planners-diaries', diary: 'planners-diaries',
+        calendar: 'planners-diaries',
+        // Paper
+        paper: 'paper', envelope: 'paper', jiffy: 'packaging',
+        // Whiteboards
+        whiteboard: 'presentation', flipchart: 'presentation',
+        // Shredders
+        shredder: 'office-machines', laminator: 'office-machines',
     },
 }
+
 
 // ── Main detection function ───────────────────────────────────────────────────
 export function detectCategoryV2(title: string): CategoryResult {
@@ -2225,12 +2995,24 @@ export function detectCategoryV2(title: string): CategoryResult {
         if (score > bestScore) { bestScore = score; bestCat = cat }
     }
 
-    // Find subcategory
+    // Find subcategory — check bigrams first (more specific), then single words
+    // e.g. "ring light" → studio-lighting, "air fryer" → small-appliances
     let subcategory: string = bestCat
     const subMap = SUBCATEGORY_MAP[bestCat]
     if (subMap) {
-        for (const word of words) {
-            if (subMap[word]) { subcategory = subMap[word]; break }
+        // Check bigrams first (2-word phrases are more specific)
+        let found = false
+        for (let i = 0; i < words.length - 1; i++) {
+            const bigram = `${words[i]}${words[i + 1]}`   // joined bigram e.g. 'ringlight'
+            const spaced = `${words[i]} ${words[i + 1]}`  // spaced bigram e.g. 'ring light'
+            if (subMap[bigram]) { subcategory = subMap[bigram]; found = true; break }
+            if (subMap[spaced]) { subcategory = subMap[spaced]; found = true; break }
+        }
+        // Fall back to single words
+        if (!found) {
+            for (const word of words) {
+                if (subMap[word]) { subcategory = subMap[word]; break }
+            }
         }
     }
 

@@ -38,8 +38,8 @@ import {
   Shield, LayoutDashboard, Search, Type, Calculator,
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
-  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock,
-  Globe, History,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
+  Globe, History, RotateCcw,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -64,6 +64,7 @@ const NAV_ITEMS = [
   { icon: Search, label: 'Product Research', href: '/dashboard/product-research' },
   { icon: Type, label: 'Title Builder', href: '/dashboard/title-builder' },
   { icon: Calculator, label: 'Profit Calculator', href: '/dashboard/tools/profit-calculator' },
+  { icon: ListChecks, label: 'Listings', href: '/dashboard/listing-generator' },
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
   { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
   { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
@@ -76,9 +77,38 @@ const KILL_SWITCH_MAP: Record<string, string> = {
   'Title Builder': 'Title Builder',
   'Product Research': 'eBay Product Research Tool',
   'Profit Calculator': 'Profit Calculator',
+  'Listings': 'Listing Generator',
   'Inventory': 'Inventory Manager',
   'Competitor Research': 'Competitor Research',
   'Orders': 'Orders Management',
+}
+
+// ── ResetButton — spins icon on click ─────────────────────────
+function ResetButton() {
+  const [spinning, setSpinning] = useState(false)
+  const [deg, setDeg] = useState(0)
+  function handleReset() {
+    if (spinning) return
+    setSpinning(true)
+    setDeg(prev => prev - 360)
+    window.dispatchEvent(new CustomEvent('tb:reset'))
+    setTimeout(() => setSpinning(false), 600)
+  }
+  return (
+    <button
+      title="Reset Title Builder"
+      onClick={handleReset}
+      className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+      style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
+      <RotateCcw
+        size={15}
+        style={{
+          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: `rotate(${deg}deg)`,
+        }}
+      />
+    </button>
+  )
 }
 
 // ── SearchBar — handles focus border state ─────────────────────
@@ -88,31 +118,49 @@ function SearchBar({ onGenerate, searchInput, setSearchInput }: {
   setSearchInput: (v: string) => void
 }) {
   const [focused, setFocused] = useState(false)
+  const [btnHovered, setBtnHovered] = useState(false)
+
   return (
-    <div className="flex items-center h-9 rounded-lg border overflow-hidden w-full transition-all duration-150"
+    <div className="flex items-center w-full h-9 rounded-lg border overflow-hidden transition-all duration-150"
       style={{
-        borderColor: focused ? '#7530fb' : '#ede9fe',
-        backgroundColor: '#f8f7ff',
-        boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
+        borderColor: focused ? '#7530fb' : '#e5e0f5',
+        backgroundColor: '#ffffff',
+        boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.10)' : 'none',
       }}>
-      <div className="flex items-center px-3">
-        <Search size={14} style={{ color: focused ? '#7530fb' : '#9ca3af' }} />
+
+      {/* Search icon */}
+      <div className="flex items-center px-2.5 shrink-0">
+        <Search size={13} style={{ color: focused ? '#7530fb' : '#c4b5fd' }} />
       </div>
+
+      {/* Input */}
       <input
         value={searchInput}
         onChange={e => setSearchInput(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && onGenerate()}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder="Paste Competitor ID or Keyword..."
+        placeholder="Paste a keyword or competitor ID..."
         className="flex-1 h-full bg-transparent text-[13px] outline-none"
-        style={{ color: '#1e1535', outline: 'none', boxShadow: 'none' }}
+        style={{ color: '#1e1535', caretColor: '#7530fb' }}
       />
-      <button onClick={onGenerate}
-        className="px-4 h-full text-[13px] font-bold"
-        style={{ backgroundColor: '#7530fb', color: '#ffffff' }}>
+
+      {/* Divider */}
+      <div style={{ width: 1, height: '60%', backgroundColor: '#e5e0f5', flexShrink: 0 }} />
+
+      {/* Generate button — inside the pill */}
+      <button
+        onClick={onGenerate}
+        onMouseEnter={() => setBtnHovered(true)}
+        onMouseLeave={() => setBtnHovered(false)}
+        className="h-full px-4 text-[13px] font-bold shrink-0 transition-all duration-150"
+        style={{
+          backgroundColor: btnHovered ? '#7530fb' : 'transparent',
+          color: btnHovered ? '#ffffff' : '#7530fb',
+        }}>
         Generate
       </button>
+
     </div>
   )
 }
@@ -855,16 +903,12 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             {/* Title Builder extra icons — sit between market selector and notification bell */}
             {pathname.startsWith('/dashboard/title-builder') && (
               <>
-                <button title="History"
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
-                  style={{ borderColor: '#ede9fe', color: '#9ca3af' }}>
-                  <History size={15} />
-                </button>
+                <ResetButton />
                 <div className="w-1.5" />
                 <button title="Settings"
                   onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
                   className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
-                  style={{ borderColor: '#ede9fe', color: '#9ca3af' }}>
+                  style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
                   <Settings size={15} />
                 </button>
                 <div className="w-3" />
