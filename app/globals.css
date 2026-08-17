@@ -119,10 +119,23 @@ body {
   color: var(--dark);
 }
 
-/* ─── Focus Ring ─────────────────────────────────────────────────────────── */
+/* ─── Search Input ───────────────────────────────────────────────────────── */
+.search-input {
+  border: 1px solid #ede9fe;
+  outline: none;
+  box-shadow: none;
+}
+
+.search-input:focus {
+  border: 1px solid #7530fb;
+  outline: none;
+  box-shadow: none;
+}
+
+:focus,
 :focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* ─── Utility Classes ─────────────────────────────────────────────────────── */
@@ -209,6 +222,19 @@ body {
     outline: none;
     border-color: var(--border-focus);
     box-shadow: 0 0 0 3px rgba(117, 48, 251, 0.12);
+  }
+
+  /* Remove browser default focus ring from all inputs and buttons */
+  input:focus,
+  input:focus-visible,
+  select:focus,
+  select:focus-visible,
+  textarea:focus,
+  textarea:focus-visible,
+  button:focus,
+  button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
   }
 }
 

@@ -39,7 +39,7 @@ import {
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
-  Globe, History, RotateCcw,
+  Globe, History, RotateCcw, Upload,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -194,6 +194,43 @@ function ExcludeInput({ exclude, setExclude }: {
           <X size={13} />
         </button>
       )}
+    </div>
+  )
+}
+
+// ── ListingStudioTopBar ────────────────────────────────────────
+// Renders inside the shared dashboard header when on /dashboard/listing-generator
+function ListingStudioTopBar() {
+  return (
+    <div className="flex items-center gap-3 flex-1 min-w-0">
+      {/* Brand + page name */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: '#f3eeff' }}>
+          <ListChecks size={15} style={{ color: '#7530fb' }} />
+        </div>
+        <span className="text-[17px] font-extrabold" style={{ color: '#7530fb', fontFamily: 'Syne, sans-serif' }}>
+          Listing Studio
+        </span>
+      </div>
+
+      <div className="flex-1" />
+
+      {/* Action buttons */}
+      <button
+        onClick={() => window.dispatchEvent(new CustomEvent('lg:bulkUpload'))}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+        style={{ backgroundColor: '#f3eeff', color: '#7530fb', border: '1px solid #ede9fe', fontFamily: 'DM Sans, sans-serif' }}>
+        <Upload size={14} />
+        Bulk Upload
+      </button>
+      <button
+        onClick={() => window.dispatchEvent(new CustomEvent('lg:newListing'))}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+        style={{ backgroundColor: '#b8fa33', color: '#1e1535', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 4px 12px rgba(184,250,51,0.3)' }}>
+        <Zap size={14} />
+        List New Item
+      </button>
     </div>
   )
 }
@@ -701,6 +738,70 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       {showNotifPanel && (
         <NotificationsPanelOverlay onClose={() => setShowNotifPanel(false)} forceUser={isUserMode} />
       )}
+
+      {/* -- TOP NAVBAR (FULL WIDTH) -- */}
+      <header className="h-[60px] flex items-center px-6 shrink-0 border-b z-30"
+        style={{ borderColor: '#ede9fe', backgroundColor: '#ffffff' }}>
+        <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
+          <Menu size={28} />
+        </button>
+
+        {pathname.startsWith('/dashboard/title-builder') ? (
+          /* ── Title Builder top bar ── */
+          <TitleBuilderTopBar pathname={pathname} />
+        ) : pathname.startsWith('/dashboard/listing-generator') ? (
+          /* ── Listing Studio top bar ── */
+          <ListingStudioTopBar />
+        ) : (
+          /* ── Default greeting ── */
+          (() => {
+            const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
+            const hour = new Date().getHours()
+            const isMain = pathname === '/dashboard'
+            const isOrders = pathname === '/dashboard/orders'
+            const isAdminP = pathname.startsWith('/dashboard/admin')
+            const greeting = isMain
+              ? (hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
+                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
+                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                    : `Good night, ${firstName}!`)
+              : isOrders ? `Welcome back, ${firstName}!`
+                : isAdminP ? (hour >= 17 && hour < 21 ? `Good evening, ${firstName}!` : `Working late, ${firstName}!`)
+                  : null
+            return greeting ? (
+              <div className="flex flex-col min-w-0">
+                <span className="font-extrabold tracking-tight truncate"
+                  style={{ fontSize: 22, color: '#1e1535', fontFamily: 'Inter, sans-serif' }}>
+                  {greeting}
+                </span>
+              </div>
+            ) : <div className="flex-1" />
+          })()
+        )}
+
+        {!pathname.startsWith('/dashboard/title-builder') && !pathname.startsWith('/dashboard/listing-generator') && <div className="flex-1" />}
+
+        {/* Title Builder extra icons */}
+        {pathname.startsWith('/dashboard/title-builder') && (
+          <>
+            <ResetButton />
+            <div className="w-1.5" />
+            <button title="Settings"
+              onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+              style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
+              <Settings size={15} />
+            </button>
+            <div className="w-3" />
+          </>
+        )}
+
+        <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
+        <div className="w-[15px]" />
+        <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
+      </header>
+
+      {/* -- SIDEBAR + CONTENT ROW -- */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
@@ -860,65 +961,6 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
 
         {/* -- MAIN CONTENT -- */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
-
-          {/* -- TOP NAVBAR -- */}
-          <header className="h-[60px] flex items-center px-6 shrink-0 border-b"
-            style={{ borderColor: '#ede9fe', backgroundColor: '#ffffff' }}>
-            <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
-              <Menu size={28} />
-            </button>
-
-            {pathname.startsWith('/dashboard/title-builder') ? (
-              /* ── Title Builder top bar ── */
-              <TitleBuilderTopBar pathname={pathname} />
-            ) : (
-              /* ── Default greeting (main dashboard only shows time greeting) ── */
-              (() => {
-                const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
-                const hour = new Date().getHours()
-                const isMain = pathname === '/dashboard'
-                const isOrders = pathname === '/dashboard/orders'
-                const isAdminP = pathname.startsWith('/dashboard/admin')
-                const greeting = isMain
-                  ? (hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
-                    : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
-                      : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
-                        : `Good night, ${firstName}!`)
-                  : isOrders ? `Welcome back, ${firstName}!`
-                    : isAdminP ? (hour >= 17 && hour < 21 ? `Good evening, ${firstName}!` : `Working late, ${firstName}!`)
-                      : null  // ← all other tool pages show nothing in the greeting slot
-                return greeting ? (
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-extrabold tracking-tight truncate"
-                      style={{ fontSize: 22, color: '#1e1535', fontFamily: 'Inter, sans-serif' }}>
-                      {greeting}
-                    </span>
-                  </div>
-                ) : <div className="flex-1" />
-              })()
-            )}
-
-            {!pathname.startsWith('/dashboard/title-builder') && <div className="flex-1" />}
-
-            {/* Title Builder extra icons — sit between market selector and notification bell */}
-            {pathname.startsWith('/dashboard/title-builder') && (
-              <>
-                <ResetButton />
-                <div className="w-1.5" />
-                <button title="Settings"
-                  onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
-                  style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
-                  <Settings size={15} />
-                </button>
-                <div className="w-3" />
-              </>
-            )}
-
-            <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
-            <div className="w-[15px]" />
-            <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
-          </header>
 
           {/* -- TEAM SWITCHER BANNER -- */}
           <TeamSwitcherBanner />
