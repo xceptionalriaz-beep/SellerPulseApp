@@ -266,3 +266,92 @@ body {
     margin-bottom: -8px;
   }
 }
+
+/* ─── Score Bar Animation ─────────────────────────────────────────────────── */
+@keyframes scoreBarGrow {
+  from {
+    width: 0%;
+  }
+}
+
+.score-bar-fill {
+  animation: scoreBarGrow 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s ease;
+}
+
+/* ─── ContentEditable Placeholder ────────────────────────────────────────── */
+[contenteditable][data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+  font-style: normal;
+}
+
+/* ─── Description Editor Content Styles ──────────────────────────────────── */
+[contenteditable] h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+  color: #1e1535;
+}
+
+[contenteditable] h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 10px 0 4px;
+  color: #1e1535;
+}
+
+[contenteditable] ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 6px 0;
+}
+
+[contenteditable] ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 6px 0;
+}
+
+[contenteditable] li {
+  margin: 2px 0;
+}
+
+[contenteditable] p {
+  margin: 4px 0;
+}
+
+[contenteditable] strong,
+[contenteditable] b {
+  font-weight: 700;
+}
+
+[contenteditable] em,
+[contenteditable] i {
+  font-style: italic;
+}
+
+[contenteditable] u {
+  text-decoration: underline;
+}
+
+[contenteditable] hr {
+  border: none;
+  border-top: 2px solid #ede9fe;
+  margin: 16px 0;
+}
+
+[contenteditable] table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+}
+
+[contenteditable] td,
+[contenteditable] th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}

@@ -18,7 +18,7 @@ import {
     Search, Upload, ChevronDown, LayoutList, LayoutGrid,
     CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
     Download, Trash2, ChevronLeft, ChevronRight,
-    X, Package, TrendingUp, Circle, Zap,
+    X, Package, TrendingUp, Circle, Zap, Copy, Check,
 } from 'lucide-react'
 
 // ── Design tokens ─────────────────────────────────────────────
@@ -236,6 +236,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [rowsPerPage, setRowsPerPage] = useState(50)
     const [jumpPage, setJumpPage] = useState('')
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
+    const [copiedId, setCopiedId] = useState<string | null>(null)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -376,6 +377,12 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
     function clearSelection() { setSelectedIds(new Set()) }
 
+    function copyToClipboard(text: string, key: string) {
+        navigator.clipboard.writeText(text)
+        setCopiedId(key)
+        setTimeout(() => setCopiedId(null), 1500)
+    }
+
     // ── Tab counts ──────────────────────────────────────────────
     const tabCounts = {
         all: listings.length,
@@ -484,11 +491,11 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderBottom: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
 
                     {/* ONE ROW — Tabs + Search + Filters + View Toggle */}
-                    <div className="flex items-center px-4"
+                    <div className="flex items-center px-0"
                         style={{ backgroundColor: '#f3eeff', borderBottom: `2px solid #7530fb` }}>
 
                         {/* Status Tabs */}
-                        {(Object.entries(tabCounts) as [TabFilter, number][]).map(([tab, count]) => {
+                        {(Object.entries(tabCounts) as [TabFilter, number][]).map(([tab, count], index) => {
                             const labels: Record<TabFilter, string> = {
                                 all: 'All', published: 'Active', draft: 'Drafts', ended: 'Ended', scheduled: 'Scheduled'
                             }
@@ -503,8 +510,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                         backgroundColor: isActive ? '#ffffff' : 'transparent',
                                         border: isActive ? `2px solid #7530fb` : '2px solid transparent',
                                         borderBottom: isActive ? `2px solid #ffffff` : '2px solid transparent',
-                                        borderRadius: '8px 8px 0 0',
+                                        borderRadius: index === 0 ? '16px 8px 0 0' : '8px 8px 0 0',
                                         marginBottom: '-2px',
+                                        marginLeft: index === 0 ? '0px' : '4px',
                                     }}>
                                     {labels[tab]}
                                     <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
@@ -519,6 +527,40 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         })}
 
                         <div className="flex-1" />
+
+                        {/* Search */}
+                        <div className="relative">
+                            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: C.muted }} />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Search title, SKU, EAN, eBay ID..."
+                                className="pl-8 pr-7 py-1.5 text-[12px] rounded-xl search-input"
+                                style={{
+                                    width: 240,
+                                    backgroundColor: C.surface,
+                                    color: C.body,
+                                    fontFamily: 'DM Sans, sans-serif',
+                                }}
+                            />
+                            {search && (
+                                <button onClick={() => { setSearch(''); setDebouncedSearch('') }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2">
+                                    <X size={11} style={{ color: C.muted }} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Filter dropdowns */}
+                        {['Category', 'Health', 'Sort'].map(f => (
+                            <button key={f}
+                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] whitespace-nowrap"
+                                style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                {f}
+                                <ChevronDown size={11} style={{ color: C.muted }} />
+                            </button>
+                        ))}
 
                         {/* View toggle */}
                         <div className="flex items-center gap-1">
@@ -620,14 +662,17 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                 />
                                             </td>
 
-                                            {/* Product Image — full height, no padding */}
-                                            <td className="p-0" style={{ width: 40 }}>
-                                                <div className="w-full h-full min-h-[36px]"
-                                                    style={{ backgroundColor: C.bg }}>
+                                            {/* Product Image — fixed size, crops to fit */}
+                                            <td className="p-0" style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, maxHeight: 40, overflow: 'hidden' }}>
+                                                <div style={{ width: 40, height: 40, backgroundColor: C.bg, overflow: 'hidden', flexShrink: 0 }}>
                                                     {listing.main_photo_url ? (
-                                                        <img src={listing.main_photo_url} alt={listing.title || ''} className="w-full h-full object-cover" style={{ minHeight: 36 }} />
+                                                        <img
+                                                            src={listing.main_photo_url}
+                                                            alt={listing.title || ''}
+                                                            style={{ width: 40, height: 40, objectFit: 'cover', display: 'block' }}
+                                                        />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center" style={{ minHeight: 36 }}>
+                                                        <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                             <Package size={14} style={{ color: C.muted }} />
                                                         </div>
                                                     )}
@@ -759,7 +804,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                         if (gtinValue) {
                                                             const { label, color, bg } = detectGtinType(gtinValue)
                                                             return (
-                                                                <div className="flex items-center gap-1">
+                                                                <div className="flex items-center gap-1 group/ean">
                                                                     <span className="text-[9px] font-bold px-1 py-0.5 rounded"
                                                                         style={{ backgroundColor: bg, color, fontFamily: 'DM Sans, sans-serif' }}>
                                                                         {label}
@@ -768,6 +813,13 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                                         style={{ color: C.body, fontFamily: 'monospace' }}>
                                                                         {gtinValue}
                                                                     </span>
+                                                                    <button
+                                                                        onClick={e => { e.stopPropagation(); copyToClipboard(gtinValue, `ean-${listing.id}`) }}
+                                                                        className="opacity-0 group-hover/ean:opacity-100 transition-opacity p-0.5 rounded"
+                                                                        style={{ color: copiedId === `ean-${listing.id}` ? C.success : C.muted }}
+                                                                        title="Copy">
+                                                                        {copiedId === `ean-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                                                    </button>
                                                                 </div>
                                                             )
                                                         }
@@ -783,7 +835,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                     })()}
                                                     {/* eBay Item ID */}
                                                     {listing.ebay_listing_id ? (
-                                                        <div className="flex items-center gap-1">
+                                                        <div className="flex items-center gap-1 group/ebay">
                                                             <span className="text-[9px] font-bold px-1 py-0.5 rounded"
                                                                 style={{ backgroundColor: C.warningBg, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
                                                                 eBay
@@ -792,6 +844,13 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                                 style={{ color: C.body, fontFamily: 'monospace' }}>
                                                                 {listing.ebay_listing_id}
                                                             </span>
+                                                            <button
+                                                                onClick={e => { e.stopPropagation(); copyToClipboard(listing.ebay_listing_id!, `ebay-${listing.id}`) }}
+                                                                className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
+                                                                style={{ color: copiedId === `ebay-${listing.id}` ? C.success : C.muted }}
+                                                                title="Copy">
+                                                                {copiedId === `ebay-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                                            </button>
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-1">

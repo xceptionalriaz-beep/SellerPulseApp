@@ -131,7 +131,7 @@ export function PrimaryButton({ onClick, disabled, loading, children, icon, clas
 // Purple gradient — exclusively for AI-powered actions.
 // Has a live shimmer animation to feel like active AI.
 // ─────────────────────────────────────────────────────────────────────────────
-export function AIButton({ onClick, disabled, loading, children, className = '', tooltip }: BaseProps) {
+export function AIButton({ onClick, disabled, loading, children, className = '', tooltip, chevron = false }: BaseProps & { chevron?: boolean }) {
     const { pressed, ...pressProps } = usePressAnimation()
     const isDisabled = disabled || loading
 
@@ -145,10 +145,11 @@ export function AIButton({ onClick, disabled, loading, children, className = '',
         100% { transform: translateX(300%) skewX(-15deg); }
       }
       @keyframes ai-sparkle {
-        0%, 100% { opacity: 1;    transform: scale(1)    rotate(0deg);   }
-        25%       { opacity: 0.6; transform: scale(1.3)  rotate(90deg);  }
-        50%       { opacity: 1;   transform: scale(0.85) rotate(180deg); }
-        75%       { opacity: 0.7; transform: scale(1.2)  rotate(270deg); }
+        0%   { opacity: 1;   transform: scale(1)    rotate(0deg);   }
+        25%  { opacity: 0.7; transform: scale(1.2)  rotate(90deg);  }
+        50%  { opacity: 1;   transform: scale(1)    rotate(180deg); }
+        75%  { opacity: 0.7; transform: scale(1.2)  rotate(270deg); }
+        100% { opacity: 1;   transform: scale(1)    rotate(360deg); }
       }
       @keyframes ai-glow {
         0%, 100% { box-shadow: 0 2px 12px rgba(139,92,246,0.35); }
@@ -193,12 +194,15 @@ export function AIButton({ onClick, disabled, loading, children, className = '',
                 : (
                     <span style={{
                         fontSize: 13,
-                        animation: isDisabled ? 'none' : 'ai-sparkle 3s ease-in-out infinite',
+                        animation: isDisabled ? 'none' : 'ai-sparkle 2s linear infinite',
                         display: 'inline-block',
                     }}>✦</span>
                 )
             }
             {children}
+            {chevron && !loading && (
+                <span style={{ fontSize: 10, opacity: 0.7, marginLeft: 2 }}>▾</span>
+            )}
         </button>
     )
 
