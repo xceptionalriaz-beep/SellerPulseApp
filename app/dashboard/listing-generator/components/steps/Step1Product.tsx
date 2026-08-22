@@ -14,7 +14,7 @@
 import { useState, ReactNode } from 'react'
 import {
     ChevronRight, ChevronDown, AlertCircle, CheckCircle2,
-    Tag, Hash, Layers, Info,
+    Tag, Hash, Layers, Info, Gavel, ShoppingCart,
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
 import Tooltip from '@/components/ui/Tooltip'
@@ -396,6 +396,69 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                         </Field>
                     )}
 
+                    {/* ── SECTION: Listing Format ─────────────── */}
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: C.primaryLight }}>
+                                <ShoppingCart size={13} style={{ color: C.primary }} />
+                            </div>
+                            <h2 className="text-[15px] font-bold"
+                                style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                Listing Format
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: 'buy_it_now', label: 'Buy It Now', desc: 'Fixed price, instant purchase', icon: <ShoppingCart size={16} /> },
+                                { id: 'auction', label: 'Auction', desc: 'Bidding starts at your price', icon: <Gavel size={16} /> },
+                            ].map(fmt => {
+                                const selected = ((draft as any).listing_format ?? 'buy_it_now') === fmt.id
+                                return (
+                                    <button key={fmt.id}
+                                        onClick={() => onChange({ listing_format: fmt.id } as any)}
+                                        className="flex items-center gap-3 p-3 rounded-xl text-left transition-all"
+                                        style={{
+                                            backgroundColor: selected ? C.primaryLight : C.surface,
+                                            border: `2px solid ${selected ? C.primary : C.border}`,
+                                        }}>
+                                        <span style={{ color: selected ? C.primary : C.muted }}>{fmt.icon}</span>
+                                        <div>
+                                            <p className="text-[13px] font-bold" style={{ color: selected ? C.primary : C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                                {fmt.label}
+                                            </p>
+                                            <p className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                {fmt.desc}
+                                            </p>
+                                        </div>
+                                        {selected && <CheckCircle2 size={14} className="ml-auto shrink-0" style={{ color: C.primary }} />}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                        {/* Auction duration — only when Auction selected */}
+                        {(draft as any).listing_format === 'auction' && (
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-[12px] font-semibold" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                    Auction Duration
+                                </label>
+                                <ProDropdown
+                                    prefix=""
+                                    currentValue={(draft as any).auction_duration ?? '7'}
+                                    onChanged={v => onChange({ auction_duration: v } as any)}
+                                    width="full"
+                                    options={[
+                                        { val: '1', label: '1 day', enabled: true },
+                                        { val: '3', label: '3 days', enabled: true },
+                                        { val: '5', label: '5 days', enabled: true },
+                                        { val: '7', label: '7 days', enabled: true },
+                                        { val: '10', label: '10 days', enabled: true },
+                                    ]}
+                                />
+                            </div>
+                        )}
+                    </div>
+
                     {/* ── SECTION: Product Name ────────────────── */}
                     <Field label="Product Name"
                         hint="Your internal name for this product. Not shown to buyers.">
@@ -409,6 +472,39 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                             onBlur={e => e.target.style.borderColor = C.borderInput}
                         />
                     </Field>
+
+                    {/* ── SECTION: Product URL — own website sellers only ── */}
+                    {['own_stock', 'wholesale', 'retail_arb'].includes(draft.seller_type) && (
+                        <Field label="Product URL (optional)"
+                            hint="Link to this item on your own website. eBay displays this on the listing. Must start with https://">
+                            <div className="relative">
+                                <input
+                                    type="url"
+                                    value={(draft as any).product_url ?? ''}
+                                    onChange={e => onChange({ product_url: e.target.value } as any)}
+                                    placeholder="https://yourstore.com/products/item-name"
+                                    style={inputStyle}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                            </div>
+                            {/* Validation */}
+                            {(draft as any).product_url &&
+                                !String((draft as any).product_url).startsWith('http') && (
+                                    <p className="text-[11px] flex items-center gap-1"
+                                        style={{ color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                        <AlertCircle size={11} /> URL must begin with http:// or https://
+                                    </p>
+                                )}
+                            {(draft as any).product_url &&
+                                String((draft as any).product_url).startsWith('http') && (
+                                    <p className="text-[11px] flex items-center gap-1"
+                                        style={{ color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
+                                        <CheckCircle2 size={11} /> Valid URL — will show on your eBay listing
+                                    </p>
+                                )}
+                        </Field>
+                    )}
 
                     {/* ── SECTION: Title ───────────────────────── */}
                     <div className="flex flex-col gap-3">
@@ -495,6 +591,33 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                         </Field>
                     </div>
 
+                    {/* ── SECTION: Subtitle ────────────────────── */}
+                    <Field label="Subtitle (optional)"
+                        hint="Shown below title in search results. Costs $2.00/listing. Max 55 characters.">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={draft.subtitle ?? ''}
+                                onChange={e => onChange({ subtitle: e.target.value })}
+                                placeholder="e.g. Includes original box, accessories and warranty"
+                                maxLength={55}
+                                style={inputStyle}
+                                onFocus={e => e.target.style.borderColor = C.primary}
+                                onBlur={e => e.target.style.borderColor = C.borderInput}
+                            />
+                            <span className="absolute bottom-3 right-3 text-[11px] font-bold"
+                                style={{
+                                    color: (draft.subtitle?.length ?? 0) >= 50 ? C.warning : C.muted,
+                                    fontFamily: 'DM Sans, sans-serif',
+                                }}>
+                                {draft.subtitle?.length ?? 0}/55
+                            </span>
+                        </div>
+                        <p className="text-[10px] flex items-center gap-1" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                            <Info size={10} /> Additional $2.00 eBay fee applies when subtitle is used
+                        </p>
+                    </Field>
+
                     {/* ── SECTION: Category + Condition ────────── */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Field label="eBay Category" required>
@@ -552,6 +675,32 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                         </Field>
                     </div>
 
+                    {/* ── SECTION: Condition Description ─────── */}
+                    {draft.condition && draft.condition.toLowerCase().includes('used') && (
+                        <Field label="Condition Description"
+                            hint="Describe defects, wear or damage honestly. eBay recommends this for all Used items. Max 1000 chars.">
+                            <div className="relative">
+                                <textarea
+                                    value={draft.condition_description ?? ''}
+                                    onChange={e => onChange({ condition_description: e.target.value })}
+                                    placeholder="e.g. Minor scratch on back panel, fully functional. Screen in perfect condition. Comes with charger only."
+                                    rows={3}
+                                    maxLength={1000}
+                                    style={{ ...inputStyle, resize: 'none', paddingBottom: 28 }}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                                <span className="absolute bottom-3 right-3 text-[11px] font-bold"
+                                    style={{
+                                        color: (draft.condition_description?.length ?? 0) > 900 ? C.warning : C.muted,
+                                        fontFamily: 'DM Sans, sans-serif',
+                                    }}>
+                                    {draft.condition_description?.length ?? 0}/1000
+                                </span>
+                            </div>
+                        </Field>
+                    )}
+
                     {/* ── SECTION: SKU + Quantity ──────────────── */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Field label="SKU / Custom Label"
@@ -584,6 +733,106 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                                 onBlur={e => e.target.style.borderColor = C.borderInput}
                             />
                         </Field>
+                    </div>
+
+                    {/* ── SECTION: Product Identifiers ──────────── */}
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: C.primaryLight }}>
+                                <Hash size={13} style={{ color: C.primary }} />
+                            </div>
+                            <h2 className="text-[15px] font-bold"
+                                style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                Product Identifiers
+                            </h2>
+                            <span className="text-[11px] px-2 py-0.5 rounded-full"
+                                style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                Optional
+                            </span>
+                        </div>
+                        <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                            eBay uses these to match your listing to product catalogue data and boost search visibility.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <Field label="UPC" hint="Universal Product Code — 12 digit barcode">
+                                <input
+                                    type="text"
+                                    value={draft.upc ?? ''}
+                                    onChange={e => onChange({ upc: e.target.value })}
+                                    placeholder="e.g. 012345678901"
+                                    maxLength={14}
+                                    style={inputStyle}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                            </Field>
+                            <Field label="EAN" hint="European Article Number — 13 digit barcode">
+                                <input
+                                    type="text"
+                                    value={draft.ean ?? ''}
+                                    onChange={e => onChange({ ean: e.target.value })}
+                                    placeholder="e.g. 0123456789012"
+                                    maxLength={13}
+                                    style={inputStyle}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                            </Field>
+                            <Field label="MPN" hint="Manufacturer Part Number — assigned by the maker">
+                                <input
+                                    type="text"
+                                    value={draft.mpn ?? ''}
+                                    onChange={e => onChange({ mpn: e.target.value })}
+                                    placeholder="e.g. MQ6T3LL/A"
+                                    style={inputStyle}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                            </Field>
+                        </div>
+                    </div>
+
+                    {/* ── SECTION: Variations ─────────────────────── */}
+                    <div className="p-4 rounded-xl flex items-start justify-between gap-4"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
+                        <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                                style={{ backgroundColor: C.primaryLight }}>
+                                <Layers size={13} style={{ color: C.primary }} />
+                            </div>
+                            <div>
+                                <p className="text-[14px] font-bold" style={{ color: C.body, fontFamily: 'Syne, sans-serif' }}>
+                                    Variations
+                                </p>
+                                <p className="text-[12px] mt-0.5" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                    List multiple sizes, colours or styles in one listing. Saves eBay fees and consolidates search rank.
+                                </p>
+                                {draft.has_variations && (
+                                    <p className="text-[11px] mt-1.5 flex items-center gap-1"
+                                        style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                        <ChevronRight size={11} /> Variation details can be configured after publishing
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        {/* Toggle */}
+                        <label className="flex items-center cursor-pointer shrink-0 mt-0.5">
+                            <div onClick={() => onChange({ has_variations: !draft.has_variations })}
+                                className="relative transition-all"
+                                style={{
+                                    width: 36, height: 20, borderRadius: 999,
+                                    backgroundColor: draft.has_variations ? C.primary : '#d1d5db',
+                                }}>
+                                <div style={{
+                                    position: 'absolute', top: 2,
+                                    left: draft.has_variations ? 18 : 2,
+                                    width: 16, height: 16, borderRadius: '50%',
+                                    backgroundColor: '#fff', transition: 'left 0.2s ease',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                }} />
+                            </div>
+                        </label>
                     </div>
 
                     {/* ── SECTION: Item Specifics ───────────────── */}

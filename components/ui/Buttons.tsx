@@ -17,8 +17,8 @@
 //   <DangerButton onClick={fn}>Delete</DangerButton>
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useCallback } from 'react'
-import { RotateCcw, Plus, Check } from 'lucide-react'
+import React, { useState, useCallback } from 'react'
+import { RotateCcw, Plus, Check, Sparkles } from 'lucide-react'
 import Tooltip from '@/components/ui/Tooltip'
 
 // ── Design tokens — matches SellerPulse design system ─────────
@@ -67,6 +67,7 @@ if (typeof document !== 'undefined') {
         style.id = 'sp-btn-styles'
         style.textContent = `
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+      @keyframes pro-pulse { 0%,100% { transform: scale(1); opacity:0.85; } 50% { transform: scale(1.35); opacity:1; } }
     `
         document.head.appendChild(style)
     }
@@ -573,5 +574,108 @@ export function ToggleButton({ value, onChanged, disabled }: ToggleButtonProps) 
                 transition: 'left 0.2s ease, background-color 0.2s ease',
             }} />
         </div>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RemoveBgProButton
+// Gold gradient — for the paid HD background removal feature.
+// ✨ icon animates like sparkles to feel premium and live.
+// ─────────────────────────────────────────────────────────────────────────────
+
+
+export function RemoveBgProButton({ onClick, disabled, loading, className = '', size = 'md' }: {
+    onClick?: () => void
+    disabled?: boolean
+    loading?: boolean
+    className?: string
+    size?: 'sm' | 'md'
+}) {
+    const { pressed, ...pressProps } = usePressAnimation()
+    const isDisabled = disabled || loading
+
+    // Inject keyframes once
+    if (typeof document !== 'undefined' && !document.getElementById('sp-pro-bg-styles')) {
+        const style = document.createElement('style')
+        style.id = 'sp-pro-bg-styles'
+        style.textContent = `
+            @keyframes pro-pulse {
+                0%,100% { transform: scale(0.75); opacity: 0.5; }
+                50%     { transform: scale(1.3);  opacity: 1;   }
+            }
+            @keyframes pro-glow {
+                0%, 100% { box-shadow: 0 2px 10px rgba(245,158,11,0.4); }
+                50%       { box-shadow: 0 2px 20px rgba(245,158,11,0.7), 0 0 28px rgba(217,119,6,0.35); }
+            }
+            @keyframes pro-shimmer {
+                0%   { transform: translateX(-100%) skewX(-15deg); }
+                100% { transform: translateX(300%) skewX(-15deg); }
+            }
+        `
+        document.head.appendChild(style)
+    }
+
+    const isSmall = size === 'sm'
+
+    return (
+        <button
+            onClick={onClick}
+            disabled={isDisabled}
+            {...pressProps}
+            className={className}
+            style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: isSmall ? 4 : 6,
+                padding: isSmall ? '4px 10px' : '7px 16px',
+                borderRadius: 999,
+                fontSize: isSmall ? 11 : 12,
+                fontWeight: 700,
+                fontFamily: 'DM Sans, sans-serif',
+                border: 'none',
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                background: isDisabled
+                    ? '#e5e7eb'
+                    : 'linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%)',
+                color: isDisabled ? '#9ca3af' : '#ffffff',
+                animation: isDisabled ? 'none' : 'pro-glow 2.5s ease-in-out infinite',
+                transform: pressed ? 'scale(0.95)' : 'scale(1)',
+                opacity: isDisabled ? 0.6 : 1,
+                transition: 'transform 0.12s ease, opacity 0.15s ease',
+                outline: 'none',
+                whiteSpace: 'nowrap',
+                position: 'relative',
+                overflow: 'hidden',
+                letterSpacing: '0.01em',
+            }}>
+
+            {/* Shimmer sweep */}
+            {!isDisabled && (
+                <span style={{
+                    position: 'absolute',
+                    top: 0, left: 0,
+                    width: '40%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+                    animation: 'pro-shimmer 2.5s ease-in-out infinite',
+                    pointerEvents: 'none',
+                }} />
+            )}
+
+            {/* ✨ Live sparkle icon */}
+            {loading
+                ? <Spinner color="#ffffff" size={isSmall ? 11 : 13} />
+                : (
+                    <span style={{
+                        fontSize: isSmall ? 13 : 15,
+                        animation: isDisabled ? 'none' : 'pro-pulse 1.4s ease-in-out infinite',
+                        display: 'inline-block',
+                        color: '#ffffff',
+                    }}>✦</span>
+                )
+            }
+
+            {loading ? 'Removing...' : 'Remove BG PRO'}
+        </button>
     )
 }

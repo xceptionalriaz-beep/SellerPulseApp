@@ -20,7 +20,7 @@ import { createClient } from '@/lib/supabase'
 import {
     Upload, X, Star, AlertCircle, CheckCircle2,
     ChevronRight, ChevronLeft, FileText,
-    Trash2, Loader2, Info, ImagePlus, Wand2, Video,
+    Trash2, Loader2, Info, ImagePlus, Wand2, Video, RotateCcw,
     Copy, Image as ImageIcon, Zap,
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
@@ -30,6 +30,7 @@ import {
     EditorToolbar, sanitiseHtml, DESCRIPTION_TEMPLATES,
 } from '@/components/ui/EditorToolbar'
 import DescriptionLibrary from '@/components/ui/DescriptionLibrary'
+import BgRemovingOverlay from '@/components/ui/BgRemovingOverlay'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -103,6 +104,7 @@ interface Props {
 interface Photo {
     id: string
     url: string
+    originalUrl?: string
     file?: File
     uploading?: boolean
     path?: string
@@ -118,20 +120,42 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const [photos, setPhotos] = useState<Photo[]>(() => {
+        const isBgRemoved = (url: string) => url.includes('bg-removed-')
         if (draft.photo_urls?.length) {
-            return draft.photo_urls.map((url, i) => ({ id: `saved-${i}`, url }))
+            return draft.photo_urls.map((url, i) => ({
+                id: `saved-${i}`,
+                url,
+                originalUrl: isBgRemoved(url) ? '__processed__' : undefined,
+            }))
         }
         if (draft.main_photo_url) {
-            return [{ id: 'saved-0', url: draft.main_photo_url }]
+            return [{
+                id: 'saved-0',
+                url: draft.main_photo_url,
+                originalUrl: isBgRemoved(draft.main_photo_url) ? '__processed__' : undefined,
+            }]
         }
         return []
     })
     const [dragOver, setDragOver] = useState(false)
+    const dragCounterRef = useRef(0)
     const [fileError, setFileError] = useState<string | null>(null)
+    const fileErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const [aiDescLoading, setAiDescLoading] = useState(false)
+    const [isTyping, setIsTyping] = useState(false)
+    const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const [bgRemoving, setBgRemoving] = useState<Set<string>>(new Set())
+    const [bgRemoved, setBgRemoved] = useState<Set<string>>(new Set())
+    const bgRemovedDerived = new Set([
+        ...Array.from(bgRemoved),
+        ...photos.filter(p => p.originalUrl).map(p => p.id)
+    ])
+    const [bgSuccess, setBgSuccess] = useState<string | null>(null) // photo id showing success toast
+    const [sliderPhoto, setSliderPhoto] = useState<string | null>(null)
+    const [sliderPos, setSliderPos] = useState(50)
     const [batchCleaning, setBatchCleaning] = useState(false)
     const [videoUploading, setVideoUploading] = useState(false)
+    const [videoProgress, setVideoProgress] = useState(0)
     const videoInputRef = useRef<HTMLInputElement>(null)
 
     // ── Description editor state ──────────────────────────────
@@ -263,12 +287,46 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
         if (descRef.current) descRef.current.innerHTML = ''
     }
 
-    function applyTemplate(html: string) {
+    function applyTemplate(html: string, animate = false) {
         const clean = sanitiseHtml(html)
-        setHtmlContent(clean)
-        onChange({ description_html: clean })
-        if (descRef.current) descRef.current.innerHTML = clean
+        if (!animate || !descRef.current) {
+            setHtmlContent(clean)
+            onChange({ description_html: clean })
+            if (descRef.current) descRef.current.innerHTML = clean
+            setDescPreview('edit')
+            scheduleAutosave(clean)
+            return
+        }
+
+        // ── Typewriter animation ────────────────────────────────
+        // Strip HTML to get plain text, type it character by character,
+        // then snap to full HTML at the end for proper formatting
         setDescPreview('edit')
+        setIsTyping(true)
+        if (descRef.current) descRef.current.innerHTML = ''
+        setHtmlContent('')
+
+        const plainText = clean.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+        let i = 0
+        const speed = Math.max(8, Math.min(20, Math.floor(2000 / plainText.length))) // 2s total
+
+        function typeNext() {
+            if (!descRef.current) return
+            i++
+            const chunk = plainText.slice(0, i)
+            descRef.current.innerText = chunk
+            if (i < plainText.length) {
+                typingTimer.current = setTimeout(typeNext, speed)
+            } else {
+                // Snap to full formatted HTML
+                descRef.current.innerHTML = clean
+                setHtmlContent(clean)
+                onChange({ description_html: clean })
+                scheduleAutosave(clean)
+                setIsTyping(false)
+            }
+        }
+        typeNext()
     }
 
     const charCount = htmlContent.replace(/<[^>]*>/g, '').length
@@ -334,11 +392,15 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
         // Validate each file
         for (const file of toAdd) {
             if (!ALLOWED_TYPES.includes(file.type)) {
+                if (fileErrorTimer.current) clearTimeout(fileErrorTimer.current)
                 setFileError(`"${file.name}" is not supported. Use JPEG, PNG or WEBP.`)
+                fileErrorTimer.current = setTimeout(() => setFileError(null), 5000)
                 return
             }
             if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                if (fileErrorTimer.current) clearTimeout(fileErrorTimer.current)
                 setFileError(`"${file.name}" is too large. Max size is ${MAX_FILE_SIZE_MB}MB.`)
+                fileErrorTimer.current = setTimeout(() => setFileError(null), 5000)
                 return
             }
         }
@@ -382,6 +444,14 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
     function onDragEnd() {
         if (dragItemRef.current === null || dragOverRef.current === null) return
         if (dragItemRef.current === dragOverRef.current) return
+        // Don't reorder if either photo is having BG removed
+        const fromPhoto = photos[dragItemRef.current]
+        const toPhoto = photos[dragOverRef.current]
+        if ((fromPhoto && bgRemoving.has(fromPhoto.id)) || (toPhoto && bgRemoving.has(toPhoto.id))) {
+            dragItemRef.current = null
+            dragOverRef.current = null
+            return
+        }
         setPhotos(prev => {
             const updated = [...prev]
             const [dragged] = updated.splice(dragItemRef.current!, 1)
@@ -435,6 +505,10 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
         const photo = photos.find(p => p.id === id)
         if (!photo || photo.uploading) return
 
+        // Save originalUrl ONLY in local var — don't set on photo yet
+        // We only mark as processed on success
+        const savedOriginalUrl = photo.originalUrl ?? photo.url
+
         setBgRemoving(prev => new Set(prev).add(id))
         try {
             // 1. Call our Next.js proxy → FastAPI service
@@ -467,28 +541,67 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                 }
             } catch { /* non-fatal */ }
 
-            // 5. Update photo in state with new URL
+            // 5. SUCCESS — update photo URL and mark as BG removed
             setPhotos(prev => {
                 const updated = prev.map(p =>
-                    p.id === id ? { ...p, url: newUrl } : p
+                    p.id === id ? { ...p, url: newUrl, originalUrl: savedOriginalUrl } : p
                 )
                 syncPhotosToDraft(updated)
                 return updated
             })
+            setBgRemoved(prev => new Set(prev).add(id))
+            setBgSuccess(id)
+            setTimeout(() => setBgSuccess(prev => prev === id ? null : prev), 3000)
         } catch (e) {
             const msg = e instanceof Error ? e.message : 'Unknown error'
             console.error('[Step2] removeBg error:', msg)
+            // FAILURE — clear originalUrl if it was set, don't mark as processed
+            setPhotos(prev => prev.map(p =>
+                p.id === id && p.originalUrl === savedOriginalUrl && p.url !== savedOriginalUrl
+                    ? { ...p, originalUrl: undefined }
+                    : p
+            ))
+            if (fileErrorTimer.current) clearTimeout(fileErrorTimer.current)
             setFileError(`Background removal failed: ${msg}`)
+            fileErrorTimer.current = setTimeout(() => setFileError(null), 5000)
         }
         setBgRemoving(prev => { const s = new Set(prev); s.delete(id); return s })
+    }
+
+    // ── Revert to original before BG removal ────────────────────
+    async function revertBg(id: string) {
+        const photo = photos.find(p => p.id === id)
+        if (!photo?.originalUrl) return
+        // '__processed__' = detected BG-removed on reload but original not stored
+        if (photo.originalUrl === '__processed__') {
+            setPhotos(prev => {
+                const updated = prev.map(p => p.id === id ? { ...p, originalUrl: undefined } : p)
+                syncPhotosToDraft(updated)
+                return updated
+            })
+            setBgRemoved(prev => { const s = new Set(prev); s.delete(id); return s })
+            setSliderPhoto(null)
+            return
+        }
+        try {
+            const match = photo.url.match(/listing-photos\/(.+)$/)
+            if (match) await supabaseRef.current.storage.from('listing-photos').remove([decodeURIComponent(match[1])])
+        } catch { /* non-fatal */ }
+        setPhotos(prev => {
+            const updated = prev.map(p => p.id === id ? { ...p, url: p.originalUrl!, originalUrl: undefined } : p)
+            syncPhotosToDraft(updated)
+            return updated
+        })
+        setBgRemoved(prev => { const s = new Set(prev); s.delete(id); return s })
+        setSliderPhoto(null)
     }
 
     // ── Batch clean all backgrounds ───────────────────────────
     async function batchCleanAll() {
         setBatchCleaning(true)
-        for (const photo of photos) {
-            await removeBg(photo.id)
-        }
+        // Skip photos that already had BG removed (originalUrl means already processed)
+        const toProcess = photos.filter(p => !p.uploading && !p.originalUrl)
+        await Promise.all(toProcess.map(p => removeBg(p.id)))
         setBatchCleaning(false)
     }
 
@@ -508,24 +621,37 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
         }
 
         setVideoUploading(true)
+        setVideoProgress(0)
         setFileError(null)
         try {
             const { data: { user } } = await supabaseRef.current.auth.getUser()
             if (!user) return
             const path = `${user.id}/${draft.sku || 'draft'}/video-${Date.now()}.mp4`
-            const { error } = await supabaseRef.current.storage
-                .from('listing-photos')
-                .upload(path, file, { upsert: true })
-            if (error) throw error
-            const { data } = supabaseRef.current.storage
-                .from('listing-photos')
-                .getPublicUrl(path)
+
+            // Use XHR for progress tracking
+            await new Promise<void>((resolve, reject) => {
+                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+                const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                const xhr = new XMLHttpRequest()
+                xhr.open('POST', `${supabaseUrl}/storage/v1/object/listing-photos/${path}`)
+                xhr.setRequestHeader('Authorization', `Bearer ${supabaseKey}`)
+                xhr.setRequestHeader('x-upsert', 'true')
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) setVideoProgress(Math.round((e.loaded / e.total) * 100))
+                }
+                xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`))
+                xhr.onerror = () => reject(new Error('Network error'))
+                xhr.send(file)
+            })
+
+            const { data } = supabaseRef.current.storage.from('listing-photos').getPublicUrl(path)
             onChange({ video_url: data.publicUrl })
         } catch (e) {
             setFileError('Video upload failed. Please try again.')
             console.error('[Step2] Video upload error:', e)
         }
         setVideoUploading(false)
+        setVideoProgress(0)
     }
     async function generateDescription() {
         setAiDescLoading(true)
@@ -534,42 +660,28 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                 .map(([k, v]) => `${k}: ${v}`)
                 .join(', ')
 
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
+            // Call server-side route — keeps Anthropic API key off the browser
+            const response = await fetch('/api/generate-description', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'claude-sonnet-4-6',
-                    max_tokens: 1000,
-                    messages: [{
-                        role: 'user',
-                        content: `Write a professional eBay product description for this listing.
-
-Product Title: ${draft.title || draft.product_name}
-Category: ${draft.category}
-Condition: ${draft.condition}
-Seller Type: ${draft.seller_type}
-Item Specifics: ${specifics || 'Not provided'}
-
-Requirements:
-- Mobile-optimized, short paragraphs
-- Start with a strong 1-line hook about the product
-- 3-5 bullet points of key features using the item specifics above
-- Mention condition clearly
-- End with a short trust/buyer confidence statement
-- Use HTML tags only: <p>, <ul>, <li>, <strong>
-- No inline styles, no price, no shipping info
-- Keep under 400 words
-- Return ONLY the HTML, nothing else`
-                    }]
-                })
+                    title: draft.title || draft.product_name || '',
+                    category: draft.category || '',
+                    condition: draft.condition || '',
+                    sellerType: draft.seller_type || '',
+                    specifics: specifics || '',
+                }),
             })
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`)
             const data = await response.json()
-            const html = data.content?.[0]?.text?.trim() || ''
+            const html = data.html?.trim() || ''
             if (html) {
-                onChange({ description_html: html })
+                applyTemplate(html, true) // animate on AI write
             }
         } catch (e) {
             console.error('[Step2] AI description error:', e)
+            setFileError('AI description failed. Please try again.')
         }
         setAiDescLoading(false)
     }
@@ -611,8 +723,8 @@ Requirements:
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1.5 shrink-0">
-                                    {/* Batch Clean All */}
-                                    {photos.length > 0 && (
+                                    {/* Batch Clean All — only show if there are unprocessed photos */}
+                                    {photos.filter(p => !p.uploading && !p.originalUrl).length > 0 && (
                                         <button
                                             onClick={batchCleanAll}
                                             disabled={batchCleaning}
@@ -627,18 +739,33 @@ Requirements:
                                                 ? <Loader2 size={11} className="animate-spin" />
                                                 : <Wand2 size={11} />
                                             }
-                                            <span className="hidden md:inline">{batchCleaning ? 'Cleaning...' : 'Clean All'}</span>
+                                            <span className="hidden md:inline">
+                                                {batchCleaning
+                                                    ? 'Cleaning...'
+                                                    : `Clean All${photos.filter(p => !p.uploading && !p.originalUrl).length < photos.length
+                                                        ? ` (${photos.filter(p => !p.uploading && !p.originalUrl).length} left)`
+                                                        : ''
+                                                    }`
+                                                }
+                                            </span>
                                         </button>
                                     )}
-                                    {/* Upload more */}
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all hover:opacity-80"
-                                        style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
-                                        <ImagePlus size={11} />
-                                        <span className="hidden md:inline">Upload More</span>
-                                        <span className="md:hidden">Upload</span>
-                                    </button>
+                                    {/* Upload more — hide at limit */}
+                                    {photos.length < MAX_PHOTOS ? (
+                                        <button
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all hover:opacity-80"
+                                            style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                            <ImagePlus size={11} />
+                                            <span className="hidden md:inline">Upload More</span>
+                                            <span className="md:hidden">Upload</span>
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold"
+                                            style={{ backgroundColor: C.warningBg, color: C.warning, border: `1px solid #fcd34d`, fontFamily: 'DM Sans, sans-serif' }}>
+                                            <AlertCircle size={11} /> 12/12 Full
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -671,9 +798,10 @@ Requirements:
                             <div
                                 className="rounded-2xl p-2 md:p-3 xl:p-4 relative"
                                 style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}
-                                onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                                onDragLeave={() => setDragOver(false)}
-                                onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files) }}>
+                                onDragEnter={e => { e.preventDefault(); dragCounterRef.current += 1; setDragOver(true) }}
+                                onDragOver={e => { e.preventDefault() }}
+                                onDragLeave={e => { e.preventDefault(); dragCounterRef.current -= 1; if (dragCounterRef.current === 0) setDragOver(false) }}
+                                onDrop={e => { e.preventDefault(); dragCounterRef.current = 0; setDragOver(false); handleFiles(e.dataTransfer.files) }}>
 
                                 {dragOver && (
                                     <div className="absolute inset-0 rounded-2xl z-10 flex items-center justify-center"
@@ -711,15 +839,43 @@ Requirements:
                                                                 <Loader2 size={28} className="animate-spin" style={{ color: C.primary }} />
                                                             </div>
                                                         )}
+                                                        {!photo.uploading && bgRemoving.has(photo.id) && (
+                                                            <BgRemovingOverlay />
+                                                        )}
+                                                        {!photo.uploading && bgSuccess === photo.id && (
+                                                            <div className="absolute inset-0 flex items-center justify-center rounded-2xl pointer-events-none"
+                                                                style={{ backgroundColor: 'rgba(16,185,129,0.75)' }}>
+                                                                <div className="flex flex-col items-center gap-1">
+                                                                    <CheckCircle2 size={28} style={{ color: '#fff' }} />
+                                                                    <p className="text-white text-[12px] font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>BG Removed!</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                         {!photo.uploading && (
                                                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2"
                                                                 style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-                                                                <button onClick={() => removeBg(photo.id)} disabled={bgRemoving.has(photo.id)}
-                                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold"
-                                                                    style={{ backgroundColor: 'rgba(117,48,251,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
-                                                                    {bgRemoving.has(photo.id) ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
-                                                                    {bgRemoving.has(photo.id) ? 'Removing...' : '✨ Remove BG'}
-                                                                </button>
+                                                                {photo.originalUrl ? (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <button onClick={() => { setSliderPhoto(photo.id); setSliderPos(50) }}
+                                                                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold hover:opacity-80"
+                                                                            style={{ backgroundColor: 'rgba(16,185,129,0.85)', color: '#fff' }}>
+                                                                            <span style={{ fontSize: 11 }}>✓</span> Compare
+                                                                        </button>
+                                                                        <button onClick={() => revertBg(photo.id)}
+                                                                            className="flex items-center justify-center rounded-lg hover:opacity-80"
+                                                                            style={{ width: 26, height: 26, backgroundColor: 'rgba(239,68,68,0.8)', color: '#fff', border: 'none' }}
+                                                                            title="Revert to original">
+                                                                            <RotateCcw size={11} />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button onClick={() => removeBg(photo.id)} disabled={bgRemoving.has(photo.id)}
+                                                                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold"
+                                                                        style={{ backgroundColor: 'rgba(117,48,251,0.85)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+                                                                        {bgRemoving.has(photo.id) ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
+                                                                        {bgRemoving.has(photo.id) ? 'Removing...' : 'Remove BG'}
+                                                                    </button>
+                                                                )}
                                                                 <button onClick={() => removePhoto(photo.id)}
                                                                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold"
                                                                     style={{ backgroundColor: 'rgba(239,68,68,0.8)', color: '#fff' }}>
@@ -765,11 +921,26 @@ Requirements:
                                                             {!photo.uploading && (
                                                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1"
                                                                     style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-                                                                    <button onClick={() => removeBg(photo.id)} disabled={bgRemoving.has(photo.id)}
-                                                                        className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
-                                                                        style={{ backgroundColor: 'rgba(117,48,251,0.85)', color: '#fff' }}>
-                                                                        {bgRemoving.has(photo.id) ? <Loader2 size={8} className="animate-spin" /> : <Wand2 size={8} />} BG
-                                                                    </button>
+                                                                    {photo.originalUrl ? (
+                                                                        <div className="flex items-center gap-0.5">
+                                                                            <button onClick={() => { setSliderPhoto(photo.id); setSliderPos(50) }}
+                                                                                className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
+                                                                                style={{ backgroundColor: 'rgba(16,185,129,0.85)', color: '#fff' }}>
+                                                                                ✓
+                                                                            </button>
+                                                                            <button onClick={() => revertBg(photo.id)}
+                                                                                className="flex items-center justify-center rounded-lg"
+                                                                                style={{ width: 16, height: 16, backgroundColor: 'rgba(239,68,68,0.8)', color: '#fff', border: 'none' }}>
+                                                                                <RotateCcw size={7} />
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button onClick={() => removeBg(photo.id)} disabled={bgRemoving.has(photo.id)}
+                                                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
+                                                                            style={{ backgroundColor: 'rgba(117,48,251,0.85)', color: '#fff' }}>
+                                                                            {bgRemoving.has(photo.id) ? <Loader2 size={8} className="animate-spin" /> : <Wand2 size={8} />} BG
+                                                                        </button>
+                                                                    )}
                                                                     <button onClick={() => setAsCover(photo.id)}
                                                                         className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
                                                                         style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff' }}>
@@ -819,14 +990,32 @@ Requirements:
                                                                 <Loader2 size={14} className="animate-spin" style={{ color: C.primary }} />
                                                             </div>
                                                         )}
+                                                        {!photo.uploading && bgRemoving.has(photo.id) && (
+                                                            <BgRemovingOverlay />
+                                                        )}
                                                         {!photo.uploading && (
                                                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1"
                                                                 style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-                                                                <button onClick={() => removeBg(photo.id)} disabled={bgRemoving.has(photo.id)}
-                                                                    className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
-                                                                    style={{ backgroundColor: 'rgba(117,48,251,0.85)', color: '#fff' }}>
-                                                                    {bgRemoving.has(photo.id) ? <Loader2 size={8} className="animate-spin" /> : <Wand2 size={8} />} BG
-                                                                </button>
+                                                                {photo.originalUrl ? (
+                                                                    <div className="flex items-center gap-0.5">
+                                                                        <button onClick={() => { setSliderPhoto(photo.id); setSliderPos(50) }}
+                                                                            className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
+                                                                            style={{ backgroundColor: 'rgba(16,185,129,0.85)', color: '#fff' }}>
+                                                                            ✓
+                                                                        </button>
+                                                                        <button onClick={() => revertBg(photo.id)}
+                                                                            className="flex items-center justify-center rounded-lg"
+                                                                            style={{ width: 16, height: 16, backgroundColor: 'rgba(239,68,68,0.8)', color: '#fff', border: 'none' }}>
+                                                                            <RotateCcw size={7} />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <button onClick={() => removeBg(photo.id)} disabled={bgRemoving.has(photo.id)}
+                                                                        className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
+                                                                        style={{ backgroundColor: 'rgba(117,48,251,0.85)', color: '#fff' }}>
+                                                                        {bgRemoving.has(photo.id) ? <Loader2 size={8} className="animate-spin" /> : <Wand2 size={8} />} BG
+                                                                    </button>
+                                                                )}
                                                                 <button onClick={() => setAsCover(photo.id)}
                                                                     className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-semibold"
                                                                     style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff' }}>
@@ -936,7 +1125,7 @@ Requirements:
                                     <div>
                                         <p className="text-[13px] font-semibold"
                                             style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                            {videoUploading ? 'Uploading video...' : 'Upload a product video'}
+                                            {videoUploading ? `Uploading video... ${videoProgress}%` : 'Upload a product video'}
                                         </p>
                                         <p className="text-[11px] mt-0.5"
                                             style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
@@ -1103,6 +1292,8 @@ Requirements:
                                                 fontFamily: 'DM Sans, sans-serif',
                                                 lineHeight: 1.6,
                                                 wordBreak: 'break-word',
+                                                pointerEvents: isTyping ? 'none' : 'auto',
+                                                userSelect: isTyping ? 'none' : 'auto',
                                             }}
                                             data-placeholder="Write your listing description here, or use AI to generate one..."
                                         />
@@ -1430,6 +1621,19 @@ Requirements:
                                                 ✓ Saved
                                             </span>
                                         )}
+                                        {isTyping && (
+                                            <span className="flex items-center gap-1 text-[11px] font-medium"
+                                                style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    width: 2, height: 13,
+                                                    backgroundColor: C.primary,
+                                                    borderRadius: 1,
+                                                    animation: 'sp-blink 0.7s step-end infinite',
+                                                }} />
+                                                AI writing...
+                                            </span>
+                                        )}
                                     </div>
 
                                 </div>
@@ -1441,6 +1645,129 @@ Requirements:
                 </div>
             </div>{/* end xl:px-[5%] wrapper */}
 
+            {/* ── Before/After Slider Modal ─────────────────────────── */}
+            <SliderModal
+                photoId={sliderPhoto}
+                photos={photos}
+                sliderPos={sliderPos}
+                setSliderPos={setSliderPos}
+                onClose={() => setSliderPhoto(null)}
+                onRevert={revertBg}
+            />
+
+        </div>
+    )
+}
+
+// ── SliderModal ───────────────────────────────────────────────
+interface SliderModalProps {
+    photoId: string | null
+    photos: Array<{ id: string; url: string; originalUrl?: string }>
+    sliderPos: number
+    setSliderPos: (v: number) => void
+    onClose: () => void
+    onRevert: (id: string) => void
+}
+
+function SliderModal({ photoId, photos, sliderPos, setSliderPos, onClose, onRevert }: SliderModalProps) {
+    if (!photoId) return null
+    const photo = photos.find(p => p.id === photoId)
+    if (!photo) return null
+    const originalUrl = photo.originalUrl
+    if (!originalUrl) return null
+    const hasOriginal = originalUrl !== '__processed__'
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)' }}
+            onClick={onClose}>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl"
+                style={{ width: 'min(90vw, 600px)', background: '#1e1535' }}
+                onClick={e => e.stopPropagation()}>
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div>
+                        <p className="font-bold text-[13px] text-white" style={{ fontFamily: 'Syne, sans-serif' }}>Before / After</p>
+                        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Drag slider to compare</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => onRevert(photo.id)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold hover:opacity-80"
+                            style={{ backgroundColor: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+                            <RotateCcw size={11} /> Revert to Original
+                        </button>
+                        <button onClick={onClose}
+                            className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
+                            style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                            <X size={14} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Slider */}
+                <div className="relative select-none" style={{ aspectRatio: '1/1', maxHeight: '65vh' }}>
+                    <img src={photo.url} alt="After"
+                        className="absolute inset-0 w-full h-full object-contain"
+                        style={{ backgroundColor: '#fff' }} />
+                    {hasOriginal ? (
+                        <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
+                            <img src={originalUrl} alt="Before"
+                                className="absolute inset-0 h-full object-contain"
+                                style={{ width: `${10000 / Math.max(sliderPos, 1)}%`, maxWidth: 'none', backgroundColor: '#f3f4f6' }} />
+                        </div>
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center"
+                            style={{ backgroundColor: 'rgba(30,21,53,0.65)', width: `${sliderPos}%` }}>
+                            <p className="text-white text-[12px] text-center px-4" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                                Original not stored
+                                <br /><span style={{ opacity: 0.5, fontSize: 11 }}>Processed before this session</span>
+                            </p>
+                        </div>
+                    )}
+                    <div className="absolute top-0 bottom-0 w-0.5 pointer-events-none"
+                        style={{ left: `${sliderPos}%`, background: '#7530fb', boxShadow: '0 0 8px rgba(117,48,251,0.8)' }}>
+                        <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg"
+                            style={{ backgroundColor: '#7530fb', cursor: 'ew-resize' }}>
+                            <span className="text-white text-[10px] font-bold">◀▶</span>
+                        </div>
+                    </div>
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>BEFORE</div>
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                        style={{ backgroundColor: 'rgba(117,48,251,0.7)' }}>AFTER</div>
+                    <div className="absolute inset-0 cursor-ew-resize"
+                        onMouseDown={e => {
+                            e.preventDefault()
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            const move = (ev: MouseEvent) =>
+                                setSliderPos(Math.min(100, Math.max(0, ((ev.clientX - rect.left) / rect.width) * 100)))
+                            const up = () => {
+                                window.removeEventListener('mousemove', move)
+                                window.removeEventListener('mouseup', up)
+                            }
+                            window.addEventListener('mousemove', move)
+                            window.addEventListener('mouseup', up)
+                        }}
+                        onTouchMove={e => {
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            setSliderPos(Math.min(100, Math.max(0, ((e.touches[0].clientX - rect.left) / rect.width) * 100)))
+                        }}
+                    />
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between px-4 py-3"
+                    style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>AI Studio — BiRefNet pipeline</p>
+                    <button onClick={onClose}
+                        className="px-4 py-1.5 rounded-lg text-[12px] font-semibold"
+                        style={{ backgroundColor: '#7530fb', color: '#fff' }}>
+                        Keep Result
+                    </button>
+                </div>
+            </div>
         </div>
     )
 }

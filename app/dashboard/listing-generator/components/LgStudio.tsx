@@ -12,9 +12,12 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { calcHealth } from '@/lib/health-engine'
 import { CheckCircle2 } from 'lucide-react'
 import Step1Product from './steps/Step1Product'
 import Step2Media from './steps/Step2Media'
+import Step3Pricing from './steps/Step3Pricing'
+import Step4Publish from './steps/Step4Publish'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -45,15 +48,20 @@ export interface DraftData {
     seller_type: string
     product_name: string
     title: string
+    subtitle: string
     category: string
     condition: string
+    condition_description: string
     sku: string
     item_specifics: Record<string, string>
+    upc: string
+    ean: string
+    mpn: string
+    product_url: string
     main_photo_url: string
     photo_urls: string[]
     video_url: string
     has_variations: boolean
-    condition_description: string
     description_html: string
     sell_price: number | null
     buy_price: number | null
@@ -63,25 +71,58 @@ export interface DraftData {
     dispatch_days: number
     returns_policy: string
     quantity: number
+    vat_registered: boolean
+    best_offer_enabled: boolean
+    best_offer_accept: number | null
+    best_offer_decline: number | null
+    out_of_stock_option: boolean
+    item_zip: string
+    item_country: string
+    international_shipping: boolean
+    immediate_payment: boolean
+    shipping_carrier: string
+    listing_format: string
+    auction_duration: string
+    package_weight_lbs: number | null
+    package_weight_oz: number | null
+    pkg_length: number | null
+    pkg_width: number | null
+    pkg_height: number | null
+    irregular_package: boolean
+    volume_pricing: boolean
+    sell_as_lot: boolean
+    private_listing: boolean
+    scheduled_at: string
+    promoted_general: boolean
+    promoted_general_rate: number | null
+    promoted_priority: boolean
+    promoted_priority_budget: number | null
+    item_disclosures: boolean
     health_score: number
     vero_status: string
     status: string
     current_step: number
+    photo_count: number
 }
 
 const INITIAL_DRAFT: DraftData = {
     seller_type: '',
     product_name: '',
     title: '',
+    subtitle: '',
     category: '',
     condition: '',
+    condition_description: '',
     sku: '',
     item_specifics: {},
+    upc: '',
+    ean: '',
+    mpn: '',
+    product_url: '',
     main_photo_url: '',
     photo_urls: [],
     video_url: '',
     has_variations: false,
-    condition_description: '',
     description_html: '',
     sell_price: null,
     buy_price: null,
@@ -91,7 +132,35 @@ const INITIAL_DRAFT: DraftData = {
     dispatch_days: 1,
     returns_policy: '30_day_buyer_pays',
     quantity: 1,
+    vat_registered: false,
+    best_offer_enabled: false,
+    best_offer_accept: null,
+    best_offer_decline: null,
+    out_of_stock_option: false,
+    item_zip: '',
+    item_country: 'US',
+    international_shipping: false,
+    immediate_payment: true,
+    shipping_carrier: '',
+    listing_format: 'buy_it_now',
+    auction_duration: '7',
+    package_weight_lbs: null,
+    package_weight_oz: null,
+    pkg_length: null,
+    pkg_width: null,
+    pkg_height: null,
+    irregular_package: false,
+    volume_pricing: false,
+    sell_as_lot: false,
+    private_listing: false,
+    scheduled_at: '',
+    promoted_general: false,
+    promoted_general_rate: null,
+    promoted_priority: false,
+    promoted_priority_budget: null,
+    item_disclosures: false,
     health_score: 0,
+    photo_count: 0,
     vero_status: 'unchecked',
     status: 'draft',
     current_step: 1,
@@ -149,25 +218,17 @@ export default function LgStudio({ draftId, onBack }: Props) {
         loadDraft()
     }, [draftId])
 
-    // ── Calculate health score ───────────────────────────────
+    // ── Calculate health score — uses shared health-engine ──────
     useEffect(() => {
-        let score = 0
-        if (draft.seller_type) score += 5
-        if (draft.title.length >= 40) score += 20
-        else if (draft.title.length >= 20) score += 10
-        if (draft.category) score += 10
-        if (draft.condition) score += 10
-        if (draft.sku) score += 5
-        if (Object.keys(draft.item_specifics).length >= 3) score += 10
-        if (draft.description_html) score += 15
-        if (draft.sell_price && draft.sell_price > 0) score += 15
-        if (draft.buy_price && draft.buy_price > 0) score += 5
-        if (draft.shipping_type) score += 5
-        setDraft(prev => ({ ...prev, health_score: Math.min(score, 100) }))
+        const { score } = calcHealth(draft as any)
+        setDraft(prev => ({ ...prev, health_score: score }))
     }, [
-        draft.seller_type, draft.title, draft.category, draft.condition,
-        draft.sku, draft.item_specifics, draft.description_html,
-        draft.sell_price, draft.buy_price, draft.shipping_type,
+        draft.title, draft.category, draft.condition, draft.sku,
+        draft.item_specifics, draft.description_html, draft.sell_price,
+        draft.buy_price, draft.shipping_type, draft.free_shipping,
+        draft.photo_urls, draft.item_zip, draft.upc, draft.ean, draft.mpn,
+        draft.subtitle, draft.returns_policy, draft.dispatch_days,
+        draft.condition_description,
     ])
 
     // ── Auto-save every 30s ──────────────────────────────────
@@ -190,8 +251,10 @@ export default function LgStudio({ draftId, onBack }: Props) {
                 seller_type: draft.seller_type || 'own_stock',
                 product_name: draft.product_name,
                 title: draft.title,
+                subtitle: draft.subtitle,
                 category: draft.category,
                 condition: draft.condition,
+                condition_description: draft.condition_description,
                 sku: draft.sku,
                 item_specifics: draft.item_specifics,
                 description_html: draft.description_html,
@@ -205,6 +268,38 @@ export default function LgStudio({ draftId, onBack }: Props) {
                 quantity: draft.quantity,
                 health_score: draft.health_score,
                 vero_status: draft.vero_status,
+                // ── Photos ──────────────────────────────────────────
+                main_photo_url: draft.main_photo_url || '',
+                photo_urls: draft.photo_urls || [],
+                photo_count: (draft.photo_urls || []).length,
+                // ── Pricing extras ───────────────────────────────────
+                vat_registered: draft.vat_registered,
+                best_offer_enabled: draft.best_offer_enabled,
+                best_offer_accept: draft.best_offer_accept,
+                best_offer_decline: draft.best_offer_decline,
+                out_of_stock_option: draft.out_of_stock_option,
+                item_zip: draft.item_zip,
+                item_country: draft.item_country,
+                international_shipping: draft.international_shipping,
+                immediate_payment: draft.immediate_payment,
+                shipping_carrier: draft.shipping_carrier,
+                listing_format: draft.listing_format,
+                auction_duration: draft.auction_duration,
+                package_weight_lbs: draft.package_weight_lbs,
+                package_weight_oz: draft.package_weight_oz,
+                pkg_length: draft.pkg_length,
+                pkg_width: draft.pkg_width,
+                pkg_height: draft.pkg_height,
+                irregular_package: draft.irregular_package,
+                volume_pricing: draft.volume_pricing,
+                sell_as_lot: draft.sell_as_lot,
+                private_listing: draft.private_listing,
+                scheduled_at: draft.scheduled_at,
+                promoted_general: draft.promoted_general,
+                promoted_general_rate: draft.promoted_general_rate,
+                promoted_priority: draft.promoted_priority,
+                promoted_priority_budget: draft.promoted_priority_budget,
+                item_disclosures: draft.item_disclosures,
                 status: 'draft',
                 current_step: currentStep,
                 updated_at: new Date().toISOString(),
@@ -280,10 +375,21 @@ export default function LgStudio({ draftId, onBack }: Props) {
                     />
                 )}
                 {currentStep === 3 && (
-                    <ComingSoon step={3} label="Price & Shipping" onBack={goPrev} onNext={goNext} />
+                    <Step3Pricing
+                        draft={draft}
+                        onChange={updateDraft}
+                        onNext={goNext}
+                        onPrev={goPrev}
+                        onSave={saveDraft}
+                    />
                 )}
                 {currentStep === 4 && (
-                    <ComingSoon step={4} label="Audit & Publish" onBack={goPrev} />
+                    <Step4Publish
+                        draft={draft}
+                        onChange={updateDraft}
+                        onSave={saveDraft}
+                        onStepJump={(step) => setCurrentStep(step as WizardStep)}
+                    />
                 )}
             </div>
 
