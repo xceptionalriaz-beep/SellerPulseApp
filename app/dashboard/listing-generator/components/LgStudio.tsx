@@ -53,45 +53,46 @@ export interface DraftData {
     condition: string
     condition_description: string
     sku: string
-    item_specifics: Record<string, string>
     upc: string
     ean: string
     mpn: string
     product_url: string
+    listing_format: string
+    auction_duration: string
+    has_variations: boolean
+    item_specifics: Record<string, string>
     main_photo_url: string
     photo_urls: string[]
     video_url: string
-    has_variations: boolean
     description_html: string
     sell_price: number | null
     buy_price: number | null
+    quantity: number
+    vat_registered: boolean
+    immediate_payment: boolean
+    best_offer_enabled: boolean
+    best_offer_min: number | null
+    best_offer_accept: number | null
+    best_offer_decline: number | null
+    volume_pricing: boolean
+    out_of_stock_option: boolean
+    sell_as_lot: boolean
+    private_listing: boolean
+    item_zip: string
+    item_country: string
     shipping_type: string
     shipping_cost: number
     free_shipping: boolean
-    dispatch_days: number
-    returns_policy: string
-    quantity: number
-    vat_registered: boolean
-    best_offer_enabled: boolean
-    best_offer_accept: number | null
-    best_offer_decline: number | null
-    out_of_stock_option: boolean
-    item_zip: string
-    item_country: string
-    international_shipping: boolean
-    immediate_payment: boolean
     shipping_carrier: string
-    listing_format: string
-    auction_duration: string
     package_weight_lbs: number | null
     package_weight_oz: number | null
     pkg_length: number | null
     pkg_width: number | null
     pkg_height: number | null
     irregular_package: boolean
-    volume_pricing: boolean
-    sell_as_lot: boolean
-    private_listing: boolean
+    international_shipping: boolean
+    dispatch_days: number
+    returns_policy: string
     scheduled_at: string
     promoted_general: boolean
     promoted_general_rate: number | null
@@ -114,45 +115,46 @@ const INITIAL_DRAFT: DraftData = {
     condition: '',
     condition_description: '',
     sku: '',
-    item_specifics: {},
     upc: '',
     ean: '',
     mpn: '',
     product_url: '',
+    listing_format: 'buy_it_now',
+    auction_duration: '7',
+    has_variations: false,
+    item_specifics: {},
     main_photo_url: '',
     photo_urls: [],
     video_url: '',
-    has_variations: false,
     description_html: '',
     sell_price: null,
     buy_price: null,
+    quantity: 1,
+    vat_registered: false,
+    immediate_payment: true,
+    best_offer_enabled: false,
+    best_offer_min: null,
+    best_offer_accept: null,
+    best_offer_decline: null,
+    volume_pricing: false,
+    out_of_stock_option: false,
+    sell_as_lot: false,
+    private_listing: false,
+    item_zip: '',
+    item_country: 'US',
     shipping_type: 'fixed',
     shipping_cost: 0,
     free_shipping: false,
-    dispatch_days: 1,
-    returns_policy: '30_day_buyer_pays',
-    quantity: 1,
-    vat_registered: false,
-    best_offer_enabled: false,
-    best_offer_accept: null,
-    best_offer_decline: null,
-    out_of_stock_option: false,
-    item_zip: '',
-    item_country: 'US',
-    international_shipping: false,
-    immediate_payment: true,
     shipping_carrier: '',
-    listing_format: 'buy_it_now',
-    auction_duration: '7',
     package_weight_lbs: null,
     package_weight_oz: null,
     pkg_length: null,
     pkg_width: null,
     pkg_height: null,
     irregular_package: false,
-    volume_pricing: false,
-    sell_as_lot: false,
-    private_listing: false,
+    international_shipping: false,
+    dispatch_days: 1,
+    returns_policy: '30_day_buyer_pays',
     scheduled_at: '',
     promoted_general: false,
     promoted_general_rate: null,
@@ -208,9 +210,21 @@ export default function LgStudio({ draftId, onBack }: Props) {
                 .eq('id', draftId)
                 .single()
             if (data) {
+                // Supabase can return arrays as null or string — normalize them
+                const photoUrls = Array.isArray(data.photo_urls)
+                    ? data.photo_urls
+                    : typeof data.photo_urls === 'string'
+                        ? JSON.parse(data.photo_urls)
+                        : []
+                const itemSpecifics = data.item_specifics && typeof data.item_specifics === 'object' && !Array.isArray(data.item_specifics)
+                    ? data.item_specifics
+                    : {}
                 setDraft({
                     ...INITIAL_DRAFT,
                     ...data,
+                    photo_urls: photoUrls,
+                    main_photo_url: data.main_photo_url || photoUrls[0] || '',
+                    item_specifics: itemSpecifics,
                 })
                 setCurrentStep((data.current_step || 1) as WizardStep)
             }
@@ -218,17 +232,17 @@ export default function LgStudio({ draftId, onBack }: Props) {
         loadDraft()
     }, [draftId])
 
-    // ── Calculate health score — uses shared health-engine ──────
+    // ── Calculate health score — shared engine ──────────────
     useEffect(() => {
         const { score } = calcHealth(draft as any)
         setDraft(prev => ({ ...prev, health_score: score }))
     }, [
         draft.title, draft.category, draft.condition, draft.sku,
-        draft.item_specifics, draft.description_html, draft.sell_price,
-        draft.buy_price, draft.shipping_type, draft.free_shipping,
-        draft.photo_urls, draft.item_zip, draft.upc, draft.ean, draft.mpn,
-        draft.subtitle, draft.returns_policy, draft.dispatch_days,
-        draft.condition_description,
+        draft.photo_urls, draft.description_html, draft.sell_price,
+        draft.buy_price, draft.free_shipping, draft.shipping_type,
+        draft.item_specifics, draft.item_zip, draft.upc, draft.ean,
+        draft.mpn, draft.subtitle, draft.returns_policy, draft.dispatch_days,
+        draft.condition_description, draft.immediate_payment,
     ])
 
     // ── Auto-save every 30s ──────────────────────────────────
@@ -254,7 +268,6 @@ export default function LgStudio({ draftId, onBack }: Props) {
                 subtitle: draft.subtitle,
                 category: draft.category,
                 condition: draft.condition,
-                condition_description: draft.condition_description,
                 sku: draft.sku,
                 item_specifics: draft.item_specifics,
                 description_html: draft.description_html,
@@ -268,32 +281,39 @@ export default function LgStudio({ draftId, onBack }: Props) {
                 quantity: draft.quantity,
                 health_score: draft.health_score,
                 vero_status: draft.vero_status,
+                // ── Product identifiers ─────────────────────────────
+                upc: draft.upc,
+                ean: draft.ean,
+                mpn: draft.mpn,
+                product_url: draft.product_url,
+                listing_format: draft.listing_format,
+                auction_duration: draft.auction_duration,
+                has_variations: draft.has_variations,
                 // ── Photos ──────────────────────────────────────────
                 main_photo_url: draft.main_photo_url || '',
                 photo_urls: draft.photo_urls || [],
                 photo_count: (draft.photo_urls || []).length,
                 // ── Pricing extras ───────────────────────────────────
                 vat_registered: draft.vat_registered,
+                immediate_payment: draft.immediate_payment,
                 best_offer_enabled: draft.best_offer_enabled,
+                best_offer_min: draft.best_offer_min,
                 best_offer_accept: draft.best_offer_accept,
                 best_offer_decline: draft.best_offer_decline,
+                volume_pricing: draft.volume_pricing,
                 out_of_stock_option: draft.out_of_stock_option,
+                sell_as_lot: draft.sell_as_lot,
+                private_listing: draft.private_listing,
                 item_zip: draft.item_zip,
                 item_country: draft.item_country,
-                international_shipping: draft.international_shipping,
-                immediate_payment: draft.immediate_payment,
                 shipping_carrier: draft.shipping_carrier,
-                listing_format: draft.listing_format,
-                auction_duration: draft.auction_duration,
                 package_weight_lbs: draft.package_weight_lbs,
                 package_weight_oz: draft.package_weight_oz,
                 pkg_length: draft.pkg_length,
                 pkg_width: draft.pkg_width,
                 pkg_height: draft.pkg_height,
                 irregular_package: draft.irregular_package,
-                volume_pricing: draft.volume_pricing,
-                sell_as_lot: draft.sell_as_lot,
-                private_listing: draft.private_listing,
+                international_shipping: draft.international_shipping,
                 scheduled_at: draft.scheduled_at,
                 promoted_general: draft.promoted_general,
                 promoted_general_rate: draft.promoted_general_rate,
@@ -335,6 +355,7 @@ export default function LgStudio({ draftId, onBack }: Props) {
     }
 
     async function goPrev() {
+        await saveDraft(true)
         if (currentStep > 1) setCurrentStep(prev => (prev - 1) as WizardStep)
     }
 
@@ -356,7 +377,7 @@ export default function LgStudio({ draftId, onBack }: Props) {
         <div className="flex flex-col h-full" style={{ backgroundColor: C.bg }}>
 
             {/* Step content — full width. On mobile: scrollable page. On xl: fixed height columns */}
-            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto xl:overflow-hidden scrollbar-hide">
+            <div className={`flex-1 flex flex-col min-h-0 scrollbar-hide ${currentStep === 4 ? 'overflow-y-auto' : 'overflow-y-auto xl:overflow-hidden'}`}>
                 {currentStep === 1 && (
                     <Step1Product
                         draft={draft}

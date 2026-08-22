@@ -1010,7 +1010,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </aside>
         ) : (
           /* -- USER SIDEBAR -- */
-          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col rounded-[30px] m-3" style={{ backgroundColor: '#1e1535' }}>
+          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col h-screen rounded-none m-0 border-r border-[#2d224d]" style={{ backgroundColor: '#1e1535' }}>
             <div className="flex justify-center pt-[30px] pb-[35px]">
               <button onClick={() => router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
                 <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 24, height: 24 }} />

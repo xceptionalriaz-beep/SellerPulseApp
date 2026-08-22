@@ -12,8 +12,8 @@
 import React, { useState, JSX } from 'react'
 import type { ReactNode } from 'react'
 import {
-    CheckCircle2, AlertCircle, XCircle,
-    Shield, Zap, ExternalLink, Send, Loader2, Eye,
+    CheckCircle2, AlertCircle, XCircle, ChevronDown,
+    Shield, Zap, Send, Loader2, Eye,
     Image as ImageIcon, FileText, Tag, DollarSign,
     Truck, RotateCcw, MapPin, Globe,
     Megaphone, Lock, Users, Hash, Layers,
@@ -118,7 +118,7 @@ function Section({ icon, title, children, status }: {
 }) {
     const dot = status === 'ok' ? C.success : status === 'warn' ? C.warning : status === 'missing' ? C.danger : C.muted
     return (
-        <div className="rounded-2xl" style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}>
+        <div className="rounded-2xl" style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface, overflow: 'visible' }}>
             <div className="w-full flex items-center gap-3 px-4 py-3"
                 style={{ borderBottom: `1px solid ${C.border}` }}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
@@ -146,7 +146,7 @@ function Row({ label, required, children, missing }: {
 }) {
     return (
         <div className="flex items-start gap-3 py-2.5" style={{ borderBottom: `1px solid ${C.border}` }}>
-            <div className="w-[130px] shrink-0 flex items-center gap-1 pt-1.5">
+            <div className="w-[150px] shrink-0 flex items-center gap-1 pt-1.5">
                 <span className="text-[11px] font-semibold" style={{ color: missing ? C.danger : C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
                     {label}
                 </span>
@@ -201,6 +201,7 @@ const CATEGORY_OPTIONS = Object.entries(CATEGORY_MAP).map(([val, label]) => ({ v
 export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Props): JSX.Element {
     const [publishing, setPublishing] = useState(false)
     const [showToast, setShowToast] = useState(false)
+    const [showActions, setShowActions] = useState(false)
     const health = calcHealth(draft as any)
     const { score, label: scoreLabel, color: scoreColor } = health
 
@@ -217,31 +218,29 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
     const fmt = (n: number | null) => n ? `$${Number(n).toFixed(2)}` : '—'
 
     return (
-        <div className="flex flex-col xl:h-full">
-            <div className="flex flex-col xl:flex-1 xl:min-h-0 xl:overflow-hidden xl:px-[5%]">
-                <div className="flex flex-col xl:flex-1 xl:flex-row xl:min-h-0 xl:overflow-hidden">
+        <div className="flex flex-col">
+            <div className="flex flex-col xl:px-[5%]">
+                <div className="flex flex-col xl:flex-row">
 
                     {/* ── LEFT: Full review list ─────────────────── */}
-                    <div className="flex-1 xl:overflow-y-auto p-3 md:p-4 xl:px-[10%] flex flex-col gap-4 scrollbar-hide"
+                    <div className="flex-1 p-3 md:p-4 xl:px-[10%] pb-8 flex flex-col gap-4"
                         style={{ scrollbarWidth: 'none' }}>
 
                         {/* ── 0. SELLER INFO ───────────────────────── */}
                         <Section icon={<Users size={14} style={{ color: C.primary }} />} title="Seller Info">
                             <Row label="Seller Type">
                                 <span className="text-[12px] font-semibold capitalize" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {draft.seller_type?.replace('_', ' ') || '—'}
+                                    {draft.seller_type?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || '—'}
                                 </span>
                             </Row>
                             <Row label="Product Name">
                                 <InlineInput value={draft.product_name} onChange={v => onChange({ product_name: v })} placeholder="Internal product name" />
                             </Row>
-                            {(draft as any).source_platform && (
-                                <Row label="Source Platform">
-                                    <span className="text-[12px] font-semibold capitalize" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                        {String((draft as any).source_platform).replace('_', ' ')}
-                                    </span>
-                                </Row>
-                            )}
+                            <Row label="Source Platform">
+                                <span className="text-[12px] font-semibold" style={{ color: (draft as any).source_platform ? C.body : C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                    {(draft as any).source_platform ? String((draft as any).source_platform).replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : '— Not set'}
+                                </span>
+                            </Row>
                         </Section>
 
                         {/* ── 1. PRODUCT INFO ──────────────────────── */}
@@ -340,61 +339,141 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                         {/* ── 4. PHOTOS & MEDIA ────────────────────── */}
                         <Section icon={<ImageIcon size={14} style={{ color: C.primary }} />} title="Photos & Media"
                             status={(draft.photo_urls?.length ?? 0) >= 1 ? 'ok' : 'missing'}>
-                            <Row label="Cover Photo" missing={!draft.main_photo_url}>
-                                {draft.main_photo_url
-                                    ? <img src={draft.main_photo_url} alt="Cover"
-                                        className="w-16 h-16 rounded-xl object-cover"
-                                        style={{ border: `1px solid ${C.border}` }} />
-                                    : <span className="text-[12px]" style={{ color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>No cover photo</span>
-                                }
-                            </Row>
-                            <Row label="Total Photos">
-                                <span className="text-[12px] font-semibold" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {draft.photo_urls?.length ?? 0} photos uploaded
-                                </span>
-                                {(draft.photo_urls?.length ?? 0) < 4 && (
-                                    <span className="text-[11px]" style={{ color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
-                                        — add {4 - (draft.photo_urls?.length ?? 0)} more for best visibility
-                                    </span>
-                                )}
-                            </Row>
-                            <Row label="Video">
-                                <span className="text-[12px]" style={{ color: draft.video_url ? C.success : C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {draft.video_url ? '✓ Video uploaded' : 'No video'}
-                                </span>
-                            </Row>
-                            {/* Photo strip */}
-                            {(draft.photo_urls?.length ?? 0) > 0 && (
-                                <div className="flex gap-2 flex-wrap pt-1">
-                                    {draft.photo_urls.slice(0, 8).map((url, i) => (
-                                        <img key={i} src={url} alt={`Photo ${i + 1}`}
-                                            className="w-12 h-12 rounded-lg object-cover"
-                                            style={{ border: `1px solid ${C.border}` }} />
-                                    ))}
-                                    {(draft.photo_urls?.length ?? 0) > 8 && (
-                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center text-[11px] font-bold"
-                                            style={{ border: `1px solid ${C.border}`, color: C.muted, backgroundColor: C.bg }}>
-                                            +{draft.photo_urls.length - 8}
+
+                            {/* Photo grid — each photo removable + set as cover */}
+                            <div className="py-2">
+                                {(draft.photo_urls?.length ?? 0) === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-6 gap-2 rounded-xl"
+                                        style={{ backgroundColor: C.bg, border: `2px dashed ${C.border}` }}>
+                                        <ImageIcon size={24} style={{ color: C.muted }} />
+                                        <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>No photos — go to Step 2 to upload</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        {/* Status badge */}
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[11px] font-semibold" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                {draft.photo_urls.length} photo{draft.photo_urls.length !== 1 ? 's' : ''}
+                                            </span>
+                                            {(draft.photo_urls?.length ?? 0) < 4
+                                                ? <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: C.warningBg, color: C.warning }}>Add {4 - draft.photo_urls.length} more in Step 2</span>
+                                                : <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold" style={{ backgroundColor: C.successBg, color: C.success }}>Good — {draft.photo_urls.length} photos</span>
+                                            }
                                         </div>
-                                    )}
-                                </div>
-                            )}
+                                        {/* Photo grid */}
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {draft.photo_urls.map((url, i) => (
+                                                <div key={i} className="relative group rounded-xl overflow-hidden"
+                                                    style={{ aspectRatio: '1', border: `2px solid ${url === draft.main_photo_url ? C.primary : C.border}` }}>
+                                                    <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                                                    {/* Cover badge */}
+                                                    {url === draft.main_photo_url && (
+                                                        <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-bold"
+                                                            style={{ backgroundColor: C.primary, color: '#fff' }}>Cover</div>
+                                                    )}
+                                                    {/* Actions overlay */}
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all"
+                                                        style={{ backgroundColor: 'rgba(30,21,53,0.7)' }}>
+                                                        {url !== draft.main_photo_url && (
+                                                            <button
+                                                                onClick={() => onChange({ main_photo_url: url })}
+                                                                className="text-[9px] font-bold px-2 py-0.5 rounded"
+                                                                style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
+                                                                Set Cover
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => {
+                                                                const newUrls = draft.photo_urls.filter((_, idx) => idx !== i)
+                                                                onChange({
+                                                                    photo_urls: newUrls,
+                                                                    main_photo_url: url === draft.main_photo_url ? (newUrls[0] ?? '') : draft.main_photo_url
+                                                                })
+                                                            }}
+                                                            className="text-[9px] font-bold px-2 py-0.5 rounded"
+                                                            style={{ backgroundColor: C.danger, color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                    {/* Number badge */}
+                                                    <div className="absolute bottom-1 right-1 w-4 h-4 rounded flex items-center justify-center text-[8px] font-bold"
+                                                        style={{ backgroundColor: 'rgba(0,0,0,0.5)', color: '#fff' }}>
+                                                        {i + 1}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                            Hover a photo to set cover or remove. Add/reorder photos in Step 2.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Video URL */}
+                            <Row label="Video URL">
+                                <InlineInput value={draft.video_url ?? ''} type="text"
+                                    onChange={v => onChange({ video_url: v })}
+                                    placeholder="https://youtube.com/watch?v=..." />
+                                {draft.video_url && <CheckCircle2 size={12} style={{ color: C.success, flexShrink: 0 }} />}
+                            </Row>
                         </Section>
 
                         {/* ── 5. DESCRIPTION ───────────────────────── */}
                         <Section icon={<FileText size={14} style={{ color: C.primary }} />} title="Description"
                             status={(draft.description_html?.length ?? 0) > 50 ? 'ok' : 'missing'}>
-                            <Row label="Description" required missing={(draft.description_html?.length ?? 0) < 50}>
-                                <div className="flex-1">
-                                    <div className="p-3 rounded-xl text-[12px]"
-                                        style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, color: C.secondary, fontFamily: 'DM Sans, sans-serif', maxHeight: 120, overflowY: 'auto' }}
-                                        dangerouslySetInnerHTML={{ __html: draft.description_html || '<em style="color:#9ca3af">No description yet — add in Step 2</em>' }}
-                                    />
-                                    <p className="text-[10px] mt-1" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                        Edit description in Step 2 → Photos & Description
-                                    </p>
+                            <div className="py-2 flex flex-col gap-2">
+                                {/* Stats bar */}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Plain text edit — formatting preserved
+                                    </span>
+                                    <span className="text-[11px] font-bold" style={{
+                                        color: (draft.description_html?.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length ?? 0) >= 100 ? C.success : C.warning,
+                                        fontFamily: 'DM Sans, sans-serif'
+                                    }}>
+                                        {draft.description_html?.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length ?? 0} words
+                                    </span>
                                 </div>
-                            </Row>
+
+                                {/* Editable plain text */}
+                                <textarea
+                                    value={draft.description_html?.replace(/<[^>]*>/g, '') ?? ''}
+                                    onChange={e => onChange({ description_html: e.target.value })}
+                                    placeholder="Write your product description here..."
+                                    rows={6}
+                                    style={{
+                                        width: '100%',
+                                        fontSize: 13,
+                                        color: C.body,
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        border: `1px solid ${C.borderInput}`,
+                                        borderRadius: 12,
+                                        padding: '10px 12px',
+                                        backgroundColor: C.surface,
+                                        outline: 'none',
+                                        resize: 'vertical',
+                                        lineHeight: 1.6,
+                                    }}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+
+                                {/* Preview rendered HTML */}
+                                {draft.description_html && (
+                                    <div>
+                                        <p className="text-[10px] mb-1" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>HTML Preview (buyer view):</p>
+                                        <div className="p-3 rounded-xl text-[12px]"
+                                            style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, color: C.secondary, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 }}
+                                            dangerouslySetInnerHTML={{ __html: draft.description_html }}
+                                        />
+                                    </div>
+                                )}
+
+                                <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                    For full rich text editing with formatting go to Step 2.
+                                </p>
+                            </div>
                         </Section>
 
                         {/* ── 6. PRICING ───────────────────────────── */}
@@ -442,6 +521,11 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                 </span>
                             </Row>
                             {(draft as any).best_offer_enabled && (<>
+                                <Row label="Min. Offer">
+                                    <InlineInput value={(draft as any).best_offer_min ?? ''} prefix="$" type="number"
+                                        onChange={v => onChange({ best_offer_min: v === '' ? null : Number(v) } as any)}
+                                        placeholder="Minimum accepted" />
+                                </Row>
                                 <Row label="Auto-Accept">
                                     <InlineInput value={(draft as any).best_offer_accept ?? ''} prefix="$" type="number"
                                         onChange={v => onChange({ best_offer_accept: v === '' ? null : Number(v) } as any)}
@@ -535,6 +619,12 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                     </Row>
                                 </>)}
                             </>)}
+                            <Row label="Irregular Package">
+                                <InlineToggle checked={(draft as any).irregular_package ?? false} onChange={v => onChange({ irregular_package: v } as any)} />
+                                <span className="text-[12px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                    {(draft as any).irregular_package ? 'Yes — carriers may charge extra' : 'No'}
+                                </span>
+                            </Row>
                             <Row label="Intl. Shipping">
                                 <InlineToggle checked={(draft as any).international_shipping ?? false} onChange={v => onChange({ international_shipping: v } as any)} />
                                 <span className="text-[12px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
@@ -544,7 +634,7 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                         </Section>
 
                         {/* ── 10. DISPATCH & RETURNS ───────────────── */}
-                        <Section icon={<RotateCcw size={14} style={{ color: C.primary }} />} title="Dispatch & Returns">
+                        <Section icon={<RotateCcw size={14} style={{ color: C.primary }} />} title="Dispatch & Returns" status={draft.dispatch_days && draft.returns_policy ? 'ok' : 'warn'}>
                             <Row label="Dispatch Time">
                                 <ProDropdown prefix="" currentValue={String(draft.dispatch_days)}
                                     onChanged={v => onChange({ dispatch_days: Number(v) })} width="full"
@@ -570,7 +660,7 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                         </Section>
 
                         {/* ── 11. LISTING OPTIONS ──────────────────── */}
-                        <Section icon={<Lock size={14} style={{ color: C.primary }} />} title="Listing Options">
+                        <Section icon={<Lock size={14} style={{ color: C.primary }} />} title="Listing Options" status="ok">
                             <Row label="Out of Stock">
                                 <InlineToggle checked={(draft as any).out_of_stock_option ?? false} onChange={v => onChange({ out_of_stock_option: v } as any)} />
                                 <span className="text-[12px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
@@ -614,70 +704,105 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                         </Section>
 
                         {/* ── 12. PROMOTIONS ───────────────────────── */}
-                        <Section icon={<Megaphone size={14} style={{ color: C.primary }} />} title="Promoted Listings">
-                            <Row label="General (Sponsored)">
-                                <InlineToggle checked={(draft as any).promoted_general ?? false} onChange={v => onChange({ promoted_general: v } as any)} />
-                                <span className="text-[12px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {(draft as any).promoted_general ? 'Enabled' : 'Disabled'}
-                                </span>
-                                {(draft as any).promoted_general && (
-                                    <InlineInput value={(draft as any).promoted_general_rate ?? ''} type="number"
+                        <Section icon={<Megaphone size={14} style={{ color: C.primary }} />} title="Promoted Listings" status={draft.promoted_general || draft.promoted_priority ? 'ok' : undefined}>
+
+                            {/* General / Sponsored */}
+                            <Row label="General">
+                                <InlineToggle checked={draft.promoted_general ?? false} onChange={v => onChange({ promoted_general: v })} />
+                                <div className="flex flex-col gap-0.5 flex-1">
+                                    <span className="text-[12px] font-semibold" style={{ color: draft.promoted_general ? C.success : C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                        {draft.promoted_general ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                    <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Pay on sale — ~90% more visibility
+                                    </span>
+                                </div>
+                            </Row>
+                            {draft.promoted_general && (
+                                <Row label="Ad Rate">
+                                    <InlineInput value={draft.promoted_general_rate ?? ''} type="number"
                                         suffix="%" placeholder="14.0"
-                                        onChange={v => onChange({ promoted_general_rate: v === '' ? null : Number(v) } as any)} />
-                                )}
+                                        onChange={v => onChange({ promoted_general_rate: v === '' ? null : Number(v) })} />
+                                    <div className="flex flex-col gap-0.5 shrink-0">
+                                        <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Suggested: 14%</span>
+                                        {draft.promoted_general_rate && (draft.sell_price ?? 0) > 0 && (
+                                            <span className="text-[10px] font-bold" style={{ color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
+                                                ~${((draft.sell_price ?? 0) * (draft.promoted_general_rate ?? 0) / 100).toFixed(2)}/sale
+                                            </span>
+                                        )}
+                                    </div>
+                                </Row>
+                            )}
+
+                            {/* Priority / CPC */}
+                            <Row label="Priority">
+                                <InlineToggle checked={draft.promoted_priority ?? false} onChange={v => onChange({ promoted_priority: v })} />
+                                <div className="flex flex-col gap-0.5 flex-1">
+                                    <span className="text-[12px] font-semibold" style={{ color: draft.promoted_priority ? C.primary : C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                        {draft.promoted_priority ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                    <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Pay per click — top of search placement
+                                    </span>
+                                </div>
                             </Row>
-                            <Row label="Priority (CPC)">
-                                <InlineToggle checked={(draft as any).promoted_priority ?? false} onChange={v => onChange({ promoted_priority: v } as any)} />
-                                <span className="text-[12px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {(draft as any).promoted_priority ? 'Enabled' : 'Disabled'}
-                                </span>
-                                {(draft as any).promoted_priority && (
-                                    <InlineInput value={(draft as any).promoted_priority_budget ?? ''} type="number"
+                            {draft.promoted_priority && (
+                                <Row label="Daily Budget">
+                                    <InlineInput value={draft.promoted_priority_budget ?? ''} type="number"
                                         prefix="$" placeholder="3.00"
-                                        onChange={v => onChange({ promoted_priority_budget: v === '' ? null : Number(v) } as any)} />
-                                )}
-                            </Row>
+                                        onChange={v => onChange({ promoted_priority_budget: v === '' ? null : Number(v) })} />
+                                    <span className="text-[10px] shrink-0" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Min $3.00/day</span>
+                                </Row>
+                            )}
+
+                            {/* Neither enabled — tip */}
+                            {!draft.promoted_general && !draft.promoted_priority && (
+                                <div className="py-2 px-1">
+                                    <p className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Enable General for pay-on-sale boosting, or Priority for top-of-search CPC ads.
+                                    </p>
+                                </div>
+                            )}
                         </Section>
 
                         <div style={{ height: 20 }} />
                     </div>
 
                     {/* ── RIGHT: Power sidebar ──────────────────── */}
-                    <div className="xl:w-[500px] xl:shrink-0 xl:overflow-y-auto p-3 xl:p-4 flex flex-col gap-3 xl:border-l xl:border-[#ede9fe] scrollbar-hide">
+                    <div className="xl:w-[500px] xl:shrink-0 p-3 xl:p-4 flex flex-col gap-3 xl:border-l xl:border-[#ede9fe] xl:sticky xl:top-0 xl:self-start xl:overflow-y-auto scrollbar-hide"
+                        style={{ maxHeight: 'calc(100vh - 56px)' }}>
 
                         {/* ── Score gauge card ─────────────────────── */}
                         <div className="rounded-2xl overflow-hidden"
                             style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}>
 
-                            {/* Gauge header */}
-                            <div className="px-4 pt-4 pb-3 flex items-center gap-4">
+                            {/* Gauge header — compact */}
+                            <div className="px-4 pt-3 pb-2 flex items-center gap-3">
                                 <ScoreRing score={score} />
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-[26px] font-bold leading-none" style={{ color: scoreColor, fontFamily: 'Syne, sans-serif' }}>{score}</p>
-                                        <div>
-                                            <p className="text-[16px] font-bold" style={{ color: scoreColor, fontFamily: 'Syne, sans-serif' }}>{scoreLabel}</p>
-                                            <p className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>/ 100 points</p>
-                                        </div>
-
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="text-[22px] font-bold leading-none" style={{ color: scoreColor, fontFamily: 'Syne, sans-serif' }}>{score}</p>
+                                        <p className="text-[14px] font-bold" style={{ color: scoreColor, fontFamily: 'Syne, sans-serif' }}>{scoreLabel}</p>
+                                        <p className="text-[10px] ml-auto" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>/ 100 pts</p>
                                     </div>
                                     {/* Zone bar */}
-                                    <div className="mt-2.5 relative h-3 rounded-full overflow-hidden flex">
-                                        <div style={{ flex: 50, backgroundColor: '#fee2e2' }} />
-                                        <div style={{ flex: 25, backgroundColor: '#fef3c7' }} />
-                                        <div style={{ flex: 15, backgroundColor: '#dcfce7' }} />
-                                        <div style={{ flex: 10, backgroundColor: '#ede9fe' }} />
-                                        {/* Score needle */}
-                                        <div className="absolute top-0 bottom-0 w-1 rounded-full"
-                                            style={{ left: `${score}%`, backgroundColor: scoreColor, transform: 'translateX(-50%)', transition: 'left 0.6s ease', boxShadow: `0 0 6px ${scoreColor}` }} />
-                                    </div>
-                                    <div className="relative mt-1" style={{ height: 14 }}>
-                                        {([['0', "Can't rank"], ['50', 'Low'], ['75', 'Good'], ['90', 'Top']] as [string, string][]).map(([pct, lbl]) => (
-                                            <span key={pct} className="absolute text-[9px]"
-                                                style={{ left: `${pct}%`, color: C.muted, fontFamily: 'DM Sans, sans-serif', transform: pct === '0' ? 'none' : 'translateX(-50%)' }}>
-                                                {lbl}
+                                    <div className="mt-2">
+                                        <div className="relative h-2 rounded-full overflow-hidden flex gap-px">
+                                            <div style={{ flex: 50, backgroundColor: '#fca5a5' }} />
+                                            <div style={{ flex: 25, backgroundColor: '#fcd34d' }} />
+                                            <div style={{ flex: 15, backgroundColor: '#86efac' }} />
+                                            <div style={{ flex: 10, backgroundColor: '#c4b5fd' }} />
+                                            <div className="absolute top-0 bottom-0 w-[3px] rounded-full"
+                                                style={{ left: `${score}%`, backgroundColor: '#1e1535', transform: 'translateX(-50%)', transition: 'left 0.6s ease' }} />
+                                        </div>
+                                        <div className="flex mt-0.5">
+                                            <span style={{ flex: 50 }}>
+                                                <span className="text-[8px] font-semibold" style={{ color: '#ef4444', fontFamily: 'DM Sans, sans-serif' }}>0–49 Can&apos;t rank</span>
                                             </span>
-                                        ))}
+                                            <span className="text-[8px] font-semibold" style={{ flex: 25, textAlign: 'center' as const, color: '#d97706', fontFamily: 'DM Sans, sans-serif' }}>50 Low</span>
+                                            <span className="text-[8px] font-semibold" style={{ flex: 15, textAlign: 'center' as const, color: '#16a34a', fontFamily: 'DM Sans, sans-serif' }}>75 Good</span>
+                                            <span className="text-[8px] font-semibold" style={{ flex: 10, textAlign: 'right' as const, color: '#7530fb', fontFamily: 'DM Sans, sans-serif' }}>90 Top</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -715,7 +840,7 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                             const incomplete = allItems
                                 .filter(i => !i.done)
                                 .sort((a, b) => (b.max - b.points) - (a.max - a.points))
-                                .slice(0, 5)
+
                             if (incomplete.length === 0) return null
                             const stepMap: Record<string, number> = {
                                 title: 1, category: 1, condition: 1, sku: 1, subtitle: 1,
@@ -724,7 +849,6 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                 price: 3, location: 3, shipping: 3, returns: 3,
                                 immediate_pay: 3, dispatch: 3, buy_price: 3,
                             }
-                            // Deduplicate — if photo_min missing, photos will also show; skip photo_min if photos already in list
                             const seen = new Set<string>()
                             const deduped = incomplete.filter(i => {
                                 const group = i.key === 'photo_min' ? 'photos_group' : i.key === 'photos' ? 'photos_group' : i.key
@@ -735,127 +859,127 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                             return (
                                 <div className="rounded-2xl overflow-hidden"
                                     style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}>
-                                    <div className="flex items-center gap-2 px-4 py-3"
-                                        style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.bg }}>
+                                    <button
+                                        className="w-full flex items-center gap-2 px-4 py-3 hover:opacity-80 transition-all"
+                                        style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.bg }}
+                                        onClick={() => setShowActions(v => !v)}>
                                         <Flame size={13} style={{ color: C.danger }} />
-                                        <p className="text-[12px] font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                        <p className="text-[12px] font-bold flex-1 text-left" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
                                             Fix these to rank higher
                                         </p>
-                                    </div>
-                                    {deduped.map((item, idx) => {
-                                        const gain = item.max - item.points
-                                        const newScore = Math.min(score + gain, 100)
-                                        const step = stepMap[item.key] ?? null
-                                        return (
-                                            <div key={item.key} className="flex items-start gap-3 px-4 py-3"
-                                                style={{ borderBottom: idx < deduped.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                                                <div className="flex items-center justify-center rounded-lg shrink-0 mt-0.5"
-                                                    style={{ width: 22, height: 22, backgroundColor: C.dangerBg, color: C.danger, fontSize: 11, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
-                                                    {idx + 1}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-[12px] font-semibold" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                            style={{ backgroundColor: C.dangerBg, color: C.danger }}>
+                                            {deduped.length}
+                                        </span>
+                                        <ChevronDown size={14} style={{ color: C.muted, transform: showActions ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                                    </button>
+                                    {showActions && <div className="grid grid-cols-2 gap-1.5 p-2.5">
+                                        {deduped.map((item, idx) => {
+                                            const gain = item.max - item.points
+                                            const newScore = Math.min(score + gain, 100)
+                                            const step = stepMap[item.key] ?? null
+                                            return (
+                                                <div key={item.key} className="flex flex-col gap-1 p-2 rounded-xl"
+                                                    style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                                                    <div className="flex items-center justify-between gap-1">
+                                                        <p className="text-[10px] font-bold truncate" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
                                                             {item.label}
                                                         </p>
-                                                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                                            style={{ backgroundColor: C.successBg, color: C.success }}>
-                                                            +{gain}pts → {newScore}
-                                                        </span>
+                                                        <div className="flex items-center gap-1 shrink-0">
+                                                            <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                style={{ backgroundColor: C.successBg, color: C.success }}>
+                                                                +{gain}
+                                                            </span>
+                                                            {step && onStepJump && (
+                                                                <button onClick={() => onStepJump(step)}
+                                                                    className="flex items-center gap-0.5 px-1.5 py-0.5 rounded hover:opacity-80 transition-all"
+                                                                    style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontSize: 9, fontFamily: 'DM Sans, sans-serif', fontWeight: 700 }}>
+                                                                    Step {step} <ArrowRight size={8} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <p className="text-[10px] mt-0.5" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    <p className="text-[9px] leading-tight" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                                         {item.tip}
                                                     </p>
                                                 </div>
-                                                {step && onStepJump && (
-                                                    <button onClick={() => onStepJump(step)}
-                                                        className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0 hover:opacity-80 transition-all"
-                                                        style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontSize: 10, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>
-                                                        Step {step} <ArrowRight size={9} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )
-                                    })}
+                                            )
+                                        })}
+                                    </div>}
                                 </div>
                             )
                         })()}
 
                         {/* ── Publish gate ──────────────────────────── */}
                         {score < 50 ? (
-                            <div className="rounded-2xl p-4 flex flex-col gap-3"
+                            <div className="rounded-2xl p-3 flex flex-col gap-2"
                                 style={{ backgroundColor: C.dangerBg, border: `1px solid #fca5a5` }}>
                                 <div className="flex items-center gap-2">
-                                    <XCircle size={16} style={{ color: C.danger }} />
-                                    <p className="text-[13px] font-bold" style={{ color: C.danger, fontFamily: 'Syne, sans-serif' }}>Not ready to publish</p>
+                                    <XCircle size={14} style={{ color: C.danger }} />
+                                    <p className="text-[12px] font-bold" style={{ color: C.danger, fontFamily: 'Syne, sans-serif' }}>Not ready — score below 50</p>
                                 </div>
-                                <p className="text-[11px]" style={{ color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                    Score {score}/100 — need 50+ to publish. Complete required fields above.
-                                </p>
                                 <button onClick={onSave}
-                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-[12px]"
+                                    className="w-full flex items-center justify-center gap-2 py-2 rounded-xl font-semibold text-[12px]"
                                     style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
-                                    <Eye size={13} /> Save as Draft
+                                    <Eye size={12} /> Save as Draft
                                 </button>
                             </div>
                         ) : score < 75 ? (
-                            <div className="rounded-2xl overflow-hidden"
-                                style={{ border: `1px solid #fcd34d` }}>
-                                <div className="p-3 flex items-start gap-2" style={{ backgroundColor: C.warningBg }}>
-                                    <AlertCircle size={14} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
-                                    <div>
-                                        <p className="text-[12px] font-bold" style={{ color: C.warning, fontFamily: 'Syne, sans-serif' }}>You can publish — but ranking will be low</p>
-                                        <p className="text-[10px] mt-0.5" style={{ color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>Fix the items above to reach 75+ for better search placement</p>
-                                    </div>
-                                </div>
+                            <div className="flex gap-2">
                                 <button onClick={handlePublish} disabled={publishing}
-                                    className="w-full flex items-center justify-center gap-2 py-3.5 font-bold text-[14px] transition-all hover:opacity-90"
-                                    style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'Syne, sans-serif', boxShadow: '0 4px 16px rgba(117,48,251,0.35)' }}>
-                                    {publishing ? <><Loader2 size={14} className="animate-spin" /> Publishing...</> : <><Send size={14} /> Publish to eBay</>}
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-[12px] transition-all hover:opacity-90"
+                                    style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'Syne, sans-serif' }}>
+                                    {publishing ? <><Loader2 size={12} className="animate-spin" /> Publishing...</> : <><Send size={12} /> Publish</>}
+                                </button>
+                                <button onClick={onSave}
+                                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold text-[12px] transition-all hover:opacity-80"
+                                    style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                    <Eye size={12} /> Save Draft
                                 </button>
                             </div>
                         ) : score < 90 ? (
                             <div className="rounded-2xl overflow-hidden"
                                 style={{ border: `1px solid #86efac` }}>
-                                <div className="p-3 flex items-start gap-2" style={{ backgroundColor: C.successBg }}>
-                                    <CheckCircle2 size={14} style={{ color: C.success, flexShrink: 0, marginTop: 1 }} />
-                                    <div>
-                                        <p className="text-[12px] font-bold" style={{ color: C.success, fontFamily: 'Syne, sans-serif' }}>Good to go!</p>
-                                        <p className="text-[10px] mt-0.5" style={{ color: C.success, fontFamily: 'DM Sans, sans-serif' }}>Score {score}/100 — improve a few more fields to reach top ranking</p>
-                                    </div>
+                                <div className="p-2.5 flex items-center gap-2" style={{ backgroundColor: C.successBg }}>
+                                    <CheckCircle2 size={12} style={{ color: C.success, flexShrink: 0 }} />
+                                    <p className="text-[11px] font-bold" style={{ color: C.success, fontFamily: 'Syne, sans-serif' }}>Good to go! Improve more to reach top ranking</p>
                                 </div>
-                                <button onClick={handlePublish} disabled={publishing}
-                                    className="w-full flex items-center justify-center gap-2 py-3 font-bold text-[13px] transition-all hover:opacity-90"
-                                    style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'Syne, sans-serif', boxShadow: '0 4px 16px rgba(117,48,251,0.35)' }}>
-                                    {publishing ? <><Loader2 size={14} className="animate-spin" /> Publishing...</> : <><Send size={14} /> Publish to eBay</>}
-                                </button>
+                                <div className="flex gap-2 p-2">
+                                    <button onClick={handlePublish} disabled={publishing}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 font-bold text-[12px] rounded-xl transition-all hover:opacity-90"
+                                        style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'Syne, sans-serif', boxShadow: '0 4px 12px rgba(117,48,251,0.35)' }}>
+                                        {publishing ? <><Loader2 size={12} className="animate-spin" /> Publishing...</> : <><Send size={12} /> Publish</>}
+                                    </button>
+                                    <button onClick={onSave}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 font-semibold text-[12px] rounded-xl transition-all hover:opacity-80"
+                                        style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                        <Eye size={12} /> Save Draft
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="rounded-2xl overflow-hidden"
                                 style={{ border: `1px solid ${C.primary}` }}>
-                                <div className="p-3 flex items-start gap-2" style={{ background: 'linear-gradient(135deg, #7530fb15, #b8fa3315)' }}>
-                                    <Flame size={14} style={{ color: C.primary, flexShrink: 0, marginTop: 1 }} />
-                                    <div>
-                                        <p className="text-[12px] font-bold" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>🔥 Top listing quality!</p>
-                                        <p className="text-[10px] mt-0.5" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Score {score}/100 — you're in the top tier. Publish now!</p>
-                                    </div>
+                                <div className="p-2.5 flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #7530fb15, #b8fa3315)' }}>
+                                    <Flame size={12} style={{ color: C.primary, flexShrink: 0 }} />
+                                    <p className="text-[11px] font-bold" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>🔥 Top quality — publish now!</p>
                                 </div>
-                                <button onClick={handlePublish} disabled={publishing}
-                                    className="w-full flex items-center justify-center gap-2 py-3.5 font-bold text-[14px] transition-all hover:opacity-90"
-                                    style={{ background: 'linear-gradient(135deg, #7530fb, #9b59fb)', color: '#fff', fontFamily: 'Syne, sans-serif', boxShadow: '0 4px 20px rgba(117,48,251,0.5)' }}>
-                                    {publishing ? <><Loader2 size={15} className="animate-spin" /> Publishing...</> : <><Send size={15} /> Publish to eBay</>}
-                                </button>
+                                <div className="flex gap-2 p-2">
+                                    <button onClick={handlePublish} disabled={publishing}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 font-bold text-[12px] rounded-xl transition-all hover:opacity-90"
+                                        style={{ background: 'linear-gradient(135deg, #7530fb, #9b59fb)', color: '#fff', fontFamily: 'Syne, sans-serif', boxShadow: '0 4px 16px rgba(117,48,251,0.5)' }}>
+                                        {publishing ? <><Loader2 size={12} className="animate-spin" /> Publishing...</> : <><Send size={12} /> Publish</>}
+                                    </button>
+                                    <button onClick={onSave}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 font-semibold text-[12px] rounded-xl transition-all hover:opacity-80"
+                                        style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                        <Eye size={12} /> Save Draft
+                                    </button>
+                                </div>
                             </div>
                         )}
 
-                        {/* Save + toast */}
-                        {score >= 50 && (
-                            <button onClick={onSave}
-                                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-[12px] transition-all hover:opacity-80"
-                                style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
-                                <Eye size={13} /> Save as Draft
-                            </button>
-                        )}
+
 
                         {showToast && (
                             <div className="flex items-start gap-2 p-3 rounded-xl"
@@ -921,12 +1045,7 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                             </div>
                         )}
 
-                        {/* Manual link */}
-                        <a href="https://www.ebay.com/sl/list" target="_blank" rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-1.5 py-1.5 text-[11px] transition-all hover:opacity-70"
-                            style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                            <ExternalLink size={11} /> List manually on eBay
-                        </a>
+
                     </div>
                 </div>
             </div>
