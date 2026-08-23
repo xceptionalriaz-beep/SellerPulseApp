@@ -39,7 +39,8 @@ import {
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
-  Globe, History, RotateCcw, Upload, Sparkles,
+  Globe, History, RotateCcw, Upload, Sparkles, Palette,
+  LayoutTemplate, User, Settings2, ChevronRight,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -66,9 +67,18 @@ const NAV_ITEMS = [
   { icon: Type, label: 'Title Builder', href: '/dashboard/title-builder' },
   { icon: Calculator, label: 'Profit Calculator', href: '/dashboard/tools/profit-calculator' },
   { icon: ListChecks, label: 'Listings', href: '/dashboard/listing-generator' },
+  { icon: Palette, label: 'Design Studio', href: '/dashboard/design' },
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
   { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
   { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
+]
+
+// -- Design Studio sub-sidebar tabs ----------------------------
+const DESIGN_STUDIO_TABS = [
+  { id: 'templates', label: 'Template Gallery', icon: LayoutTemplate, description: 'Browse pre-made eBay templates' },
+  { id: 'library', label: 'Block Library', icon: BookOpen, description: '37 ready-made HTML blocks' },
+  { id: 'my-templates', label: 'My Templates', icon: User, description: 'Your saved custom templates' },
+  { id: 'settings', label: 'Studio Settings', icon: Settings2, description: 'Manage design preferences' },
 ]
 
 // -- Kill switch ? nav label mapping ---------------------------
@@ -608,6 +618,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
   const { brand } = useBrand()
   const [showAdminSettings, setShowAdminSettings] = useState(false)
+  const [subSidebarOpen, setSubSidebarOpen] = useState(false)
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -634,9 +645,15 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     sessionStorage.getItem('riazify_usermode') === '1'
   )
   const isAdmin = profile?.role === 'admin' && !isUserMode
+  const isDesignPage = pathname.startsWith('/dashboard/design')
   const profileLoaded = profile !== null
   const [cachedIsAdmin, setCachedIsAdmin] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  // Auto open sub-sidebar when on design page, close when leaving
+  useEffect(() => {
+    setSubSidebarOpen(isDesignPage)
+  }, [isDesignPage])
 
   useEffect(() => {
     setMounted(true)
@@ -1017,9 +1034,41 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             <div className="flex flex-col flex-1">
-              {visibleNavItems.map((item) => (
-                <SidebarItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={pathname === item.href} />
-              ))}
+              {visibleNavItems.map((item) => {
+                if (item.label === 'Design Studio') {
+                  // Design Studio toggles the sub-sidebar; stays active when on design page
+                  return (
+                    <button
+                      key={item.href}
+                      title={item.label}
+                      onClick={() => {
+                        if (!isDesignPage) router.push(item.href)
+                        setSubSidebarOpen(v => !v)
+                      }}
+                      className="relative flex items-center justify-center w-[60px] h-[52px] group"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      {isDesignPage && (
+                        <div className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-[10px]" />
+                      )}
+                      <div className={cn(
+                        'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-250',
+                        isDesignPage
+                          ? 'bg-accent scale-100'
+                          : 'bg-transparent group-hover:bg-white/10 scale-95 group-hover:scale-100'
+                      )}>
+                        <item.icon
+                          size={isDesignPage ? 20 : 19}
+                          className={cn(isDesignPage ? 'text-dark' : 'text-white group-hover:text-white')}
+                        />
+                      </div>
+                    </button>
+                  )
+                }
+                return (
+                  <SidebarItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={pathname === item.href} />
+                )
+              })}
               {/* Admin uses separate sidebar */}
             </div>
             <div className="pb-6 flex flex-col items-center gap-2">
@@ -1034,6 +1083,81 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </aside>
+        )}
+
+        {/* -- DESIGN STUDIO SUB-SIDEBAR -- */}
+        {isDesignPage && subSidebarOpen && (
+          <div
+            className="hidden lg:flex flex-col shrink-0 h-screen"
+            style={{
+              width: 220,
+              backgroundColor: '#ffffff',
+              borderRight: '1px solid #ede9fe',
+              boxShadow: '2px 0 12px rgba(117,48,251,0.06)',
+            }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-4 pt-5 pb-4 shrink-0"
+              style={{ borderBottom: '1px solid #f3eeff' }}
+            >
+              <span
+                className="text-[16px] font-bold whitespace-nowrap"
+                style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}
+              >
+                Design Studio
+              </span>
+              <button
+                onClick={() => setSubSidebarOpen(false)}
+                title="Close panel"
+                className="w-6 h-6 flex items-center justify-center rounded-full transition-all hover:opacity-70"
+                style={{ backgroundColor: '#f3eeff', border: '1px solid #ede9fe', cursor: 'pointer', flexShrink: 0 }}
+              >
+                <ChevronRight size={12} style={{ color: '#7530fb' }} />
+              </button>
+            </div>
+
+            {/* Tab list */}
+            <nav className="flex flex-col pt-2 flex-1 overflow-y-auto">
+              {DESIGN_STUDIO_TABS.map(tab => {
+                const currentTab = searchParams.get('tab') || 'templates'
+                const isActive = currentTab === tab.id
+                const Icon = tab.icon
+                return (
+                  <Link
+                    key={tab.id}
+                    href={`/dashboard/design?tab=${tab.id}`}
+                    className="relative flex items-center gap-2.5 px-4 py-2.5 transition-all"
+                    style={{
+                      textDecoration: 'none',
+                      backgroundColor: isActive ? '#f3eeff' : 'transparent',
+                    }}
+                  >
+                    {isActive && (
+                      <div
+                        className="absolute right-0 top-1/2 -translate-y-1/2 rounded-l-full"
+                        style={{ width: 3, height: 22, backgroundColor: '#7530fb' }}
+                      />
+                    )}
+                    <Icon
+                      size={15}
+                      style={{ flexShrink: 0, color: isActive ? '#7530fb' : '#9ca3af' }}
+                    />
+                    <span
+                      className="text-[13px] whitespace-nowrap truncate"
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#7530fb' : '#1f1d2e',
+                      }}
+                    >
+                      {tab.label}
+                    </span>
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
         )}
 
         {/* -- MAIN CONTENT -- */}
