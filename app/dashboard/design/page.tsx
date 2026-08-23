@@ -1154,9 +1154,6 @@ function DesignStudioInner() {
                 ::-webkit-scrollbar { display: none; }
             `}</style>
         </div>
-        </div >
-        </div >
-        </div >
     )
 }
 
