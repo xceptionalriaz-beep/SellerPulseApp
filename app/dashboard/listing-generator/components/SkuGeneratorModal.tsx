@@ -5,11 +5,11 @@
 // Full formula builder with saved templates, live preview, Supabase persistence
 // ─────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
     X, Plus, GripVertical, Lock, AlertTriangle,
-    CheckCircle2, RefreshCw, Zap, ChevronDown, Save, Sparkles
+    CheckCircle2, RefreshCw, Zap, ChevronDown, Save, Sparkles, Trash2
 } from 'lucide-react'
 import type { DraftData } from './LgStudio'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -133,9 +133,12 @@ function getSegmentValue(seg: SkuSegment, draft: DraftData): { value: string; is
     }
 }
 
-function buildSku(segments: SkuSegment[], separator: string, caseFormat: CaseFormat, draft: DraftData): string {
+function buildSku(segments: SkuSegment[], separator: string, caseFormat: CaseFormat, draft: DraftData, randVals?: Record<string, string>): string {
     const parts = segments
-        .map(seg => getSegmentValue(seg, draft).value)
+        .map(seg => {
+            if (seg.type === 'random' && randVals && randVals[seg.id]) return randVals[seg.id]
+            return getSegmentValue(seg, draft).value
+        })
         .filter(Boolean)
     let result = parts.join(separator)
     if (caseFormat === 'upper') result = result.toUpperCase()
@@ -212,6 +215,11 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
     const [showSaveInput, setShowSaveInput] = useState(false)
     const [dragIndex, setDragIndex] = useState<number | null>(null)
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+    const addSegmentRef = useRef<HTMLDivElement>(null)
+    const templateDropdownRef = useRef<HTMLDivElement>(null)
+    const [randomValues, setRandomValues] = useState<Record<string, string>>(() =>
+        Object.fromEntries(DEFAULT_SEGMENTS.filter(s => s.type === 'random').map(s => [s.id, genRandomChars(s.length ?? 4)]))
+    )
     const [mounted, setMounted] = useState(false)
 
     // ── Mount animation ───────────────────────────────────────
@@ -224,6 +232,20 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
         setMounted(false)
         setTimeout(onClose, 220)
     }
+
+    // ── Click outside to close dropdowns ─────────────────────
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (addSegmentRef.current && !addSegmentRef.current.contains(e.target as Node)) {
+                setShowAddSegment(false)
+            }
+            if (templateDropdownRef.current && !templateDropdownRef.current.contains(e.target as Node)) {
+                setShowTemplateDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
     // ── Load saved templates ──────────────────────────────────
     useEffect(() => {
@@ -243,8 +265,8 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
 
     // ── Rebuild preview whenever segments/case/separator change ──
     const rebuildPreview = useCallback(() => {
-        setPreviewSku(buildSku(segments, separator, caseFormat, draft))
-    }, [segments, separator, caseFormat, draft])
+        setPreviewSku(buildSku(segments, separator, caseFormat, draft, randomValues))
+    }, [segments, separator, caseFormat, draft, randomValues])
 
     useEffect(() => {
         rebuildPreview()
@@ -272,6 +294,9 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
             ...(type === 'free_text' ? { value: '' } : {}),
         }
         setSegments((prev: SkuSegment[]) => [...prev, newSeg])
+        if (type === 'random') {
+            setRandomValues((prev: Record<string, string>) => ({ ...prev, [newSeg.id]: genRandomChars(newSeg.length ?? 4) }))
+        }
         setShowAddSegment(false)
     }
 
@@ -294,12 +319,19 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
 
     // ── Update random length ──────────────────────────────────
     function updateRandomLength(id: string, len: number) {
-        setSegments((prev: SkuSegment[]) => prev.map((s: SkuSegment) => s.id === id ? { ...s, length: Math.max(2, Math.min(8, len)) } : s))
+        const clamped = Math.max(2, Math.min(8, len))
+        setSegments((prev: SkuSegment[]) => prev.map((s: SkuSegment) => s.id === id ? { ...s, length: clamped } : s))
+        setRandomValues((prev: Record<string, string>) => ({ ...prev, [id]: genRandomChars(clamped) }))
     }
 
     // ── Regenerate random segments ────────────────────────────
     function regeneratePreview() {
-        setPreviewSku(buildSku(segments, separator, caseFormat, draft))
+        const newRandVals: Record<string, string> = {}
+        segments.forEach((s: SkuSegment) => {
+            if (s.type === 'random') newRandVals[s.id] = genRandomChars(s.length ?? 4)
+        })
+        setRandomValues((prev: Record<string, string>) => ({ ...prev, ...newRandVals }))
+        setPreviewSku(buildSku(segments, separator, caseFormat, draft, { ...randomValues, ...newRandVals }))
     }
 
     // ── Drag & drop reorder ───────────────────────────────────
@@ -351,6 +383,17 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
             setShowSaveInput(false)
         }
         setSavingTemplate(false)
+    }
+
+    // ── Delete template ───────────────────────────────────────
+    async function deleteTemplate(id: string, e: React.MouseEvent) {
+        e.stopPropagation()
+        const sb = supabase as any
+        const { error } = await sb.from('sku_templates').delete().eq('id', id)
+        if (!error) {
+            setTemplates((prev: SkuTemplate[]) => prev.filter((t: SkuTemplate) => t.id !== id))
+            if (selectedTemplate === id) setSelectedTemplate('')
+        }
     }
 
     // ── Generate & close ──────────────────────────────────────
@@ -416,7 +459,7 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                         </h2>
 
                         {/* Saved Templates dropdown — in header */}
-                        <div className="relative flex-1 min-w-0 max-w-[180px] sm:max-w-[220px] ml-auto">
+                        <div className="relative flex-1 min-w-0 max-w-[180px] sm:max-w-[220px] ml-auto" ref={templateDropdownRef}>
                             <button
                                 onClick={() => setShowTemplateDropdown((v: boolean) => !v)}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all"
@@ -445,17 +488,26 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                                         </div>
                                     ) : (
                                         templates.map((t: SkuTemplate) => (
-                                            <button key={t.id}
-                                                onClick={() => applyTemplate(t)}
-                                                className="w-full px-4 py-3 text-left text-[13px] transition-all hover:opacity-80"
-                                                style={{
-                                                    backgroundColor: selectedTemplate === t.id ? C.primaryLight : C.surface,
-                                                    color: selectedTemplate === t.id ? C.primary : C.body,
-                                                    fontFamily: 'DM Sans, sans-serif',
-                                                    borderBottom: `1px solid ${C.border}`,
-                                                }}>
-                                                {t.name}
-                                            </button>
+                                            <div key={t.id} className="flex items-center"
+                                                style={{ borderBottom: `1px solid ${C.border}` }}>
+                                                <button
+                                                    onClick={() => applyTemplate(t)}
+                                                    className="flex-1 px-4 py-3 text-left text-[13px] transition-all hover:opacity-80"
+                                                    style={{
+                                                        backgroundColor: selectedTemplate === t.id ? C.primaryLight : C.surface,
+                                                        color: selectedTemplate === t.id ? C.primary : C.body,
+                                                        fontFamily: 'DM Sans, sans-serif',
+                                                    }}>
+                                                    {t.name}
+                                                </button>
+                                                <button
+                                                    onClick={(e: React.MouseEvent) => deleteTemplate(t.id, e)}
+                                                    className="px-3 py-3 transition-all hover:opacity-70"
+                                                    style={{ color: C.danger, backgroundColor: selectedTemplate === t.id ? C.primaryLight : C.surface }}
+                                                    title="Delete template">
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            </div>
                                         ))
                                     )}
                                 </div>
@@ -557,7 +609,7 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-[13px] font-bold"
                                                                     style={{ color: C.body, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.06em' }}>
-                                                                    {genRandomChars(seg.length ?? 4)}
+                                                                    {randomValues[seg.id] ?? genRandomChars(seg.length ?? 4)}
                                                                 </span>
                                                                 <select
                                                                     value={seg.length ?? 4}
@@ -615,7 +667,7 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
 
 
                                 {/* Add Segment */}
-                                <div className="relative">
+                                <div className="relative" ref={addSegmentRef}>
                                     <button
                                         onClick={() => setShowAddSegment((v: boolean) => !v)}
                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
@@ -629,7 +681,7 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                                     </button>
 
                                     {showAddSegment && (
-                                        <div className="absolute bottom-full mb-1 left-0 z-10 rounded-xl overflow-hidden"
+                                        <div className="absolute top-full mt-1 left-0 z-10 rounded-xl overflow-hidden"
                                             style={{
                                                 backgroundColor: C.surface,
                                                 border: `1px solid ${C.border}`,
@@ -667,8 +719,8 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                                 Separator
                             </label>
                             <div className="flex gap-2">
-                                {['-', '_'].map(sep => (
-                                    <button key={sep}
+                                {(['-', '_', ''] as string[]).map(sep => (
+                                    <button key={sep === '' ? 'none' : sep}
                                         onClick={() => setSeparator(sep)}
                                         className="px-5 py-2 rounded-xl text-[14px] font-bold transition-all"
                                         style={{
@@ -676,8 +728,9 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                                             border: `2px solid ${separator === sep ? C.primary : C.border}`,
                                             color: separator === sep ? C.primary : C.secondary,
                                             fontFamily: 'DM Sans, sans-serif',
+                                            minWidth: 44,
                                         }}>
-                                        {sep}
+                                        {sep === '' ? 'None' : sep}
                                     </button>
                                 ))}
                             </div>
@@ -766,7 +819,7 @@ export default function SkuGeneratorModal({ draft, onGenerate, onClose }: Props)
                                 <div className="flex items-center gap-3">
                                     <span className="text-[12px] font-bold"
                                         style={{ color: C.accentText, fontFamily: 'DM Sans, sans-serif', opacity: 0.7 }}>
-                                        {totalCount} / 20 Chars
+                                        {totalCount} / 50 Chars
                                     </span>
                                     <button
                                         onClick={regeneratePreview}
