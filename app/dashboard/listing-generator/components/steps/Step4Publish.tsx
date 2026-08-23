@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
 import { calcHealth } from '@/lib/health-engine'
+import { ProfitEngine, DEFAULT_SETTINGS } from '@/lib/profit-engine'
 import ProDropdown from '@/components/ui/ProDropdown'
 
 // ── Design tokens ─────────────────────────────────────────────
@@ -1000,45 +1001,78 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                     style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.bg }}>
                                     <TrendingUp size={13} style={{ color: C.primary }} />
                                     <p className="text-[12px] font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>Profit Snapshot</p>
+                                    <span className="text-[9px] font-semibold ml-auto px-1.5 py-0.5 rounded"
+                                        style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Profit Engine
+                                    </span>
                                 </div>
                                 {(() => {
                                     const s = draft.sell_price ?? 0
                                     const b = draft.buy_price ?? 0
-                                    const fee = s * 0.1285 + 0.30
-                                    const ship = draft.free_shipping ? (draft.shipping_cost ?? 0) : 0
-                                    const profit = s - fee - b - ship
-                                    const margin = s > 0 ? (profit / s) * 100 : 0
-                                    const roi = b > 0 ? (profit / b) * 100 : null
-                                    const profitColor = profit > 0 ? C.success : C.danger
+                                    const country = draft.item_country ?? 'US'
+                                    const p = ProfitEngine.calculate({
+                                        sellingPrice: s,
+                                        buyPrice: b,
+                                        shippingCost: draft.free_shipping ? (draft.shipping_cost ?? 0) : 0,
+                                        settings: {
+                                            ...DEFAULT_SETTINGS,
+                                            isUSMarket: country === 'US',
+                                            isUKMarket: country === 'GB',
+                                            isCAMarket: country === 'CA',
+                                            isAUMarket: country === 'AU',
+                                            isDEMarket: country === 'DE',
+                                            isFRMarket: country === 'FR',
+                                            isVATRegistered: draft.vat_registered ?? false,
+                                            adRatePercent: draft.promoted_general_rate ?? 0,
+                                            buyerPaidShipping: draft.free_shipping ? 0 : (draft.shipping_cost ?? 0),
+                                        }
+                                    })
+                                    const sym = country === 'GB' ? '£' : ['DE', 'FR'].includes(country) ? '€' : country === 'CA' ? 'CA$' : country === 'AU' ? 'AU$' : '$'
+                                    const f = (n: number) => n >= 0 ? `${sym}${n.toFixed(2)}` : `-${sym}${Math.abs(n).toFixed(2)}`
+                                    const profitColor = p.netProfit > 0 ? C.success : C.danger
                                     return (
                                         <div className="px-4 pb-3">
                                             {[
-                                                { label: 'Sell Price', val: `$${s.toFixed(2)}`, color: C.body },
-                                                { label: 'eBay Fee (~12.85%)', val: `-$${fee.toFixed(2)}`, color: C.muted },
-                                                { label: 'Cost', val: b > 0 ? `-$${b.toFixed(2)}` : '—', color: C.muted },
-                                            ].map(row => (
-                                                <div key={row.label} className="flex justify-between py-1.5"
+                                                { label: 'Sell Price', val: f(s), color: C.body },
+                                                { label: `eBay Fee (${p.effectiveCatFeePercent.toFixed(2)}%)`, val: `-${f(p.totalEbayFees)}`, color: C.muted },
+                                                p.promotedAdFee > 0 ? { label: 'Promoted Ads', val: `-${f(p.promotedAdFee)}`, color: C.muted } : null,
+                                                b > 0 ? { label: 'Cost', val: `-${f(b)}`, color: C.muted } : null,
+                                                p.vatOnFees > 0 ? { label: 'VAT on Fees', val: `-${f(p.vatOnFees)}`, color: C.muted } : null,
+                                            ].filter(Boolean).map(row => (
+                                                <div key={row!.label} className="flex justify-between py-1.5"
                                                     style={{ borderBottom: `1px solid ${C.border}` }}>
-                                                    <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>{row.label}</span>
-                                                    <span className="text-[11px] font-semibold" style={{ color: row.color, fontFamily: 'DM Sans, sans-serif' }}>{row.val}</span>
+                                                    <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>{row!.label}</span>
+                                                    <span className="text-[11px] font-semibold" style={{ color: row!.color, fontFamily: 'DM Sans, sans-serif' }}>{row!.val}</span>
                                                 </div>
                                             ))}
                                             <div className="flex justify-between pt-2">
                                                 <span className="text-[13px] font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>Net Profit</span>
-                                                <span className="text-[15px] font-bold" style={{ color: profitColor, fontFamily: 'Syne, sans-serif' }}>${profit.toFixed(2)}</span>
+                                                <span className="text-[15px] font-bold" style={{ color: profitColor, fontFamily: 'Syne, sans-serif' }}>{f(p.netProfit)}</span>
                                             </div>
                                             <div className="grid grid-cols-2 gap-2 mt-2">
-                                                <div className="p-2 rounded-xl text-center"
-                                                    style={{ backgroundColor: margin >= 20 ? C.successBg : margin >= 0 ? C.warningBg : C.dangerBg }}>
-                                                    <p className="text-[9px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>MARGIN</p>
-                                                    <p className="text-[15px] font-bold" style={{ color: margin >= 20 ? C.success : margin >= 0 ? C.warning : C.danger, fontFamily: 'Syne, sans-serif' }}>{margin.toFixed(1)}%</p>
-                                                </div>
-                                                <div className="p-2 rounded-xl text-center"
-                                                    style={{ backgroundColor: (roi ?? 0) >= 30 ? C.successBg : (roi ?? 0) >= 0 ? C.warningBg : C.dangerBg }}>
-                                                    <p className="text-[9px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>ROI</p>
-                                                    <p className="text-[15px] font-bold" style={{ color: (roi ?? 0) >= 30 ? C.success : (roi ?? 0) >= 0 ? C.warning : C.danger, fontFamily: 'Syne, sans-serif' }}>{roi !== null ? `${roi.toFixed(1)}%` : '—'}</p>
-                                                </div>
+                                                {[
+                                                    { label: 'MARGIN', val: p.profitMargin, good: 20 },
+                                                    { label: 'ROI', val: b > 0 ? p.roi : null, good: 30 },
+                                                ].map(stat => (
+                                                    <div key={stat.label} className="p-2 rounded-xl text-center"
+                                                        style={{ backgroundColor: stat.val === null ? C.bg : stat.val >= stat.good ? C.successBg : stat.val >= 0 ? C.warningBg : C.dangerBg }}>
+                                                        <p className="text-[9px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>{stat.label}</p>
+                                                        <p className="text-[15px] font-bold" style={{
+                                                            color: stat.val === null ? C.muted : stat.val >= stat.good ? C.success : stat.val >= 0 ? C.warning : C.danger,
+                                                            fontFamily: 'Syne, sans-serif'
+                                                        }}>
+                                                            {stat.val !== null ? `${stat.val.toFixed(1)}%` : '—'}
+                                                        </p>
+                                                    </div>
+                                                ))}
                                             </div>
+                                            {p.breakEvenPrice > 0 && (
+                                                <div className="flex items-center justify-between mt-2 px-2 py-1.5 rounded-lg"
+                                                    style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                                                    <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Break-even</span>
+                                                    <span className="text-[11px] font-bold" style={{ color: C.warning, fontFamily: 'Syne, sans-serif' }}>{f(p.breakEvenPrice)}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     )
                                 })()}

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import ProDropdown from '@/components/ui/ProDropdown'
 import type { DraftData } from '../LgStudio'
+import { ProfitEngine, DEFAULT_SETTINGS } from '@/lib/profit-engine'
 
 // ── Design tokens ────────────────────────────────────────────
 const C = {
@@ -158,24 +159,6 @@ function SectionHeader({ icon, title, subtitle }: { icon: JSX.Element; title: st
     )
 }
 
-// ── Profit row ───────────────────────────────────────────────
-function ProfitRow({ label, value, highlight, muted, danger }: {
-    label: string; value: string; highlight?: boolean; muted?: boolean; danger?: boolean
-}) {
-    return (
-        <div className="flex items-center justify-between py-1.5">
-            <span className="text-[12px]" style={{
-                color: muted ? C.muted : C.secondary,
-                fontFamily: 'DM Sans, sans-serif',
-            }}>{label}</span>
-            <span className="text-[13px] font-semibold" style={{
-                color: danger ? C.danger : highlight ? C.success : C.body,
-                fontFamily: 'DM Sans, sans-serif',
-            }}>{value}</span>
-        </div>
-    )
-}
-
 // ── Currency map — derived from country ───────────────────────
 const CURRENCY_MAP: Record<string, { code: string; symbol: string }> = {
     US: { code: 'USD', symbol: '$' },
@@ -189,18 +172,32 @@ function getCurrency(country: string) {
     return CURRENCY_MAP[country] ?? { code: 'USD', symbol: '$' }
 }
 
-// ── Simple profit estimate ────────────────────────────────────
-function calcProfit(sell: number, buy: number, shipping: number, freeShipping: boolean) {
-    const ebayFee = sell * 0.1285 + 0.30   // ~12.85% + $0.30 typical
-    const shippingOut = freeShipping ? shipping : 0
-    const gross = sell - ebayFee - shippingOut - buy
-    const margin = sell > 0 ? (gross / sell) * 100 : 0
-    const roi = buy > 0 ? (gross / buy) * 100 : 0
-    return { ebayFee, gross, margin, roi }
+// ── Currency map ──────────────────────────────────────────────
+// (kept here — getCurrency already defined above)
+
+function fmt(n: number, symbol = '$') {
+    return n >= 0 ? `${symbol}${n.toFixed(2)}` : `-${symbol}${Math.abs(n).toFixed(2)}`
 }
 
-function fmt(n: number) {
-    return n >= 0 ? `$${n.toFixed(2)}` : `-$${Math.abs(n).toFixed(2)}`
+// ── Map draft → ProfitEngine settings ────────────────────────
+function draftToSettings(draft: DraftData): typeof DEFAULT_SETTINGS {
+    const country = (draft as any).item_country ?? 'US'
+    const adRate = (draft as any).promoted_general_rate ?? 0
+    return {
+        ...DEFAULT_SETTINGS,
+        isUSMarket: country === 'US',
+        isUKMarket: country === 'GB',
+        isCAMarket: country === 'CA',
+        isAUMarket: country === 'AU',
+        isDEMarket: country === 'DE',
+        isFRMarket: country === 'FR',
+        isVATRegistered: draft.vat_registered ?? false,
+        defaultShipping: draft.free_shipping ? (draft.shipping_cost ?? 0) : 0,
+        buyerPaidShipping: draft.free_shipping ? 0 : (draft.shipping_cost ?? 0),
+        adRatePercent: adRate,
+        lotSize: 1,
+        sellQuantity: 1,
+    }
 }
 
 // ── Main component ────────────────────────────────────────────
@@ -208,8 +205,17 @@ export default function Step3Pricing({ draft, onChange }: Props): JSX.Element {
     const sell = Number(draft.sell_price) || 0
     const buy = Number(draft.buy_price) || 0
     const shipping = Number(draft.shipping_cost) || 0
-    const profit = calcProfit(sell, buy, shipping, draft.free_shipping)
     const currency = getCurrency((draft as any).item_country ?? 'US')
+
+    // ── Real profit calc via ProfitEngine ────────────────────
+    const profit = sell > 0
+        ? ProfitEngine.calculate({
+            sellingPrice: sell,
+            buyPrice: buy,
+            shippingCost: draft.free_shipping ? (draft.shipping_cost ?? 0) : 0,
+            settings: draftToSettings(draft),
+        })
+        : null
 
     const showBestOfferThresholds = (draft as any).best_offer_enabled
 
@@ -410,162 +416,152 @@ export default function Step3Pricing({ draft, onChange }: Props): JSX.Element {
                     <div className="flex-1 xl:overflow-y-auto p-3 md:p-4 xl:p-5 flex flex-col gap-5 scrollbar-hide"
                         style={{ scrollbarWidth: 'none' }}>
 
-                        {/* ── Profit Calculator UI ─────────────── */}
-                        <div className="flex flex-col gap-4">
-                            <SectionHeader
-                                icon={<Zap size={14} style={{ color: C.primary }} />}
-                                title="Profit Calculator"
-                                subtitle="Live estimate — connect full calculator in settings"
-                            />
+                        {/* ── Item Location + Profit Calculator ── */}
+                        <div className="flex flex-col xl:flex-row gap-4 xl:items-start">
 
-                            <div className="rounded-2xl overflow-hidden"
-                                style={{ border: `1px solid ${C.border}` }}>
-
-                                {/* Calculator header */}
-                                <div className="px-4 py-3 flex items-center justify-between"
-                                    style={{ backgroundColor: C.dark }}>
-                                    <div>
-                                        <p className="text-[13px] font-bold text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
-                                            Quick Estimate
-                                        </p>
-                                        <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'DM Sans, sans-serif' }}>
-                                            Based on ~12.85% eBay fee
-                                        </p>
+                            {/* LEFT — Item Location */}
+                            <div className="flex flex-col gap-3 w-full xl:w-[70%] xl:shrink-0">
+                                <SectionHeader
+                                    icon={<MapPin size={14} style={{ color: C.primary }} />}
+                                    title="Item Location"
+                                    subtitle="Required by eBay"
+                                />
+                                <div className="grid grid-cols-2 xl:grid-cols-1 gap-3">
+                                    <div className="flex flex-col gap-1.5">
+                                        <Label text="Postal / Zip Code" required />
+                                        <Input
+                                            value={(draft as any).item_zip ?? ''}
+                                            onChange={v => onChange({ item_zip: v } as any)}
+                                            placeholder="e.g. 33166"
+                                            type="text"
+                                        />
                                     </div>
-                                    {/* Connect button — placeholder for future */}
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
-                                        style={{ backgroundColor: 'rgba(184,250,51,0.15)', border: '1px solid rgba(184,250,51,0.3)' }}>
-                                        <Zap size={11} style={{ color: C.accent }} />
-                                        <span className="text-[11px] font-semibold" style={{ color: C.accent, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Pro Calculator
-                                        </span>
+                                    <div className="flex flex-col gap-1.5">
+                                        <Label text="Country" required />
+                                        <ProDropdown
+                                            prefix=""
+                                            currentValue={(draft as any).item_country ?? 'US'}
+                                            onChanged={v => onChange({ item_country: v } as any)}
+                                            width="full"
+                                            options={[
+                                                { val: 'US', label: 'United States', enabled: true, flagCode: 'us' },
+                                                { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
+                                                { val: 'CA', label: 'Canada', enabled: true, flagCode: 'ca' },
+                                                { val: 'AU', label: 'Australia', enabled: true, flagCode: 'au' },
+                                                { val: 'DE', label: 'Germany', enabled: true, flagCode: 'de' },
+                                                { val: 'FR', label: 'France', enabled: true, flagCode: 'fr' },
+                                            ]}
+                                        />
                                     </div>
                                 </div>
+                            </div>
 
-                                {sell > 0 ? (
-                                    <div className="px-4 py-3" style={{ backgroundColor: C.surface }}>
-                                        <ProfitRow label="Sell Price" value={fmt(sell)} />
-                                        <div style={{ borderTop: `1px dashed ${C.border}`, margin: '4px 0' }} />
-                                        <ProfitRow label="eBay Fee (~12.85% + $0.30)" value={`-${fmt(profit.ebayFee)}`} muted />
-                                        {buy > 0 && <ProfitRow label="Cost Price" value={`-${fmt(buy)}`} muted />}
-                                        {draft.free_shipping && shipping > 0 && (
-                                            <ProfitRow label="Shipping (your cost)" value={`-${fmt(shipping)}`} muted />
-                                        )}
-                                        <div style={{ borderTop: `1px solid ${C.border}`, margin: '8px 0' }} />
-                                        <ProfitRow
-                                            label="Est. Profit"
-                                            value={fmt(profit.gross)}
-                                            highlight={profit.gross > 0}
-                                            danger={profit.gross < 0}
-                                        />
-                                        <div className="grid grid-cols-2 gap-2 mt-3">
-                                            <div className="p-2.5 rounded-xl text-center"
-                                                style={{
-                                                    backgroundColor: profit.margin >= 20 ? C.successBg : profit.margin >= 0 ? C.warningBg : C.dangerBg,
-                                                    border: `1px solid ${profit.margin >= 20 ? '#86efac' : profit.margin >= 0 ? '#fcd34d' : '#fca5a5'}`,
-                                                }}>
-                                                <p className="text-[10px] font-medium" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Margin</p>
-                                                <p className="text-[16px] font-bold" style={{
-                                                    color: profit.margin >= 20 ? C.success : profit.margin >= 0 ? C.warning : C.danger,
-                                                    fontFamily: 'Syne, sans-serif',
-                                                }}>
-                                                    {profit.margin.toFixed(1)}%
+                            {/* RIGHT — Profit Calculator */}
+                            <div className="flex flex-col gap-3 w-full xl:w-[30%] xl:shrink-0 min-w-0">
+                                <SectionHeader
+                                    icon={<Zap size={14} style={{ color: C.primary }} />}
+                                    title="Profit Calculator"
+                                    subtitle="Powered by Riazify Profit Engine"
+                                />
+
+                                {profit ? (
+                                    <div className="rounded-2xl flex flex-col gap-0 overflow-hidden"
+                                        style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}>
+
+                                        {/* ── Net profit hero ── */}
+                                        <div className="px-5 py-4 flex items-center justify-between"
+                                            style={{ backgroundColor: profit.netProfit >= 0 ? C.successBg : C.dangerBg, borderBottom: `1px solid ${C.border}` }}>
+                                            <div>
+                                                <p className="text-[11px] font-semibold uppercase tracking-wider"
+                                                    style={{ color: profit.netProfit >= 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    Net Profit
+                                                </p>
+                                                <p className="text-[28px] font-black leading-tight"
+                                                    style={{ color: profit.netProfit >= 0 ? C.success : C.danger, fontFamily: 'Syne, sans-serif', letterSpacing: '-0.5px' }}>
+                                                    {fmt(profit.netProfit, currency.symbol)}
                                                 </p>
                                             </div>
-                                            <div className="p-2.5 rounded-xl text-center"
-                                                style={{
-                                                    backgroundColor: profit.roi >= 30 ? C.successBg : profit.roi >= 0 ? C.warningBg : C.dangerBg,
-                                                    border: `1px solid ${profit.roi >= 30 ? '#86efac' : profit.roi >= 0 ? '#fcd34d' : '#fca5a5'}`,
-                                                }}>
-                                                <p className="text-[10px] font-medium" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>ROI</p>
-                                                <p className="text-[16px] font-bold" style={{
-                                                    color: profit.roi >= 30 ? C.success : profit.roi >= 0 ? C.warning : C.danger,
-                                                    fontFamily: 'Syne, sans-serif',
-                                                }}>
-                                                    {buy > 0 ? `${profit.roi.toFixed(1)}%` : '—'}
-                                                </p>
+                                            {/* Margin + ROI inline */}
+                                            <div className="flex gap-3">
+                                                {[
+                                                    { label: 'Margin', val: profit.profitMargin, good: 20 },
+                                                    { label: 'ROI', val: buy > 0 ? profit.roi : null, good: 30 },
+                                                ].map(s => (
+                                                    <div key={s.label} className="flex flex-col items-center">
+                                                        <p className="text-[20px] font-bold leading-none"
+                                                            style={{ color: s.val === null ? C.muted : s.val >= s.good ? C.success : s.val >= 0 ? C.warning : C.danger, fontFamily: 'Syne, sans-serif' }}>
+                                                            {s.val !== null ? `${s.val.toFixed(1)}%` : '—'}
+                                                        </p>
+                                                        <p className="text-[10px] font-medium mt-0.5"
+                                                            style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                            {s.label}
+                                                        </p>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
 
-                                        {/* Loss warning */}
-                                        {profit.gross < 0 && sell > 0 && (
-                                            <div className="flex items-center gap-2 p-2.5 rounded-xl mt-3"
-                                                style={{ backgroundColor: C.dangerBg, border: `1px solid #fca5a5` }}>
+                                        {/* ── 2-col layout: breakdown left, insights right ── */}
+                                        <div className="flex gap-0">
+                                            {/* Left — fee rows */}
+                                            <div className="flex-1 px-4 py-3 flex flex-col gap-0"
+                                                style={{ borderRight: `1px solid ${C.border}` }}>
+                                                {[
+                                                    { label: 'Sell Price', val: fmt(sell, currency.symbol), color: C.body, bold: true },
+                                                    { label: `eBay Fee (${profit.effectiveCatFeePercent?.toFixed(2) ?? '—'}%)`, val: `-${fmt(profit.totalEbayFees, currency.symbol)}`, color: C.muted },
+                                                    ...(profit.promotedAdFee > 0 ? [{ label: 'Promoted Ads', val: `-${fmt(profit.promotedAdFee, currency.symbol)}`, color: C.muted, bold: false }] : []),
+                                                    ...(buy > 0 ? [{ label: 'Cost Price', val: `-${fmt(buy, currency.symbol)}`, color: C.muted, bold: false }] : []),
+                                                    ...(draft.free_shipping && shipping > 0 ? [{ label: 'Shipping', val: `-${fmt(shipping, currency.symbol)}`, color: C.muted, bold: false }] : []),
+                                                    ...(profit.vatOnFees > 0 ? [{ label: 'VAT on Fees', val: `-${fmt(profit.vatOnFees, currency.symbol)}`, color: C.muted, bold: false }] : []),
+                                                ].map((row, i) => (
+                                                    <div key={i} className="flex items-center justify-between py-2"
+                                                        style={{ borderBottom: `1px solid ${C.border}` }}>
+                                                        <span className="text-[11px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>{row.label}</span>
+                                                        <span className="text-[11px] font-semibold" style={{ color: row.color, fontFamily: 'DM Sans, sans-serif' }}>{row.val}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {/* Right — insights */}
+                                            <div className="flex flex-col" style={{ width: 110 }}>
+                                                <div className="flex-1 px-3 py-3 flex flex-col justify-center"
+                                                    style={{ borderBottom: `1px solid ${C.border}` }}>
+                                                    <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Break-even</p>
+                                                    <p className="text-[14px] font-bold mt-0.5" style={{ color: C.warning, fontFamily: 'Syne, sans-serif' }}>
+                                                        {profit.breakEvenPrice > 0 ? fmt(profit.breakEvenPrice, currency.symbol) : '—'}
+                                                    </p>
+                                                </div>
+                                                <div className="flex-1 px-3 py-3 flex flex-col justify-center">
+                                                    <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Max safe ad rate</p>
+                                                    <p className="text-[14px] font-bold mt-0.5" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>
+                                                        {profit.maxSafeAdRatePercent > 0 ? `${profit.maxSafeAdRatePercent.toFixed(1)}%` : '—'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Alert ── */}
+                                        {profit.netProfit < 0 && (
+                                            <div className="flex items-center gap-2 px-4 py-2.5"
+                                                style={{ backgroundColor: C.dangerBg, borderTop: `1px solid #fca5a5` }}>
                                                 <AlertCircle size={12} style={{ color: C.danger, flexShrink: 0 }} />
                                                 <p className="text-[11px]" style={{ color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                                    You&apos;re selling at a loss. Raise price or lower cost.
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {/* Good margin badge */}
-                                        {profit.gross > 0 && profit.margin >= 20 && (
-                                            <div className="flex items-center gap-2 p-2.5 rounded-xl mt-3"
-                                                style={{ backgroundColor: C.successBg, border: `1px solid #86efac` }}>
-                                                <CheckCircle2 size={12} style={{ color: C.success, flexShrink: 0 }} />
-                                                <p className="text-[11px]" style={{ color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
-                                                    Good margin! Connect Pro Calculator for full breakdown.
+                                                    Selling at a loss — raise price to {fmt(profit.breakEvenPrice, currency.symbol)} to break even
                                                 </p>
                                             </div>
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-8 gap-2"
-                                        style={{ backgroundColor: C.surface }}>
+                                    <div className="rounded-2xl flex flex-col items-center justify-center py-10 gap-2"
+                                        style={{ border: `2px dashed ${C.border}`, backgroundColor: C.surface }}>
                                         <DollarSign size={28} style={{ color: C.border }} />
                                         <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Enter a sell price to see profit estimate
+                                            Enter a sell price to see profit breakdown
                                         </p>
                                     </div>
                                 )}
+                            </div>{/* end right profit */}
+                        </div>{/* end location+profit row */}
 
-                                {/* Connect full calculator CTA */}
-                                <div className="px-4 py-3 flex items-center gap-2"
-                                    style={{ backgroundColor: C.primaryLight, borderTop: `1px solid ${C.border}` }}>
-                                    <Info size={11} style={{ color: C.primary, flexShrink: 0 }} />
-                                    <p className="text-[11px]" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                        Connect the Pro Calculator for eBay category fees, promoted listings, VAT, FX rates and more.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ── Item Location ───────────────────────── */}
-                        <div className="flex flex-col gap-4">
-                            <SectionHeader
-                                icon={<MapPin size={14} style={{ color: C.primary }} />}
-                                title="Item Location"
-                                subtitle="Required by eBay to calculate delivery estimates"
-                            />
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <Label text="Postal / Zip Code" required />
-                                    <Input
-                                        value={(draft as any).item_zip ?? ''}
-                                        onChange={v => onChange({ item_zip: v } as any)}
-                                        placeholder="e.g. 33166"
-                                        type="text"
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <Label text="Country" required />
-                                    <ProDropdown
-                                        prefix=""
-                                        currentValue={(draft as any).item_country ?? 'US'}
-                                        onChanged={v => onChange({ item_country: v } as any)}
-                                        width="full"
-                                        options={[
-                                            { val: 'US', label: 'United States', enabled: true, flagCode: 'us' },
-                                            { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
-                                            { val: 'CA', label: 'Canada', enabled: true, flagCode: 'ca' },
-                                            { val: 'AU', label: 'Australia', enabled: true, flagCode: 'au' },
-                                            { val: 'DE', label: 'Germany', enabled: true, flagCode: 'de' },
-                                            { val: 'FR', label: 'France', enabled: true, flagCode: 'fr' },
-                                        ]}
-                                    />
-                                </div>
-                            </div>
-                        </div>
 
                         {/* ── Shipping ─────────────────────────── */}
                         <div className="flex flex-col gap-4">

@@ -14,12 +14,13 @@
 import { useState, ReactNode } from 'react'
 import {
     ChevronRight, ChevronDown, AlertCircle, CheckCircle2,
-    Tag, Hash, Layers, Info, Gavel, ShoppingCart,
+    Tag, Hash, Layers, Info, Gavel, ShoppingCart, Sparkles,
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
 import Tooltip from '@/components/ui/Tooltip'
 import ProDropdown from '@/components/ui/ProDropdown'
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Buttons'
+import SkuGeneratorModal from '../SkuGeneratorModal'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -293,6 +294,7 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
     const [newSpecKey, setNewSpecKey] = useState('')
     const [newSpecVal, setNewSpecVal] = useState('')
     const [parentCategory, setParentCategory] = useState('')
+    const [showSkuModal, setShowSkuModal] = useState(false)
 
     const categorySuggestions = suggestCategories(draft.product_name || draft.title)
 
@@ -705,20 +707,46 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Field label="SKU / Custom Label"
                             hint="Your internal reference number. Buyers don't see this.">
-                            <div className="relative">
-                                <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2"
-                                    style={{ color: C.muted }} />
-                                <input
-                                    type="text"
-                                    value={draft.sku}
-                                    onChange={e => onChange({ sku: e.target.value })}
-                                    placeholder="e.g. SP-4421"
-                                    style={{ ...inputStyle, paddingLeft: 36 }}
-                                    onFocus={e => e.target.style.borderColor = C.primary}
-                                    onBlur={e => e.target.style.borderColor = C.borderInput}
-                                />
+                            <div className="flex items-center gap-2">
+                                <div className="relative flex-1">
+                                    <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2"
+                                        style={{ color: C.muted }} />
+                                    <input
+                                        type="text"
+                                        value={draft.sku}
+                                        onChange={e => onChange({ sku: e.target.value })}
+                                        placeholder="e.g. SP-4421"
+                                        style={{ ...inputStyle, paddingLeft: 36 }}
+                                        onFocus={e => e.target.style.borderColor = C.primary}
+                                        onBlur={e => e.target.style.borderColor = C.borderInput}
+                                    />
+                                </div>
+                                {/* Generate / Regenerate SKU button */}
+                                <button
+                                    onClick={() => setShowSkuModal(true)}
+                                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-[12px] font-bold transition-all hover:opacity-85 shrink-0"
+                                    style={{
+                                        backgroundColor: C.primary,
+                                        color: '#ffffff',
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        boxShadow: '0 2px 8px rgba(117,48,251,0.3)',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                    title={draft.sku ? 'Regenerate SKU' : 'Generate SKU'}>
+                                    <Sparkles size={12} />
+                                    {draft.sku ? 'Regen' : 'Generate'}
+                                </button>
                             </div>
                         </Field>
+
+                        {/* SKU Generator Modal */}
+                        {showSkuModal && (
+                            <SkuGeneratorModal
+                                draft={draft}
+                                onGenerate={sku => onChange({ sku })}
+                                onClose={() => setShowSkuModal(false)}
+                            />
+                        )}
 
                         <Field label="Quantity" required
                             hint="How many do you have in stock?">

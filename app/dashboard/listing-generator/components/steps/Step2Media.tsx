@@ -156,6 +156,7 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
     const [batchCleaning, setBatchCleaning] = useState(false)
     const [videoUploading, setVideoUploading] = useState(false)
     const [videoProgress, setVideoProgress] = useState(0)
+    const [videoSize, setVideoSize] = useState<number | null>(null)
     const videoInputRef = useRef<HTMLInputElement>(null)
 
     // ── Description editor state ──────────────────────────────
@@ -611,8 +612,8 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
         if (!file) return
 
         // Validate
-        if (file.type !== 'video/mp4') {
-            setFileError('Only MP4 videos are supported by eBay.')
+        if (!file.type.startsWith('video/')) {
+            setFileError('Only video files are supported.')
             return
         }
         if (file.size > 150 * 1024 * 1024) {
@@ -625,33 +626,54 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
         setFileError(null)
         try {
             const { data: { user } } = await supabaseRef.current.auth.getUser()
-            if (!user) return
-            const path = `${user.id}/${draft.sku || 'draft'}/video-${Date.now()}.mp4`
+            if (!user) { setFileError('Not logged in.'); return }
 
-            // Use XHR for progress tracking
-            await new Promise<void>((resolve, reject) => {
-                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-                const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-                const xhr = new XMLHttpRequest()
-                xhr.open('POST', `${supabaseUrl}/storage/v1/object/listing-photos/${path}`)
-                xhr.setRequestHeader('Authorization', `Bearer ${supabaseKey}`)
-                xhr.setRequestHeader('x-upsert', 'true')
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) setVideoProgress(Math.round((e.loaded / e.total) * 100))
-                }
-                xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`))
-                xhr.onerror = () => reject(new Error('Network error'))
-                xhr.send(file)
-            })
+            const ext = file.name.split('.').pop() || 'mp4'
+            const path = `${user.id}/${draft.sku || 'draft'}/video-${Date.now()}.${ext}`
+
+            // Simulate progress since SDK doesn't support it
+            const progressInterval = setInterval(() => {
+                setVideoProgress(prev => prev < 90 ? prev + 5 : prev)
+            }, 300)
+
+            const { error } = await supabaseRef.current.storage
+                .from('listing-photos')
+                .upload(path, file, { upsert: true, contentType: file.type })
+
+            clearInterval(progressInterval)
+            setVideoProgress(100)
+
+            if (error) throw error
 
             const { data } = supabaseRef.current.storage.from('listing-photos').getPublicUrl(path)
             onChange({ video_url: data.publicUrl })
+            setVideoSize(file.size)
         } catch (e) {
-            setFileError('Video upload failed. Please try again.')
+            const msg = e instanceof Error ? e.message : 'Unknown error'
+            setFileError(`Video upload failed: ${msg}`)
             console.error('[Step2] Video upload error:', e)
         }
         setVideoUploading(false)
         setVideoProgress(0)
+    }
+
+    async function removeVideo() {
+        const url = draft.video_url
+        onChange({ video_url: '' })
+        setVideoSize(null)
+        // Delete from Supabase Storage
+        if (url) {
+            try {
+                const match = url.match(/listing-photos\/(.+)$/)
+                if (match) {
+                    await supabaseRef.current.storage
+                        .from('listing-photos')
+                        .remove([decodeURIComponent(match[1])])
+                }
+            } catch (e) {
+                console.error('[Step2] Video delete from storage error:', e)
+            }
+        }
     }
     async function generateDescription() {
         setAiDescLoading(true)
@@ -958,9 +980,14 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                                                 }
                                                 return (
                                                     <button key={`under-${i}`} onClick={() => fileInputRef.current?.click()}
-                                                        className="rounded-xl flex items-center justify-center transition-all hover:opacity-70"
-                                                        style={{ aspectRatio: '1', border: `1.5px dashed ${C.border}`, backgroundColor: C.bg }}>
-                                                        <span className="text-[18px]" style={{ color: C.border }}>+</span>
+                                                        className="group rounded-xl flex items-center justify-center transition-all"
+                                                        style={{ aspectRatio: '1', border: `1.5px dashed ${C.border}`, backgroundColor: C.bg, position: 'relative', overflow: 'hidden' }}>
+                                                        <span className="text-[18px] group-hover:opacity-0 transition-opacity" style={{ color: C.border }}>+</span>
+                                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all"
+                                                            style={{ backgroundColor: C.primaryLight }}>
+                                                            <Upload size={14} style={{ color: C.primary }} />
+                                                            <span className="text-[9px] font-bold" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>Upload</span>
+                                                        </div>
                                                     </button>
                                                 )
                                             })}
@@ -1033,9 +1060,14 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                                             }
                                             return (
                                                 <button key={`empty-${i}`} onClick={() => fileInputRef.current?.click()}
-                                                    className={`rounded-xl flex items-center justify-center transition-all hover:opacity-70${hideOnXl ? ' xl:hidden' : ''}`}
-                                                    style={{ aspectRatio: '1', border: `1.5px dashed ${C.border}`, backgroundColor: C.bg }}>
-                                                    <span className="text-[18px]" style={{ color: C.border }}>+</span>
+                                                    className={`group rounded-xl flex items-center justify-center transition-all${hideOnXl ? ' xl:hidden' : ''}`}
+                                                    style={{ aspectRatio: '1', border: `1.5px dashed ${C.border}`, backgroundColor: C.bg, position: 'relative', overflow: 'hidden' }}>
+                                                    <span className="text-[18px] group-hover:opacity-0 transition-opacity" style={{ color: C.border }}>+</span>
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all"
+                                                        style={{ backgroundColor: C.primaryLight }}>
+                                                        <Upload size={16} style={{ color: C.primary }} />
+                                                        <span className="text-[9px] font-bold" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>Upload</span>
+                                                    </div>
                                                 </button>
                                             )
                                         })}
@@ -1084,29 +1116,41 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                                     </p>
                                 </div>
                             ) : draft.video_url ? (
-                                /* Video uploaded — show preview */
-                                <div className="flex items-center gap-4 p-4 rounded-2xl"
-                                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
-                                    <div className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0"
-                                        style={{ backgroundColor: C.primaryLight }}>
-                                        <Video size={24} style={{ color: C.primary }} />
+                                /* Video uploaded — inline player */
+                                <div className="flex flex-col gap-2 rounded-2xl overflow-hidden"
+                                    style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}>
+                                    {/* Player */}
+                                    <video
+                                        src={draft.video_url}
+                                        controls
+                                        preload="metadata"
+                                        className="w-full"
+                                        style={{ display: 'block', maxHeight: 280, backgroundColor: '#000', borderRadius: 0 }}>
+                                        Your browser does not support video playback.
+                                    </video>
+                                    {/* Footer */}
+                                    <div className="flex items-center justify-between px-3 py-2.5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                                                style={{ backgroundColor: C.successBg }}>
+                                                <CheckCircle2 size={13} style={{ color: C.success }} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[12px] font-semibold" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    Video uploaded{videoSize ? ` · ${(videoSize / (1024 * 1024)).toFixed(1)} MB` : ''}
+                                                </p>
+                                                <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    eBay reviews within 48hrs before going live
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={removeVideo}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold"
+                                            style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                            <Trash2 size={11} /> Remove
+                                        </button>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[13px] font-semibold truncate"
-                                            style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Video uploaded
-                                        </p>
-                                        <p className="text-[11px] mt-0.5"
-                                            style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                            eBay reviews videos within 48 hours before going live
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => onChange({ video_url: '' })}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold"
-                                        style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                        <Trash2 size={12} /> Remove
-                                    </button>
                                 </div>
                             ) : (
                                 /* Upload area */
