@@ -19,7 +19,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
@@ -418,6 +418,7 @@ export default function DesignStudioPage() {
 function DesignStudioInner() {
     const supabase = createClient()
     const searchParams = useSearchParams()
+    const router = useRouter()
     const activeTab = (searchParams.get('tab') || 'templates') as 'templates' | 'library' | 'my-templates' | 'settings'
 
     // ── State ──────────────────────────────────────────────────────────────
@@ -640,7 +641,7 @@ function DesignStudioInner() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                         <AIButton onClick={() => setShowAiModal(true)}>AI Generate</AIButton>
-                        <PrimaryButton onClick={() => setShowBuilderModal(true)} icon={<Plus size={13} />}>New Template</PrimaryButton>
+                        <PrimaryButton onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')} icon={<Plus size={13} />}>New Template</PrimaryButton>
                     </div>
                 </div>
 
@@ -650,7 +651,7 @@ function DesignStudioInner() {
                     {/* Custom HTML Builder card */}
                     <div className="flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all hover:shadow-md"
                         style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}
-                        onClick={() => setShowBuilderModal(true)}>
+                        onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')}>
                         <div className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
                             style={{ backgroundColor: C.primaryLight }}>
                             <Code2 size={16} style={{ color: C.primary }} />
