@@ -30,7 +30,6 @@ import {
     EditorToolbar, sanitiseHtml, DESCRIPTION_TEMPLATES,
 } from '@/components/ui/EditorToolbar'
 import DescriptionLibrary from '@/components/ui/DescriptionLibrary'
-import HtmlTemplateEditor from '@/components/ui/HtmlTemplateEditor'
 import BgRemovingOverlay from '@/components/ui/BgRemovingOverlay'
 
 // ── Design tokens ─────────────────────────────────────────────
@@ -1229,20 +1228,460 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                             </div>
                         )}
 
-                        {/* ── Product Description — shared HtmlTemplateEditor ── */}
+                        {/* ── Product Description ───────────────────── */}
                         <div className="flex flex-col gap-3 xl:flex-1 px-3 md:px-4 xl:px-5 pb-3 md:pb-4 xl:pb-5 pt-3 md:pt-4 xl:pt-5">
-                            <HtmlTemplateEditor
-                                value={draft.description_html || ''}
-                                onChange={html => onChange({ description_html: html })}
-                                onAiWrite={generateDescription}
-                                aiLoading={aiDescLoading}
-                                isTyping={isTyping}
-                                autoSaved={autoSaved}
-                                uploadedPhotos={draft.photo_urls?.filter(Boolean) || []}
-                                supabaseUpload={uploadPhoto}
-                                showHeader={true}
-                                placeholder="Write your listing description here, or use AI to generate one..."
-                            />
+
+                            {/* Header */}
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+                                    style={{ backgroundColor: C.primaryLight }}>
+                                    <FileText size={13} style={{ color: C.primary }} />
+                                </div>
+                                <h2 className="text-[15px] font-bold"
+                                    style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                    Product Description
+                                </h2>
+                            </div>
+
+
+                            {/* Design Library Modal */}
+                            {descTab === 'library' && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                                    style={{ backgroundColor: 'rgba(30,21,53,0.6)', backdropFilter: 'blur(4px)' }}>
+                                    <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl w-full max-w-2xl"
+                                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, maxHeight: '85vh' }}>
+
+                                        {/* Modal header */}
+                                        <div className="flex items-center justify-between px-5 py-4 shrink-0"
+                                            style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.bg }}>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                                                    style={{ backgroundColor: C.primaryLight }}>
+                                                    <Zap size={13} style={{ color: C.primary }} />
+                                                </div>
+                                                <div>
+                                                    <h2 className="text-[15px] font-bold"
+                                                        style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                                        Design Library
+                                                    </h2>
+                                                    <p className="text-[11px]"
+                                                        style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                        37 eBay-safe blocks — click any to insert
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => setDescTab('templates')}
+                                                className="w-8 h-8 flex items-center justify-center rounded-xl transition-all hover:opacity-70"
+                                                style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>
+                                                <X size={14} style={{ color: C.secondary }} />
+                                            </button>
+                                        </div>
+
+                                        {/* Modal body — scrollable */}
+                                        <div className="flex-1 overflow-y-auto p-4">
+                                            <DescriptionLibrary
+                                                onInsert={html => {
+                                                    const newContent = (htmlContent || '') + '\n' + html
+                                                    setHtmlContent(newContent)
+                                                    onChange({ description_html: sanitiseHtml(newContent) })
+                                                    if (descRef.current) descRef.current.innerHTML = sanitiseHtml(newContent)
+                                                    setDescMode('rich')
+                                                    setDescPreview('edit')
+                                                    setDescTab('templates')
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Editor card — full width, sticky toolbar at column top */}
+                            <div className="rounded-2xl -mx-4 md:-mx-5 flex flex-col xl:flex-1"
+                                style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
+
+                                {/* Toolbar — sticky at top of right column scroll container */}
+                                {descMode === 'rich' && (
+                                    <div className="sticky top-0 z-20 rounded-t-2xl overflow-hidden"
+                                        style={{ backgroundColor: C.surface, boxShadow: '0 2px 8px rgba(117,48,251,0.08)' }}>
+                                        <EditorToolbar
+                                            activeFormats={activeFormats}
+                                            onExec={execCmd}
+                                            descPreview={descPreview}
+                                            onPreview={setDescPreview}
+                                            uploadedPhotos={draft.photo_urls?.filter(Boolean) || []}
+                                            supabaseUpload={uploadPhoto}
+                                            onLibrary={() => setDescTab('library')}
+                                            onAiWrite={generateDescription}
+                                            aiLoading={aiDescLoading}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Editor area — always mounted, hidden in preview */}
+                                <div className="flex flex-col xl:flex-1" style={{ display: descPreview === 'edit' ? 'flex' : 'none' }}>
+                                    {/* Rich text editor — hidden when in HTML mode */}
+                                    <div className="xl:flex-1" style={{ display: descMode === 'rich' ? 'flex' : 'none', flexDirection: 'column' }}>
+                                        <div
+                                            ref={descRef}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            spellCheck
+                                            onInput={onInput}
+                                            className="p-4 outline-none scrollbar-hide xl:flex-1"
+                                            style={{
+                                                minHeight: 'calc(100svh - 320px)',
+                                                fontSize: 13,
+                                                color: C.body,
+                                                fontFamily: 'DM Sans, sans-serif',
+                                                lineHeight: 1.6,
+                                                wordBreak: 'break-word',
+                                                pointerEvents: isTyping ? 'none' : 'auto',
+                                                userSelect: isTyping ? 'none' : 'auto',
+                                            }}
+                                            data-placeholder="Write your listing description here, or use AI to generate one..."
+                                        />
+                                    </div>
+
+                                    {/* HTML editor — split view: code left, live preview right */}
+                                    {descMode === 'html' && (() => {
+                                        // eBay safety check
+                                        const ebayWarnings: string[] = []
+                                        if (/<script/i.test(htmlContent)) ebayWarnings.push('<script> tags blocked by eBay')
+                                        if (/<form/i.test(htmlContent)) ebayWarnings.push('<form> tags blocked by eBay')
+                                        if (/<iframe/i.test(htmlContent)) ebayWarnings.push('<iframe> tags blocked by eBay')
+                                        if (/on\w+=/i.test(htmlContent)) ebayWarnings.push('onclick/onload events blocked by eBay')
+                                        if (/javascript:/i.test(htmlContent)) ebayWarnings.push('javascript: URLs blocked by eBay')
+                                        if (/<input/i.test(htmlContent)) ebayWarnings.push('<input> tags blocked by eBay')
+                                        if (/http:\/\//i.test(htmlContent)) ebayWarnings.push('HTTP images will be blocked — use HTTPS')
+
+                                        return (
+                                            <div className="flex flex-col" style={{ minHeight: 420 }}>
+
+                                                {/* eBay warnings banner */}
+                                                {ebayWarnings.length > 0 && (
+                                                    <div className="flex items-start gap-2 px-3 py-2 shrink-0"
+                                                        style={{ backgroundColor: '#fef3c7', borderBottom: `1px solid #fde68a` }}>
+                                                        <span className="text-[11px] shrink-0" style={{ color: '#d97706' }}>⚠</span>
+                                                        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                                                            {ebayWarnings.map((w, i) => (
+                                                                <span key={i} className="text-[11px]"
+                                                                    style={{ color: '#d97706', fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    {w}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Split header */}
+                                                <div className="flex shrink-0" style={{ borderBottom: `1px solid ${C.border}` }}>
+                                                    <div className="flex-1 flex items-center justify-between px-3 py-1.5"
+                                                        style={{ backgroundColor: '#f3eeff', borderRight: `1px solid ${C.border}` }}>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.primary }} />
+                                                            <span className="text-[10px] font-bold tracking-widest uppercase"
+                                                                style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>HTML Code</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            {/* Snippet buttons */}
+                                                            {[
+                                                                { label: 'B', insert: '<strong></strong>', title: 'Bold' },
+                                                                { label: 'BR', insert: '<br>', title: 'Line break' },
+                                                                { label: 'HR', insert: '\n<hr style="border:none;border-top:1px solid #ede9fe;margin:16px 0;">\n', title: 'Divider' },
+                                                                { label: 'UL', insert: '\n<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ul>\n', title: 'Bullet list' },
+                                                                { label: 'IMG', insert: '<img src="https://" alt="" style="max-width:100%;height:auto;">', title: 'Image' },
+                                                            ].map(s => (
+                                                                <button key={s.label}
+                                                                    onClick={() => {
+                                                                        const ta = codeTextareaRef.current
+                                                                        if (!ta) return
+                                                                        const start = ta.selectionStart
+                                                                        const newVal = htmlContent.substring(0, start) + s.insert + htmlContent.substring(ta.selectionEnd)
+                                                                        setHtmlContent(newVal)
+                                                                        onChange({ description_html: sanitiseHtml(newVal) })
+                                                                        if (descRef.current) descRef.current.innerHTML = sanitiseHtml(newVal)
+                                                                        setTimeout(() => { ta.focus(); ta.selectionStart = ta.selectionEnd = start + s.insert.length }, 0)
+                                                                    }}
+                                                                    title={s.title}
+                                                                    className="px-1.5 py-0.5 rounded text-[9px] font-bold hover:opacity-80"
+                                                                    style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'monospace' }}>
+                                                                    {s.label}
+                                                                </button>
+                                                            ))}
+                                                            <div className="w-px h-3 mx-0.5" style={{ backgroundColor: C.border }} />
+                                                            {/* Format */}
+                                                            <button
+                                                                onClick={() => {
+                                                                    const pretty = htmlContent
+                                                                        .replace(/<\/([a-z][a-z0-9]*)[^>]*>/gi, '</$1>\n')
+                                                                        .replace(/(<(?:br|hr|img|input)[^>]*\/?>)/gi, '$1\n')
+                                                                        .replace(/(<(?!\/|br|strong|em|a|span|b|i|u)[a-z][a-z0-9]*[^>]*>)/gi, '\n$1')
+                                                                        .split('\n').map(l => l.trimEnd())
+                                                                        .filter((l, i, arr) => !(l === '' && arr[i - 1] === ''))
+                                                                        .join('\n').trim()
+                                                                    setHtmlContent(pretty)
+                                                                    onChange({ description_html: sanitiseHtml(pretty) })
+                                                                    if (descRef.current) descRef.current.innerHTML = sanitiseHtml(pretty)
+                                                                }}
+                                                                className="px-2 py-0.5 rounded text-[9px] font-semibold hover:opacity-80"
+                                                                style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}
+                                                                title="Format / Prettify HTML">
+                                                                ✦ Format
+                                                            </button>
+                                                            {/* Copy */}
+                                                            <button
+                                                                onClick={() => navigator.clipboard.writeText(htmlContent)}
+                                                                className="px-2 py-0.5 rounded text-[9px] font-semibold hover:opacity-80"
+                                                                style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}
+                                                                title="Copy HTML code">
+                                                                Copy
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Preview header */}
+                                                    <div className="flex-1 flex items-center gap-1.5 px-3 py-1.5"
+                                                        style={{ backgroundColor: C.bg }}>
+                                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.success }} />
+                                                        <span className="text-[10px] font-bold tracking-widest uppercase"
+                                                            style={{ color: C.success, fontFamily: 'DM Sans, sans-serif' }}>Live Preview</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Split panes */}
+                                                <div className="flex flex-1 min-h-0">
+
+                                                    {/* Left — VS Code style editor with line numbers */}
+                                                    <div className="flex overflow-hidden"
+                                                        style={{ width: '50%', borderRight: `1px solid ${C.border}`, backgroundColor: '#faf9ff' }}>
+
+                                                        {/* Line numbers column — one number per \n only */}
+                                                        <div
+                                                            ref={lineNumbersRef}
+                                                            className="select-none shrink-0"
+                                                            style={{
+                                                                width: 40,
+                                                                backgroundColor: '#f3eeff',
+                                                                borderRight: `1px solid ${C.border}`,
+                                                                fontFamily: '"Fira Code", "Cascadia Code", "Courier New", monospace',
+                                                                fontSize: 12,
+                                                                color: C.muted,
+                                                                textAlign: 'right',
+                                                                paddingRight: 8,
+                                                                paddingTop: 16,
+                                                                paddingBottom: 16,
+                                                                overflowY: 'scroll',
+                                                                overflowX: 'hidden',
+                                                                scrollbarWidth: 'none',
+                                                            }}>
+                                                            {(htmlContent || '\n').split('\n').map((_, i) => (
+                                                                <div key={i} style={{ height: '21.6px', lineHeight: '21.6px' }}>{i + 1}</div>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Code textarea */}
+                                                        <textarea
+                                                            ref={codeTextareaRef}
+                                                            value={htmlContent}
+                                                            onChange={e => {
+                                                                const val = e.target.value
+                                                                setHtmlContent(val)
+                                                                onChange({ description_html: sanitiseHtml(val) })
+                                                                if (descRef.current) descRef.current.innerHTML = sanitiseHtml(val)
+                                                                scheduleAutosave(val)
+                                                            }}
+                                                            onScroll={e => {
+                                                                if (lineNumbersRef.current) {
+                                                                    lineNumbersRef.current.scrollTop = (e.target as HTMLTextAreaElement).scrollTop
+                                                                }
+                                                            }}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Tab') {
+                                                                    e.preventDefault()
+                                                                    const ta = e.target as HTMLTextAreaElement
+                                                                    const start = ta.selectionStart
+                                                                    const end = ta.selectionEnd
+                                                                    const newVal = htmlContent.substring(0, start) + '  ' + htmlContent.substring(end)
+                                                                    setHtmlContent(newVal)
+                                                                    setTimeout(() => { ta.selectionStart = ta.selectionEnd = start + 2 }, 0)
+                                                                }
+                                                            }}
+                                                            spellCheck={false}
+                                                            className="flex-1 outline-none pt-4 pb-4 pl-3 pr-4"
+                                                            style={{
+                                                                height: '100%',
+                                                                fontSize: 12,
+                                                                color: '#7530fb',
+                                                                backgroundColor: '#faf9ff',
+                                                                border: 'none',
+                                                                resize: 'none',
+                                                                lineHeight: '21.6px',
+                                                                fontFamily: '"Fira Code", "Cascadia Code", "Courier New", monospace',
+                                                                whiteSpace: 'pre',
+                                                                overflowX: 'auto',
+                                                                overflowWrap: 'normal',
+                                                            }}
+                                                            placeholder={'<p>Start typing HTML here...</p>'}
+                                                        />
+                                                    </div>
+
+                                                    {/* Right — live preview */}
+                                                    <div className="flex-1 overflow-auto p-4"
+                                                        style={{ backgroundColor: C.surface }}>
+                                                        <div style={{
+                                                            fontSize: 13,
+                                                            color: C.body,
+                                                            fontFamily: 'DM Sans, sans-serif',
+                                                            lineHeight: 1.6,
+                                                        }}
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: htmlContent ||
+                                                                    '<p style="color:#9ca3af;font-size:12px;text-align:center;padding:40px 20px;font-family:DM Sans,sans-serif">✦ Live preview appears here as you type HTML on the left</p>'
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Status bar */}
+                                                <div className="flex items-center justify-between px-3 py-1 shrink-0"
+                                                    style={{ backgroundColor: C.primary }}>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans, sans-serif' }}>
+                                                            Lines: {(htmlContent || '').split('\n').length}
+                                                        </span>
+                                                        <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans, sans-serif' }}>
+                                                            Chars: {htmlContent.length.toLocaleString()}
+                                                        </span>
+                                                        {ebayWarnings.length > 0 && (
+                                                            <span className="text-[10px]" style={{ color: '#fde68a', fontFamily: 'DM Sans, sans-serif' }}>
+                                                                ⚠ {ebayWarnings.length} eBay warning{ebayWarnings.length > 1 ? 's' : ''}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans, sans-serif' }}>
+                                                        HTML · UTF-8
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )
+                                    })()}
+                                </div>
+
+                                {/* Mobile / Desktop preview */}
+                                {(descPreview === 'mobile' || descPreview === 'desktop') && (
+                                    <div className="flex justify-center p-6 overflow-auto"
+                                        style={{ minHeight: 420, backgroundColor: '#f0f0f0' }}>
+                                        <div style={{
+                                            width: descPreview === 'mobile' ? 375 : '100%',
+                                            maxWidth: descPreview === 'desktop' ? 860 : undefined,
+                                            backgroundColor: '#fff',
+                                            borderRadius: descPreview === 'mobile' ? 24 : 12,
+                                            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                                            overflow: 'hidden',
+                                        }}>
+                                            <div className="flex items-center gap-1.5 px-4 py-2.5"
+                                                style={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid #e5e5e5' }}>
+                                                {descPreview === 'desktop' && (
+                                                    <div className="contents">
+                                                        {['#ef4444', '#f59e0b', '#22c55e'].map(c => (
+                                                            <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c }} />
+                                                        ))}
+                                                        <div className="flex-1 mx-3 py-1 px-3 rounded-md text-[11px]"
+                                                            style={{ backgroundColor: '#fff', border: '1px solid #e5e5e5', color: '#9ca3af', fontFamily: 'DM Sans, sans-serif' }}>
+                                                            ebay.com/itm/listing
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {descPreview === 'mobile' && (
+                                                    <div className="w-full text-center text-[11px]"
+                                                        style={{ color: '#9ca3af', fontFamily: 'DM Sans, sans-serif' }}>
+                                                        ebay.com
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="p-5 overflow-auto"
+                                                style={{
+                                                    fontSize: descPreview === 'mobile' ? 14 : 15,
+                                                    color: C.body, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.7,
+                                                    maxHeight: 600,
+                                                }}
+                                                dangerouslySetInnerHTML={{ __html: htmlContent || '<p style="color:#9ca3af;text-align:center;padding:40px 0">No description yet</p>' }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Bottom bar */}
+                                <div className="flex items-center justify-between px-3 py-2"
+                                    style={{ borderTop: `2px solid ${C.primary}`, backgroundColor: C.primaryLight }}>
+                                    <div className="flex items-center gap-2">
+                                        {/* Rich/HTML toggle */}
+                                        <div className="flex items-center rounded-lg overflow-hidden"
+                                            style={{ border: `1px solid ${C.border}` }}>
+                                            {(['rich', 'html'] as const).map(mode => (
+                                                <button key={mode} onClick={() => {
+                                                    setDescMode(mode)
+                                                    setDescPreview('edit')
+                                                }}
+                                                    className="px-2.5 py-1 text-[11px] font-semibold transition-all"
+                                                    style={{
+                                                        backgroundColor: descMode === mode ? C.primary : 'transparent',
+                                                        color: descMode === mode ? '#fff' : C.muted,
+                                                        fontFamily: 'DM Sans, sans-serif',
+                                                    }}>
+                                                    {mode === 'rich' ? 'Rich Text' : 'HTML'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {/* Copy */}
+                                        <button onClick={copyContent}
+                                            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold hover:opacity-80"
+                                            style={{ color: copied ? C.success : C.muted, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                            <Copy size={10} />
+                                            {copied ? 'Copied!' : 'Copy'}
+                                        </button>
+                                        {/* Clear */}
+                                        {htmlContent && (
+                                            <button onClick={clearContent}
+                                                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold hover:opacity-80"
+                                                style={{ backgroundColor: C.dangerBg, color: C.danger, border: `1px solid #fca5a5`, fontFamily: 'DM Sans, sans-serif' }}>
+                                                <Trash2 size={10} /> Clear
+                                            </button>
+                                        )}
+                                        <div className="w-px h-3" style={{ backgroundColor: C.border }} />
+                                        <span className="text-[11px]" style={{
+                                            color: charCount > CHAR_LIMIT ? C.danger : charCount > CHAR_LIMIT * 0.9 ? C.warning : C.muted,
+                                            fontFamily: 'DM Sans, sans-serif',
+                                            fontWeight: charCount > CHAR_LIMIT * 0.9 ? 700 : 400,
+                                        }}>
+                                            {wordCount}w · {charCount.toLocaleString()} / 500k
+                                            {charCount > CHAR_LIMIT && ' ⚠ Limit reached!'}
+                                            {charCount > CHAR_LIMIT * 0.9 && charCount <= CHAR_LIMIT && ' ⚠ Near limit'}
+                                        </span>
+                                        {autoSaved && (
+                                            <span className="text-[10px] font-semibold"
+                                                style={{ color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
+                                                ✓ Saved
+                                            </span>
+                                        )}
+                                        {isTyping && (
+                                            <span className="flex items-center gap-1 text-[11px] font-medium"
+                                                style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    width: 2, height: 13,
+                                                    backgroundColor: C.primary,
+                                                    borderRadius: 1,
+                                                    animation: 'sp-blink 0.7s step-end infinite',
+                                                }} />
+                                                AI writing...
+                                            </span>
+                                        )}
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
 
                     </div>
