@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import ImageAssets from '@/components/ui/ImageAssets'
 import ImportUrl from '@/components/ui/ImportUrl'
+import VisualEditor from '@/components/ui/VisualEditor'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -543,228 +544,242 @@ function HtmlEditorInner() {
             {/* ── Main split ────────────────────────────────────────────── */}
             <div className="flex flex-1 min-h-0">
 
-                {/* ── LEFT: Code editor ──────────────────────────────────── */}
-                <div className="flex flex-col shrink-0"
-                    style={{ width: '50%', borderRight: `1px solid ${C.editorBorder}`, backgroundColor: C.editorBg }}>
+                {/* ── VISUAL EDITOR MODE ─────────────────────────────────── */}
+                {activeMode === 'visual' && (
+                    <VisualEditor
+                        value={html}
+                        onChange={setHtml}
+                        placeholders={PLACEHOLDER_GROUPS}
+                    />
+                )}
 
-                    {/* Editor label bar */}
-                    <div className="flex items-center justify-between px-4 py-2 shrink-0"
-                        style={{ backgroundColor: C.editorGutter, borderBottom: `1px solid ${C.editorBorder}` }}>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                                style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
-                                HTML
-                            </span>
-                            <span className="text-[11px] font-medium"
-                                style={{ color: 'rgba(255,255,255,0.8)', fontFamily: 'DM Sans, sans-serif' }}>
-                                HTML &amp; CSS Source Code
-                            </span>
-                        </div>
-                        <button
-                            onClick={() => setHtml(h => h.trim())}
-                            className="text-[11px] font-semibold hover:opacity-70 transition-all"
-                            style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                            Format Code
-                        </button>
-                    </div>
+                {/* ── CODE EDITOR MODE ───────────────────────────────────── */}
+                {activeMode === 'code' && <>
 
-                    {/* Editor body: gutter + textarea side by side */}
-                    <div className="flex flex-1 min-h-0 overflow-hidden">
+                    {/* ── LEFT: Code editor ──────────────────────────────────── */}
+                    <div className="flex flex-col shrink-0"
+                        style={{ width: '50%', borderRight: `1px solid ${C.editorBorder}`, backgroundColor: C.editorBg }}>
 
-                        {/* Line numbers — scrolls in sync via JS */}
-                        <div
-                            ref={gutterRef}
-                            className="shrink-0 select-none"
-                            style={{
-                                width: 48,
-                                backgroundColor: C.editorGutter,
-                                borderRight: `1px solid ${C.editorBorder}`,
-                                overflowY: 'hidden',
-                                paddingTop: 12,
-                                paddingBottom: 12,
-                            }}
-                        >
-                            {lines.map((_, i) => (
-                                <div key={i}
-                                    style={{
-                                        height: LINE_H,
-                                        lineHeight: `${LINE_H}px`,
-                                        textAlign: 'right',
-                                        paddingRight: 10,
-                                        fontSize: 11,
-                                        color: 'rgba(255,255,255,0.4)',
-                                        fontFamily: 'Consolas, monospace',
-                                    }}>
-                                    {i + 1}
-                                </div>
-                            ))}
+                        {/* Editor label bar */}
+                        <div className="flex items-center justify-between px-4 py-2 shrink-0"
+                            style={{ backgroundColor: C.editorGutter, borderBottom: `1px solid ${C.editorBorder}` }}>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                                    style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'DM Sans, sans-serif' }}>
+                                    HTML
+                                </span>
+                                <span className="text-[11px] font-medium"
+                                    style={{ color: 'rgba(255,255,255,0.8)', fontFamily: 'DM Sans, sans-serif' }}>
+                                    HTML &amp; CSS Source Code
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => setHtml(h => h.trim())}
+                                className="text-[11px] font-semibold hover:opacity-70 transition-all"
+                                style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                Format Code
+                            </button>
                         </div>
 
-                        {/* Editor: highlight overlay + textarea */}
-                        <div className="flex-1 relative overflow-hidden" style={{ backgroundColor: C.editorBg }}>
+                        {/* Editor body: gutter + textarea side by side */}
+                        <div className="flex flex-1 min-h-0 overflow-hidden">
 
-                            {/* Highlight pre — only shown when searching */}
-                            {findVal && (
-                                <pre
-                                    aria-hidden
-                                    id="hl-overlay"
+                            {/* Line numbers — scrolls in sync via JS */}
+                            <div
+                                ref={gutterRef}
+                                className="shrink-0 select-none"
+                                style={{
+                                    width: 48,
+                                    backgroundColor: C.editorGutter,
+                                    borderRight: `1px solid ${C.editorBorder}`,
+                                    overflowY: 'hidden',
+                                    paddingTop: 12,
+                                    paddingBottom: 12,
+                                }}
+                            >
+                                {lines.map((_, i) => (
+                                    <div key={i}
+                                        style={{
+                                            height: LINE_H,
+                                            lineHeight: `${LINE_H}px`,
+                                            textAlign: 'right',
+                                            paddingRight: 10,
+                                            fontSize: 11,
+                                            color: 'rgba(255,255,255,0.4)',
+                                            fontFamily: 'Consolas, monospace',
+                                        }}>
+                                        {i + 1}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Editor: highlight overlay + textarea */}
+                            <div className="flex-1 relative overflow-hidden" style={{ backgroundColor: C.editorBg }}>
+
+                                {/* Highlight pre — only shown when searching */}
+                                {findVal && (
+                                    <pre
+                                        aria-hidden
+                                        id="hl-overlay"
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0, left: 0,
+                                            margin: 0,
+                                            padding: '12px 16px',
+                                            fontFamily: "'Fira Code','Cascadia Code',Consolas,monospace",
+                                            fontSize: 12,
+                                            lineHeight: `${LINE_H}px`,
+                                            whiteSpace: 'pre',
+                                            pointerEvents: 'none',
+                                            color: '#e2e8f0',
+                                            width: '100%',
+                                            minHeight: '100%',
+                                            overflow: 'hidden',
+                                            zIndex: 1,
+                                            boxSizing: 'border-box',
+                                        }}
+                                        dangerouslySetInnerHTML={{
+                                            __html: html
+                                                .replace(/&/g, '&amp;')
+                                                .replace(/</g, '&lt;')
+                                                .replace(/>/g, '&gt;')
+                                                .replace(
+                                                    new RegExp(
+                                                        findVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+                                                        caseSensitive ? 'g' : 'gi'
+                                                    ),
+                                                    m => `<mark style="background:#f59e0b;color:#1e1535;border-radius:2px">${m}</mark>`
+                                                )
+                                        }}
+                                    />
+                                )}
+
+                                {/* Textarea — transparent text when searching so highlight shows */}
+                                <textarea
+                                    ref={textareaRef}
+                                    value={html}
+                                    onChange={e => setHtml(e.target.value)}
+                                    spellCheck={false}
                                     style={{
-                                        position: 'absolute',
+                                        position: findVal ? 'absolute' : 'relative',
                                         top: 0, left: 0,
+                                        flex: 1,
+                                        width: '100%',
+                                        height: '100%',
                                         margin: 0,
                                         padding: '12px 16px',
                                         fontFamily: "'Fira Code','Cascadia Code',Consolas,monospace",
                                         fontSize: 12,
                                         lineHeight: `${LINE_H}px`,
+                                        backgroundColor: findVal ? 'transparent' : C.editorBg,
+                                        color: findVal ? 'transparent' : '#e2e8f0',
+                                        caretColor: '#fff',
+                                        border: 'none',
+                                        outline: 'none',
+                                        resize: 'none',
+                                        tabSize: 2,
                                         whiteSpace: 'pre',
-                                        pointerEvents: 'none',
-                                        color: '#e2e8f0',
-                                        width: '100%',
-                                        minHeight: '100%',
-                                        overflow: 'hidden',
-                                        zIndex: 1,
+                                        overflowY: 'auto',
+                                        overflowX: 'auto',
                                         boxSizing: 'border-box',
+                                        zIndex: 2,
                                     }}
-                                    dangerouslySetInnerHTML={{
-                                        __html: html
-                                            .replace(/&/g, '&amp;')
-                                            .replace(/</g, '&lt;')
-                                            .replace(/>/g, '&gt;')
-                                            .replace(
-                                                new RegExp(
-                                                    findVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-                                                    caseSensitive ? 'g' : 'gi'
-                                                ),
-                                                m => `<mark style="background:#f59e0b;color:#1e1535;border-radius:2px">${m}</mark>`
-                                            )
+                                    onScroll={e => {
+                                        if (gutterRef.current) {
+                                            gutterRef.current.scrollTop = e.currentTarget.scrollTop
+                                        }
+                                        const pre = document.getElementById('hl-overlay')
+                                        if (pre) {
+                                            pre.scrollTop = e.currentTarget.scrollTop
+                                            pre.scrollLeft = e.currentTarget.scrollLeft
+                                        }
+                                    }}
+                                    onBlur={e => { if (!phOpen) savedCursor.current = e.currentTarget.selectionStart }}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Tab') {
+                                            e.preventDefault()
+                                            const el = e.currentTarget
+                                            const start = el.selectionStart
+                                            const end = el.selectionEnd
+                                            const next = html.slice(0, start) + '  ' + html.slice(end)
+                                            setHtml(next)
+                                            setTimeout(() => el.setSelectionRange(start + 2, start + 2), 0)
+                                        }
                                     }}
                                 />
-                            )}
-
-                            {/* Textarea — transparent text when searching so highlight shows */}
-                            <textarea
-                                ref={textareaRef}
-                                value={html}
-                                onChange={e => setHtml(e.target.value)}
-                                spellCheck={false}
-                                style={{
-                                    position: findVal ? 'absolute' : 'relative',
-                                    top: 0, left: 0,
-                                    flex: 1,
-                                    width: '100%',
-                                    height: '100%',
-                                    margin: 0,
-                                    padding: '12px 16px',
-                                    fontFamily: "'Fira Code','Cascadia Code',Consolas,monospace",
-                                    fontSize: 12,
-                                    lineHeight: `${LINE_H}px`,
-                                    backgroundColor: findVal ? 'transparent' : C.editorBg,
-                                    color: findVal ? 'transparent' : '#e2e8f0',
-                                    caretColor: '#fff',
-                                    border: 'none',
-                                    outline: 'none',
-                                    resize: 'none',
-                                    tabSize: 2,
-                                    whiteSpace: 'pre',
-                                    overflowY: 'auto',
-                                    overflowX: 'auto',
-                                    boxSizing: 'border-box',
-                                    zIndex: 2,
-                                }}
-                                onScroll={e => {
-                                    if (gutterRef.current) {
-                                        gutterRef.current.scrollTop = e.currentTarget.scrollTop
-                                    }
-                                    const pre = document.getElementById('hl-overlay')
-                                    if (pre) {
-                                        pre.scrollTop = e.currentTarget.scrollTop
-                                        pre.scrollLeft = e.currentTarget.scrollLeft
-                                    }
-                                }}
-                                onBlur={e => { if (!phOpen) savedCursor.current = e.currentTarget.selectionStart }}
-                                onKeyDown={e => {
-                                    if (e.key === 'Tab') {
-                                        e.preventDefault()
-                                        const el = e.currentTarget
-                                        const start = el.selectionStart
-                                        const end = el.selectionEnd
-                                        const next = html.slice(0, start) + '  ' + html.slice(end)
-                                        setHtml(next)
-                                        setTimeout(() => el.setSelectionRange(start + 2, start + 2), 0)
-                                    }
-                                }}
-                            />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* ── RIGHT: Live preview ────────────────────────────────── */}
-                <div className="flex flex-col flex-1 min-w-0" style={{ backgroundColor: '#e8e8e8' }}>
+                    {/* ── RIGHT: Live preview ────────────────────────────────── */}
+                    <div className="flex flex-col flex-1 min-w-0" style={{ backgroundColor: '#e8e8e8' }}>
 
-                    {/* Preview toolbar */}
-                    <div className="flex items-center justify-between px-4 shrink-0"
-                        style={{ height: 44, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
+                        {/* Preview toolbar */}
+                        <div className="flex items-center justify-between px-4 shrink-0"
+                            style={{ height: 44, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
 
-                        {/* Device toggles */}
-                        <div className="flex items-center gap-1">
-                            {DEVICES.map(d => (
-                                <button key={d.id} onClick={() => setDevice(d.id)} title={d.label}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
-                                    style={{ backgroundColor: device === d.id ? C.primaryLight : 'transparent', border: 'none', cursor: 'pointer' }}>
-                                    <d.icon size={15} style={{ color: device === d.id ? C.primary : C.muted }} />
+                            {/* Device toggles */}
+                            <div className="flex items-center gap-1">
+                                {DEVICES.map(d => (
+                                    <button key={d.id} onClick={() => setDevice(d.id)} title={d.label}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
+                                        style={{ backgroundColor: device === d.id ? C.primaryLight : 'transparent', border: 'none', cursor: 'pointer' }}>
+                                        <d.icon size={15} style={{ color: device === d.id ? C.primary : C.muted }} />
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* eBay ID + fullscreen */}
+                            <div className="flex items-center gap-2">
+                                <input value={ebayId} onChange={e => setEbayId(e.target.value)}
+                                    placeholder="Enter eBay Item ID or SKU to test..."
+                                    className="text-[11px] px-3 py-1.5 rounded-lg outline-none"
+                                    style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif', width: 240 }}
+                                    onFocus={e => e.currentTarget.style.borderColor = C.primary}
+                                    onBlur={e => e.currentTarget.style.borderColor = C.borderInput}
+                                    onKeyDown={e => e.key === 'Enter' && testPreview()} />
+                                <button onClick={testPreview} disabled={testLoading || !ebayId.trim()}
+                                    className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg hover:opacity-80 transition-all disabled:opacity-40"
+                                    style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                    {testLoading ? 'Loading...' : 'Test'}
                                 </button>
-                            ))}
-                        </div>
-
-                        {/* eBay ID + fullscreen */}
-                        <div className="flex items-center gap-2">
-                            <input value={ebayId} onChange={e => setEbayId(e.target.value)}
-                                placeholder="Enter eBay Item ID or SKU to test..."
-                                className="text-[11px] px-3 py-1.5 rounded-lg outline-none"
-                                style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif', width: 240 }}
-                                onFocus={e => e.currentTarget.style.borderColor = C.primary}
-                                onBlur={e => e.currentTarget.style.borderColor = C.borderInput}
-                                onKeyDown={e => e.key === 'Enter' && testPreview()} />
-                            <button onClick={testPreview} disabled={testLoading || !ebayId.trim()}
-                                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg hover:opacity-80 transition-all disabled:opacity-40"
-                                style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                                {testLoading ? 'Loading...' : 'Test'}
-                            </button>
-                            {previewHtml && (
-                                <button onClick={() => setPreviewHtml('')}
-                                    className="text-[10px] font-semibold px-2 py-1.5 rounded-lg hover:opacity-80 transition-all"
-                                    style={{ backgroundColor: 'transparent', color: C.muted, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                                    Reset
+                                {previewHtml && (
+                                    <button onClick={() => setPreviewHtml('')}
+                                        className="text-[10px] font-semibold px-2 py-1.5 rounded-lg hover:opacity-80 transition-all"
+                                        style={{ backgroundColor: 'transparent', color: C.muted, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                        Reset
+                                    </button>
+                                )}
+                                <button onClick={() => setFullscreen(true)}
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-all"
+                                    style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, cursor: 'pointer' }} title="Fullscreen">
+                                    <Maximize2 size={12} style={{ color: C.muted }} />
                                 </button>
-                            )}
-                            <button onClick={() => setFullscreen(true)}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-80 transition-all"
-                                style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, cursor: 'pointer' }} title="Fullscreen">
-                                <Maximize2 size={12} style={{ color: C.muted }} />
-                            </button>
+                            </div>
+                        </div>
+
+                        {/* Live iframe — fills remaining height */}
+                        <div className="flex-1 min-h-0 overflow-auto">
+                            <div style={{
+                                width: iframeWidth,
+                                maxWidth: '100%',
+                                height: '100%',
+                                backgroundColor: '#fff',
+                                margin: device === 'desktop' ? 0 : '0 auto',
+                                transition: 'width 0.25s ease',
+                            }}>
+                                <iframe
+                                    key={device}
+                                    srcDoc={previewHtml || html}
+                                    style={{ width: '100%', height: '100%', minHeight: 'calc(100vh - 176px)', border: 'none', display: 'block' }}
+                                    sandbox="allow-same-origin"
+                                    title="Template Preview"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Live iframe — fills remaining height */}
-                    <div className="flex-1 min-h-0 overflow-auto">
-                        <div style={{
-                            width: iframeWidth,
-                            maxWidth: '100%',
-                            height: '100%',
-                            backgroundColor: '#fff',
-                            margin: device === 'desktop' ? 0 : '0 auto',
-                            transition: 'width 0.25s ease',
-                        }}>
-                            <iframe
-                                key={device}
-                                srcDoc={previewHtml || html}
-                                style={{ width: '100%', height: '100%', minHeight: 'calc(100vh - 176px)', border: 'none', display: 'block' }}
-                                sandbox="allow-same-origin"
-                                title="Template Preview"
-                            />
-                        </div>
-                    </div>
-                </div>
+                </> /* end activeMode === 'code' */}
             </div>
 
             {/* ── Bottom status bar ────────────────────────────────────── */}
