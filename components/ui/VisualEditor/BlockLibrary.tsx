@@ -16,6 +16,15 @@
 
 import React, { useState, useCallback } from 'react'
 import {
+    Layout, Columns2, Columns3, Square,
+    Heading, Pilcrow, List, Minus,
+    Tag, BadgeDollarSign, Image, FileText, Table2,
+    Camera, Megaphone, LayoutGrid,
+    ShieldCheck, Truck, RotateCcw, User, Bell,
+    ChevronDown,
+    type LucideIcon,
+} from 'lucide-react'
+import {
     BLOCK_CATEGORIES,
     BLOCK_DEFINITIONS,
     BlockType,
@@ -55,6 +64,32 @@ const CATEGORY_LABEL_COLORS: Record<BlockCategory, string> = {
     'Product': '#16a34a',
     'Media': '#d97706',
     'eBay Specific': '#1e1535',
+}
+
+
+// ── Lucide icon lookup — maps icon string from blocks.ts to component ─────────
+const BLOCK_ICONS: Record<string, LucideIcon> = {
+    'layout': Layout,
+    'columns-2': Columns2,
+    'columns-3': Columns3,
+    'square': Square,
+    'heading': Heading,
+    'pilcrow': Pilcrow,
+    'list': List,
+    'minus': Minus,
+    'tag': Tag,
+    'badge-dollar-sign': BadgeDollarSign,
+    'image': Image,
+    'file-text': FileText,
+    'table': Table2,
+    'camera': Camera,
+    'megaphone': Megaphone,
+    'layout-grid': LayoutGrid,
+    'shield-check': ShieldCheck,
+    'truck': Truck,
+    'rotate-ccw': RotateCcw,
+    'user': User,
+    'bell': Bell,
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -393,15 +428,15 @@ function CategorySection({
                 </div>
 
                 {/* Collapse chevron */}
-                <span style={{
-                    fontSize: 10,
-                    color: C.muted,
-                    transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s',
-                    display: 'inline-block',
-                }}>
-                    ▾
-                </span>
+                <ChevronDown
+                    size={13}
+                    style={{
+                        color: C.muted,
+                        transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                        flexShrink: 0,
+                    }}
+                />
             </button>
 
             {/* Block cards */}
@@ -490,12 +525,15 @@ function BlockCard({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 14,
                 flexShrink: 0,
                 transition: 'background-color 0.12s, border-color 0.12s',
-                lineHeight: 1,
             }}>
-                {def.icon}
+                {(() => {
+                    const Icon = BLOCK_ICONS[def.icon]
+                    return Icon
+                        ? <Icon size={14} style={{ color: hovered ? accentColor : C.secondary }} />
+                        : <span style={{ fontSize: 12, color: hovered ? accentColor : C.secondary }}>{def.icon}</span>
+                })()}
             </div>
 
             {/* Label + description */}

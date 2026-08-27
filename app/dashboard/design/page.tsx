@@ -25,7 +25,7 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     Plus, Search, X, Copy, Trash2,
     Eye, Check, Loader2, Code2, Zap,
-    Save, RefreshCw, LayoutTemplate,
+    Save, RefreshCw, LayoutTemplate, Layers,
 } from 'lucide-react'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, PrimaryButton, SecondaryButton, GhostButton, IconButton } from '@/components/ui/Buttons'
@@ -646,7 +646,7 @@ function DesignStudioInner() {
                 </div>
 
                 {/* Quick-action cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-5">
 
                     {/* Custom HTML Builder card */}
                     <div className="flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all hover:shadow-md"
@@ -706,6 +706,35 @@ function DesignStudioInner() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Visual Drag-&-Drop Builder card */}
+                    <div className="flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                        style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}
+                        onClick={() => router.push('/dashboard/design/visual-editor?name=New+Visual+Template')}>
+                        <div className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
+                            style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+                            <Layers size={16} style={{ color: '#16a34a' }} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <p className="text-[14px] font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                    Visual Drag-&amp;-Drop Builder
+                                </p>
+                                <span className="text-[9px] font-black px-2 py-0.5 rounded-full"
+                                    style={{ backgroundColor: C.accent, color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
+                                    NEW
+                                </span>
+                            </div>
+                            <p className="text-[12px] leading-relaxed" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                Build eBay listings visually — no code needed. Drag blocks, customise styles and publish.
+                            </p>
+                            <button className="mt-2 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-80"
+                                style={{ backgroundColor: C.dark, color: C.accent, fontFamily: 'DM Sans, sans-serif', border: 'none' }}>
+                                + Open Builder
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

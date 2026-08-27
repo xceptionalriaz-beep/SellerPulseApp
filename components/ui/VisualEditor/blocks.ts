@@ -408,7 +408,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'full_width_section',
         label: 'Full Width Section',
         category: 'Layout',
-        icon: '▬',
+        icon: 'layout',
         description: 'Full-width container for any content',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -437,7 +437,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'two_column',
         label: 'Two Column',
         category: 'Layout',
-        icon: '⊞',
+        icon: 'columns-2',
         description: 'Side-by-side two column layout',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -474,7 +474,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'three_column',
         label: 'Three Column',
         category: 'Layout',
-        icon: '⊟',
+        icon: 'columns-3',
         description: 'Three equal column layout',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -507,7 +507,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'container',
         label: 'Container',
         category: 'Layout',
-        icon: '▢',
+        icon: 'square',
         description: 'Centered container with max-width',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -540,7 +540,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'heading',
         label: 'Heading',
         category: 'Content',
-        icon: 'H',
+        icon: 'heading',
         description: 'Section heading H1 – H4',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -576,7 +576,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'paragraph',
         label: 'Paragraph',
         category: 'Content',
-        icon: '¶',
+        icon: 'pilcrow',
         description: 'Body text paragraph',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -606,7 +606,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         type: 'bullet_list',
         label: 'Bullet List',
         category: 'Content',
-        icon: '≡',
+        icon: 'list',
         description: 'Styled feature list with icons',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -649,7 +649,7 @@ ${rows}
         type: 'divider',
         label: 'Divider',
         category: 'Content',
-        icon: '─',
+        icon: 'minus',
         description: 'Horizontal divider line',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -686,7 +686,7 @@ ${rows}
         type: 'product_title',
         label: 'Product Title',
         category: 'Product',
-        icon: '🏷',
+        icon: 'tag',
         description: 'Main product title with condition badge',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -724,7 +724,7 @@ ${rows}
         type: 'price_block',
         label: 'Price Block',
         category: 'Product',
-        icon: '£',
+        icon: 'badge-dollar-sign',
         description: 'Price display with optional sale badge',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -768,7 +768,7 @@ ${rows}
         type: 'product_image',
         label: 'Product Image',
         category: 'Product',
-        icon: '🖼',
+        icon: 'image',
         description: 'Main product image with placeholder',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -803,7 +803,7 @@ ${rows}
         type: 'product_description',
         label: 'Product Description',
         category: 'Product',
-        icon: '📄',
+        icon: 'file-text',
         description: 'Full product description section',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -839,7 +839,7 @@ ${rows}
         type: 'specs_table',
         label: 'Specs Table',
         category: 'Product',
-        icon: '📋',
+        icon: 'table',
         description: 'Item specifics / specs table',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -893,7 +893,7 @@ ${rows}
         type: 'image',
         label: 'Image',
         category: 'Media',
-        icon: '📷',
+        icon: 'camera',
         description: 'Single image block',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -929,7 +929,7 @@ ${rows}
         type: 'banner',
         label: 'Banner',
         category: 'Media',
-        icon: '🎯',
+        icon: 'megaphone',
         description: 'Hero banner with heading and subtext',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -973,7 +973,7 @@ ${rows}
         type: 'gallery_row',
         label: 'Gallery Row',
         category: 'Media',
-        icon: '🖼',
+        icon: 'layout-grid',
         description: 'Product image gallery row',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -1027,16 +1027,16 @@ ${thumbCells}
         type: 'trust_badges',
         label: 'Trust Badges Row',
         category: 'eBay Specific',
-        icon: '🛡',
+        icon: 'shield-check',
         description: 'eBay trust badges — authentic, shipping, returns, seller rating',
         defaultProps: {
             ...DEFAULT_COMMON,
             bgColor: '#f8f7ff',
             badges: [
-                { icon: '✓', text: 'Authentic Product' },
-                { icon: '📦', text: 'Fast Dispatch' },
-                { icon: '↩', text: '30-Day Returns' },
-                { icon: '⭐', text: 'Top Rated Seller' },
+                { icon: 'check', text: 'Authentic Product' },
+                { icon: 'package', text: 'Fast Dispatch' },
+                { icon: 'rotate-ccw', text: '30-Day Returns' },
+                { icon: 'star', text: 'Top Rated Seller' },
             ],
             iconColor: '#7530fb',
             textColor: '#1e1535',
@@ -1075,7 +1075,7 @@ ${cells}
         type: 'shipping_info',
         label: 'Shipping Info Bar',
         category: 'eBay Specific',
-        icon: '🚚',
+        icon: 'truck',
         description: 'Shipping time, dispatch and location bar',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -1109,7 +1109,7 @@ ${cells}
         type: 'returns_policy',
         label: 'Returns Policy',
         category: 'eBay Specific',
-        icon: '↩',
+        icon: 'rotate-ccw',
         description: 'Returns policy block with period and terms',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -1146,7 +1146,7 @@ ${cells}
         type: 'seller_info',
         label: 'Seller Info',
         category: 'eBay Specific',
-        icon: '👤',
+        icon: 'user',
         description: 'Seller name, tagline and feedback score',
         defaultProps: {
             ...DEFAULT_COMMON,
@@ -1185,7 +1185,7 @@ ${cells}
         type: 'cta_banner',
         label: 'CTA Banner',
         category: 'eBay Specific',
-        icon: '📣',
+        icon: 'bell',
         description: 'Call-to-action banner — end of listing',
         defaultProps: {
             ...DEFAULT_COMMON,

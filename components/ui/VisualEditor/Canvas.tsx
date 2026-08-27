@@ -30,6 +30,15 @@
 
 import React, { useState, useRef, useCallback } from 'react'
 import {
+    Layout, Columns2, Columns3, Square,
+    Heading, Pilcrow, List, Minus,
+    Tag, BadgeDollarSign, Image, FileText, Table2,
+    Camera, Megaphone, LayoutGrid,
+    ShieldCheck, Truck, RotateCcw, User, Bell,
+    Check, ArrowRight, Star, Package,
+    type LucideIcon,
+} from 'lucide-react'
+import {
     Block,
     BlockType,
     BlockDefinition,
@@ -77,6 +86,39 @@ const DEVICE_WIDTHS = {
     desktop: 700,
     tablet: 480,
     mobile: 375,
+}
+
+
+// ── Lucide icon lookup ────────────────────────────────────────────────────────
+const BLOCK_ICONS: Record<string, LucideIcon> = {
+    'layout': Layout,
+    'columns-2': Columns2,
+    'columns-3': Columns3,
+    'square': Square,
+    'heading': Heading,
+    'pilcrow': Pilcrow,
+    'list': List,
+    'minus': Minus,
+    'tag': Tag,
+    'badge-dollar-sign': BadgeDollarSign,
+    'image': Image,
+    'file-text': FileText,
+    'table': Table2,
+    'camera': Camera,
+    'megaphone': Megaphone,
+    'layout-grid': LayoutGrid,
+    'shield-check': ShieldCheck,
+    'truck': Truck,
+    'rotate-ccw': RotateCcw,
+    'user': User,
+    'bell': Bell,
+}
+
+// ── Bullet icons ──────────────────────────────────────────────────────────────
+const BULLET_ICONS: Record<string, LucideIcon> = {
+    check: Check,
+    arrow: ArrowRight,
+    star: Star,
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -551,7 +593,7 @@ function BlockCard({
                     zIndex: 2,
                     pointerEvents: 'none',
                 }}>
-                    {def.icon} {def.label}
+                    {(() => { const I = BLOCK_ICONS[def.icon]; return I ? <I size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 3 }} /> : null })()} {def.label}
                 </div>
             )}
 
@@ -998,7 +1040,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
                         border: `1px dashed ${C.border}`,
                         gap: 4,
                     }}>
-                        <span style={{ fontSize: 22, opacity: 0.5 }}>🖼</span>
+                        <Image size={28} style={{ color: C.muted, opacity: 0.4 }} />
                         <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
                             {isPlaceholder ? '{{MAIN_IMAGE_URL}}' : 'Product Image'}
                         </p>
@@ -1081,7 +1123,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
                         borderRadius: p.borderRadius ?? 0,
                         border: `1px dashed ${C.border}`,
                     }}>
-                        <span style={{ fontSize: 20, opacity: 0.4 }}>📷</span>
+                        <Camera size={22} style={{ color: C.muted, opacity: 0.4 }} />
                     </div>
                     {p.src && !p.src.includes('placeholder') && (
                         <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1117,7 +1159,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
             return (
                 <WireframePreview icon={def.icon} label="Gallery Row" color="#d97706">
                     <div style={{ display: 'flex', gap: 4 }}>
-                        <div style={{ flex: 2, height: 50, backgroundColor: '#fef3c7', borderRadius: 4, border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🖼</div>
+                        <div style={{ flex: 2, height: 50, backgroundColor: '#fef3c7', borderRadius: 4, border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LayoutGrid size={18} style={{ color: '#d97706', opacity: 0.6 }} /></div>
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                             <div style={{ flex: 1, backgroundColor: '#fef3c7', borderRadius: 3, border: '1px solid #fde68a' }} />
                             <div style={{ flex: 1, backgroundColor: '#fef3c7', borderRadius: 3, border: '1px solid #fde68a' }} />
@@ -1159,7 +1201,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
                     padding: '8px 12px',
                 }}>
                     <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 12, fontWeight: 700, color: p.textColor ?? '#166534', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        🚚 <strong>{p.shippingText ?? '{{SHIPPING_TIME}}'}</strong> · {p.dispatchText ?? 'Same Day Dispatch'}
+                        {''}<Truck size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /><strong>{p.shippingText ?? '{{SHIPPING_TIME}}'}</strong> · {p.dispatchText ?? 'Same Day Dispatch'}
                     </p>
                 </div>
             )
@@ -1184,9 +1226,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
             const p = props as SellerInfoProps
             return (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: p.bgColor ?? '#f8f7ff', padding: '8px 12px', borderRadius: 8 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-                        👤
-                    </div>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}><User size={16} style={{ color: C.primary }} /></div>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 13, fontWeight: 700, color: p.textColor ?? C.dark }}>{p.sellerName ?? '{{SELLER_NAME}}'}</p>
@@ -1243,10 +1283,13 @@ function WireframePreview({
     color: string
     children?: React.ReactNode
 }) {
+    const WIcon = BLOCK_ICONS[icon]
     return (
         <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                <span style={{ fontSize: 14 }}>{icon}</span>
+                <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {WIcon ? <WIcon size={14} style={{ color }} /> : <span style={{ fontSize: 12 }}>{icon}</span>}
+                </span>
                 <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color }}>
                     {label}
                 </span>

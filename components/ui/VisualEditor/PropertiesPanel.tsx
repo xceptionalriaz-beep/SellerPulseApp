@@ -20,6 +20,18 @@
 
 import React, { useState, useCallback } from 'react'
 import {
+    Layout, Columns2, Columns3, Square,
+    Heading, Pilcrow, List, Minus,
+    Tag, BadgeDollarSign, Image, FileText, Table2,
+    Camera, Megaphone, LayoutGrid,
+    ShieldCheck, Truck, RotateCcw, User, Bell,
+    Sparkles, Wand2, Zap,
+    AlignLeft, AlignCenter, AlignRight,
+    CheckCircle2, AlertTriangle,
+    MousePointer2,
+    type LucideIcon,
+} from 'lucide-react'
+import {
     Block,
     BlockType,
     BlockProps,
@@ -67,6 +79,31 @@ const C = {
     successLight: '#dcfce7',
     warning: '#d97706',
     warningLight: '#fef3c7',
+}
+
+// ── Lucide icon lookup — maps icon string keys from blocks.ts to components ────
+const BLOCK_ICONS: Record<string, LucideIcon> = {
+    'layout': Layout,
+    'columns-2': Columns2,
+    'columns-3': Columns3,
+    'square': Square,
+    'heading': Heading,
+    'pilcrow': Pilcrow,
+    'list': List,
+    'minus': Minus,
+    'tag': Tag,
+    'badge-dollar-sign': BadgeDollarSign,
+    'image': Image,
+    'file-text': FileText,
+    'table': Table2,
+    'camera': Camera,
+    'megaphone': Megaphone,
+    'layout-grid': LayoutGrid,
+    'shield-check': ShieldCheck,
+    'truck': Truck,
+    'rotate-ccw': RotateCcw,
+    'user': User,
+    'bell': Bell,
 }
 
 // ── Placeholder group type (mirrors PLACEHOLDER_GROUPS in page.tsx) ───────────
@@ -212,7 +249,10 @@ export default function PropertiesPanel({
                             fontSize: 15,
                             flexShrink: 0,
                         }}>
-                            {def?.icon}
+                            {(() => {
+                                const I = def?.icon ? BLOCK_ICONS[def.icon] : null
+                                return I ? <I size={16} style={{ color: C.primary }} /> : null
+                            })()}
                         </div>
                         <div>
                             <p style={{
@@ -269,7 +309,7 @@ export default function PropertiesPanel({
                     padding: '3px 10px',
                     marginBottom: 10,
                 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: C.success, display: 'inline-block' }} />
+                    <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
                     <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.success }}>
                         100% eBay Compliant
                     </span>
@@ -410,7 +450,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <ColorRow label="Bullet colour" value={props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ bulletColor: v })} />
                     <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                     <SelectInput label="Bullet style" value={props.style ?? 'check'}
-                        options={[{ v: 'disc', l: '• Disc' }, { v: 'check', l: '✓ Check' }, { v: 'arrow', l: '→ Arrow' }, { v: 'star', l: '★ Star' }]}
+                        options={[{ v: 'disc', l: 'Disc' }, { v: 'check', l: 'Check' }, { v: 'arrow', l: 'Arrow' }, { v: 'star', l: 'Star' }]}
                         onChange={v => updateProps({ style: v })} />
                 </Section>
             )
@@ -929,7 +969,7 @@ function AITab({ block }: { block: Block }) {
         <div style={{ padding: '14px 14px 24px' }}>
             <Section title="AI Tools">
                 <AIToolButton
-                    icon="✦"
+                    Icon={Sparkles}
                     label="AI Copy Optimizer"
                     description="Rewrite this block's text for higher eBay conversion"
                     color={C.primary}
@@ -938,7 +978,7 @@ function AITab({ block }: { block: Block }) {
                     comingSoon
                 />
                 <AIToolButton
-                    icon="🖼"
+                    Icon={Wand2}
                     label="AI Photo Studio"
                     description="Generate or enhance product images for this block"
                     color="#d97706"
@@ -947,7 +987,7 @@ function AITab({ block }: { block: Block }) {
                     comingSoon
                 />
                 <AIToolButton
-                    icon="⚡"
+                    Icon={Zap}
                     label="AI Policy Writer"
                     description="Auto-generate eBay-safe shipping & returns copy"
                     color={C.success}
@@ -964,8 +1004,8 @@ function AITab({ block }: { block: Block }) {
                     border: `1px solid #86efac50`,
                     borderRadius: 8,
                 }}>
-                    <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.success }}>
-                        ✓ This block is eBay safe
+                    <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.success, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <CheckCircle2 size={13} /> This block is eBay safe
                     </p>
                     <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.success + 'cc', lineHeight: 1.5 }}>
                         No JavaScript · No external CSS · Table-based layout · HTTPS images only
@@ -1134,7 +1174,7 @@ function BadgesEditor({ badges, onChange }: { badges: Array<{ icon: string; text
                 </div>
             ))}
             {badges.length < 6 && (
-                <button onClick={() => onChange([...badges, { icon: '✓', text: 'New badge' }])} style={addBtnStyle}>
+                <button onClick={() => onChange([...badges, { icon: 'check', text: 'New badge' }])} style={addBtnStyle}>
                     + Add badge
                 </button>
             )}
@@ -1507,7 +1547,7 @@ function AlignButtons({ value, onChange }: { value: string; onChange: (v: 'left'
                             transition: 'all 0.12s',
                         }}
                     >
-                        {align === 'left' ? '⬅' : align === 'center' ? '↔' : '➡'}
+                        {align === 'left' ? <AlignLeft size={13} /> : align === 'center' ? <AlignCenter size={13} /> : <AlignRight size={13} />}
                     </button>
                 ))}
             </div>
@@ -1533,9 +1573,9 @@ function InfoBox({ children }: { children: React.ReactNode }) {
 }
 
 function AIToolButton({
-    icon, label, description, color, bg, border, comingSoon
+    Icon, label, description, color, bg, border, comingSoon
 }: {
-    icon: string; label: string; description: string; color: string; bg: string; border: string; comingSoon?: boolean
+    Icon: LucideIcon; label: string; description: string; color: string; bg: string; border: string; comingSoon?: boolean
 }) {
     const [hovered, setHovered] = useState(false)
     return (
@@ -1572,7 +1612,7 @@ function AIToolButton({
                 fontSize: 16,
                 flexShrink: 0,
             }}>
-                {icon}
+                <Icon size={18} style={{ color }} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

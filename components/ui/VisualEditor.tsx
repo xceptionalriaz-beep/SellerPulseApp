@@ -24,6 +24,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import {
+    Monitor, Tablet, Smartphone,
+    Undo2, Redo2, Trash2,
+    AlertTriangle, CheckCircle2, X,
+    type LucideIcon,
+} from 'lucide-react'
 
 import {
     Block,
@@ -399,10 +405,10 @@ function EditorToolbar({
     onRedo,
     onClearAll,
 }: EditorToolbarProps) {
-    const devices: Array<{ id: 'desktop' | 'tablet' | 'mobile'; icon: string; label: string; width: string }> = [
-        { id: 'desktop', icon: '🖥', label: 'Desktop', width: '700px' },
-        { id: 'tablet', icon: '📱', label: 'Tablet', width: '480px' },
-        { id: 'mobile', icon: '📲', label: 'Mobile', width: '375px' },
+    const devices: Array<{ id: 'desktop' | 'tablet' | 'mobile'; Icon: LucideIcon; label: string; width: string }> = [
+        { id: 'desktop', Icon: Monitor, label: 'Desktop', width: '700px' },
+        { id: 'tablet', Icon: Tablet, label: 'Tablet', width: '480px' },
+        { id: 'mobile', Icon: Smartphone, label: 'Mobile', width: '375px' },
     ]
 
     return (
@@ -425,7 +431,7 @@ function EditorToolbar({
                     disabled={!canUndo}
                     title="Undo (Cmd+Z)"
                 >
-                    ↩
+                    <Undo2 size={14} />
                 </ToolbarButton>
                 {/* Redo */}
                 <ToolbarButton
@@ -433,7 +439,7 @@ function EditorToolbar({
                     disabled={!canRedo}
                     title="Redo (Cmd+Shift+Z)"
                 >
-                    ↪
+                    <Redo2 size={14} />
                 </ToolbarButton>
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
@@ -485,7 +491,7 @@ function EditorToolbar({
                             transition: 'all 0.15s',
                         }}
                     >
-                        <span style={{ fontSize: 13 }}>{d.icon}</span>
+                        <d.Icon size={13} />
                         <span>{d.label}</span>
                         <span style={{ fontSize: 9, opacity: 0.6 }}>{d.width}</span>
                     </button>
@@ -511,7 +517,7 @@ function EditorToolbar({
                         transition: 'all 0.15s',
                     }}
                 >
-                    Clear all
+                    <Trash2 size={12} style={{ marginRight: 4 }} />Clear all
                 </button>
             </div>
         </div>
@@ -535,7 +541,7 @@ function WarningBanner({
     const bg = isHeuristic ? C.warningLight : C.dangerLight
     const border = isHeuristic ? '#fde68a50' : '#fecaca50'
     const color = isHeuristic ? C.warning : C.danger
-    const icon = isHeuristic ? '⚠' : '✕'
+    const WarningIcon = isHeuristic ? AlertTriangle : X
     const title = isHeuristic
         ? 'Converted from existing HTML — some properties may need adjusting'
         : 'Custom code detected — some sections cannot be edited visually'
@@ -551,7 +557,7 @@ function WarningBanner({
             gap: 10,
             flexShrink: 0,
         }}>
-            <span style={{ fontSize: 14, color, marginTop: 1, flexShrink: 0 }}>{icon}</span>
+            <WarningIcon size={14} style={{ color, marginTop: 1, flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ margin: '0 0 2px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color }}>
                     {title}
@@ -642,14 +648,7 @@ function StatusBar({
 function StatusPill({ color, label }: { color: string; label: string }) {
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{
-                width: 5,
-                height: 5,
-                borderRadius: '50%',
-                backgroundColor: color,
-                display: 'inline-block',
-                flexShrink: 0,
-            }} />
+            <CheckCircle2 size={10} style={{ color, flexShrink: 0 }} />
             <span style={{
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: 10,
