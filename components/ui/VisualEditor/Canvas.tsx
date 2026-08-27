@@ -987,16 +987,15 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
             return (
                 <div style={{ textAlign: p.align ?? 'center' }}>
                     <div style={{
-                        display: 'inline-block',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         width: Math.min(p.maxWidth ?? 500, 200),
                         height: 90,
                         backgroundColor: C.bg,
                         borderRadius: p.borderRadius ?? 8,
                         border: `1px dashed ${C.border}`,
-                        display: 'flex' as any,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'column' as any,
                         gap: 4,
                     }}>
                         <span style={{ fontSize: 22, opacity: 0.5 }}>🖼</span>
@@ -1072,16 +1071,15 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
             return (
                 <div style={{ textAlign: p.align ?? 'center' }}>
                     <div style={{
-                        display: 'inline-block',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         width: p.widthUnit === '%' ? '100%' : Math.min(p.width ?? 100, 240),
                         maxWidth: '100%',
                         height: 70,
                         backgroundColor: C.bg,
                         borderRadius: p.borderRadius ?? 0,
                         border: `1px dashed ${C.border}`,
-                        display: 'flex' as any,
-                        alignItems: 'center',
-                        justifyContent: 'center',
                     }}>
                         <span style={{ fontSize: 20, opacity: 0.4 }}>📷</span>
                     </div>
