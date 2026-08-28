@@ -32,6 +32,7 @@ export type BlockCategory =
     | 'Product'
     | 'Media'
     | 'eBay Specific'
+    | 'Conversion'
 
 // ── All block type keys ──────────────────────────────────────────────────────
 export type BlockType =
@@ -61,6 +62,15 @@ export type BlockType =
     | 'returns_policy'
     | 'seller_info'
     | 'cta_banner'
+    // Conversion
+    | 'policy_tabs'
+    | 'nav_bar'
+    | 'urgency_bar'
+    | 'cross_sell'
+    | 'button_block'
+    | 'rectangle'
+    | 'hero_header'
+    | 'raw_html'
 
 // ── Base block instance ─────────────────────────────────────────────────────
 export interface Block {
@@ -94,6 +104,14 @@ export type BlockProps =
     | ReturnsPolicyProps
     | SellerInfoProps
     | CtaBannerProps
+    | PolicyTabsProps
+    | NavBarProps
+    | UrgencyBarProps
+    | CrossSellProps
+    | ButtonBlockProps
+    | RectangleProps
+    | HeroHeaderProps
+    | RawHtmlProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -180,14 +198,14 @@ export interface BulletListProps extends CommonProps {
     color: string
     fontSize: number
     bulletColor: string
-    style: 'disc' | 'check' | 'arrow' | 'star'
+    bulletStyle: 'disc' | 'check' | 'arrow' | 'star'
 }
 
 // ── Divider ───────────────────────────────────────────────────────────────────
 export interface DividerProps extends CommonProps {
     color: string
     thickness: number         // px
-    style: 'solid' | 'dashed' | 'dotted' | 'gradient'
+    lineStyle: 'solid' | 'dashed' | 'dotted' | 'gradient'
     widthPercent: number      // 0–100
 }
 
@@ -204,6 +222,8 @@ export interface ProductTitleProps extends CommonProps {
     fontWeight: '600' | '700' | '800' | '900'
     showCondition: boolean
     conditionText: string     // default: {{ITEM_CONDITION}}
+    conditionColor: string    // condition text colour
+    conditionFontSize: number // condition text size
 }
 
 // ── Price Block ───────────────────────────────────────────────────────────────
@@ -211,12 +231,18 @@ export interface PriceBlockProps extends CommonProps {
     priceText: string         // default: {{ITEM_PRICE}}
     priceColor: string
     priceFontSize: number
+    priceFontWeight: string   // default '900'
+    priceAlign: 'left' | 'center' | 'right'
     showOriginal: boolean
     originalText: string      // default: {{ORIGINAL_PRICE}}
+    originalColor: string     // strikethrough price colour
+    originalFontSize: number  // strikethrough price size
     showBadge: boolean
     badgeText: string         // e.g. "SALE" or "{{DISCOUNT_PERCENT}} OFF"
     badgeBg: string
     badgeColor: string
+    badgeFontSize: number     // badge text size
+    badgeBorderRadius: number // badge pill radius
     borderRadius: number
 }
 
@@ -229,6 +255,8 @@ export interface ProductImageProps extends CommonProps {
     borderRadius: number
     showBorder: boolean
     borderColor: string
+    borderWidth: number       // border thickness in px (default 1)
+    objectFit: 'contain' | 'cover' | 'fill'  // css object-fit
 }
 
 // ── Product Description ───────────────────────────────────────────────────────
@@ -236,10 +264,12 @@ export interface ProductDescriptionProps extends CommonProps {
     text: string              // default: {{ITEM_DESCRIPTION}}
     color: string
     fontSize: number
+    fontWeight: string        // body text weight (default '400')
     lineHeight: number
     showTitle: boolean
     titleText: string
     titleColor: string
+    titleFontSize: number     // title font size (default 16)
 }
 
 // ── Specs Table ───────────────────────────────────────────────────────────────
@@ -268,6 +298,7 @@ export interface ImageProps extends CommonProps {
     align: 'left' | 'center' | 'right'
     borderRadius: number
     linkUrl: string           // optional click-through URL
+    bgColor: string           // container background colour
 }
 
 // ── Banner ────────────────────────────────────────────────────────────────────
@@ -306,6 +337,7 @@ export interface TrustBadgesProps extends CommonProps {
     badgeBg: string
     borderColor: string
     borderRadius: number
+    align: 'left' | 'center' | 'right'  // badge row alignment
 }
 
 // ── Shipping Info Bar ─────────────────────────────────────────────────────────
@@ -354,6 +386,124 @@ export interface CtaBannerProps extends CommonProps {
     subTextColor: string
     align: 'left' | 'center' | 'right'
     minHeight: number
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONVERSION BLOCKS — NEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Policy Tabs ───────────────────────────────────────────────────────────────
+export interface PolicyTabsProps extends CommonProps {
+    tabs: Array<{
+        label: string
+        content: string
+    }>
+    activeBg: string          // active tab background
+    activeText: string        // active tab text colour
+    inactiveBg: string
+    inactiveText: string
+    borderColor: string
+    borderRadius: number
+    fontSize: number
+}
+
+// ── Navigation Bar ────────────────────────────────────────────────────────────
+export interface NavBarProps extends CommonProps {
+    links: Array<{ label: string; url: string }>
+    bgColor: string
+    textColor: string
+    hoverColor: string
+    separator: string         // '|' or '•' or '·'
+    align: 'left' | 'center' | 'right'
+    fontSize: number
+    fontWeight: string        // link font weight (default '700')
+    letterSpacing: number     // px converted to em in toHtml (default 3 = 0.03em)
+    borderRadius: number
+}
+
+// ── Urgency Bar ───────────────────────────────────────────────────────────────
+export interface UrgencyBarProps extends CommonProps {
+    text: string              // e.g. "Only {{QUANTITY}} Left — Order Soon!"
+    bgColor: string
+    textColor: string
+    iconColor: string
+    borderRadius: number
+    showIcon: boolean
+    pulse: boolean            // adds pulsing dot
+    align: 'left' | 'center' | 'right'
+    fontSize: number
+}
+
+// ── Cross-Sell Grid ───────────────────────────────────────────────────────────
+export interface CrossSellProps extends CommonProps {
+    title: string
+    titleColor: string
+    columns: 2 | 3 | 4
+    items: Array<{
+        imageUrl: string
+        title: string
+        price: string
+        url: string
+    }>
+    cardBg: string
+    cardBorder: string
+    borderRadius: number
+    showPrice: boolean
+    gap: number
+}
+
+// ── Button Block ──────────────────────────────────────────────────────────────
+export interface ButtonBlockProps extends CommonProps {
+    label: string
+    url: string
+    variant: 'primary' | 'secondary' | 'outline' | 'dark' | 'accent'
+    bgColor: string
+    textColor: string
+    borderColor: string
+    borderRadius: number
+    fontSize: number
+    fontWeight: '600' | '700' | '800'
+    align: 'left' | 'center' | 'right'
+    fullWidth: boolean
+    paddingV: number          // vertical padding inside button
+    paddingH: number          // horizontal padding inside button
+}
+
+// ── Rectangle ─────────────────────────────────────────────────────────────────
+export interface RectangleProps extends CommonProps {
+    height: number            // px
+    fillColor: string
+    borderColor: string
+    borderWidth: number
+    borderRadius: number
+    content: string           // optional HTML inside
+    align: 'left' | 'center' | 'right'
+}
+
+// ── Hero Header ───────────────────────────────────────────────────────────────
+export interface HeroHeaderProps extends CommonProps {
+    storeName: string         // default: {{SELLER_NAME}}
+    tagline: string
+    bgColor: string
+    bgGradient: boolean
+    gradientFrom: string
+    gradientTo: string
+    textColor: string
+    taglineColor: string
+    logoUrl: string           // optional logo image
+    showLogo: boolean
+    height: number            // px min-height
+    align: 'left' | 'center' | 'right'
+    borderRadius: number
+    nameFontSize: number      // store name font size (default 26)
+    taglineFontSize: number   // tagline font size (default 13)
+    nameFontWeight: string    // store name font weight (default 900)
+}
+
+// ── Raw HTML ──────────────────────────────────────────────────────────────────
+export interface RawHtmlProps extends CommonProps {
+    code: string              // raw HTML — passed through sanitiseHtml on export
+    label: string             // internal label shown on canvas card
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -614,7 +764,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             color: '#1f1d2e',
             fontSize: 14,
             bulletColor: '#7530fb',
-            style: 'check',
+            bulletStyle: 'check',
         } as BulletListProps,
         toHtml(props, id) {
             const p = props as BulletListProps
@@ -624,7 +774,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 arrow: '&#8594;',
                 star: '&#9733;',
             }
-            const bullet = bulletMap[p.style] || '•'
+            const bullet = bulletMap[p.bulletStyle] || '•'
             const rows = p.items.map(item =>
                 `        <tr>
           <td width="20" valign="top" style="padding-right:8px;padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.bulletColor};font-weight:700;">${bullet}</td>
@@ -657,16 +807,16 @@ ${rows}
             paddingBottom: 8,
             color: '#ede9fe',
             thickness: 1,
-            style: 'solid',
+            lineStyle: 'solid',
             widthPercent: 100,
         } as DividerProps,
         toHtml(props, id) {
             const p = props as DividerProps
             let hrStyle: string
-            if (p.style === 'gradient') {
+            if (p.lineStyle === 'gradient') {
                 hrStyle = `border:none;height:${p.thickness}px;background:linear-gradient(to right,#7530fb,#b8fa33);width:${p.widthPercent}%;margin:0 auto;display:block;`
             } else {
-                hrStyle = `border:none;border-top:${p.thickness}px ${p.style} ${p.color};width:${p.widthPercent}%;margin:0 auto;display:block;`
+                hrStyle = `border:none;border-top:${p.thickness}px ${p.lineStyle} ${p.color};width:${p.widthPercent}%;margin:0 auto;display:block;`
             }
             return wrapBlock('divider', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
@@ -699,11 +849,13 @@ ${rows}
             fontWeight: '800',
             showCondition: true,
             conditionText: '{{ITEM_CONDITION}}',
+            conditionColor: '#6b7280',
+            conditionFontSize: 13,
         } as ProductTitleProps,
         toHtml(props, id) {
             const p = props as ProductTitleProps
             const conditionHtml = p.showCondition
-                ? `<p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">Condition: <strong style="color:#7530fb;">${p.conditionText}</strong></p>`
+                ? `<p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:${p.conditionFontSize ?? 13}px;color:${p.conditionColor ?? '#6b7280'};">Condition: <strong style="color:${p.conditionColor ?? '#6b7280'};">${p.conditionText}</strong></p>`
                 : ''
             return wrapBlock('product_title', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
@@ -734,27 +886,33 @@ ${rows}
             priceText: '{{ITEM_PRICE}}',
             priceColor: '#7530fb',
             priceFontSize: 32,
+            priceFontWeight: '900',
+            priceAlign: 'left',
             showOriginal: false,
             originalText: '{{ORIGINAL_PRICE}}',
+            originalColor: '#9ca3af',
+            originalFontSize: 16,
             showBadge: false,
             badgeText: 'SALE',
             badgeBg: '#b8fa33',
             badgeColor: '#1e1535',
+            badgeFontSize: 11,
+            badgeBorderRadius: 4,
             borderRadius: 10,
         } as PriceBlockProps,
         toHtml(props, id) {
             const p = props as PriceBlockProps
             const badgeHtml = p.showBadge
-                ? `<span style="display:inline-block;background-color:${p.badgeBg};color:${p.badgeColor};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;margin-left:10px;vertical-align:middle;">${p.badgeText}</span>`
+                ? `<span style="display:inline-block;background-color:${p.badgeBg};color:${p.badgeColor};font-family:Arial,sans-serif;font-size:${p.badgeFontSize ?? 11}px;font-weight:700;padding:3px 8px;border-radius:${p.badgeBorderRadius ?? 4}px;margin-left:10px;vertical-align:middle;">${p.badgeText}</span>`
                 : ''
             const originalHtml = p.showOriginal
-                ? `<span style="font-family:Arial,sans-serif;font-size:16px;color:#9ca3af;text-decoration:line-through;margin-left:12px;vertical-align:middle;">${p.originalText}</span>`
+                ? `<span style="font-family:Arial,sans-serif;font-size:${p.originalFontSize ?? 16}px;color:${p.originalColor ?? '#9ca3af'};text-decoration:line-through;margin-left:12px;vertical-align:middle;">${p.originalText}</span>`
                 : ''
             return wrapBlock('price_block', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;">
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.priceFontSize}px;font-weight:900;color:${p.priceColor};line-height:1.2;">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.priceFontSize}px;font-weight:${p.priceFontWeight ?? '900'};color:${p.priceColor};line-height:1.2;text-align:${p.priceAlign ?? 'left'};">
         ${p.priceText}${badgeHtml}${originalHtml}
       </p>
     </td>
@@ -781,17 +939,19 @@ ${rows}
             borderRadius: 8,
             showBorder: false,
             borderColor: '#ede9fe',
+            borderWidth: 1,
+            objectFit: 'contain',
         } as ProductImageProps,
         toHtml(props, id) {
             const p = props as ProductImageProps
-            const border = p.showBorder ? `border:1px solid ${p.borderColor};` : ''
+            const border = p.showBorder ? `border:${p.borderWidth ?? 1}px solid ${p.borderColor};` : ''
             return wrapBlock('product_image', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}${textAlign(p.align)}">
       <img src="${p.src}" alt="${p.alt}"
         width="${p.maxWidth}"
-        style="max-width:${p.maxWidth}px;width:100%;height:auto;display:block;${imgMargin(p.align)}border-radius:${p.borderRadius}px;${border}" />
+        style="max-width:${p.maxWidth}px;width:100%;height:auto;display:block;object-fit:${p.objectFit ?? 'contain'};${imgMargin(p.align)}border-radius:${p.borderRadius}px;${border}" />
     </td>
   </tr>
 </table>`
@@ -814,18 +974,20 @@ ${rows}
             showTitle: true,
             titleText: 'Product Description',
             titleColor: '#1e1535',
+            fontWeight: '400',
+            titleFontSize: 16,
         } as ProductDescriptionProps,
         toHtml(props, id) {
             const p = props as ProductDescriptionProps
             const titleHtml = p.showTitle
-                ? `<p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.titleColor};border-left:4px solid #7530fb;padding-left:12px;">${p.titleText}</p>`
+                ? `<p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:${p.titleFontSize ?? 16}px;font-weight:700;color:${p.titleColor};border-left:4px solid #7530fb;padding-left:12px;">${p.titleText}</p>`
                 : ''
             return wrapBlock('product_description', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       ${titleHtml}
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;line-height:${p.lineHeight};color:${p.color};">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '400'};line-height:${p.lineHeight};color:${p.color};">
         ${p.text}
       </p>
     </td>
@@ -904,6 +1066,7 @@ ${rows}
             align: 'center',
             borderRadius: 0,
             linkUrl: '',
+            bgColor: '#ffffff',
         } as ImageProps,
         toHtml(props, id) {
             const p = props as ImageProps
@@ -1043,12 +1206,13 @@ ${thumbCells}
             badgeBg: '#ffffff',
             borderColor: '#ede9fe',
             borderRadius: 8,
+            align: 'center',
         } as TrustBadgesProps,
         toHtml(props, id) {
             const p = props as TrustBadgesProps
             const colWidth = Math.floor(100 / p.badges.length)
             const cells = p.badges.map(b =>
-                `        <td width="${colWidth}%" style="text-align:center;padding:12px 8px;">
+                `        <td width="${colWidth}%" style="text-align:${p.align ?? 'center'};padding:12px 8px;">
           <div style="display:inline-block;background-color:${p.badgeBg};border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;padding:10px 14px;min-width:80px;">
             <p style="margin:0 0 4px;font-size:18px;">${b.icon}</p>
             <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.textColor};">${b.text}</p>
@@ -1224,6 +1388,355 @@ ${cells}
         },
     },
 
+    // ── CONVERSION BLOCKS ────────────────────────────────────────────────────
+
+    {
+        type: 'policy_tabs',
+        label: 'Policy Tabs',
+        category: 'Conversion',
+        icon: 'panel-top',
+        description: 'Shipping / Returns / Payment / Warranty tabs',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            bgColor: '#ffffff',
+            paddingTop: 0,
+            paddingBottom: 0,
+            tabs: [
+                { label: 'Shipping', content: 'Free UK delivery on all orders. Standard: 2–3 business days. Express: next day available. International shipping available via eBay Global Shipping Programme.' },
+                { label: 'Returns', content: '30-day free returns. Item must be in original condition and packaging. Buyer pays return postage unless item is not as described.' },
+                { label: 'Payment', content: 'We accept PayPal, credit/debit cards via eBay checkout. All payments are processed securely through eBay.' },
+                { label: 'Warranty', content: '12-month manufacturer warranty on all items. Contact us within warranty period for any issues.' },
+            ],
+            activeBg: '#7530fb',
+            activeText: '#ffffff',
+            inactiveBg: '#f8f7ff',
+            inactiveText: '#6b7280',
+            borderColor: '#ede9fe',
+            borderRadius: 8,
+            fontSize: 13,
+        } as PolicyTabsProps,
+        toHtml(props, id) {
+            const p = props as PolicyTabsProps
+            const tabHeaders = p.tabs.map((tab, i) =>
+                `<td style="padding:10px 16px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:700;cursor:pointer;white-space:nowrap;${i === 0
+                    ? `background-color:${p.activeBg};color:${p.activeText};border-bottom:2px solid ${p.activeBg};`
+                    : `background-color:${p.inactiveBg};color:${p.inactiveText};border-bottom:2px solid ${p.borderColor};`
+                }">${tab.label}</td>`
+            ).join('<td style="width:4px;"></td>')
+
+            // Show first tab content by default
+            const firstTab = p.tabs[0]
+            return wrapBlock('policy_tabs', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;overflow:hidden;">
+      <!-- Tab headers -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>${tabHeaders}</tr>
+      </table>
+      <!-- Tab contents (all shown in email, tabs shown via label above) -->
+${p.tabs.map((tab, i) => `      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${i > 0 ? 'display:none;' : ''}"><tr><td style="padding:16px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:#6b7280;line-height:1.7;border-top:1px solid ${p.borderColor};"><strong style="display:block;margin-bottom:6px;color:#1e1535;">${tab.label}</strong>${tab.content}</td></tr></table>`).join('')}
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'nav_bar',
+        label: 'Navigation Bar',
+        category: 'Conversion',
+        icon: 'navigation',
+        description: 'Store category links row',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 12,
+            paddingBottom: 12,
+            bgColor: '#1e1535',
+            links: [
+                { label: 'All Items', url: '#' },
+                { label: 'Electronics', url: '#' },
+                { label: 'Clothing', url: '#' },
+                { label: 'Home & Garden', url: '#' },
+                { label: 'Contact Us', url: '#' },
+            ],
+            textColor: '#ffffff',
+            hoverColor: '#b8fa33',
+            separator: '•',
+            align: 'center',
+            fontSize: 12,
+            fontWeight: '700',
+            letterSpacing: 3,
+            borderRadius: 0,
+        } as NavBarProps,
+        toHtml(props, id) {
+            const p = props as NavBarProps
+            const sep = `<td style="padding:0 8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:rgba(255,255,255,0.4);">${p.separator}</td>`
+            const linkCells = p.links.map((link, i) => {
+                const sepCell = i > 0 ? sep : ''
+                const linkCell = `<td style="white-space:nowrap;"><a href="${link.url}" style="font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '700'};color:${p.textColor};text-decoration:none;letter-spacing:${(p.letterSpacing ?? 3) / 100}em;">${link.label}</a></td>`
+                return sepCell + linkCell
+            }).join('')
+            const alignMap: Record<string, string> = { left: 'left', center: 'center', right: 'right' }
+            return wrapBlock('nav_bar', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;border-radius:${p.borderRadius}px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}">
+      <table cellpadding="0" cellspacing="0" border="0" align="${alignMap[p.align] ?? 'center'}">
+        <tr>${linkCells}</tr>
+      </table>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'urgency_bar',
+        label: 'Urgency Stock Bar',
+        category: 'Conversion',
+        icon: 'flame',
+        description: 'Low stock / urgency callout banner',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 12,
+            paddingBottom: 12,
+            text: 'Only {{QUANTITY}} Left in Stock — Order Soon!',
+            bgColor: '#fee2e2',
+            textColor: '#991b1b',
+            iconColor: '#ef4444',
+            borderRadius: 8,
+            showIcon: true,
+            pulse: true,
+            align: 'center',
+            fontSize: 13,
+        } as UrgencyBarProps,
+        toHtml(props, id) {
+            const p = props as UrgencyBarProps
+            const dot = p.showIcon
+                ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${p.iconColor};margin-right:8px;vertical-align:middle;"></span>`
+                : ''
+            return wrapBlock('urgency_bar', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;text-align:${p.align};">
+      <p style="margin:0;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:800;color:${p.textColor};letter-spacing:0.02em;">
+        ${dot}${p.text}
+      </p>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'cross_sell',
+        label: 'Cross-Sell Grid',
+        category: 'Conversion',
+        icon: 'grid-2x2',
+        description: '4-card related product recommendation grid',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            bgColor: '#f8f7ff',
+            paddingTop: 20,
+            paddingBottom: 20,
+            title: 'You May Also Like',
+            titleColor: '#1e1535',
+            columns: 4,
+            items: [
+                { imageUrl: '{{IMAGE_2_URL}}', title: '{{RELATED_TITLE_1}}', price: '{{RELATED_PRICE_1}}', url: '#' },
+                { imageUrl: '{{IMAGE_3_URL}}', title: '{{RELATED_TITLE_2}}', price: '{{RELATED_PRICE_2}}', url: '#' },
+                { imageUrl: '{{IMAGE_4_URL}}', title: '{{RELATED_TITLE_3}}', price: '{{RELATED_PRICE_3}}', url: '#' },
+                { imageUrl: '{{IMAGE_5_URL}}', title: '{{RELATED_TITLE_4}}', price: '{{RELATED_PRICE_4}}', url: '#' },
+            ],
+            cardBg: '#ffffff',
+            cardBorder: '#ede9fe',
+            borderRadius: 8,
+            showPrice: true,
+            gap: 10,
+        } as CrossSellProps,
+        toHtml(props, id) {
+            const p = props as CrossSellProps
+            const colWidth = Math.floor(100 / p.columns)
+            const cells = p.items.slice(0, p.columns).map(item =>
+                `<td width="${colWidth}%" valign="top" style="padding:${p.gap / 2}px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.cardBg};border:1px solid ${p.cardBorder};border-radius:${p.borderRadius}px;overflow:hidden;">
+            <tr><td style="padding:0;">
+              <img src="${item.imageUrl}" alt="${item.title}" width="100%" style="width:100%;height:auto;display:block;border-radius:${p.borderRadius}px ${p.borderRadius}px 0 0;" />
+            </td></tr>
+            <tr><td style="padding:8px 10px;">
+              <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#1e1535;line-height:1.4;">${item.title}</p>
+              ${p.showPrice ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:#7530fb;">${item.price}</p>` : ''}
+            </td></tr>
+          </table>
+        </td>`
+            ).join('')
+            return wrapBlock('cross_sell', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}">
+      <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.titleColor};border-left:4px solid #7530fb;padding-left:12px;">${p.title}</p>
+      <table width="100%" cellpadding="0" cellspacing="${p.gap}" border="0">
+        <tr>${cells}</tr>
+      </table>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'button_block',
+        label: 'Button',
+        category: 'Conversion',
+        icon: 'mouse-pointer-click',
+        description: 'CTA button — Buy Now, Ask Question, Visit Store',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 16,
+            paddingBottom: 16,
+            label: 'Buy It Now',
+            url: '#',
+            variant: 'primary',
+            bgColor: '#7530fb',
+            textColor: '#ffffff',
+            borderColor: '#7530fb',
+            borderRadius: 10,
+            fontSize: 14,
+            fontWeight: '700',
+            align: 'center',
+            fullWidth: false,
+            paddingV: 14,
+            paddingH: 40,
+        } as ButtonBlockProps,
+        toHtml(props, id) {
+            const p = props as ButtonBlockProps
+            const width = p.fullWidth ? 'width:100%;display:block;' : 'display:inline-block;'
+            return wrapBlock('button_block', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}text-align:${p.align};">
+      <a href="${p.url}"
+        style="${width}padding:${p.paddingV}px ${p.paddingH}px;background-color:${p.bgColor};color:${p.textColor};font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};text-decoration:none;border-radius:${p.borderRadius}px;border:2px solid ${p.borderColor};letter-spacing:0.03em;text-align:center;">
+        ${p.label}
+      </a>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'rectangle',
+        label: 'Rectangle',
+        category: 'Conversion',
+        icon: 'square',
+        description: 'Shape container for background fills and callouts',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 0,
+            paddingBottom: 0,
+            height: 60,
+            fillColor: '#f3eeff',
+            borderColor: '#ede9fe',
+            borderWidth: 1,
+            borderRadius: 8,
+            content: '',
+            align: 'center',
+        } as RectangleProps,
+        toHtml(props, id) {
+            const p = props as RectangleProps
+            return wrapBlock('rectangle', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.fillColor};height:${p.height}px;min-height:${p.height}px;border:${p.borderWidth}px solid ${p.borderColor};border-radius:${p.borderRadius}px;text-align:${p.align};vertical-align:middle;${pad(p)}">
+      ${p.content || '&nbsp;'}
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'hero_header',
+        label: 'Hero Header',
+        category: 'Conversion',
+        icon: 'layout-panel-top',
+        description: 'Store logo, name and tagline banner',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 28,
+            paddingBottom: 28,
+            storeName: '{{SELLER_NAME}}',
+            tagline: 'Trusted eBay Seller · Fast Dispatch · Top Rated',
+            bgColor: '#1e1535',
+            bgGradient: true,
+            gradientFrom: '#7530fb',
+            gradientTo: '#1e1535',
+            textColor: '#ffffff',
+            taglineColor: 'rgba(255,255,255,0.7)',
+            logoUrl: '',
+            showLogo: false,
+            height: 120,
+            align: 'center',
+            borderRadius: 0,
+            nameFontSize: 26,
+            taglineFontSize: 13,
+            nameFontWeight: '900',
+        } as HeroHeaderProps,
+        toHtml(props, id) {
+            const p = props as HeroHeaderProps
+            const bg = p.bgGradient
+                ? `background:linear-gradient(135deg,${p.gradientFrom},${p.gradientTo});`
+                : `background-color:${p.bgColor};`
+            const logoHtml = p.showLogo && p.logoUrl
+                ? `<tr><td style="text-align:${p.align};padding-bottom:12px;"><img src="${p.logoUrl}" alt="${p.storeName}" height="50" style="height:50px;width:auto;display:inline-block;" /></td></tr>`
+                : ''
+            return wrapBlock('hero_header', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;border-radius:${p.borderRadius}px;overflow:hidden;">
+  <tr>
+    <td style="${bg}${pad(p)}min-height:${p.height}px;text-align:${p.align};">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        ${logoHtml}
+        <tr><td style="text-align:${p.align};">
+          <h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.nameFontSize ?? 26}px;font-weight:${p.nameFontWeight ?? '900'};color:${p.textColor};letter-spacing:0.02em;">${p.storeName}</h1>
+          <p style="margin:0;font-family:Arial,sans-serif;font-size:${p.taglineFontSize ?? 13}px;color:${p.taglineColor};line-height:1.6;">${p.tagline}</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'raw_html',
+        label: 'Raw HTML',
+        category: 'Conversion',
+        icon: 'code-2',
+        description: 'Paste custom HTML code directly',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 0,
+            paddingBottom: 0,
+            paddingLeft: 0,
+            paddingRight: 0,
+            code: '<!-- Paste your custom HTML here -->',
+            label: 'Custom HTML Block',
+        } as RawHtmlProps,
+        toHtml(props, id) {
+            const p = props as RawHtmlProps
+            return wrapBlock('raw_html', id, p.code)
+        },
+    },
+
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1247,6 +1760,7 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
     'Product',
     'Media',
     'eBay Specific',
+    'Conversion',
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1264,10 +1778,34 @@ export function createBlock(type: BlockType): Block {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CANVAS SETTINGS
+// Global settings passed to assembleDocument to control the document shell
+// ─────────────────────────────────────────────────────────────────────────────
+export interface CanvasSettings {
+    maxWidth: number             // px — canvas content max-width (600–800)
+    bgColor: string              // outer body background
+    canvasBg: string             // inner table/canvas background
+    fontStack: string            // CSS font-family value
+    textColor: string            // global body text colour
+    linkColor: string            // global <a> colour
+    align: 'center' | 'left'    // canvas alignment inside body
+}
+
+export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
+    maxWidth: 700,
+    bgColor: '#f8f8f8',
+    canvasBg: '#ffffff',
+    fontStack: 'Arial, Helvetica, sans-serif',
+    textColor: '#1f1d2e',
+    linkColor: '#7530fb',
+    align: 'center',
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // FULL DOCUMENT ASSEMBLER
 // Wraps all block HTML in a valid eBay-safe document shell
 // ─────────────────────────────────────────────────────────────────────────────
-export function assembleDocument(blocks: Block[]): string {
+export function assembleDocument(blocks: Block[], settings: CanvasSettings = DEFAULT_CANVAS_SETTINGS): string {
     if (blocks.length === 0) {
         return `<!DOCTYPE html>
 <html lang="en">
@@ -1275,8 +1813,9 @@ export function assembleDocument(blocks: Block[]): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background: #f8f8f8; }
+    body { margin: 0; padding: 0; font-family: ${settings.fontStack}; background: ${settings.bgColor}; color: ${settings.textColor}; }
     table { border-collapse: collapse; }
+    a { color: ${settings.linkColor}; }
   </style>
 </head>
 <body>
@@ -1296,14 +1835,15 @@ export function assembleDocument(blocks: Block[]): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background: #f8f8f8; }
+    body { margin: 0; padding: 0; font-family: ${settings.fontStack}; background: ${settings.bgColor}; color: ${settings.textColor}; }
     table { border-collapse: collapse; }
     img { border: 0; display: block; }
+    a { color: ${settings.linkColor}; }
   </style>
 </head>
 <body>
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;margin:0 auto;background:#ffffff;">
+<table width="${settings.maxWidth}" cellpadding="0" cellspacing="0" border="0" align="${settings.align}"
+  style="width:100%;max-width:${settings.maxWidth}px;margin:0 ${settings.align === 'center' ? 'auto' : '0'};background:${settings.canvasBg};">
 
 ${bodyHtml}
 

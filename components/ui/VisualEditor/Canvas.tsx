@@ -914,7 +914,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
         case 'bullet_list': {
             const p = props as BulletListProps
             const bulletMap: Record<string, string> = { disc: '•', check: '✓', arrow: '→', star: '★' }
-            const bullet = bulletMap[p.style ?? 'disc']
+            const bullet = bulletMap[p.bulletStyle ?? 'disc']
             return (
                 <div>
                     {(p.items ?? []).slice(0, 3).map((item: string, i: number) => (
@@ -940,14 +940,14 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
                         height: p.thickness ?? 1,
                         width: `${p.widthPercent ?? 100}%`,
                         margin: '0 auto',
-                        background: p.style === 'gradient'
+                        background: p.lineStyle === 'gradient'
                             ? 'linear-gradient(to right, #7530fb, #b8fa33)'
                             : p.color ?? '#ede9fe',
                         borderRadius: 2,
-                        borderTop: p.style !== 'gradient' ? `${p.thickness}px ${p.style} ${p.color}` : 'none',
+                        borderTop: p.lineStyle !== 'gradient' ? `${p.thickness}px ${p.lineStyle} ${p.color}` : 'none',
                     }} />
                     <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, textAlign: 'center' }}>
-                        {p.style} · {p.widthPercent}% width
+                        {p.lineStyle} · {p.widthPercent}% width
                     </p>
                 </div>
             )
@@ -1025,26 +1025,41 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
 
         case 'product_image': {
             const p = props as ProductImageProps
-            const isPlaceholder = !p.src || p.src.includes('{{')
+            const hasRealSrc = p.src && !p.src.includes('{{') && !p.src.includes('placeholder')
             return (
-                <div style={{ textAlign: p.align ?? 'center' }}>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: Math.min(p.maxWidth ?? 500, 200),
-                        height: 90,
-                        backgroundColor: C.bg,
-                        borderRadius: p.borderRadius ?? 8,
-                        border: `1px dashed ${C.border}`,
-                        gap: 4,
-                    }}>
-                        <Image size={28} style={{ color: C.muted, opacity: 0.4 }} />
-                        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
-                            {isPlaceholder ? '{{MAIN_IMAGE_URL}}' : 'Product Image'}
-                        </p>
-                    </div>
+                <div style={{ textAlign: p.align ?? 'center', backgroundColor: p.bgColor ?? 'transparent' }}>
+                    {hasRealSrc ? (
+                        <img
+                            src={p.src}
+                            alt={p.alt ?? 'Product'}
+                            style={{
+                                display: 'inline-block',
+                                maxWidth: '100%',
+                                width: Math.min(p.maxWidth ?? 500, 240),
+                                height: 'auto',
+                                borderRadius: p.borderRadius ?? 8,
+                                objectFit: p.objectFit ?? 'contain',
+                                border: p.showBorder ? `${p.borderWidth ?? 1}px solid ${p.borderColor ?? '#ede9fe'}` : 'none',
+                            }}
+                        />
+                    ) : (
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column' as const,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: Math.min(p.maxWidth ?? 500, 240),
+                            maxWidth: '100%',
+                            height: 80,
+                            backgroundColor: C.bg,
+                            borderRadius: p.borderRadius ?? 8,
+                            border: `1px dashed ${C.border}`,
+                            gap: 4,
+                        }}>
+                            <Image size={24} style={{ color: C.muted, opacity: 0.4 }} />
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>Product Image</p>
+                        </div>
+                    )}
                 </div>
             )
         }
@@ -1110,25 +1125,35 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
         // ── Media blocks ────────────────────────────────────────────────────
         case 'image': {
             const p = props as ImageProps
+            const hasRealSrc = p.src && !p.src.includes('{{') && !p.src.includes('placeholder') && !p.src.includes('via.placeholder')
             return (
-                <div style={{ textAlign: p.align ?? 'center' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: p.widthUnit === '%' ? '100%' : Math.min(p.width ?? 100, 240),
-                        maxWidth: '100%',
-                        height: 70,
-                        backgroundColor: C.bg,
-                        borderRadius: p.borderRadius ?? 0,
-                        border: `1px dashed ${C.border}`,
-                    }}>
-                        <Camera size={22} style={{ color: C.muted, opacity: 0.4 }} />
-                    </div>
-                    {p.src && !p.src.includes('placeholder') && (
-                        <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {p.src.length > 40 ? p.src.slice(0, 40) + '…' : p.src}
-                        </p>
+                <div style={{ textAlign: p.align ?? 'center', backgroundColor: p.bgColor ?? 'transparent' }}>
+                    {hasRealSrc ? (
+                        <img
+                            src={p.src}
+                            alt={p.alt ?? ''}
+                            style={{
+                                display: 'inline-block',
+                                maxWidth: '100%',
+                                width: p.widthUnit === '%' ? `${p.width ?? 100}%` : Math.min(p.width ?? 100, 240),
+                                height: 'auto',
+                                borderRadius: p.borderRadius ?? 0,
+                                objectFit: 'contain',
+                            }}
+                        />
+                    ) : (
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: 70,
+                            backgroundColor: C.bg,
+                            borderRadius: p.borderRadius ?? 0,
+                            border: `1px dashed ${C.border}`,
+                        }}>
+                            <Camera size={22} style={{ color: C.muted, opacity: 0.4 }} />
+                        </div>
                     )}
                 </div>
             )

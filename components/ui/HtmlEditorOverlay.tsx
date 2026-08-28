@@ -1,10 +1,11 @@
 'use client'
-// app/dashboard/design/html-editor/page.tsx
-// Riazify — HTML Template Editor Studio
+// components/ui/HtmlEditorOverlay.tsx
+// ─────────────────────────────────────────────────────────────────────────────
+// Riazify — HTML Template Editor as a full-screen overlay
+// Slides up over the dashboard — sub-sidebar stays underneath
+// ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useRef, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useRef, useEffect } from 'react'
 import {
     ChevronLeft, Save, X,
     Search, Plus, Image, Link2, ChevronDown,
@@ -120,12 +121,64 @@ const DEFAULT_HTML = `<!DOCTYPE html>
 const LINE_H = 21 // px — must match textarea lineHeight
 
 // ── Inner component ────────────────────────────────────────────────────────
-function HtmlEditorInner() {
-    const router = useRouter()
-    const searchParams = useSearchParams()
 
-    const [html, setHtml] = useState(DEFAULT_HTML)
-    const [name, setName] = useState(searchParams.get('name') || 'Untitled Template')
+// ── Props ──────────────────────────────────────────────────────────────────
+interface HtmlEditorOverlayProps {
+    open: boolean
+    onClose: () => void
+    templateName?: string
+    initialHtml?: string
+    onSave?: (html: string, name: string) => void
+}
+
+// ── Component ──────────────────────────────────────────────────────────────
+export default function HtmlEditorOverlay({
+    open,
+    onClose,
+    templateName = 'Untitled Template',
+    initialHtml,
+    onSave,
+}: HtmlEditorOverlayProps) {
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        if (open) setMounted(true)
+    }, [open])
+
+    if (!mounted && !open) return null
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex flex-col"
+            style={{
+                transform: open ? 'translateY(0)' : 'translateY(100%)',
+                transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)',
+                backgroundColor: C.editorBg,
+            }}
+        >
+            <HtmlEditorContent
+                templateName={templateName}
+                initialHtml={initialHtml}
+                onClose={onClose}
+                onSave={onSave}
+            />
+        </div>
+    )
+}
+
+function HtmlEditorContent({
+    templateName,
+    initialHtml,
+    onClose,
+    onSave,
+}: {
+    templateName: string
+    initialHtml?: string
+    onClose: () => void
+    onSave?: (html: string, name: string) => void
+}) {
+    const [html, setHtml] = useState(initialHtml || DEFAULT_HTML)
+    const [name, setName] = useState(templateName)
     const [device, setDevice] = useState<DeviceId>('desktop')
     const [ebayId, setEbayId] = useState('')
     const [phOpen, setPhOpen] = useState(false)
@@ -232,15 +285,16 @@ function HtmlEditorInner() {
 
     async function saveDraft() {
         setSaving(true)
-        await new Promise(r => setTimeout(r, 600))
+        await new Promise(r => setTimeout(r, 400))
         setSaving(false)
         setSaved(true)
+        if (onSave) onSave(html, name)
         setTimeout(() => setSaved(false), 2000)
     }
 
     async function saveAndClose() {
         await saveDraft()
-        router.push('/dashboard/design?tab=templates')
+        onClose()
     }
 
     // Test preview with real eBay data
@@ -289,11 +343,12 @@ function HtmlEditorInner() {
                 style={{ height: 52, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}`, gap: 12 }}>
 
                 <div className="flex items-center gap-3 min-w-0">
-                    <Link href="/dashboard/design?tab=templates"
+                    <button
+                        onClick={onClose}
                         className="flex items-center gap-1 text-[12px] font-semibold shrink-0 hover:opacity-70 transition-all"
-                        style={{ color: C.primary, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                        style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                         <ChevronLeft size={14} /> Template Library
-                    </Link>
+                    </button>
                     <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
                     <h1 className="text-[15px] font-bold truncate"
                         style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>
@@ -821,13 +876,5 @@ function HtmlEditorInner() {
                 }}
             />
         </div>
-    )
-}
-
-export default function HtmlEditorPage() {
-    return (
-        <Suspense fallback={null}>
-            <HtmlEditorInner />
-        </Suspense>
     )
 }

@@ -55,6 +55,7 @@ const CATEGORY_COLORS: Record<BlockCategory, string> = {
     'Product': '#16a34a',
     'Media': '#d97706',
     'eBay Specific': '#b8fa33',
+    'Conversion': '#ef4444',
 }
 
 // Category label colors for the section header text
@@ -64,6 +65,7 @@ const CATEGORY_LABEL_COLORS: Record<BlockCategory, string> = {
     'Product': '#16a34a',
     'Media': '#d97706',
     'eBay Specific': '#1e1535',
+    'Conversion': '#ef4444',
 }
 
 
@@ -152,36 +154,21 @@ export default function BlockLibrary({
     // ─────────────────────────────────────────────────────────────────────────
     return (
         <div style={{
-            width: 240,
-            minWidth: 240,
+            width: '100%',
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
             backgroundColor: C.bg,
-            borderRight: `1px solid ${C.border}`,
             overflow: 'hidden',
-            flexShrink: 0,
         }}>
 
-            {/* ── Header ── */}
+            {/* ── Search ── */}
             <div style={{
-                padding: '14px 16px 10px',
+                padding: '10px 12px 8px',
                 borderBottom: `1px solid ${C.border}`,
                 backgroundColor: C.surface,
                 flexShrink: 0,
             }}>
-                <p style={{
-                    margin: '0 0 10px',
-                    fontFamily: 'Syne, sans-serif',
-                    fontWeight: 700,
-                    fontSize: 13,
-                    color: C.dark,
-                    letterSpacing: '0.02em',
-                    textTransform: 'uppercase',
-                }}>
-                    Content &amp; Blocks
-                </p>
-
                 {/* Search */}
                 <div style={{ position: 'relative' }}>
                     <span style={{
@@ -243,7 +230,7 @@ export default function BlockLibrary({
                         </button>
                     )}
                 </div>
-            </div>
+            </div>  {/* end search bar */}
 
             {/* ── Block list ── */}
             <div style={{

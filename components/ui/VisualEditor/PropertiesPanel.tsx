@@ -29,6 +29,8 @@ import {
     AlignLeft, AlignCenter, AlignRight,
     CheckCircle2, AlertTriangle,
     MousePointer2,
+    PanelTop, Navigation, Flame, Grid2x2,
+    MousePointerClick, LayoutPanelTop, Code2,
     type LucideIcon,
 } from 'lucide-react'
 import {
@@ -58,7 +60,16 @@ import {
     TwoColumnProps,
     ThreeColumnProps,
     ContainerProps,
+    PolicyTabsProps,
+    NavBarProps,
+    UrgencyBarProps,
+    CrossSellProps,
+    ButtonBlockProps,
+    RectangleProps,
+    HeroHeaderProps,
+    RawHtmlProps,
 } from './blocks'
+import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -104,6 +115,14 @@ const BLOCK_ICONS: Record<string, LucideIcon> = {
     'rotate-ccw': RotateCcw,
     'user': User,
     'bell': Bell,
+    // Conversion block icons
+    'panel-top': PanelTop,
+    'navigation': Navigation,
+    'flame': Flame,
+    'grid-2x2': Grid2x2,
+    'mouse-pointer-click': MousePointerClick,
+    'layout-panel-top': LayoutPanelTop,
+    'code-2': Code2,
 }
 
 // ── Placeholder group type (mirrors PLACEHOLDER_GROUPS in page.tsx) ───────────
@@ -449,9 +468,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
                     <ColorRow label="Bullet colour" value={props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ bulletColor: v })} />
                     <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                    <SelectInput label="Bullet style" value={props.style ?? 'check'}
+                    <SelectInput label="Bullet style" value={props.bulletStyle ?? 'check'}
                         options={[{ v: 'disc', l: 'Disc' }, { v: 'check', l: 'Check' }, { v: 'arrow', l: 'Arrow' }, { v: 'star', l: 'Star' }]}
-                        onChange={v => updateProps({ style: v })} />
+                        onChange={v => updateProps({ bulletStyle: v })} />
                 </Section>
             )
 
@@ -459,9 +478,9 @@ function BlockStyleProps({ block, props, updateProps }: {
             return (
                 <Section title="Divider style">
                     <ColorRow label="Colour" value={props.color ?? '#ede9fe'} onChange={v => updateProps({ color: v })} />
-                    <SelectInput label="Style" value={props.style ?? 'solid'}
+                    <SelectInput label="Style" value={props.lineStyle ?? 'solid'}
                         options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }, { v: 'gradient', l: 'Gradient' }]}
-                        onChange={v => updateProps({ style: v })} />
+                        onChange={v => updateProps({ lineStyle: v })} />
                     <SliderInput label="Thickness" value={props.thickness ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ thickness: v })} />
                     <SliderInput label="Width" value={props.widthPercent ?? 100} min={20} max={100} suffix="%" onChange={v => updateProps({ widthPercent: v })} />
                 </Section>
@@ -469,79 +488,265 @@ function BlockStyleProps({ block, props, updateProps }: {
 
         case 'product_title':
             return (
-                <Section title="Typography">
-                    <ColorRow label="Title colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
-                    <SliderInput label="Font size" value={props.fontSize ?? 24} min={14} max={40} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                    <SelectInput label="Weight" value={props.fontWeight ?? '800'}
-                        options={[{ v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }, { v: '900', l: 'Black' }]}
-                        onChange={v => updateProps({ fontWeight: v })} />
-                    <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
-                </Section>
+                <>
+                    <Section title="Background">
+                        <ColorRow
+                            label="Background"
+                            value={props.bgColor ?? '#ffffff'}
+                            onChange={v => updateProps({ bgColor: v })}
+                        />
+                    </Section>
+                    <Section title="Title">
+                        <ColorRow label="Title colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 24} min={14} max={56} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SelectInput
+                            label="Weight"
+                            value={props.fontWeight ?? '800'}
+                            options={[
+                                { v: '600', l: 'Semibold' },
+                                { v: '700', l: 'Bold' },
+                                { v: '800', l: 'Extrabold' },
+                                { v: '900', l: 'Black' },
+                            ]}
+                            onChange={v => updateProps({ fontWeight: v })}
+                        />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+                    <Section title="Condition text">
+                        <ColorRow
+                            label="Condition colour"
+                            value={props.conditionColor ?? '#6b7280'}
+                            onChange={v => updateProps({ conditionColor: v })}
+                        />
+                        <SliderInput
+                            label="Condition font size"
+                            value={props.conditionFontSize ?? 13}
+                            min={10} max={20} suffix="px"
+                            onChange={v => updateProps({ conditionFontSize: v })}
+                        />
+                    </Section>
+                </>
             )
 
         case 'price_block':
             return (
                 <>
+                    <Section title="Background">
+                        <ColorRow
+                            label="Background"
+                            value={props.bgColor ?? '#ffffff'}
+                            onChange={v => updateProps({ bgColor: v })}
+                        />
+                    </Section>
                     <Section title="Price">
                         <ColorRow label="Price colour" value={props.priceColor ?? '#7530fb'} onChange={v => updateProps({ priceColor: v })} />
                         <SliderInput label="Font size" value={props.priceFontSize ?? 32} min={18} max={56} suffix="px" onChange={v => updateProps({ priceFontSize: v })} />
-                        <SliderInput label="Border radius" value={props.borderRadius ?? 10} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <SelectInput
+                            label="Font weight"
+                            value={props.priceFontWeight ?? '900'}
+                            options={[
+                                { v: '600', l: 'Semibold' },
+                                { v: '700', l: 'Bold' },
+                                { v: '800', l: 'Extrabold' },
+                                { v: '900', l: 'Black' },
+                            ]}
+                            onChange={v => updateProps({ priceFontWeight: v })}
+                        />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.priceAlign ?? 'left'} onChange={v => updateProps({ priceAlign: v })} />
+                        </div>
+                    </Section>
+                    <Section title="Original price">
+                        <ColorRow
+                            label="Strike colour"
+                            value={props.originalColor ?? '#9ca3af'}
+                            onChange={v => updateProps({ originalColor: v })}
+                        />
+                        <SliderInput
+                            label="Strike font size"
+                            value={props.originalFontSize ?? 16}
+                            min={10} max={32} suffix="px"
+                            onChange={v => updateProps({ originalFontSize: v })}
+                        />
                     </Section>
                     <Section title="Sale badge">
                         <ToggleRow label="Show badge" value={props.showBadge ?? false} onChange={v => updateProps({ showBadge: v })} />
                         {props.showBadge && (
                             <>
                                 <ColorRow label="Badge background" value={props.badgeBg ?? '#b8fa33'} onChange={v => updateProps({ badgeBg: v })} />
-                                <ColorRow label="Badge text" value={props.badgeColor ?? '#1e1535'} onChange={v => updateProps({ badgeColor: v })} />
+                                <ColorRow label="Badge text colour" value={props.badgeColor ?? '#1e1535'} onChange={v => updateProps({ badgeColor: v })} />
+                                <SliderInput
+                                    label="Badge font size"
+                                    value={props.badgeFontSize ?? 11}
+                                    min={9} max={18} suffix="px"
+                                    onChange={v => updateProps({ badgeFontSize: v })}
+                                />
+                                <SliderInput
+                                    label="Badge border radius"
+                                    value={props.badgeBorderRadius ?? 4}
+                                    min={0} max={20} suffix="px"
+                                    onChange={v => updateProps({ badgeBorderRadius: v })}
+                                />
                             </>
                         )}
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput
+                            label="Border radius"
+                            value={props.borderRadius ?? 10}
+                            min={0} max={40} suffix="px"
+                            onChange={v => updateProps({ borderRadius: v })}
+                        />
                     </Section>
                 </>
             )
 
         case 'product_image':
             return (
-                <Section title="Image style">
-                    <SliderInput label="Max width" value={props.maxWidth ?? 500} min={100} max={700} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                    <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                    <ToggleRow label="Show border" value={props.showBorder ?? false} onChange={v => updateProps({ showBorder: v })} />
-                    {props.showBorder && (
-                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
-                    )}
-                </Section>
+                <>
+                    <Section title="Background">
+                        <ColorRow
+                            label="Background"
+                            value={props.bgColor ?? '#f8fafc'}
+                            onChange={v => updateProps({ bgColor: v })}
+                        />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput
+                            label="Max width"
+                            value={props.maxWidth ?? 500}
+                            min={100} max={800} suffix="px"
+                            onChange={v => updateProps({ maxWidth: v })}
+                        />
+                        <SelectInput
+                            label="Object fit"
+                            value={props.objectFit ?? 'contain'}
+                            options={[
+                                { v: 'contain', l: 'Contain — show full image' },
+                                { v: 'cover', l: 'Cover — fill the frame' },
+                                { v: 'fill', l: 'Fill — stretch to fit' },
+                            ]}
+                            onChange={v => updateProps({ objectFit: v })}
+                        />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+                    <Section title="Border">
+                        <SliderInput
+                            label="Border radius"
+                            value={props.borderRadius ?? 8}
+                            min={0} max={60} suffix="px"
+                            onChange={v => updateProps({ borderRadius: v })}
+                        />
+                        <ToggleRow
+                            label="Show border"
+                            value={props.showBorder ?? false}
+                            onChange={v => updateProps({ showBorder: v })}
+                        />
+                        {props.showBorder && (
+                            <>
+                                <ColorRow
+                                    label="Border colour"
+                                    value={props.borderColor ?? '#ede9fe'}
+                                    onChange={v => updateProps({ borderColor: v })}
+                                />
+                                <SliderInput
+                                    label="Border thickness"
+                                    value={props.borderWidth ?? 1}
+                                    min={1} max={8} suffix="px"
+                                    onChange={v => updateProps({ borderWidth: v })}
+                                />
+                            </>
+                        )}
+                    </Section>
+                </>
             )
 
         case 'product_description':
             return (
-                <Section title="Typography">
-                    <ColorRow label="Text colour" value={props.color ?? '#6b7280'} onChange={v => updateProps({ color: v })} />
-                    <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
-                    <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                    <SliderInput label="Line height" value={props.lineHeight ?? 1.8} min={1} max={3} step={0.1} onChange={v => updateProps({ lineHeight: v })} />
-                </Section>
+                <>
+                    <Section title="Title">
+                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                        <SliderInput
+                            label="Title font size"
+                            value={props.titleFontSize ?? 16}
+                            min={12} max={32} suffix="px"
+                            onChange={v => updateProps({ titleFontSize: v })}
+                        />
+                    </Section>
+                    <Section title="Body text">
+                        <ColorRow label="Text colour" value={props.color ?? '#6b7280'} onChange={v => updateProps({ color: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SelectInput
+                            label="Font weight"
+                            value={props.fontWeight ?? '400'}
+                            options={[
+                                { v: '400', l: 'Regular' },
+                                { v: '500', l: 'Medium' },
+                                { v: '600', l: 'Semibold' },
+                            ]}
+                            onChange={v => updateProps({ fontWeight: v })}
+                        />
+                        <SliderInput label="Line height" value={props.lineHeight ?? 1.8} min={1} max={3} step={0.1} onChange={v => updateProps({ lineHeight: v })} />
+                    </Section>
+                </>
             )
 
         case 'specs_table':
             return (
-                <Section title="Table colours">
-                    <ColorRow label="Row background" value={props.rowBg ?? '#ffffff'} onChange={v => updateProps({ rowBg: v })} />
-                    <ColorRow label="Alt row background" value={props.altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v })} />
-                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
-                    <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                </Section>
+                <>
+                    <Section title="Header">
+                        <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                    </Section>
+                    <Section title="Rows">
+                        <ColorRow label="Row background" value={props.rowBg ?? '#ffffff'} onChange={v => updateProps({ rowBg: v })} />
+                        <ColorRow label="Alt row background" value={props.altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
             )
 
         case 'image':
             return (
-                <Section title="Image style">
-                    <SliderInput label="Width" value={props.width ?? 100} min={10} max={props.widthUnit === 'px' ? 700 : 100} suffix={props.widthUnit ?? '%'} onChange={v => updateProps({ width: v })} />
-                    <SelectInput label="Width unit" value={props.widthUnit ?? '%'}
-                        options={[{ v: '%', l: 'Percent (%)' }, { v: 'px', l: 'Pixels (px)' }]}
-                        onChange={v => updateProps({ widthUnit: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                    <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                </Section>
+                <>
+                    <Section title="Background">
+                        <ColorRow
+                            label="Background"
+                            value={props.bgColor ?? '#ffffff'}
+                            onChange={v => updateProps({ bgColor: v })}
+                        />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Width" value={props.width ?? 100} min={10} max={props.widthUnit === 'px' ? 700 : 100} suffix={props.widthUnit ?? '%'} onChange={v => updateProps({ width: v })} />
+                        <SelectInput
+                            label="Width unit"
+                            value={props.widthUnit ?? '%'}
+                            options={[{ v: '%', l: 'Percent (%)' }, { v: 'px', l: 'Pixels (px)' }]}
+                            onChange={v => updateProps({ widthUnit: v })}
+                        />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+                </>
             )
 
         case 'banner':
@@ -573,12 +778,23 @@ function BlockStyleProps({ block, props, updateProps }: {
 
         case 'trust_badges':
             return (
-                <Section title="Badge style">
-                    <ColorRow label="Badge background" value={props.badgeBg ?? '#ffffff'} onChange={v => updateProps({ badgeBg: v })} />
-                    <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
-                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                </Section>
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#ffffff'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+                </>
             )
 
         case 'shipping_info':
@@ -640,6 +856,246 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <ToggleRow label="Show main image" value={props.showMain ?? true} onChange={v => updateProps({ showMain: v })} />
                     <SliderInput label="Gap" value={props.gap ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ gap: v })} />
                     <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                </Section>
+            )
+
+        case 'policy_tabs':
+            return (
+                <>
+                    <Section title="Tab colours">
+                        <ColorRow label="Active background" value={props.activeBg ?? '#7530fb'} onChange={v => updateProps({ activeBg: v })} />
+                        <ColorRow label="Active text" value={props.activeText ?? '#ffffff'} onChange={v => updateProps({ activeText: v })} />
+                        <ColorRow label="Inactive background" value={props.inactiveBg ?? '#f8f7ff'} onChange={v => updateProps({ inactiveBg: v })} />
+                        <ColorRow label="Inactive text" value={props.inactiveText ?? '#6b7280'} onChange={v => updateProps({ inactiveText: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'nav_bar':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Hover colour" value={props.hoverColor ?? '#b8fa33'} onChange={v => updateProps({ hoverColor: v })} />
+                        <InfoBox>
+                            Hover colour shows in Live Preview only — eBay strips CSS hover states in listings.
+                        </InfoBox>
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 12} min={10} max={20} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SelectInput
+                            label="Font weight"
+                            value={props.fontWeight ?? '700'}
+                            options={[
+                                { v: '400', l: 'Regular' },
+                                { v: '600', l: 'Semibold' },
+                                { v: '700', l: 'Bold' },
+                                { v: '800', l: 'Extrabold' },
+                            ]}
+                            onChange={v => updateProps({ fontWeight: v })}
+                        />
+                        <SliderInput
+                            label="Letter spacing"
+                            value={props.letterSpacing ?? 3}
+                            min={0} max={10} suffix="px"
+                            onChange={v => updateProps({ letterSpacing: v })}
+                        />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+                </>
+            )
+
+        case 'urgency_bar':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#fee2e2'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#991b1b'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Dot colour" value={props.iconColor ?? '#ef4444'} onChange={v => updateProps({ iconColor: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <ToggleRow label="Show pulse dot" value={props.showIcon ?? true} onChange={v => updateProps({ showIcon: v })} />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+                </>
+            )
+
+        case 'cross_sell':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Card background" value={props.cardBg ?? '#ffffff'} onChange={v => updateProps({ cardBg: v })} />
+                        <ColorRow label="Card border" value={props.cardBorder ?? '#ede9fe'} onChange={v => updateProps({ cardBorder: v })} />
+                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SelectInput label="Columns" value={String(props.columns ?? 4)}
+                            options={[{ v: '2', l: '2 Columns' }, { v: '3', l: '3 Columns' }, { v: '4', l: '4 Columns' }]}
+                            onChange={v => updateProps({ columns: Number(v) as 2 | 3 | 4 })} />
+                        <SliderInput label="Gap" value={props.gap ?? 10} min={0} max={24} suffix="px" onChange={v => updateProps({ gap: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <ToggleRow label="Show price" value={props.showPrice ?? true} onChange={v => updateProps({ showPrice: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'button_block':
+            return (
+                <>
+                    <Section title="Button style">
+                        <SelectInput label="Preset" value={props.variant ?? 'primary'}
+                            options={[
+                                { v: 'primary', l: 'Primary — Purple' },
+                                { v: 'secondary', l: 'Secondary — Light' },
+                                { v: 'outline', l: 'Outline — Ghost' },
+                                { v: 'dark', l: 'Dark — Black' },
+                                { v: 'accent', l: 'Accent — Lime' },
+                            ]}
+                            onChange={v => {
+                                const presets: Record<string, Partial<ButtonBlockProps>> = {
+                                    primary: { bgColor: '#7530fb', textColor: '#ffffff', borderColor: '#7530fb' },
+                                    secondary: { bgColor: '#f3eeff', textColor: '#7530fb', borderColor: '#f3eeff' },
+                                    outline: { bgColor: 'transparent', textColor: '#7530fb', borderColor: '#7530fb' },
+                                    dark: { bgColor: '#1e1535', textColor: '#ffffff', borderColor: '#1e1535' },
+                                    accent: { bgColor: '#b8fa33', textColor: '#1e1535', borderColor: '#b8fa33' },
+                                }
+                                updateProps({ variant: v, ...presets[v] })
+                            }} />
+                        <ColorRow label="Background" value={props.bgColor ?? '#7530fb'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#7530fb'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                    <Section title="Shape">
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 10} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <SliderInput label="Padding V" value={props.paddingV ?? 14} min={6} max={30} suffix="px" onChange={v => updateProps({ paddingV: v })} />
+                        <SliderInput label="Padding H" value={props.paddingH ?? 40} min={12} max={80} suffix="px" onChange={v => updateProps({ paddingH: v })} />
+                        <ToggleRow label="Full width" value={props.fullWidth ?? false} onChange={v => updateProps({ fullWidth: v })} />
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SelectInput label="Weight" value={props.fontWeight ?? '700'}
+                            options={[{ v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }]}
+                            onChange={v => updateProps({ fontWeight: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'rectangle':
+            return (
+                <Section title="Rectangle">
+                    <ColorRow label="Fill colour" value={props.fillColor ?? '#f3eeff'} onChange={v => updateProps({ fillColor: v })} />
+                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                    <SliderInput label="Height" value={props.height ?? 60} min={4} max={400} suffix="px" onChange={v => updateProps({ height: v })} />
+                    <SliderInput label="Border width" value={props.borderWidth ?? 1} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                    <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                </Section>
+            )
+
+        case 'hero_header':
+            return (
+                <>
+                    {/* ── Background ── */}
+                    <Section title="Background">
+                        <ToggleRow
+                            label="Use gradient"
+                            value={props.bgGradient ?? true}
+                            onChange={v => updateProps({ bgGradient: v })}
+                        />
+                        {props.bgGradient && (
+                            <>
+                                <ColorRow label="Gradient from" value={props.gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v })} />
+                                <ColorRow label="Gradient to" value={props.gradientTo ?? '#1e1535'} onChange={v => updateProps({ gradientTo: v })} />
+                            </>
+                        )}
+                        {/* Flat bg — always shown as email client fallback */}
+                        <ColorRow
+                            label={props.bgGradient ? 'Fallback colour (email clients)' : 'Background colour'}
+                            value={props.bgColor ?? '#1e1535'}
+                            onChange={v => updateProps({ bgColor: v })}
+                        />
+                    </Section>
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <ColorRow label="Name colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Tagline colour" value={props.taglineColor ?? 'rgba(255,255,255,0.7)'} onChange={v => updateProps({ taglineColor: v })} />
+                        <SliderInput
+                            label="Name font size"
+                            value={props.nameFontSize ?? 26}
+                            min={14} max={48} suffix="px"
+                            onChange={v => updateProps({ nameFontSize: v })}
+                        />
+                        <SliderInput
+                            label="Tagline font size"
+                            value={props.taglineFontSize ?? 13}
+                            min={10} max={22} suffix="px"
+                            onChange={v => updateProps({ taglineFontSize: v })}
+                        />
+                        <SelectInput
+                            label="Name weight"
+                            value={props.nameFontWeight ?? '900'}
+                            options={[
+                                { v: '400', l: 'Regular' },
+                                { v: '600', l: 'Semibold' },
+                                { v: '700', l: 'Bold' },
+                                { v: '800', l: 'Extrabold' },
+                                { v: '900', l: 'Black' },
+                            ]}
+                            onChange={v => updateProps({ nameFontWeight: v })}
+                        />
+                        <div style={{ marginTop: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
+                                Alignment
+                            </p>
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </div>
+                    </Section>
+
+                    {/* ── Layout ── */}
+                    <Section title="Layout">
+                        <SliderInput label="Height" value={props.height ?? 120} min={60} max={500} suffix="px" onChange={v => updateProps({ height: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'raw_html':
+            return (
+                <Section title="Block label">
+                    <TextInput
+                        label="Internal label"
+                        value={props.label ?? 'Custom HTML Block'}
+                        onChange={v => updateProps({ label: v })}
+                    />
+                    <InfoBox>
+                        HTML content is edited in the Attributes tab. Style this block using the raw HTML code directly.
+                    </InfoBox>
                 </Section>
             )
 
@@ -950,6 +1406,166 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                         Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
                     </InfoBox>
                 </div>
+            )
+
+        case 'policy_tabs':
+            return (
+                <Section title="Tab content">
+                    <PolicyTabsEditor
+                        tabs={props.tabs ?? []}
+                        onChange={tabs => updateProps({ tabs })}
+                    />
+                </Section>
+            )
+
+        case 'nav_bar':
+            return (
+                <>
+                    <Section title={`Links (${(props.links ?? []).length}/8)`}>
+                        <NavLinksEditor
+                            links={props.links ?? []}
+                            onChange={links => updateProps({ links })}
+                        />
+                        <InfoBox>
+                            Click a link label or URL to edit. Add up to 8 links.
+                        </InfoBox>
+                    </Section>
+                    <Section title="Separator">
+                        <SelectInput
+                            label="Separator style"
+                            value={props.separator ?? '•'}
+                            options={[
+                                { v: '•', l: '•  Bullet' },
+                                { v: '|', l: '|  Pipe' },
+                                { v: '·', l: '·  Middle dot' },
+                                { v: '/', l: '/  Slash' },
+                                { v: '-', l: '-  Hyphen' },
+                                { v: '', l: '   None' },
+                            ]}
+                            onChange={v => updateProps({ separator: v })}
+                        />
+                        <div style={{
+                            marginTop: 8,
+                            padding: '8px 12px',
+                            backgroundColor: props.bgColor ?? '#1e1535',
+                            borderRadius: 6,
+                            textAlign: 'center' as const,
+                        }}>
+                            {(props.links ?? []).slice(0, 3).map((link: { label: string; url: string }, i: number) => (
+                                <span key={i} style={{ fontFamily: 'Arial, sans-serif', fontSize: 11, color: props.textColor ?? '#ffffff' }}>
+                                    {i > 0 && (
+                                        <span style={{ margin: '0 6px', opacity: 0.5 }}>
+                                            {props.separator ?? '•'}
+                                        </span>
+                                    )}
+                                    {link.label}
+                                </span>
+                            ))}
+                            {(props.links ?? []).length > 3 && (
+                                <span style={{ fontFamily: 'Arial, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.4)', marginLeft: 6 }}>
+                                    +{(props.links ?? []).length - 3} more
+                                </span>
+                            )}
+                        </div>
+                    </Section>
+                </>
+            )
+
+        case 'urgency_bar':
+            return (
+                <Section title="Content">
+                    <TextInput label="Urgency text" value={props.text ?? 'Only {{QUANTITY}} Left — Order Soon!'} onChange={v => updateProps({ text: v })} />
+                    {phButton('text', 'urgency text')}
+                    <ToggleRow label="Show pulse dot" value={props.showIcon ?? true} onChange={v => updateProps({ showIcon: v })} />
+                </Section>
+            )
+
+        case 'cross_sell':
+            return (
+                <>
+                    <Section title="Section title">
+                        <TextInput label="Title" value={props.title ?? 'You May Also Like'} onChange={v => updateProps({ title: v })} />
+                    </Section>
+                    <Section title="Products">
+                        <CrossSellItemsEditor
+                            items={props.items ?? []}
+                            onChange={items => updateProps({ items })}
+                        />
+                    </Section>
+                </>
+            )
+
+        case 'button_block':
+            return (
+                <Section title="Button">
+                    <TextInput label="Button label" value={props.label ?? 'Buy It Now'} onChange={v => updateProps({ label: v })} />
+                    {phButton('label', 'button label')}
+                    <TextInput label="Link URL" value={props.url ?? '#'} onChange={v => updateProps({ url: v })} />
+                </Section>
+            )
+
+        case 'rectangle':
+            return (
+                <Section title="Content (optional)">
+                    <TextareaInput label="Inner HTML" value={props.content ?? ''} rows={3} onChange={v => updateProps({ content: v })} />
+                    <InfoBox>Leave empty for a plain colour block. Add HTML for a callout or notice.</InfoBox>
+                </Section>
+            )
+
+        case 'hero_header':
+            return (
+                <>
+                    <Section title="Store details">
+                        <TextInput
+                            label="Store name"
+                            value={props.storeName ?? '{{SELLER_NAME}}'}
+                            onChange={v => updateProps({ storeName: v })}
+                        />
+                        {phButton('storeName', 'store name')}
+                        <TextareaInput
+                            label="Tagline"
+                            value={props.tagline ?? ''}
+                            rows={3}
+                            onChange={v => updateProps({ tagline: v })}
+                        />
+                        {phButton('tagline', 'tagline')}
+                    </Section>
+                    <Section title="Logo">
+                        <ToggleRow
+                            label="Show logo"
+                            value={props.showLogo ?? false}
+                            onChange={v => updateProps({ showLogo: v })}
+                        />
+                        {props.showLogo && (
+                            <>
+                                <TextInput
+                                    label="Logo URL"
+                                    value={props.logoUrl ?? ''}
+                                    onChange={v => updateProps({ logoUrl: v })}
+                                />
+                                <InfoBox>
+                                    Use an HTTPS image URL. Recommended height: 50px. Transparent PNG works best on dark backgrounds.
+                                </InfoBox>
+                            </>
+                        )}
+                    </Section>
+                </>
+            )
+
+        case 'raw_html':
+            return (
+                <Section title="HTML code">
+                    <TextareaInput
+                        label="Custom HTML"
+                        value={props.code ?? '<!-- Paste your HTML here -->'}
+                        rows={10}
+                        onChange={v => updateProps({ code: v })}
+                    />
+                    <InfoBox>
+                        eBay-safe HTML only. No &lt;script&gt;, no external CSS, no event handlers. Table-based layout recommended.
+                    </InfoBox>
+                    <TextInput label="Internal label" value={props.label ?? 'Custom HTML Block'} onChange={v => updateProps({ label: v })} />
+                </Section>
             )
 
         default:
@@ -1424,29 +2040,37 @@ function NumberInput({
 function SelectInput({
     label, value, options, onChange
 }: {
-    label: string; value: string; options: Array<{ v: string; l: string }>; onChange: (v: string) => void
+    label: string
+    value: string
+    options: Array<{ v: string; l: string }>
+    onChange: (v: string) => void
 }) {
+    // Convert { v, l } → DropdownOption { val, label, enabled }
+    const ddOptions: DropdownOption[] = options.map(o => ({
+        val: o.v,
+        label: o.l,
+        enabled: true,
+    }))
+
     return (
         <div style={{ marginBottom: 8 }}>
-            <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>{label}</p>
-            <select
-                value={value}
-                onChange={e => onChange(e.target.value)}
-                style={{
-                    width: '100%',
-                    padding: '5px 8px',
-                    border: `1px solid ${C.inputBorder}`,
-                    borderRadius: 6,
-                    backgroundColor: C.surface,
+            {label && (
+                <p style={{
+                    margin: '0 0 4px',
                     fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 12,
+                    fontSize: 11,
                     color: C.body,
-                    cursor: 'pointer',
-                    outline: 'none',
-                }}
-            >
-                {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-            </select>
+                }}>
+                    {label}
+                </p>
+            )}
+            <ProDropdown
+                prefix=""
+                currentValue={value}
+                options={ddOptions}
+                onChanged={onChange}
+                width="full"
+            />
         </div>
     )
 }
@@ -1640,6 +2264,153 @@ function AIToolButton({
                 </p>
             </div>
         </button>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW COMPOUND EDITORS — for conversion blocks
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PolicyTabsEditor({
+    tabs,
+    onChange,
+}: {
+    tabs: Array<{ label: string; content: string }>
+    onChange: (tabs: Array<{ label: string; content: string }>) => void
+}) {
+    return (
+        <div>
+            {tabs.map((tab, i) => (
+                <div key={i} style={{ marginBottom: 12, padding: 10, backgroundColor: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <input
+                            value={tab.label}
+                            onChange={e => {
+                                const next = [...tabs]
+                                next[i] = { ...next[i], label: e.target.value }
+                                onChange(next)
+                            }}
+                            placeholder="Tab label"
+                            style={{ ...inputStyle, fontWeight: 600, width: '60%' }}
+                        />
+                        {tabs.length > 1 && (
+                            <button onClick={() => onChange(tabs.filter((_, j) => j !== i))}
+                                style={{ ...smallBtnStyle, color: C.danger }}>×</button>
+                        )}
+                    </div>
+                    <textarea
+                        value={tab.content}
+                        rows={3}
+                        onChange={e => {
+                            const next = [...tabs]
+                            next[i] = { ...next[i], content: e.target.value }
+                            onChange(next)
+                        }}
+                        placeholder="Tab content..."
+                        style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: 1.5 }}
+                    />
+                </div>
+            ))}
+            {tabs.length < 6 && (
+                <button onClick={() => onChange([...tabs, { label: 'New Tab', content: 'Tab content here...' }])}
+                    style={addBtnStyle}>
+                    + Add tab
+                </button>
+            )}
+        </div>
+    )
+}
+
+function NavLinksEditor({
+    links,
+    onChange,
+}: {
+    links: Array<{ label: string; url: string }>
+    onChange: (links: Array<{ label: string; url: string }>) => void
+}) {
+    return (
+        <div>
+            {links.map((link, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 4, marginBottom: 5, alignItems: 'center' }}>
+                    <input
+                        value={link.label}
+                        placeholder="Label"
+                        onChange={e => {
+                            const next = [...links]
+                            next[i] = { ...next[i], label: e.target.value }
+                            onChange(next)
+                        }}
+                        style={{ ...inputStyle, fontSize: 11 }}
+                    />
+                    <input
+                        value={link.url}
+                        placeholder="URL"
+                        onChange={e => {
+                            const next = [...links]
+                            next[i] = { ...next[i], url: e.target.value }
+                            onChange(next)
+                        }}
+                        style={{ ...inputStyle, fontSize: 11 }}
+                    />
+                    <button onClick={() => onChange(links.filter((_, j) => j !== i))}
+                        style={{ ...smallBtnStyle, color: C.danger }}>×</button>
+                </div>
+            ))}
+            {links.length < 8 && (
+                <button onClick={() => onChange([...links, { label: 'New Link', url: '#' }])}
+                    style={addBtnStyle}>
+                    + Add link
+                </button>
+            )}
+        </div>
+    )
+}
+
+function CrossSellItemsEditor({
+    items,
+    onChange,
+}: {
+    items: Array<{ imageUrl: string; title: string; price: string; url: string }>
+    onChange: (items: Array<{ imageUrl: string; title: string; price: string; url: string }>) => void
+}) {
+    return (
+        <div>
+            {items.map((item, i) => (
+                <div key={i} style={{ marginBottom: 10, padding: 8, backgroundColor: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.muted }}>
+                            PRODUCT {i + 1}
+                        </span>
+                        <button onClick={() => onChange(items.filter((_, j) => j !== i))}
+                            style={{ ...smallBtnStyle, color: C.danger }}>×</button>
+                    </div>
+                    <input value={item.imageUrl} placeholder="Image URL"
+                        onChange={e => { const n = [...items]; n[i] = { ...n[i], imageUrl: e.target.value }; onChange(n) }}
+                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
+                    <input value={item.title} placeholder="Product title / placeholder"
+                        onChange={e => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; onChange(n) }}
+                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+                        <input value={item.price} placeholder="Price"
+                            onChange={e => { const n = [...items]; n[i] = { ...n[i], price: e.target.value }; onChange(n) }}
+                            style={{ ...inputStyle, fontSize: 11 }} />
+                        <input value={item.url} placeholder="Link URL"
+                            onChange={e => { const n = [...items]; n[i] = { ...n[i], url: e.target.value }; onChange(n) }}
+                            style={{ ...inputStyle, fontSize: 11 }} />
+                    </div>
+                </div>
+            ))}
+            {items.length < 4 && (
+                <button onClick={() => onChange([...items, {
+                    imageUrl: `{{IMAGE_${items.length + 2}_URL}}`,
+                    title: `{{RELATED_TITLE_${items.length + 1}}}`,
+                    price: `{{RELATED_PRICE_${items.length + 1}}}`,
+                    url: '#',
+                }])} style={addBtnStyle}>
+                    + Add product
+                </button>
+            )}
+        </div>
     )
 }
 

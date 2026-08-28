@@ -25,7 +25,7 @@ import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
-    Globe, LayoutTemplate,
+    Globe, LayoutTemplate, Code2,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 
@@ -367,6 +367,21 @@ function VisualEditorInner() {
         if (!name.trim()) setName('New Visual Template')
     }
 
+    // ── Open in Code Editor ───────────────────────────────────────────────────
+    // Passes the current compiled HTML to the html-editor page via sessionStorage
+    // so the code editor opens with the visual template ready to fine-tune.
+    const handleOpenInCodeEditor = () => {
+        try {
+            sessionStorage.setItem('riazify_visual_export_html', html)
+            sessionStorage.setItem('riazify_visual_export_name', name)
+        } catch {
+            // sessionStorage unavailable — pass via URL (truncated, best effort)
+        }
+        router.push(
+            `/dashboard/design/html-editor?source=visual&name=${encodeURIComponent(name)}`
+        )
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // LOADING STATE
     // ─────────────────────────────────────────────────────────────────────────
@@ -582,8 +597,43 @@ function VisualEditorInner() {
                     </select>
                 </div>
 
-                {/* Right — Save Draft + Publish */}
+                {/* Right — Open in Code Editor + Save Draft + Publish */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                    {/* Open in Code Editor */}
+                    <button
+                        onClick={handleOpenInCodeEditor}
+                        title="Open this template in the Code Editor"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            padding: '6px 12px',
+                            border: `1px solid ${C.border}`,
+                            borderRadius: 8,
+                            backgroundColor: 'transparent',
+                            color: C.secondary,
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 12,
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s',
+                            whiteSpace: 'nowrap',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.backgroundColor = C.bg
+                            e.currentTarget.style.color = C.dark
+                            e.currentTarget.style.borderColor = C.dark
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                            e.currentTarget.style.color = C.secondary
+                            e.currentTarget.style.borderColor = C.border
+                        }}
+                    >
+                        <Code2 size={13} />
+                        Code Editor
+                    </button>
+
                     {/* Save Draft */}
                     <button
                         onClick={handleSaveDraft}

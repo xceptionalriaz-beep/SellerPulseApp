@@ -1,32 +1,27 @@
 'use client'
 // components/ui/VisualEditor.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Riazify — Visual Drag-&-Drop Editor
+// Riazify — Visual Drag-&-Drop Editor (Phase 4 rewire)
 //
-// Entry point. Imported by app/dashboard/design/html-editor/page.tsx.
-// Rendered when activeMode === 'visual'.
+// Layout: [IconRail 44px] [SidebarPanel 260px] [Canvas flex-1] [PropertiesPanel 280px]
 //
-// Owns:
-//   blocks[]       — ordered array of Block instances on the canvas
-//   selectedId     — which block is currently selected (or null)
-//   draggedType    — block type being dragged from library (or null)
-//   parseWarnings  — warnings from HTML→blocks parse on mode entry
-//   parseStrategy  — 'block-comments' | 'heuristic' | 'empty'
+// New state vs old:
+//   + activeTab       — which sidebar tab is open
+//   + panelOpen       — sidebar panel visible
+//   + canvasSettings  — global canvas settings (max-width, font, bg etc.)
+//   + livePreview     — toggle between card view and iframe preview
+//   + auditErrors     — count passed to IconRail badge
 //
-// Syncs with parent (html-editor/page.tsx) via:
-//   value          — reads html state on mount to reconstruct blocks
-//   onChange       — fires with new full HTML string on every block change
-//
-// Props:
-//   value          — current html string from page.tsx state
-//   onChange       — setHtml from page.tsx
-//   placeholders   — PLACEHOLDER_GROUPS from page.tsx
+// New handlers:
+//   handleInsertTemplate — appends blocks from TemplatesTab
+//   handleInsertImage    — updates selected block's image src prop
+//   handleInsertToken    — appends placeholder to selected block's text field
+//   handleUpdateSettings — updates canvasSettings + rebuilds HTML
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import {
-    Monitor, Tablet, Smartphone,
-    Undo2, Redo2, Trash2,
+    Undo2, Redo2, Trash2, Eye, EyeOff,
     AlertTriangle, CheckCircle2, X,
     type LucideIcon,
 } from 'lucide-react'
@@ -37,12 +32,17 @@ import {
     createBlock,
     assembleDocument,
     getDefinition,
+    CanvasSettings,
+    DEFAULT_CANVAS_SETTINGS,
 } from './VisualEditor/blocks'
 
-import { parseHtml, describeResult, ParseResult } from './VisualEditor/htmlParser'
-import BlockLibrary from './VisualEditor/BlockLibrary'
+import { parseHtml, ParseResult } from './VisualEditor/htmlParser'
+import { RailTabId } from './VisualEditor/IconRail'
+import IconRail from './VisualEditor/IconRail'
+import SidebarPanel from './VisualEditor/SidebarPanel'
 import Canvas from './VisualEditor/Canvas'
 import PropertiesPanel from './VisualEditor/PropertiesPanel'
+import LivePreview from './VisualEditor/LivePreview'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -64,7 +64,7 @@ const C = {
     successLight: '#dcfce7',
 }
 
-// ── PlaceholderGroup — mirrors interface in page.tsx ─────────────────────────
+// ── PlaceholderGroup ──────────────────────────────────────────────────────────
 interface PlaceholderItem {
     label: string
     value: string
@@ -90,47 +90,71 @@ export default function VisualEditor({
     onChange,
     placeholders,
 }: VisualEditorProps) {
-    // ── Core state ────────────────────────────────────────────────────────────
+    // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [draggedType, setDraggedType] = useState<BlockType | null>(null)
-    const [parseResult, setParseResult] = useState<ParseResult | null>(null)
-    const [showWarning, setShowWarning] = useState(false)
-    const [deviceWidth, setDeviceWidth] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
     const [undoStack, setUndoStack] = useState<Block[][]>([])
     const [redoStack, setRedoStack] = useState<Block[][]>([])
 
-    // Prevent feedback loop: when we call onChange(html), page.tsx sets html,
-    // which would re-trigger our useEffect. Use a ref to skip that cycle.
+    // ── Parse state ───────────────────────────────────────────────────────────
+    const [parseResult, setParseResult] = useState<ParseResult | null>(null)
+    const [showWarning, setShowWarning] = useState(false)
+
+    // ── Sidebar state ─────────────────────────────────────────────────────────
+    const [activeTab, setActiveTab] = useState<RailTabId | null>('blocks')
+    const [panelOpen, setPanelOpen] = useState(true)
+
+    // ── Canvas + preview state ────────────────────────────────────────────────
+    const [deviceWidth, setDeviceWidth] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
+    const [livePreview, setLivePreview] = useState(false)
+    const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(DEFAULT_CANVAS_SETTINGS)
+
+    // ── Anti-feedback-loop refs ───────────────────────────────────────────────
     const isInternalChange = useRef(false)
     const hasInitialised = useRef(false)
+
+    // ── Current assembled HTML ────────────────────────────────────────────────
+    const [currentHtml, setCurrentHtml] = useState(value)
+
+    // ── Audit error count — for IconRail badge ────────────────────────────────
+    const auditErrors = useMemo(() => {
+        if (!currentHtml) return 0
+        let count = 0
+        if (/<script\b/i.test(currentHtml)) count++
+        if (/<iframe\b/i.test(currentHtml)) count++
+        if (/<form\b/i.test(currentHtml)) count++
+        if (/\bon\w+\s*=/i.test(currentHtml)) count++
+        if (/href\s*=\s*["']javascript:/i.test(currentHtml)) count++
+        if (/src\s*=\s*["']http:\/\//i.test(currentHtml)) count++
+        return count
+    }, [currentHtml])
 
     // ── Initialise from value on first mount ──────────────────────────────────
     useEffect(() => {
         if (hasInitialised.current) return
         hasInitialised.current = true
-
         const result = parseHtml(value)
         setParseResult(result)
         setBlocks(result.blocks)
-
+        setCurrentHtml(value)
         if (result.warnings.length > 0 || result.strategy === 'heuristic') {
             setShowWarning(true)
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ── Rebuild HTML whenever blocks change ───────────────────────────────────
-    const rebuildAndEmit = useCallback((nextBlocks: Block[]) => {
+    // ── Rebuild HTML whenever blocks or settings change ───────────────────────
+    const rebuildAndEmit = useCallback((nextBlocks: Block[], settings?: CanvasSettings) => {
         isInternalChange.current = true
-        const html = assembleDocument(nextBlocks)
+        const html = assembleDocument(nextBlocks, settings ?? canvasSettings)
+        setCurrentHtml(html)
         onChange(html)
-        // Reset the flag after the state update cycle
         requestAnimationFrame(() => { isInternalChange.current = false })
-    }, [onChange])
+    }, [onChange, canvasSettings])
 
-    // ── Block mutation helpers — all push to undo stack ───────────────────────
+    // ── Undo/redo helpers ─────────────────────────────────────────────────────
     const pushUndo = useCallback((prev: Block[]) => {
-        setUndoStack(s => [...s.slice(-30), prev]) // keep last 30 states
+        setUndoStack(s => [...s.slice(-30), prev])
         setRedoStack([])
     }, [])
 
@@ -140,7 +164,7 @@ export default function VisualEditor({
         rebuildAndEmit(next)
     }, [pushUndo, rebuildAndEmit])
 
-    // ── Add block (from library drop or click) ────────────────────────────────
+    // ── Block mutations ───────────────────────────────────────────────────────
     const handleAddBlock = useCallback((type: BlockType) => {
         const newBlock = createBlock(type)
         setBlocks(prev => {
@@ -152,13 +176,11 @@ export default function VisualEditor({
         setSelectedId(newBlock.id)
     }, [pushUndo, rebuildAndEmit])
 
-    // ── Drop from library onto canvas ─────────────────────────────────────────
     const handleDrop = useCallback((type: BlockType) => {
         handleAddBlock(type)
         setDraggedType(null)
     }, [handleAddBlock])
 
-    // ── Reorder blocks (drag within canvas) ───────────────────────────────────
     const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
         setBlocks(prev => {
             const next = [...prev]
@@ -170,7 +192,6 @@ export default function VisualEditor({
         })
     }, [pushUndo, rebuildAndEmit])
 
-    // ── Delete block ──────────────────────────────────────────────────────────
     const handleDelete = useCallback((id: string) => {
         setBlocks(prev => {
             const next = prev.filter(b => b.id !== id)
@@ -181,7 +202,6 @@ export default function VisualEditor({
         setSelectedId(s => s === id ? null : s)
     }, [pushUndo, rebuildAndEmit])
 
-    // ── Duplicate block ───────────────────────────────────────────────────────
     const handleDuplicate = useCallback((id: string) => {
         setBlocks(prev => {
             const idx = prev.findIndex(b => b.id === id)
@@ -199,7 +219,6 @@ export default function VisualEditor({
         })
     }, [pushUndo, rebuildAndEmit])
 
-    // ── Move up / down ────────────────────────────────────────────────────────
     const handleMoveUp = useCallback((id: string) => {
         setBlocks(prev => {
             const idx = prev.findIndex(b => b.id === id)
@@ -218,7 +237,6 @@ export default function VisualEditor({
         })
     }, [handleReorder])
 
-    // ── Update block props (from PropertiesPanel) ─────────────────────────────
     const handleBlockChange = useCallback((updated: Block) => {
         setBlocks(prev => {
             const next = prev.map(b => b.id === updated.id ? updated : b)
@@ -252,41 +270,123 @@ export default function VisualEditor({
         })
     }, [blocks, rebuildAndEmit])
 
+    // ── NEW: Template insert — appends blocks ─────────────────────────────────
+    const handleInsertTemplate = useCallback((newBlocks: Block[]) => {
+        setBlocks(prev => {
+            const next = [...prev, ...newBlocks]
+            pushUndo(prev)
+            rebuildAndEmit(next)
+            return next
+        })
+    }, [pushUndo, rebuildAndEmit])
+
+    // ── NEW: Image insert — updates selected block's src/imageUrl prop ─────────
+    const handleInsertImage = useCallback((url: string, alt: string) => {
+        // ── Capture selectedId OUTSIDE setBlocks to avoid stale closure ──────
+        const currentSelectedId = selectedId
+
+        setBlocks(prev => {
+            // ── If a block is selected, try to patch its image prop ───────────
+            if (currentSelectedId) {
+                const target = prev.find(b => b.id === currentSelectedId)
+                if (target) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const p = target.props as any
+                    const hasImageProp =
+                        'src' in p ||
+                        'imageUrl' in p ||
+                        'logoUrl' in p ||
+                        'bgImage' in p
+
+                    if (hasImageProp) {
+                        const next: Block[] = prev.map(b => {
+                            if (b.id !== currentSelectedId) return b
+                            if ('src' in p) return { ...b, props: { ...p, src: url, alt } } as Block
+                            if ('imageUrl' in p) return { ...b, props: { ...p, imageUrl: url, alt } } as Block
+                            if ('logoUrl' in p) return { ...b, props: { ...p, logoUrl: url } } as Block
+                            if ('bgImage' in p) return { ...b, props: { ...p, bgImage: url } } as Block
+                            return b
+                        })
+                        rebuildAndEmit(next)
+                        return next
+                    }
+                }
+            }
+
+            // ── No compatible block selected — add as new image block ─────────
+            const newBlock: Block = {
+                id: `image_${Date.now()}`,
+                type: 'image',
+                props: {
+                    ...getDefinition('image')!.defaultProps,
+                    src: url,
+                    alt,
+                },
+            }
+            const next = [...prev, newBlock]
+            rebuildAndEmit(next)
+            return next
+        })
+    }, [selectedId, rebuildAndEmit])
+
+    // ── NEW: Token insert — appends placeholder to selected block's text ───────
+    const handleInsertToken = useCallback((token: string) => {
+        if (!selectedId) return
+        setBlocks(prev => {
+            const next: Block[] = prev.map(b => {
+                if (b.id !== selectedId) return b
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const p = b.props as any
+                const textKey = ['text', 'headingText', 'subText', 'content',
+                    'description', 'label', 'storeName', 'tagline']
+                    .find(k => k in p)
+                if (textKey) {
+                    return {
+                        ...b,
+                        props: { ...p, [textKey]: `${p[textKey] ?? ''} ${token}`.trim() },
+                    } as Block
+                }
+                return b
+            })
+            rebuildAndEmit(next)
+            return next
+        })
+    }, [selectedId, rebuildAndEmit])
+
+    // ── NEW: Canvas settings update ───────────────────────────────────────────
+    const handleUpdateSettings = useCallback((settings: CanvasSettings) => {
+        setCanvasSettings(settings)
+        // Rebuild with new settings immediately
+        setBlocks(prev => {
+            const html = assembleDocument(prev, settings)
+            setCurrentHtml(html)
+            onChange(html)
+            return prev
+        })
+    }, [onChange])
+
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             const meta = e.metaKey || e.ctrlKey
-
-            // Undo: Cmd/Ctrl + Z
             if (meta && e.key === 'z' && !e.shiftKey) {
-                e.preventDefault()
-                handleUndo()
-                return
+                e.preventDefault(); handleUndo(); return
             }
-            // Redo: Cmd/Ctrl + Shift + Z or Cmd/Ctrl + Y
             if ((meta && e.key === 'z' && e.shiftKey) || (meta && e.key === 'y')) {
-                e.preventDefault()
-                handleRedo()
-                return
+                e.preventDefault(); handleRedo(); return
             }
-            // Delete selected block: Backspace / Delete (when not in an input)
             if ((e.key === 'Backspace' || e.key === 'Delete') && selectedId) {
                 const tag = (e.target as HTMLElement).tagName.toLowerCase()
                 if (!['input', 'textarea', 'select'].includes(tag)) {
-                    e.preventDefault()
-                    handleDelete(selectedId)
+                    e.preventDefault(); handleDelete(selectedId)
                 }
             }
-            // Deselect: Escape
-            if (e.key === 'Escape') {
-                setSelectedId(null)
-            }
+            if (e.key === 'Escape') setSelectedId(null)
         }
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
     }, [handleUndo, handleRedo, handleDelete, selectedId])
 
-    // ── Selected block ────────────────────────────────────────────────────────
     const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -301,16 +401,16 @@ export default function VisualEditor({
             overflow: 'hidden',
             backgroundColor: C.bg,
         }}>
-            {/* ── Top toolbar bar ── */}
+            {/* ── Top toolbar ── */}
             <EditorToolbar
                 blockCount={blocks.length}
                 selectedBlock={selectedBlock}
-                deviceWidth={deviceWidth}
-                onDeviceChange={setDeviceWidth}
                 canUndo={undoStack.length > 0}
                 canRedo={redoStack.length > 0}
+                livePreview={livePreview}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
+                onToggleLivePreview={() => setLivePreview(p => !p)}
                 onClearAll={() => {
                     if (blocks.length === 0) return
                     if (window.confirm('Clear all blocks? This cannot be undone.')) {
@@ -329,35 +429,73 @@ export default function VisualEditor({
                 />
             )}
 
-            {/* ── Three-panel editor ── */}
+            {/* ── Four-panel editor ── */}
             <div style={{
                 display: 'flex',
                 flex: 1,
                 minHeight: 0,
                 overflow: 'hidden',
             }}>
-                {/* LEFT — Block Library */}
-                <BlockLibrary
+                {/* FAR LEFT — Icon Rail */}
+                <IconRail
+                    activeTab={activeTab}
+                    onTabChange={(tab) => {
+                        setActiveTab(tab)
+                        if (!panelOpen) setPanelOpen(true)
+                    }}
+                    auditErrors={auditErrors}
+                    panelOpen={panelOpen}
+                    onTogglePanel={() => setPanelOpen(p => !p)}
+                />
+
+                {/* LEFT — Sidebar Panel (all 6 tabs) */}
+                <SidebarPanel
+                    activeTab={activeTab}
+                    isOpen={panelOpen}
+                    // BlockLibrary
                     onAddBlock={handleAddBlock}
                     onDragStart={setDraggedType}
                     onDragEnd={() => setDraggedType(null)}
                     draggedType={draggedType}
+                    // TemplatesTab
+                    onInsertTemplate={handleInsertTemplate}
+                    // BodySettings
+                    canvasSettings={canvasSettings}
+                    onUpdateSettings={handleUpdateSettings}
+                    // ImagesTab
+                    onInsertImage={handleInsertImage}
+                    selectedId={selectedId}
+                    blocks={blocks}
+                    // AuditTab
+                    html={currentHtml}
+                    blockCount={blocks.length}
+                    // TokensTab
+                    placeholders={placeholders}
+                    onInsertToken={handleInsertToken}
                 />
 
-                {/* CENTRE — Canvas */}
-                <Canvas
-                    blocks={blocks}
-                    selectedId={selectedId}
-                    draggedType={draggedType}
-                    deviceWidth={deviceWidth}
-                    onSelect={setSelectedId}
-                    onDrop={handleDrop}
-                    onReorder={handleReorder}
-                    onDelete={handleDelete}
-                    onDuplicate={handleDuplicate}
-                    onMoveUp={handleMoveUp}
-                    onMoveDown={handleMoveDown}
-                />
+                {/* CENTRE — Canvas or Live Preview */}
+                {livePreview ? (
+                    <LivePreview
+                        html={currentHtml}
+                        deviceWidth={deviceWidth}
+                        onDeviceChange={setDeviceWidth}
+                    />
+                ) : (
+                    <Canvas
+                        blocks={blocks}
+                        selectedId={selectedId}
+                        draggedType={draggedType}
+                        deviceWidth={deviceWidth}
+                        onSelect={setSelectedId}
+                        onDrop={handleDrop}
+                        onReorder={handleReorder}
+                        onDelete={handleDelete}
+                        onDuplicate={handleDuplicate}
+                        onMoveUp={handleMoveUp}
+                        onMoveDown={handleMoveDown}
+                    />
+                )}
 
                 {/* RIGHT — Properties Panel */}
                 <PropertiesPanel
@@ -373,6 +511,8 @@ export default function VisualEditor({
                 blockCount={blocks.length}
                 selectedBlock={selectedBlock}
                 parseStrategy={parseResult?.strategy ?? null}
+                auditErrors={auditErrors}
+                livePreview={livePreview}
             />
         </div>
     )
@@ -380,37 +520,23 @@ export default function VisualEditor({
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EDITOR TOOLBAR
-// Visual-mode-specific top bar: undo/redo, device toggles, block count, clear
 // ─────────────────────────────────────────────────────────────────────────────
 interface EditorToolbarProps {
     blockCount: number
     selectedBlock: Block | null
-    deviceWidth: 'desktop' | 'tablet' | 'mobile'
-    onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void
     canUndo: boolean
     canRedo: boolean
+    livePreview: boolean
     onUndo: () => void
     onRedo: () => void
+    onToggleLivePreview: () => void
     onClearAll: () => void
 }
 
 function EditorToolbar({
-    blockCount,
-    selectedBlock,
-    deviceWidth,
-    onDeviceChange,
-    canUndo,
-    canRedo,
-    onUndo,
-    onRedo,
-    onClearAll,
+    blockCount, selectedBlock, canUndo, canRedo,
+    livePreview, onUndo, onRedo, onToggleLivePreview, onClearAll,
 }: EditorToolbarProps) {
-    const devices: Array<{ id: 'desktop' | 'tablet' | 'mobile'; Icon: LucideIcon; label: string; width: string }> = [
-        { id: 'desktop', Icon: Monitor, label: 'Desktop', width: '700px' },
-        { id: 'tablet', Icon: Tablet, label: 'Tablet', width: '480px' },
-        { id: 'mobile', Icon: Smartphone, label: 'Mobile', width: '375px' },
-    ]
-
     return (
         <div style={{
             height: 44,
@@ -425,30 +551,17 @@ function EditorToolbar({
         }}>
             {/* Left — undo/redo + block count */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {/* Undo */}
-                <ToolbarButton
-                    onClick={onUndo}
-                    disabled={!canUndo}
-                    title="Undo (Cmd+Z)"
-                >
+                <ToolbarButton onClick={onUndo} disabled={!canUndo} title="Undo (Cmd+Z)">
                     <Undo2 size={14} />
                 </ToolbarButton>
-                {/* Redo */}
-                <ToolbarButton
-                    onClick={onRedo}
-                    disabled={!canRedo}
-                    title="Redo (Cmd+Shift+Z)"
-                >
+                <ToolbarButton onClick={onRedo} disabled={!canRedo} title="Redo (Cmd+Shift+Z)">
                     <Redo2 size={14} />
                 </ToolbarButton>
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
-                {/* Block count pill */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
+                    display: 'flex', alignItems: 'center', gap: 5,
                     padding: '3px 10px',
                     backgroundColor: C.bg,
                     border: `1px solid ${C.border}`,
@@ -468,70 +581,55 @@ function EditorToolbar({
                 </div>
             </div>
 
-            {/* Centre — device width toggles */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                {devices.map(d => (
-                    <button
-                        key={d.id}
-                        onClick={() => onDeviceChange(d.id)}
-                        title={`${d.label} preview (${d.width})`}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            padding: '4px 10px',
-                            border: `1px solid ${deviceWidth === d.id ? C.primary : C.border}`,
-                            borderRadius: 7,
-                            backgroundColor: deviceWidth === d.id ? C.primaryLight : 'transparent',
-                            color: deviceWidth === d.id ? C.primary : C.secondary,
-                            fontFamily: 'DM Sans, sans-serif',
-                            fontSize: 11,
-                            fontWeight: deviceWidth === d.id ? 700 : 400,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s',
-                        }}
-                    >
-                        <d.Icon size={13} />
-                        <span>{d.label}</span>
-                        <span style={{ fontSize: 9, opacity: 0.6 }}>{d.width}</span>
-                    </button>
-                ))}
-            </div>
+            {/* Centre — Live Preview toggle */}
+            <button
+                onClick={onToggleLivePreview}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '5px 14px',
+                    border: `1px solid ${livePreview ? C.primary : C.border}`,
+                    borderRadius: 8,
+                    backgroundColor: livePreview ? C.primaryLight : 'transparent',
+                    color: livePreview ? C.primary : C.secondary,
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 12, fontWeight: livePreview ? 700 : 400,
+                    cursor: 'pointer', transition: 'all 0.15s',
+                }}
+            >
+                {livePreview ? <EyeOff size={13} /> : <Eye size={13} />}
+                {livePreview ? 'Card View' : 'Live Preview'}
+            </button>
 
             {/* Right — clear all */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <button
-                    onClick={onClearAll}
-                    disabled={blockCount === 0}
-                    title="Clear all blocks"
-                    style={{
-                        padding: '4px 12px',
-                        border: `1px solid ${blockCount === 0 ? C.border : '#fecaca'}`,
-                        borderRadius: 7,
-                        backgroundColor: 'transparent',
-                        color: blockCount === 0 ? C.muted : C.danger,
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 11,
-                        cursor: blockCount === 0 ? 'default' : 'pointer',
-                        opacity: blockCount === 0 ? 0.5 : 1,
-                        transition: 'all 0.15s',
-                    }}
-                >
-                    <Trash2 size={12} style={{ marginRight: 4 }} />Clear all
-                </button>
-            </div>
+            <button
+                onClick={onClearAll}
+                disabled={blockCount === 0}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '4px 12px',
+                    border: `1px solid ${blockCount === 0 ? C.border : '#fecaca'}`,
+                    borderRadius: 7,
+                    backgroundColor: 'transparent',
+                    color: blockCount === 0 ? C.muted : C.danger,
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 11,
+                    cursor: blockCount === 0 ? 'default' : 'pointer',
+                    opacity: blockCount === 0 ? 0.5 : 1,
+                    transition: 'all 0.15s',
+                }}
+            >
+                <Trash2 size={12} />
+                Clear all
+            </button>
         </div>
     )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WARNING BANNER
-// Shown when parseHtml() used heuristics or found issues
 // ─────────────────────────────────────────────────────────────────────────────
 function WarningBanner({
-    strategy,
-    warnings,
-    onDismiss,
+    strategy, warnings, onDismiss,
 }: {
     strategy: ParseResult['strategy']
     warnings: string[]
@@ -539,25 +637,18 @@ function WarningBanner({
 }) {
     const isHeuristic = strategy === 'heuristic'
     const bg = isHeuristic ? C.warningLight : C.dangerLight
-    const border = isHeuristic ? '#fde68a50' : '#fecaca50'
     const color = isHeuristic ? C.warning : C.danger
-    const WarningIcon = isHeuristic ? AlertTriangle : X
+    const Icon = isHeuristic ? AlertTriangle : X
     const title = isHeuristic
         ? 'Converted from existing HTML — some properties may need adjusting'
         : 'Custom code detected — some sections cannot be edited visually'
 
     return (
         <div style={{
-            backgroundColor: bg,
-            border: `1px solid ${border}`,
-            borderRadius: 0,
-            padding: '8px 16px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 10,
-            flexShrink: 0,
+            backgroundColor: bg, padding: '8px 16px',
+            display: 'flex', alignItems: 'flex-start', gap: 10, flexShrink: 0,
         }}>
-            <WarningIcon size={14} style={{ color, marginTop: 1, flexShrink: 0 }} />
+            <Icon size={14} style={{ color, marginTop: 1, flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ margin: '0 0 2px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color }}>
                     {title}
@@ -568,20 +659,7 @@ function WarningBanner({
                     </p>
                 ))}
             </div>
-            <button
-                onClick={onDismiss}
-                style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color,
-                    fontSize: 16,
-                    padding: 0,
-                    flexShrink: 0,
-                    opacity: 0.6,
-                    lineHeight: 1,
-                }}
-            >
+            <button onClick={onDismiss} style={{ background: 'none', border: 'none', cursor: 'pointer', color, fontSize: 16, padding: 0, flexShrink: 0, opacity: 0.6 }}>
                 ×
             </button>
         </div>
@@ -590,52 +668,40 @@ function WarningBanner({
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STATUS BAR
-// Bottom bar — matches the style of the code editor's bottom bar
 // ─────────────────────────────────────────────────────────────────────────────
 function StatusBar({
-    blockCount,
-    selectedBlock,
-    parseStrategy,
+    blockCount, selectedBlock, parseStrategy, auditErrors, livePreview,
 }: {
     blockCount: number
     selectedBlock: Block | null
     parseStrategy: ParseResult['strategy'] | null
+    auditErrors: number
+    livePreview: boolean
 }) {
     return (
         <div style={{
             height: 28,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '0 16px',
             backgroundColor: C.dark,
-            borderTop: `1px solid rgba(255,255,255,0.06)`,
+            borderTop: '1px solid rgba(255,255,255,0.06)',
             flexShrink: 0,
         }}>
-            {/* Left */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <StatusPill color={C.accent} label="Visual Editor" />
-                <StatusPill color={C.success} label="Active Content Free" />
-                <StatusPill color={C.success} label="100% eBay Policy Compliant" />
+                {auditErrors === 0
+                    ? <StatusPill color={C.success} label="eBay Compliant" />
+                    : <StatusPill color={C.danger} label={`${auditErrors} compliance error${auditErrors > 1 ? 's' : ''}`} />
+                }
+                {livePreview && <StatusPill color="#0ea5e9" label="Live Preview" />}
             </div>
-
-            {/* Right */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {selectedBlock && (
-                    <span style={{
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 10,
-                        color: 'rgba(255,255,255,0.5)',
-                    }}>
-                        {getDefinition(selectedBlock.type)?.label}
-                        {' · '}id: {selectedBlock.id}
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>
+                        {getDefinition(selectedBlock.type)?.label} · {selectedBlock.id}
                     </span>
                 )}
-                <span style={{
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 10,
-                    color: 'rgba(255,255,255,0.4)',
-                }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
                     {blockCount} block{blockCount !== 1 ? 's' : ''}
                     {parseStrategy === 'heuristic' ? ' · Heuristic parse' : ''}
                     {parseStrategy === 'block-comments' ? ' · Exact restore' : ''}
@@ -649,12 +715,7 @@ function StatusPill({ color, label }: { color: string; label: string }) {
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <CheckCircle2 size={10} style={{ color, flexShrink: 0 }} />
-            <span style={{
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: 10,
-                color: 'rgba(255,255,255,0.6)',
-                fontWeight: 500,
-            }}>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
                 {label}
             </span>
         </div>
@@ -663,13 +724,9 @@ function StatusPill({ color, label }: { color: string; label: string }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOOLBAR BUTTON
-// Small icon button used in the editor toolbar
 // ─────────────────────────────────────────────────────────────────────────────
 function ToolbarButton({
-    children,
-    onClick,
-    disabled,
-    title,
+    children, onClick, disabled, title,
 }: {
     children: React.ReactNode
     onClick: () => void
@@ -679,27 +736,18 @@ function ToolbarButton({
     const [hovered, setHovered] = useState(false)
     return (
         <button
-            onClick={onClick}
-            disabled={disabled}
-            title={title}
+            onClick={onClick} disabled={disabled} title={title}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                width: 30,
-                height: 30,
-                borderRadius: 7,
+                width: 30, height: 30, borderRadius: 7,
                 border: `1px solid ${C.border}`,
                 backgroundColor: hovered && !disabled ? C.primaryLight : 'transparent',
                 color: disabled ? C.muted : hovered ? C.primary : C.secondary,
-                fontSize: 15,
                 cursor: disabled ? 'default' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                transition: 'all 0.12s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 0, transition: 'all 0.12s',
                 opacity: disabled ? 0.4 : 1,
-                fontFamily: 'DM Sans, sans-serif',
             }}
         >
             {children}
