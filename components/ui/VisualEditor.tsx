@@ -94,6 +94,7 @@ export default function VisualEditor({
     const [blocks, setBlocks] = useState<Block[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [copiedStyle, setCopiedStyle] = useState<Record<string, unknown> | null>(null)
+    const [tokenFeedback, setTokenFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null)
     const [draggedType, setDraggedType] = useState<BlockType | null>(null)
     const [undoStack, setUndoStack] = useState<Block[][]>([])
     const [redoStack, setRedoStack] = useState<Block[][]>([])
@@ -110,6 +111,13 @@ export default function VisualEditor({
     const [deviceWidth, setDeviceWidth] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
     const [livePreview, setLivePreview] = useState(false)
     const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(DEFAULT_CANVAS_SETTINGS)
+    const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
+    const [focusMode, setFocusMode] = useState(false)        // hides sidebar + panel
+    const [templateName, setTemplateName] = useState('My Template')
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()) // multi-select
+    const [lockedIds, setLockedIds] = useState<Set<string>>(new Set()) // locked blocks
+    const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set()) // hidden blocks
+    const [canvasSearch, setCanvasSearch] = useState('')          // search blocks on canvas
 
     // ── Anti-feedback-loop refs ───────────────────────────────────────────────
     const isInternalChange = useRef(false)
@@ -177,6 +185,23 @@ export default function VisualEditor({
         })
         setSelectedId(newBlock.id)
     }, [pushUndo, rebuildAndEmit, canvasSettings])
+
+    // ── Lock / Hide block ────────────────────────────────────────────────────
+    const handleToggleLock = useCallback((id: string) => {
+        setLockedIds(prev => {
+            const next = new Set(prev)
+            next.has(id) ? next.delete(id) : next.add(id)
+            return next
+        })
+    }, [])
+
+    const handleToggleHide = useCallback((id: string) => {
+        setHiddenIds(prev => {
+            const next = new Set(prev)
+            next.has(id) ? next.delete(id) : next.add(id)
+            return next
+        })
+    }, [])
 
     // ── Copy / Paste block style ─────────────────────────────────────────────
     const handleCopyStyle = useCallback((id: string) => {
@@ -363,20 +388,44 @@ export default function VisualEditor({
     }, [selectedId, rebuildAndEmit])
 
     // ── NEW: Token insert — appends placeholder to selected block's text ───────
+    // All text prop keys across every block type — ordered by priority
+    const TEXT_PROP_KEYS = [
+        // Generic
+        'text', 'content', 'label',
+        // Product blocks
+        'title', 'titleText', 'description',
+        // Hero / Banner / CTA
+        'headingText', 'subText', 'buttonText',
+        // Shipping / Returns / Policy
+        'shippingText', 'dispatchText', 'locationText', 'policyText', 'periodText',
+        // Seller / Nav / Urgency
+        'sellerName', 'tagline', 'feedbackText', 'message',
+        // Misc
+        'storeName', 'alt', 'linkUrl',
+    ]
+
     const handleInsertToken = useCallback((token: string) => {
-        if (!selectedId) return
+        // Fix #3: show feedback if no block selected
+        if (!selectedId) {
+            setTokenFeedback({ type: 'error', msg: 'Select a block first, then click Insert' })
+            setTimeout(() => setTokenFeedback(null), 3000)
+            return
+        }
         setBlocks(prev => {
+            const currentSelectedId = selectedId
             const next: Block[] = prev.map(b => {
-                if (b.id !== selectedId) return b
+                if (b.id !== currentSelectedId) return b
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const p = b.props as any
-                const textKey = ['text', 'headingText', 'subText', 'content',
-                    'description', 'label', 'storeName', 'tagline']
-                    .find(k => k in p)
+                // Fix #2: find first matching text key across all block types
+                const textKey = TEXT_PROP_KEYS.find(k => k in p && typeof p[k] === 'string')
                 if (textKey) {
+                    const current = p[textKey] ?? ''
+                    // Fix #4: smart append — add space only if needed
+                    const separator = current && !current.endsWith(' ') ? ' ' : ''
                     return {
                         ...b,
-                        props: { ...p, [textKey]: `${p[textKey] ?? ''} ${token}`.trim() },
+                        props: { ...p, [textKey]: `${current}${separator}${token}` },
                     } as Block
                 }
                 return b
@@ -384,6 +433,9 @@ export default function VisualEditor({
             rebuildAndEmit(next)
             return next
         })
+        // Fix #3+9: show success feedback
+        setTokenFeedback({ type: 'success', msg: `${token} inserted` })
+        setTimeout(() => setTokenFeedback(null), 2000)
     }, [selectedId, rebuildAndEmit])
 
     // ── NEW: Canvas settings update ───────────────────────────────────────────
@@ -415,6 +467,37 @@ export default function VisualEditor({
                 }
             }
             if (e.key === 'Escape') setSelectedId(null)
+            // Alt+↑/↓ — move selected block
+            if (e.altKey && selectedId) {
+                if (e.key === 'ArrowUp') { e.preventDefault(); handleMoveUp(selectedId) }
+                if (e.key === 'ArrowDown') { e.preventDefault(); handleMoveDown(selectedId) }
+            }
+            // Cmd+D — duplicate selected
+            if (meta && e.key === 'd' && selectedId) {
+                e.preventDefault(); handleDuplicate(selectedId)
+            }
+            // Cmd+L — lock/unlock selected
+            if (meta && e.key === 'l' && selectedId) {
+                e.preventDefault()
+                setLockedIds(prev => {
+                    const next = new Set(prev)
+                    next.has(selectedId) ? next.delete(selectedId) : next.add(selectedId)
+                    return next
+                })
+            }
+            // Cmd+H — hide/show selected
+            if (meta && e.key === 'h' && selectedId) {
+                e.preventDefault()
+                setHiddenIds(prev => {
+                    const next = new Set(prev)
+                    next.has(selectedId) ? next.delete(selectedId) : next.add(selectedId)
+                    return next
+                })
+            }
+            // Cmd+F — focus mode
+            if (meta && e.key === 'f') {
+                e.preventDefault(); setFocusMode(p => !p)
+            }
         }
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
@@ -440,10 +523,17 @@ export default function VisualEditor({
                 selectedBlock={selectedBlock}
                 canUndo={undoStack.length > 0}
                 canRedo={redoStack.length > 0}
+                undoDepth={undoStack.length}
                 livePreview={livePreview}
+                focusMode={focusMode}
+                canvasZoom={canvasZoom}
+                templateName={templateName}
                 onUndo={handleUndo}
                 onRedo={handleRedo}
                 onToggleLivePreview={() => setLivePreview(p => !p)}
+                onToggleFocusMode={() => setFocusMode(p => !p)}
+                onZoomChange={setCanvasZoom}
+                onTemplateNameChange={setTemplateName}
                 onClearAll={() => {
                     if (blocks.length === 0) return
                     if (window.confirm('Clear all blocks? This cannot be undone.')) {
@@ -481,8 +571,8 @@ export default function VisualEditor({
                     onTogglePanel={() => setPanelOpen(p => !p)}
                 />
 
-                {/* LEFT — Sidebar Panel (all 6 tabs) */}
-                <SidebarPanel
+                {/* LEFT — Sidebar Panel — hidden in focus mode */}
+                {!focusMode && <SidebarPanel
                     activeTab={activeTab}
                     isOpen={panelOpen}
                     // BlockLibrary
@@ -505,41 +595,94 @@ export default function VisualEditor({
                     // TokensTab
                     placeholders={placeholders}
                     onInsertToken={handleInsertToken}
-                />
+                    tokenFeedback={tokenFeedback}
+                    selectedBlockLabel={selectedBlock ? (getDefinition(selectedBlock.type)?.label ?? null) : null}
+                />}
 
                 {/* CENTRE — Canvas or Live Preview */}
-                {livePreview ? (
-                    <LivePreview
-                        html={currentHtml}
-                        deviceWidth={deviceWidth}
-                        onDeviceChange={setDeviceWidth}
-                    />
-                ) : (
-                    <Canvas
-                        blocks={blocks}
-                        selectedId={selectedId}
-                        draggedType={draggedType}
-                        deviceWidth={deviceWidth}
-                        onSelect={setSelectedId}
-                        onDrop={handleDrop}
-                        onReorder={handleReorder}
-                        onDelete={handleDelete}
-                        onDuplicate={handleDuplicate}
-                        onMoveUp={handleMoveUp}
-                        onMoveDown={handleMoveDown}
-                        onCopyStyle={handleCopyStyle}
-                        onPasteStyle={handlePasteStyle}
-                        hasCopiedStyle={copiedStyle !== null}
-                    />
-                )}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+                    {/* ── Canvas search bar — hidden in live preview ── */}
+                    {!livePreview && (
+                        <div style={{
+                            padding: '6px 16px',
+                            borderBottom: `1px solid ${C.border}`,
+                            backgroundColor: C.surface,
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            flexShrink: 0,
+                        }}>
+                            <div style={{ position: 'relative', flex: 1, maxWidth: 260 }}>
+                                <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: C.muted, pointerEvents: 'none' }}>⌕</span>
+                                <input
+                                    type="text"
+                                    value={canvasSearch}
+                                    onChange={e => setCanvasSearch(e.target.value)}
+                                    placeholder="Search blocks on canvas..."
+                                    style={{
+                                        width: '100%', boxSizing: 'border-box' as const,
+                                        padding: '5px 10px 5px 26px',
+                                        border: `1px solid ${C.border}`, borderRadius: 7,
+                                        backgroundColor: C.bg, fontFamily: 'DM Sans, sans-serif',
+                                        fontSize: 11, color: C.body, outline: 'none',
+                                    }}
+                                    onFocus={e => { e.currentTarget.style.borderColor = C.primary }}
+                                    onBlur={e => { e.currentTarget.style.borderColor = C.border }}
+                                />
+                                {canvasSearch && (
+                                    <button onClick={() => setCanvasSearch('')}
+                                        style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: 14, padding: 0 }}>×</button>
+                                )}
+                            </div>
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted, flexShrink: 0 }}>
+                                {canvasSearch
+                                    ? `${blocks.filter(b => getDefinition(b.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase())).length} match${blocks.filter(b => getDefinition(b.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase())).length !== 1 ? 'es' : ''}`
+                                    : `${blocks.length} block${blocks.length !== 1 ? 's' : ''}`
+                                }
+                            </span>
+                        </div>
+                    )}
+                    {/* ── Canvas or Live Preview ── */}
+                    {livePreview ? (
+                        <LivePreview
+                            html={currentHtml}
+                            deviceWidth={deviceWidth}
+                            onDeviceChange={setDeviceWidth}
+                        />
+                    ) : (
+                        <Canvas
+                            blocks={blocks}
+                            zoom={canvasZoom}
+                            canvasSearch={canvasSearch}
+                            lockedIds={lockedIds}
+                            hiddenIds={hiddenIds}
+                            selectedId={selectedId}
+                            draggedType={draggedType}
+                            deviceWidth={deviceWidth}
+                            onSelect={setSelectedId}
+                            onDrop={handleDrop}
+                            onReorder={handleReorder}
+                            onDelete={handleDelete}
+                            onDuplicate={handleDuplicate}
+                            onMoveUp={handleMoveUp}
+                            onMoveDown={handleMoveDown}
+                            onCopyStyle={handleCopyStyle}
+                            onPasteStyle={handlePasteStyle}
+                            hasCopiedStyle={copiedStyle !== null}
+                            onToggleLock={handleToggleLock}
+                            onToggleHide={handleToggleHide}
+                            onAddBlock={handleAddBlock}
+                        />
+                    )}
+                </div>
 
                 {/* RIGHT — Properties Panel */}
-                <PropertiesPanel
-                    block={selectedBlock}
-                    placeholders={placeholders}
-                    onChange={handleBlockChange}
-                    onDeselect={() => setSelectedId(null)}
-                />
+                {!focusMode && (
+                    <PropertiesPanel
+                        block={selectedBlock}
+                        placeholders={placeholders}
+                        onChange={handleBlockChange}
+                        onDeselect={() => setSelectedId(null)}
+                    />
+                )}
             </div>
 
             {/* ── Bottom status bar ── */}
@@ -549,6 +692,10 @@ export default function VisualEditor({
                 parseStrategy={parseResult?.strategy ?? null}
                 auditErrors={auditErrors}
                 livePreview={livePreview}
+                lockedIds={lockedIds}
+                hiddenIds={hiddenIds}
+                canvasZoom={canvasZoom}
+                templateName={templateName}
             />
         </div>
     )
@@ -562,16 +709,25 @@ interface EditorToolbarProps {
     selectedBlock: Block | null
     canUndo: boolean
     canRedo: boolean
+    undoDepth: number
     livePreview: boolean
+    focusMode: boolean
+    canvasZoom: number
+    templateName: string
     onUndo: () => void
     onRedo: () => void
     onToggleLivePreview: () => void
+    onToggleFocusMode: () => void
+    onZoomChange: (z: number) => void
+    onTemplateNameChange: (name: string) => void
     onClearAll: () => void
 }
 
 function EditorToolbar({
-    blockCount, selectedBlock, canUndo, canRedo,
-    livePreview, onUndo, onRedo, onToggleLivePreview, onClearAll,
+    blockCount, selectedBlock, canUndo, canRedo, undoDepth,
+    livePreview, focusMode, canvasZoom, templateName,
+    onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
+    onZoomChange, onTemplateNameChange, onClearAll,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -585,32 +741,56 @@ function EditorToolbar({
             flexShrink: 0,
             gap: 12,
         }}>
-            {/* Left — undo/redo + block count */}
+            {/* Left — template name + undo/redo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <ToolbarButton onClick={onUndo} disabled={!canUndo} title="Undo (Cmd+Z)">
+                {/* Template name */}
+                <input
+                    value={templateName}
+                    onChange={e => onTemplateNameChange(e.target.value)}
+                    style={{
+                        fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700,
+                        color: C.dark, background: 'transparent', border: 'none',
+                        outline: 'none', width: 140,
+                        borderBottom: `1px solid transparent`,
+                        padding: '2px 4px', borderRadius: 4,
+                        cursor: 'text',
+                        transition: 'border-color 0.15s',
+                    }}
+                    onFocus={e => e.currentTarget.style.borderBottomColor = C.border}
+                    onBlur={e => e.currentTarget.style.borderBottomColor = 'transparent'}
+                    placeholder="Template name..."
+                />
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
+                <ToolbarButton onClick={onUndo} disabled={!canUndo} title={`Undo (Cmd+Z) · ${undoDepth} step${undoDepth !== 1 ? 's' : ''} available`}>
                     <Undo2 size={14} />
                 </ToolbarButton>
+                {canUndo && (
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, marginLeft: -4 }}>
+                        {undoDepth}
+                    </span>
+                )}
                 <ToolbarButton onClick={onRedo} disabled={!canRedo} title="Redo (Cmd+Shift+Z)">
                     <Redo2 size={14} />
                 </ToolbarButton>
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
+                {/* Block count pill */}
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: 5,
                     padding: '3px 10px',
-                    backgroundColor: C.bg,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 20,
+                    backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 20,
                 }}>
-                    <span style={{ fontFamily: 'Syne, DM Sans, sans-serif', fontSize: 11, color: C.secondary }}>
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.secondary }}>
                         {blockCount} block{blockCount !== 1 ? 's' : ''}
                     </span>
                     {selectedBlock && (
                         <>
                             <span style={{ color: C.border }}>·</span>
                             <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.primary, fontWeight: 600 }}>
-                                {getDefinition(selectedBlock.type)?.label} selected
+                                {getDefinition(selectedBlock.type)?.label}
                             </span>
                         </>
                     )}
@@ -636,27 +816,54 @@ function EditorToolbar({
                 {livePreview ? 'Card View' : 'Live Preview'}
             </button>
 
-            {/* Right — clear all */}
-            <button
-                onClick={onClearAll}
-                disabled={blockCount === 0}
-                style={{
-                    display: 'flex', alignItems: 'center', gap: 5,
-                    padding: '4px 12px',
-                    border: `1px solid ${blockCount === 0 ? C.border : '#fecaca'}`,
-                    borderRadius: 7,
-                    backgroundColor: 'transparent',
-                    color: blockCount === 0 ? C.muted : C.danger,
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 11,
-                    cursor: blockCount === 0 ? 'default' : 'pointer',
-                    opacity: blockCount === 0 ? 0.5 : 1,
-                    transition: 'all 0.15s',
-                }}
-            >
-                <Trash2 size={12} />
-                Clear all
-            </button>
+            {/* Right — zoom + focus + clear */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* Zoom */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <ToolbarButton onClick={() => onZoomChange(Math.max(50, canvasZoom - 10))} title="Zoom out" disabled={canvasZoom <= 50}>
+                        <span style={{ fontSize: 14, lineHeight: 1 }}>−</span>
+                    </ToolbarButton>
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.secondary, minWidth: 36, textAlign: 'center' }}>
+                        {canvasZoom}%
+                    </span>
+                    <ToolbarButton onClick={() => onZoomChange(Math.min(150, canvasZoom + 10))} title="Zoom in" disabled={canvasZoom >= 150}>
+                        <span style={{ fontSize: 14, lineHeight: 1 }}>+</span>
+                    </ToolbarButton>
+                    {canvasZoom !== 100 && (
+                        <ToolbarButton onClick={() => onZoomChange(100)} title="Reset zoom">
+                            <span style={{ fontSize: 10 }}>100%</span>
+                        </ToolbarButton>
+                    )}
+                </div>
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
+                {/* Focus mode */}
+                <ToolbarButton onClick={onToggleFocusMode} title={focusMode ? 'Exit focus mode (Cmd+F)' : 'Focus mode — hide panels (Cmd+F)'}>
+                    <span style={{ fontSize: 13, color: focusMode ? C.primary : C.secondary }}>{focusMode ? '⊡' : '⊞'}</span>
+                </ToolbarButton>
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
+                {/* Clear all */}
+                <button
+                    onClick={onClearAll}
+                    disabled={blockCount === 0}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: '4px 12px',
+                        border: `1px solid ${blockCount === 0 ? C.border : '#fecaca'}`,
+                        borderRadius: 7, backgroundColor: 'transparent',
+                        color: blockCount === 0 ? C.muted : C.danger,
+                        fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                        cursor: blockCount === 0 ? 'default' : 'pointer',
+                        opacity: blockCount === 0 ? 0.5 : 1, transition: 'all 0.15s',
+                    }}
+                >
+                    <Trash2 size={12} />
+                    Clear all
+                </button>
+            </div>
         </div>
     )
 }
@@ -706,13 +913,18 @@ function WarningBanner({
 // STATUS BAR
 // ─────────────────────────────────────────────────────────────────────────────
 function StatusBar({
-    blockCount, selectedBlock, parseStrategy, auditErrors, livePreview,
+    blockCount, selectedBlock, parseStrategy, auditErrors,
+    livePreview, lockedIds, hiddenIds, canvasZoom, templateName,
 }: {
     blockCount: number
     selectedBlock: Block | null
     parseStrategy: ParseResult['strategy'] | null
     auditErrors: number
     livePreview: boolean
+    lockedIds: Set<string>
+    hiddenIds: Set<string>
+    canvasZoom: number
+    templateName: string
 }) {
     return (
         <div style={{
@@ -734,13 +946,20 @@ function StatusBar({
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {selectedBlock && (
                     <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>
-                        {getDefinition(selectedBlock.type)?.label} · {selectedBlock.id}
+                        {getDefinition(selectedBlock.type)?.label}
+                        {lockedIds?.has(selectedBlock.id) ? ' · 🔒' : ''}
+                        {hiddenIds?.has(selectedBlock.id) ? ' · Hidden' : ''}
+                    </span>
+                )}
+                {canvasZoom !== 100 && (
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
+                        {canvasZoom}%
                     </span>
                 )}
                 <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
                     {blockCount} block{blockCount !== 1 ? 's' : ''}
-                    {parseStrategy === 'heuristic' ? ' · Heuristic parse' : ''}
-                    {parseStrategy === 'block-comments' ? ' · Exact restore' : ''}
+                    {lockedIds?.size ? ` · ${lockedIds.size} locked` : ''}
+                    {hiddenIds?.size ? ` · ${hiddenIds.size} hidden` : ''}
                 </span>
             </div>
         </div>

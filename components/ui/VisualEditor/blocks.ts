@@ -197,7 +197,8 @@ export interface TwoColumnProps extends CommonProps {
     leftContent: string
     rightContent: string
     leftWidth: number         // percentage 0–100, right = 100-leftWidth
-    gap: number               // px gap between columns
+    gap: number               // px gap between columns    leftBg: string                // left column background
+    rightBg: string               // right column background
 }
 
 // ── Three Column ─────────────────────────────────────────────────────────────
@@ -206,6 +207,9 @@ export interface ThreeColumnProps extends CommonProps {
     col2Content: string
     col3Content: string
     gap: number
+    col1Bg: string
+    col2Bg: string
+    col3Bg: string
 }
 
 // ── Container ────────────────────────────────────────────────────────────────
@@ -306,7 +310,43 @@ export interface ProductImageProps extends CommonProps {
     showBorder: boolean
     borderColor: string
     borderWidth: number       // border thickness in px (default 1)
-    objectFit: 'contain' | 'cover' | 'fill'  // css object-fit
+    objectFit: 'contain' | 'cover' | 'fill'
+    variant: string           // 'single' | 'split' | 'gallery' | 'fullwidth' | 'zoom'
+    // Split variant
+    imagePosition: 'left' | 'right'
+    imageWidthPercent: number // 30–60
+    verticalAlign: 'top' | 'middle' | 'bottom'
+    descriptionText: string
+    descriptionTitle: string
+    descriptionColor: string
+    descriptionFontSize: number
+    // Gallery variant
+    image2Url: string
+    image3Url: string
+    image4Url: string
+    image5Url: string
+    imageCount: number        // 2–5 thumbnails
+    thumbHeight: number
+    thumbBorderRadius: number
+    showThumbBorder: boolean
+    // Full width variant
+    minHeight: number
+    overlayText: string
+    overlayColor: string
+    // Zoom variant
+    showZoomHint: boolean
+    // Comparison variant
+    label1: string
+    label2: string
+    // Before/After variant
+    beforeLabel: string
+    afterLabel: string
+    accentColor: string
+    // Lifestyle variant
+    lifestyleSubtext: string
+    nameFontSize: number
+    // Polaroid variant
+    polaroidCaption: string
 }
 
 // ── Product Description ───────────────────────────────────────────────────────
@@ -362,6 +402,7 @@ export interface BannerProps extends CommonProps {
     headingSize: number
     subText: string
     subColor: string
+    subTextColor: string      // alias for subColor for panel consistency
     align: 'left' | 'center' | 'right'
     minHeight: number         // px
 }
@@ -373,6 +414,8 @@ export interface GalleryRowProps extends CommonProps {
     borderRadius: number
     mainImageSrc: string      // large image on left
     showMain: boolean
+    objectFit: 'cover' | 'contain'   // image fit
+    thumbHeight: number               // thumbnail height px
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -409,6 +452,7 @@ export interface ReturnsPolicyProps extends CommonProps {
     bgColor: string
     textColor: string
     accentColor: string
+    iconColor: string         // icon colour
     borderRadius: number
 }
 
@@ -548,6 +592,9 @@ export interface HeroHeaderProps extends CommonProps {
     nameFontSize: number      // store name font size (default 26)
     taglineFontSize: number   // tagline font size (default 13)
     nameFontWeight: string    // store name font weight (default 900)
+    variant: string           // layout variant id
+    categoryBadge: string     // category variant badge text
+    saleBadgeText: string     // seasonal variant badge text
 }
 
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
@@ -555,6 +602,10 @@ export interface RawHtmlProps extends CommonProps {
     code: string              // raw HTML — passed through sanitiseHtml on export
     label: string             // internal label shown on canvas card
 }
+
+// Variant system imports
+import { getHeroVariant as _getHeroVariant } from './variants/hero_header.variants'
+import { getProductImageVariant as _getProductImageVariant } from './variants/product_image.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
@@ -656,6 +707,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             rightContent: '<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;margin:0;">Right column</p>',
             leftWidth: 50,
             gap: 16,
+            leftBg: '#ffffff',
+            rightBg: '#ffffff',
         } as TwoColumnProps,
         toHtml(props, id) {
             const p = props as TwoColumnProps
@@ -693,6 +746,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             col2Content: '<p style="font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;margin:0;">Column 2</p>',
             col3Content: '<p style="font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;margin:0;">Column 3</p>',
             gap: 12,
+            col1Bg: '#ffffff',
+            col2Bg: '#ffffff',
+            col3Bg: '#ffffff',
         } as ThreeColumnProps,
         toHtml(props, id) {
             const p = props as ThreeColumnProps
@@ -1002,21 +1058,43 @@ ${rows}
             borderColor: '#ede9fe',
             borderWidth: 1,
             objectFit: 'contain',
+            variant: 'single',
+            // Split
+            imagePosition: 'left',
+            imageWidthPercent: 45,
+            verticalAlign: 'middle',
+            descriptionText: '{{ITEM_DESCRIPTION}}',
+            descriptionTitle: '{{PRODUCT_TITLE}}',
+            descriptionColor: '#475569',
+            descriptionFontSize: 13,
+            // Gallery
+            image2Url: '{{IMAGE_2_URL}}',
+            image3Url: '{{IMAGE_3_URL}}',
+            image4Url: '{{IMAGE_4_URL}}',
+            image5Url: '{{IMAGE_5_URL}}',
+            imageCount: 4,
+            thumbHeight: 80,
+            thumbBorderRadius: 6,
+            showThumbBorder: true,
+            // Fullwidth
+            minHeight: 300,
+            overlayText: '',
+            overlayColor: 'rgba(0,0,0,0)',
+            // Zoom
+            showZoomHint: true,
+            // Comparison
+            label1: 'Front',
+            label2: 'Back',
+            beforeLabel: 'Before',
+            afterLabel: 'After',
+            accentColor: '#1d4ed8',
+            lifestyleSubtext: '',
+            nameFontSize: 20,
+            polaroidCaption: '',
         } as ProductImageProps,
         toHtml(props, id) {
             const p = props as ProductImageProps
-            const border = p.showBorder ? `border:${p.borderWidth ?? 1}px solid ${p.borderColor};` : ''
-            return wrapBlock('product_image', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}${textAlign(p.align)}">
-      <img src="${p.src}" alt="${p.alt}"
-        width="${p.maxWidth}"
-        style="max-width:${p.maxWidth}px;width:100%;height:auto;display:block;object-fit:${p.objectFit ?? 'contain'};${imgMargin(p.align)}border-radius:${p.borderRadius}px;${border}" />
-    </td>
-  </tr>
-</table>`
-            )
+            return _getProductImageVariant(p.variant ?? 'single').toHtml(p, id)
         },
     },
 
@@ -1168,6 +1246,7 @@ ${rows}
             headingSize: 26,
             subText: 'Quality products · Fast dispatch · Trusted seller',
             subColor: 'rgba(255,255,255,0.75)',
+            subTextColor: 'rgba(255,255,255,0.75)',
             align: 'center',
             minHeight: 120,
         } as BannerProps,
@@ -1211,6 +1290,8 @@ ${rows}
             ],
             gap: 8,
             borderRadius: 6,
+            objectFit: 'cover',
+            thumbHeight: 80,
         } as GalleryRowProps,
         toHtml(props, id) {
             const p = props as GalleryRowProps
@@ -1750,30 +1831,15 @@ ${p.tabs.map((tab, i) => `      <table width="100%" cellpadding="0" cellspacing=
             nameFontSize: 26,
             taglineFontSize: 13,
             nameFontWeight: '900',
+            variant: 'gradient',
+            categoryBadge: 'Specialist Seller',
+            saleBadgeText: 'SALE',
         } as HeroHeaderProps,
         toHtml(props, id) {
             const p = props as HeroHeaderProps
-            const bg = p.bgGradient
-                ? `background:linear-gradient(135deg,${p.gradientFrom},${p.gradientTo});`
-                : `background-color:${p.bgColor};`
-            const logoHtml = p.showLogo && p.logoUrl
-                ? `<tr><td style="text-align:${p.align};padding-bottom:12px;"><img src="${p.logoUrl}" alt="${p.storeName}" height="50" style="height:50px;width:auto;display:inline-block;" /></td></tr>`
-                : ''
-            return wrapBlock('hero_header', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;border-radius:${p.borderRadius}px;overflow:hidden;">
-  <tr>
-    <td style="${bg}${pad(p)}min-height:${p.height}px;text-align:${p.align};">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        ${logoHtml}
-        <tr><td style="text-align:${p.align};">
-          <h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.nameFontSize ?? 26}px;font-weight:${p.nameFontWeight ?? '900'};color:${p.textColor};letter-spacing:0.02em;">${p.storeName}</h1>
-          <p style="margin:0;font-family:Arial,sans-serif;font-size:${p.taglineFontSize ?? 13}px;color:${p.taglineColor};line-height:1.6;">${p.tagline}</p>
-        </td></tr>
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
+            // Delegate to variant system — import at top of file
+            const variant = _getHeroVariant(p.variant ?? 'gradient')
+            return variant.toHtml(p, id)
         },
     },
 

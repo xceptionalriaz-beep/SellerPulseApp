@@ -66,18 +66,21 @@ const GROUP_COLORS: Record<string, string> = {
 interface TokensTabProps {
     placeholders: PlaceholderGroup[]
     onInsert: (value: string) => void
+    tokenFeedback?: { type: 'success' | 'error', msg: string } | null
+    selectedBlockLabel?: string | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TokensTab({ placeholders, onInsert }: TokensTabProps) {
+export default function TokensTab({ placeholders, onInsert, tokenFeedback, selectedBlockLabel }: TokensTabProps) {
     const [search, setSearch] = useState('')
     const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
     const [copied, setCopied] = useState<string | null>(null)
     const [inserted, setInserted] = useState<string | null>(null)
     const [customKey, setCustomKey] = useState('')
     const [customCreated, setCustomCreated] = useState(false)
+    const [customTokens, setCustomTokens] = useState<PlaceholderItem[]>([])
 
     // Filter placeholders by search
     const query = search.trim().toLowerCase()
@@ -121,7 +124,7 @@ export default function TokensTab({ placeholders, onInsert }: TokensTabProps) {
         })
     }
 
-    // Create custom token
+    // Create custom token — Fix #8: save for reuse
     const handleCreateCustom = () => {
         if (!customKey.trim()) return
         const formatted = customKey.trim()
@@ -130,6 +133,12 @@ export default function TokensTab({ placeholders, onInsert }: TokensTabProps) {
             .replace(/[^A-Z0-9_]/g, '')
         const token = `{{${formatted}}}`
         handleInsert(token)
+        // Save for reuse if not already in list
+        setCustomTokens(prev =>
+            prev.some(t => t.value === token)
+                ? prev
+                : [...prev, { label: formatted, value: token, example: 'Custom' }]
+        )
         setCustomKey('')
         setCustomCreated(true)
         setTimeout(() => setCustomCreated(false), 2000)
@@ -216,102 +225,151 @@ export default function TokensTab({ placeholders, onInsert }: TokensTabProps) {
                 )}
             </div>
 
-            {/* ── Usage hint ── */}
+            {/* ── Selected block context + feedback ── */}
             <div style={{
-                padding: '8px 14px',
-                backgroundColor: C.primaryLight,
-                borderBottom: `1px solid ${C.primaryBorder}`,
+                padding: '7px 14px',
+                backgroundColor: tokenFeedback?.type === 'error'
+                    ? '#fee2e2'
+                    : tokenFeedback?.type === 'success'
+                        ? '#dcfce7'
+                        : selectedBlockLabel ? C.primaryLight : '#f8f7ff',
+                borderBottom: `1px solid ${tokenFeedback?.type === 'error' ? '#fecaca'
+                        : tokenFeedback?.type === 'success' ? '#86efac'
+                            : C.primaryBorder}`,
                 flexShrink: 0,
+                transition: 'background-color 0.2s',
             }}>
-                <p style={{
-                    margin: 0,
-                    fontFamily: 'DM Sans, sans-serif', fontSize: 10,
-                    color: C.primary, lineHeight: 1.5,
-                }}>
-                    <strong>Insert</strong> adds the token to the selected block's text field.{' '}
-                    <strong>Copy</strong> copies to clipboard.
-                </p>
+                {tokenFeedback ? (
+                    <p style={{
+                        margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                        color: tokenFeedback.type === 'error' ? '#dc2626' : '#16a34a'
+                    }}>
+                        {tokenFeedback.type === 'success' ? '✓ ' : '⚠ '}{tokenFeedback.msg}
+                    </p>
+                ) : selectedBlockLabel ? (
+                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.primary, lineHeight: 1.5 }}>
+                        Inserting into: <strong>{selectedBlockLabel}</strong>
+                        {' · '}Hover a token and click <strong>+</strong> to insert
+                    </p>
+                ) : (
+                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+                        Select a block on the canvas, then click <strong>+</strong> to insert
+                    </p>
+                )}
             </div>
 
             {/* ── Token groups ── */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0 8px' }}>
 
-                {filtered.length === 0 ? (
+                {/* Empty search state */}
+                {filtered.length === 0 && (
                     <div style={{ padding: '32px 16px', textAlign: 'center' }}>
                         <Tag size={24} style={{ color: C.border, margin: '0 auto 8px', display: 'block' }} />
                         <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.muted }}>
                             No tokens match "{search}"
                         </p>
                     </div>
-                ) : (
-                    filtered.map(group => {
-                        const accentColor = GROUP_COLORS[group.group] ?? C.primary
-                        const isCollapsed = collapsed.has(group.group)
-
-                        return (
-                            <div key={group.group}>
-                                {/* Group header */}
-                                <button
-                                    onClick={() => toggleGroup(group.group)}
-                                    style={{
-                                        width: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '8px 14px 4px',
-                                        background: 'none', border: 'none',
-                                        cursor: 'pointer', textAlign: 'left' as const,
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span style={{
-                                            width: 7, height: 7, borderRadius: '50%',
-                                            backgroundColor: accentColor,
-                                            display: 'inline-block', flexShrink: 0,
-                                        }} />
-                                        <span style={{
-                                            fontFamily: 'DM Sans, sans-serif',
-                                            fontSize: 10, fontWeight: 700,
-                                            color: C.secondary,
-                                            textTransform: 'uppercase' as const,
-                                            letterSpacing: '0.07em',
-                                        }}>
-                                            {group.group}
-                                        </span>
-                                        <span style={{
-                                            fontFamily: 'DM Sans, sans-serif',
-                                            fontSize: 10, color: C.muted,
-                                        }}>
-                                            {group.items.length}
-                                        </span>
-                                    </div>
-                                    <ChevronDown size={11} style={{
-                                        color: C.muted,
-                                        transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                                        transition: 'transform 0.2s',
-                                    }} />
-                                </button>
-
-                                {/* Token items */}
-                                {!isCollapsed && (
-                                    <div style={{ padding: '0 10px 4px' }}>
-                                        {group.items.map(item => (
-                                            <TokenCard
-                                                key={item.value}
-                                                item={item}
-                                                accentColor={accentColor}
-                                                isCopied={copied === item.value}
-                                                isInserted={inserted === item.value}
-                                                onCopy={() => handleCopy(item.value)}
-                                                onInsert={() => handleInsert(item.value)}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )
-                    })
                 )}
+
+                {/* Custom saved tokens group */}
+                {filtered.length > 0 && customTokens.length > 0 && (
+                    <div>
+                        <button
+                            onClick={() => toggleGroup('__custom__')}
+                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px 4px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' as const }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: C.muted, display: 'inline-block' }} />
+                                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>My Custom Tokens</span>
+                                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>{customTokens.length}</span>
+                            </div>
+                            <ChevronDown size={11} style={{ color: C.muted, transform: collapsed.has('__custom__') ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                        </button>
+                        {!collapsed.has('__custom__') && (
+                            <div style={{ padding: '0 10px 4px' }}>
+                                {customTokens.map(item => (
+                                    <TokenCard
+                                        key={item.value}
+                                        item={item}
+                                        accentColor={C.muted}
+                                        isCopied={copied === item.value}
+                                        isInserted={inserted === item.value}
+                                        onCopy={() => handleCopy(item.value)}
+                                        onInsert={() => handleInsert(item.value)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Token groups */}
+                {filtered.map(group => {
+                    const accentColor = GROUP_COLORS[group.group] ?? C.primary
+                    const isCollapsed = collapsed.has(group.group)
+                    return (
+                        <div key={group.group}>
+                            {/* Group header */}
+                            <button
+                                onClick={() => toggleGroup(group.group)}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '8px 14px 4px',
+                                    background: 'none', border: 'none',
+                                    cursor: 'pointer', textAlign: 'left' as const,
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <span style={{
+                                        width: 7, height: 7, borderRadius: '50%',
+                                        backgroundColor: accentColor,
+                                        display: 'inline-block', flexShrink: 0,
+                                    }} />
+                                    <span style={{
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        fontSize: 10, fontWeight: 700,
+                                        color: C.secondary,
+                                        textTransform: 'uppercase' as const,
+                                        letterSpacing: '0.07em',
+                                    }}>
+                                        {group.group}
+                                    </span>
+                                    <span style={{
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        fontSize: 10, color: C.muted,
+                                    }}>
+                                        {group.items.length}
+                                    </span>
+                                </div>
+                                <ChevronDown size={11} style={{
+                                    color: C.muted,
+                                    transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s',
+                                }} />
+                            </button>
+
+                            {/* Token items */}
+                            {!isCollapsed && (
+                                <div style={{ padding: '0 10px 4px' }}>
+                                    {group.items.map(item => (
+                                        <TokenCard
+                                            key={item.value}
+                                            item={item}
+                                            accentColor={accentColor}
+                                            isCopied={copied === item.value}
+                                            isInserted={inserted === item.value}
+                                            onCopy={() => handleCopy(item.value)}
+                                            onInsert={() => handleInsert(item.value)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )
+                })}
             </div>
 
             {/* ── Custom token creator ── */}
@@ -481,41 +539,35 @@ function TokenCard({
                 </div>
             </div>
 
-            {/* Action buttons */}
-            {hovered && (
-                <div style={{
-                    display: 'flex',
-                    gap: 3,
-                    flexShrink: 0,
-                }}>
-                    {/* Copy */}
-                    <ActionBtn
-                        onClick={onCopy}
-                        title="Copy to clipboard"
-                        active={isCopied}
-                        activeColor="#16a34a"
-                    >
-                        {isCopied
-                            ? <Check size={10} style={{ color: '#16a34a' }} />
-                            : <Copy size={10} />
-                        }
-                    </ActionBtn>
+            {/* Action buttons — always visible, not just on hover */}
+            <div style={{ display: 'flex', gap: 3, flexShrink: 0, opacity: hovered ? 1 : 0.4, transition: 'opacity 0.15s' }}>
+                {/* Copy */}
+                <ActionBtn
+                    onClick={onCopy}
+                    title="Copy to clipboard"
+                    active={isCopied}
+                    activeColor="#16a34a"
+                >
+                    {isCopied
+                        ? <Check size={10} style={{ color: '#16a34a' }} />
+                        : <Copy size={10} />
+                    }
+                </ActionBtn>
 
-                    {/* Insert */}
-                    <ActionBtn
-                        onClick={onInsert}
-                        title="Insert into selected block"
-                        active={isInserted}
-                        activeColor={C.primary}
-                        primary
-                    >
-                        {isInserted
-                            ? <Check size={10} style={{ color: '#fff' }} />
-                            : <Plus size={10} style={{ color: '#fff' }} />
-                        }
-                    </ActionBtn>
-                </div>
-            )}
+                {/* Insert */}
+                <ActionBtn
+                    onClick={onInsert}
+                    title="Insert into selected block"
+                    active={isInserted}
+                    activeColor={C.primary}
+                    primary
+                >
+                    {isInserted
+                        ? <Check size={10} style={{ color: '#fff' }} />
+                        : <Plus size={10} style={{ color: '#fff' }} />
+                    }
+                </ActionBtn>
+            </div>
         </div>
     )
 }

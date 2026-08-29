@@ -8,6 +8,7 @@ export interface TemplateSection {
     name: string
     description: string
     category: TemplateCategoryId
+    thumbnail?: string
     blocks: Array<{
         type: BlockType
         props?: Record<string, unknown>

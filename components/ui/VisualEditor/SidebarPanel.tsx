@@ -81,6 +81,8 @@ interface SidebarPanelProps {
     // TokensTab props
     placeholders: PlaceholderGroup[]
     onInsertToken: (value: string) => void
+    tokenFeedback?: { type: 'success' | 'error', msg: string } | null
+    selectedBlockLabel?: string | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -103,6 +105,8 @@ export default function SidebarPanel({
     blockCount,
     placeholders,
     onInsertToken,
+    tokenFeedback,
+    selectedBlockLabel,
 }: SidebarPanelProps) {
     return (
         <div style={{
@@ -174,6 +178,8 @@ export default function SidebarPanel({
                         <TokensTab
                             placeholders={placeholders}
                             onInsert={onInsertToken}
+                            tokenFeedback={tokenFeedback}
+                            selectedBlockLabel={selectedBlockLabel}
                         />
                     )}
 

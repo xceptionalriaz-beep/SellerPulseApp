@@ -19,6 +19,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useCallback } from 'react'
+import { getVariants, hasVariants } from './variants/index'
+import type { BlockVariant } from './variants/hero_header.variants'
 import {
     Layout, Columns2, Columns3, Square,
     Heading, Pilcrow, List, Minus,
@@ -32,6 +34,7 @@ import {
     PanelTop, Navigation, Flame, Grid2x2,
     MousePointerClick, LayoutPanelTop, Code2,
     type LucideIcon,
+    Layers,
 } from 'lucide-react'
 import {
     Block,
@@ -396,32 +399,43 @@ function StylesTab({
     updateProps: (patch: Partial<BlockProps>) => void
 }) {
     return (
-        <div style={{ padding: '14px 14px 24px' }}>
+        <div style={{ padding: '0 0 24px' }}>
 
-            {/* ── Universal: Background ── */}
-            <UniversalBackground props={props as any} updateProps={p => updateProps(p as any)} />
+            {/* ── Variant Picker — shown at very top when block has variants ── */}
+            {hasVariants(block.type) && (
+                <VariantPicker
+                    blockType={block.type}
+                    currentVariant={(props as any).variant ?? 'gradient'}
+                    onChange={v => updateProps({ variant: v } as any)}
+                />
+            )}
 
-            {/* ── Common: Spacing ── */}
-            <Section title="Spacing">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <NumberInput label="Top" value={props.paddingTop ?? 16} min={0} max={120}
-                        onChange={v => updateProps({ paddingTop: v } as any)} suffix="px" />
-                    <NumberInput label="Bottom" value={props.paddingBottom ?? 16} min={0} max={120}
-                        onChange={v => updateProps({ paddingBottom: v } as any)} suffix="px" />
-                    <NumberInput label="Left" value={props.paddingLeft ?? 24} min={0} max={120}
-                        onChange={v => updateProps({ paddingLeft: v } as any)} suffix="px" />
-                    <NumberInput label="Right" value={props.paddingRight ?? 24} min={0} max={120}
-                        onChange={v => updateProps({ paddingRight: v } as any)} suffix="px" />
-                </div>
-            </Section>
+            <div style={{ padding: '14px 14px 0' }}>
+                {/* ── Universal: Background ── */}
+                <UniversalBackground props={props as any} updateProps={p => updateProps(p as any)} />
 
-            {/* ── Block-specific style props ── */}
-            <BlockStyleProps block={block} props={props} updateProps={updateProps} />
+                {/* ── Common: Spacing ── */}
+                <Section title="Spacing">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <NumberInput label="Top" value={props.paddingTop ?? 16} min={0} max={120}
+                            onChange={v => updateProps({ paddingTop: v } as any)} suffix="px" />
+                        <NumberInput label="Bottom" value={props.paddingBottom ?? 16} min={0} max={120}
+                            onChange={v => updateProps({ paddingBottom: v } as any)} suffix="px" />
+                        <NumberInput label="Left" value={props.paddingLeft ?? 24} min={0} max={120}
+                            onChange={v => updateProps({ paddingLeft: v } as any)} suffix="px" />
+                        <NumberInput label="Right" value={props.paddingRight ?? 24} min={0} max={120}
+                            onChange={v => updateProps({ paddingRight: v } as any)} suffix="px" />
+                    </div>
+                </Section>
 
-            {/* ── Universal: Border + Shadow + Typography ── */}
-            <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
-            <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
-            <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
+                {/* ── Block-specific style props ── */}
+                <BlockStyleProps block={block} props={props} updateProps={updateProps} />
+
+                {/* ── Universal: Border + Shadow + Typography ── */}
+                <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
+                <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
+                <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
+            </div>
         </div>
     )
 }
@@ -587,59 +601,112 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'product_image':
+        case 'product_image': {
+            const pv = props.variant ?? 'single'
             return (
                 <>
-
-                    <Section title="Layout">
-                        <SliderInput
-                            label="Max width"
-                            value={props.maxWidth ?? 500}
-                            min={100} max={800} suffix="px"
-                            onChange={v => updateProps({ maxWidth: v })}
-                        />
-                        <SelectInput
-                            label="Object fit"
-                            value={props.objectFit ?? 'contain'}
-                            options={[
-                                { v: 'contain', l: 'Contain — show full image' },
-                                { v: 'cover', l: 'Cover — fill the frame' },
-                                { v: 'fill', l: 'Fill — stretch to fit' },
-                            ]}
-                            onChange={v => updateProps({ objectFit: v })}
-                        />
-                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                    </Section>
-                    <Section title="Border">
-                        <SliderInput
-                            label="Border radius"
-                            value={props.borderRadius ?? 8}
-                            min={0} max={60} suffix="px"
-                            onChange={v => updateProps({ borderRadius: v })}
-                        />
-                        <ToggleRow
-                            label="Show border"
-                            value={props.showBorder ?? false}
-                            onChange={v => updateProps({ showBorder: v })}
-                        />
-                        {props.showBorder && (
-                            <>
-                                <ColorRow
-                                    label="Border colour"
-                                    value={props.borderColor ?? '#ede9fe'}
-                                    onChange={v => updateProps({ borderColor: v })}
-                                />
-                                <SliderInput
-                                    label="Border thickness"
-                                    value={props.borderWidth ?? 1}
-                                    min={1} max={8} suffix="px"
-                                    onChange={v => updateProps({ borderWidth: v })}
-                                />
-                            </>
-                        )}
-                    </Section>
+                    {(pv === 'single' || pv === 'zoom') && (
+                        <Section title="Image">
+                            <SliderInput label="Max width" value={props.maxWidth ?? 500} min={100} max={800} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={60} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
+                                options={[{ v: 'contain', l: 'Contain' }, { v: 'cover', l: 'Cover' }, { v: 'fill', l: 'Fill' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                            <ToggleRow label="Show border" value={props.showBorder ?? false} onChange={v => updateProps({ showBorder: v })} />
+                            {props.showBorder && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                                    <SliderInput label="Border width" value={props.borderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                                </>
+                            )}
+                        </Section>
+                    )}
+                    {pv === 'zoom' && (
+                        <Section title="Zoom Style">
+                            <ToggleRow label="Show zoom hint" value={props.showZoomHint ?? true} onChange={v => updateProps({ showZoomHint: v })} />
+                        </Section>
+                    )}
+                    {pv === 'comparison' && (
+                        <Section title="Comparison">
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
+                                options={[{ v: 'contain', l: 'Contain' }, { v: 'cover', l: 'Cover' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <ToggleRow label="Show border" value={props.showBorder ?? false} onChange={v => updateProps({ showBorder: v })} />
+                            {props.showBorder && <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />}
+                        </Section>
+                    )}
+                    {pv === 'lifestyle' && (
+                        <Section title="Lifestyle Shot">
+                            <SliderInput label="Min height" value={props.minHeight ?? 320} min={200} max={600} suffix="px" onChange={v => updateProps({ minHeight: v })} />
+                            <SliderInput label="Name size" value={props.nameFontSize ?? 20} min={14} max={36} suffix="px" onChange={v => updateProps({ nameFontSize: v })} />
+                            <ColorRow label="Overlay tint" value={props.overlayColor ?? 'rgba(0,0,0,0.45)'} onChange={v => updateProps({ overlayColor: v })} />
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        </Section>
+                    )}
+                    {pv === 'polaroid' && (
+                        <Section title="Polaroid">
+                            <SliderInput label="Max width" value={props.maxWidth ?? 440} min={200} max={600} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'cover'}
+                                options={[{ v: 'cover', l: 'Cover' }, { v: 'contain', l: 'Contain' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                        </Section>
+                    )}
+                    {pv === 'before-after' && (
+                        <Section title="Before / After">
+                            <ColorRow label="Accent colour" value={props.accentColor ?? '#1d4ed8'} onChange={v => updateProps({ accentColor: v })} />
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        </Section>
+                    )}
+                    {pv === 'magazine' && (
+                        <Section title="Magazine Grid">
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'cover'}
+                                options={[{ v: 'cover', l: 'Cover' }, { v: 'contain', l: 'Contain' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                        </Section>
+                    )}
+                    {pv === 'split' && (
+                        <>
+                            <Section title="Layout">
+                                <SelectInput label="Image position" value={props.imagePosition ?? 'left'}
+                                    options={[{ v: 'left', l: 'Image left, text right' }, { v: 'right', l: 'Image right, text left' }]}
+                                    onChange={v => updateProps({ imagePosition: v })} />
+                                <SliderInput label="Image width" value={props.imageWidthPercent ?? 45} min={30} max={60} suffix="%" onChange={v => updateProps({ imageWidthPercent: v })} />
+                                <SelectInput label="Vertical align" value={props.verticalAlign ?? 'middle'}
+                                    options={[{ v: 'top', l: 'Top' }, { v: 'middle', l: 'Middle' }, { v: 'bottom', l: 'Bottom' }]}
+                                    onChange={v => updateProps({ verticalAlign: v })} />
+                                <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            </Section>
+                            <Section title="Description text">
+                                <ColorRow label="Text colour" value={props.descriptionColor ?? '#475569'} onChange={v => updateProps({ descriptionColor: v })} />
+                                <SliderInput label="Font size" value={props.descriptionFontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ descriptionFontSize: v })} />
+                            </Section>
+                        </>
+                    )}
+                    {pv === 'gallery' && (
+                        <Section title="Gallery">
+                            <SliderInput label="Thumbnail count" value={props.imageCount ?? 4} min={2} max={5} onChange={v => updateProps({ imageCount: v })} />
+                            <SliderInput label="Thumbnail height" value={props.thumbHeight ?? 80} min={40} max={160} suffix="px" onChange={v => updateProps({ thumbHeight: v })} />
+                            <SliderInput label="Thumb radius" value={props.thumbBorderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v })} />
+                            <ToggleRow label="Thumb border" value={props.showThumbBorder ?? true} onChange={v => updateProps({ showThumbBorder: v })} />
+                            {props.showThumbBorder && <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />}
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
+                                options={[{ v: 'contain', l: 'Contain' }, { v: 'cover', l: 'Cover' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                        </Section>
+                    )}
+                    {pv === 'fullwidth' && (
+                        <Section title="Full Width">
+                            <SliderInput label="Min height" value={props.minHeight ?? 300} min={100} max={600} suffix="px" onChange={v => updateProps({ minHeight: v })} />
+                            <ColorRow label="Overlay tint" value={props.overlayColor ?? 'rgba(0,0,0,0)'} onChange={v => updateProps({ overlayColor: v })} />
+                            <InfoBox>Use overlay tint to darken the image. Add overlay text in the Attributes tab.</InfoBox>
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'product_description':
             return (
@@ -706,6 +773,22 @@ function BlockStyleProps({ block, props, updateProps }: {
             )
 
         case 'banner':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Heading text" value={props.headingColor ?? '#ffffff'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Sub text" value={props.subColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps({ subColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Heading size" value={props.headingSize ?? 24} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                    </Section>
+                </>
+            )
+
         case 'cta_banner':
             return (
                 <>
@@ -714,10 +797,8 @@ function BlockStyleProps({ block, props, updateProps }: {
                     </Section>
                     <Section title="Typography">
                         <ColorRow label="Heading colour" value={props.textColor ?? (block.type === 'cta_banner' ? '#b8fa33' : '#ffffff')} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Subtext colour" value={props.subColor ?? props.subTextColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps(block.type === 'banner' ? { subColor: v } : { subTextColor: v })} />
-                        {block.type === 'banner' && (
-                            <SliderInput label="Heading size" value={props.headingSize ?? 26} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
-                        )}
+                        <ColorRow label="Subtext colour" value={props.subColor ?? props.subTextColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps({ subColor: v })} />
+                        <SliderInput label="Heading size" value={props.headingSize ?? 26} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                 </>
@@ -740,13 +821,31 @@ function BlockStyleProps({ block, props, updateProps }: {
             )
 
         case 'shipping_info':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Icon colour" value={props.iconColor ?? '#16a34a'} onChange={v => updateProps({ iconColor: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                </>
+            )
+
         case 'returns_policy':
             return (
-                <Section title="Colours">
-                    <ColorRow label="Background" value={props.bgColor ?? '#dcfce7'} onChange={v => updateProps({ bgColor: v })} />
-                    <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                </Section>
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#eff6ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e40af'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Icon colour" value={props.iconColor ?? '#3b82f6'} onChange={v => updateProps({ iconColor: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                </>
             )
 
         case 'seller_info':
@@ -760,45 +859,76 @@ function BlockStyleProps({ block, props, updateProps }: {
 
         case 'full_width_section':
             return (
-                <Section title="Border">
-                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
-                    <SliderInput label="Border width" value={props.borderWidth ?? 0} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                </Section>
+                <>
+                    <Section title="Border">
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <SliderInput label="Border width" value={props.borderWidth ?? 0} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                </>
             )
 
         case 'container':
             return (
-                <Section title="Container">
-                    <SliderInput label="Max width" value={props.maxWidth ?? 600} min={300} max={700} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
-                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
-                    <SliderInput label="Border width" value={props.borderWidth ?? 1} min={0} max={4} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                </Section>
+                <>
+                    <Section title="Container">
+                        <SliderInput label="Max width" value={props.maxWidth ?? 600} min={300} max={700} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <SliderInput label="Border width" value={props.borderWidth ?? 1} min={0} max={4} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                    </Section>
+                </>
             )
 
         case 'two_column':
             return (
-                <Section title="Columns">
-                    <SliderInput label="Left width" value={props.leftWidth ?? 50} min={20} max={80} suffix="%" onChange={v => updateProps({ leftWidth: v })} />
-                    <SliderInput label="Gap" value={props.gap ?? 16} min={0} max={48} suffix="px" onChange={v => updateProps({ gap: v })} />
-                </Section>
+                <>
+                    <Section title="Layout">
+                        <SliderInput label="Left column width" value={props.leftWidth ?? 50} min={20} max={80} suffix="%" onChange={v => updateProps({ leftWidth: v })} />
+                        <SliderInput label="Column gap" value={props.gap ?? 16} min={0} max={48} suffix="px" onChange={v => updateProps({ gap: v })} />
+                    </Section>
+                    <Section title="Column colours">
+                        <ColorRow label="Left background" value={props.leftBg ?? '#ffffff'} onChange={v => updateProps({ leftBg: v })} />
+                        <ColorRow label="Right background" value={props.rightBg ?? '#ffffff'} onChange={v => updateProps({ rightBg: v })} />
+                    </Section>
+                </>
             )
 
         case 'three_column':
             return (
-                <Section title="Columns">
-                    <SliderInput label="Gap" value={props.gap ?? 12} min={0} max={48} suffix="px" onChange={v => updateProps({ gap: v })} />
-                </Section>
+                <>
+                    <Section title="Layout">
+                        <SliderInput label="Column gap" value={props.gap ?? 12} min={0} max={48} suffix="px" onChange={v => updateProps({ gap: v })} />
+                    </Section>
+                    <Section title="Column colours">
+                        <ColorRow label="Col 1 background" value={props.col1Bg ?? '#ffffff'} onChange={v => updateProps({ col1Bg: v })} />
+                        <ColorRow label="Col 2 background" value={props.col2Bg ?? '#ffffff'} onChange={v => updateProps({ col2Bg: v })} />
+                        <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
+                    </Section>
+                </>
             )
 
         case 'gallery_row':
             return (
-                <Section title="Gallery">
-                    <ToggleRow label="Show main image" value={props.showMain ?? true} onChange={v => updateProps({ showMain: v })} />
-                    <SliderInput label="Gap" value={props.gap ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ gap: v })} />
-                    <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                </Section>
+                <>
+                    <Section title="Layout">
+                        <ToggleRow label="Show main image" value={props.showMain ?? true} onChange={v => updateProps({ showMain: v })} />
+                        <SliderInput label="Gap" value={props.gap ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ gap: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={30} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                    <Section title="Image style">
+                        <SelectInput
+                            label="Image fit"
+                            value={props.objectFit ?? 'cover'}
+                            options={[
+                                { v: 'cover', l: 'Cover — fill frame' },
+                                { v: 'contain', l: 'Contain — show full' },
+                            ]}
+                            onChange={v => updateProps({ objectFit: v })}
+                        />
+                        <SliderInput label="Thumbnail height" value={props.thumbHeight ?? 80} min={40} max={200} suffix="px" onChange={v => updateProps({ thumbHeight: v })} />
+                    </Section>
+                </>
             )
 
         case 'policy_tabs':
@@ -949,27 +1079,52 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </Section>
             )
 
-        case 'hero_header':
+        case 'hero_header': {
+            const currentVariant = props.variant ?? 'gradient'
+            const isDark = currentVariant !== 'typographic'
             return (
                 <>
-
+                    {/* ── Background — variant aware ── */}
+                    <Section title="Background">
+                        {currentVariant === 'typographic' ? (
+                            // Light bg for typographic variant
+                            <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        ) : currentVariant === 'image-bg' ? (
+                            // Image bg variant — show overlay colour
+                            <>
+                                <ColorRow label="Overlay colour" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                                <InfoBox>Set your background image in the Attributes tab → Logo URL field. The overlay colour darkens the image for text readability.</InfoBox>
+                            </>
+                        ) : (
+                            // Gradient variants
+                            <>
+                                <ToggleRow label="Use gradient" value={props.bgGradient ?? true} onChange={v => updateProps({ bgGradient: v })} />
+                                {(props.bgGradient ?? true) ? (
+                                    <>
+                                        <ColorRow label="Gradient from" value={props.gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v })} />
+                                        <ColorRow label="Gradient to" value={props.gradientTo ?? '#1e1535'} onChange={v => updateProps({ gradientTo: v })} />
+                                    </>
+                                ) : (
+                                    <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                                )}
+                            </>
+                        )}
+                    </Section>
 
                     {/* ── Typography ── */}
                     <Section title="Typography">
-                        <ColorRow label="Name colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Tagline colour" value={props.taglineColor ?? 'rgba(255,255,255,0.7)'} onChange={v => updateProps({ taglineColor: v })} />
-                        <SliderInput
-                            label="Name font size"
-                            value={props.nameFontSize ?? 26}
-                            min={14} max={48} suffix="px"
-                            onChange={v => updateProps({ nameFontSize: v })}
+                        <ColorRow
+                            label="Name colour"
+                            value={props.textColor ?? (isDark ? '#ffffff' : '#1e1535')}
+                            onChange={v => updateProps({ textColor: v })}
                         />
-                        <SliderInput
-                            label="Tagline font size"
-                            value={props.taglineFontSize ?? 13}
-                            min={10} max={22} suffix="px"
-                            onChange={v => updateProps({ taglineFontSize: v })}
+                        <ColorRow
+                            label="Tagline colour"
+                            value={props.taglineColor ?? (isDark ? 'rgba(255,255,255,0.7)' : '#6b7280')}
+                            onChange={v => updateProps({ taglineColor: v })}
                         />
+                        <SliderInput label="Name size" value={props.nameFontSize ?? 26} min={14} max={52} suffix="px" onChange={v => updateProps({ nameFontSize: v })} />
+                        <SliderInput label="Tagline size" value={props.taglineFontSize ?? 13} min={10} max={22} suffix="px" onChange={v => updateProps({ taglineFontSize: v })} />
                         <SelectInput
                             label="Name weight"
                             value={props.nameFontWeight ?? '900'}
@@ -987,11 +1142,30 @@ function BlockStyleProps({ block, props, updateProps }: {
 
                     {/* ── Layout ── */}
                     <Section title="Layout">
-                        <SliderInput label="Height" value={props.height ?? 120} min={60} max={500} suffix="px" onChange={v => updateProps({ height: v })} />
+                        <SliderInput label="Height" value={props.height ?? 120} min={40} max={500} suffix="px" onChange={v => updateProps({ height: v })} />
                         <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                     </Section>
+
+                    {/* ── Variant-specific extras ── */}
+                    {currentVariant === 'credibility' && (
+                        <Section title="Credibility">
+                            <InfoBox>Add the token {'{{FEEDBACK_SCORE}}'} to your Tagline in the Attributes tab to show your feedback count.</InfoBox>
+                        </Section>
+                    )}
+                    {currentVariant === 'category' && (
+                        <Section title="Category Badge">
+                            <TextInput label="Badge text" value={props.categoryBadge ?? 'Specialist Seller'} onChange={v => updateProps({ categoryBadge: v })} />
+                        </Section>
+                    )}
+                    {currentVariant === 'seasonal' && (
+                        <Section title="Sale Badge">
+                            <TextInput label="Badge text" value={props.saleBadgeText ?? 'SALE'} onChange={v => updateProps({ saleBadgeText: v })} />
+                            <ColorRow label="Badge colour" value={props.bgGradientFrom ?? '#dc2626'} onChange={v => updateProps({ bgGradientFrom: v, gradientFrom: v })} />
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'raw_html':
             return (
@@ -1088,6 +1262,13 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
 }) {
     switch (block.type) {
 
+        case 'divider':
+            return (
+                <Section title="Divider">
+                    <InfoBox>Divider has no text content — all controls are in the Styles tab.</InfoBox>
+                </Section>
+            )
+
         case 'heading':
             return (
                 <>
@@ -1163,58 +1344,86 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                 </>
             )
 
-        case 'product_image':
-            return (
-                <Section title="Image">
-                    <TextInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
-                    {phButton('src', 'image URL')}
-                    <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
-                    {phButton('alt', 'alt text')}
-                </Section>
-            )
-
-        case 'product_description':
+        case 'product_image': {
+            const av = props.variant ?? 'single'
             return (
                 <>
-                    <Section title="Title">
-                        <ToggleRow label="Show section title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
-                        {props.showTitle && (
-                            <TextInput label="Title text" value={props.titleText ?? 'Product Description'} onChange={v => updateProps({ titleText: v })} />
-                        )}
+                    <Section title="Main image">
+                        <TextInput label="Image URL" value={props.src ?? ''} onChange={v => updateProps({ src: v })} />
+                        {phButton('src', 'main image URL')}
+                        <TextInput label="Alt text" value={props.alt ?? ''} onChange={v => updateProps({ alt: v })} />
+                        {phButton('alt', 'alt text')}
                     </Section>
-                    <Section title="Description">
-                        <TextareaInput label="Description" value={props.text ?? '{{ITEM_DESCRIPTION}}'} rows={4} onChange={v => updateProps({ text: v })} />
-                        {phButton('text', 'description')}
-                    </Section>
+                    {av === 'gallery' && (
+                        <Section title="Gallery images">
+                            <InfoBox>Add extra images for the thumbnail strip.</InfoBox>
+                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            {phButton('image2Url', 'image 2 URL')}
+                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            {phButton('image3Url', 'image 3 URL')}
+                            {(props.imageCount ?? 4) >= 4 && <>
+                                <TextInput label="Image 4 URL" value={props.image4Url ?? ''} onChange={v => updateProps({ image4Url: v })} />
+                                {phButton('image4Url', 'image 4 URL')}
+                            </>}
+                            {(props.imageCount ?? 4) >= 5 && <>
+                                <TextInput label="Image 5 URL" value={props.image5Url ?? ''} onChange={v => updateProps({ image5Url: v })} />
+                                {phButton('image5Url', 'image 5 URL')}
+                            </>}
+                        </Section>
+                    )}
+                    {av === 'split' && (
+                        <Section title="Description content">
+                            <TextInput label="Title" value={props.descriptionTitle ?? ''} onChange={v => updateProps({ descriptionTitle: v })} />
+                            {phButton('descriptionTitle', 'title')}
+                            <TextareaInput label="Description" value={props.descriptionText ?? ''} rows={4} onChange={v => updateProps({ descriptionText: v })} />
+                            {phButton('descriptionText', 'description')}
+                        </Section>
+                    )}
+                    {av === 'fullwidth' && (
+                        <Section title="Overlay text">
+                            <TextInput label="Overlay text (optional)" value={props.overlayText ?? ''} onChange={v => updateProps({ overlayText: v })} />
+                            {phButton('overlayText', 'overlay text')}
+                        </Section>
+                    )}
+                    {av === 'comparison' && (
+                        <Section title="Second image">
+                            <TextInput label="Second image URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            {phButton('image2Url', 'second image URL')}
+                            <TextInput label="Left label" value={props.label1 ?? 'Front'} onChange={v => updateProps({ label1: v })} />
+                            <TextInput label="Right label" value={props.label2 ?? 'Back'} onChange={v => updateProps({ label2: v })} />
+                        </Section>
+                    )}
+                    {av === 'lifestyle' && (
+                        <Section title="Overlay text">
+                            <TextInput label="Subtext (optional)" value={props.lifestyleSubtext ?? ''} onChange={v => updateProps({ lifestyleSubtext: v })} />
+                            {phButton('lifestyleSubtext', 'subtext')}
+                        </Section>
+                    )}
+                    {av === 'polaroid' && (
+                        <Section title="Caption">
+                            <TextInput label="Caption text" value={props.polaroidCaption ?? ''} onChange={v => updateProps({ polaroidCaption: v })} />
+                            {phButton('polaroidCaption', 'caption')}
+                        </Section>
+                    )}
+                    {av === 'before-after' && (
+                        <Section title="Before / After images">
+                            <TextInput label="Before label" value={props.beforeLabel ?? 'Before'} onChange={v => updateProps({ beforeLabel: v })} />
+                            <TextInput label="After label" value={props.afterLabel ?? 'After'} onChange={v => updateProps({ afterLabel: v })} />
+                            <TextInput label="After image URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            {phButton('image2Url', 'after image URL')}
+                        </Section>
+                    )}
+                    {av === 'magazine' && (
+                        <Section title="Additional images">
+                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            {phButton('image2Url', 'image 2 URL')}
+                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            {phButton('image3Url', 'image 3 URL')}
+                        </Section>
+                    )}
                 </>
             )
-
-        case 'specs_table':
-            return (
-                <>
-                    <Section title="Title">
-                        <ToggleRow label="Show title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
-                        {props.showTitle && (
-                            <TextInput label="Title text" value={props.titleText ?? 'Item Specifics'} onChange={v => updateProps({ titleText: v })} />
-                        )}
-                    </Section>
-                    <Section title="Rows">
-                        <SpecsRowsEditor
-                            rows={props.rows ?? []}
-                            onChange={rows => updateProps({ rows })}
-                        />
-                    </Section>
-                </>
-            )
-
-        case 'image':
-            return (
-                <Section title="Image">
-                    <TextInput label="Image URL" value={props.src ?? ''} onChange={v => updateProps({ src: v })} />
-                    <TextInput label="Alt text" value={props.alt ?? ''} onChange={v => updateProps({ alt: v })} />
-                    <TextInput label="Link URL (optional)" value={props.linkUrl ?? ''} onChange={v => updateProps({ linkUrl: v })} />
-                </Section>
-            )
+        }
 
         case 'banner':
             return (
@@ -1228,10 +1437,19 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
 
         case 'cta_banner':
             return (
-                <Section title="Content">
-                    <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
-                    <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
-                </Section>
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
+                        {phButton('headingText', 'heading')}
+                        <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
+                        {phButton('subText', 'subtext')}
+                    </Section>
+                    <Section title="Button">
+                        <TextInput label="Button text" value={props.buttonText ?? 'Shop Now'} onChange={v => updateProps({ buttonText: v })} />
+                        {phButton('buttonText', 'button text')}
+                        <TextInput label="Button URL" value={props.buttonUrl ?? '#'} onChange={v => updateProps({ buttonUrl: v })} />
+                    </Section>
+                </>
             )
 
         case 'gallery_row':
@@ -1393,8 +1611,10 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                 <>
                     <Section title="Section title">
                         <TextInput label="Title" value={props.title ?? 'You May Also Like'} onChange={v => updateProps({ title: v })} />
+                        {phButton('title', 'title')}
                     </Section>
                     <Section title="Products">
+                        <InfoBox>Add up to 3 cross-sell products with image URL, title and price.</InfoBox>
                         <CrossSellItemsEditor
                             items={props.items ?? []}
                             onChange={items => updateProps({ items })}
@@ -1438,7 +1658,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                         />
                         {phButton('tagline', 'tagline')}
                     </Section>
-                    <Section title="Logo">
+                    <Section title="Logo / Background image">
                         <ToggleRow
                             label="Show logo"
                             value={props.showLogo ?? false}
@@ -1451,10 +1671,17 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                                     value={props.logoUrl ?? ''}
                                     onChange={v => updateProps({ logoUrl: v })}
                                 />
+                                {phButton('logoUrl', 'logo URL')}
                                 <InfoBox>
                                     Use an HTTPS image URL. Recommended height: 50px. Transparent PNG works best on dark backgrounds.
+                                    For the Image Background variant, this URL is used as the banner background image.
                                 </InfoBox>
                             </>
+                        )}
+                        {(props.variant === 'image-bg') && !props.showLogo && (
+                            <InfoBox>
+                                Enable "Show logo" above to set a background image URL for the Image Background variant.
+                            </InfoBox>
                         )}
                     </Section>
                 </>
@@ -2165,6 +2392,301 @@ function UniversalTypography({
                 onChange={v => updateProps({ fontFamily: v })}
             />
         </Section>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VARIANT PICKER — visual style cards shown at top of Styles tab
+// ─────────────────────────────────────────────────────────────────────────────
+function VariantPicker({
+    blockType,
+    currentVariant,
+    onChange,
+}: {
+    blockType: string
+    currentVariant: string
+    onChange: (variantId: string) => void
+}) {
+    const variants = getVariants(blockType)
+    if (!variants) return null
+
+    return (
+        <div style={{ marginBottom: 4 }}>
+            {/* Header */}
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '10px 14px 8px',
+                borderBottom: `1px solid ${C.border}`,
+                backgroundColor: C.primaryLight,
+            }}>
+                <Layers size={14} style={{ color: C.primary, flexShrink: 0 }} />
+                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: C.primary }}>
+                    Layout Style
+                </p>
+            </div>
+
+            {/* Variant cards grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 6,
+                padding: '10px 10px 4px',
+            }}>
+                {variants.map((variant: BlockVariant) => {
+                    const isSelected = currentVariant === variant.id
+                    return (
+                        <button
+                            key={variant.id}
+                            onClick={() => onChange(variant.id)}
+                            title={variant.description}
+                            style={{
+                                padding: '8px 6px',
+                                border: `2px solid ${isSelected ? C.primary : C.border}`,
+                                borderRadius: 8,
+                                backgroundColor: isSelected ? C.primaryLight : C.surface,
+                                cursor: 'pointer',
+                                textAlign: 'center' as const,
+                                transition: 'all 0.12s',
+                            }}
+                        >
+                            {/* Mini visual thumbnail */}
+                            <VariantThumbnail variantId={variant.id} isSelected={isSelected} />
+                            <p style={{
+                                margin: '5px 0 0',
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 10,
+                                fontWeight: isSelected ? 700 : 500,
+                                color: isSelected ? C.primary : C.secondary,
+                                whiteSpace: 'nowrap' as const,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }}>
+                                {variant.label}
+                            </p>
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
+// Mini SVG thumbnails for each Hero Header variant
+// ── Variant thumbnail SVGs — add a new entry here when adding a new variant ──
+// The picker itself is fully dynamic — thumbnails fall back to auto-generated
+const VARIANT_THUMBNAILS: Record<string, (col: string, light: string) => JSX.Element> = {
+    // ── Hero Header ───────────────────────────────────────────────────────────
+    'gradient': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <defs><linearGradient id="vg1" x1="0" y1="0" x2="80" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stopColor={col} stopOpacity="0.8" /><stop offset="1" stopColor={col} stopOpacity="0.3" />
+            </linearGradient></defs>
+            <rect width="80" height="36" rx="3" fill="url(#vg1)" />
+            <rect x="20" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="24" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    'minimal': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="6" y="14" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="50" y="15" width="24" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+    'image-bg': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.55" />
+            <circle cx="20" cy="14" r="5" fill="white" opacity="0.25" />
+            <path d="M6 28 Q20 20 34 24 Q50 18 74 26" stroke="white" strokeWidth="1.5" fill="none" opacity="0.3" />
+            <rect x="20" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="24" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    'typographic': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="10" y="9" width="60" height="7" rx="2" fill={col} opacity="0.85" />
+            <rect x="34" y="19" width="12" height="2" rx="1" fill={col} />
+            <rect x="16" y="24" width="48" height="3" rx="1.5" fill="#e5e7eb" />
+        </svg>
+    ),
+    // ── Shared — split layout (hero split + product split) ────────────────────
+    'split': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
+            <rect x="52" width="28" height="36" fill={col} opacity="0.3" />
+            <rect x="6" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="6" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="56" y="10" width="18" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="56" y="16" width="14" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="56" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Product Image ─────────────────────────────────────────────────────────
+    'single': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="16" y="4" width="48" height="28" rx="4" fill={col} opacity="0.3" />
+            <circle cx="30" cy="14" r="5" fill={col} opacity="0.4" />
+            <path d="M16 28 Q32 20 48 24 Q60 20 64 28" stroke={col} strokeWidth="1.5" fill="none" opacity="0.5" />
+        </svg>
+    ),
+    'gallery': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="4" width="72" height="18" rx="3" fill={col} opacity="0.3" />
+            <circle cx="16" cy="11" r="4" fill={col} opacity="0.4" />
+            <rect x="4" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
+            <rect x="22" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
+            <rect x="40" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
+            <rect x="58" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    'fullwidth': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.25" />
+            <circle cx="20" cy="16" r="7" fill={col} opacity="0.3" />
+            <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
+        </svg>
+    ),
+    'zoom': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
+            <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
+            <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
+            <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    // ── Product Image: Comparison / Front & Back ──────────────────────────────
+    'comparison': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="3" y="4" width="34" height="28" rx="3" fill={col} opacity="0.25" />
+            <circle cx="16" cy="14" r="5" fill={col} opacity="0.35" />
+            <path d="M3 28 Q16 22 37 26" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
+            <rect x="39" y="17" width="1" height="16" fill="#e2e8f0" />
+            <rect x="43" y="4" width="34" height="28" rx="3" fill={col} opacity="0.15" />
+            <circle cx="56" cy="14" r="5" fill={col} opacity="0.25" />
+            <path d="M43 28 Q56 20 77 24" stroke={col} strokeWidth="1.5" fill="none" opacity="0.3" />
+            <rect x="8" y="30" width="24" height="2" rx="1" fill={col} opacity="0.3" />
+            <rect x="48" y="30" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    // ── Hero Header: Credibility Banner ──────────────────────────────────────
+    'credibility': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="0" y="0" width="30" height="36" fill="rgba(0,0,0,0.15)" />
+            <rect x="4" y="9" width="22" height="4" rx="2" fill="#f59e0b" opacity="0.9" />
+            <rect x="4" y="17" width="18" height="2.5" rx="1.25" fill="white" opacity="0.7" />
+            <rect x="4" y="23" width="14" height="5" rx="2.5" fill="#f59e0b" opacity="0.8" />
+            <rect x="36" y="10" width="36" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="36" y="19" width="28" height="2.5" rx="1.25" fill="white" opacity="0.5" />
+            <rect x="36" y="25" width="22" height="2" rx="1" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Product Image: Lifestyle Shot ─────────────────────────────────────────
+    'lifestyle': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect x="0" y="22" width="80" height="14" rx="0" fill={col} opacity="0.55" />
+            <circle cx="22" cy="13" r="7" fill={col} opacity="0.3" />
+            <rect x="6" y="25" width="40" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="6" y="31" width="28" height="2.5" rx="1.25" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    // ── Product Image: Polaroid ───────────────────────────────────────────────
+    'polaroid': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect x="8" y="2" width="64" height="32" rx="2" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="11" y="5" width="58" height="22" rx="1" fill={col} opacity="0.25" />
+            <circle cx="26" cy="14" r="5" fill={col} opacity="0.35" />
+            <path d="M11 24 Q25 17 40 20 Q55 16 69 22" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
+            <rect x="20" y="29" width="40" height="2.5" rx="1.25" fill="#9ca3af" />
+        </svg>
+    ),
+    // ── Product Image: Before/After ───────────────────────────────────────────
+    'before-after': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="3" width="36" height="24" rx="3" fill={col} opacity="0.2" />
+            <rect x="42" y="3" width="36" height="24" rx="3" fill={col} opacity="0.35" />
+            <rect x="38" y="3" width="4" height="24" fill={col} opacity="0.6" />
+            <rect x="6" y="29" width="28" height="4" rx="2" fill={col} opacity="0.5" />
+            <rect x="46" y="29" width="28" height="4" rx="2" fill={col} opacity="0.7" />
+        </svg>
+    ),
+    // ── Product Image: Magazine Grid ──────────────────────────────────────────
+    'magazine': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
+            <circle cx="18" cy="14" r="7" fill={col} opacity="0.35" />
+            <rect x="52" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
+            <rect x="52" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    // ── Hero Header: Announcement Strip ──────────────────────────────────────
+    'announcement': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="10" y="15" width="60" height="4" rx="2" fill="white" opacity="0.9" />
+            <circle cx="36" cy="17" r="1.5" fill={col} opacity="0.6" />
+            <circle cx="44" cy="17" r="1.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    // ── Hero Header: Dark Luxury ──────────────────────────────────────────────
+    'luxury': (_, __) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#000000" />
+            <rect x="32" y="7" width="16" height="1" fill="#c9a84c" />
+            <rect x="14" y="13" width="52" height="6" rx="2" fill="white" opacity="0.9" />
+            <rect x="32" y="22" width="16" height="1" fill="#c9a84c" />
+            <rect x="20" y="26" width="40" height="2.5" rx="1.25" fill="#c9a84c" opacity="0.7" />
+        </svg>
+    ),
+    // ── Hero Header: Category Banner ─────────────────────────────────────────
+    'category': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="0" y="0" width="5" height="36" rx="2" fill={col} />
+            <rect x="10" y="10" width="35" height="5" rx="2" fill={col} opacity="0.8" />
+            <rect x="10" y="19" width="26" height="3" rx="1.5" fill="#9ca3af" />
+            <rect x="54" y="12" width="20" height="10" rx="4" fill={col} opacity="0.85" />
+            <rect x="56" y="15" width="16" height="4" rx="2" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    // ── Hero Header: Seasonal / Sale ─────────────────────────────────────────
+    'seasonal': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e1535" />
+            <rect x="4" y="6" width="22" height="24" rx="5" fill="#dc2626" />
+            <rect x="7" y="14" width="16" height="6" rx="2" fill="white" opacity="0.95" />
+            <rect x="32" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="32" y="20" width="30" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+}
+
+function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
+    const col = isSelected ? C.primary : C.secondary
+    const light = isSelected ? C.primaryLight : '#f3f4f6'
+    const render = VARIANT_THUMBNAILS[variantId]
+    if (render) return render(col, light)
+    // ── Auto-generated fallback for any future variant not in the map ─────────
+    // Shows a simple coloured bar with the first letter of the variant id
+    return (
+        <div style={{
+            height: 32, backgroundColor: light, borderRadius: 4,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: `1px solid ${isSelected ? col : '#e5e7eb'}`,
+        }}>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: col, textTransform: 'uppercase' as const }}>
+                {variantId.slice(0, 3)}
+            </span>
+        </div>
     )
 }
 

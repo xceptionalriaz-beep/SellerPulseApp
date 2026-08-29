@@ -36,6 +36,8 @@ import {
     Camera, Megaphone, LayoutGrid,
     ShieldCheck, Truck, RotateCcw, User, Bell,
     Check, ArrowRight, Star, Package,
+    ChevronUp, ChevronDown, Copy, Clipboard,
+    Lock, Unlock, Eye, EyeOff, Trash2, CopySlash,
     type LucideIcon,
 } from 'lucide-react'
 import {
@@ -44,22 +46,6 @@ import {
     BlockDefinition,
     getDefinition,
     BLOCK_DEFINITIONS,
-    HeadingProps,
-    ParagraphProps,
-    ProductTitleProps,
-    PriceBlockProps,
-    ProductImageProps,
-    ProductDescriptionProps,
-    SpecsTableProps,
-    BulletListProps,
-    DividerProps,
-    BannerProps,
-    CtaBannerProps,
-    TrustBadgesProps,
-    ShippingInfoProps,
-    ReturnsPolicyProps,
-    SellerInfoProps,
-    ImageProps,
 } from './blocks'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -126,6 +112,10 @@ interface CanvasProps {
     blocks: Block[]
     selectedId: string | null
     draggedType: BlockType | null
+    zoom?: number
+    canvasSearch?: string
+    lockedIds?: Set<string>
+    hiddenIds?: Set<string>
     deviceWidth: 'desktop' | 'tablet' | 'mobile'
     onSelect: (id: string) => void
     onDrop: (type: BlockType) => void
@@ -137,6 +127,9 @@ interface CanvasProps {
     onCopyStyle: (id: string) => void
     onPasteStyle: (id: string) => void
     hasCopiedStyle: boolean
+    onToggleLock?: (id: string) => void
+    onToggleHide?: (id: string) => void
+    onAddBlock?: (type: BlockType) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -146,6 +139,10 @@ export default function Canvas({
     blocks,
     selectedId,
     draggedType,
+    zoom = 100,
+    canvasSearch = '',
+    lockedIds = new Set(),
+    hiddenIds = new Set(),
     deviceWidth,
     onSelect,
     onDrop,
@@ -157,6 +154,9 @@ export default function Canvas({
     onCopyStyle,
     onPasteStyle,
     hasCopiedStyle,
+    onToggleLock,
+    onToggleHide,
+    onAddBlock,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -233,6 +233,8 @@ export default function Canvas({
                 alignItems: 'center',
                 padding: '24px 24px 40px',
                 position: 'relative',
+                transformOrigin: 'top center',
+                transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
             }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -266,6 +268,7 @@ export default function Canvas({
                     <EmptyState
                         isDropTarget={isDropTarget}
                         draggedType={draggedType}
+                        onAddBlock={onAddBlock}
                     />
                 )}
 
@@ -290,6 +293,9 @@ export default function Canvas({
                                 index={index}
                                 total={blocks.length}
                                 isSelected={isSelected}
+                                isLocked={lockedIds.has(block.id)}
+                                isHidden={hiddenIds.has(block.id)}
+                                searchMatch={!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true)}
                                 isBeingDragged={isBeingDragged}
                                 onSelect={() => onSelect(block.id)}
                                 onDelete={() => onDelete(block.id)}
@@ -299,6 +305,8 @@ export default function Canvas({
                                 onCopyStyle={() => onCopyStyle(block.id)}
                                 onPasteStyle={() => onPasteStyle(block.id)}
                                 hasCopiedStyle={hasCopiedStyle}
+                                onToggleLock={() => onToggleLock?.(block.id)}
+                                onToggleHide={() => onToggleHide?.(block.id)}
                                 onReorderDragStart={() => handleReorderDragStart(index)}
                                 onReorderDragOver={(e) => handleReorderDragOver(e, index)}
                                 onReorderDrop={(e) => handleReorderDrop(e, index)}
@@ -344,9 +352,11 @@ export default function Canvas({
 function EmptyState({
     isDropTarget,
     draggedType,
+    onAddBlock,
 }: {
     isDropTarget: boolean
     draggedType: BlockType | null
+    onAddBlock?: (type: BlockType) => void
 }) {
     const def = draggedType ? getDefinition(draggedType) : null
 
@@ -354,7 +364,7 @@ function EmptyState({
         <div style={{
             flex: 1,
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'column' as const,
             alignItems: 'center',
             justifyContent: 'center',
             minHeight: 400,
@@ -365,42 +375,24 @@ function EmptyState({
             padding: 40,
         }}>
             {isDropTarget && def ? (
-                /* Actively dragging a block over empty canvas */
                 <>
                     <div style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 16,
+                        width: 64, height: 64, borderRadius: 16,
                         backgroundColor: C.primary,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 28,
-                        marginBottom: 16,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 28, marginBottom: 16,
                         boxShadow: `0 8px 24px ${C.primary}44`,
                     }}>
                         {def.icon}
                     </div>
-                    <p style={{
-                        margin: '0 0 4px',
-                        fontFamily: 'Syne, sans-serif',
-                        fontWeight: 700,
-                        fontSize: 18,
-                        color: C.primary,
-                    }}>
+                    <p style={{ margin: '0 0 4px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: C.primary }}>
                         Drop to add {def.label}
                     </p>
-                    <p style={{
-                        margin: 0,
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 13,
-                        color: C.secondary,
-                    }}>
+                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: C.secondary }}>
                         {def.description}
                     </p>
                 </>
             ) : (
-                /* Normal empty state */
                 <>
                     {/* Visual hint — mini block stack */}
                     <div style={{ position: 'relative', width: 120, height: 80, marginBottom: 24 }}>
@@ -408,58 +400,38 @@ function EmptyState({
                             { top: 0, left: 10, opacity: 0.2, height: 18 },
                             { top: 24, left: 0, opacity: 0.35, height: 22 },
                             { top: 52, left: 6, opacity: 0.15, height: 14 },
-                        ].map((style, i) => (
+                        ].map((s, i) => (
                             <div key={i} style={{
-                                position: 'absolute',
-                                width: 100,
-                                borderRadius: 6,
-                                backgroundColor: C.primary,
-                                ...style,
+                                position: 'absolute', width: 100, borderRadius: 6,
+                                backgroundColor: C.primary, ...s,
                             }} />
                         ))}
                     </div>
 
-                    <p style={{
-                        margin: '0 0 8px',
-                        fontFamily: 'Syne, sans-serif',
-                        fontWeight: 700,
-                        fontSize: 18,
-                        color: C.dark,
-                        textAlign: 'center',
-                    }}>
+                    <p style={{ margin: '0 0 8px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: C.dark, textAlign: 'center' }}>
                         Drag blocks here to start building
                     </p>
-                    <p style={{
-                        margin: '0 0 20px',
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 13,
-                        color: C.secondary,
-                        textAlign: 'center',
-                        maxWidth: 280,
-                        lineHeight: 1.6,
-                    }}>
+                    <p style={{ margin: '0 0 20px', fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: C.secondary, textAlign: 'center', maxWidth: 280, lineHeight: 1.6 }}>
                         Select blocks from the library on the left, or click any block to add it instantly.
                     </p>
 
-                    {/* Quick-start suggestions */}
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {['product_title', 'product_image', 'price_block', 'trust_badges'].map(type => {
-                            const d = getDefinition(type as BlockType)
+                    {/* Quick-start suggestions — clickable */}
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center' }}>
+                        {(['product_title', 'product_image', 'price_block', 'trust_badges'] as BlockType[]).map(type => {
+                            const d = getDefinition(type)
                             if (!d) return null
                             return (
                                 <div
                                     key={type}
+                                    onClick={() => onAddBlock?.(type)}
                                     style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                        padding: '5px 10px',
-                                        borderRadius: 20,
+                                        display: 'flex', alignItems: 'center', gap: 5,
+                                        padding: '5px 10px', borderRadius: 20,
                                         border: `1px solid ${C.border}`,
                                         backgroundColor: C.surface,
-                                        fontFamily: 'DM Sans, sans-serif',
-                                        fontSize: 11,
+                                        fontFamily: 'DM Sans, sans-serif', fontSize: 11,
                                         color: C.secondary,
+                                        cursor: onAddBlock ? 'pointer' : 'default',
                                     }}
                                 >
                                     <span style={{ fontSize: 12 }}>{d.icon}</span>
@@ -473,6 +445,7 @@ function EmptyState({
         </div>
     )
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DROP INDICATOR
@@ -510,6 +483,11 @@ interface BlockCardProps {
     onCopyStyle: () => void
     onPasteStyle: () => void
     hasCopiedStyle: boolean
+    onToggleLock: () => void
+    onToggleHide: () => void
+    isLocked: boolean
+    isHidden: boolean
+    searchMatch: boolean
     onReorderDragStart: () => void
     onReorderDragOver: (e: React.DragEvent) => void
     onReorderDrop: (e: React.DragEvent) => void
@@ -531,6 +509,11 @@ function BlockCard({
     onCopyStyle,
     onPasteStyle,
     hasCopiedStyle,
+    onToggleLock,
+    onToggleHide,
+    isLocked,
+    isHidden,
+    searchMatch,
     onReorderDragStart,
     onReorderDragOver,
     onReorderDrop,
@@ -563,7 +546,7 @@ function BlockCard({
             onDragOver={onReorderDragOver}
             onDrop={onReorderDrop}
             onDragEnd={onReorderDragEnd}
-            onClick={onSelect}
+            onClick={isLocked ? undefined : onSelect}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => {
                 setHovered(false)
@@ -573,15 +556,18 @@ function BlockCard({
                 position: 'relative',
                 marginBottom: 8,
                 borderRadius: 10,
-                outline: `2px solid ${isSelected
-                    ? C.primary
-                    : hovered
-                        ? C.primaryBorder
-                        : 'transparent'
+                opacity: isBeingDragged ? 0.4 : isHidden ? 0.35 : 1,
+                filter: !searchMatch ? 'opacity(0.25) grayscale(0.5)' : undefined,
+                outline: isLocked
+                    ? `2px solid #d97706`
+                    : `2px solid ${isSelected
+                        ? C.primary
+                        : hovered
+                            ? C.primaryBorder
+                            : 'transparent'
                     }`,
                 backgroundColor: C.surface,
-                cursor: 'pointer',
-                opacity: isBeingDragged ? 0.4 : 1,
+                cursor: isLocked ? 'not-allowed' : 'pointer',
                 transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.15s',
                 // Universal shadow from block props — falls back to selection/hover shadow
                 boxShadow: (block.props as any).showShadow
@@ -652,74 +638,86 @@ function BlockCard({
                 <BlockPreview block={block} def={def} />
             </div>
 
-            {/* ── Action toolbar (shown on hover/select) ── */}
+            {/* ── Action toolbar — horizontal, top of block ── */}
             {(hovered || isSelected) && (
                 <div
                     style={{
                         position: 'absolute',
-                        right: -1,
-                        top: 8,
+                        top: 6,
+                        right: 8,
                         display: 'flex',
-                        flexDirection: 'column',
-                        gap: 3,
-                        zIndex: 4,
+                        flexDirection: 'row',
+                        gap: 2,
+                        zIndex: 10,
+                        backgroundColor: 'rgba(255,255,255,0.95)',
+                        border: `1px solid ${C.border}`,
+                        borderRadius: 8,
+                        padding: '3px 4px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                        backdropFilter: 'blur(4px)',
                     }}
                     onClick={e => e.stopPropagation()}
                 >
                     {/* Move Up */}
                     {index > 0 && (
-                        <ActionButton
-                            onClick={onMoveUp}
-                            title="Move up"
-                            color={C.secondary}
-                        >
-                            ↑
+                        <ActionButton onClick={onMoveUp} title="Move up (Alt+↑)" color={C.secondary}>
+                            <ChevronUp size={13} />
                         </ActionButton>
                     )}
                     {/* Move Down */}
                     {index < total - 1 && (
-                        <ActionButton
-                            onClick={onMoveDown}
-                            title="Move down"
-                            color={C.secondary}
-                        >
-                            ↓
+                        <ActionButton onClick={onMoveDown} title="Move down (Alt+↓)" color={C.secondary}>
+                            <ChevronDown size={13} />
                         </ActionButton>
                     )}
+
+                    <Divider />
+
                     {/* Duplicate */}
-                    <ActionButton
-                        onClick={onDuplicate}
-                        title="Duplicate block"
-                        color={C.primary}
-                    >
-                        ⧉
+                    <ActionButton onClick={onDuplicate} title="Duplicate (Cmd+D)" color={C.primary}>
+                        <Copy size={13} />
                     </ActionButton>
                     {/* Copy Style */}
-                    <ActionButton
-                        onClick={onCopyStyle}
-                        title="Copy block style"
-                        color={C.secondary}
-                    >
-                        S↑
+                    <ActionButton onClick={onCopyStyle} title="Copy style" color={C.secondary}>
+                        <CopySlash size={13} />
                     </ActionButton>
                     {/* Paste Style */}
                     {hasCopiedStyle && (
-                        <ActionButton
-                            onClick={onPasteStyle}
-                            title="Paste style onto this block"
-                            color={C.primary}
-                        >
-                            S↓
+                        <ActionButton onClick={onPasteStyle} title="Paste style" color={C.primary}>
+                            <Clipboard size={13} />
                         </ActionButton>
                     )}
+
+                    <Divider />
+
+                    {/* Lock */}
+                    <ActionButton
+                        onClick={onToggleLock}
+                        title={isLocked ? 'Unlock (Cmd+L)' : 'Lock (Cmd+L)'}
+                        color={isLocked ? '#d97706' : C.secondary}
+                        bg={isLocked ? '#fef3c7' : undefined}
+                    >
+                        {isLocked ? <Lock size={13} /> : <Unlock size={13} />}
+                    </ActionButton>
+                    {/* Hide */}
+                    <ActionButton
+                        onClick={onToggleHide}
+                        title={isHidden ? 'Show (Cmd+H)' : 'Hide (Cmd+H)'}
+                        color={isHidden ? C.muted : C.secondary}
+                    >
+                        {isHidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                    </ActionButton>
+
+                    <Divider />
+
                     {/* Delete */}
                     <ActionButton
                         onClick={handleDelete}
-                        title={deleteConfirm ? 'Click again to confirm delete' : 'Delete block'}
+                        title={deleteConfirm ? 'Click again to confirm' : 'Delete block'}
                         color={deleteConfirm ? C.danger : C.secondary}
                         bg={deleteConfirm ? C.dangerLight : undefined}
                     >
-                        {deleteConfirm ? '!' : '×'}
+                        <Trash2 size={13} />
                     </ActionButton>
                 </div>
             )}
@@ -770,6 +768,11 @@ function BlockCard({
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ACTION BUTTON
+// Toolbar separator
+function Divider() {
+    return <div style={{ width: 1, height: 18, backgroundColor: C.border, margin: '0 2px', alignSelf: 'center' }} />
+}
+
 // Small icon button used in the block card toolbar
 // ─────────────────────────────────────────────────────────────────────────────
 function ActionButton({
@@ -822,547 +825,93 @@ function ActionButton({
 // NOT the full toHtml() output — a lightweight React representation so
 // the canvas stays fast and doesn't need iframe sandboxing.
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// BLOCK PREVIEW — Live iframe renderer
+// Renders the exact same HTML that goes to eBay, inside a sandboxed iframe.
+// What you see on canvas = what eBay renders. No more wireframe sketches.
+// ─────────────────────────────────────────────────────────────────────────────
 function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
     const props = block.props as any
+    const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
-    switch (block.type) {
-
-        // ── Layout blocks — show wireframe ─────────────────────────────────
-        case 'full_width_section':
-            return (
-                <WireframePreview
-                    icon={def.icon}
-                    label="Full Width Section"
-                    color="#7530fb"
-                    children={
-                        <div style={{
-                            height: 28,
-                            backgroundColor: props.bgColor ?? '#f8f7ff',
-                            borderRadius: 4,
-                            border: `1px solid #ede9fe`,
-                        }} />
-                    }
-                />
-            )
-
-        case 'two_column':
-            return (
-                <WireframePreview icon={def.icon} label="Two Column" color="#7530fb">
-                    <div style={{ display: 'flex', gap: 6 }}>
-                        <div style={{ flex: props.leftWidth ?? 50, height: 28, backgroundColor: '#f8f7ff', borderRadius: 4, border: '1px solid #ede9fe' }} />
-                        <div style={{ flex: 100 - (props.leftWidth ?? 50), height: 28, backgroundColor: '#f8f7ff', borderRadius: 4, border: '1px solid #ede9fe' }} />
-                    </div>
-                </WireframePreview>
-            )
-
-        case 'three_column':
-            return (
-                <WireframePreview icon={def.icon} label="Three Column" color="#7530fb">
-                    <div style={{ display: 'flex', gap: 6 }}>
-                        {[0, 1, 2].map(i => (
-                            <div key={i} style={{ flex: 1, height: 28, backgroundColor: '#f8f7ff', borderRadius: 4, border: '1px solid #ede9fe' }} />
-                        ))}
-                    </div>
-                </WireframePreview>
-            )
-
-        case 'container':
-            return (
-                <WireframePreview icon={def.icon} label="Container" color="#7530fb">
-                    <div style={{
-                        height: 32,
-                        backgroundColor: '#f8f7ff',
-                        borderRadius: props.borderRadius ?? 8,
-                        border: `${props.borderWidth ?? 1}px solid ${props.borderColor ?? '#ede9fe'}`,
-                        maxWidth: '80%',
-                        margin: '0 auto',
-                    }} />
-                </WireframePreview>
-            )
-
-        // ── Content blocks ──────────────────────────────────────────────────
-        case 'heading': {
-            const p = props as HeadingProps
-            return (
-                <div>
-                    {p.borderBottom && (
-                        <div style={{
-                            width: 3,
-                            height: '100%',
-                            backgroundColor: p.accentColor,
-                            position: 'absolute',
-                            left: 16,
-                            top: 14,
-                            bottom: 12,
-                            borderRadius: 2,
-                        }} />
-                    )}
-                    <p style={{
-                        margin: 0,
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: Math.min(p.fontSize ?? 22, 20),
-                        fontWeight: p.fontWeight ?? '700',
-                        color: p.color ?? '#1e1535',
-                        textAlign: p.align ?? 'left',
-                        paddingLeft: p.borderBottom ? 10 : 0,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        lineHeight: 1.3,
-                    }}>
-                        {p.text || 'Heading text'}
-                    </p>
-                    <p style={{
-                        margin: '2px 0 0',
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 10,
-                        color: C.muted,
-                        paddingLeft: p.borderBottom ? 10 : 0,
-                    }}>
-                        {p.level?.toUpperCase()} · {p.align}
-                    </p>
-                </div>
-            )
+    // Build the full HTML for this single block
+    const html = React.useMemo(() => {
+        try {
+            const blockDef = getDefinition(block.type)
+            if (!blockDef) return ''
+            const blockHtml = blockDef.toHtml(props, block.id)
+            return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: transparent;
+    overflow: hidden;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  img { border: 0; display: block; max-width: 100%; }
+  a { text-decoration: none; }
+</style>
+</head>
+<body>${blockHtml}</body>
+</html>`
+        } catch {
+            return ''
         }
+    }, [block.type, block.id, props])
 
-        case 'paragraph': {
-            const p = props as ParagraphProps
-            return (
-                <div>
-                    <p style={{
-                        margin: 0,
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: 13,
-                        color: p.color ?? '#6b7280',
-                        textAlign: p.align ?? 'left',
-                        lineHeight: 1.5,
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                    }}>
-                        {p.text || 'Paragraph text...'}
-                    </p>
-                </div>
-            )
-        }
+    // Auto-resize iframe to fit content height
+    const [height, setHeight] = React.useState(80)
 
-        case 'bullet_list': {
-            const p = props as BulletListProps
-            const bulletMap: Record<string, string> = { disc: '•', check: '✓', arrow: '→', star: '★' }
-            const bullet = bulletMap[p.bulletStyle ?? 'disc']
-            return (
-                <div>
-                    {(p.items ?? []).slice(0, 3).map((item: string, i: number) => (
-                        <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 3, alignItems: 'flex-start' }}>
-                            <span style={{ color: p.bulletColor ?? C.primary, fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>{bullet}</span>
-                            <span style={{ fontFamily: 'Arial, sans-serif', fontSize: 12, color: p.color ?? C.body, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item}</span>
-                        </div>
-                    ))}
-                    {(p.items ?? []).length > 3 && (
-                        <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
-                            +{(p.items ?? []).length - 3} more items
-                        </p>
-                    )}
-                </div>
-            )
-        }
+    const onLoad = React.useCallback(() => {
+        const iframe = iframeRef.current
+        if (!iframe) return
+        try {
+            const doc = iframe.contentDocument
+            if (!doc) return
+            const body = doc.body
+            if (!body) return
+            const h = body.scrollHeight || body.offsetHeight
+            setHeight(Math.max(40, Math.min(h + 4, 600)))
+        } catch { /* cross-origin guard */ }
+    }, [])
 
-        case 'divider': {
-            const p = props as DividerProps
-            return (
-                <div style={{ padding: '4px 0' }}>
-                    <div style={{
-                        height: p.thickness ?? 1,
-                        width: `${p.widthPercent ?? 100}%`,
-                        margin: '0 auto',
-                        background: p.lineStyle === 'gradient'
-                            ? 'linear-gradient(to right, #7530fb, #b8fa33)'
-                            : p.color ?? '#ede9fe',
-                        borderRadius: 2,
-                        borderTop: p.lineStyle !== 'gradient' ? `${p.thickness}px ${p.lineStyle} ${p.color}` : 'none',
-                    }} />
-                    <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, textAlign: 'center' }}>
-                        {p.lineStyle} · {p.widthPercent}% width
-                    </p>
-                </div>
-            )
-        }
-
-        // ── Product blocks ──────────────────────────────────────────────────
-        case 'product_title': {
-            const p = props as ProductTitleProps
-            return (
-                <div>
-                    <p style={{
-                        margin: 0,
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: Math.min(p.fontSize ?? 24, 18),
-                        fontWeight: p.fontWeight ?? '800',
-                        color: p.color ?? '#1e1535',
-                        textAlign: p.align ?? 'left',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        lineHeight: 1.3,
-                    }}>
-                        {p.text ?? '{{PRODUCT_TITLE}}'}
-                    </p>
-                    {p.showCondition && (
-                        <p style={{ margin: '3px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.secondary }}>
-                            Condition: <span style={{ color: C.primary, fontWeight: 600 }}>{p.conditionText ?? '{{ITEM_CONDITION}}'}</span>
-                        </p>
-                    )}
-                </div>
-            )
-        }
-
-        case 'price_block': {
-            const p = props as PriceBlockProps
-            return (
-                <div style={{
-                    backgroundColor: p.bgColor ?? '#f8f7ff',
-                    borderRadius: p.borderRadius ?? 10,
-                    padding: '8px 12px',
-                    display: 'inline-block',
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{
-                            fontFamily: 'Arial, sans-serif',
-                            fontSize: Math.min(p.priceFontSize ?? 32, 26),
-                            fontWeight: 900,
-                            color: p.priceColor ?? C.primary,
-                            lineHeight: 1,
-                        }}>
-                            {p.priceText ?? '{{ITEM_PRICE}}'}
-                        </span>
-                        {p.showBadge && (
-                            <span style={{
-                                backgroundColor: p.badgeBg ?? C.accent,
-                                color: p.badgeColor ?? C.dark,
-                                fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 10,
-                                fontWeight: 700,
-                                padding: '2px 6px',
-                                borderRadius: 4,
-                            }}>
-                                {p.badgeText ?? 'SALE'}
-                            </span>
-                        )}
-                    </div>
-                    {p.showOriginal && (
-                        <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted, textDecoration: 'line-through' }}>
-                            {p.originalText ?? '{{ORIGINAL_PRICE}}'}
-                        </p>
-                    )}
-                </div>
-            )
-        }
-
-        case 'product_image': {
-            const p = props as ProductImageProps
-            const hasRealSrc = p.src && !p.src.includes('{{') && !p.src.includes('placeholder')
-            return (
-                <div style={{ textAlign: p.align ?? 'center', backgroundColor: p.bgColor ?? 'transparent' }}>
-                    {hasRealSrc ? (
-                        <img
-                            src={p.src}
-                            alt={p.alt ?? 'Product'}
-                            style={{
-                                display: 'inline-block',
-                                maxWidth: '100%',
-                                width: Math.min(p.maxWidth ?? 500, 240),
-                                height: 'auto',
-                                borderRadius: p.borderRadius ?? 8,
-                                objectFit: p.objectFit ?? 'contain',
-                                border: p.showBorder ? `${p.borderWidth ?? 1}px solid ${p.borderColor ?? '#ede9fe'}` : 'none',
-                            }}
-                        />
-                    ) : (
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column' as const,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: Math.min(p.maxWidth ?? 500, 240),
-                            maxWidth: '100%',
-                            height: 80,
-                            backgroundColor: C.bg,
-                            borderRadius: p.borderRadius ?? 8,
-                            border: `1px dashed ${C.border}`,
-                            gap: 4,
-                        }}>
-                            <Image size={24} style={{ color: C.muted, opacity: 0.4 }} />
-                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>Product Image</p>
-                        </div>
-                    )}
-                </div>
-            )
-        }
-
-        case 'product_description': {
-            const p = props as ProductDescriptionProps
-            return (
-                <div>
-                    {p.showTitle && (
-                        <p style={{
-                            margin: '0 0 6px',
-                            fontFamily: 'Arial, sans-serif',
-                            fontSize: 13,
-                            fontWeight: 700,
-                            color: p.titleColor ?? C.dark,
-                            borderLeft: `3px solid ${C.primary}`,
-                            paddingLeft: 8,
-                        }}>
-                            {p.titleText ?? 'Product Description'}
-                        </p>
-                    )}
-                    <p style={{
-                        margin: 0,
-                        fontFamily: 'Arial, sans-serif',
-                        fontSize: 12,
-                        color: p.color ?? C.secondary,
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        lineHeight: 1.5,
-                    }}>
-                        {p.text ?? '{{ITEM_DESCRIPTION}}'}
-                    </p>
-                </div>
-            )
-        }
-
-        case 'specs_table': {
-            const p = props as SpecsTableProps
-            return (
-                <div>
-                    {p.showTitle && (
-                        <p style={{ margin: '0 0 6px', fontFamily: 'Arial, sans-serif', fontSize: 12, fontWeight: 700, color: C.dark, borderLeft: `3px solid ${C.primary}`, paddingLeft: 8 }}>
-                            {p.titleText ?? 'Item Specifics'}
-                        </p>
-                    )}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                        {(p.rows ?? []).slice(0, 4).map((row: { key: string; value: string }, i: number) => (
-                            <React.Fragment key={i}>
-                                <div style={{ backgroundColor: i % 2 === 0 ? '#f8f7ff' : '#fff', padding: '3px 8px', fontFamily: 'Arial, sans-serif', fontSize: 10, fontWeight: 700, color: C.dark, border: `1px solid ${C.border}` }}>{row.key}</div>
-                                <div style={{ backgroundColor: i % 2 === 0 ? '#f8f7ff' : '#fff', padding: '3px 8px', fontFamily: 'Arial, sans-serif', fontSize: 10, color: C.secondary, border: `1px solid ${C.border}` }}>{row.value}</div>
-                            </React.Fragment>
-                        ))}
-                    </div>
-                    {(p.rows ?? []).length > 4 && (
-                        <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>+{(p.rows ?? []).length - 4} more rows</p>
-                    )}
-                </div>
-            )
-        }
-
-        // ── Media blocks ────────────────────────────────────────────────────
-        case 'image': {
-            const p = props as ImageProps
-            const hasRealSrc = p.src && !p.src.includes('{{') && !p.src.includes('placeholder') && !p.src.includes('via.placeholder')
-            return (
-                <div style={{ textAlign: p.align ?? 'center', backgroundColor: p.bgColor ?? 'transparent' }}>
-                    {hasRealSrc ? (
-                        <img
-                            src={p.src}
-                            alt={p.alt ?? ''}
-                            style={{
-                                display: 'inline-block',
-                                maxWidth: '100%',
-                                width: p.widthUnit === '%' ? `${p.width ?? 100}%` : Math.min(p.width ?? 100, 240),
-                                height: 'auto',
-                                borderRadius: p.borderRadius ?? 0,
-                                objectFit: 'contain',
-                            }}
-                        />
-                    ) : (
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            height: 70,
-                            backgroundColor: C.bg,
-                            borderRadius: p.borderRadius ?? 0,
-                            border: `1px dashed ${C.border}`,
-                        }}>
-                            <Camera size={22} style={{ color: C.muted, opacity: 0.4 }} />
-                        </div>
-                    )}
-                </div>
-            )
-        }
-
-        case 'banner': {
-            const p = props as BannerProps
-            return (
-                <div style={{
-                    borderRadius: 8,
-                    padding: '14px 16px',
-                    background: p.bgGradient
-                        ? `linear-gradient(135deg, ${p.gradientFrom ?? '#7530fb'}, ${p.gradientTo ?? '#1e1535'})`
-                        : p.bgColor ?? '#1e1535',
-                    textAlign: p.align ?? 'center',
-                }}>
-                    <p style={{ margin: '0 0 3px', fontFamily: 'Arial, sans-serif', fontSize: 14, fontWeight: 800, color: p.headingColor ?? '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.headingText ?? 'Banner Heading'}
-                    </p>
-                    <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 11, color: p.subColor ?? 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.subText ?? 'Subtitle text'}
-                    </p>
-                </div>
-            )
-        }
-
-        case 'gallery_row': {
-            return (
-                <WireframePreview icon={def.icon} label="Gallery Row" color="#d97706">
-                    <div style={{ display: 'flex', gap: 4 }}>
-                        <div style={{ flex: 2, height: 50, backgroundColor: '#fef3c7', borderRadius: 4, border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LayoutGrid size={18} style={{ color: '#d97706', opacity: 0.6 }} /></div>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            <div style={{ flex: 1, backgroundColor: '#fef3c7', borderRadius: 3, border: '1px solid #fde68a' }} />
-                            <div style={{ flex: 1, backgroundColor: '#fef3c7', borderRadius: 3, border: '1px solid #fde68a' }} />
-                        </div>
-                    </div>
-                </WireframePreview>
-            )
-        }
-
-        // ── eBay Specific blocks ────────────────────────────────────────────
-        case 'trust_badges': {
-            const p = props as TrustBadgesProps
-            return (
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {(p.badges ?? []).map((badge: { icon: string; text: string }, i: number) => (
-                        <div key={i} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            padding: '4px 8px',
-                            backgroundColor: p.badgeBg ?? '#fff',
-                            border: `1px solid ${p.borderColor ?? C.border}`,
-                            borderRadius: p.borderRadius ?? 8,
-                        }}>
-                            <span style={{ fontSize: 13 }}>{badge.icon}</span>
-                            <span style={{ fontFamily: 'Arial, sans-serif', fontSize: 10, fontWeight: 700, color: p.textColor ?? C.dark }}>{badge.text}</span>
-                        </div>
-                    ))}
-                </div>
-            )
-        }
-
-        case 'shipping_info': {
-            const p = props as ShippingInfoProps
-            return (
-                <div style={{
-                    backgroundColor: p.bgColor ?? '#dcfce7',
-                    borderRadius: p.borderRadius ?? 8,
-                    padding: '8px 12px',
-                }}>
-                    <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 12, fontWeight: 700, color: p.textColor ?? '#166534', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {''}<Truck size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /><strong>{p.shippingText ?? '{{SHIPPING_TIME}}'}</strong> · {p.dispatchText ?? 'Same Day Dispatch'}
-                    </p>
-                </div>
-            )
-        }
-
-        case 'returns_policy': {
-            const p = props as ReturnsPolicyProps
-            return (
-                <div style={{
-                    backgroundColor: p.bgColor ?? '#e0f2fe',
-                    borderRadius: p.borderRadius ?? 8,
-                    padding: '8px 12px',
-                }}>
-                    <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 12, fontWeight: 600, color: p.textColor ?? '#075985', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        ↩ {p.showPeriod ? `${p.periodText ?? '30-Day Free Returns'} · ` : ''}{p.policyText ?? '{{RETURN_POLICY}}'}
-                    </p>
-                </div>
-            )
-        }
-
-        case 'seller_info': {
-            const p = props as SellerInfoProps
-            return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: p.bgColor ?? '#f8f7ff', padding: '8px 12px', borderRadius: 8 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}><User size={16} style={{ color: C.primary }} /></div>
-                    <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 13, fontWeight: 700, color: p.textColor ?? C.dark }}>{p.sellerName ?? '{{SELLER_NAME}}'}</p>
-                            {p.showBadge && (
-                                <span style={{ backgroundColor: C.accent, color: C.dark, fontFamily: 'DM Sans, sans-serif', fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>{p.badgeText ?? 'Top Rated'}</span>
-                            )}
-                        </div>
-                        <p style={{ margin: '1px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.secondary }}>{p.tagline ?? 'Trusted Seller'} · <span style={{ color: C.primary }}>{p.feedbackText ?? '99.8% Positive'}</span></p>
-                    </div>
-                </div>
-            )
-        }
-
-        case 'cta_banner': {
-            const p = props as CtaBannerProps
-            return (
-                <div style={{
-                    borderRadius: 8,
-                    padding: '14px 16px',
-                    background: p.bgGradient
-                        ? `linear-gradient(135deg, ${p.gradientFrom ?? '#7530fb'}, ${p.gradientTo ?? '#1e1535'})`
-                        : p.bgColor ?? '#1e1535',
-                    textAlign: p.align ?? 'center',
-                }}>
-                    <p style={{ margin: '0 0 3px', fontFamily: 'Arial, sans-serif', fontSize: 13, fontWeight: 800, color: p.textColor ?? C.accent, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.headingText ?? 'Buy with Confidence'}
-                    </p>
-                    <p style={{ margin: 0, fontFamily: 'Arial, sans-serif', fontSize: 11, color: p.subTextColor ?? 'rgba(255,255,255,0.6)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {p.subText ?? 'Secure payment · Fast dispatch'}
-                    </p>
-                </div>
-            )
-        }
-
-        default:
-            return (
-                <WireframePreview icon={def.icon} label={def.label} color={C.primary} />
-            )
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// WIREFRAME PREVIEW
-// Generic placeholder for blocks that don't need custom rendering
-// ─────────────────────────────────────────────────────────────────────────────
-function WireframePreview({
-    icon,
-    label,
-    color,
-    children,
-}: {
-    icon: string
-    label: string
-    color: string
-    children?: React.ReactNode
-}) {
-    const WIcon = BLOCK_ICONS[icon]
-    return (
-        <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {WIcon ? <WIcon size={14} style={{ color }} /> : <span style={{ fontSize: 12 }}>{icon}</span>}
-                </span>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color }}>
-                    {label}
-                </span>
+    if (!html) {
+        // Fallback for blocks with no toHtml
+        return (
+            <div style={{
+                height: 48,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backgroundColor: C.bg, borderRadius: 6,
+                fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted,
+            }}>
+                {def.label}
             </div>
-            {children ?? (
-                <div style={{
-                    height: 32,
-                    backgroundColor: '#f8f7ff',
-                    borderRadius: 6,
-                    border: '1px solid #ede9fe',
-                }} />
-            )}
+        )
+    }
+
+    return (
+        <div style={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
+            <iframe
+                ref={iframeRef}
+                srcDoc={html}
+                onLoad={onLoad}
+                sandbox="allow-same-origin"
+                scrolling="no"
+                style={{
+                    width: '100%',
+                    height: height,
+                    border: 'none',
+                    display: 'block',
+                    pointerEvents: 'none', // clicks go to canvas, not iframe
+                    backgroundColor: 'transparent',
+                }}
+                title={`Preview: ${def.label}`}
+            />
         </div>
     )
 }
