@@ -285,19 +285,50 @@ export interface PriceBlockProps extends CommonProps {
     priceText: string         // default: {{ITEM_PRICE}}
     priceColor: string
     priceFontSize: number
-    priceFontWeight: string   // default '900'
+    priceFontWeight: string
     priceAlign: 'left' | 'center' | 'right'
     showOriginal: boolean
-    originalText: string      // default: {{ORIGINAL_PRICE}}
-    originalColor: string     // strikethrough price colour
-    originalFontSize: number  // strikethrough price size
+    originalText: string
+    originalColor: string
+    originalFontSize: number
     showBadge: boolean
-    badgeText: string         // e.g. "SALE" or "{{DISCOUNT_PERCENT}} OFF"
+    badgeText: string
     badgeBg: string
     badgeColor: string
-    badgeFontSize: number     // badge text size
-    badgeBorderRadius: number // badge pill radius
+    badgeFontSize: number
+    badgeBorderRadius: number
     borderRadius: number
+    variant: string           // price block layout variant
+    // Urgency
+    urgencyText: string
+    urgencyColor: string
+    urgencyBg: string
+    // Range
+    priceRangeMax: string
+    // Auction
+    bidCount: string
+    timeLeft: string
+    reserveMet: boolean
+    // Bundle
+    bundleTier1Qty: number
+    bundleTier1Price: string
+    bundleTier2Qty: number
+    bundleTier2Price: string
+    bundleTier3Qty: number
+    bundleTier3Price: string
+    // Finance
+    monthlyPrice: string
+    financeText: string
+    // Trade
+    tradePrice: string
+    rrpText: string
+    tradeCta: string
+    // Shipping highlight
+    deliveryText: string
+    deliveryDate: string
+    deliveryColor: string
+    // Savings
+    savingsText: string
 }
 
 // ── Product Image ─────────────────────────────────────────────────────────────
@@ -606,6 +637,7 @@ export interface RawHtmlProps extends CommonProps {
 // Variant system imports
 import { getHeroVariant as _getHeroVariant } from './variants/hero_header.variants'
 import { getProductImageVariant as _getProductImageVariant } from './variants/product_image.variants'
+import { getPriceVariant as _getPriceVariant } from './variants/price_block.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
@@ -1016,26 +1048,33 @@ ${rows}
             badgeFontSize: 11,
             badgeBorderRadius: 4,
             borderRadius: 10,
+            variant: 'simple',
+            urgencyText: 'Only {{QUANTITY}} left in stock',
+            urgencyColor: '#991b1b',
+            urgencyBg: '#fef2f2',
+            priceRangeMax: '{{PRICE_MAX}}',
+            bidCount: '{{BID_COUNT}}',
+            timeLeft: '{{TIME_LEFT}}',
+            reserveMet: true,
+            bundleTier1Qty: 2,
+            bundleTier1Price: '{{BUNDLE_PRICE_2}}',
+            bundleTier2Qty: 3,
+            bundleTier2Price: '{{BUNDLE_PRICE_3}}',
+            bundleTier3Qty: 5,
+            bundleTier3Price: '{{BUNDLE_PRICE_5}}',
+            monthlyPrice: '{{MONTHLY_PRICE}}',
+            financeText: '0% interest available — Subject to status',
+            tradePrice: '{{TRADE_PRICE}}',
+            rrpText: '{{RRP_PRICE}}',
+            tradeCta: 'Contact us for bulk pricing',
+            deliveryText: 'FREE UK Delivery',
+            deliveryDate: '{{DELIVERY_DATE}}',
+            deliveryColor: '#16a34a',
+            savingsText: 'Save {{DISCOUNT_AMOUNT}}',
         } as PriceBlockProps,
         toHtml(props, id) {
             const p = props as PriceBlockProps
-            const badgeHtml = p.showBadge
-                ? `<span style="display:inline-block;background-color:${p.badgeBg};color:${p.badgeColor};font-family:Arial,sans-serif;font-size:${p.badgeFontSize ?? 11}px;font-weight:700;padding:3px 8px;border-radius:${p.badgeBorderRadius ?? 4}px;margin-left:10px;vertical-align:middle;">${p.badgeText}</span>`
-                : ''
-            const originalHtml = p.showOriginal
-                ? `<span style="font-family:Arial,sans-serif;font-size:${p.originalFontSize ?? 16}px;color:${p.originalColor ?? '#9ca3af'};text-decoration:line-through;margin-left:12px;vertical-align:middle;">${p.originalText}</span>`
-                : ''
-            return wrapBlock('price_block', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;">
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.priceFontSize}px;font-weight:${p.priceFontWeight ?? '900'};color:${p.priceColor};line-height:1.2;text-align:${p.priceAlign ?? 'left'};">
-        ${p.priceText}${badgeHtml}${originalHtml}
-      </p>
-    </td>
-  </tr>
-</table>`
-            )
+            return _getPriceVariant(p.variant ?? 'simple').toHtml(p, id)
         },
     },
 

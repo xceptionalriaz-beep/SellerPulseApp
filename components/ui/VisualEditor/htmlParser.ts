@@ -531,7 +531,7 @@ function extractDividerProps(html: string): DividerProps {
 
         // Gradient divider
         if (style.includes('linear-gradient')) {
-            base.style = 'gradient'
+            base.lineStyle = 'gradient'
         } else {
             const borderTop = extractStyle(style, 'border-top')
             if (borderTop) {
@@ -542,7 +542,7 @@ function extractDividerProps(html: string): DividerProps {
                 const styleType = parts.find(p =>
                     ['solid', 'dashed', 'dotted'].includes(p)
                 )
-                if (styleType) base.style = styleType as DividerProps['style']
+                if (styleType) base.lineStyle = styleType as DividerProps['lineStyle']
 
                 const color = parts.find(p => p.startsWith('#'))
                 if (color) base.color = color
@@ -578,10 +578,10 @@ function extractBulletListProps(html: string): BulletListProps {
     const bulletMatch = html.match(/<td[^>]*width="20"[^>]*>([\s\S]*?)<\/td>/i)
     if (bulletMatch) {
         const bulletChar = stripTags(bulletMatch[1]).trim()
-        if (bulletChar === '✓' || bulletChar === '&#10003;') base.style = 'check'
-        else if (bulletChar === '→' || bulletChar === '&#8594;') base.style = 'arrow'
-        else if (bulletChar === '★' || bulletChar === '&#9733;') base.style = 'star'
-        else base.style = 'disc'
+        if (bulletChar === '✓' || bulletChar === '&#10003;') base.bulletStyle = 'check'
+        else if (bulletChar === '→' || bulletChar === '&#8594;') base.bulletStyle = 'arrow'
+        else if (bulletChar === '★' || bulletChar === '&#9733;') base.bulletStyle = 'star'
+        else base.bulletStyle = 'disc'
 
         // Bullet color
         const styleMatch = bulletMatch[0].match(/color:\s*([^;'"]+)/i)
