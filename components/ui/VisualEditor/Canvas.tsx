@@ -134,6 +134,9 @@ interface CanvasProps {
     onDuplicate: (id: string) => void
     onMoveUp: (id: string) => void
     onMoveDown: (id: string) => void
+    onCopyStyle: (id: string) => void
+    onPasteStyle: (id: string) => void
+    hasCopiedStyle: boolean
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -151,6 +154,9 @@ export default function Canvas({
     onDuplicate,
     onMoveUp,
     onMoveDown,
+    onCopyStyle,
+    onPasteStyle,
+    hasCopiedStyle,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -290,6 +296,9 @@ export default function Canvas({
                                 onDuplicate={() => onDuplicate(block.id)}
                                 onMoveUp={() => onMoveUp(block.id)}
                                 onMoveDown={() => onMoveDown(block.id)}
+                                onCopyStyle={() => onCopyStyle(block.id)}
+                                onPasteStyle={() => onPasteStyle(block.id)}
+                                hasCopiedStyle={hasCopiedStyle}
                                 onReorderDragStart={() => handleReorderDragStart(index)}
                                 onReorderDragOver={(e) => handleReorderDragOver(e, index)}
                                 onReorderDrop={(e) => handleReorderDrop(e, index)}
@@ -498,6 +507,9 @@ interface BlockCardProps {
     onDuplicate: () => void
     onMoveUp: () => void
     onMoveDown: () => void
+    onCopyStyle: () => void
+    onPasteStyle: () => void
+    hasCopiedStyle: boolean
     onReorderDragStart: () => void
     onReorderDragOver: (e: React.DragEvent) => void
     onReorderDrop: (e: React.DragEvent) => void
@@ -516,6 +528,9 @@ function BlockCard({
     onDuplicate,
     onMoveUp,
     onMoveDown,
+    onCopyStyle,
+    onPasteStyle,
+    hasCopiedStyle,
     onReorderDragStart,
     onReorderDragOver,
     onReorderDrop,
@@ -558,7 +573,7 @@ function BlockCard({
                 position: 'relative',
                 marginBottom: 8,
                 borderRadius: 10,
-                border: `2px solid ${isSelected
+                outline: `2px solid ${isSelected
                     ? C.primary
                     : hovered
                         ? C.primaryBorder
@@ -568,11 +583,14 @@ function BlockCard({
                 cursor: 'pointer',
                 opacity: isBeingDragged ? 0.4 : 1,
                 transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.15s',
-                boxShadow: isSelected
-                    ? `0 0 0 3px ${C.primary}22, 0 2px 8px ${C.primary}18`
-                    : hovered
-                        ? `0 2px 12px ${C.primary}12`
-                        : '0 1px 4px rgba(0,0,0,0.06)',
+                // Universal shadow from block props — falls back to selection/hover shadow
+                boxShadow: (block.props as any).showShadow
+                    ? `${(block.props as any).shadowX ?? 0}px ${(block.props as any).shadowY ?? 4}px ${(block.props as any).shadowBlur ?? 12}px ${(block.props as any).shadowSpread ?? 0}px ${(block.props as any).shadowColor ?? 'rgba(0,0,0,0.10)'}`
+                    : isSelected
+                        ? `0 0 0 3px ${C.primary}22, 0 2px 8px ${C.primary}18`
+                        : hovered
+                            ? `0 2px 12px ${C.primary}12`
+                            : '0 1px 4px rgba(0,0,0,0.06)',
                 overflow: 'visible',
             }}
         >
@@ -676,6 +694,24 @@ function BlockCard({
                     >
                         ⧉
                     </ActionButton>
+                    {/* Copy Style */}
+                    <ActionButton
+                        onClick={onCopyStyle}
+                        title="Copy block style"
+                        color={C.secondary}
+                    >
+                        S↑
+                    </ActionButton>
+                    {/* Paste Style */}
+                    {hasCopiedStyle && (
+                        <ActionButton
+                            onClick={onPasteStyle}
+                            title="Paste style onto this block"
+                            color={C.primary}
+                        >
+                            S↓
+                        </ActionButton>
+                    )}
                     {/* Delete */}
                     <ActionButton
                         onClick={handleDelete}

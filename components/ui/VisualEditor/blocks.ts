@@ -115,19 +115,69 @@ export type BlockProps =
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
-    bgColor: string        // background colour of the block's wrapper cell
-    paddingTop: number     // px
-    paddingBottom: number  // px
-    paddingLeft: number    // px
-    paddingRight: number   // px
+    // Background
+    bgColor: string
+    bgGradient: boolean
+    bgGradientFrom: string
+    bgGradientTo: string
+    bgGradientDir: number      // degrees
+
+    // Spacing
+    paddingTop: number
+    paddingBottom: number
+    paddingLeft: number
+    paddingRight: number
+
+    // Border
+    showBorder: boolean
+    borderColor: string
+    borderWidth: number
+    borderStyle: 'solid' | 'dashed' | 'dotted'
+    borderRadius: number
+
+    // Shadow (canvas only — email clients strip box-shadow)
+    showShadow: boolean
+    shadowColor: string
+    shadowX: number
+    shadowY: number
+    shadowBlur: number
+    shadowSpread: number
+
+    // Typography override
+    fontFamily: string
 }
 
 const DEFAULT_COMMON: CommonProps = {
+    // Background
     bgColor: '#ffffff',
+    bgGradient: false,
+    bgGradientFrom: '#7530fb',
+    bgGradientTo: '#1e1535',
+    bgGradientDir: 135,
+
+    // Spacing
     paddingTop: 16,
     paddingBottom: 16,
     paddingLeft: 24,
     paddingRight: 24,
+
+    // Border
+    showBorder: false,
+    borderColor: '#ede9fe',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderRadius: 0,
+
+    // Shadow
+    showShadow: false,
+    shadowColor: 'rgba(0,0,0,0.10)',
+    shadowX: 0,
+    shadowY: 4,
+    shadowBlur: 12,
+    shadowSpread: 0,
+
+    // Typography
+    fontFamily: 'Arial, Helvetica, sans-serif',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -532,6 +582,17 @@ function wrapBlock(type: BlockType, id: string, innerHtml: string): string {
 // Padding shorthand helper
 function pad(p: CommonProps): string {
     return `padding:${p.paddingTop}px ${p.paddingRight}px ${p.paddingBottom}px ${p.paddingLeft}px;`
+}
+
+// Universal block wrapper style — background + border (shadow omitted: email clients strip it)
+function blockStyles(p: CommonProps): string {
+    const bg = p.bgGradient
+        ? `background:linear-gradient(${p.bgGradientDir ?? 135}deg,${p.bgGradientFrom ?? '#7530fb'},${p.bgGradientTo ?? '#1e1535'});`
+        : `background-color:${p.bgColor};`
+    const border = p.showBorder
+        ? `border:${p.borderWidth ?? 1}px ${p.borderStyle ?? 'solid'} ${p.borderColor ?? '#ede9fe'};border-radius:${p.borderRadius ?? 0}px;`
+        : ''
+    return bg + border
 }
 
 // Text alignment
@@ -1767,13 +1828,20 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
 // BLOCK FACTORY
 // Creates a fresh Block instance from a definition
 // ─────────────────────────────────────────────────────────────────────────────
-export function createBlock(type: BlockType): Block {
+export function createBlock(type: BlockType, settings?: Partial<CanvasSettings>): Block {
     const def = getDefinition(type)
     if (!def) throw new Error(`Unknown block type: ${type}`)
+    // Apply global tokens to new block defaults when settings are provided
+    const tokenOverrides: Partial<CommonProps> = settings ? {
+        borderRadius: settings.borderRadiusBase ?? 0,
+        paddingTop: settings.spacingBase ?? 16,
+        paddingBottom: settings.spacingBase ?? 16,
+        fontFamily: settings.fontStack ?? 'Arial, Helvetica, sans-serif',
+    } : {}
     return {
         id: generateId(),
         type,
-        props: { ...def.defaultProps },
+        props: { ...def.defaultProps, ...tokenOverrides },
     }
 }
 
@@ -1789,6 +1857,16 @@ export interface CanvasSettings {
     textColor: string            // global body text colour
     linkColor: string            // global <a> colour
     align: 'center' | 'left'    // canvas alignment inside body
+
+    // ── Global Design Tokens (Phase 2) ───────────────────────────────────────
+    primaryColor: string         // brand primary — buttons, accents, links
+    accentColor: string          // brand accent — badges, highlights
+    headingColor: string         // h1/h2/h3 colour across all blocks
+    headingFont: string          // heading font stack
+    borderRadiusBase: number     // global default border radius (px)
+    spacingBase: number          // global base spacing multiplier (px)
+    mobileFontScale: number      // % scale for mobile font sizes (default 90)
+    mobilePaddingScale: number   // % scale for mobile padding (default 80)
 }
 
 export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
@@ -1799,6 +1877,16 @@ export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
     textColor: '#1f1d2e',
     linkColor: '#7530fb',
     align: 'center',
+
+    // Global tokens
+    primaryColor: '#7530fb',
+    accentColor: '#b8fa33',
+    headingColor: '#1e1535',
+    headingFont: 'Arial, Helvetica, sans-serif',
+    borderRadiusBase: 8,
+    spacingBase: 16,
+    mobileFontScale: 90,
+    mobilePaddingScale: 80,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1838,7 +1926,12 @@ export function assembleDocument(blocks: Block[], settings: CanvasSettings = DEF
     body { margin: 0; padding: 0; font-family: ${settings.fontStack}; background: ${settings.bgColor}; color: ${settings.textColor}; }
     table { border-collapse: collapse; }
     img { border: 0; display: block; }
-    a { color: ${settings.linkColor}; }
+    a { color: ${settings.primaryColor ?? settings.linkColor}; text-decoration: none; }
+    h1, h2, h3 { color: ${settings.headingColor ?? settings.textColor}; font-family: ${settings.headingFont ?? settings.fontStack}; }
+    @media only screen and (max-width: 480px) {
+      .block-text { font-size: ${settings.mobileFontScale ?? 90}% !important; }
+      td[class="block-pad"] { padding-left: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; padding-right: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; }
+    }
   </style>
 </head>
 <body>

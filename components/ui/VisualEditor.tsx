@@ -93,6 +93,7 @@ export default function VisualEditor({
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
+    const [copiedStyle, setCopiedStyle] = useState<Record<string, unknown> | null>(null)
     const [draggedType, setDraggedType] = useState<BlockType | null>(null)
     const [undoStack, setUndoStack] = useState<Block[][]>([])
     const [redoStack, setRedoStack] = useState<Block[][]>([])
@@ -166,7 +167,8 @@ export default function VisualEditor({
 
     // ── Block mutations ───────────────────────────────────────────────────────
     const handleAddBlock = useCallback((type: BlockType) => {
-        const newBlock = createBlock(type)
+        // Pass canvasSettings so new blocks inherit global tokens
+        const newBlock = createBlock(type, canvasSettings)
         setBlocks(prev => {
             const next = [...prev, newBlock]
             pushUndo(prev)
@@ -174,7 +176,44 @@ export default function VisualEditor({
             return next
         })
         setSelectedId(newBlock.id)
-    }, [pushUndo, rebuildAndEmit])
+    }, [pushUndo, rebuildAndEmit, canvasSettings])
+
+    // ── Copy / Paste block style ─────────────────────────────────────────────
+    const handleCopyStyle = useCallback((id: string) => {
+        setBlocks(prev => {
+            const block = prev.find(b => b.id === id)
+            if (!block) return prev
+            // Copy only universal style props — not content props
+            const p = block.props as any
+            setCopiedStyle({
+                bgColor: p.bgColor, bgGradient: p.bgGradient,
+                bgGradientFrom: p.bgGradientFrom, bgGradientTo: p.bgGradientTo,
+                bgGradientDir: p.bgGradientDir,
+                showBorder: p.showBorder, borderColor: p.borderColor,
+                borderWidth: p.borderWidth, borderStyle: p.borderStyle,
+                borderRadius: p.borderRadius,
+                showShadow: p.showShadow, shadowColor: p.shadowColor,
+                shadowX: p.shadowX, shadowY: p.shadowY,
+                shadowBlur: p.shadowBlur, shadowSpread: p.shadowSpread,
+                fontFamily: p.fontFamily,
+                paddingTop: p.paddingTop, paddingBottom: p.paddingBottom,
+                paddingLeft: p.paddingLeft, paddingRight: p.paddingRight,
+            })
+            return prev
+        })
+    }, [])
+
+    const handlePasteStyle = useCallback((id: string) => {
+        if (!copiedStyle) return
+        setBlocks(prev => {
+            const next = prev.map(b => {
+                if (b.id !== id) return b
+                return { ...b, props: { ...(b.props as any), ...copiedStyle } } as Block
+            })
+            rebuildAndEmit(next)
+            return next
+        })
+    }, [copiedStyle, rebuildAndEmit])
 
     const handleDrop = useCallback((type: BlockType) => {
         handleAddBlock(type)
@@ -314,15 +353,9 @@ export default function VisualEditor({
             }
 
             // ── No compatible block selected — add as new image block ─────────
-            const newBlock: Block = {
-                id: `image_${Date.now()}`,
-                type: 'image',
-                props: {
-                    ...getDefinition('image')!.defaultProps,
-                    src: url,
-                    alt,
-                },
-            }
+            const newBlock: Block = createBlock('image', canvasSettings)
+                ; (newBlock.props as any).src = url
+                ; (newBlock.props as any).alt = alt
             const next = [...prev, newBlock]
             rebuildAndEmit(next)
             return next
@@ -494,6 +527,9 @@ export default function VisualEditor({
                         onDuplicate={handleDuplicate}
                         onMoveUp={handleMoveUp}
                         onMoveDown={handleMoveDown}
+                        onCopyStyle={handleCopyStyle}
+                        onPasteStyle={handlePasteStyle}
+                        hasCopiedStyle={copiedStyle !== null}
                     />
                 )}
 

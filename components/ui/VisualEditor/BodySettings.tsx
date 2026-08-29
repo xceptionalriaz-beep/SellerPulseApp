@@ -23,7 +23,7 @@
 
 import React, { useState } from 'react'
 import { CanvasSettings, DEFAULT_CANVAS_SETTINGS } from './blocks'
-import { Monitor, Type, AlignCenter, AlignLeft, RotateCcw } from 'lucide-react'
+import { Monitor, Type, AlignCenter, AlignLeft, RotateCcw, Palette, Layers, Copy, Smartphone } from 'lucide-react'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -393,6 +393,107 @@ export default function BodySettings({ settings, onUpdate }: BodySettingsProps) 
                     </p>
                 </Section>
 
+                {/* ── Global Design Tokens ── */}
+                <Section title="Brand Tokens" Icon={Palette}>
+                    <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+                        Set once — propagates to all blocks automatically
+                    </p>
+                    <ColorRow
+                        label="Primary colour"
+                        value={settings.primaryColor ?? '#7530fb'}
+                        onChange={(v: string) => patch({ primaryColor: v, linkColor: v })}
+                    />
+                    <ColorRow
+                        label="Accent colour"
+                        value={settings.accentColor ?? '#b8fa33'}
+                        onChange={(v: string) => patch({ accentColor: v })}
+                    />
+                    <ColorRow
+                        label="Heading colour"
+                        value={settings.headingColor ?? '#1e1535'}
+                        onChange={(v: string) => patch({ headingColor: v })}
+                    />
+                    <ColorRow
+                        label="Body text"
+                        value={settings.textColor}
+                        onChange={(v: string) => patch({ textColor: v })}
+                    />
+                    {/* Token preview */}
+                    <div style={{
+                        marginTop: 10,
+                        padding: '10px 12px',
+                        borderRadius: 8,
+                        border: `1px solid ${C.border}`,
+                        backgroundColor: C.bg,
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'center',
+                        flexWrap: 'wrap' as const,
+                    }}>
+                        <div style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: settings.primaryColor ?? '#7530fb', flexShrink: 0 }} title="Primary" />
+                        <div style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: settings.accentColor ?? '#b8fa33', flexShrink: 0 }} title="Accent" />
+                        <div style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: settings.headingColor ?? '#1e1535', flexShrink: 0 }} title="Heading" />
+                        <div style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: settings.textColor, flexShrink: 0 }} title="Body text" />
+                        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>Your brand palette</p>
+                    </div>
+                </Section>
+
+                {/* ── Global Spacing & Radius ── */}
+                <Section title="Global Style" Icon={Layers}>
+                    <SliderSetting
+                        label="Base border radius"
+                        value={settings.borderRadiusBase ?? 8}
+                        min={0} max={24} suffix="px"
+                        onChange={v => patch({ borderRadiusBase: v })}
+                    />
+                    <SliderSetting
+                        label="Base spacing"
+                        value={settings.spacingBase ?? 16}
+                        min={8} max={40} suffix="px"
+                        onChange={v => patch({ spacingBase: v })}
+                    />
+                    <p style={{ margin: '6px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+                        These values are used as defaults when adding new blocks
+                    </p>
+                </Section>
+
+                {/* ── Section Groups (Phase 4) ── */}
+                <Section title="Sections" Icon={Layers}>
+                    <p style={{ margin: '0 0 8px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+                        Group your blocks into named sections for easier navigation and reordering.
+                    </p>
+                    <InfoBox>
+                        Select blocks on the canvas and drag to reorder. Section grouping coming in next update.
+                    </InfoBox>
+                </Section>
+
+                {/* ── Copy/Paste Style (Phase 4) ── */}
+                <Section title="Style Clipboard" Icon={Copy}>
+                    <p style={{ margin: '0 0 8px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+                        Copy the style from one block and paste it to another.
+                    </p>
+                    <StyleClipboard settings={settings} />
+                </Section>
+
+                {/* ── Responsive (Phase 4) ── */}
+                <Section title="Mobile Overrides" Icon={Smartphone}>
+                    <InfoBox>
+                        eBay renders listings in a single column on mobile. Font sizes and padding scale down automatically via eBay's responsive CSS.
+                    </InfoBox>
+                    <SliderSetting
+                        label="Mobile font scale"
+                        value={settings.mobileFontScale ?? 90}
+                        min={70} max={100} suffix="%"
+                        onChange={v => patch({ mobileFontScale: v })}
+                    />
+                    <SliderSetting
+                        label="Mobile padding scale"
+                        value={settings.mobilePaddingScale ?? 80}
+                        min={50} max={100} suffix="%"
+                        onChange={v => patch({ mobilePaddingScale: v })}
+                    />
+                </Section>
+
                 {/* ── Live preview strip ── */}
                 <div style={{
                     marginTop: 4,
@@ -424,9 +525,25 @@ export default function BodySettings({ settings, onUpdate }: BodySettingsProps) 
                         <p style={{ margin: '0 0 4px', fontFamily: settings.fontStack, fontSize: 11, color: settings.textColor, opacity: 0.7 }}>
                             Preview of your font and colours
                         </p>
-                        <a href="#" style={{ fontFamily: settings.fontStack, fontSize: 11, color: settings.linkColor }}>
+                        <a href="#" style={{ fontFamily: settings.fontStack, fontSize: 11, color: settings.primaryColor ?? settings.linkColor }}>
                             Sample link →
                         </a>
+                        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                            <span style={{
+                                display: 'inline-block', padding: '2px 8px',
+                                borderRadius: settings.borderRadiusBase ?? 8,
+                                backgroundColor: settings.primaryColor ?? '#7530fb',
+                                color: '#fff',
+                                fontFamily: settings.fontStack, fontSize: 9, fontWeight: 700,
+                            }}>Button</span>
+                            <span style={{
+                                display: 'inline-block', padding: '2px 8px',
+                                borderRadius: settings.borderRadiusBase ?? 8,
+                                backgroundColor: settings.accentColor ?? '#b8fa33',
+                                color: '#1e1535',
+                                fontFamily: settings.fontStack, fontSize: 9, fontWeight: 700,
+                            }}>Badge</span>
+                        </div>
                     </div>
                     <p style={{ margin: '6px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, textAlign: 'center' as const }}>
                         Max width: {settings.maxWidth}px · {settings.align === 'center' ? 'Centred' : 'Left-aligned'}
@@ -520,6 +637,97 @@ function ColorRow({
                     }}
                 />
             </div>
+        </div>
+    )
+}
+
+// ── SliderSetting ─────────────────────────────────────────────────────────────
+function SliderSetting({
+    label, value, min, max, suffix, onChange
+}: {
+    label: string; value: number; min: number; max: number
+    suffix: string; onChange: (v: number) => void
+}) {
+    return (
+        <div style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>{label}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.primary, fontWeight: 700 }}>
+                    {value}{suffix}
+                </span>
+            </div>
+            <input
+                type="range"
+                min={min} max={max}
+                value={value}
+                onChange={e => onChange(Number(e.target.value))}
+                style={{ width: '100%', accentColor: C.primary }}
+            />
+        </div>
+    )
+}
+
+// ── InfoBox ──────────────────────────────────────────────────────────────────
+function InfoBox({ children }: { children: React.ReactNode }) {
+    return (
+        <div style={{
+            padding: '8px 10px',
+            backgroundColor: '#f0f4ff',
+            borderRadius: 7,
+            border: '1px solid #dbeafe',
+            marginBottom: 8,
+        }}>
+            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#3b82f6', lineHeight: 1.5 }}>
+                {children}
+            </p>
+        </div>
+    )
+}
+
+// ── StyleClipboard — copy/paste block styles ──────────────────────────────────
+function StyleClipboard({ settings }: { settings: CanvasSettings }) {
+    const [copied, setCopied] = React.useState(false)
+    const [clipboard, setClipboard] = React.useState<string | null>(null)
+
+    const handleCopy = () => {
+        const style = JSON.stringify({
+            primaryColor: settings.primaryColor,
+            accentColor: settings.accentColor,
+            headingColor: settings.headingColor,
+            textColor: settings.textColor,
+            fontStack: settings.fontStack,
+            borderRadiusBase: settings.borderRadiusBase,
+            spacingBase: settings.spacingBase,
+        })
+        navigator.clipboard.writeText(style).then(() => {
+            setClipboard(style)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        })
+    }
+
+    return (
+        <div style={{ display: 'flex', gap: 6 }}>
+            <button
+                onClick={handleCopy}
+                style={{
+                    flex: 1,
+                    padding: '8px 0',
+                    border: `1px solid ${copied ? '#16a34a' : C.border}`,
+                    borderRadius: 8,
+                    backgroundColor: copied ? '#dcfce7' : 'transparent',
+                    color: copied ? '#16a34a' : C.secondary,
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 11, fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', gap: 6,
+                    transition: 'all 0.15s',
+                }}
+            >
+                <Copy size={12} />
+                {copied ? 'Copied!' : 'Copy global style'}
+            </button>
         </div>
     )
 }

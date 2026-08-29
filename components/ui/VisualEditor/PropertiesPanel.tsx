@@ -398,30 +398,30 @@ function StylesTab({
     return (
         <div style={{ padding: '14px 14px 24px' }}>
 
-            {/* ── Common: Background + Spacing ── */}
-            <Section title="Background">
-                <ColorRow
-                    label="Background"
-                    value={props.bgColor ?? '#ffffff'}
-                    onChange={v => updateProps({ bgColor: v } as any)}
-                />
-            </Section>
+            {/* ── Universal: Background ── */}
+            <UniversalBackground props={props as any} updateProps={p => updateProps(p as any)} />
 
+            {/* ── Common: Spacing ── */}
             <Section title="Spacing">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <NumberInput label="Top" value={props.paddingTop ?? 16} min={0} max={80}
+                    <NumberInput label="Top" value={props.paddingTop ?? 16} min={0} max={120}
                         onChange={v => updateProps({ paddingTop: v } as any)} suffix="px" />
-                    <NumberInput label="Bottom" value={props.paddingBottom ?? 16} min={0} max={80}
+                    <NumberInput label="Bottom" value={props.paddingBottom ?? 16} min={0} max={120}
                         onChange={v => updateProps({ paddingBottom: v } as any)} suffix="px" />
-                    <NumberInput label="Left" value={props.paddingLeft ?? 24} min={0} max={80}
+                    <NumberInput label="Left" value={props.paddingLeft ?? 24} min={0} max={120}
                         onChange={v => updateProps({ paddingLeft: v } as any)} suffix="px" />
-                    <NumberInput label="Right" value={props.paddingRight ?? 24} min={0} max={80}
+                    <NumberInput label="Right" value={props.paddingRight ?? 24} min={0} max={120}
                         onChange={v => updateProps({ paddingRight: v } as any)} suffix="px" />
                 </div>
             </Section>
 
             {/* ── Block-specific style props ── */}
             <BlockStyleProps block={block} props={props} updateProps={updateProps} />
+
+            {/* ── Universal: Border + Shadow + Typography ── */}
+            <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
+            <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
+            <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
         </div>
     )
 }
@@ -489,13 +489,7 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'product_title':
             return (
                 <>
-                    <Section title="Background">
-                        <ColorRow
-                            label="Background"
-                            value={props.bgColor ?? '#ffffff'}
-                            onChange={v => updateProps({ bgColor: v })}
-                        />
-                    </Section>
+
                     <Section title="Title">
                         <ColorRow label="Title colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
                         <SliderInput label="Font size" value={props.fontSize ?? 24} min={14} max={56} suffix="px" onChange={v => updateProps({ fontSize: v })} />
@@ -510,12 +504,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                             ]}
                             onChange={v => updateProps({ fontWeight: v })}
                         />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
                     </Section>
                     <Section title="Condition text">
                         <ColorRow
@@ -536,13 +525,7 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'price_block':
             return (
                 <>
-                    <Section title="Background">
-                        <ColorRow
-                            label="Background"
-                            value={props.bgColor ?? '#ffffff'}
-                            onChange={v => updateProps({ bgColor: v })}
-                        />
-                    </Section>
+
                     <Section title="Price">
                         <ColorRow label="Price colour" value={props.priceColor ?? '#7530fb'} onChange={v => updateProps({ priceColor: v })} />
                         <SliderInput label="Font size" value={props.priceFontSize ?? 32} min={18} max={56} suffix="px" onChange={v => updateProps({ priceFontSize: v })} />
@@ -557,12 +540,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                             ]}
                             onChange={v => updateProps({ priceFontWeight: v })}
                         />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.priceAlign ?? 'left'} onChange={v => updateProps({ priceAlign: v })} />
-                        </div>
+                        <AlignButtons value={props.priceAlign ?? 'left'} onChange={v => updateProps({ priceAlign: v })} />
                     </Section>
                     <Section title="Original price">
                         <ColorRow
@@ -612,13 +590,7 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'product_image':
             return (
                 <>
-                    <Section title="Background">
-                        <ColorRow
-                            label="Background"
-                            value={props.bgColor ?? '#f8fafc'}
-                            onChange={v => updateProps({ bgColor: v })}
-                        />
-                    </Section>
+
                     <Section title="Layout">
                         <SliderInput
                             label="Max width"
@@ -636,12 +608,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                             ]}
                             onChange={v => updateProps({ objectFit: v })}
                         />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                     <Section title="Border">
                         <SliderInput
@@ -723,13 +690,7 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'image':
             return (
                 <>
-                    <Section title="Background">
-                        <ColorRow
-                            label="Background"
-                            value={props.bgColor ?? '#ffffff'}
-                            onChange={v => updateProps({ bgColor: v })}
-                        />
-                    </Section>
+
                     <Section title="Layout">
                         <SliderInput label="Width" value={props.width ?? 100} min={10} max={props.widthUnit === 'px' ? 700 : 100} suffix={props.widthUnit ?? '%'} onChange={v => updateProps({ width: v })} />
                         <SelectInput
@@ -739,12 +700,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                             onChange={v => updateProps({ widthUnit: v })}
                         />
                         <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                 </>
             )
@@ -753,16 +709,7 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'cta_banner':
             return (
                 <>
-                    <Section title="Background">
-                        <ToggleRow label="Use gradient" value={props.bgGradient ?? true} onChange={v => updateProps({ bgGradient: v })} />
-                        {props.bgGradient ? (
-                            <>
-                                <ColorRow label="Gradient from" value={props.gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v })} />
-                                <ColorRow label="Gradient to" value={props.gradientTo ?? '#1e1535'} onChange={v => updateProps({ gradientTo: v })} />
-                            </>
-                        ) : (
-                            <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
-                        )}
+                    <Section title="Layout">
                         <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
                     </Section>
                     <Section title="Typography">
@@ -787,12 +734,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                     </Section>
                     <Section title="Layout">
                         <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                 </>
             )
@@ -911,12 +853,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                     </Section>
                     <Section title="Layout">
                         <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                 </>
             )
@@ -933,12 +870,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                         <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                         <ToggleRow label="Show pulse dot" value={props.showIcon ?? true} onChange={v => updateProps({ showIcon: v })} />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                 </>
             )
@@ -1020,26 +952,7 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'hero_header':
             return (
                 <>
-                    {/* ── Background ── */}
-                    <Section title="Background">
-                        <ToggleRow
-                            label="Use gradient"
-                            value={props.bgGradient ?? true}
-                            onChange={v => updateProps({ bgGradient: v })}
-                        />
-                        {props.bgGradient && (
-                            <>
-                                <ColorRow label="Gradient from" value={props.gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v })} />
-                                <ColorRow label="Gradient to" value={props.gradientTo ?? '#1e1535'} onChange={v => updateProps({ gradientTo: v })} />
-                            </>
-                        )}
-                        {/* Flat bg — always shown as email client fallback */}
-                        <ColorRow
-                            label={props.bgGradient ? 'Fallback colour (email clients)' : 'Background colour'}
-                            value={props.bgColor ?? '#1e1535'}
-                            onChange={v => updateProps({ bgColor: v })}
-                        />
-                    </Section>
+
 
                     {/* ── Typography ── */}
                     <Section title="Typography">
@@ -1069,12 +982,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                             ]}
                             onChange={v => updateProps({ nameFontWeight: v })}
                         />
-                        <div style={{ marginTop: 8 }}>
-                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280' }}>
-                                Alignment
-                            </p>
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                        </div>
+                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
 
                     {/* ── Layout ── */}
@@ -2148,11 +2056,123 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
     )
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// UNIVERSAL SHARED SECTIONS — rendered in every block's Styles tab
+// ─────────────────────────────────────────────────────────────────────────────
+
+function UniversalBackground({
+    props, updateProps
+}: {
+    props: Record<string, unknown>
+    updateProps: (p: Record<string, unknown>) => void
+}) {
+    const p = props as any
+    return (
+        <Section title="Background">
+            <ToggleRow
+                label="Use gradient"
+                value={p.bgGradient ?? false}
+                onChange={v => updateProps({ bgGradient: v })}
+            />
+            {p.bgGradient ? (
+                <>
+                    <ColorRow label="Gradient from" value={p.bgGradientFrom ?? '#7530fb'} onChange={v => updateProps({ bgGradientFrom: v })} />
+                    <ColorRow label="Gradient to" value={p.bgGradientTo ?? '#1e1535'} onChange={v => updateProps({ bgGradientTo: v })} />
+                    <SliderInput label="Direction" value={p.bgGradientDir ?? 135} min={0} max={360} suffix="°" onChange={v => updateProps({ bgGradientDir: v })} />
+                </>
+            ) : (
+                <ColorRow label="Background" value={p.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+            )}
+        </Section>
+    )
+}
+
+function UniversalBorder({
+    props, updateProps
+}: {
+    props: Record<string, unknown>
+    updateProps: (p: Record<string, unknown>) => void
+}) {
+    const p = props as any
+    return (
+        <Section title="Border">
+            <ToggleRow label="Show border" value={p.showBorder ?? false} onChange={v => updateProps({ showBorder: v })} />
+            {p.showBorder && (
+                <>
+                    <ColorRow label="Border colour" value={p.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                    <SliderInput label="Width" value={p.borderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                    <SliderInput label="Radius" value={p.borderRadius ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    <SelectInput
+                        label="Style"
+                        value={p.borderStyle ?? 'solid'}
+                        options={[
+                            { v: 'solid', l: 'Solid' },
+                            { v: 'dashed', l: 'Dashed' },
+                            { v: 'dotted', l: 'Dotted' },
+                        ]}
+                        onChange={v => updateProps({ borderStyle: v })}
+                    />
+                </>
+            )}
+        </Section>
+    )
+}
+
+function UniversalShadow({
+    props, updateProps
+}: {
+    props: Record<string, unknown>
+    updateProps: (p: Record<string, unknown>) => void
+}) {
+    const p = props as any
+    return (
+        <Section title="Shadow">
+            <InfoBox>Shadow shows in canvas preview only — most email clients strip box-shadow.</InfoBox>
+            <ToggleRow label="Show shadow" value={p.showShadow ?? false} onChange={v => updateProps({ showShadow: v })} />
+            {p.showShadow && (
+                <>
+                    <ColorRow label="Shadow colour" value={p.shadowColor ?? 'rgba(0,0,0,0.10)'} onChange={v => updateProps({ shadowColor: v })} />
+                    <SliderInput label="Blur" value={p.shadowBlur ?? 12} min={0} max={60} suffix="px" onChange={v => updateProps({ shadowBlur: v })} />
+                    <SliderInput label="Spread" value={p.shadowSpread ?? 0} min={0} max={30} suffix="px" onChange={v => updateProps({ shadowSpread: v })} />
+                    <SliderInput label="X offset" value={p.shadowX ?? 0} min={-30} max={30} suffix="px" onChange={v => updateProps({ shadowX: v })} />
+                    <SliderInput label="Y offset" value={p.shadowY ?? 4} min={-30} max={30} suffix="px" onChange={v => updateProps({ shadowY: v })} />
+                </>
+            )}
+        </Section>
+    )
+}
+
+function UniversalTypography({
+    props, updateProps
+}: {
+    props: Record<string, unknown>
+    updateProps: (p: Record<string, unknown>) => void
+}) {
+    const p = props as any
+    return (
+        <Section title="Font family">
+            <SelectInput
+                label="Font"
+                value={p.fontFamily ?? 'Arial, Helvetica, sans-serif'}
+                options={[
+                    { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                    { v: 'Georgia, Times New Roman, serif', l: 'Georgia' },
+                    { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
+                    { v: "'Trebuchet MS', Helvetica, sans-serif", l: 'Trebuchet' },
+                    { v: "'Times New Roman', Times, serif", l: 'Times New Roman' },
+                    { v: "'Courier New', Courier, monospace", l: 'Courier New' },
+                ]}
+                onChange={v => updateProps({ fontFamily: v })}
+            />
+        </Section>
+    )
+}
+
 function AlignButtons({ value, onChange }: { value: string; onChange: (v: 'left' | 'center' | 'right') => void }) {
     return (
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 8, width: '100%' }}>
             <p style={{ margin: '0 0 5px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>Alignment</p>
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 4, width: '100%' }}>
                 {(['left', 'center', 'right'] as const).map(align => (
                     <button
                         key={align}
@@ -2160,18 +2180,19 @@ function AlignButtons({ value, onChange }: { value: string; onChange: (v: 'left'
                         title={align.charAt(0).toUpperCase() + align.slice(1)}
                         style={{
                             flex: 1,
-                            padding: '5px 0',
+                            padding: '7px 0',
                             border: `1px solid ${value === align ? C.primary : C.inputBorder}`,
                             borderRadius: 6,
                             backgroundColor: value === align ? C.primaryLight : C.surface,
                             color: value === align ? C.primary : C.secondary,
                             cursor: 'pointer',
-                            fontFamily: 'DM Sans, sans-serif',
-                            fontSize: 13,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             transition: 'all 0.12s',
                         }}
                     >
-                        {align === 'left' ? <AlignLeft size={13} /> : align === 'center' ? <AlignCenter size={13} /> : <AlignRight size={13} />}
+                        {align === 'left' ? <AlignLeft size={14} /> : align === 'center' ? <AlignCenter size={14} /> : <AlignRight size={14} />}
                     </button>
                 ))}
             </div>
