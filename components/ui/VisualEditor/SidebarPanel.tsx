@@ -27,6 +27,7 @@ import BodySettings from './BodySettings'
 import ImagesTab from './ImagesTab'
 import AuditTab from './AuditTab'
 import TokensTab from './TokensTab'
+import SavedTab from './SavedTab'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -83,6 +84,9 @@ interface SidebarPanelProps {
     onInsertToken: (value: string) => void
     tokenFeedback?: { type: 'success' | 'error', msg: string } | null
     selectedBlockLabel?: string | null
+
+    // SavedTab props
+    onLoadTemplate: (name: string, blocks: Block[], settings: CanvasSettings) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -107,6 +111,7 @@ export default function SidebarPanel({
     onInsertToken,
     tokenFeedback,
     selectedBlockLabel,
+    onLoadTemplate,
 }: SidebarPanelProps) {
     return (
         <div style={{
@@ -183,6 +188,12 @@ export default function SidebarPanel({
                         />
                     )}
 
+                    {activeTab === 'saved' && (
+                        <SavedTab
+                            onLoad={onLoadTemplate}
+                        />
+                    )}
+
                     {/* Null state — no tab selected (panel shouldn't open, but safety fallback) */}
                     {!activeTab && (
                         <div style={{
@@ -222,6 +233,7 @@ const TAB_LABELS: Record<RailTabId, string> = {
     images: 'Images',
     audit: 'eBay Audit',
     tokens: 'Dynamic Tokens',
+    saved: 'Saved Templates',
 }
 
 function TabHeader({ activeTab }: { activeTab: RailTabId }) {

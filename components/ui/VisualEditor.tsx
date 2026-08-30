@@ -20,6 +20,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { createClient } from '@/lib/supabase'
 import {
     Undo2, Redo2, Trash2, Eye, EyeOff,
     AlertTriangle, CheckCircle2, X,
@@ -310,6 +311,66 @@ export default function VisualEditor({
     }, [rebuildAndEmit])
 
     // ── Undo / Redo ───────────────────────────────────────────────────────────
+    // ── Save / Load state ─────────────────────────────────────────────────────
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+
+    const handleSave = useCallback(async () => {
+        if (blocks.length === 0) return
+        setSaveStatus('saving')
+        try {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('Not logged in')
+
+            await supabase
+                .from('visual_templates')
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .insert({
+                    user_id: user.id,
+                    name: templateName || 'My Template',
+                    blocks_json: blocks,
+                    canvas_settings_json: canvasSettings,
+                } as any)
+            setSaveStatus('saved')
+            setTimeout(() => setSaveStatus('idle'), 2500)
+        } catch (e) {
+            console.error('[VisualEditor] save error:', e)
+            setSaveStatus('error')
+            setTimeout(() => setSaveStatus('idle'), 3000)
+        }
+    }, [blocks, canvasSettings, templateName])
+
+    const handleLoadTemplate = useCallback((
+        name: string,
+        loadedBlocks: Block[],
+        loadedSettings: CanvasSettings,
+    ) => {
+        if (blocks.length > 0) {
+            if (!window.confirm('Load this template? Your current canvas will be replaced.')) return
+        }
+        pushUndo(blocks)
+        setTemplateName(name)
+        setSelectedId(null)
+        rebuildAndEmit(loadedBlocks, loadedSettings)
+        setBlocks(loadedBlocks)
+        setCanvasSettings(loadedSettings)
+    }, [blocks, pushUndo, rebuildAndEmit])
+
+    const handleExport = useCallback(() => {
+        if (blocks.length === 0) return
+        const html = assembleDocument(blocks, canvasSettings)
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        const safeName = (templateName || 'my-template').replace(/[^a-z0-9_-]/gi, '-').toLowerCase()
+        a.href = url
+        a.download = `${safeName}.html`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+    }, [blocks, canvasSettings, templateName])
+
     const handleUndo = useCallback(() => {
         setUndoStack(prev => {
             if (prev.length === 0) return prev
@@ -534,6 +595,9 @@ export default function VisualEditor({
                 onToggleFocusMode={() => setFocusMode(p => !p)}
                 onZoomChange={setCanvasZoom}
                 onTemplateNameChange={setTemplateName}
+                onSave={handleSave}
+                saveStatus={saveStatus}
+                onExport={handleExport}
                 onClearAll={() => {
                     if (blocks.length === 0) return
                     if (window.confirm('Clear all blocks? This cannot be undone.')) {
@@ -597,6 +661,7 @@ export default function VisualEditor({
                     onInsertToken={handleInsertToken}
                     tokenFeedback={tokenFeedback}
                     selectedBlockLabel={selectedBlock ? (getDefinition(selectedBlock.type)?.label ?? null) : null}
+                    onLoadTemplate={handleLoadTemplate}
                 />}
 
                 {/* CENTRE — Canvas or Live Preview */}
@@ -720,6 +785,9 @@ interface EditorToolbarProps {
     onToggleFocusMode: () => void
     onZoomChange: (z: number) => void
     onTemplateNameChange: (name: string) => void
+    onSave: () => void
+    saveStatus: 'idle' | 'saving' | 'saved' | 'error'
+    onExport: () => void
     onClearAll: () => void
 }
 
@@ -727,7 +795,7 @@ function EditorToolbar({
     blockCount, selectedBlock, canUndo, canRedo, undoDepth,
     livePreview, focusMode, canvasZoom, templateName,
     onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
-    onZoomChange, onTemplateNameChange, onClearAll,
+    onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -797,6 +865,42 @@ function EditorToolbar({
                 </div>
             </div>
 
+            {/* Save button */}
+            <button
+                onClick={onSave}
+                disabled={blockCount === 0 || saveStatus === 'saving'}
+                title="Save template to your account"
+                style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '5px 14px',
+                    border: `1px solid ${saveStatus === 'saved' ? '#86efac' :
+                            saveStatus === 'error' ? '#fecaca' :
+                                C.border
+                        }`,
+                    borderRadius: 8,
+                    backgroundColor:
+                        saveStatus === 'saved' ? '#dcfce7' :
+                            saveStatus === 'error' ? '#fee2e2' :
+                                'transparent',
+                    color:
+                        saveStatus === 'saved' ? '#16a34a' :
+                            saveStatus === 'error' ? '#ef4444' :
+                                blockCount === 0 ? C.muted : C.secondary,
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 12, fontWeight: saveStatus !== 'idle' ? 700 : 400,
+                    cursor: blockCount === 0 || saveStatus === 'saving' ? 'default' : 'pointer',
+                    opacity: blockCount === 0 ? 0.5 : 1,
+                    transition: 'all 0.2s',
+                    flexShrink: 0,
+                }}
+            >
+                <CheckCircle2 size={13} />
+                {saveStatus === 'saving' ? 'Saving…' :
+                    saveStatus === 'saved' ? 'Saved ✓' :
+                        saveStatus === 'error' ? 'Error — retry' :
+                            'Save'}
+            </button>
+
             {/* Centre — Live Preview toggle */}
             <button
                 onClick={onToggleLivePreview}
@@ -842,6 +946,32 @@ function EditorToolbar({
                 <ToolbarButton onClick={onToggleFocusMode} title={focusMode ? 'Exit focus mode (Cmd+F)' : 'Focus mode — hide panels (Cmd+F)'}>
                     <span style={{ fontSize: 13, color: focusMode ? C.primary : C.secondary }}>{focusMode ? '⊡' : '⊞'}</span>
                 </ToolbarButton>
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
+                {/* Export HTML */}
+                <button
+                    onClick={onExport}
+                    disabled={blockCount === 0}
+                    title="Download assembled HTML file — ready to paste into eBay"
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: '4px 12px',
+                        border: `1px solid ${blockCount === 0 ? C.border : C.primary}`,
+                        borderRadius: 7,
+                        backgroundColor: blockCount === 0 ? 'transparent' : C.primary,
+                        color: blockCount === 0 ? C.muted : '#ffffff',
+                        fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                        cursor: blockCount === 0 ? 'default' : 'pointer',
+                        opacity: blockCount === 0 ? 0.5 : 1,
+                        transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { if (blockCount > 0) e.currentTarget.style.backgroundColor = '#6020e0' }}
+                    onMouseLeave={e => { if (blockCount > 0) e.currentTarget.style.backgroundColor = '#7530fb' }}
+                >
+                    <CheckCircle2 size={12} />
+                    Export HTML
+                </button>
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 

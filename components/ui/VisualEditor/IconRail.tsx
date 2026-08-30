@@ -30,7 +30,7 @@
 import React, { useState } from 'react'
 import {
     LayoutTemplate, Layers, Settings, Image,
-    ShieldCheck, Tag, PanelLeftClose, PanelLeftOpen,
+    ShieldCheck, Tag, Bookmark, PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react'
 
 // ── Design tokens — exact Riazify sidebar system ──────────────────────────────
@@ -48,7 +48,7 @@ const C = {
 }
 
 // ── Tab definition ────────────────────────────────────────────────────────────
-export type RailTabId = 'blocks' | 'templates' | 'body' | 'images' | 'audit' | 'tokens'
+export type RailTabId = 'blocks' | 'templates' | 'body' | 'images' | 'audit' | 'tokens' | 'saved'
 
 interface RailTab {
     id: RailTabId
@@ -64,6 +64,7 @@ const TABS: RailTab[] = [
     { id: 'images', label: 'Images', Icon: Image, shortcut: 'I' },
     { id: 'audit', label: 'Audit', Icon: ShieldCheck, shortcut: 'A' },
     { id: 'tokens', label: 'Tokens', Icon: Tag, shortcut: 'K' },
+    { id: 'saved', label: 'Saved', Icon: Bookmark, shortcut: 'S' },
 ]
 
 // ── Props ─────────────────────────────────────────────────────────────────────
