@@ -404,6 +404,7 @@ export interface SpecsTableProps extends CommonProps {
     fontSize: number
     showTitle: boolean
     titleText: string
+    variant: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -462,6 +463,8 @@ export interface TrustBadgesProps extends CommonProps {
     borderColor: string
     borderRadius: number
     align: 'left' | 'center' | 'right'  // badge row alignment
+    subTextColor: string
+    variant: string
 }
 
 // ── Shipping Info Bar ─────────────────────────────────────────────────────────
@@ -530,6 +533,8 @@ export interface PolicyTabsProps extends CommonProps {
     borderColor: string
     borderRadius: number
     fontSize: number
+    contentBg: string
+    variant: string
 }
 
 // ── Navigation Bar ────────────────────────────────────────────────────────────
@@ -544,6 +549,7 @@ export interface NavBarProps extends CommonProps {
     fontWeight: string        // link font weight (default '700')
     letterSpacing: number     // px converted to em in toHtml (default 3 = 0.03em)
     borderRadius: number
+    variant: string
 }
 
 // ── Urgency Bar ───────────────────────────────────────────────────────────────
@@ -638,6 +644,10 @@ export interface RawHtmlProps extends CommonProps {
 import { getHeroVariant as _getHeroVariant } from './variants/hero_header.variants'
 import { getProductImageVariant as _getProductImageVariant } from './variants/product_image.variants'
 import { getPriceVariant as _getPriceVariant } from './variants/price_block.variants'
+import { getTrustBadgesVariant as _getTBVariant } from './variants/trust_badges.variants'
+import { getNavBarVariant as _getNavBarVariant } from './variants/nav_bar.variants'
+import { getSpecsTableVariant as _getSpecsVariant } from './variants/specs_table.variants'
+import { getPolicyTabsVariant as _getPolicyTabsVariant } from './variants/policy_tabs.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
@@ -1200,70 +1210,12 @@ ${rows}
             fontSize: 13,
             showTitle: true,
             titleText: 'Item Specifics',
+            variant: 'full',
         } as SpecsTableProps,
         toHtml(props, id) {
             const p = props as SpecsTableProps
-            const titleHtml = p.showTitle
-                ? `<p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#1e1535;border-left:4px solid #7530fb;padding-left:12px;">${p.titleText}</p>`
-                : ''
-            const rows = p.rows.map((row, i) =>
-                `        <tr>
-          <td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:700;color:#1e1535;border:1px solid ${p.borderColor};background-color:${i % 2 === 0 ? p.rowBg : p.altRowBg};width:40%;">${row.key}</td>
-          <td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:#6b7280;border:1px solid ${p.borderColor};background-color:${i % 2 === 0 ? p.rowBg : p.altRowBg};">${row.value}</td>
-        </tr>`
-            ).join('\n')
-            return wrapBlock('specs_table', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      ${titleHtml}
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-${rows}
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
-        },
-    },
-
-    // ── MEDIA ────────────────────────────────────────────────────────────────
-
-    {
-        type: 'image',
-        label: 'Image',
-        category: 'Media',
-        icon: 'camera',
-        description: 'Single image block',
-        defaultProps: {
-            ...DEFAULT_COMMON,
-            src: 'https://via.placeholder.com/700x300/f3eeff/7530fb?text=Add+Image+URL',
-            alt: 'Image',
-            width: 100,
-            widthUnit: '%',
-            align: 'center',
-            borderRadius: 0,
-            linkUrl: '',
-            bgColor: '#ffffff',
-        } as ImageProps,
-        toHtml(props, id) {
-            const p = props as ImageProps
-            const widthStyle = `width:${p.width}${p.widthUnit};max-width:100%;`
-            const imgTag = `<img src="${p.src}" alt="${p.alt}" border="0"
-        style="${widthStyle}height:auto;display:block;${imgMargin(p.align)}border-radius:${p.borderRadius}px;" />`
-            const content = p.linkUrl
-                ? `<a href="${p.linkUrl}" style="display:block;${imgMargin(p.align)}">${imgTag}</a>`
-                : imgTag
-            return wrapBlock('image', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}${textAlign(p.align)}">
-      ${content}
-    </td>
-  </tr>
-</table>`
-            )
-        },
+            return _getSpecsVariant(p.variant ?? 'full').toHtml(p, id)
+        }
     },
 
     {
@@ -1388,32 +1340,13 @@ ${thumbCells}
             borderColor: '#ede9fe',
             borderRadius: 8,
             align: 'center',
+            subTextColor: '#6b7280',
+            variant: 'row',
         } as TrustBadgesProps,
         toHtml(props, id) {
             const p = props as TrustBadgesProps
-            const colWidth = Math.floor(100 / p.badges.length)
-            const cells = p.badges.map(b =>
-                `        <td width="${colWidth}%" style="text-align:${p.align ?? 'center'};padding:12px 8px;">
-          <div style="display:inline-block;background-color:${p.badgeBg};border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;padding:10px 14px;min-width:80px;">
-            <p style="margin:0 0 4px;font-size:18px;">${b.icon}</p>
-            <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.textColor};">${b.text}</p>
-          </div>
-        </td>`
-            ).join('\n')
-            return wrapBlock('trust_badges', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-${cells}
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
-        },
+            return _getTBVariant(p.variant ?? 'row').toHtml(p, id)
+        }
     },
 
     {
@@ -1595,33 +1528,13 @@ ${cells}
             borderColor: '#ede9fe',
             borderRadius: 8,
             fontSize: 13,
+            contentBg: '#ffffff',
+            variant: 'tabbed',
         } as PolicyTabsProps,
         toHtml(props, id) {
             const p = props as PolicyTabsProps
-            const tabHeaders = p.tabs.map((tab, i) =>
-                `<td style="padding:10px 16px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:700;cursor:pointer;white-space:nowrap;${i === 0
-                    ? `background-color:${p.activeBg};color:${p.activeText};border-bottom:2px solid ${p.activeBg};`
-                    : `background-color:${p.inactiveBg};color:${p.inactiveText};border-bottom:2px solid ${p.borderColor};`
-                }">${tab.label}</td>`
-            ).join('<td style="width:4px;"></td>')
-
-            // Show first tab content by default
-            const firstTab = p.tabs[0]
-            return wrapBlock('policy_tabs', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;overflow:hidden;">
-      <!-- Tab headers -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>${tabHeaders}</tr>
-      </table>
-      <!-- Tab contents (all shown in email, tabs shown via label above) -->
-${p.tabs.map((tab, i) => `      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="${i > 0 ? 'display:none;' : ''}"><tr><td style="padding:16px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:#6b7280;line-height:1.7;border-top:1px solid ${p.borderColor};"><strong style="display:block;margin-bottom:6px;color:#1e1535;">${tab.label}</strong>${tab.content}</td></tr></table>`).join('')}
-    </td>
-  </tr>
-</table>`
-            )
-        },
+            return _getPolicyTabsVariant(p.variant ?? 'tabbed').toHtml(p, id)
+        }
     },
 
     {
@@ -1650,28 +1563,12 @@ ${p.tabs.map((tab, i) => `      <table width="100%" cellpadding="0" cellspacing=
             fontWeight: '700',
             letterSpacing: 3,
             borderRadius: 0,
+            variant: 'dark',
         } as NavBarProps,
         toHtml(props, id) {
             const p = props as NavBarProps
-            const sep = `<td style="padding:0 8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:rgba(255,255,255,0.4);">${p.separator}</td>`
-            const linkCells = p.links.map((link, i) => {
-                const sepCell = i > 0 ? sep : ''
-                const linkCell = `<td style="white-space:nowrap;"><a href="${link.url}" style="font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '700'};color:${p.textColor};text-decoration:none;letter-spacing:${(p.letterSpacing ?? 3) / 100}em;">${link.label}</a></td>`
-                return sepCell + linkCell
-            }).join('')
-            const alignMap: Record<string, string> = { left: 'left', center: 'center', right: 'right' }
-            return wrapBlock('nav_bar', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;border-radius:${p.borderRadius}px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table cellpadding="0" cellspacing="0" border="0" align="${alignMap[p.align] ?? 'center'}">
-        <tr>${linkCells}</tr>
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
-        },
+            return _getNavBarVariant(p.variant ?? 'dark').toHtml(p, id)
+        }
     },
 
     {

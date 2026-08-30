@@ -390,7 +390,8 @@ export default function PropertiesPanel({
 // Visual styling — colours, spacing, typography, borders
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT PICKER — visual style cards shown at top of Styles tab
-const VARIANT_THUMBNAILS: Record<string, (col: string, light: string) => JSX.Element> = {
+type ThumbFn = (col: string, light: string) => JSX.Element
+const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     // ── Hero Header ───────────────────────────────────────────────────────────
     'gradient': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
@@ -668,6 +669,273 @@ const VARIANT_THUMBNAILS: Record<string, (col: string, light: string) => JSX.Ele
             <rect x="50" y="7" width="25" height="22" rx="5" fill="#16a34a" />
             <rect x="52" y="13" width="21" height="4" rx="2" fill="white" opacity="0.95" />
             <rect x="54" y="19" width="17" height="3" rx="1.5" fill="white" opacity="0.7" />
+        </svg>
+    ),
+
+    // ── Trust Badges ─────────────────────────────────────────────────────────
+    'row': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="10" width="16" height="16" rx="3" fill={col} opacity="0.3" />
+            <rect x="22" y="10" width="16" height="16" rx="3" fill={col} opacity="0.3" />
+            <rect x="40" y="10" width="16" height="16" rx="3" fill={col} opacity="0.3" />
+            <rect x="58" y="10" width="16" height="16" rx="3" fill={col} opacity="0.3" />
+            <circle cx="12" cy="15" r="4" fill={col} opacity="0.6" />
+            <circle cx="30" cy="15" r="4" fill={col} opacity="0.6" />
+            <circle cx="48" cy="15" r="4" fill={col} opacity="0.6" />
+            <circle cx="66" cy="15" r="4" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    'grid': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="3" y="3" width="35" height="14" rx="3" fill={col} opacity="0.25" />
+            <rect x="42" y="3" width="35" height="14" rx="3" fill={col} opacity="0.25" />
+            <rect x="3" y="19" width="35" height="14" rx="3" fill={col} opacity="0.25" />
+            <rect x="42" y="19" width="35" height="14" rx="3" fill={col} opacity="0.25" />
+            <circle cx="11" cy="10" r="3" fill={col} opacity="0.6" />
+            <circle cx="50" cy="10" r="3" fill={col} opacity="0.6" />
+            <circle cx="11" cy="26" r="3" fill={col} opacity="0.6" />
+            <circle cx="50" cy="26" r="3" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    'strip': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="10" cy="18" r="3" fill={col} opacity="0.7" />
+            <rect x="15" y="15.5" width="10" height="5" rx="2.5" fill={col} opacity="0.4" />
+            <rect x="29" y="17" width="1" height="2" fill="#e5e7eb" />
+            <circle cx="35" cy="18" r="3" fill={col} opacity="0.7" />
+            <rect x="40" y="15.5" width="10" height="5" rx="2.5" fill={col} opacity="0.4" />
+            <rect x="54" y="17" width="1" height="2" fill="#e5e7eb" />
+            <circle cx="60" cy="18" r="3" fill={col} opacity="0.7" />
+            <rect x="65" y="15.5" width="10" height="5" rx="2.5" fill={col} opacity="0.4" />
+        </svg>
+    ),
+    'icon-only': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <circle cx="12" cy="15" r="7" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <circle cx="12" cy="15" r="3" fill={col} opacity="0.5" />
+            <circle cx="32" cy="15" r="7" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <circle cx="32" cy="15" r="3" fill={col} opacity="0.5" />
+            <circle cx="52" cy="15" r="7" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <circle cx="52" cy="15" r="3" fill={col} opacity="0.5" />
+            <circle cx="70" cy="15" r="7" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <circle cx="70" cy="15" r="3" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    'text-only': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="3" y="12" width="16" height="12" rx="6" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <rect x="22" y="12" width="20" height="12" rx="6" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <rect x="45" y="12" width="14" height="12" rx="6" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+            <rect x="62" y="12" width="15" height="12" rx="6" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
+        </svg>
+    ),    // ── Nav Bar ───────────────────────────────────────────────────────────────
+    'dark': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e293b" />
+            <rect x="8" y="15" width="10" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="22" y="15" width="14" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="40" y="15" width="10" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="54" y="15" width="12" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    'light': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="15" width="10" height="3" rx="1.5" fill="#374151" opacity="0.7" />
+            <rect x="22" y="15" width="14" height="3" rx="1.5" fill="#374151" opacity="0.7" />
+            <rect x="40" y="15" width="10" height="3" rx="1.5" fill="#374151" opacity="0.7" />
+            <rect x="54" y="15" width="12" height="3" rx="1.5" fill="#374151" opacity="0.7" />
+        </svg>
+    ),
+    'underline': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="14" width="10" height="3" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="8" y="20" width="10" height="2" rx="1" fill={col} />
+            <rect x="22" y="14" width="14" height="3" rx="1.5" fill="#374151" opacity="0.5" />
+            <rect x="40" y="14" width="10" height="3" rx="1.5" fill="#374151" opacity="0.5" />
+            <rect x="54" y="14" width="12" height="3" rx="1.5" fill="#374151" opacity="0.5" />
+        </svg>
+    ),
+    'pills': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="12" width="16" height="12" rx="6" fill={col} opacity="0.85" />
+            <rect x="23" y="12" width="20" height="12" rx="6" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="46" y="12" width="14" height="12" rx="6" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="63" y="12" width="14" height="12" rx="6" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+        </svg>
+    ),
+    'centered': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e293b" />
+            <rect x="26" y="7" width="28" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="8" y="22" width="10" height="3" rx="1.5" fill="white" opacity="0.5" />
+            <rect x="22" y="22" width="14" height="3" rx="1.5" fill="white" opacity="0.5" />
+            <rect x="40" y="22" width="10" height="3" rx="1.5" fill="white" opacity="0.5" />
+            <rect x="54" y="22" width="12" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+    'left-aligned': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e293b" />
+            <rect x="6" y="14" width="20" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="42" y="15" width="10" height="3" rx="1.5" fill="white" opacity="0.5" />
+            <rect x="55" y="15" width="10" height="3" rx="1.5" fill="white" opacity="0.5" />
+            <rect x="68" y="15" width="8" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+    // ── Specs Table ───────────────────────────────────────────────────────────
+    'full': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="0" y="0" width="80" height="8" rx="3" fill={col} opacity="0.8" />
+            <rect x="0" y="10" width="30" height="4" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="32" y="10" width="40" height="4" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="0" y="17" width="30" height="4" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="32" y="17" width="35" height="4" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="0" y="24" width="30" height="4" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="32" y="24" width="38" height="4" rx="1" fill="#6b7280" opacity="0.4" />
+        </svg>
+    ),
+    'two-column': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="0" y="0" width="80" height="8" rx="3" fill={col} opacity="0.8" />
+            <rect x="2" y="11" width="16" height="3" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="20" y="11" width="16" height="3" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="42" y="11" width="16" height="3" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="60" y="11" width="16" height="3" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="2" y="17" width="16" height="3" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="20" y="17" width="14" height="3" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="42" y="17" width="16" height="3" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="60" y="17" width="12" height="3" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="38" y="8" width="2" height="28" fill="#e5e7eb" />
+        </svg>
+    ), 'zebra': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" />
+            <rect x="0" y="0" width="80" height="6" rx="3" fill="white" />
+            <rect x="2" y="1" width="30" height="4" rx="1" fill={col} opacity="0.8" />
+            <rect x="0" y="8" width="80" height="7" fill="#f5f3ff" />
+            <rect x="0" y="15" width="80" height="7" fill="white" />
+            <rect x="0" y="22" width="80" height="7" fill="#f5f3ff" />
+            <rect x="0" y="29" width="80" height="7" fill="white" />
+            <rect x="2" y="10" width="22" height="3" rx="1" fill={col} opacity="0.5" />
+            <rect x="2" y="17" width="22" height="3" rx="1" fill={col} opacity="0.5" />
+            <rect x="2" y="24" width="22" height="3" rx="1" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    'card': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="4" width="36" height="12" rx="3" fill="white" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="2" y="20" width="36" height="12" rx="3" fill="white" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="42" y="4" width="36" height="12" rx="3" fill="white" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="42" y="20" width="36" height="12" rx="3" fill="white" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="5" y="7" width="14" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="5" y="11" width="20" height="2.5" rx="1" fill="#374151" opacity="0.5" />
+            <rect x="5" y="23" width="14" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="5" y="27" width="18" height="2.5" rx="1" fill="#374151" opacity="0.5" />
+        </svg>
+    ),
+    'highlighted': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="0" y="0" width="80" height="9" rx="3" fill={col} opacity="0.9" />
+            <rect x="6" y="2.5" width="20" height="4" rx="1" fill="white" opacity="0.9" />
+            <rect x="0" y="11" width="30" height="5" rx="0" fill="#f9fafb" />
+            <rect x="2" y="12.5" width="18" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="32" y="12.5" width="28" height="2" rx="1" fill="#4b5563" opacity="0.5" />
+            <rect x="0" y="18" width="30" height="5" rx="0" fill="#f9fafb" />
+            <rect x="2" y="19.5" width="18" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="32" y="19.5" width="24" height="2" rx="1" fill="#4b5563" opacity="0.5" />
+            <rect x="0" y="25" width="30" height="5" rx="0" fill="#f9fafb" />
+            <rect x="2" y="26.5" width="18" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="32" y="26.5" width="30" height="2" rx="1" fill="#4b5563" opacity="0.5" />
+        </svg>
+    ),
+    // ── Policy Tabs ───────────────────────────────────────────────────────────
+    'tabbed': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="0" y="0" width="20" height="10" rx="2" fill={col} opacity="0.85" />
+            <rect x="22" y="0" width="20" height="10" rx="2" fill="#e5e7eb" />
+            <rect x="44" y="0" width="20" height="10" rx="2" fill="#e5e7eb" />
+            <rect x="0" y="10" width="80" height="26" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="17" width="50" height="3" rx="1.5" fill="#9ca3af" opacity="0.6" />
+            <rect x="6" y="23" width="40" height="3" rx="1.5" fill="#9ca3af" opacity="0.4" />
+        </svg>
+    ),
+    'stacked': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="2" width="3" height="10" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="8" y="4" width="20" height="3" rx="1" fill={col} opacity="0.7" />
+            <rect x="8" y="9" width="50" height="2" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="2" y="15" width="3" height="10" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="8" y="17" width="24" height="3" rx="1" fill={col} opacity="0.7" />
+            <rect x="8" y="22" width="45" height="2" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="2" y="28" width="3" height="7" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="8" y="30" width="18" height="3" rx="1" fill={col} opacity="0.7" />
+        </svg>
+    ),
+    'accordion': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="2" width="76" height="8" rx="3" fill={col} opacity="0.85" />
+            <rect x="6" y="4.5" width="20" height="3" rx="1" fill="white" opacity="0.9" />
+            <rect x="70" y="4.5" width="6" height="3" rx="1" fill="white" opacity="0.7" />
+            <rect x="2" y="12" width="76" height="14" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="16" width="50" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="6" y="20" width="40" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+            <rect x="2" y="28" width="76" height="7" rx="3" fill="#f3f4f6" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="30" width="18" height="3" rx="1" fill="#6b7280" opacity="0.6" />
+        </svg>
+    ),
+    'side-nav': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="0" y="0" width="22" height="36" rx="3" fill="#f3f4f6" />
+            <rect x="2" y="4" width="18" height="6" rx="2" fill={col} opacity="0.85" />
+            <rect x="4" y="13" width="14" height="3" rx="1" fill="#9ca3af" opacity="0.6" />
+            <rect x="4" y="19" width="14" height="3" rx="1" fill="#9ca3af" opacity="0.6" />
+            <rect x="4" y="25" width="14" height="3" rx="1" fill="#9ca3af" opacity="0.6" />
+            <rect x="26" y="4" width="40" height="3" rx="1" fill={col} opacity="0.7" />
+            <rect x="26" y="10" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+            <rect x="26" y="15" width="44" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+            <rect x="26" y="20" width="46" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+        </svg>
+    ),
+    'pills-nav': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="3" width="16" height="8" rx="4" fill={col} opacity="0.85" />
+            <rect x="23" y="3" width="20" height="8" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="46" y="3" width="14" height="8" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="63" y="3" width="14" height="8" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="2" y="14" width="76" height="20" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="19" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="6" y="24" width="38" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+        </svg>
+    ),
+    'icon-tabs': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="0" y="0" width="20" height="12" rx="2" fill={col} opacity="0.85" />
+            <rect x="21" y="0" width="19" height="12" rx="2" fill="#e5e7eb" />
+            <rect x="41" y="0" width="19" height="12" rx="2" fill="#e5e7eb" />
+            <rect x="61" y="0" width="19" height="12" rx="2" fill="#e5e7eb" />
+            <circle cx="10" cy="5" r="2.5" fill="white" opacity="0.8" />
+            <rect x="4" y="9" width="12" height="2" rx="1" fill="white" opacity="0.6" />
+            <rect x="0" y="12" width="80" height="24" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="19" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
+            <rect x="6" y="24" width="36" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
         </svg>
     ),
 }
@@ -1438,21 +1706,31 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'specs_table':
+        case 'specs_table': {
+            const pv = props.variant ?? 'full'
             return (
                 <>
                     <Section title="Header">
                         <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v })} />
                         <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                        <ToggleRow label="Show title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
                     </Section>
-                    <Section title="Rows">
-                        <ColorRow label="Row background" value={props.rowBg ?? '#ffffff'} onChange={v => updateProps({ rowBg: v })} />
-                        <ColorRow label="Alt row background" value={props.altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v })} />
-                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
-                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                    </Section>
+                    {(pv === 'full' || pv === 'two-column' || pv === 'highlighted') && (
+                        <Section title="Rows">
+                            <ColorRow label="Row background" value={props.rowBg ?? '#ffffff'} onChange={v => updateProps({ rowBg: v })} />
+                            <ColorRow label="Alt row background" value={props.altRowBg ?? '#f8fafc'} onChange={v => updateProps({ altRowBg: v })} />
+                            <ColorRow label="Border colour" value={props.borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v })} />
+                            <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={16} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        </Section>
+                    )}
+                    {pv === 'zebra' && (
+                        <Section title="Zebra colours">
+                            <ColorRow label="Accent colour" value={props.headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'image':
             return (
@@ -1504,21 +1782,30 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'trust_badges':
+        case 'trust_badges': {
+            const pv = props.variant ?? 'row'
             return (
                 <>
                     <Section title="Colours">
-                        <ColorRow label="Badge background" value={props.badgeBg ?? '#ffffff'} onChange={v => updateProps({ badgeBg: v })} />
-                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Subtext colour" value={props.subTextColor ?? '#6b7280'} onChange={v => updateProps({ subTextColor: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#f0f9ff'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#bfdbfe'} onChange={v => updateProps({ borderColor: v })} />
                     </Section>
-                    <Section title="Layout">
-                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
-                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
-                    </Section>
+                    {(pv === 'row' || pv === 'grid') && (
+                        <Section title="Layout">
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 10} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        </Section>
+                    )}
+                    {pv === 'credibility' && (
+                        <Section title="Credibility">
+                            <ColorRow label="Accent (stars/badge)" value={props.iconColor ?? '#f59e0b'} onChange={v => updateProps({ iconColor: v })} />
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'shipping_info':
             return (
@@ -1631,62 +1918,56 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'policy_tabs':
+        case 'policy_tabs': {
+            const pv = props.variant ?? 'tabbed'
             return (
                 <>
-                    <Section title="Tab colours">
+                    <Section title="Active tab">
                         <ColorRow label="Active background" value={props.activeBg ?? '#7530fb'} onChange={v => updateProps({ activeBg: v })} />
                         <ColorRow label="Active text" value={props.activeText ?? '#ffffff'} onChange={v => updateProps({ activeText: v })} />
-                        <ColorRow label="Inactive background" value={props.inactiveBg ?? '#f8f7ff'} onChange={v => updateProps({ inactiveBg: v })} />
+                    </Section>
+                    <Section title="Inactive tab">
+                        <ColorRow label="Inactive background" value={props.inactiveBg ?? '#f3f4f6'} onChange={v => updateProps({ inactiveBg: v })} />
                         <ColorRow label="Inactive text" value={props.inactiveText ?? '#6b7280'} onChange={v => updateProps({ inactiveText: v })} />
-                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
                     </Section>
-                    <Section title="Typography">
-                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                    </Section>
-                    <Section title="Layout">
-                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    <Section title="Content">
+                        <ColorRow label="Content background" value={props.contentBg ?? '#ffffff'} onChange={v => updateProps({ contentBg: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={16} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                     </Section>
                 </>
             )
+        }
 
-        case 'nav_bar':
+        case 'nav_bar': {
+            const pv = props.variant ?? 'dark'
             return (
                 <>
-                    <Section title="Colours">
-                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Link colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Hover colour" value={props.hoverColor ?? '#b8fa33'} onChange={v => updateProps({ hoverColor: v })} />
-                        <InfoBox>
-                            Hover colour shows in Live Preview only — eBay strips CSS hover states in listings.
-                        </InfoBox>
-                    </Section>
-                    <Section title="Typography">
-                        <SliderInput label="Font size" value={props.fontSize ?? 12} min={10} max={20} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                        <SelectInput
-                            label="Font weight"
-                            value={props.fontWeight ?? '700'}
-                            options={[
-                                { v: '400', l: 'Regular' },
-                                { v: '600', l: 'Semibold' },
-                                { v: '700', l: 'Bold' },
-                                { v: '800', l: 'Extrabold' },
-                            ]}
-                            onChange={v => updateProps({ fontWeight: v })}
-                        />
-                        <SliderInput
-                            label="Letter spacing"
-                            value={props.letterSpacing ?? 3}
-                            min={0} max={10} suffix="px"
-                            onChange={v => updateProps({ letterSpacing: v })}
-                        />
-                    </Section>
-                    <Section title="Layout">
-                        <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    <Section title="Links">
+                        <ColorRow label="Text colour" value={props.textColor ?? '#94a3b8'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Hover colour" value={props.hoverColor ?? '#7530fb'} onChange={v => updateProps({ hoverColor: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 12} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SliderInput label="Font weight" value={parseInt(props.fontWeight ?? '600')} min={400} max={900} step={100} onChange={v => updateProps({ fontWeight: String(v) })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
+                    {(pv === 'dark' || pv === 'centered' || pv === 'left-aligned') && (
+                        <Section title="Background">
+                            <ColorRow label="Background" value={props.bgColor ?? '#1e293b'} onChange={v => updateProps({ bgColor: v })} />
+                        </Section>
+                    )}
+                    {pv === 'pills' && (
+                        <Section title="Pills">
+                            <ColorRow label="Active pill colour" value={props.hoverColor ?? '#7530fb'} onChange={v => updateProps({ hoverColor: v })} />
+                        </Section>
+                    )}
+                    {pv === 'underline' && (
+                        <Section title="Underline">
+                            <ColorRow label="Accent colour" value={props.hoverColor ?? '#7530fb'} onChange={v => updateProps({ hoverColor: v })} />
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'urgency_bar':
             return (
