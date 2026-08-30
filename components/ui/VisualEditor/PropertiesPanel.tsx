@@ -389,6 +389,698 @@ export default function PropertiesPanel({
 // STYLES TAB
 // Visual styling — colours, spacing, typography, borders
 // ─────────────────────────────────────────────────────────────────────────────
+// VARIANT PICKER — visual style cards shown at top of Styles tab
+const VARIANT_THUMBNAILS: Record<string, (col: string, light: string) => JSX.Element> = {
+    // ── Hero Header ───────────────────────────────────────────────────────────
+    'gradient': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <defs><linearGradient id="vg1" x1="0" y1="0" x2="80" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stopColor={col} stopOpacity="0.8" /><stop offset="1" stopColor={col} stopOpacity="0.3" />
+            </linearGradient></defs>
+            <rect width="80" height="36" rx="3" fill="url(#vg1)" />
+            <rect x="20" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="24" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    'minimal': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="6" y="14" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="50" y="15" width="24" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+    'image-bg': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.55" />
+            <circle cx="20" cy="14" r="5" fill="white" opacity="0.25" />
+            <path d="M6 28 Q20 20 34 24 Q50 18 74 26" stroke="white" strokeWidth="1.5" fill="none" opacity="0.3" />
+            <rect x="20" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="24" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    'typographic': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="10" y="9" width="60" height="7" rx="2" fill={col} opacity="0.85" />
+            <rect x="34" y="19" width="12" height="2" rx="1" fill={col} />
+            <rect x="16" y="24" width="48" height="3" rx="1.5" fill="#e5e7eb" />
+        </svg>
+    ),
+    // ── Shared — split layout (hero split + product split) ────────────────────
+    'split': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
+            <rect x="52" width="28" height="36" fill={col} opacity="0.3" />
+            <rect x="6" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="6" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="56" y="10" width="18" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="56" y="16" width="14" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="56" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Product Image ─────────────────────────────────────────────────────────
+    'single': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="16" y="4" width="48" height="28" rx="4" fill={col} opacity="0.3" />
+            <circle cx="30" cy="14" r="5" fill={col} opacity="0.4" />
+            <path d="M16 28 Q32 20 48 24 Q60 20 64 28" stroke={col} strokeWidth="1.5" fill="none" opacity="0.5" />
+        </svg>
+    ),
+    'gallery': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="4" width="72" height="18" rx="3" fill={col} opacity="0.3" />
+            <circle cx="16" cy="11" r="4" fill={col} opacity="0.4" />
+            <rect x="4" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
+            <rect x="22" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
+            <rect x="40" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
+            <rect x="58" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    'fullwidth': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.25" />
+            <circle cx="20" cy="16" r="7" fill={col} opacity="0.3" />
+            <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
+        </svg>
+    ),
+    'zoom': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
+            <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
+            <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
+            <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    // ── Product Image: Comparison / Front & Back ──────────────────────────────
+    'comparison': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="3" y="4" width="34" height="28" rx="3" fill={col} opacity="0.25" />
+            <circle cx="16" cy="14" r="5" fill={col} opacity="0.35" />
+            <path d="M3 28 Q16 22 37 26" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
+            <rect x="39" y="17" width="1" height="16" fill="#e2e8f0" />
+            <rect x="43" y="4" width="34" height="28" rx="3" fill={col} opacity="0.15" />
+            <circle cx="56" cy="14" r="5" fill={col} opacity="0.25" />
+            <path d="M43 28 Q56 20 77 24" stroke={col} strokeWidth="1.5" fill="none" opacity="0.3" />
+            <rect x="8" y="30" width="24" height="2" rx="1" fill={col} opacity="0.3" />
+            <rect x="48" y="30" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    // ── Hero Header: Credibility Banner ──────────────────────────────────────
+    'credibility': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="0" y="0" width="30" height="36" fill="rgba(0,0,0,0.15)" />
+            <rect x="4" y="9" width="22" height="4" rx="2" fill="#f59e0b" opacity="0.9" />
+            <rect x="4" y="17" width="18" height="2.5" rx="1.25" fill="white" opacity="0.7" />
+            <rect x="4" y="23" width="14" height="5" rx="2.5" fill="#f59e0b" opacity="0.8" />
+            <rect x="36" y="10" width="36" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="36" y="19" width="28" height="2.5" rx="1.25" fill="white" opacity="0.5" />
+            <rect x="36" y="25" width="22" height="2" rx="1" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Product Image: Lifestyle Shot ─────────────────────────────────────────
+    'lifestyle': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect x="0" y="22" width="80" height="14" rx="0" fill={col} opacity="0.55" />
+            <circle cx="22" cy="13" r="7" fill={col} opacity="0.3" />
+            <rect x="6" y="25" width="40" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="6" y="31" width="28" height="2.5" rx="1.25" fill="white" opacity="0.6" />
+        </svg>
+    ),
+    // ── Product Image: Polaroid ───────────────────────────────────────────────
+    'polaroid': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect x="8" y="2" width="64" height="32" rx="2" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="11" y="5" width="58" height="22" rx="1" fill={col} opacity="0.25" />
+            <circle cx="26" cy="14" r="5" fill={col} opacity="0.35" />
+            <path d="M11 24 Q25 17 40 20 Q55 16 69 22" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
+            <rect x="20" y="29" width="40" height="2.5" rx="1.25" fill="#9ca3af" />
+        </svg>
+    ),
+    // ── Product Image: Before/After ───────────────────────────────────────────
+    'before-after': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="3" width="36" height="24" rx="3" fill={col} opacity="0.2" />
+            <rect x="42" y="3" width="36" height="24" rx="3" fill={col} opacity="0.35" />
+            <rect x="38" y="3" width="4" height="24" fill={col} opacity="0.6" />
+            <rect x="6" y="29" width="28" height="4" rx="2" fill={col} opacity="0.5" />
+            <rect x="46" y="29" width="28" height="4" rx="2" fill={col} opacity="0.7" />
+        </svg>
+    ),
+    // ── Product Image: Magazine Grid ──────────────────────────────────────────
+    'magazine': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
+            <circle cx="18" cy="14" r="7" fill={col} opacity="0.35" />
+            <rect x="52" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
+            <rect x="52" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    // ── Hero Header: Announcement Strip ──────────────────────────────────────
+    'announcement': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="10" y="15" width="60" height="4" rx="2" fill="white" opacity="0.9" />
+            <circle cx="36" cy="17" r="1.5" fill={col} opacity="0.6" />
+            <circle cx="44" cy="17" r="1.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    // ── Hero Header: Dark Luxury ──────────────────────────────────────────────
+    'luxury': (_, __) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#000000" />
+            <rect x="32" y="7" width="16" height="1" fill="#c9a84c" />
+            <rect x="14" y="13" width="52" height="6" rx="2" fill="white" opacity="0.9" />
+            <rect x="32" y="22" width="16" height="1" fill="#c9a84c" />
+            <rect x="20" y="26" width="40" height="2.5" rx="1.25" fill="#c9a84c" opacity="0.7" />
+        </svg>
+    ),
+    // ── Hero Header: Category Banner ─────────────────────────────────────────
+    'category': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="0" y="0" width="5" height="36" rx="2" fill={col} />
+            <rect x="10" y="10" width="35" height="5" rx="2" fill={col} opacity="0.8" />
+            <rect x="10" y="19" width="26" height="3" rx="1.5" fill="#9ca3af" />
+            <rect x="54" y="12" width="20" height="10" rx="4" fill={col} opacity="0.85" />
+            <rect x="56" y="15" width="16" height="4" rx="2" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    // ── Hero Header: Seasonal / Sale ─────────────────────────────────────────
+    'seasonal': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e1535" />
+            <rect x="4" y="6" width="22" height="24" rx="5" fill="#dc2626" />
+            <rect x="7" y="14" width="16" height="6" rx="2" fill="white" opacity="0.95" />
+            <rect x="32" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="32" y="20" width="30" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+
+    // ── Price Block ───────────────────────────────────────────────────────────
+    'simple': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="12" width="44" height="12" rx="3" fill={col} opacity="0.85" />
+        </svg>
+    ),
+    'sale': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="11" width="34" height="10" rx="3" fill="#dc2626" opacity="0.8" />
+            <rect x="44" y="13" width="18" height="1" fill="#9ca3af" opacity="0.8" />
+            <rect x="56" y="9" width="18" height="10" rx="4" fill="#b8fa33" />
+            <rect x="58" y="12.5" width="14" height="3" rx="1.5" fill="#1e1535" opacity="0.7" />
+        </svg>
+    ),
+    'urgency': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="7" width="44" height="14" rx="3" fill={col} opacity="0.8" />
+            <rect x="0" y="25" width="80" height="11" fill="#fef2f2" />
+            <circle cx="10" cy="30.5" r="2.5" fill="#ef4444" opacity="0.8" />
+            <rect x="16" y="28.5" width="44" height="4" rx="2" fill="#ef4444" opacity="0.5" />
+        </svg>
+    ),
+    'compact': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="14" width="28" height="8" rx="2" fill={col} opacity="0.85" />
+            <rect x="50" y="14" width="24" height="3" rx="1.5" fill="#6b7280" opacity="0.5" />
+            <rect x="50" y="20" width="18" height="2.5" rx="1.25" fill="#9ca3af" opacity="0.4" />
+        </svg>
+    ),
+    'range': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="14" width="66" height="10" rx="3" fill={col} opacity="0.8" />
+            <rect x="6" y="28" width="44" height="3" rx="1.5" fill="#9ca3af" opacity="0.4" />
+        </svg>
+    ),
+    'auction': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="13" width="36" height="9" rx="3" fill={col} opacity="0.85" />
+            <rect x="4" y="26" width="72" height="1" fill="#e5e7eb" />
+            <rect x="6" y="29" width="28" height="3" rx="1.5" fill="#9ca3af" opacity="0.5" />
+            <rect x="54" y="29" width="20" height="3" rx="1.5" fill="#ef4444" opacity="0.5" />
+        </svg>
+    ),
+    'bundle': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="4" y="4" width="72" height="7" rx="2" fill={col} opacity="0.8" />
+            <rect x="4" y="13" width="72" height="6" fill="white" />
+            <rect x="4" y="19" width="72" height="6" fill={light} />
+            <rect x="4" y="25" width="72" height="6" fill="white" />
+            <rect x="36" y="15" width="20" height="2.5" rx="1.25" fill={col} opacity="0.7" />
+            <rect x="36" y="21" width="20" height="2.5" rx="1.25" fill={col} opacity="0.7" />
+        </svg>
+    ),
+    'finance': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="14" width="38" height="10" rx="3" fill={col} opacity="0.85" />
+            <rect x="56" y="9" width="18" height="18" rx="4" fill={col} opacity="0.7" />
+            <rect x="58" y="14" width="14" height="4" rx="2" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'trade': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e293b" />
+            <rect x="6" y="13" width="36" height="9" rx="3" fill="white" opacity="0.9" />
+            <rect x="50" y="10" width="24" height="16" rx="4" fill="#1e3a5f" />
+            <rect x="53" y="15" width="18" height="3" rx="1.5" fill="#94a3b8" opacity="0.7" />
+        </svg>
+    ),
+    'free-shipping': (col: string, light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="6" y="10" width="36" height="12" rx="3" fill={col} opacity="0.85" />
+            <rect x="50" y="7" width="25" height="22" rx="5" fill="#16a34a" />
+            <rect x="52" y="13" width="21" height="4" rx="2" fill="white" opacity="0.95" />
+            <rect x="54" y="19" width="17" height="3" rx="1.5" fill="white" opacity="0.7" />
+        </svg>
+    ),
+}
+
+function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
+    const col = isSelected ? C.primary : C.secondary
+    const light = isSelected ? C.primaryLight : '#f3f4f6'
+    const render = VARIANT_THUMBNAILS[variantId]
+    if (render) return render(col, light)
+    // ── Auto-generated fallback for any future variant not in the map ─────────
+    // Shows a simple coloured bar with the first letter of the variant id
+    return (
+        <div style={{
+            height: 32, backgroundColor: light, borderRadius: 4,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: `1px solid ${isSelected ? col : '#e5e7eb'}`,
+        }}>
+            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: col, textTransform: 'uppercase' as const }}>
+                {variantId.slice(0, 3)}
+            </span>
+        </div>
+    )
+}
+
+function AlignButtons({ value, onChange }: { value: string; onChange: (v: 'left' | 'center' | 'right') => void }) {
+    return (
+        <div style={{ marginBottom: 8, width: '100%' }}>
+            <p style={{ margin: '0 0 5px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>Alignment</p>
+            <div style={{ display: 'flex', gap: 4, width: '100%' }}>
+                {(['left', 'center', 'right'] as const).map(align => (
+                    <button
+                        key={align}
+                        onClick={() => onChange(align)}
+                        title={align.charAt(0).toUpperCase() + align.slice(1)}
+                        style={{
+                            flex: 1,
+                            padding: '7px 0',
+                            border: `1px solid ${value === align ? C.primary : C.inputBorder}`,
+                            borderRadius: 6,
+                            backgroundColor: value === align ? C.primaryLight : C.surface,
+                            color: value === align ? C.primary : C.secondary,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.12s',
+                        }}
+                    >
+                        {align === 'left' ? <AlignLeft size={14} /> : align === 'center' ? <AlignCenter size={14} /> : <AlignRight size={14} />}
+                    </button>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+function InfoBox({ children }: { children: React.ReactNode }) {
+    return (
+        <div style={{
+            padding: '10px 12px',
+            backgroundColor: C.bg,
+            border: `1px solid ${C.border}`,
+            borderRadius: 8,
+            fontFamily: 'DM Sans, sans-serif',
+            fontSize: 12,
+            color: C.secondary,
+            lineHeight: 1.6,
+        }}>
+            {children}
+        </div>
+    )
+}
+
+function AIToolButton({
+    Icon, label, description, color, bg, border, comingSoon
+}: {
+    Icon: LucideIcon; label: string; description: string; color: string; bg: string; border: string; comingSoon?: boolean
+}) {
+    const [hovered, setHovered] = useState(false)
+    return (
+        <button
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            disabled={comingSoon}
+            title={comingSoon ? 'Coming soon' : label}
+            style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                marginBottom: 8,
+                border: `1px solid ${hovered && !comingSoon ? color : border}`,
+                borderRadius: 10,
+                backgroundColor: hovered && !comingSoon ? bg : C.surface,
+                cursor: comingSoon ? 'default' : 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.15s',
+                opacity: comingSoon ? 0.65 : 1,
+            }}
+        >
+            <div style={{
+                width: 34,
+                height: 34,
+                borderRadius: 9,
+                backgroundColor: bg,
+                border: `1px solid ${border}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 16,
+                flexShrink: 0,
+            }}>
+                <Icon size={18} style={{ color }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color }}>
+                        {label}
+                    </p>
+                    {comingSoon && (
+                        <span style={{
+                            backgroundColor: '#f3f4f6',
+                            color: C.muted,
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 9,
+                            fontWeight: 700,
+                            padding: '1px 5px',
+                            borderRadius: 4,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                        }}>
+                            Soon
+                        </span>
+                    )}
+                </div>
+                <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
+                    {description}
+                </p>
+            </div>
+        </button>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW COMPOUND EDITORS — for conversion blocks
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PolicyTabsEditor({
+    tabs,
+    onChange,
+}: {
+    tabs: Array<{ label: string; content: string }>
+    onChange: (tabs: Array<{ label: string; content: string }>) => void
+}) {
+    return (
+        <div>
+            {tabs.map((tab, i) => (
+                <div key={i} style={{ marginBottom: 12, padding: 10, backgroundColor: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <input
+                            value={tab.label}
+                            onChange={e => {
+                                const next = [...tabs]
+                                next[i] = { ...next[i], label: e.target.value }
+                                onChange(next)
+                            }}
+                            placeholder="Tab label"
+                            style={{ ...inputStyle, fontWeight: 600, width: '60%' }}
+                        />
+                        {tabs.length > 1 && (
+                            <button onClick={() => onChange(tabs.filter((_, j) => j !== i))}
+                                style={{ ...smallBtnStyle, color: C.danger }}>×</button>
+                        )}
+                    </div>
+                    <textarea
+                        value={tab.content}
+                        rows={3}
+                        onChange={e => {
+                            const next = [...tabs]
+                            next[i] = { ...next[i], content: e.target.value }
+                            onChange(next)
+                        }}
+                        placeholder="Tab content..."
+                        style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: 1.5 }}
+                    />
+                </div>
+            ))}
+            {tabs.length < 6 && (
+                <button onClick={() => onChange([...tabs, { label: 'New Tab', content: 'Tab content here...' }])}
+                    style={addBtnStyle}>
+                    + Add tab
+                </button>
+            )}
+        </div>
+    )
+}
+
+function NavLinksEditor({
+    links,
+    onChange,
+}: {
+    links: Array<{ label: string; url: string }>
+    onChange: (links: Array<{ label: string; url: string }>) => void
+}) {
+    return (
+        <div>
+            {links.map((link, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 4, marginBottom: 5, alignItems: 'center' }}>
+                    <input
+                        value={link.label}
+                        placeholder="Label"
+                        onChange={e => {
+                            const next = [...links]
+                            next[i] = { ...next[i], label: e.target.value }
+                            onChange(next)
+                        }}
+                        style={{ ...inputStyle, fontSize: 11 }}
+                    />
+                    <input
+                        value={link.url}
+                        placeholder="URL"
+                        onChange={e => {
+                            const next = [...links]
+                            next[i] = { ...next[i], url: e.target.value }
+                            onChange(next)
+                        }}
+                        style={{ ...inputStyle, fontSize: 11 }}
+                    />
+                    <button onClick={() => onChange(links.filter((_, j) => j !== i))}
+                        style={{ ...smallBtnStyle, color: C.danger }}>×</button>
+                </div>
+            ))}
+            {links.length < 8 && (
+                <button onClick={() => onChange([...links, { label: 'New Link', url: '#' }])}
+                    style={addBtnStyle}>
+                    + Add link
+                </button>
+            )}
+        </div>
+    )
+}
+
+function CrossSellItemsEditor({
+    items,
+    onChange,
+}: {
+    items: Array<{ imageUrl: string; title: string; price: string; url: string }>
+    onChange: (items: Array<{ imageUrl: string; title: string; price: string; url: string }>) => void
+}) {
+    return (
+        <div>
+            {items.map((item, i) => (
+                <div key={i} style={{ marginBottom: 10, padding: 8, backgroundColor: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.muted }}>
+                            PRODUCT {i + 1}
+                        </span>
+                        <button onClick={() => onChange(items.filter((_, j) => j !== i))}
+                            style={{ ...smallBtnStyle, color: C.danger }}>×</button>
+                    </div>
+                    <input value={item.imageUrl} placeholder="Image URL"
+                        onChange={e => { const n = [...items]; n[i] = { ...n[i], imageUrl: e.target.value }; onChange(n) }}
+                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
+                    <input value={item.title} placeholder="Product title / placeholder"
+                        onChange={e => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; onChange(n) }}
+                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
+                        <input value={item.price} placeholder="Price"
+                            onChange={e => { const n = [...items]; n[i] = { ...n[i], price: e.target.value }; onChange(n) }}
+                            style={{ ...inputStyle, fontSize: 11 }} />
+                        <input value={item.url} placeholder="Link URL"
+                            onChange={e => { const n = [...items]; n[i] = { ...n[i], url: e.target.value }; onChange(n) }}
+                            style={{ ...inputStyle, fontSize: 11 }} />
+                    </div>
+                </div>
+            ))}
+            {items.length < 4 && (
+                <button onClick={() => onChange([...items, {
+                    imageUrl: `{{IMAGE_${items.length + 2}_URL}}`,
+                    title: `{{RELATED_TITLE_${items.length + 1}}}`,
+                    price: `{{RELATED_PRICE_${items.length + 1}}}`,
+                    url: '#',
+                }])} style={addBtnStyle}>
+                    + Add product
+                </button>
+            )}
+        </div>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARED STYLE OBJECTS
+// ─────────────────────────────────────────────────────────────────────────────
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    boxSizing: 'border-box',
+    padding: '5px 8px',
+    border: `1px solid ${C.inputBorder}`,
+    borderRadius: 6,
+    backgroundColor: C.surface,
+    fontFamily: 'DM Sans, sans-serif',
+    fontSize: 12,
+    color: C.body,
+    outline: 'none',
+}
+
+const smallBtnStyle: React.CSSProperties = {
+    width: 22,
+    height: 22,
+    border: `1px solid ${C.border}`,
+    borderRadius: 5,
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 14,
+    padding: 0,
+    flexShrink: 0,
+    color: C.secondary,
+}
+
+const addBtnStyle: React.CSSProperties = {
+    marginTop: 4,
+    padding: '5px 10px',
+    border: `1px dashed ${C.primaryBorder}`,
+    borderRadius: 7,
+    backgroundColor: 'transparent',
+    color: C.primary,
+    fontFamily: 'DM Sans, sans-serif',
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: 'pointer',
+    width: '100%',
+}
+// ─────────────────────────────────────────────────────────────────────────────
+function VariantPicker({
+    blockType,
+    currentVariant,
+    onChange,
+}: {
+    blockType: string
+    currentVariant: string
+    onChange: (variantId: string) => void
+}) {
+    const variants = getVariants(blockType)
+    if (!variants) return null
+
+    return (
+        <div style={{ marginBottom: 4 }}>
+            {/* Header */}
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '10px 14px 8px',
+                borderBottom: `1px solid ${C.border}`,
+                backgroundColor: C.primaryLight,
+            }}>
+                <Layers size={14} style={{ color: C.primary, flexShrink: 0 }} />
+                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: C.primary }}>
+                    Layout Style
+                </p>
+            </div>
+
+            {/* Variant cards grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 6,
+                padding: '10px 10px 4px',
+            }}>
+                {variants.map((variant: BlockVariant) => {
+                    const isSelected = currentVariant === variant.id
+                    return (
+                        <button
+                            key={variant.id}
+                            onClick={() => onChange(variant.id)}
+                            title={variant.description}
+                            style={{
+                                padding: '8px 6px',
+                                border: `2px solid ${isSelected ? C.primary : C.border}`,
+                                borderRadius: 8,
+                                backgroundColor: isSelected ? C.primaryLight : C.surface,
+                                cursor: 'pointer',
+                                textAlign: 'center' as const,
+                                transition: 'all 0.12s',
+                            }}
+                        >
+                            {/* Mini visual thumbnail */}
+                            <VariantThumbnail variantId={variant.id} isSelected={isSelected} />
+                            <p style={{
+                                margin: '5px 0 0',
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 10,
+                                fontWeight: isSelected ? 700 : 500,
+                                color: isSelected ? C.primary : C.secondary,
+                                whiteSpace: 'nowrap' as const,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }}>
+                                {variant.label}
+                            </p>
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
+// Mini SVG thumbnails for each Hero Header variant
+// ── Variant thumbnail SVGs — add a new entry here when adding a new variant ──
+// The picker itself is fully dynamic — thumbnails fall back to auto-generated
 function StylesTab({
     block,
     props,
@@ -536,70 +1228,78 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'price_block':
+        case 'price_block': {
+            const pv = props.variant ?? 'simple'
             return (
                 <>
-
                     <Section title="Price">
                         <ColorRow label="Price colour" value={props.priceColor ?? '#7530fb'} onChange={v => updateProps({ priceColor: v })} />
-                        <SliderInput label="Font size" value={props.priceFontSize ?? 32} min={18} max={56} suffix="px" onChange={v => updateProps({ priceFontSize: v })} />
-                        <SelectInput
-                            label="Font weight"
-                            value={props.priceFontWeight ?? '900'}
-                            options={[
-                                { v: '600', l: 'Semibold' },
-                                { v: '700', l: 'Bold' },
-                                { v: '800', l: 'Extrabold' },
-                                { v: '900', l: 'Black' },
-                            ]}
-                            onChange={v => updateProps({ priceFontWeight: v })}
-                        />
+                        <SliderInput label="Price size" value={props.priceFontSize ?? 32} min={18} max={56} suffix="px" onChange={v => updateProps({ priceFontSize: v })} />
+                        <SelectInput label="Weight" value={props.priceFontWeight ?? '900'}
+                            options={[{ v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }, { v: '900', l: 'Black' }]}
+                            onChange={v => updateProps({ priceFontWeight: v })} />
                         <AlignButtons value={props.priceAlign ?? 'left'} onChange={v => updateProps({ priceAlign: v })} />
                     </Section>
-                    <Section title="Original price">
-                        <ColorRow
-                            label="Strike colour"
-                            value={props.originalColor ?? '#9ca3af'}
-                            onChange={v => updateProps({ originalColor: v })}
-                        />
-                        <SliderInput
-                            label="Strike font size"
-                            value={props.originalFontSize ?? 16}
-                            min={10} max={32} suffix="px"
-                            onChange={v => updateProps({ originalFontSize: v })}
-                        />
-                    </Section>
-                    <Section title="Sale badge">
-                        <ToggleRow label="Show badge" value={props.showBadge ?? false} onChange={v => updateProps({ showBadge: v })} />
-                        {props.showBadge && (
-                            <>
+                    {pv === 'sale' && (
+                        <>
+                            <Section title="Original price">
+                                <ColorRow label="Strikethrough colour" value={props.originalColor ?? '#9ca3af'} onChange={v => updateProps({ originalColor: v })} />
+                                <SliderInput label="Size" value={props.originalFontSize ?? 18} min={10} max={28} suffix="px" onChange={v => updateProps({ originalFontSize: v })} />
+                            </Section>
+                            <Section title="Savings badge">
                                 <ColorRow label="Badge background" value={props.badgeBg ?? '#b8fa33'} onChange={v => updateProps({ badgeBg: v })} />
-                                <ColorRow label="Badge text colour" value={props.badgeColor ?? '#1e1535'} onChange={v => updateProps({ badgeColor: v })} />
-                                <SliderInput
-                                    label="Badge font size"
-                                    value={props.badgeFontSize ?? 11}
-                                    min={9} max={18} suffix="px"
-                                    onChange={v => updateProps({ badgeFontSize: v })}
-                                />
-                                <SliderInput
-                                    label="Badge border radius"
-                                    value={props.badgeBorderRadius ?? 4}
-                                    min={0} max={20} suffix="px"
-                                    onChange={v => updateProps({ badgeBorderRadius: v })}
-                                />
-                            </>
-                        )}
-                    </Section>
-                    <Section title="Layout">
-                        <SliderInput
-                            label="Border radius"
-                            value={props.borderRadius ?? 10}
-                            min={0} max={40} suffix="px"
-                            onChange={v => updateProps({ borderRadius: v })}
-                        />
-                    </Section>
+                                <ColorRow label="Badge text" value={props.badgeColor ?? '#1e1535'} onChange={v => updateProps({ badgeColor: v })} />
+                                <SliderInput label="Badge radius" value={props.badgeBorderRadius ?? 4} min={0} max={24} suffix="px" onChange={v => updateProps({ badgeBorderRadius: v })} />
+                            </Section>
+                        </>
+                    )}
+                    {pv === 'urgency' && (
+                        <Section title="Urgency bar">
+                            <ColorRow label="Urgency text" value={props.urgencyColor ?? '#991b1b'} onChange={v => updateProps({ urgencyColor: v })} />
+                            <ColorRow label="Urgency background" value={props.urgencyBg ?? '#fef2f2'} onChange={v => updateProps({ urgencyBg: v })} />
+                            <ToggleRow label="Show badge" value={props.showBadge ?? false} onChange={v => updateProps({ showBadge: v })} />
+                            {props.showBadge && (
+                                <>
+                                    <ColorRow label="Badge bg" value={props.badgeBg ?? '#b8fa33'} onChange={v => updateProps({ badgeBg: v })} />
+                                    <ColorRow label="Badge text" value={props.badgeColor ?? '#1e1535'} onChange={v => updateProps({ badgeColor: v })} />
+                                </>
+                            )}
+                        </Section>
+                    )}
+                    {pv === 'auction' && (
+                        <Section title="Auction">
+                            <ToggleRow label="Reserve met" value={props.reserveMet ?? true} onChange={v => updateProps({ reserveMet: v })} />
+                        </Section>
+                    )}
+                    {pv === 'bundle' && (
+                        <Section title="Bundle tiers">
+                            <SliderInput label="Tier 1 qty" value={props.bundleTier1Qty ?? 2} min={2} max={10} onChange={v => updateProps({ bundleTier1Qty: v })} />
+                            <SliderInput label="Tier 2 qty" value={props.bundleTier2Qty ?? 3} min={2} max={10} onChange={v => updateProps({ bundleTier2Qty: v })} />
+                            <SliderInput label="Tier 3 qty" value={props.bundleTier3Qty ?? 5} min={2} max={20} onChange={v => updateProps({ bundleTier3Qty: v })} />
+                        </Section>
+                    )}
+                    {pv === 'finance' && (
+                        <Section title="Finance">
+                            <InfoBox>Set the monthly price in the Attributes tab.</InfoBox>
+                        </Section>
+                    )}
+                    {pv === 'trade' && (
+                        <Section title="Trade">
+                            <InfoBox>Trade variant uses a dark slate background. Edit prices in the Attributes tab.</InfoBox>
+                        </Section>
+                    )}
+                    {pv === 'free-shipping' && (
+                        <Section title="Delivery badge">
+                            <ColorRow label="Badge colour" value={props.deliveryColor ?? '#16a34a'} onChange={v => updateProps({ deliveryColor: v })} />
+                            <ToggleRow label="Show original price" value={props.showOriginal ?? false} onChange={v => updateProps({ showOriginal: v })} />
+                            {props.showOriginal && (
+                                <ColorRow label="Original colour" value={props.originalColor ?? '#9ca3af'} onChange={v => updateProps({ originalColor: v })} />
+                            )}
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'product_image': {
             const pv = props.variant ?? 'single'
@@ -1319,30 +2019,82 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                 </>
             )
 
-        case 'price_block':
+        case 'price_block': {
+            const av = props.variant ?? 'simple'
             return (
                 <>
                     <Section title="Price">
-                        <TextInput label="Price text" value={props.priceText ?? '{{ITEM_PRICE}}'} onChange={v => updateProps({ priceText: v })} />
+                        <TextInput label="Price" value={props.priceText ?? ''} onChange={v => updateProps({ priceText: v })} />
                         {phButton('priceText', 'price')}
                     </Section>
-                    <Section title="Original price">
-                        <ToggleRow label="Show original price" value={props.showOriginal ?? false} onChange={v => updateProps({ showOriginal: v })} />
-                        {props.showOriginal && (
-                            <>
-                                <TextInput label="Original price text" value={props.originalText ?? '{{ORIGINAL_PRICE}}'} onChange={v => updateProps({ originalText: v })} />
-                                {phButton('originalText', 'original price')}
-                            </>
-                        )}
-                    </Section>
-                    <Section title="Badge">
-                        <ToggleRow label="Show badge" value={props.showBadge ?? false} onChange={v => updateProps({ showBadge: v })} />
-                        {props.showBadge && (
-                            <TextInput label="Badge text" value={props.badgeText ?? 'SALE'} onChange={v => updateProps({ badgeText: v })} />
-                        )}
-                    </Section>
+                    {(av === 'sale' || av === 'urgency' || av === 'free-shipping') && (
+                        <Section title="Original price">
+                            <TextInput label="Original price" value={props.originalText ?? ''} onChange={v => updateProps({ originalText: v })} />
+                            {phButton('originalText', 'original price')}
+                        </Section>
+                    )}
+                    {av === 'sale' && (
+                        <Section title="Savings badge">
+                            <TextInput label="Badge text" value={props.savingsText ?? ''} onChange={v => updateProps({ savingsText: v })} />
+                            {phButton('savingsText', 'savings text')}
+                        </Section>
+                    )}
+                    {av === 'urgency' && (
+                        <Section title="Urgency message">
+                            <TextInput label="Urgency text" value={props.urgencyText ?? ''} onChange={v => updateProps({ urgencyText: v })} />
+                            {phButton('urgencyText', 'urgency text')}
+                        </Section>
+                    )}
+                    {av === 'range' && (
+                        <Section title="Price range">
+                            <TextInput label="Max price" value={props.priceRangeMax ?? ''} onChange={v => updateProps({ priceRangeMax: v })} />
+                            {phButton('priceRangeMax', 'max price')}
+                        </Section>
+                    )}
+                    {av === 'auction' && (
+                        <Section title="Auction details">
+                            <TextInput label="Bid count" value={props.bidCount ?? ''} onChange={v => updateProps({ bidCount: v })} />
+                            {phButton('bidCount', 'bid count')}
+                            <TextInput label="Time left" value={props.timeLeft ?? ''} onChange={v => updateProps({ timeLeft: v })} />
+                            {phButton('timeLeft', 'time left')}
+                        </Section>
+                    )}
+                    {av === 'bundle' && (
+                        <Section title="Bundle prices">
+                            <TextInput label="Tier 1 price" value={props.bundleTier1Price ?? ''} onChange={v => updateProps({ bundleTier1Price: v })} />
+                            {phButton('bundleTier1Price', 'tier 1 price')}
+                            <TextInput label="Tier 2 price" value={props.bundleTier2Price ?? ''} onChange={v => updateProps({ bundleTier2Price: v })} />
+                            {phButton('bundleTier2Price', 'tier 2 price')}
+                            <TextInput label="Tier 3 price" value={props.bundleTier3Price ?? ''} onChange={v => updateProps({ bundleTier3Price: v })} />
+                            {phButton('bundleTier3Price', 'tier 3 price')}
+                        </Section>
+                    )}
+                    {av === 'finance' && (
+                        <Section title="Finance details">
+                            <TextInput label="Monthly price" value={props.monthlyPrice ?? ''} onChange={v => updateProps({ monthlyPrice: v })} />
+                            {phButton('monthlyPrice', 'monthly price')}
+                            <TextInput label="Finance note" value={props.financeText ?? ''} onChange={v => updateProps({ financeText: v })} />
+                        </Section>
+                    )}
+                    {av === 'trade' && (
+                        <Section title="Trade details">
+                            <TextInput label="Trade price" value={props.tradePrice ?? ''} onChange={v => updateProps({ tradePrice: v })} />
+                            {phButton('tradePrice', 'trade price')}
+                            <TextInput label="RRP" value={props.rrpText ?? ''} onChange={v => updateProps({ rrpText: v })} />
+                            {phButton('rrpText', 'RRP')}
+                            <TextInput label="CTA text" value={props.tradeCta ?? ''} onChange={v => updateProps({ tradeCta: v })} />
+                        </Section>
+                    )}
+                    {av === 'free-shipping' && (
+                        <Section title="Delivery">
+                            <TextInput label="Delivery text" value={props.deliveryText ?? ''} onChange={v => updateProps({ deliveryText: v })} />
+                            <TextInput label="Est. delivery date" value={props.deliveryDate ?? ''} onChange={v => updateProps({ deliveryDate: v })} />
+                            {phButton('deliveryDate', 'delivery date')}
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'product_image': {
             const av = props.variant ?? 'single'
@@ -2396,609 +3148,3 @@ function UniversalTypography({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VARIANT PICKER — visual style cards shown at top of Styles tab
-// ─────────────────────────────────────────────────────────────────────────────
-function VariantPicker({
-    blockType,
-    currentVariant,
-    onChange,
-}: {
-    blockType: string
-    currentVariant: string
-    onChange: (variantId: string) => void
-}) {
-    const variants = getVariants(blockType)
-    if (!variants) return null
-
-    return (
-        <div style={{ marginBottom: 4 }}>
-            {/* Header */}
-            <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '10px 14px 8px',
-                borderBottom: `1px solid ${C.border}`,
-                backgroundColor: C.primaryLight,
-            }}>
-                <Layers size={14} style={{ color: C.primary, flexShrink: 0 }} />
-                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: C.primary }}>
-                    Layout Style
-                </p>
-            </div>
-
-            {/* Variant cards grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 6,
-                padding: '10px 10px 4px',
-            }}>
-                {variants.map((variant: BlockVariant) => {
-                    const isSelected = currentVariant === variant.id
-                    return (
-                        <button
-                            key={variant.id}
-                            onClick={() => onChange(variant.id)}
-                            title={variant.description}
-                            style={{
-                                padding: '8px 6px',
-                                border: `2px solid ${isSelected ? C.primary : C.border}`,
-                                borderRadius: 8,
-                                backgroundColor: isSelected ? C.primaryLight : C.surface,
-                                cursor: 'pointer',
-                                textAlign: 'center' as const,
-                                transition: 'all 0.12s',
-                            }}
-                        >
-                            {/* Mini visual thumbnail */}
-                            <VariantThumbnail variantId={variant.id} isSelected={isSelected} />
-                            <p style={{
-                                margin: '5px 0 0',
-                                fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 10,
-                                fontWeight: isSelected ? 700 : 500,
-                                color: isSelected ? C.primary : C.secondary,
-                                whiteSpace: 'nowrap' as const,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}>
-                                {variant.label}
-                            </p>
-                        </button>
-                    )
-                })}
-            </div>
-        </div>
-    )
-}
-
-// Mini SVG thumbnails for each Hero Header variant
-// ── Variant thumbnail SVGs — add a new entry here when adding a new variant ──
-// The picker itself is fully dynamic — thumbnails fall back to auto-generated
-const VARIANT_THUMBNAILS: Record<string, (col: string, light: string) => JSX.Element> = {
-    // ── Hero Header ───────────────────────────────────────────────────────────
-    'gradient': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <defs><linearGradient id="vg1" x1="0" y1="0" x2="80" y2="36" gradientUnits="userSpaceOnUse">
-                <stop stopColor={col} stopOpacity="0.8" /><stop offset="1" stopColor={col} stopOpacity="0.3" />
-            </linearGradient></defs>
-            <rect width="80" height="36" rx="3" fill="url(#vg1)" />
-            <rect x="20" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
-            <rect x="24" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
-        </svg>
-    ),
-    'minimal': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
-            <rect x="6" y="14" width="30" height="4" rx="2" fill="white" opacity="0.9" />
-            <rect x="50" y="15" width="24" height="3" rx="1.5" fill="white" opacity="0.5" />
-        </svg>
-    ),
-    'image-bg': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.55" />
-            <circle cx="20" cy="14" r="5" fill="white" opacity="0.25" />
-            <path d="M6 28 Q20 20 34 24 Q50 18 74 26" stroke="white" strokeWidth="1.5" fill="none" opacity="0.3" />
-            <rect x="20" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
-            <rect x="24" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
-        </svg>
-    ),
-    'typographic': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="10" y="9" width="60" height="7" rx="2" fill={col} opacity="0.85" />
-            <rect x="34" y="19" width="12" height="2" rx="1" fill={col} />
-            <rect x="16" y="24" width="48" height="3" rx="1.5" fill="#e5e7eb" />
-        </svg>
-    ),
-    // ── Shared — split layout (hero split + product split) ────────────────────
-    'split': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
-            <rect x="52" width="28" height="36" fill={col} opacity="0.3" />
-            <rect x="6" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
-            <rect x="6" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
-            <rect x="56" y="10" width="18" height="3" rx="1.5" fill="white" opacity="0.6" />
-            <rect x="56" y="16" width="14" height="2.5" rx="1.25" fill="white" opacity="0.4" />
-            <rect x="56" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
-        </svg>
-    ),
-    // ── Product Image ─────────────────────────────────────────────────────────
-    'single': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="16" y="4" width="48" height="28" rx="4" fill={col} opacity="0.3" />
-            <circle cx="30" cy="14" r="5" fill={col} opacity="0.4" />
-            <path d="M16 28 Q32 20 48 24 Q60 20 64 28" stroke={col} strokeWidth="1.5" fill="none" opacity="0.5" />
-        </svg>
-    ),
-    'gallery': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="4" y="4" width="72" height="18" rx="3" fill={col} opacity="0.3" />
-            <circle cx="16" cy="11" r="4" fill={col} opacity="0.4" />
-            <rect x="4" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
-            <rect x="22" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
-            <rect x="40" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
-            <rect x="58" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
-        </svg>
-    ),
-    'fullwidth': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.25" />
-            <circle cx="20" cy="16" r="7" fill={col} opacity="0.3" />
-            <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
-        </svg>
-    ),
-    'zoom': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
-            <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
-            <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
-            <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
-        </svg>
-    ),
-    // ── Product Image: Comparison / Front & Back ──────────────────────────────
-    'comparison': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="3" y="4" width="34" height="28" rx="3" fill={col} opacity="0.25" />
-            <circle cx="16" cy="14" r="5" fill={col} opacity="0.35" />
-            <path d="M3 28 Q16 22 37 26" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
-            <rect x="39" y="17" width="1" height="16" fill="#e2e8f0" />
-            <rect x="43" y="4" width="34" height="28" rx="3" fill={col} opacity="0.15" />
-            <circle cx="56" cy="14" r="5" fill={col} opacity="0.25" />
-            <path d="M43 28 Q56 20 77 24" stroke={col} strokeWidth="1.5" fill="none" opacity="0.3" />
-            <rect x="8" y="30" width="24" height="2" rx="1" fill={col} opacity="0.3" />
-            <rect x="48" y="30" width="24" height="2" rx="1" fill={col} opacity="0.2" />
-        </svg>
-    ),
-    // ── Hero Header: Credibility Banner ──────────────────────────────────────
-    'credibility': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
-            <rect x="0" y="0" width="30" height="36" fill="rgba(0,0,0,0.15)" />
-            <rect x="4" y="9" width="22" height="4" rx="2" fill="#f59e0b" opacity="0.9" />
-            <rect x="4" y="17" width="18" height="2.5" rx="1.25" fill="white" opacity="0.7" />
-            <rect x="4" y="23" width="14" height="5" rx="2.5" fill="#f59e0b" opacity="0.8" />
-            <rect x="36" y="10" width="36" height="5" rx="2" fill="white" opacity="0.9" />
-            <rect x="36" y="19" width="28" height="2.5" rx="1.25" fill="white" opacity="0.5" />
-            <rect x="36" y="25" width="22" height="2" rx="1" fill="white" opacity="0.4" />
-        </svg>
-    ),
-    // ── Product Image: Lifestyle Shot ─────────────────────────────────────────
-    'lifestyle': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
-            <rect x="0" y="22" width="80" height="14" rx="0" fill={col} opacity="0.55" />
-            <circle cx="22" cy="13" r="7" fill={col} opacity="0.3" />
-            <rect x="6" y="25" width="40" height="4" rx="2" fill="white" opacity="0.9" />
-            <rect x="6" y="31" width="28" height="2.5" rx="1.25" fill="white" opacity="0.6" />
-        </svg>
-    ),
-    // ── Product Image: Polaroid ───────────────────────────────────────────────
-    'polaroid': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect x="8" y="2" width="64" height="32" rx="2" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="11" y="5" width="58" height="22" rx="1" fill={col} opacity="0.25" />
-            <circle cx="26" cy="14" r="5" fill={col} opacity="0.35" />
-            <path d="M11 24 Q25 17 40 20 Q55 16 69 22" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
-            <rect x="20" y="29" width="40" height="2.5" rx="1.25" fill="#9ca3af" />
-        </svg>
-    ),
-    // ── Product Image: Before/After ───────────────────────────────────────────
-    'before-after': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="3" width="36" height="24" rx="3" fill={col} opacity="0.2" />
-            <rect x="42" y="3" width="36" height="24" rx="3" fill={col} opacity="0.35" />
-            <rect x="38" y="3" width="4" height="24" fill={col} opacity="0.6" />
-            <rect x="6" y="29" width="28" height="4" rx="2" fill={col} opacity="0.5" />
-            <rect x="46" y="29" width="28" height="4" rx="2" fill={col} opacity="0.7" />
-        </svg>
-    ),
-    // ── Product Image: Magazine Grid ──────────────────────────────────────────
-    'magazine': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
-            <circle cx="18" cy="14" r="7" fill={col} opacity="0.35" />
-            <rect x="52" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
-            <rect x="52" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
-        </svg>
-    ),
-    // ── Hero Header: Announcement Strip ──────────────────────────────────────
-    'announcement': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
-            <rect x="10" y="15" width="60" height="4" rx="2" fill="white" opacity="0.9" />
-            <circle cx="36" cy="17" r="1.5" fill={col} opacity="0.6" />
-            <circle cx="44" cy="17" r="1.5" fill={col} opacity="0.6" />
-        </svg>
-    ),
-    // ── Hero Header: Dark Luxury ──────────────────────────────────────────────
-    'luxury': (_, __) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill="#000000" />
-            <rect x="32" y="7" width="16" height="1" fill="#c9a84c" />
-            <rect x="14" y="13" width="52" height="6" rx="2" fill="white" opacity="0.9" />
-            <rect x="32" y="22" width="16" height="1" fill="#c9a84c" />
-            <rect x="20" y="26" width="40" height="2.5" rx="1.25" fill="#c9a84c" opacity="0.7" />
-        </svg>
-    ),
-    // ── Hero Header: Category Banner ─────────────────────────────────────────
-    'category': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="0" y="0" width="5" height="36" rx="2" fill={col} />
-            <rect x="10" y="10" width="35" height="5" rx="2" fill={col} opacity="0.8" />
-            <rect x="10" y="19" width="26" height="3" rx="1.5" fill="#9ca3af" />
-            <rect x="54" y="12" width="20" height="10" rx="4" fill={col} opacity="0.85" />
-            <rect x="56" y="15" width="16" height="4" rx="2" fill="white" opacity="0.9" />
-        </svg>
-    ),
-    // ── Hero Header: Seasonal / Sale ─────────────────────────────────────────
-    'seasonal': (col, _) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill="#1e1535" />
-            <rect x="4" y="6" width="22" height="24" rx="5" fill="#dc2626" />
-            <rect x="7" y="14" width="16" height="6" rx="2" fill="white" opacity="0.95" />
-            <rect x="32" y="11" width="40" height="5" rx="2" fill="white" opacity="0.9" />
-            <rect x="32" y="20" width="30" height="3" rx="1.5" fill="white" opacity="0.5" />
-        </svg>
-    ),
-}
-
-function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
-    const col = isSelected ? C.primary : C.secondary
-    const light = isSelected ? C.primaryLight : '#f3f4f6'
-    const render = VARIANT_THUMBNAILS[variantId]
-    if (render) return render(col, light)
-    // ── Auto-generated fallback for any future variant not in the map ─────────
-    // Shows a simple coloured bar with the first letter of the variant id
-    return (
-        <div style={{
-            height: 32, backgroundColor: light, borderRadius: 4,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: `1px solid ${isSelected ? col : '#e5e7eb'}`,
-        }}>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: col, textTransform: 'uppercase' as const }}>
-                {variantId.slice(0, 3)}
-            </span>
-        </div>
-    )
-}
-
-function AlignButtons({ value, onChange }: { value: string; onChange: (v: 'left' | 'center' | 'right') => void }) {
-    return (
-        <div style={{ marginBottom: 8, width: '100%' }}>
-            <p style={{ margin: '0 0 5px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>Alignment</p>
-            <div style={{ display: 'flex', gap: 4, width: '100%' }}>
-                {(['left', 'center', 'right'] as const).map(align => (
-                    <button
-                        key={align}
-                        onClick={() => onChange(align)}
-                        title={align.charAt(0).toUpperCase() + align.slice(1)}
-                        style={{
-                            flex: 1,
-                            padding: '7px 0',
-                            border: `1px solid ${value === align ? C.primary : C.inputBorder}`,
-                            borderRadius: 6,
-                            backgroundColor: value === align ? C.primaryLight : C.surface,
-                            color: value === align ? C.primary : C.secondary,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.12s',
-                        }}
-                    >
-                        {align === 'left' ? <AlignLeft size={14} /> : align === 'center' ? <AlignCenter size={14} /> : <AlignRight size={14} />}
-                    </button>
-                ))}
-            </div>
-        </div>
-    )
-}
-
-function InfoBox({ children }: { children: React.ReactNode }) {
-    return (
-        <div style={{
-            padding: '10px 12px',
-            backgroundColor: C.bg,
-            border: `1px solid ${C.border}`,
-            borderRadius: 8,
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: 12,
-            color: C.secondary,
-            lineHeight: 1.6,
-        }}>
-            {children}
-        </div>
-    )
-}
-
-function AIToolButton({
-    Icon, label, description, color, bg, border, comingSoon
-}: {
-    Icon: LucideIcon; label: string; description: string; color: string; bg: string; border: string; comingSoon?: boolean
-}) {
-    const [hovered, setHovered] = useState(false)
-    return (
-        <button
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            disabled={comingSoon}
-            title={comingSoon ? 'Coming soon' : label}
-            style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '10px 12px',
-                marginBottom: 8,
-                border: `1px solid ${hovered && !comingSoon ? color : border}`,
-                borderRadius: 10,
-                backgroundColor: hovered && !comingSoon ? bg : C.surface,
-                cursor: comingSoon ? 'default' : 'pointer',
-                textAlign: 'left',
-                transition: 'all 0.15s',
-                opacity: comingSoon ? 0.65 : 1,
-            }}
-        >
-            <div style={{
-                width: 34,
-                height: 34,
-                borderRadius: 9,
-                backgroundColor: bg,
-                border: `1px solid ${border}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 16,
-                flexShrink: 0,
-            }}>
-                <Icon size={18} style={{ color }} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color }}>
-                        {label}
-                    </p>
-                    {comingSoon && (
-                        <span style={{
-                            backgroundColor: '#f3f4f6',
-                            color: C.muted,
-                            fontFamily: 'DM Sans, sans-serif',
-                            fontSize: 9,
-                            fontWeight: 700,
-                            padding: '1px 5px',
-                            borderRadius: 4,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                        }}>
-                            Soon
-                        </span>
-                    )}
-                </div>
-                <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
-                    {description}
-                </p>
-            </div>
-        </button>
-    )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// NEW COMPOUND EDITORS — for conversion blocks
-// ─────────────────────────────────────────────────────────────────────────────
-
-function PolicyTabsEditor({
-    tabs,
-    onChange,
-}: {
-    tabs: Array<{ label: string; content: string }>
-    onChange: (tabs: Array<{ label: string; content: string }>) => void
-}) {
-    return (
-        <div>
-            {tabs.map((tab, i) => (
-                <div key={i} style={{ marginBottom: 12, padding: 10, backgroundColor: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <input
-                            value={tab.label}
-                            onChange={e => {
-                                const next = [...tabs]
-                                next[i] = { ...next[i], label: e.target.value }
-                                onChange(next)
-                            }}
-                            placeholder="Tab label"
-                            style={{ ...inputStyle, fontWeight: 600, width: '60%' }}
-                        />
-                        {tabs.length > 1 && (
-                            <button onClick={() => onChange(tabs.filter((_, j) => j !== i))}
-                                style={{ ...smallBtnStyle, color: C.danger }}>×</button>
-                        )}
-                    </div>
-                    <textarea
-                        value={tab.content}
-                        rows={3}
-                        onChange={e => {
-                            const next = [...tabs]
-                            next[i] = { ...next[i], content: e.target.value }
-                            onChange(next)
-                        }}
-                        placeholder="Tab content..."
-                        style={{ ...inputStyle, resize: 'vertical' as const, lineHeight: 1.5 }}
-                    />
-                </div>
-            ))}
-            {tabs.length < 6 && (
-                <button onClick={() => onChange([...tabs, { label: 'New Tab', content: 'Tab content here...' }])}
-                    style={addBtnStyle}>
-                    + Add tab
-                </button>
-            )}
-        </div>
-    )
-}
-
-function NavLinksEditor({
-    links,
-    onChange,
-}: {
-    links: Array<{ label: string; url: string }>
-    onChange: (links: Array<{ label: string; url: string }>) => void
-}) {
-    return (
-        <div>
-            {links.map((link, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 4, marginBottom: 5, alignItems: 'center' }}>
-                    <input
-                        value={link.label}
-                        placeholder="Label"
-                        onChange={e => {
-                            const next = [...links]
-                            next[i] = { ...next[i], label: e.target.value }
-                            onChange(next)
-                        }}
-                        style={{ ...inputStyle, fontSize: 11 }}
-                    />
-                    <input
-                        value={link.url}
-                        placeholder="URL"
-                        onChange={e => {
-                            const next = [...links]
-                            next[i] = { ...next[i], url: e.target.value }
-                            onChange(next)
-                        }}
-                        style={{ ...inputStyle, fontSize: 11 }}
-                    />
-                    <button onClick={() => onChange(links.filter((_, j) => j !== i))}
-                        style={{ ...smallBtnStyle, color: C.danger }}>×</button>
-                </div>
-            ))}
-            {links.length < 8 && (
-                <button onClick={() => onChange([...links, { label: 'New Link', url: '#' }])}
-                    style={addBtnStyle}>
-                    + Add link
-                </button>
-            )}
-        </div>
-    )
-}
-
-function CrossSellItemsEditor({
-    items,
-    onChange,
-}: {
-    items: Array<{ imageUrl: string; title: string; price: string; url: string }>
-    onChange: (items: Array<{ imageUrl: string; title: string; price: string; url: string }>) => void
-}) {
-    return (
-        <div>
-            {items.map((item, i) => (
-                <div key={i} style={{ marginBottom: 10, padding: 8, backgroundColor: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.muted }}>
-                            PRODUCT {i + 1}
-                        </span>
-                        <button onClick={() => onChange(items.filter((_, j) => j !== i))}
-                            style={{ ...smallBtnStyle, color: C.danger }}>×</button>
-                    </div>
-                    <input value={item.imageUrl} placeholder="Image URL"
-                        onChange={e => { const n = [...items]; n[i] = { ...n[i], imageUrl: e.target.value }; onChange(n) }}
-                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
-                    <input value={item.title} placeholder="Product title / placeholder"
-                        onChange={e => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; onChange(n) }}
-                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-                        <input value={item.price} placeholder="Price"
-                            onChange={e => { const n = [...items]; n[i] = { ...n[i], price: e.target.value }; onChange(n) }}
-                            style={{ ...inputStyle, fontSize: 11 }} />
-                        <input value={item.url} placeholder="Link URL"
-                            onChange={e => { const n = [...items]; n[i] = { ...n[i], url: e.target.value }; onChange(n) }}
-                            style={{ ...inputStyle, fontSize: 11 }} />
-                    </div>
-                </div>
-            ))}
-            {items.length < 4 && (
-                <button onClick={() => onChange([...items, {
-                    imageUrl: `{{IMAGE_${items.length + 2}_URL}}`,
-                    title: `{{RELATED_TITLE_${items.length + 1}}}`,
-                    price: `{{RELATED_PRICE_${items.length + 1}}}`,
-                    url: '#',
-                }])} style={addBtnStyle}>
-                    + Add product
-                </button>
-            )}
-        </div>
-    )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SHARED STYLE OBJECTS
-// ─────────────────────────────────────────────────────────────────────────────
-const inputStyle: React.CSSProperties = {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: '5px 8px',
-    border: `1px solid ${C.inputBorder}`,
-    borderRadius: 6,
-    backgroundColor: C.surface,
-    fontFamily: 'DM Sans, sans-serif',
-    fontSize: 12,
-    color: C.body,
-    outline: 'none',
-}
-
-const smallBtnStyle: React.CSSProperties = {
-    width: 22,
-    height: 22,
-    border: `1px solid ${C.border}`,
-    borderRadius: 5,
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 14,
-    padding: 0,
-    flexShrink: 0,
-    color: C.secondary,
-}
-
-const addBtnStyle: React.CSSProperties = {
-    marginTop: 4,
-    padding: '5px 10px',
-    border: `1px dashed ${C.primaryBorder}`,
-    borderRadius: 7,
-    backgroundColor: 'transparent',
-    color: C.primary,
-    fontFamily: 'DM Sans, sans-serif',
-    fontSize: 11,
-    fontWeight: 600,
-    cursor: 'pointer',
-    width: '100%',
-}
