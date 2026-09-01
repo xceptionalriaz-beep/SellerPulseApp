@@ -65,7 +65,7 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard' },
   { icon: Search, label: 'Product Research', href: '/dashboard/product-research' },
   { icon: Type, label: 'Title Builder', href: '/dashboard/title-builder' },
-  { icon: Calculator, label: 'Profit Calculator', href: '/dashboard/tools/profit-calculator' },
+  { icon: Calculator, label: 'Profit Calculator', href: '/tools/profitcalculator' },
   { icon: ListChecks, label: 'Listings', href: '/dashboard/listing-generator' },
   { icon: Palette, label: 'Design Studio', href: '/dashboard/design' },
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
@@ -1221,6 +1221,27 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               {visibleNavItems.map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href
+                const isExternalTool = item.href.startsWith('/tools/')
+
+                if (isExternalTool) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
+                        isActive ? 'bg-accent text-dark' : 'text-white hover:bg-white/10'
+                      )}
+                    >
+                      <Icon size={20} />
+                      <span className={cn('text-sm', isActive ? 'font-bold' : 'font-normal')}>
+                        {item.label}
+                      </span>
+                    </a>
+                  )
+                }
+
                 return (
                   <Link
                     key={item.href}

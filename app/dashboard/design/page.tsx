@@ -25,7 +25,7 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     Plus, Search, X, Copy, Trash2,
     Eye, Check, Loader2, Code2, Zap,
-    Save, RefreshCw, LayoutTemplate, Layers,
+    Save, RefreshCw, LayoutTemplate, Layers, Pencil,
 } from 'lucide-react'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, PrimaryButton, SecondaryButton, GhostButton, IconButton } from '@/components/ui/Buttons'
@@ -358,18 +358,21 @@ const BUILTIN_TEMPLATES: ListingTemplate[] = [
 // ── Tiny HTML thumbnail preview ────────────────────────────────────────────
 function TemplateThumbnail({ html }: { html: string }) {
     return (
-        <div style={{ width: '100%', height: 160, overflow: 'hidden', backgroundColor: '#ffffff', position: 'relative' }}>
-            <div style={{
-                transform: 'scale(0.38)',
-                transformOrigin: 'top left',
-                width: '263%',
-                pointerEvents: 'none',
-                fontFamily: 'Arial, sans-serif',
-                fontSize: 14,
-                lineHeight: 1.4,
-                color: '#1f1d2e',
-            }}
-                dangerouslySetInnerHTML={{ __html: html }}
+        <div style={{ width: '100%', height: 200, overflow: 'hidden', backgroundColor: '#f8f7ff', position: 'relative' }}>
+            <iframe
+                srcDoc={html}
+                sandbox="allow-same-origin"
+                scrolling="no"
+                style={{
+                    width: '260%',
+                    height: '260%',
+                    border: 'none',
+                    pointerEvents: 'none',
+                    transform: 'scale(0.385)',
+                    transformOrigin: 'top left',
+                    backgroundColor: '#ffffff',
+                }}
+                title="Template Preview"
             />
         </div>
     )
@@ -841,6 +844,7 @@ function DesignStudioInner() {
                                                 onPreview={() => setPreviewTemplate(t)}
                                                 onCopy={() => copyHtml(t)}
                                                 onDelete={() => deleteTemplate(t.id)}
+                                                onEdit={() => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
                                             />
                                         ))}
                                     </div>
@@ -879,6 +883,7 @@ function DesignStudioInner() {
                                             onPreview={() => setPreviewTemplate(t)}
                                             onCopy={() => copyHtml(t)}
                                             onDelete={() => deleteTemplate(t.id)}
+                                            onEdit={() => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
                                         />
                                     ))}
                                 </div>
@@ -1196,107 +1201,106 @@ interface CardProps {
     onPreview: () => void
     onCopy: () => void
     onDelete: () => void
+    onEdit: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit }: CardProps) {
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
 
-    // Badge
-    const getBadge = () => {
-        if (template.id.startsWith('builtin-') || template.is_system) {
-            if (template.category === 'electronics') return { label: 'HIGH CONVERTING', bg: '#7530fb', text: '#fff' }
-            if (template.category === 'fashion') return { label: 'MOBILE READY', bg: '#1e1535', text: '#b8fa33' }
-            if ((template.use_count || 0) > 10) return { label: 'POPULAR', bg: '#b8fa33', text: '#1e1535' }
-            return { label: 'NEW', bg: '#16a34a', text: '#fff' }
-        }
-        return null
-    }
-    const badge = getBadge()
+    const badge = (() => {
+        if (!template.is_system && !template.id.startsWith('builtin-')) return null
+        if (template.category === 'electronics') return { label: 'TOP PICK', bg: '#7530fb', text: '#fff' }
+        if (template.category === 'fashion') return { label: 'MOBILE READY', bg: '#1e1535', text: '#b8fa33' }
+        if ((template.use_count || 0) > 10) return { label: 'POPULAR', bg: '#b8fa33', text: '#1e1535' }
+        return { label: 'NEW', bg: '#16a34a', text: '#fff' }
+    })()
 
     return (
         <div
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            className="rounded-2xl overflow-hidden flex flex-col transition-all cursor-pointer"
+            className="rounded-2xl overflow-hidden flex flex-col"
             style={{
                 border: `2px solid ${hovered ? C.primary : C.border}`,
                 backgroundColor: C.surface,
-                boxShadow: hovered ? `0 4px 20px rgba(117,48,251,0.15)` : '0 1px 4px rgba(117,48,251,0.05)',
-            }}>
-
+                boxShadow: hovered ? '0 8px 32px rgba(117,48,251,0.18)' : '0 1px 4px rgba(117,48,251,0.05)',
+                transition: 'all 0.2s ease',
+            }}
+        >
             {/* Thumbnail */}
-            <div className="relative" onClick={onPreview}>
-                {template.description_html ? (
-                    <TemplateThumbnail html={template.description_html} />
-                ) : (
-                    <div className="w-full h-40 flex items-center justify-center"
-                        style={{ backgroundColor: C.bg }}>
+            <div className="relative" style={{ cursor: 'pointer' }} onClick={onPreview}>
+                {template.description_html
+                    ? <TemplateThumbnail html={template.description_html} />
+                    : <div className="w-full flex items-center justify-center" style={{ height: 200, backgroundColor: C.bg }}>
                         <LayoutTemplate size={28} style={{ color: C.border }} />
                     </div>
-                )}
+                }
 
-                {/* Badge */}
+                {/* Badges */}
                 {badge && (
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide"
-                        style={{ backgroundColor: badge.bg, color: badge.text, fontFamily: 'DM Sans, sans-serif' }}>
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide"
+                        style={{ backgroundColor: badge.bg, color: badge.text, fontFamily: 'DM Sans, sans-serif', zIndex: 2 }}>
                         {badge.label}
                     </div>
                 )}
-
-                {/* System badge */}
                 {isOwn && (
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-bold"
-                        style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                    <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-bold"
+                        style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif', zIndex: 2 }}>
                         Mine
                     </div>
                 )}
 
                 {/* Hover overlay */}
-                {hovered && (
-                    <div className="absolute inset-0 flex items-center justify-center"
-                        style={{ backgroundColor: 'rgba(30,21,53,0.55)' }}>
-                        <GhostButton onClick={onPreview} icon={<Eye size={13} />}>
-                            Preview
-                        </GhostButton>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                    style={{
+                        backgroundColor: 'rgba(14,12,28,0.72)',
+                        opacity: hovered ? 1 : 0,
+                        backdropFilter: hovered ? 'blur(2px)' : 'none',
+                        transition: 'opacity 0.2s ease',
+                        zIndex: 3,
+                    }}>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={e => { e.stopPropagation(); onPreview() }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-80"
+                            style={{ backgroundColor: '#fff', color: C.dark, border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            <Eye size={13} /> Preview
+                        </button>
+                        <button
+                            onClick={e => { e.stopPropagation(); onEdit() }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-90"
+                            style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            <Pencil size={13} /> Edit
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Footer */}
-            <div className="px-3 py-2.5 flex items-start justify-between gap-2"
+            <div className="px-3 py-2.5 flex items-center justify-between gap-2"
                 style={{ borderTop: `1px solid ${C.border}` }}>
                 <div className="min-w-0 flex-1">
                     <p className="text-[12px] font-bold truncate" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
                         {template.name}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                            Pure HTML/CSS
-                        </span>
-                        <span style={{ color: C.border }}>·</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
                         <CategoryBadge category={template.category} />
                     </div>
                 </div>
-
-                {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
-                    <IconButton
-                        onClick={onCopy}
+                    <IconButton onClick={onCopy}
                         icon={copied ? <Check size={12} /> : <Copy size={12} />}
-                        tooltip="Copy HTML"
-                        active={copied}
-                        variant={copied ? 'success' : 'default'}
-                        size={28}
-                    />
+                        tooltip={copied ? 'Copied!' : 'Copy HTML'}
+                        active={copied} variant={copied ? 'success' : 'default'} size={28} />
+                    <IconButton onClick={onEdit}
+                        icon={<Pencil size={12} />}
+                        tooltip="Edit template" size={28} />
                     {isOwn && (
-                        <IconButton
-                            onClick={onDelete}
+                        <IconButton onClick={onDelete}
                             icon={deleting ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={12} />}
-                            tooltip="Delete template"
-                            size={28}
-                        />
+                            tooltip="Delete" size={28} />
                     )}
                 </div>
             </div>

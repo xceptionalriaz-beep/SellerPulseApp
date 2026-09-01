@@ -33,7 +33,7 @@ import CurrencyWidget from '@/components/currency/CurrencyWidget'
 
 // â”€â”€ Design tokens (matches Dart _C class exactly) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const C = {
-  accent: '#8FFF00',
+  accent: '#b8fa33',
   accentDeep: '#4A8F00',
   accentDim: '#F4FFE6',
   accentDark: '#0A0D08',
@@ -354,14 +354,14 @@ export default function DashboardHomePage() {
               ].map(s => (
                 <button key={s.step} onClick={() => router.push(s.href)}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#E8EDE2] hover:border-[#8FFF00] hover:bg-[#F4FFE6] transition-all">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-black" style={{ backgroundColor: '#1A2410', color: '#8FFF00' }}>{s.step}</div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-black" style={{ backgroundColor: '#1A2410', color: '#b8fa33' }}>{s.step}</div>
                   <p className="text-[12px] font-bold text-[#1A2410]">{s.label}</p>
                   <p className="text-[10px] text-[#8A9E78]">{s.desc}</p>
                 </button>
               ))}
             </div>
             <button onClick={() => router.push('/dashboard/settings?tab=ebay')}
-              className="px-6 py-3 rounded-xl font-black text-[13px]" style={{ backgroundColor: '#8FFF00', color: '#1A2410' }}>
+              className="px-6 py-3 rounded-xl font-black text-[13px]" style={{ backgroundColor: '#b8fa33', color: '#1A2410' }}>
               Connect eBay now
             </button>
           </div>
