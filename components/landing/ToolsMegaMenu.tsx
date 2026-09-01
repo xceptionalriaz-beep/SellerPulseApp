@@ -58,6 +58,13 @@ const CORE_APPS: ToolItem[] = [
         href: '#inventory-manager',
         icon: Boxes,
     },
+    {
+        id: 'tool-inventory-manager',
+        name: 'Listing Studio',
+        description: 'Smart stock alerts and automated syncing.',
+        href: '#inventory-manager',
+        icon: Boxes,
+    },
 ];
 
 const FREE_TOOLS: ToolItem[] = [

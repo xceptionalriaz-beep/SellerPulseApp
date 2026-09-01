@@ -1,211 +1,326 @@
 // app/cookie-policy/page.tsx
+// Riazify Cookie & Tracking Technologies Policy — v2.0
+
 import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { ShieldCheck, Cookie, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy | Riazify',
-  description: 'Learn how Riazify uses cookies and how you can control them.',
+  title: 'Cookie Policy — Privacy & Tracking Disclosures | Riazify',
+  description: 'Learn how Riazify uses essential cookies, authentication session tokens, and local preferences to operate securely.',
 }
 
+// ── Riazify Color Role Tokens (v2.0) ──────────────────────────
 const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  bg:       '#f7f9f5',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 const LAST_UPDATED = 'July 4, 2026'
 
+const COOKIE_CATEGORIES = [
+  {
+    type: 'Essential & Authentication',
+    color: C.primary,
+    desc: 'Mandatory for core platform security, encrypted session persistence, and API token validation.',
+    cookies: [
+      { name: 'sb-auth-token', purpose: 'Supabase encrypted session state', duration: 'Session' },
+      { name: 'sb-refresh-token', purpose: 'Persistent multi-factor OAuth session refresh', duration: '7 Days' },
+    ],
+  },
+  {
+    type: 'Operational & Workspace Preferences',
+    color: '#2563eb',
+    desc: 'Stores your active marketplace defaults, Cassini title preferences, and UI layout settings.',
+    cookies: [
+      { name: 'riazify-theme', purpose: 'Stores interface theme and density preference', duration: '1 Year' },
+      { name: 'riazify-region', purpose: 'Remembers active eBay locale (e.g. US, UK, DE)', duration: '1 Year' },
+    ],
+  },
+  {
+    type: 'Telemetry & Performance Analytics',
+    color: C.muted,
+    desc: 'Aggregated, non-personally identifiable metrics used strictly for debugging load times.',
+    cookies: [
+      { name: '_vercel_analytics', purpose: 'Anonymous platform latency and uptime telemetry', duration: '1 Year' },
+    ],
+  },
+]
+
+const FAQS = [
+  {
+    q: 'Can I use Riazify without enabling cookies?',
+    a: 'Essential cookies are technically required for secure authentication and OAuth verification with eBay APIs. Disabling essential cookies prevents your account from maintaining a logged-in session.'
+  },
+  {
+    q: 'Does Riazify sell or monetize cookie data?',
+    a: 'No. Riazify does not sell, license, or monetize seller telemetry, listing margins, or cookie identifiers to advertising exchanges or data brokers.'
+  },
+  {
+    q: 'How do I clear or reset cookies stored by Riazify?',
+    a: 'You can remove cookies anytime through your browser settings under "Cookies and Site Data" for the riazify.com domain. Note that clearing session cookies will log you out.'
+  },
+  {
+    q: 'Does Riazify deploy third-party advertising tracking pixels?',
+    a: 'No. We do not inject cross-site tracking pixels, behavioral retargeting scripts, or third-party ad network beacons.'
+  },
+]
+
 export default function CookiePolicyPage() {
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: C.bg, minHeight: '100vh' }}>
       <Navbar />
       <div style={{ paddingTop: '72px' }}>
 
-        {/* Hero */}
-        <div style={{ backgroundColor: C.dark }}>
-          <div className="max-w-4xl mx-auto px-4 py-16 md:py-24 text-center">
-            <h1 className="font-black mb-3" style={{ color: '#fff', fontSize: 'clamp(28px, 5vw, 40px)' }}>Cookie Policy</h1>
-            <p className="text-[14px]" style={{ color: 'rgba(255,255,255,0.5)' }}>Last updated: {LAST_UPDATED}</p>
+        {/* ── 1. Hero Header ── */}
+        <header className="border-b" style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+          <div className="max-w-4xl mx-auto px-6 py-16 md:py-20 text-center">
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 border"
+              style={{ backgroundColor: 'rgba(117,48,251,0.25)', borderColor: C.primary }}>
+              <Cookie size={13} style={{ color: C.accent }} />
+              <span className="text-[11px] font-black tracking-wider uppercase font-syne" style={{ color: C.accent }}>
+                LEGAL &amp; DATA PRIVACY
+              </span>
+            </div>
+
+            <h1 className="text-[34px] md:text-[46px] font-black leading-tight mb-2 font-syne text-white tracking-tight">
+              Cookie Policy
+            </h1>
+
+            <p className="text-[13.5px] font-medium" style={{ color: C.textLight }}>
+              Effective Date: {LAST_UPDATED} · Version 2.4
+            </p>
+
           </div>
-        </div>
+        </header>
 
-        {/* Content */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="rounded-3xl border p-8 md:p-12 flex flex-col gap-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
+        {/* ── 2. Policy Documentation Container ── */}
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+          <div className="bg-white rounded-2xl border p-6 md:p-10 shadow-xs flex flex-col gap-8" style={{ borderColor: C.border }}>
 
-            {/* Intro */}
-            <div>
-              <p className="text-[15px] leading-relaxed" style={{ color: C.muted }}>
-                This Cookie Policy explains how Riazify ("we", "us" or "our") uses cookies and similar technologies when you visit our website at riazify.com. It explains what these technologies are, why we use them, and your rights to control our use of them.
+            {/* Intro Lead */}
+            <div className="pb-6 border-b" style={{ borderColor: C.border }}>
+              <p className="text-[14.5px] leading-relaxed" style={{ color: C.textDark }}>
+                This Cookie Policy explains how <strong>Riazify LLC</strong> ("we", "us", or "our") employs cookies, local storage tokens, and telemetry protocols when you access the Riazify web application, developer APIs, and intelligence dashboards. It outlines what these technologies perform, why they are essential to store security, and your administrative controls.
               </p>
             </div>
 
-            {/* Section */}
-            {[
-              {
-                title: '1. What Are Cookies?',
-                content: 'Cookies are small data files placed on your device when you visit a website. They are widely used to make websites work more efficiently and to provide information to site owners. Cookies can be "persistent" (remaining on your device until deleted) or "session" cookies (deleted when you close your browser).'
-              },
-              {
-                title: '2. How We Use Cookies',
-                content: 'We use cookies for the following purposes:'
-              },
-            ].map((s, i) => (
-              <div key={i}>
-                <h2 className="text-[20px] font-black mb-3" style={{ color: C.dark }}>{s.title}</h2>
-                <p className="text-[14px] leading-relaxed" style={{ color: C.muted }}>{s.content}</p>
-              </div>
-            ))}
-
-            {/* Cookie table */}
+            {/* Section 1 & 2 */}
             <div>
-              <h2 className="text-[20px] font-black mb-4" style={{ color: C.dark }}>3. Types of Cookies We Use</h2>
+              <h2 className="text-[18px] font-bold font-syne mb-2" style={{ color: C.textDark }}>
+                1. What Are Cookies and Local Storage Identifiers?
+              </h2>
+              <p className="text-[13.5px] leading-relaxed" style={{ color: C.muted }}>
+                Cookies are compact data files transmitted to and stored upon your computing device when navigating web platforms. They serve to authenticate session states, preserve personalized filters, and ensure responsive interaction. Cookies are classified as either <em>session cookies</em> (erased upon closing your browser window) or <em>persistent cookies</em> (retained across visits until manual deletion or expiration).
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-[18px] font-bold font-syne mb-2" style={{ color: C.textDark }}>
+                2. Operational Scope &amp; Purpose
+              </h2>
+              <p className="text-[13.5px] leading-relaxed" style={{ color: C.muted }}>
+                Riazify utilizes tracking technologies exclusively to verify merchant identity, enforce account access controls, compute real-time order risk scoring, and prevent unauthorized credential stuffing.
+              </p>
+            </div>
+
+            {/* Section 3: Detailed Cookie Tables */}
+            <div>
+              <h2 className="text-[18px] font-bold font-syne mb-4" style={{ color: C.textDark }}>
+                3. Technical Breakdown of Deployed Cookies
+              </h2>
+
               <div className="flex flex-col gap-4">
-                {[
-                  {
-                    type: 'Essential Cookies',
-                    color: C.lime,
-                    desc: 'Required for the website to function properly.',
-                    cookies: [
-                      { name: 'sb-auth-token', purpose: 'Supabase authentication session', duration: 'Session' },
-                      { name: 'sb-refresh-token', purpose: 'Keeps you logged in between sessions', duration: '7 days' },
-                    ]
-                  },
-                  {
-                    type: 'Preference Cookies',
-                    color: '#3b82f6',
-                    desc: 'Remember your settings and preferences.',
-                    cookies: [
-                      { name: 'riazify-theme', purpose: 'Stores your UI preferences', duration: '1 year' },
-                    ]
-                  },
-                  {
-                    type: 'Analytics Cookies',
-                    color: C.muted,
-                    desc: 'Help us understand how visitors use our site.',
-                    cookies: [
-                      { name: '_vercel_analytics', purpose: 'Anonymous usage analytics via Vercel', duration: '1 year' },
-                    ]
-                  },
-                ].map((cat, i) => (
-                  <div key={i} className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
-                    <div className="px-5 py-3 flex items-center gap-3" style={{ backgroundColor: C.bg }}>
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                      <p className="text-[13px] font-black" style={{ color: C.dark }}>{cat.type}</p>
-                      <p className="text-[12px]" style={{ color: C.muted }}>— {cat.desc}</p>
+                {COOKIE_CATEGORIES.map((cat, i) => (
+                  <div key={i} className="rounded-xl border overflow-hidden bg-white shadow-2xs" style={{ borderColor: C.border }}>
+                    <div className="px-4 py-3 flex items-center justify-between gap-3 border-b" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
+                        <span className="text-[13px] font-bold font-syne" style={{ color: C.textDark }}>
+                          {cat.type}
+                        </span>
+                      </div>
+                      <span className="text-[11.5px] hidden sm:inline" style={{ color: C.muted }}>
+                        {cat.desc}
+                      </span>
                     </div>
-                    <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
-                      <thead>
-                        <tr style={{ backgroundColor: C.bg, borderTop: `1px solid ${C.border}` }}>
-                          {['Cookie Name', 'Purpose', 'Duration'].map(h => (
-                            <th key={h} className="px-4 py-2 text-left text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cat.cookies.map((c, j) => (
-                          <tr key={j} style={{ borderTop: `1px solid ${C.border}` }}>
-                            <td className="px-4 py-3"><code className="text-[12px] font-bold" style={{ color: C.limeDeep }}>{c.name}</code></td>
-                            <td className="px-4 py-3 text-[13px]" style={{ color: C.muted }}>{c.purpose}</td>
-                            <td className="px-4 py-3 text-[12px] font-bold" style={{ color: C.dark }}>{c.duration}</td>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse min-w-[380px]">
+                        <thead>
+                          <tr className="border-b" style={{ borderColor: C.border, backgroundColor: '#ffffff' }}>
+                            <th className="px-4 py-2 text-[10.5px] font-bold uppercase tracking-wider font-syne" style={{ color: C.muted }}>Identifier</th>
+                            <th className="px-4 py-2 text-[10.5px] font-bold uppercase tracking-wider font-syne" style={{ color: C.muted }}>Functional Purpose</th>
+                            <th className="px-4 py-2 text-[10.5px] font-bold uppercase tracking-wider font-syne" style={{ color: C.muted }}>Lifespan</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y text-[12.5px]" style={{ borderColor: C.border }}>
+                          {cat.cookies.map((c, j) => (
+                            <tr key={j} className="hover:bg-[#f8f7ff] transition-colors">
+                              <td className="px-4 py-2.5 font-mono font-semibold" style={{ color: C.primary }}>
+                                {c.name}
+                              </td>
+                              <td className="px-4 py-2.5" style={{ color: C.textDark }}>
+                                {c.purpose}
+                              </td>
+                              <td className="px-4 py-2.5 font-medium" style={{ color: C.muted }}>
+                                {c.duration}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {[
-              {
-                title: '4. Third-Party Cookies',
-                content: 'We use the following third-party services that may set their own cookies: Supabase (database and authentication), Resend (email delivery), and Vercel (hosting and analytics). These services have their own privacy policies governing the use of cookies.'
-              },
-              {
-                title: '5. How to Control Cookies',
-                content: 'You can control and manage cookies in your browser settings. Please note that removing or blocking cookies may impact your user experience and some features may not work as intended. Most browsers allow you to refuse cookies, delete existing cookies, and set preferences for certain websites.'
-              },
-              {
-                title: '6. Updates to This Policy',
-                content: `We may update this Cookie Policy from time to time to reflect changes in technology or legislation. The date at the top of this page indicates when it was last revised. We encourage you to check this page periodically.`
-              },
-              {
-                title: '7. Contact Us',
-                content: 'If you have questions about our use of cookies, please contact us at privacy@riazify.com'
-              },
-            ].map((s, i) => (
-              <div key={i}>
-                <h2 className="text-[20px] font-black mb-3" style={{ color: C.dark }}>{s.title}</h2>
-                <p className="text-[14px] leading-relaxed" style={{ color: C.muted }}>{s.content}</p>
+            {/* Section 4, 5, 6, 7 */}
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-[18px] font-bold font-syne mb-2" style={{ color: C.textDark }}>
+                  4. Third-Party Infrastructure Providers
+                </h2>
+                <p className="text-[13.5px] leading-relaxed" style={{ color: C.muted }}>
+                  Our platform integrates select cloud infrastructure vendors to ensure high availability. These partners include <strong>Supabase</strong> (encrypted database layer &amp; session tokens), <strong>Resend</strong> (transactional email dispatches), and <strong>Vercel</strong> (edge computing). Each vendor operates under strict SOC2 and GDPR data processing addendums.
+                </p>
               </div>
-            ))}
 
-            {/* Related links */}
-            <div className="pt-6 border-t flex items-center gap-4 flex-wrap" style={{ borderColor: C.border }}>
-              <p className="text-[12px] font-bold" style={{ color: C.muted }}>Related:</p>
-              <Link href="/privacy-policy" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Privacy Policy</Link>
-              <Link href="/terms-of-service" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Terms of Service</Link>
+              <div>
+                <h2 className="text-[18px] font-bold font-syne mb-2" style={{ color: C.textDark }}>
+                  5. Managing &amp; Opting Out
+                </h2>
+                <p className="text-[13.5px] leading-relaxed" style={{ color: C.muted }}>
+                  You retain full authority to configure cookie acceptance through standard browser preferences. You may decline non-essential cookies, delete stored local caches, or enable "Do Not Track" headers. Please observe that restricting essential session tokens will disable authenticated workspace features.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-[18px] font-bold font-syne mb-2" style={{ color: C.textDark }}>
+                  6. Amendments to This Disclosure
+                </h2>
+                <p className="text-[13.5px] leading-relaxed" style={{ color: C.muted }}>
+                  We reserve the right to revise this policy periodically to reflect statutory updates or algorithmic platform revisions. Revisions become effective immediately upon public deployment to this URL.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-[18px] font-bold font-syne mb-2" style={{ color: C.textDark }}>
+                  7. Privacy Desk Contact
+                </h2>
+                <p className="text-[13.5px] leading-relaxed" style={{ color: C.muted }}>
+                  For technical inquiries regarding our cookie governance or data privacy safeguards, contact our security team at{' '}
+                  <a href="mailto:privacy@riazify.com" className="font-bold underline" style={{ color: C.primary }}>
+                    privacy@riazify.com
+                  </a>.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-        {/* FAQ */}
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 16px 48px' }}>
-        <h2 style={{ fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 900, color: '#1a2410', textAlign: 'center', margin: '0 0 8px' }}>Cookie questions</h2>
-        <p style={{ fontSize: 14, color: '#8a9e78', textAlign: 'center', margin: '0 0 28px' }}>Quick answers about how we use cookies</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            { q: 'Can I use Riazify without cookies?', a: 'Essential cookies are required for login and authentication to work. Without them, you cannot stay logged in. Analytics and preference cookies are optional.' },
-            { q: 'Do you sell my cookie data?', a: 'No. We never sell your data including cookie data to third parties. Cookies are only used to improve your experience on Riazify.' },
-            { q: 'How do I delete Riazify cookies?', a: 'Open your browser settings, go to Privacy or Cookies section, and delete cookies from riazify.com. Note this will log you out of your account.' },
-            { q: 'Does Riazify use tracking cookies?', a: 'We only use anonymous analytics via Vercel to understand general usage patterns. We do not use advertising or cross-site tracking cookies.' },
-            { q: 'How long do cookies last?', a: 'Session cookies are deleted when you close your browser. Authentication cookies last 7 days. Analytics and preference cookies last up to 1 year.' },
-          ].map((faq, i) => (
-            <details key={i} style={{ background: '#ffffff', border: '1px solid #e8ede2', borderRadius: 12, overflow: 'hidden' }}>
-              <summary style={{ padding: '14px 18px', fontSize: 13, fontWeight: 700, color: '#1a2410', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                {faq.q}
-                <span style={{ fontSize: 16, color: '#8a9e78', flexShrink: 0, marginLeft: 12 }}>+</span>
-              </summary>
-              <div style={{ padding: '0 18px 14px' }}>
-                <p style={{ fontSize: 13, color: '#8a9e78', margin: 0, lineHeight: 1.6 }}>{faq.a}</p>
-              </div>
-            </details>
-          ))}
-        </div>
-      </div>
 
-      {/* CTA Banner */}
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 16px 60px' }}>
-        <div style={{ background: '#1a2410', borderRadius: 20, padding: '40px 24px', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 100, background: 'rgba(143,255,0,0.1)', border: '1px solid rgba(143,255,0,0.3)', marginBottom: 16 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: '#8fff00' }}>14-day free trial</span>
+            {/* Related Policy Links */}
+            <div className="pt-6 border-t flex items-center gap-4 flex-wrap text-[12.5px]" style={{ borderColor: C.border }}>
+              <span className="font-bold font-syne" style={{ color: C.textDark }}>RELATED LEGAL TEXTS:</span>
+              <Link href="/privacy-policy" className="font-bold hover:underline" style={{ color: C.primary }}>
+                Privacy Policy →
+              </Link>
+              <Link href="/terms-of-service" className="font-bold hover:underline" style={{ color: C.primary }}>
+                Terms of Service →
+              </Link>
+            </div>
+
           </div>
-          <h2 style={{ fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: 900, color: '#ffffff', margin: '0 0 10px', lineHeight: 1.1 }}>
-            Ready to grow your eBay business?
-          </h2>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 24px' }}>
-            No credit card required. No commitment. Cancel anytime.
-          </p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/auth/signup" style={{ height: 46, padding: '0 24px', borderRadius: 12, background: '#8fff00', color: '#1a2410', fontSize: 14, fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-              Start free trial
-            </a>
-            <a href="/pricing" target="_blank" rel="noopener noreferrer"
-               style={{ height: 46, padding: '0 24px', borderRadius: 12, background: 'rgba(255,255,255,0.08)', color: '#ffffff', fontSize: 14, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>
-              View pricing
-            </a>
-          </div>
-        </div>
-      </div>
-      <Footer/>
+
+          {/* ── 3. Quick FAQ Details Accordion ── */}
+          <section className="max-w-3xl mx-auto my-14">
+            <div className="text-center mb-8">
+              <p className="text-[11px] font-black uppercase tracking-wider font-syne mb-1" style={{ color: C.primary }}>
+                FREQUENTLY ASKED
+              </p>
+              <h2 className="text-[24px] md:text-[28px] font-black font-syne" style={{ color: C.textDark }}>
+                Cookie &amp; telemetry questions
+              </h2>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {FAQS.map((faq, i) => (
+                <details
+                  key={i}
+                  className="rounded-xl border bg-white overflow-hidden shadow-2xs group"
+                  style={{ borderColor: C.border }}
+                >
+                  <summary
+                    className="flex items-center justify-between gap-4 p-4 md:p-5 cursor-pointer list-none select-none text-[13.5px] font-bold font-syne"
+                    style={{ color: C.textDark }}
+                  >
+                    <span>{faq.q}</span>
+                    <span className="text-[16px] font-bold shrink-0 transition-transform group-open:rotate-45" style={{ color: C.primary }}>
+                      +
+                    </span>
+                  </summary>
+                  <div className="px-4 md:px-5 pb-5 pt-1 border-t" style={{ borderColor: C.border }}>
+                    <p className="text-[13px] leading-relaxed" style={{ color: C.muted }}>
+                      {faq.a}
+                    </p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+
+          {/* ── 4. Final CTA Banner ── */}
+          <section className="rounded-3xl p-8 md:p-10 text-center border shadow-xl mb-6"
+            style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md mb-3 text-[11px] font-bold font-syne uppercase"
+              style={{ backgroundColor: 'rgba(117,48,251,0.25)', color: C.accent }}>
+              <CheckCircle2 size={13} />
+              <span>TRANSPARENT SELLER TOOLS</span>
+            </div>
+            <h2 className="text-[24px] md:text-[30px] font-black font-syne text-white mb-2 tracking-tight">
+              Ready to scale your eBay store safely?
+            </h2>
+            <p className="text-[13.5px] mb-6 max-w-md mx-auto" style={{ color: C.textLight }}>
+              No credit card required. Experience automated dispute defense and verified margin tracking today.
+            </p>
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <Link
+                href="/auth/signup"
+                className="px-7 py-3 rounded-xl font-black font-syne text-[13.5px] transition-transform hover:scale-105 shadow-md cursor-pointer"
+                style={{ backgroundColor: C.accent, color: C.dark }}
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                href="/pricing"
+                className="px-7 py-3 rounded-xl font-bold text-[13.5px] border transition-colors hover:bg-[#271c42] cursor-pointer"
+                style={{ borderColor: C.borderDark, color: '#ffffff' }}
+              >
+                View Pricing
+              </Link>
+            </div>
+          </section>
+
+        </main>
+
+        <Footer />
       </div>
     </div>
   )

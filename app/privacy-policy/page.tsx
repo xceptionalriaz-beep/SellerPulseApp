@@ -1,22 +1,33 @@
-// app/privacy-policy/page.tsx
 import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { Shield, Lock, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | Riazify',
   description: 'How Riazify collects, uses and protects your personal data.',
 }
 
+// -- Riazify Color Role Tokens (v2.0) ---------------------------
 const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  bg:       '#f7f9f5',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 const LAST_UPDATED = 'July 4, 2026'
@@ -114,39 +125,71 @@ const SECTIONS = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: C.bg, minHeight: '100vh' }}>
       <Navbar />
-      <div style={{ paddingTop: '80px' }}>
+      <div style={{ paddingTop: '72px' }}>
 
-        {/* Hero */}
-        <div style={{ backgroundColor: C.dark }}>
-          <div className="max-w-4xl mx-auto px-6 py-16">
+        {/* ── 1. HERO ── */}
+        <div style={{ backgroundColor: C.dark, position: 'relative', overflow: 'hidden' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: -80,
+              right: -80,
+              width: 360,
+              height: 360,
+              borderRadius: '50%',
+              background: 'rgba(117,48,251,0.18)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div className="max-w-4xl mx-auto px-6 py-16 md:py-20 relative z-10">
             <div className="flex items-center gap-2 mb-4">
-              <Link href="/" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.muted }}>Home</Link>
-              <span style={{ color: C.muted }}>›</span>
-              <span className="text-[12px] font-bold" style={{ color: C.lime }}>Privacy Policy</span>
+              <Link href="/" className="text-[12px] font-bold transition-colors hover:text-[#b8fa33]" style={{ color: C.textLight }}>
+                Home
+              </Link>
+              <span style={{ color: C.textLight }}>›</span>
+              <span className="text-[12px] font-black" style={{ color: C.accent }}>
+                Privacy Policy
+              </span>
             </div>
-            <h1 className="text-[40px] font-black mb-3" style={{ color: '#fff' }}>Privacy Policy</h1>
-            <p className="text-[14px] mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Last updated: {LAST_UPDATED}</p>
-            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Applies to users in the USA, UK and internationally</p>
+            <h1 className="text-[36px] md:text-[48px] font-black mb-3 font-syne tracking-tight text-white">
+              Privacy Policy
+            </h1>
+            <p className="text-[14px] mb-1 font-medium" style={{ color: C.textLight }}>
+              Last updated: {LAST_UPDATED}
+            </p>
+            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Applies to sellers and operators in the USA, UK, and internationally
+            </p>
           </div>
         </div>
 
-        {/* Quick summary */}
-        <div className="max-w-4xl mx-auto px-6 pt-8">
-          <div className="rounded-2xl p-6 flex flex-col gap-3" style={{ backgroundColor: C.limeTint, border: `1px solid rgba(143,255,0,0.3)` }}>
-            <p className="text-[12px] font-black tracking-wider" style={{ color: C.limeDeep }}>QUICK SUMMARY</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* ── 2. QUICK SUMMARY BOX ── */}
+        <div className="max-w-4xl mx-auto px-6 pt-10">
+          <div
+            className="rounded-2xl p-6 sm:p-7 border shadow-xs"
+            style={{ backgroundColor: C.primaryLight, borderColor: C.border }}
+          >
+            <p className="text-[11px] font-black tracking-wider mb-4 font-syne uppercase" style={{ color: C.primary }}>
+              QUICK SUMMARY
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
-                { icon: '🔒', title: 'We protect your data', desc: 'Industry-standard encryption and security measures' },
-                { icon: '🚫', title: 'We never sell your data', desc: 'Your personal information is never sold to third parties' },
-                { icon: '✅', title: 'You are in control', desc: 'Access, correct or delete your data at any time' },
+                { icon: Lock, title: 'We protect your data', desc: 'Enterprise-grade encryption and secure auth isolation' },
+                { icon: Shield, title: 'We never sell your data', desc: 'Your sourcing and listing intelligence stays 100% private' },
+                { icon: CheckCircle2, title: 'You are in control', desc: 'Access, export, correct or delete your profile data anytime' },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span style={{ fontSize: 20 }}>{item.icon}</span>
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+                    style={{ backgroundColor: C.surface, borderColor: C.border }}
+                  >
+                    <item.icon size={18} style={{ color: C.primary }} />
+                  </div>
                   <div>
-                    <p className="text-[13px] font-black" style={{ color: C.dark }}>{item.title}</p>
-                    <p className="text-[12px]" style={{ color: C.muted }}>{item.desc}</p>
+                    <p className="text-[13px] font-black font-syne" style={{ color: C.textDark }}>{item.title}</p>
+                    <p className="text-[12px] leading-relaxed mt-0.5" style={{ color: C.muted }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -154,26 +197,42 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="rounded-3xl border p-8 md:p-12 flex flex-col gap-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-
+        {/* ── 3. LEGAL CONTENT SECTIONS ── */}
+        <div className="max-w-4xl mx-auto px-6 py-10">
+          <div
+            className="rounded-3xl border p-8 sm:p-12 flex flex-col gap-9 shadow-sm"
+            style={{ backgroundColor: C.surface, borderColor: C.border }}
+          >
             <p className="text-[15px] leading-relaxed" style={{ color: C.muted }}>
-              This Privacy Policy explains how Riazify collects, uses, shares and protects your personal information when you use our platform. We are committed to being transparent about our data practices and protecting your privacy rights.
+              This Privacy Policy explains how Riazify LLC collects, uses, shares, and protects your personal information when you interact with our platform. We are committed to transparency, strict data minimization, and safeguarding your operational confidentiality.
             </p>
 
             {SECTIONS.map((s, i) => (
-              <div key={i}>
-                <h2 className="text-[20px] font-black mb-3" style={{ color: C.dark }}>{s.title}</h2>
-                {s.content && <p className="text-[14px] leading-relaxed" style={{ color: C.muted }}>{s.content}</p>}
+              <div key={i} className="flex flex-col gap-3">
+                <h2 className="text-[20px] font-black font-syne" style={{ color: C.textDark }}>
+                  {s.title}
+                </h2>
+                {s.content && (
+                  <p className="text-[14px] leading-relaxed" style={{ color: C.muted }}>
+                    {s.content}
+                  </p>
+                )}
                 {s.items && (
-                  <div className="flex flex-col gap-3 mt-2">
+                  <div className="flex flex-col gap-3 mt-1">
                     {s.items.map((item, j) => (
-                      <div key={j} className="flex gap-3 p-3 rounded-xl" style={{ backgroundColor: C.bg }}>
-                        <div className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ backgroundColor: C.lime }} />
+                      <div
+                        key={j}
+                        className="flex gap-3.5 p-4 rounded-xl border transition-colors hover:border-[#7530fb]"
+                        style={{ backgroundColor: C.bg, borderColor: C.border }}
+                      >
+                        <div className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: C.primary }} />
                         <div>
-                          <p className="text-[13px] font-black" style={{ color: C.dark }}>{item.label}</p>
-                          <p className="text-[13px]" style={{ color: C.muted }}>{item.desc}</p>
+                          <p className="text-[13.5px] font-black font-syne" style={{ color: C.textDark }}>
+                            {item.label}
+                          </p>
+                          <p className="text-[13px] leading-relaxed mt-0.5" style={{ color: C.muted }}>
+                            {item.desc}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -182,14 +241,24 @@ export default function PrivacyPolicyPage() {
               </div>
             ))}
 
-            {/* Related links */}
+            {/* Related Navigation Links */}
             <div className="pt-6 border-t flex items-center gap-4 flex-wrap" style={{ borderColor: C.border }}>
-              <p className="text-[12px] font-bold" style={{ color: C.muted }}>Related:</p>
-              <Link href="/cookie-policy" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Cookie Policy</Link>
-              <Link href="/terms-of-service" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Terms of Service</Link>
+              <p className="text-[12px] font-bold font-syne uppercase" style={{ color: C.muted }}>Related Legal Policies:</p>
+              <Link href="/cookie-policy" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>
+                Cookie Policy
+              </Link>
+              <span style={{ color: C.border }}>•</span>
+              <Link href="/terms-of-service" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>
+                Terms of Service
+              </Link>
+              <span style={{ color: C.border }}>•</span>
+              <Link href="/gdpr" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>
+                GDPR Rights
+              </Link>
             </div>
           </div>
         </div>
+
         <Footer />
       </div>
     </div>

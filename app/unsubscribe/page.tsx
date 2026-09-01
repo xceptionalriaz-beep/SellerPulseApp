@@ -1,18 +1,30 @@
 ﻿// app/unsubscribe/page.tsx
 'use client'
-import { Suspense } from 'react'
-import { useEffect, useState } from 'react'
+
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Activity, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react'
 
-const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  bg:       '#f7f9f5',
+// -- Riazify Color Role Tokens (v2.0) ---------------------------
+const T = {
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 function UnsubscribeContent() {
@@ -34,65 +46,152 @@ function UnsubscribeContent() {
   }, [email])
 
   return (
-    <div style={{ backgroundColor: C.dark, borderRadius: 24, border: '1px solid rgba(143,255,0,0.2)', padding: '48px 40px', maxWidth: 480, width: '100%', textAlign: 'center' }}>
-      <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 32, textDecoration: 'none' }}>
-        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.dark} strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <div
+      className="rounded-3xl border p-8 sm:p-12 max-w-md w-full text-center shadow-2xl relative overflow-hidden"
+      style={{
+        backgroundColor: T.dark,
+        borderColor: T.borderDark,
+      }}
+    >
+      {/* Background radial glow */}
+      <div
+        style={{
+          position: 'absolute',
+          top: -60,
+          right: -60,
+          width: 220,
+          height: 220,
+          borderRadius: '50%',
+          background: 'rgba(117,48,251,0.25)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Brand Header */}
+      <Link
+        href="/"
+        className="inline-flex items-center gap-2.5 mb-8 text-decoration-none transition-transform hover:scale-105"
+      >
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
+          style={{ backgroundColor: T.primary }}
+        >
+          <Activity size={18} style={{ color: T.accent }} />
         </div>
-        <span style={{ fontSize: 20, fontWeight: 900, color: '#fff' }}>Riazify</span>
+        <span className="text-[22px] font-black font-syne text-white tracking-tight">
+          Riazify
+        </span>
       </Link>
 
+      {/* ── 1. INVALID LINK STATE ── */}
       {!email && (
-        <>
-          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div className="relative z-10">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border"
+            style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca' }}
+          >
+            <AlertCircle size={28} style={{ color: '#dc2626' }} />
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Invalid link</h1>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>This unsubscribe link is missing the email address. Please use the link from your email.</p>
-          <Link href="/blog" style={{ display: 'inline-block', backgroundColor: C.dark, color: C.lime, fontWeight: 700, fontSize: 13, padding: '10px 24px', borderRadius: 12, textDecoration: 'none' }}>← Back to Blog</Link>
-        </>
-      )}
-
-      {status === 'loading' && (
-        <>
-          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: C.limeTint, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Unsubscribing...</h1>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>Please wait a moment.</p>
-          <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-        </>
-      )}
-
-      {status === 'success' && (
-        <>
-          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: C.limeTint, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>You've been unsubscribed</h1>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>
-            <strong style={{ color: C.lime }}>{email}</strong> has been removed from the Riazify Blog newsletter.
+          <h1 className="text-[22px] font-black font-syne text-white mb-2 tracking-tight">
+            Invalid Link
+          </h1>
+          <p className="text-[14px] leading-relaxed mb-6" style={{ color: T.textLight }}>
+            This unsubscribe link is missing the subscriber email address. Please click the direct unsubscribe link inside your newsletter email.
           </p>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 28 }}>You won't receive any more emails from us. You can resubscribe anytime from the blog.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Link href="/blog" style={{ display: 'block', backgroundColor: C.dark, color: C.lime, fontWeight: 700, fontSize: 13, padding: '12px 24px', borderRadius: 12, textDecoration: 'none' }}>← Back to Blog</Link>
-            <button onClick={() => { fetch('/api/blog/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'resubscribe' }) }).then(() => setStatus('idle')) }}
-              style={{ backgroundColor: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontWeight: 600, fontSize: 13, padding: '12px 24px', borderRadius: 12, cursor: 'pointer' }}>
-              Actually, resubscribe me
+          <Link
+            href="/blog"
+            className="inline-block px-7 py-3 rounded-xl font-black text-[13px] transition-all hover:scale-105 shadow-sm"
+            style={{ backgroundColor: T.accent, color: T.dark }}
+          >
+            ← Return to Blog
+          </Link>
+        </div>
+      )}
+
+      {/* ── 2. LOADING STATE ── */}
+      {status === 'loading' && (
+        <div className="relative z-10 py-4">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border shadow-sm"
+            style={{ backgroundColor: 'rgba(117,48,251,0.2)', borderColor: T.primary }}
+          >
+            <RefreshCw size={26} style={{ color: T.accent }} className="animate-spin" />
+          </div>
+          <h1 className="text-[22px] font-black font-syne text-white mb-2 tracking-tight">
+            Unsubscribing...
+          </h1>
+          <p className="text-[14px] font-medium" style={{ color: T.textLight }}>
+            Updating your newsletter preferences across our clusters.
+          </p>
+        </div>
+      )}
+
+      {/* ── 3. SUCCESS STATE ── */}
+      {status === 'success' && (
+        <div className="relative z-10">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border shadow-sm"
+            style={{ backgroundColor: 'rgba(184,250,51,0.12)', borderColor: 'rgba(184,250,51,0.3)' }}
+          >
+            <CheckCircle2 size={30} style={{ color: T.accent }} />
+          </div>
+          <h1 className="text-[22px] font-black font-syne text-white mb-2 tracking-tight">
+            You&apos;ve Been Unsubscribed
+          </h1>
+          <p className="text-[14px] leading-relaxed mb-2" style={{ color: T.textLight }}>
+            <strong style={{ color: T.accent }}>{email}</strong> has been removed from the Riazify newsletter list.
+          </p>
+          <p className="text-[13px] leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            You will no longer receive weekly eBay intelligence digests. You can resubscribe anytime on our blog.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/blog"
+              className="w-full py-3.5 rounded-xl font-black text-[13px] transition-all hover:scale-[1.02] shadow-sm"
+              style={{ backgroundColor: T.accent, color: T.dark }}
+            >
+              ← Back to Blog
+            </Link>
+            <button
+              onClick={() => {
+                fetch('/api/blog/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email, source: 'resubscribe' }),
+                }).then(() => setStatus('idle'))
+              }}
+              className="w-full py-3 rounded-xl font-bold text-[12.5px] border transition-colors hover:bg-[#271c42] cursor-pointer"
+              style={{ borderColor: T.borderDark, color: T.textLight }}
+            >
+              Accident? Resubscribe me
             </button>
           </div>
-        </>
+        </div>
       )}
 
+      {/* ── 4. ERROR STATE ── */}
       {status === 'error' && (
-        <>
-          <div style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div className="relative z-10">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 border"
+            style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca' }}
+          >
+            <AlertCircle size={28} style={{ color: '#dc2626' }} />
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#fff', marginBottom: 8 }}>Something went wrong</h1>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>We couldn't process your request. Please try again.</p>
-          <Link href="/blog" style={{ display: 'inline-block', backgroundColor: C.dark, color: C.lime, fontWeight: 700, fontSize: 13, padding: '10px 24px', borderRadius: 12, textDecoration: 'none' }}>← Back to Blog</Link>
-        </>
+          <h1 className="text-[22px] font-black font-syne text-white mb-2 tracking-tight">
+            Something Went Wrong
+          </h1>
+          <p className="text-[14px] leading-relaxed mb-6" style={{ color: T.textLight }}>
+            We could not process your unsubscribe request right now. Please try again or reach out to support@riazify.com.
+          </p>
+          <Link
+            href="/blog"
+            className="inline-block px-7 py-3 rounded-xl font-black text-[13px] transition-all hover:scale-105 shadow-sm"
+            style={{ backgroundColor: T.accent, color: T.dark }}
+          >
+            ← Return to Blog
+          </Link>
+        </div>
       )}
     </div>
   )
@@ -100,12 +199,29 @@ function UnsubscribeContent() {
 
 export default function UnsubscribePage() {
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: '#f7f9f5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      <Suspense fallback={
-        <div style={{ backgroundColor: C.dark, borderRadius: 24, border: '1px solid rgba(143,255,0,0.2)', padding: '48px 40px', maxWidth: 480, width: '100%', textAlign: 'center' }}>
-          <p style={{ color: '#8a9e78', fontSize: 14 }}>Loading...</p>
-        </div>
-      }>
+    <div
+      style={{
+        fontFamily: "'DM Sans', sans-serif",
+        backgroundColor: T.bg,
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+      }}
+    >
+      <Suspense
+        fallback={
+          <div
+            className="rounded-3xl border p-10 max-w-md w-full text-center shadow-xl"
+            style={{ backgroundColor: T.dark, borderColor: T.borderDark }}
+          >
+            <p className="text-[14px] font-medium" style={{ color: T.textLight }}>
+              Loading preferences...
+            </p>
+          </div>
+        }
+      >
         <UnsubscribeContent />
       </Suspense>
     </div>

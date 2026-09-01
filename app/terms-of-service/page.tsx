@@ -1,22 +1,33 @@
-// app/terms-of-service/page.tsx
 import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { CreditCard, Ban, Lock, Scale } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Terms of Service | Riazify',
   description: 'Terms and conditions for using the Riazify platform.',
 }
 
+// -- Riazify Color Role Tokens (v2.0) ---------------------------
 const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  bg:       '#f7f9f5',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 const LAST_UPDATED = 'July 4, 2026'
@@ -33,7 +44,7 @@ const SECTIONS = [
   {
     title: '3. Eligibility',
     items: [
-      { label: 'Age', desc: 'You must be at least 18 years old to use Riazify.' },
+      { label: 'Age Requirement', desc: 'You must be at least 18 years old to create an account and use Riazify.' },
       { label: 'Business Use', desc: 'Riazify is designed for eBay sellers and ecommerce business operators.' },
       { label: 'Legal Capacity', desc: 'You must have the legal capacity to enter into binding contracts in your jurisdiction.' },
       { label: 'Compliance', desc: 'You must comply with all applicable laws and eBay\'s terms of service when using Riazify.' },
@@ -46,10 +57,10 @@ const SECTIONS = [
   {
     title: '5. Subscription Plans and Billing',
     items: [
-      { label: 'Free Plan', desc: 'Riazify offers a free tier with limited features. No payment information required.' },
+      { label: 'Free Tier', desc: 'Riazify offers a free tier with limited features. No payment information required.' },
       { label: 'Paid Plans', desc: 'Paid subscriptions are available on monthly or annual billing cycles. Prices are displayed at riazify.com/pricing.' },
-      { label: 'Billing', desc: 'Paid subscriptions are billed in advance at the start of each billing period. All fees are in USD unless otherwise stated.' },
-      { label: 'Auto-renewal', desc: 'Subscriptions automatically renew unless cancelled before the renewal date.' },
+      { label: 'Billing Schedule', desc: 'Paid subscriptions are billed in advance at the start of each billing period. All fees are in USD unless otherwise stated.' },
+      { label: 'Auto-Renewal', desc: 'Subscriptions automatically renew unless cancelled before the renewal date.' },
       { label: 'Price Changes', desc: 'We reserve the right to change subscription prices with 30 days advance notice via email.' },
       { label: 'Taxes', desc: 'You are responsible for all applicable taxes. We will add applicable taxes to your invoice where required by law.' },
     ]
@@ -127,40 +138,72 @@ const SECTIONS = [
 
 export default function TermsOfServicePage() {
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: C.bg, minHeight: '100vh' }}>
       <Navbar />
-      <div style={{ paddingTop: '80px' }}>
+      <div style={{ paddingTop: '72px' }}>
 
-        {/* Hero */}
-        <div style={{ backgroundColor: C.dark }}>
-          <div className="max-w-4xl mx-auto px-6 py-16">
+        {/* ── 1. HERO ── */}
+        <div style={{ backgroundColor: C.dark, position: 'relative', overflow: 'hidden' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: -80,
+              right: -80,
+              width: 360,
+              height: 360,
+              borderRadius: '50%',
+              background: 'rgba(117,48,251,0.18)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div className="max-w-4xl mx-auto px-6 py-16 md:py-20 relative z-10">
             <div className="flex items-center gap-2 mb-4">
-              <Link href="/" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.muted }}>Home</Link>
-              <span style={{ color: C.muted }}>›</span>
-              <span className="text-[12px] font-bold" style={{ color: C.lime }}>Terms of Service</span>
+              <Link href="/" className="text-[12px] font-bold transition-colors hover:text-[#b8fa33]" style={{ color: C.textLight }}>
+                Home
+              </Link>
+              <span style={{ color: C.textLight }}>›</span>
+              <span className="text-[12px] font-black" style={{ color: C.accent }}>
+                Terms of Service
+              </span>
             </div>
-            <h1 className="text-[40px] font-black mb-3" style={{ color: '#fff' }}>Terms of Service</h1>
-            <p className="text-[14px] mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Last updated: {LAST_UPDATED}</p>
-            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Operated by Riazify LLC</p>
+            <h1 className="text-[36px] md:text-[48px] font-black mb-3 font-syne tracking-tight text-white">
+              Terms of Service
+            </h1>
+            <p className="text-[14px] mb-1 font-medium" style={{ color: C.textLight }}>
+              Last updated: {LAST_UPDATED}
+            </p>
+            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Operated by Riazify LLC · United States
+            </p>
           </div>
         </div>
 
-        {/* Quick summary */}
-        <div className="max-w-4xl mx-auto px-6 pt-8">
-          <div className="rounded-2xl p-6" style={{ backgroundColor: C.limeTint, border: `1px solid rgba(143,255,0,0.3)` }}>
-            <p className="text-[12px] font-black tracking-wider mb-4" style={{ color: C.limeDeep }}>KEY POINTS</p>
+        {/* ── 2. KEY HIGHLIGHTS SUMMARY ── */}
+        <div className="max-w-4xl mx-auto px-6 pt-10">
+          <div
+            className="rounded-2xl p-6 sm:p-7 border shadow-xs"
+            style={{ backgroundColor: C.primaryLight, borderColor: C.border }}
+          >
+            <p className="text-[11px] font-black tracking-wider mb-4 font-syne uppercase" style={{ color: C.primary }}>
+              KEY AGREEMENT POINTS
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { icon: '💳', title: '7-day money back', desc: 'Full refund within 7 days of your first paid subscription' },
-                { icon: '🚫', title: 'Cancel anytime', desc: 'No lock-in — cancel from your account settings at any time' },
-                { icon: '🔒', title: 'Your data is yours', desc: 'You own your business data — we never sell it' },
-                { icon: '⚖️', title: 'US law governs', desc: 'These Terms are governed by United States law' },
+                { icon: CreditCard, title: '7-Day Money Back Guarantee', desc: 'Full refund within 7 days of your first paid subscription' },
+                { icon: Ban, title: 'Cancel Anytime', desc: 'No lock-in contracts — cancel directly from billing settings' },
+                { icon: Lock, title: 'Your Data Remains Yours', desc: 'You own your sourcing and store data — we never sell it' },
+                { icon: Scale, title: 'US Law Governed', desc: 'Standard commercial terms governed by United States law' },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span style={{ fontSize: 20 }}>{item.icon}</span>
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+                    style={{ backgroundColor: C.surface, borderColor: C.border }}
+                  >
+                    <item.icon size={18} style={{ color: C.primary }} />
+                  </div>
                   <div>
-                    <p className="text-[13px] font-black" style={{ color: C.dark }}>{item.title}</p>
-                    <p className="text-[12px]" style={{ color: C.muted }}>{item.desc}</p>
+                    <p className="text-[13px] font-black font-syne" style={{ color: C.textDark }}>{item.title}</p>
+                    <p className="text-[12px] leading-relaxed mt-0.5" style={{ color: C.muted }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -168,26 +211,42 @@ export default function TermsOfServicePage() {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="rounded-3xl border p-8 md:p-12 flex flex-col gap-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-
+        {/* ── 3. TERMS CLAUSES ── */}
+        <div className="max-w-4xl mx-auto px-6 py-10">
+          <div
+            className="rounded-3xl border p-8 sm:p-12 flex flex-col gap-9 shadow-sm"
+            style={{ backgroundColor: C.surface, borderColor: C.border }}
+          >
             <p className="text-[15px] leading-relaxed" style={{ color: C.muted }}>
-              Please read these Terms of Service carefully before using Riazify. These Terms govern your access to and use of our platform. By creating an account or using our services, you agree to be bound by these Terms.
+              Please review these Terms of Service carefully before using Riazify. These Terms govern your access to and use of our platform. By creating an account or using our services, you agree to be bound by these Terms.
             </p>
 
             {SECTIONS.map((s, i) => (
-              <div key={i}>
-                <h2 className="text-[20px] font-black mb-3" style={{ color: C.dark }}>{s.title}</h2>
-                {s.content && <p className="text-[14px] leading-relaxed" style={{ color: C.muted }}>{s.content}</p>}
+              <div key={i} className="flex flex-col gap-3">
+                <h2 className="text-[20px] font-black font-syne" style={{ color: C.textDark }}>
+                  {s.title}
+                </h2>
+                {s.content && (
+                  <p className="text-[14px] leading-relaxed" style={{ color: C.muted }}>
+                    {s.content}
+                  </p>
+                )}
                 {s.items && (
-                  <div className="flex flex-col gap-3 mt-2">
+                  <div className="flex flex-col gap-3 mt-1">
                     {s.items.map((item, j) => (
-                      <div key={j} className="flex gap-3 p-3 rounded-xl" style={{ backgroundColor: C.bg }}>
-                        <div className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ backgroundColor: C.lime }} />
+                      <div
+                        key={j}
+                        className="flex gap-3.5 p-4 rounded-xl border transition-colors hover:border-[#7530fb]"
+                        style={{ backgroundColor: C.bg, borderColor: C.border }}
+                      >
+                        <div className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: C.primary }} />
                         <div>
-                          <p className="text-[13px] font-black" style={{ color: C.dark }}>{item.label}</p>
-                          <p className="text-[13px]" style={{ color: C.muted }}>{item.desc}</p>
+                          <p className="text-[13.5px] font-black font-syne" style={{ color: C.textDark }}>
+                            {item.label}
+                          </p>
+                          <p className="text-[13px] leading-relaxed mt-0.5" style={{ color: C.muted }}>
+                            {item.desc}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -196,14 +255,24 @@ export default function TermsOfServicePage() {
               </div>
             ))}
 
-            {/* Related links */}
+            {/* Related Navigation Links */}
             <div className="pt-6 border-t flex items-center gap-4 flex-wrap" style={{ borderColor: C.border }}>
-              <p className="text-[12px] font-bold" style={{ color: C.muted }}>Related:</p>
-              <Link href="/privacy-policy" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Privacy Policy</Link>
-              <Link href="/cookie-policy" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Cookie Policy</Link>
+              <p className="text-[12px] font-bold font-syne uppercase" style={{ color: C.muted }}>Related Legal Policies:</p>
+              <Link href="/privacy-policy" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>
+                Privacy Policy
+              </Link>
+              <span style={{ color: C.border }}>•</span>
+              <Link href="/cookie-policy" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>
+                Cookie Policy
+              </Link>
+              <span style={{ color: C.border }}>•</span>
+              <Link href="/gdpr" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>
+                GDPR Rights
+              </Link>
             </div>
           </div>
         </div>
+
         <Footer />
       </div>
     </div>

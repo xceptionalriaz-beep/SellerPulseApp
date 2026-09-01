@@ -1,34 +1,44 @@
 ﻿'use client'
+
 // app/onboarding/page.tsx
 // ══════════════════════════════════════════════════════════════
-// Post-signup onboarding flow
-// Slide 1: Welcome + email verified confirmation
-// Slide 2: How did you hear about us?
-// Slide 3: What's your main goal?
-// Slide 4: You're all set!
+// Riazify Post-Signup Onboarding Flow
+// Slide 1: Welcome + Account verification confirmation
+// Slide 2: Acquisition channel attribution
+// Slide 3: Seller objective mapping
+// Slide 4: Provisioning & Trial initialization
 // ══════════════════════════════════════════════════════════════
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import {
-  Shield, CheckCircle, ChevronRight, ChevronLeft,
+  Activity, CheckCircle2, ChevronRight, ChevronLeft,
   ShieldCheck, Calculator, Type, BarChart2,
   Search, Youtube, Users, MessageCircle, Globe,
   Target, TrendingUp, DollarSign, LayoutDashboard,
-  Sparkles,
+  Sparkles, Check
 } from 'lucide-react'
 
+// -- Riazify Color Role Tokens (v2.0) ---------------------------
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 // ── Slide types ────────────────────────────────────────────────
@@ -36,56 +46,58 @@ type Slide = 'welcome' | 'source' | 'goal' | 'done'
 const SLIDES: Slide[] = ['welcome', 'source', 'goal', 'done']
 
 const SOURCES = [
-  { id: 'google',    label: 'Google Search',       icon: Search          },
-  { id: 'youtube',   label: 'YouTube',              icon: Youtube         },
-  { id: 'social',    label: 'Facebook / Instagram', icon: Globe           },
-  { id: 'friend',    label: 'Friend / Referral',    icon: Users           },
-  { id: 'ebay',      label: 'eBay Community',       icon: MessageCircle   },
-  { id: 'other',     label: 'Other',                icon: Sparkles        },
+  { id: 'google', label: 'Google Search', icon: Search },
+  { id: 'youtube', label: 'YouTube', icon: Youtube },
+  { id: 'social', label: 'Facebook / Instagram', icon: Globe },
+  { id: 'friend', label: 'Friend / Referral', icon: Users },
+  { id: 'ebay', label: 'eBay Community', icon: MessageCircle },
+  { id: 'other', label: 'Other', icon: Sparkles },
 ]
 
 const GOALS = [
-  { id: 'protect',   label: 'Protect orders from risky buyers',  icon: ShieldCheck  },
-  { id: 'research',  label: 'Research profitable products',       icon: Search       },
-  { id: 'titles',    label: 'Build better eBay titles',           icon: Type         },
-  { id: 'profit',    label: 'Track profit & analytics',           icon: DollarSign   },
-  { id: 'scale',     label: 'Scale my eBay business faster',      icon: TrendingUp   },
-  { id: 'all',       label: 'All of the above!',                  icon: Target       },
+  { id: 'protect', label: 'Protect orders from risky buyers', icon: ShieldCheck },
+  { id: 'research', label: 'Research profitable products', icon: Search },
+  { id: 'titles', label: 'Build Cassini-optimized titles', icon: Type },
+  { id: 'profit', label: 'Track profit & analytics', icon: DollarSign },
+  { id: 'scale', label: 'Scale eBay business velocity', icon: TrendingUp },
+  { id: 'all', label: 'All of the above!', icon: Target },
 ]
 
 export default function OnboardingPage() {
-  const router   = useRouter()
+  const router = useRouter()
   const supabase = createClient()
 
-  const [slide,      setSlide]      = useState<Slide>('welcome')
-  const [source,     setSource]     = useState<string | null>(null)
-  const [goals,      setGoals]      = useState<string[]>([])
-  const [userName,   setUserName]   = useState('there')
-  const [saving,     setSaving]     = useState(false)
-  const [animating,  setAnimating]  = useState(false)
+  const [slide, setSlide] = useState<Slide>('welcome')
+  const [source, setSource] = useState<string | null>(null)
+  const [goals, setGoals] = useState<string[]>([])
+  const [userName, setUserName] = useState('there')
+  const [saving, setSaving] = useState(false)
+  const [animating, setAnimating] = useState(false)
 
-  const slideIndex  = SLIDES.indexOf(slide)
-  const totalSlides = SLIDES.length
+  const slideIndex = SLIDES.indexOf(slide)
 
   useEffect(() => {
     async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const name = user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'there'
-        setUserName(name.split(' ')[0])
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const name = user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'there'
+          setUserName(name.split(' ')[0])
+        }
+      } catch {
+        // Fallback gracefully
       }
-      // No session yet is fine — user just signed up with email confirmation
     }
     loadUser()
   }, [])
 
   function goNext() {
-    if (animating) return
+    if (animating || slideIndex >= SLIDES.length - 1) return
     setAnimating(true)
     setTimeout(() => {
       setSlide(SLIDES[slideIndex + 1])
       setAnimating(false)
-    }, 200)
+    }, 180)
   }
 
   function goBack() {
@@ -94,10 +106,19 @@ export default function OnboardingPage() {
     setTimeout(() => {
       setSlide(SLIDES[slideIndex - 1])
       setAnimating(false)
-    }, 200)
+    }, 180)
   }
 
   function toggleGoal(id: string) {
+    if (id === 'all') {
+      if (goals.length === GOALS.length) {
+        setGoals([])
+      } else {
+        setGoals(GOALS.map(g => g.id))
+      }
+      return
+    }
+
     setGoals(prev =>
       prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]
     )
@@ -110,32 +131,39 @@ export default function OnboardingPage() {
       if (user) {
         await (supabase.from('profiles') as any).update({
           onboarding_completed: true,
-          onboarding_source:    source,
-          onboarding_goals:     goals,
-          updated_at:           new Date().toISOString(),
+          onboarding_source: source,
+          onboarding_goals: goals,
+          updated_at: new Date().toISOString(),
         }).eq('id', user.id)
 
-        // Log to user events
         await (supabase.from('user_events') as any).insert({
-          user_id:     user.id,
-          event_type:  'onboarding_completed',
+          user_id: user.id,
+          event_type: 'onboarding_completed',
           event_title: 'Onboarding Completed',
-          event_desc:  `Source: ${source ?? 'unknown'} · Goals: ${goals.join(', ')}`,
-          created_at:  new Date().toISOString(),
+          event_desc: `Source: ${source ?? 'unknown'} · Goals: ${goals.join(', ')}`,
+          created_at: new Date().toISOString(),
         })
       }
-    } catch { /* non-critical */ }
-    setSaving(false)
-    router.push('/dashboard')
+    } catch {
+      // Non-blocking catch
+    } finally {
+      setSaving(false)
+      router.push('/dashboard')
+    }
   }
 
-  // ── Progress bar ───────────────────────────────────────────
+  // ── Progress Bar ───────────────────────────────────────────
   function ProgressBar() {
     return (
       <div className="flex items-center gap-2 mb-8">
         {SLIDES.map((s, i) => (
-          <div key={s} className="flex-1 h-1 rounded-full transition-all duration-300"
-               style={{ backgroundColor: i <= slideIndex ? C.lime : C.border }} />
+          <div
+            key={s}
+            className="flex-1 h-1.5 rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: i <= slideIndex ? C.primary : C.border,
+            }}
+          />
         ))}
       </div>
     )
@@ -145,52 +173,63 @@ export default function OnboardingPage() {
   function SlideWelcome() {
     return (
       <div className="flex flex-col items-center text-center gap-6">
-        <div className="w-24 h-24 rounded-3xl flex items-center justify-center"
-             style={{ backgroundColor: C.dark }}>
-          <Shield size={48} style={{ color: C.lime }} />
+        <div
+          className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-105"
+          style={{ backgroundColor: C.primary }}
+        >
+          <Activity size={40} style={{ color: C.accent }} />
         </div>
+
         <div>
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                 style={{ backgroundColor: C.limeTint }}>
-              <CheckCircle size={14} style={{ color: C.limeDeep }} />
-              <span className="text-[12px] font-bold" style={{ color: C.limeDeep }}>
-                Email Verified Successfully
-              </span>
-            </div>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border mb-3"
+            style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+            <CheckCircle2 size={14} style={{ color: C.primary }} />
+            <span className="text-[12px] font-extrabold tracking-tight" style={{ color: C.primary }}>
+              Email Verified Successfully
+            </span>
           </div>
-          <h1 className="text-[32px] font-black mb-2" style={{ color: C.dark }}>
+
+          <h1 className="text-[28px] sm:text-[32px] font-black font-syne mb-2 tracking-tight" style={{ color: C.textDark }}>
             Welcome to Riazify, {userName}!
           </h1>
-          <p className="text-[15px]" style={{ color: C.muted }}>
-            You're now part of the smartest eBay seller community.
-            Let's set up your account in 60 seconds.
+          <p className="text-[14px] sm:text-[15px] max-w-md mx-auto leading-relaxed" style={{ color: C.muted }}>
+            You are now part of the premier eBay operator community. Let’s personalize your workspace in under 60 seconds.
           </p>
         </div>
 
-        {/* Feature pills */}
-        <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+        {/* Feature Pills */}
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md">
           {[
-            { icon: ShieldCheck, label: 'Order Protection'    },
-            { icon: Calculator,  label: 'Profit Calculator'   },
-            { icon: Type,        label: 'AI Title Builder'    },
-            { icon: BarChart2,   label: 'Analytics Dashboard' },
+            { icon: ShieldCheck, label: 'Order Protection' },
+            { icon: Calculator, label: 'Profit Calculator' },
+            { icon: Type, label: 'AI Title Builder' },
+            { icon: BarChart2, label: 'Analytics Dashboard' },
           ].map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl border"
-                 style={{ borderColor: C.border, backgroundColor: C.bg }}>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                   style={{ backgroundColor: C.limeTint }}>
-                <Icon size={14} style={{ color: C.limeDeep }} />
+            <div
+              key={label}
+              className="flex items-center gap-2.5 px-3.5 py-3 rounded-2xl border transition-all"
+              style={{ borderColor: C.border, backgroundColor: C.bg }}
+            >
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border"
+                style={{ backgroundColor: C.primaryLight, borderColor: C.border }}
+              >
+                <Icon size={16} style={{ color: C.primary }} />
               </div>
-              <span className="text-[12px] font-semibold" style={{ color: C.text }}>{label}</span>
+              <span className="text-[12px] font-bold text-left" style={{ color: C.textDark }}>
+                {label}
+              </span>
             </div>
           ))}
         </div>
 
-        <button onClick={goNext}
-          className="w-full max-w-sm py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2"
-          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-          Let's get started <ChevronRight size={18} />
+        <button
+          onClick={goNext}
+          className="w-full max-w-md py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md cursor-pointer"
+          style={{ backgroundColor: C.accent, color: C.dark }}
+        >
+          <span>Let&apos;s get started</span>
+          <ChevronRight size={18} className="stroke-[2.5]" />
         </button>
       </div>
     )
@@ -199,51 +238,71 @@ export default function OnboardingPage() {
   // ── Slide 2: Source ────────────────────────────────────────
   function SlideSource() {
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <div>
-          <p className="text-[12px] font-black tracking-wider mb-1" style={{ color: C.muted }}>
-            QUICK QUESTION 1 OF 2
+          <p className="text-[11px] font-black uppercase tracking-wider mb-1 font-syne" style={{ color: C.primary }}>
+            QUESTION 1 OF 2
           </p>
-          <h2 className="text-[26px] font-black" style={{ color: C.dark }}>
+          <h2 className="text-[24px] sm:text-[28px] font-black font-syne" style={{ color: C.textDark }}>
             How did you hear about Riazify?
           </h2>
           <p className="text-[14px] mt-1" style={{ color: C.muted }}>
-            This helps us understand where our community comes from
+            Helps us understand how scaling sellers discover our platform.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {SOURCES.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setSource(id)}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all"
-              style={{
-                borderColor:     source === id ? C.limeDeep : C.border,
-                backgroundColor: source === id ? C.limeTint : C.surface,
-              }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                   style={{ backgroundColor: source === id ? C.limeDeep : C.bg }}>
-                <Icon size={16} style={{ color: source === id ? C.lime : C.muted }} />
-              </div>
-              <span className="text-[13px] font-bold" style={{ color: source === id ? C.limeDeep : C.text }}>
-                {label}
-              </span>
-              {source === id && (
-                <CheckCircle size={16} style={{ color: C.limeDeep, marginLeft: 'auto', flexShrink: 0 }} />
-              )}
-            </button>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {SOURCES.map(({ id, label, icon: Icon }) => {
+            const isSelected = source === id
+            return (
+              <button
+                key={id}
+                onClick={() => setSource(id)}
+                className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border text-left transition-all hover:-translate-y-0.5 cursor-pointer shadow-xs"
+                style={{
+                  borderColor: isSelected ? C.primary : C.border,
+                  backgroundColor: isSelected ? C.primaryLight : C.surface,
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors"
+                  style={{
+                    backgroundColor: isSelected ? C.primary : C.bg,
+                    borderColor: isSelected ? C.primary : C.border,
+                  }}
+                >
+                  <Icon size={18} style={{ color: isSelected ? '#ffffff' : C.primary }} />
+                </div>
+                <span className="text-[13px] font-bold" style={{ color: isSelected ? C.primary : C.textDark }}>
+                  {label}
+                </span>
+                {isSelected && (
+                  <div className="ml-auto w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: C.primary }}>
+                    <Check size={14} style={{ color: '#ffffff' }} className="stroke-[3]" />
+                  </div>
+                )}
+              </button>
+            )
+          })}
         </div>
 
-        <div className="flex gap-3">
-          <button onClick={goBack}
-            className="flex items-center gap-1 px-4 py-3 rounded-2xl border text-[13px] font-semibold"
-            style={{ borderColor: C.border, color: C.muted }}>
-            <ChevronLeft size={16} /> Back
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={goBack}
+            className="flex items-center gap-1.5 px-5 py-3.5 rounded-2xl border text-[13px] font-bold transition-all hover:bg-[#f8f7ff] cursor-pointer"
+            style={{ borderColor: C.border, color: C.muted }}
+          >
+            <ChevronLeft size={16} />
+            <span>Back</span>
           </button>
-          <button onClick={goNext} disabled={!source}
-            className="flex-1 py-3 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 disabled:opacity-40"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-            Continue <ChevronRight size={16} />
+          <button
+            onClick={goNext}
+            disabled={!source}
+            className="flex-1 py-3.5 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:hover:scale-100 cursor-pointer shadow-sm"
+            style={{ backgroundColor: C.accent, color: C.dark }}
+          >
+            <span>Continue</span>
+            <ChevronRight size={18} className="stroke-[2.5]" />
           </button>
         </div>
       </div>
@@ -253,54 +312,71 @@ export default function OnboardingPage() {
   // ── Slide 3: Goals ─────────────────────────────────────────
   function SlideGoals() {
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <div>
-          <p className="text-[12px] font-black tracking-wider mb-1" style={{ color: C.muted }}>
-            QUICK QUESTION 2 OF 2
+          <p className="text-[11px] font-black uppercase tracking-wider mb-1 font-syne" style={{ color: C.primary }}>
+            QUESTION 2 OF 2
           </p>
-          <h2 className="text-[26px] font-black" style={{ color: C.dark }}>
-            What's your main goal with Riazify?
+          <h2 className="text-[24px] sm:text-[28px] font-black font-syne" style={{ color: C.textDark }}>
+            What is your main goal with Riazify?
           </h2>
           <p className="text-[14px] mt-1" style={{ color: C.muted }}>
-            Select all that apply — we'll personalise your experience
+            Select all that apply — we&apos;ll configure your default dashboard widgets.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {GOALS.map(({ id, label, icon: Icon }) => {
-            const selected = goals.includes(id)
+            const isSelected = goals.includes(id)
             return (
-              <button key={id} onClick={() => toggleGoal(id)}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all"
+              <button
+                key={id}
+                onClick={() => toggleGoal(id)}
+                className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border text-left transition-all hover:-translate-y-0.5 cursor-pointer shadow-xs"
                 style={{
-                  borderColor:     selected ? C.limeDeep : C.border,
-                  backgroundColor: selected ? C.limeTint : C.surface,
-                }}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                     style={{ backgroundColor: selected ? C.limeDeep : C.bg }}>
-                  <Icon size={16} style={{ color: selected ? C.lime : C.muted }} />
+                  borderColor: isSelected ? C.primary : C.border,
+                  backgroundColor: isSelected ? C.primaryLight : C.surface,
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors"
+                  style={{
+                    backgroundColor: isSelected ? C.primary : C.bg,
+                    borderColor: isSelected ? C.primary : C.border,
+                  }}
+                >
+                  <Icon size={18} style={{ color: isSelected ? '#ffffff' : C.primary }} />
                 </div>
-                <span className="text-[13px] font-bold" style={{ color: selected ? C.limeDeep : C.text }}>
+                <span className="text-[13px] font-bold" style={{ color: isSelected ? C.primary : C.textDark }}>
                   {label}
                 </span>
-                {selected && (
-                  <CheckCircle size={16} style={{ color: C.limeDeep, marginLeft: 'auto', flexShrink: 0 }} />
+                {isSelected && (
+                  <div className="ml-auto w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: C.primary }}>
+                    <Check size={14} style={{ color: '#ffffff' }} className="stroke-[3]" />
+                  </div>
                 )}
               </button>
             )
           })}
         </div>
 
-        <div className="flex gap-3">
-          <button onClick={goBack}
-            className="flex items-center gap-1 px-4 py-3 rounded-2xl border text-[13px] font-semibold"
-            style={{ borderColor: C.border, color: C.muted }}>
-            <ChevronLeft size={16} /> Back
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={goBack}
+            className="flex items-center gap-1.5 px-5 py-3.5 rounded-2xl border text-[13px] font-bold transition-all hover:bg-[#f8f7ff] cursor-pointer"
+            style={{ borderColor: C.border, color: C.muted }}
+          >
+            <ChevronLeft size={16} />
+            <span>Back</span>
           </button>
-          <button onClick={goNext} disabled={goals.length === 0}
-            className="flex-1 py-3 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 disabled:opacity-40"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
-            Almost done <ChevronRight size={16} />
+          <button
+            onClick={goNext}
+            disabled={goals.length === 0}
+            className="flex-1 py-3.5 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:hover:scale-100 cursor-pointer shadow-sm"
+            style={{ backgroundColor: C.accent, color: C.dark }}
+          >
+            <span>Almost done</span>
+            <ChevronRight size={18} className="stroke-[2.5]" />
           </button>
         </div>
       </div>
@@ -311,96 +387,128 @@ export default function OnboardingPage() {
   function SlideDone() {
     return (
       <div className="flex flex-col items-center text-center gap-6">
-        <div className="w-24 h-24 rounded-3xl flex items-center justify-center"
-             style={{ backgroundColor: C.limeTint }}>
-          <span style={{ fontSize: 48 }}>🎉</span>
+        <div
+          className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg"
+          style={{ backgroundColor: C.primaryLight, border: `1px solid ${C.border}` }}
+        >
+          <span className="text-[38px]">🎉</span>
         </div>
+
         <div>
-          <h2 className="text-[32px] font-black mb-2" style={{ color: C.dark }}>
-            You're all set, {userName}!
+          <h2 className="text-[28px] sm:text-[32px] font-black font-syne mb-2 tracking-tight" style={{ color: C.textDark }}>
+            You&apos;re all set, {userName}!
           </h2>
-          <p className="text-[15px]" style={{ color: C.muted }}>
-            Your Riazify account is ready. Your free trial starts now —
-            no credit card required.
+          <p className="text-[14px] sm:text-[15px] max-w-md mx-auto" style={{ color: C.muted }}>
+            Your Riazify workspace is fully provisioned. Your 14-day free trial starts right now — no credit card needed.
           </p>
         </div>
 
-        {/* Summary */}
-        <div className="w-full max-w-sm rounded-2xl border p-4 text-left"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
-          <p className="text-[11px] font-black tracking-wider mb-3" style={{ color: C.muted }}>
-            YOUR ACCOUNT SUMMARY
+        {/* Summary Card */}
+        <div
+          className="w-full max-w-md rounded-2xl border p-5 text-left shadow-xs"
+          style={{ borderColor: C.border, backgroundColor: C.bg }}
+        >
+          <p className="text-[11px] font-black uppercase tracking-wider mb-3 font-syne" style={{ color: C.primary }}>
+            WORKSPACE SUMMARY
           </p>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {[
-              { label: 'Plan',          value: 'Free (14-day trial)' },
-              { label: 'Orders/month',  value: '30 protected'        },
-              { label: 'VeRO checks',   value: '5/month'             },
-              { label: 'Title Builder', value: '3/day'               },
+              { label: 'Active Plan', value: 'Free 14-Day Trial' },
+              { label: 'Protected Orders', value: '30 orders/mo' },
+              { label: 'VeRO Risk Audits', value: '5 instant scans' },
+              { label: 'AI Title Builder', value: '3 generations/day' },
             ].map(({ label, value }) => (
-              <div key={label} className="flex items-center justify-between">
-                <span className="text-[12px]" style={{ color: C.muted }}>{label}</span>
-                <span className="text-[12px] font-bold" style={{ color: C.text }}>{value}</span>
+              <div key={label} className="flex items-center justify-between py-1 border-b border-[#ede9fe]/50 last:border-0">
+                <span className="text-[13px] font-medium" style={{ color: C.muted }}>{label}</span>
+                <span className="text-[13px] font-bold" style={{ color: C.textDark }}>{value}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <button onClick={handleFinish} disabled={saving}
-          className="w-full max-w-sm py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2 disabled:opacity-40"
-          style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+        <button
+          onClick={handleFinish}
+          disabled={saving}
+          className="w-full max-w-md py-4 rounded-2xl font-black text-[15px] flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-md"
+          style={{ backgroundColor: C.accent, color: C.dark }}
+        >
           {saving ? (
-            <div className="w-5 h-5 rounded-full border-2 border-transparent animate-spin"
-                 style={{ borderTopColor: C.lime }} />
+            <div className="w-5 h-5 rounded-full border-2 border-[#1e1535] border-t-transparent animate-spin" />
           ) : (
-            <><LayoutDashboard size={18} /> Go to Dashboard</>
+            <>
+              <LayoutDashboard size={18} />
+              <span>Enter Dashboard</span>
+            </>
           )}
         </button>
 
-        <button onClick={goBack}
-          className="text-[12px]" style={{ color: C.muted }}>
-          ← Go back
+        <button
+          onClick={goBack}
+          className="text-[12px] font-semibold transition-colors hover:text-[#7530fb] cursor-pointer"
+          style={{ color: C.muted }}
+        >
+          ← Edit preferences
         </button>
       </div>
     )
   }
 
-  // ── Render ─────────────────────────────────────────────────
+  // ── Render Frame ───────────────────────────────────────────
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-         style={{ backgroundColor: C.bg }}>
-      <div className="w-full max-w-2xl">
-
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-               style={{ backgroundColor: C.dark }}>
-            <Shield size={20} style={{ color: C.lime }} />
+    <div
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6"
+      style={{
+        fontFamily: "'DM Sans', sans-serif",
+        backgroundColor: C.bg,
+      }}
+    >
+      <div className="w-full max-w-xl">
+        {/* Brand Header */}
+        <div className="flex items-center justify-center gap-2.5 mb-8">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md"
+            style={{ backgroundColor: C.primary }}
+          >
+            <Activity size={20} style={{ color: C.accent }} />
           </div>
-          <span className="text-[22px] font-extrabold" style={{ color: C.dark }}>Riazify</span>
+          <span className="text-[24px] font-black font-syne tracking-tight" style={{ color: C.textDark }}>
+            Riazify
+          </span>
         </div>
 
-        {/* Card */}
-        <div className="rounded-3xl shadow-xl p-8"
-             style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
-
+        {/* Container Box */}
+        <div
+          className="rounded-3xl shadow-xl p-6 sm:p-10 border"
+          style={{
+            backgroundColor: C.surface,
+            borderColor: C.border,
+          }}
+        >
           <ProgressBar />
 
-          <div style={{ opacity: animating ? 0 : 1, transition: 'opacity 0.2s ease' }}>
+          <div
+            style={{
+              opacity: animating ? 0 : 1,
+              transform: animating ? 'translateY(6px)' : 'translateY(0)',
+              transition: 'opacity 0.18s ease, transform 0.18s ease',
+            }}
+          >
             {slide === 'welcome' && <SlideWelcome />}
-            {slide === 'source'  && <SlideSource  />}
-            {slide === 'goal'    && <SlideGoals   />}
-            {slide === 'done'    && <SlideDone    />}
+            {slide === 'source' && <SlideSource />}
+            {slide === 'goal' && <SlideGoals />}
+            {slide === 'done' && <SlideDone />}
           </div>
         </div>
 
-        {/* Skip link */}
+        {/* Skip Link */}
         {slide !== 'done' && (
-          <div className="text-center mt-4">
-            <button onClick={handleFinish}
-              className="text-[12px] hover:opacity-70"
-              style={{ color: C.muted }}>
-              Skip for now →
+          <div className="text-center mt-5">
+            <button
+              onClick={handleFinish}
+              className="text-[12px] font-semibold transition-colors hover:text-[#7530fb] cursor-pointer"
+              style={{ color: C.muted }}
+            >
+              Skip configuration for now →
             </button>
           </div>
         )}

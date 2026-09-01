@@ -5,18 +5,29 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'GDPR | Riazify',
+  title: 'GDPR & Your Rights | Riazify',
   description: 'Your rights under GDPR and how Riazify protects EU and UK user data.',
 }
 
+// -- Riazify Color Role Tokens (v2.0) ---------------------------
 const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  bg:       '#f7f9f5',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 const LAST_UPDATED = 'July 4, 2026'
@@ -85,37 +96,42 @@ const LEGAL_BASIS = [
 
 export default function GDPRPage() {
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: C.bg, minHeight: '100vh' }}>
       <Navbar />
-      <div style={{ paddingTop: '80px' }}>
+      <div style={{ paddingTop: '72px' }}>
 
         {/* Hero */}
-        <div style={{ backgroundColor: C.dark }}>
-          <div className="max-w-4xl mx-auto px-6 py-16">
+        <div style={{ backgroundColor: C.dark, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: -80, right: -80, width: 360, height: 360, borderRadius: '50%', background: 'rgba(117,48,251,0.18)', pointerEvents: 'none' }} />
+          <div className="max-w-4xl mx-auto px-6 py-16 md:py-20 relative z-10">
             <div className="flex items-center gap-2 mb-4">
-              <Link href="/" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.muted }}>Home</Link>
-              <span style={{ color: C.muted }}>›</span>
-              <span className="text-[12px] font-bold" style={{ color: C.lime }}>GDPR</span>
+              <Link href="/" className="text-[12px] font-bold transition-colors hover:text-[#b8fa33]" style={{ color: C.textLight }}>Home</Link>
+              <span style={{ color: C.textLight }}>›</span>
+              <span className="text-[12px] font-black" style={{ color: C.accent }}>GDPR</span>
             </div>
-            <h1 className="text-[40px] font-black mb-3" style={{ color: '#fff' }}>GDPR & Your Rights</h1>
-            <p className="text-[14px] mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Last updated: {LAST_UPDATED}</p>
-            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.4)' }}>For users in the European Economic Area and United Kingdom</p>
+            <h1 className="text-[36px] md:text-[44px] font-black mb-3 font-syne tracking-tight" style={{ color: '#fff' }}>
+              GDPR & Your Rights
+            </h1>
+            <p className="text-[14px] mb-1 font-medium" style={{ color: C.textLight }}>Last updated: {LAST_UPDATED}</p>
+            <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.45)' }}>For users in the European Economic Area and United Kingdom</p>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-6 py-10 flex flex-col gap-8">
+        <div className="max-w-4xl mx-auto px-6 py-12 flex flex-col gap-8">
 
           {/* Intro card */}
-          <div className="rounded-2xl p-6" style={{ backgroundColor: C.limeTint, border: `1px solid rgba(143,255,0,0.3)` }}>
-            <p className="text-[12px] font-black tracking-wider mb-2" style={{ color: C.limeDeep }}>WHAT IS GDPR?</p>
-            <p className="text-[14px] leading-relaxed" style={{ color: C.dark }}>
+          <div className="rounded-2xl p-6 border shadow-sm" style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+            <p className="text-[11px] font-black tracking-wider mb-2 font-syne uppercase" style={{ color: C.primary }}>
+              WHAT IS GDPR?
+            </p>
+            <p className="text-[14px] leading-relaxed font-medium" style={{ color: C.textDark }}>
               The General Data Protection Regulation (GDPR) is a law that gives EU and UK residents control over their personal data. Riazify LLC is committed to full compliance with GDPR and the UK Data Protection Act 2018. This page explains your rights and how to exercise them.
             </p>
           </div>
 
           {/* Data controller */}
-          <div className="rounded-3xl border p-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-            <h2 className="text-[20px] font-black mb-4" style={{ color: C.dark }}>Data Controller</h2>
+          <div className="rounded-3xl border p-8 shadow-sm" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            <h2 className="text-[20px] font-black mb-4 font-syne" style={{ color: C.textDark }}>Data Controller</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { label: 'Company', value: 'Riazify LLC' },
@@ -123,31 +139,31 @@ export default function GDPRPage() {
                 { label: 'Privacy Contact', value: 'privacy@riazify.com' },
                 { label: 'Response Time', value: 'Within 30 days' },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col gap-1 p-3 rounded-xl" style={{ backgroundColor: C.bg }}>
-                  <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{item.label}</p>
-                  <p className="text-[13px] font-bold" style={{ color: C.dark }}>{item.value}</p>
+                <div key={i} className="flex flex-col gap-1 p-4 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                  <p className="text-[10px] font-black tracking-wider uppercase font-syne" style={{ color: C.primary }}>{item.label}</p>
+                  <p className="text-[14px] font-bold" style={{ color: C.textDark }}>{item.value}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Your 8 rights */}
-          <div className="rounded-3xl border p-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-            <h2 className="text-[20px] font-black mb-2" style={{ color: C.dark }}>Your 8 GDPR Rights</h2>
+          <div className="rounded-3xl border p-8 shadow-sm" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            <h2 className="text-[20px] font-black mb-2 font-syne" style={{ color: C.textDark }}>Your 8 GDPR Rights</h2>
             <p className="text-[13px] mb-6" style={{ color: C.muted }}>Under GDPR you have the following rights regarding your personal data:</p>
             <div className="flex flex-col gap-4">
               {RIGHTS.map((right, i) => (
-                <div key={i} className="flex gap-4 p-4 rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-[13px]"
-                       style={{ backgroundColor: C.dark, color: C.lime }}>
+                <div key={i} className="flex gap-4 p-5 rounded-2xl border transition-all hover:border-[#7530fb]" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-[13px] shadow-sm font-syne"
+                    style={{ backgroundColor: C.primary, color: '#ffffff' }}>
                     {right.number}
                   </div>
                   <div className="flex-1">
-                    <p className="text-[14px] font-black mb-1" style={{ color: C.dark }}>{right.title}</p>
-                    <p className="text-[13px] leading-relaxed mb-2" style={{ color: C.muted }}>{right.desc}</p>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg inline-flex" style={{ backgroundColor: C.limeTint }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      <p className="text-[11px] font-bold" style={{ color: C.limeDeep }}>{right.action}</p>
+                    <p className="text-[15px] font-black mb-1 font-syne" style={{ color: C.textDark }}>{right.title}</p>
+                    <p className="text-[13px] leading-relaxed mb-3" style={{ color: C.muted }}>{right.desc}</p>
+                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg inline-flex border" style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.primary} strokeWidth="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                      <p className="text-[11px] font-black" style={{ color: C.primary }}>{right.action}</p>
                     </div>
                   </div>
                 </div>
@@ -156,43 +172,46 @@ export default function GDPRPage() {
           </div>
 
           {/* Legal basis table */}
-          <div className="rounded-3xl border overflow-hidden" style={{ backgroundColor: '#fff', borderColor: C.border }}>
+          <div className="rounded-3xl border overflow-hidden shadow-sm" style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <div className="p-6 border-b" style={{ borderColor: C.border }}>
-              <h2 className="text-[20px] font-black" style={{ color: C.dark }}>Legal Basis for Processing</h2>
+              <h2 className="text-[20px] font-black font-syne" style={{ color: C.textDark }}>Legal Basis for Processing</h2>
               <p className="text-[13px] mt-1" style={{ color: C.muted }}>How we justify each type of data processing under GDPR</p>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: C.bg }}>
-                  {['Processing Activity', 'Legal Basis', 'Details'].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {LEGAL_BASIS.map((row, i) => (
-                  <tr key={i} style={{ borderTop: `1px solid ${C.border}` }}>
-                    <td className="px-5 py-3 text-[13px] font-bold" style={{ color: C.dark }}>{row.processing}</td>
-                    <td className="px-5 py-3">
-                      <span className="text-[11px] font-black px-2.5 py-1 rounded-full"
-                            style={{
-                              backgroundColor: row.basis === 'Contract Performance' ? C.limeTint : row.basis === 'Consent' ? '#eff6ff' : row.basis === 'Legal Obligation' ? '#fef3c7' : '#f0fdf4',
-                              color: row.basis === 'Contract Performance' ? C.limeDeep : row.basis === 'Consent' ? '#3b82f6' : row.basis === 'Legal Obligation' ? '#d97706' : '#16a34a'
-                            }}>
-                        {row.basis}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-[12px]" style={{ color: C.muted }}>{row.detail}</td>
+            <div className="overflow-x-auto">
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ backgroundColor: C.bg }}>
+                    {['Processing Activity', 'Legal Basis', 'Details'].map(h => (
+                      <th key={h} className="px-5 py-3.5 text-left text-[11px] font-black tracking-wider uppercase font-syne" style={{ color: C.textDark }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {LEGAL_BASIS.map((row, i) => (
+                    <tr key={i} style={{ borderTop: `1px solid ${C.border}` }}>
+                      <td className="px-5 py-4 text-[13px] font-bold" style={{ color: C.textDark }}>{row.processing}</td>
+                      <td className="px-5 py-4">
+                        <span className="text-[11px] font-black px-3 py-1 rounded-full border"
+                          style={{
+                            backgroundColor: row.basis === 'Contract Performance' ? C.primaryLight : row.basis === 'Consent' ? '#eff6ff' : row.basis === 'Legal Obligation' ? '#fef3c7' : '#f0fdf4',
+                            borderColor: row.basis === 'Contract Performance' ? C.border : row.basis === 'Consent' ? '#bfdbfe' : row.basis === 'Legal Obligation' ? '#fde68a' : '#bbf7d0',
+                            color: row.basis === 'Contract Performance' ? C.primary : row.basis === 'Consent' ? '#2563eb' : row.basis === 'Legal Obligation' ? '#d97706' : '#16a34a'
+                          }}>
+                          {row.basis}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[13px]" style={{ color: C.muted }}>{row.detail}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* International transfers */}
-          <div className="rounded-3xl border p-8" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-            <h2 className="text-[20px] font-black mb-3" style={{ color: C.dark }}>International Data Transfers</h2>
-            <p className="text-[14px] leading-relaxed mb-4" style={{ color: C.muted }}>
+          <div className="rounded-3xl border p-8 shadow-sm" style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            <h2 className="text-[20px] font-black mb-3 font-syne" style={{ color: C.textDark }}>International Data Transfers</h2>
+            <p className="text-[14px] leading-relaxed mb-5" style={{ color: C.muted }}>
               Riazify LLC is based in the United States. When we transfer your personal data from the EU or UK to the US, we ensure appropriate safeguards are in place:
             </p>
             <div className="flex flex-col gap-3">
@@ -201,11 +220,11 @@ export default function GDPRPage() {
                 { title: 'UK International Data Transfer Agreements', desc: 'For UK users, we use IDTA-approved mechanisms for transfers to the US.' },
                 { title: 'Data Processing Agreements', desc: 'All third-party processors (Supabase, Resend, Vercel) have signed DPAs ensuring GDPR compliance.' },
               ].map((item, i) => (
-                <div key={i} className="flex gap-3 p-4 rounded-xl" style={{ backgroundColor: C.bg }}>
-                  <div className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ backgroundColor: C.lime }} />
+                <div key={i} className="flex gap-3.5 p-4 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                  <div className="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: C.primary }} />
                   <div>
-                    <p className="text-[13px] font-black" style={{ color: C.dark }}>{item.title}</p>
-                    <p className="text-[13px]" style={{ color: C.muted }}>{item.desc}</p>
+                    <p className="text-[14px] font-black font-syne" style={{ color: C.textDark }}>{item.title}</p>
+                    <p className="text-[13px] leading-relaxed mt-0.5" style={{ color: C.muted }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -213,9 +232,9 @@ export default function GDPRPage() {
           </div>
 
           {/* How to complain */}
-          <div className="rounded-3xl p-8" style={{ backgroundColor: C.dark, border: '1px solid rgba(143,255,0,0.2)' }}>
-            <h2 className="text-[20px] font-black mb-3" style={{ color: '#fff' }}>Right to Lodge a Complaint</h2>
-            <p className="text-[14px] leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <div className="rounded-3xl p-8 shadow-xl" style={{ backgroundColor: C.dark, border: `1px solid ${C.borderDark}` }}>
+            <h2 className="text-[22px] font-black mb-3 font-syne" style={{ color: '#fff' }}>Right to Lodge a Complaint</h2>
+            <p className="text-[14px] leading-relaxed mb-6" style={{ color: C.textLight }}>
               If you believe we have not handled your personal data in accordance with GDPR, you have the right to lodge a complaint with your local supervisory authority:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -223,24 +242,24 @@ export default function GDPRPage() {
                 { region: '🇬🇧 United Kingdom', authority: 'Information Commissioner\'s Office (ICO)', url: 'ico.org.uk', contact: 'casework@ico.org.uk' },
                 { region: '🇪🇺 European Union', authority: 'Your national Data Protection Authority', url: 'edpb.europa.eu', contact: 'Find your DPA at edpb.europa.eu' },
               ].map((item, i) => (
-                <div key={i} className="p-4 rounded-2xl" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <p className="text-[13px] font-black mb-1" style={{ color: C.lime }}>{item.region}</p>
-                  <p className="text-[13px] font-bold mb-1" style={{ color: '#fff' }}>{item.authority}</p>
-                  <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.contact}</p>
+                <div key={i} className="p-5 rounded-2xl border" style={{ backgroundColor: C.darkCard, borderColor: C.borderDark }}>
+                  <p className="text-[13px] font-black mb-1 font-syne" style={{ color: C.accent }}>{item.region}</p>
+                  <p className="text-[14px] font-bold mb-1" style={{ color: '#fff' }}>{item.authority}</p>
+                  <p className="text-[12px]" style={{ color: C.textLight }}>{item.contact}</p>
                 </div>
               ))}
             </div>
-            <p className="text-[13px] mt-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              We encourage you to contact us first at <span style={{ color: C.lime }}>privacy@riazify.com</span> — we aim to resolve all concerns within 30 days.
+            <p className="text-[13px] mt-6" style={{ color: C.textLight }}>
+              We encourage you to contact us first at <span className="font-bold" style={{ color: C.accent }}>privacy@riazify.com</span> — we aim to resolve all concerns within 30 days.
             </p>
           </div>
 
           {/* Related links */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <p className="text-[12px] font-bold" style={{ color: C.muted }}>Related:</p>
-            <Link href="/privacy-policy" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Privacy Policy</Link>
-            <Link href="/cookie-policy" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Cookie Policy</Link>
-            <Link href="/terms-of-service" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>Terms of Service</Link>
+          <div className="flex items-center gap-4 flex-wrap pt-2">
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>Related:</p>
+            <Link href="/privacy-policy" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>Privacy Policy</Link>
+            <Link href="/cookie-policy" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>Cookie Policy</Link>
+            <Link href="/terms-of-service" className="text-[13px] font-bold transition-colors hover:text-[#6020e0]" style={{ color: C.primary }}>Terms of Service</Link>
           </div>
         </div>
         <Footer />

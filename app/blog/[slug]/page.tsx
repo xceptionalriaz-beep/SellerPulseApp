@@ -1,26 +1,45 @@
 // app/blog/[slug]/page.tsx
+// Riazify Blog Post Detail View — v2.0
+
 import { createClient } from '@/lib/supabase'
 import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import {
+  Package, Clock, Eye, Calendar, ArrowRight, ArrowLeft,
+  Share2, CheckCircle2, ChevronRight
+} from 'lucide-react'
 
+// ── Riazify Color Role Tokens (v2.0) ──────────────────────────
 const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  surface:  '#fafcf7',
-  bg:       '#f7f9f5',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
 }
 
 async function getPost(slug: string) {
   const supabase = createClient()
   const { data } = await (supabase.from('blog_posts') as any)
-    .select('*').eq('slug', slug).eq('status', 'live').single()
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'live')
+    .single()
   return data
 }
 
@@ -33,7 +52,7 @@ async function getRelatedPosts(category: string, currentId: string) {
     .neq('id', currentId)
     .order('views', { ascending: false })
     .limit(3)
-  // If less than 3 in same category, fill with other posts
+
   if ((data ?? []).length < 3) {
     const { data: more } = await (supabase.from('blog_posts') as any)
       .select('id,title,slug,featured_image_url,category,word_count,created_at,excerpt,meta_description')
@@ -51,8 +70,10 @@ async function getPopularPosts(currentId: string) {
   const supabase = createClient()
   const { data } = await (supabase.from('blog_posts') as any)
     .select('id,title,slug,word_count,views')
-    .eq('status', 'live').neq('id', currentId)
-    .order('views', { ascending: false }).limit(4)
+    .eq('status', 'live')
+    .neq('id', currentId)
+    .order('views', { ascending: false })
+    .limit(4)
   return data ?? []
 }
 
@@ -61,27 +82,37 @@ export const revalidate = 0
 async function getPrevNext(slug: string) {
   const supabase = createClient()
   const { data: current } = await (supabase.from('blog_posts') as any)
-    .select('created_at').eq('slug', slug).single()
+    .select('created_at')
+    .eq('slug', slug)
+    .single()
+
   if (!current) return { prev: null, next: null }
+
   const [{ data: prev }, { data: next }] = await Promise.all([
     (supabase.from('blog_posts') as any)
-      .select('title,slug').eq('status','live')
+      .select('title,slug')
+      .eq('status', 'live')
       .lt('created_at', current.created_at)
-      .order('created_at', { ascending: false }).limit(1).single(),
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single(),
     (supabase.from('blog_posts') as any)
-      .select('title,slug').eq('status','live')
+      .select('title,slug')
+      .eq('status', 'live')
       .gt('created_at', current.created_at)
-      .order('created_at', { ascending: true }).limit(1).single(),
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single(),
   ])
   return { prev: prev || null, next: next || null }
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const post = await getPost(params.slug)
-  if (!post) return { title: 'Post Not Found' }
+  if (!post) return { title: 'Post Not Found | Riazify' }
   const ogImage = post.og_image || post.featured_image_url || 'https://riazify.com/og-default.jpg'
   return {
-    title: post.meta_title || post.title,
+    title: `${post.meta_title || post.title} | Riazify Blog`,
     description: post.meta_description || post.excerpt || '',
     openGraph: {
       title: post.meta_title || post.title,
@@ -102,12 +133,21 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-function readingTime(words: number) { return Math.max(1, Math.ceil((words || 500) / 200)) }
-function formatDate(date: string) { return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) }
+function readingTime(words: number) {
+  return Math.max(1, Math.ceil((words || 500) / 200))
+}
+
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}
 
 function extractToc(html: string) {
   const matches = [...(html || '').matchAll(/<h([23])[^>]*>(.*?)<\/h[23]>/gi)]
-  return matches.map((m, i) => ({ level: parseInt(m[1]), text: m[2].replace(/<[^>]+>/g, ''), id: `heading-${i}` }))
+  return matches.map((m, i) => ({
+    level: parseInt(m[1]),
+    text: m[2].replace(/<[^>]+>/g, ''),
+    id: `heading-${i}`
+  }))
 }
 
 function injectHeadingIds(html: string): string {
@@ -124,7 +164,7 @@ async function trackView(id: string) {
     const supabase = createClient()
     const { data: post } = await (supabase.from('blog_posts') as any).select('views').eq('id', id).single()
     if (post) await (supabase.from('blog_posts') as any).update({ views: (post.views ?? 0) + 1 }).eq('id', id)
-  } catch {}
+  } catch { }
 }
 
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -139,13 +179,14 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     getPrevNext(params.slug),
   ])
 
-  const toc  = extractToc(post.body || '')
+  const toc = extractToc(post.body || '')
   const body = injectHeadingIds(post.body || '')
-  const rt   = readingTime(post.word_count)
+  const rt = readingTime(post.word_count)
   const postUrl = `https://riazify.com/blog/${post.slug}`
 
   const schema = {
-    '@context': 'https://schema.org', '@type': 'Article',
+    '@context': 'https://schema.org',
+    '@type': 'Article',
     headline: post.title,
     description: post.meta_description || post.excerpt || '',
     image: post.featured_image_url || '',
@@ -155,438 +196,552 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     publisher: { '@type': 'Organization', name: 'Riazify', logo: { '@type': 'ImageObject', url: 'https://riazify.com/logo.png' } },
   }
 
-  // Client-side JS for progress bar, back to top, copy link — injected as inline script
+  // Client-side interactions for reading progress, back to top, and link copying
   const clientScript = `
-    function initPage() {
+    function initPostPage() {
       var bar = document.getElementById('rp-bar');
       var backTop = document.getElementById('back-top');
       var copyBtn = document.getElementById('copy-link');
       var nlSubmit = document.getElementById('nl-submit');
       var nlMsg = document.getElementById('nl-msg');
-      if(!copyBtn){ setTimeout(initPage, 200); return; }
-      window.addEventListener('scroll', function(){
+
+      window.addEventListener('scroll', function() {
         var el = document.documentElement;
         var top = el.scrollTop || document.body.scrollTop;
         var h = el.scrollHeight - el.clientHeight;
-        if(bar) bar.style.width = (h > 0 ? Math.min((top/h)*100,100) : 0) + '%';
-        if(backTop) backTop.style.display = top > 600 ? 'flex' : 'none';
-      }, {passive:true});
-      if(backTop) backTop.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
-      if(copyBtn) copyBtn.addEventListener('click', function(){
-        var url = window.location.href;
-        navigator.clipboard.writeText(url).then(function(){
-          copyBtn.textContent = 'Copied! ✓';
-          copyBtn.style.color = '#4a8f00';
-          copyBtn.style.borderColor = '#8fff00';
-          copyBtn.style.backgroundColor = '#f4ffe6';
-          setTimeout(function(){ copyBtn.textContent = 'Copy Link'; copyBtn.style.color=''; copyBtn.style.borderColor=''; copyBtn.style.backgroundColor=''; }, 2000);
-        }).catch(function(){
-          // Fallback for browsers that block clipboard
-          var el = document.createElement('textarea');
-          el.value = url;
-          document.body.appendChild(el);
-          el.select();
-          document.execCommand('copy');
-          document.body.removeChild(el);
-          copyBtn.textContent = 'Copied! ✓';
-          copyBtn.style.color = '#4a8f00';
-          copyBtn.style.borderColor = '#8fff00';
-          copyBtn.style.backgroundColor = '#f4ffe6';
-          setTimeout(function(){ copyBtn.textContent = 'Copy Link'; copyBtn.style.color=''; copyBtn.style.borderColor=''; copyBtn.style.backgroundColor=''; }, 2000);
+        if(bar) bar.style.width = (h > 0 ? Math.min((top/h)*100, 100) : 0) + '%';
+        if(backTop) backTop.style.display = top > 500 ? 'flex' : 'none';
+      }, { passive: true });
+
+      if(backTop) {
+        backTop.addEventListener('click', function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-      });
-      if(nlSubmit) nlSubmit.addEventListener('click', function(){
-        var email = document.getElementById('nl-email').value.trim();
-        if(!email || !email.includes('@')){ if(nlMsg){ nlMsg.textContent='Please enter a valid email'; nlMsg.style.color='#ef4444'; } return; }
-        nlSubmit.textContent='Subscribing...';
-        fetch('/api/blog/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, source:'blog-post'}) })
-          .then(function(r){ return r.json(); })
-          .then(function(d){
-            if(d.success && !d.alreadySubscribed){ if(nlMsg){ nlMsg.textContent='Subscribed! Welcome to Riazify Blog.'; nlMsg.style.color='#4a8f00'; } nlSubmit.textContent='Subscribed ✓'; nlSubmit.style.backgroundColor='#4a8f00'; }
-            else if(d.alreadySubscribed){ if(nlMsg){ nlMsg.textContent='You are already subscribed!'; nlMsg.style.color='#f59e0b'; } nlSubmit.textContent='Subscribe →'; }
-            else { if(nlMsg){ nlMsg.textContent='Error — please try again'; nlMsg.style.color='#ef4444'; } nlSubmit.textContent='Subscribe →'; }
-          }).catch(function(){ if(nlMsg){ nlMsg.textContent='Error — please try again'; nlMsg.style.color='#ef4444'; } nlSubmit.textContent='Subscribe →'; });
-      });
+      }
+
+      if(copyBtn) {
+        copyBtn.addEventListener('click', function() {
+          var url = window.location.href;
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(function() {
+              copyBtn.textContent = 'Copied! ✓';
+              copyBtn.style.color = '#7530fb';
+              setTimeout(function() { copyBtn.textContent = 'Copy Link'; copyBtn.style.color = ''; }, 2000);
+            });
+          }
+        });
+      }
+
+      if(nlSubmit) {
+        nlSubmit.addEventListener('click', function() {
+          var emailEl = document.getElementById('nl-email');
+          if(!emailEl) return;
+          var email = emailEl.value.trim();
+          if(!email || !email.includes('@')) {
+            if(nlMsg) { nlMsg.textContent = 'Please enter a valid email address'; nlMsg.style.color = '#dc2626'; }
+            return;
+          }
+          nlSubmit.textContent = 'Subscribing...';
+          fetch('/api/blog/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, source: 'blog-post' })
+          }).then(function(r) { return r.json(); })
+            .then(function(d) {
+              if(d.success && !d.alreadySubscribed) {
+                if(nlMsg) { nlMsg.textContent = '✓ Subscribed to Riazify Weekly.'; nlMsg.style.color = '#b8fa33'; }
+                nlSubmit.textContent = 'Subscribed ✓';
+              } else if(d.alreadySubscribed) {
+                if(nlMsg) { nlMsg.textContent = 'You are already subscribed.'; nlMsg.style.color = '#b8fa33'; }
+                nlSubmit.textContent = 'Subscribed';
+              } else {
+                if(nlMsg) { nlMsg.textContent = 'Error — please try again.'; nlMsg.style.color = '#dc2626'; }
+                nlSubmit.textContent = 'Subscribe →';
+              }
+            }).catch(function() {
+              if(nlMsg) { nlMsg.textContent = 'Error — please try again.'; nlMsg.style.color = '#dc2626'; }
+              nlSubmit.textContent = 'Subscribe →';
+            });
+        });
+      }
     }
-    initPage();
+    initPostPage();
   `
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh' }}>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: C.bg, minHeight: '100vh' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <script dangerouslySetInnerHTML={{ __html: clientScript }} />
 
-      {/* Reading progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-[100] h-1" style={{ backgroundColor: 'rgba(0,0,0,0.08)' }}>
-        <div id="rp-bar" style={{ width: '0%', height: '100%', backgroundColor: C.lime, boxShadow: '0 0 8px rgba(143,255,0,0.6)', transition: 'width 75ms' }} />
+      {/* Reading Progress Indicator */}
+      <div className="fixed top-0 left-0 right-0 z-[100] h-1" style={{ backgroundColor: 'rgba(0,0,0,0.06)' }}>
+        <div id="rp-bar" style={{ width: '0%', height: '100%', backgroundColor: C.primary, transition: 'width 75ms' }} />
       </div>
 
-      {/* Back to top button */}
-      <button id="back-top" aria-label="Back to top"
-        className="fixed bottom-8 right-6 z-50 w-11 h-11 rounded-full items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
-        style={{ display: 'none', backgroundColor: C.dark, border: `2px solid ${C.lime}` }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.lime} strokeWidth="2.5" strokeLinecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+      {/* Back to Top Trigger */}
+      <button
+        id="back-top"
+        aria-label="Back to top"
+        className="fixed bottom-8 right-6 z-50 w-10 h-10 rounded-xl items-center justify-center shadow-md transition-transform hover:scale-110 cursor-pointer border"
+        style={{ display: 'none', backgroundColor: C.dark, borderColor: C.borderDark }}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2.5" strokeLinecap="round">
+          <polyline points="18 15 12 9 6 15" />
+        </svg>
       </button>
 
       <Navbar />
 
-      <div style={{ paddingTop: '80px' }}>
-        <div className="max-w-6xl mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10">
+      <div style={{ paddingTop: '72px' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10 items-start">
 
-            {/* ── Main content ── */}
-            <div>
-              {/* Breadcrumb */}
-              <div className="flex items-center gap-2 mb-6">
-                <Link href="/blog" className="text-[12px] font-bold hover:opacity-70" style={{ color: C.muted }}>Blog</Link>
-                <span style={{ color: C.border }}>›</span>
-                <span className="text-[12px] font-bold line-clamp-1" style={{ color: C.dark }}>{post.title}</span>
-              </div>
+            {/* ── Main Article Body ── */}
+            <article className="min-w-0">
 
-              {/* Category + meta */}
-              <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[11px] font-black" style={{ backgroundColor: C.lime, color: C.dark }}>{post.category}</span>
-                <span className="text-[12px] font-bold" style={{ color: C.muted }}>{formatDate(post.created_at)}</span>
-                <span style={{ color: C.border }}>·</span>
-                <span className="text-[12px] font-bold" style={{ color: C.muted }}>{rt} min read</span>
-                {post.word_count && <span style={{ color: C.border }}>·</span>}
-                {post.word_count && <span className="text-[12px] font-bold" style={{ color: C.muted }}>{post.word_count.toLocaleString()} words</span>}
-                {post.views > 0 && <span style={{ color: C.border }}>·</span>}
-                {post.views > 0 && <span className="text-[12px] font-bold" style={{ color: C.muted }}>👁 {post.views.toLocaleString()} views</span>}
+              {/* Breadcrumbs */}
+              <nav className="flex items-center gap-2 mb-4 text-[12px] font-medium" style={{ color: C.muted }}>
+                <Link href="/blog" className="hover:text-[#7530fb] transition-colors">
+                  Blog
+                </Link>
+                <span>›</span>
+                <span className="truncate max-w-xs" style={{ color: C.textDark }}>
+                  {post.category || 'Seller Guides'}
+                </span>
+              </nav>
+
+              {/* Category & Meta Badges */}
+              <div className="flex items-center gap-3 mb-4 flex-wrap text-[12px]">
+                <span
+                  className="px-2.5 py-0.5 rounded-md text-[11px] font-black font-syne uppercase"
+                  style={{ backgroundColor: C.primaryLight, color: C.primary }}
+                >
+                  {post.category}
+                </span>
+                <span className="font-medium" style={{ color: C.muted }}>{formatDate(post.created_at)}</span>
+                <span style={{ color: C.border }}>•</span>
+                <span className="font-medium" style={{ color: C.muted }}>{rt} min read</span>
+                {post.views > 0 && (
+                  <>
+                    <span style={{ color: C.border }}>•</span>
+                    <span className="font-medium flex items-center gap-1" style={{ color: C.muted }}>
+                      <Eye size={12} />
+                      {post.views.toLocaleString()} views
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Title */}
-              <h1 className="text-[32px] md:text-[40px] font-black leading-tight mb-4" style={{ color: C.dark }}>{post.title}</h1>
+              <h1 className="text-[28px] md:text-[38px] font-black font-syne leading-tight mb-4 tracking-tight" style={{ color: C.textDark }}>
+                {post.title}
+              </h1>
 
-              {/* Excerpt */}
+              {/* Excerpt Lead */}
               {(post.excerpt || post.meta_description) && (
-                <p className="text-[16px] leading-relaxed mb-6 pb-6 border-b" style={{ color: C.muted, borderColor: C.border }}>
+                <p className="text-[15px] leading-relaxed mb-6 pb-6 border-b font-medium" style={{ color: C.muted, borderColor: C.border }}>
                   {post.excerpt || post.meta_description}
                 </p>
               )}
 
-              {/* Author + reading time */}
-              <div className="flex items-center justify-between gap-4 mb-8 p-4 rounded-2xl border flex-wrap"
-                   style={{ backgroundColor: '#fff', borderColor: C.border }}>
+              {/* Author & Header Metadata Box */}
+              <div
+                className="flex items-center justify-between gap-4 mb-8 p-4 rounded-xl border bg-white shadow-xs flex-wrap"
+                style={{ borderColor: C.border }}
+              >
                 <div className="flex items-center gap-3">
                   {post.author_image ? (
-                    <img src={post.author_image} alt={post.author_name || 'Author'}
-                      className="w-11 h-11 rounded-full object-cover" style={{ border: `2px solid ${C.lime}` }}/>
+                    <img
+                      src={post.author_image}
+                      alt={post.author_name || 'Author'}
+                      className="w-10 h-10 rounded-lg object-cover border"
+                      style={{ borderColor: C.border }}
+                    />
                   ) : (
-                    <div className="w-11 h-11 rounded-full flex items-center justify-center font-black text-[16px]"
-                         style={{ backgroundColor: C.lime, color: C.dark }}>
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center font-black font-syne text-[14px]"
+                      style={{ backgroundColor: C.primary, color: '#ffffff' }}
+                    >
                       {(post.author_name || 'R').charAt(0)}
                     </div>
                   )}
                   <div>
-                    <p className="text-[13px] font-black" style={{ color: C.dark }}>{post.author_name || 'Reaz Uddin'}</p>
-                    <p className="text-[11px]" style={{ color: C.muted }}>{post.author_bio || 'eBay seller & founder of Riazify'}</p>
+                    <p className="text-[13px] font-bold font-syne" style={{ color: C.textDark }}>
+                      {post.author_name || 'Reaz Uddin'}
+                    </p>
+                    <p className="text-[11.5px]" style={{ color: C.muted }}>
+                      {post.author_bio || 'eBay seller & founder of Riazify'}
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: C.limeTint }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  <span className="text-[12px] font-black" style={{ color: C.limeDeep }}>{rt} min read</span>
+
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[12px] font-bold font-syne"
+                  style={{ backgroundColor: C.bg, borderColor: C.border, color: C.primary }}>
+                  <Clock size={13} />
+                  <span>{rt} min read</span>
                 </div>
               </div>
 
-              {/* Featured image */}
+              {/* Featured Cover Image */}
               {post.featured_image_url && (
-                <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${C.border}` }}>
-                  <img src={post.featured_image_url} alt={post.title} className="w-full object-cover" style={{ maxHeight: 480 }}/>
+                <div className="rounded-2xl overflow-hidden mb-8 border shadow-xs" style={{ borderColor: C.border }}>
+                  <img
+                    src={post.featured_image_url}
+                    alt={post.title}
+                    className="w-full object-cover"
+                    style={{ maxHeight: 440 }}
+                  />
                 </div>
               )}
 
-              {/* TOC mobile */}
+              {/* Mobile Table of Contents */}
               {toc.length >= 3 && (
-                <div className="lg:hidden mb-8 p-5 rounded-2xl border" style={{ backgroundColor: C.limeTint, borderColor: 'rgba(143,255,0,0.3)' }}>
-                  <p className="text-[11px] font-black tracking-wider mb-3" style={{ color: C.limeDeep }}>TABLE OF CONTENTS</p>
+                <div className="lg:hidden mb-8 p-4 rounded-xl border bg-white" style={{ borderColor: C.border }}>
+                  <p className="text-[11px] font-black font-syne uppercase tracking-wider mb-2.5" style={{ color: C.primary }}>
+                    TABLE OF CONTENTS
+                  </p>
                   <ol className="space-y-1.5">
                     {toc.map((item, i) => (
-                      <li key={i} style={{ paddingLeft: item.level === 3 ? 16 : 0 }}>
-                        <a href={`#${item.id}`} className="text-[13px] font-bold hover:opacity-70" style={{ color: C.limeDeep }}>{item.text}</a>
+                      <li key={i} style={{ paddingLeft: item.level === 3 ? 14 : 0 }}>
+                        <a href={`#${item.id}`} className="text-[12.5px] font-medium hover:underline block" style={{ color: C.textDark }}>
+                          {item.text}
+                        </a>
                       </li>
                     ))}
                   </ol>
                 </div>
               )}
 
-              {/* Post body */}
+              {/* Article Content Render */}
               <div className="prose-blog" dangerouslySetInnerHTML={{ __html: body }} />
 
-              {/* Share buttons */}
-              <div className="mt-10 pt-8 border-t" style={{ borderColor: C.border }}>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>SHARE</span>
-                  <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(postUrl)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 transition-all"
-                    style={{ borderColor: '#000', color: '#fff', backgroundColor: '#000' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    X
+              {/* Social Sharing Bar */}
+              <div className="mt-10 pt-6 border-t flex items-center justify-between gap-4 flex-wrap" style={{ borderColor: C.border }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black uppercase font-syne" style={{ color: C.muted }}>
+                    SHARE GUIDE:
+                  </span>
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(postUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-colors hover:bg-black hover:text-white"
+                    style={{ borderColor: C.border, color: C.textDark, backgroundColor: '#ffffff' }}
+                  >
+                    X (Twitter)
                   </a>
-                  <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 transition-all"
-                    style={{ borderColor: '#0077b5', color: '#fff', backgroundColor: '#0077b5' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                  <a
+                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-colors hover:bg-[#0077b5] hover:text-white"
+                    style={{ borderColor: C.border, color: C.textDark, backgroundColor: '#ffffff' }}
+                  >
                     LinkedIn
                   </a>
-                  <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 transition-all"
-                    style={{ borderColor: '#1877f2', color: '#fff', backgroundColor: '#1877f2' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    Facebook
-                  </a>
-                  <a href={`https://wa.me/?text=${encodeURIComponent(post.title + ' ' + postUrl)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 transition-all"
-                    style={{ borderColor: '#25d366', color: '#fff', backgroundColor: '#25d366' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    WhatsApp
-                  </a>
-                  <button id="copy-link"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold border hover:opacity-80 transition-all"
-                    style={{ borderColor: C.border, color: C.dark, backgroundColor: '#fff' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  <button
+                    id="copy-link"
+                    className="px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-colors hover:bg-[#f8f7ff] cursor-pointer"
+                    style={{ borderColor: C.border, color: C.textDark, backgroundColor: '#ffffff' }}
+                  >
                     Copy Link
                   </button>
                 </div>
+
+                <Link href="/blog" className="text-[12.5px] font-bold hover:underline font-syne" style={{ color: C.primary }}>
+                  ← Back to All Guides
+                </Link>
               </div>
 
-              {/* Author bio */}
+              {/* Author Bio Box */}
               {post.author_bio && (
-                <div className="mt-8 p-6 rounded-2xl border" style={{ backgroundColor: '#fff', borderColor: C.border }}>
+                <div className="mt-8 p-6 rounded-2xl border bg-white shadow-xs" style={{ borderColor: C.border }}>
                   <div className="flex items-start gap-4">
                     {post.author_image ? (
-                      <img src={post.author_image} alt={post.author_name || 'Author'}
-                        className="w-14 h-14 rounded-full object-cover shrink-0" style={{ border: `2px solid ${C.lime}` }}/>
+                      <img
+                        src={post.author_image}
+                        alt={post.author_name || 'Author'}
+                        className="w-12 h-12 rounded-xl object-cover border shrink-0"
+                        style={{ borderColor: C.border }}
+                      />
                     ) : (
-                      <div className="w-14 h-14 rounded-full flex items-center justify-center font-black text-[18px] shrink-0"
-                           style={{ backgroundColor: C.lime, color: C.dark }}>
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center font-black font-syne text-[16px] shrink-0"
+                        style={{ backgroundColor: C.primaryLight, color: C.primary }}
+                      >
                         {(post.author_name || 'R').charAt(0)}
                       </div>
                     )}
                     <div>
-                      <p className="text-[11px] font-black tracking-wider mb-1" style={{ color: C.muted }}>WRITTEN BY</p>
-                      <p className="text-[16px] font-black mb-2" style={{ color: C.dark }}>{post.author_name || 'Reaz Uddin'}</p>
-                      <p className="text-[13px] leading-relaxed" style={{ color: C.muted }}>{post.author_bio}</p>
+                      <p className="text-[10.5px] font-black uppercase font-syne tracking-wider mb-0.5" style={{ color: C.primary }}>
+                        PUBLISHED BY
+                      </p>
+                      <p className="text-[15px] font-bold font-syne mb-1" style={{ color: C.textDark }}>
+                        {post.author_name || 'Reaz Uddin'}
+                      </p>
+                      <p className="text-[13px] leading-relaxed" style={{ color: C.muted }}>
+                        {post.author_bio}
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Related posts */}
+              {/* Related Posts Grid */}
               {related.length > 0 && (
                 <div className="mt-12">
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.lime }} />
-                    <p className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>RELATED ARTICLES</p>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.primary }} />
+                    <p className="text-[11px] font-black font-syne uppercase tracking-wider" style={{ color: C.primary }}>
+                      RELATED ARTICLES
+                    </p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {related.map((r: any) => (
-                      <Link key={r.id} href={`/blog/${r.slug}`}
-                        className="group p-4 rounded-2xl border hover:shadow-md transition-all"
-                        style={{ backgroundColor: '#fff', borderColor: C.border }}>
+                      <Link
+                        key={r.id}
+                        href={`/blog/${r.slug}`}
+                        className="group p-4 rounded-xl border bg-white hover:border-[#7530fb] transition-all shadow-xs"
+                        style={{ borderColor: C.border }}
+                      >
                         {r.featured_image_url && (
-                          <div className="rounded-xl overflow-hidden mb-3 h-32">
-                            <img src={r.featured_image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+                          <div className="rounded-lg overflow-hidden mb-3 h-28 bg-[#1e1535]">
+                            <img
+                              src={r.featured_image_url}
+                              alt={r.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
                           </div>
                         )}
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>{r.category}</span>
-                        <p className="text-[13px] font-black mt-2 line-clamp-2 group-hover:text-[#4a8f00] transition-colors" style={{ color: C.dark }}>{r.title}</p>
-                        <p className="text-[11px] mt-1" style={{ color: C.muted }}>{readingTime(r.word_count)} min read</p>
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-md font-syne uppercase"
+                          style={{ backgroundColor: C.primaryLight, color: C.primary }}
+                        >
+                          {r.category}
+                        </span>
+                        <p className="text-[13px] font-bold font-syne mt-2 line-clamp-2 group-hover:text-[#7530fb] transition-colors" style={{ color: C.textDark }}>
+                          {r.title}
+                        </p>
+                        <p className="text-[11px] mt-1" style={{ color: C.muted }}>
+                          {readingTime(r.word_count)} min read
+                        </p>
                       </Link>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
+            </article>
 
-            {/* ── Sidebar ── */}
-            <div className="hidden lg:block">
+            {/* ── Sticky Right Sidebar ── */}
+            <aside className="hidden lg:block">
               <div className="sticky top-24 flex flex-col gap-5" style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}>
 
-                {/* TOC */}
+                {/* Table of Contents */}
                 {toc.length >= 3 && (
-                  <div className="p-5 rounded-2xl border" style={{ backgroundColor: C.limeTint, borderColor: 'rgba(143,255,0,0.3)' }}>
-                    <p className="text-[10px] font-black tracking-wider mb-4" style={{ color: C.limeDeep }}>TABLE OF CONTENTS</p>
-                    <ol className="space-y-2">
+                  <div className="p-4 rounded-2xl border bg-white shadow-xs" style={{ borderColor: C.border }}>
+                    <p className="text-[11px] font-black font-syne uppercase tracking-wider mb-3" style={{ color: C.primary }}>
+                      TABLE OF CONTENTS
+                    </p>
+                    <ol className="space-y-1.5">
                       {toc.map((item, i) => (
                         <li key={i} style={{ paddingLeft: item.level === 3 ? 12 : 0 }}>
-                          <a href={`#${item.id}`} className="text-[12px] font-bold leading-snug hover:opacity-70 transition-opacity block" style={{ color: C.limeDeep }}>{item.text}</a>
+                          <a
+                            href={`#${item.id}`}
+                            className="text-[12px] font-medium leading-snug hover:text-[#7530fb] transition-colors block"
+                            style={{ color: C.muted }}
+                          >
+                            {item.text}
+                          </a>
                         </li>
                       ))}
                     </ol>
                   </div>
                 )}
 
-                {/* CTA */}
-                <div className="p-5 rounded-2xl" style={{ backgroundColor: C.dark }}>
-                  <p className="text-[13px] font-black mb-2" style={{ color: C.lime }}>Try Riazify Free</p>
-                  <p className="text-[12px] mb-4" style={{ color: 'rgba(255,255,255,0.6)' }}>Protect your eBay orders, research products and calculate real profits.</p>
-                  <Link href="/auth/signup" className="block text-center py-2.5 rounded-xl text-[12px] font-black hover:opacity-90 transition-all" style={{ backgroundColor: C.lime, color: C.dark }}>
-                    Get Started Free →
+                {/* Sidebar Callout */}
+                <div className="p-5 rounded-2xl border text-center" style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+                  <p className="text-[13px] font-black font-syne text-white mb-1">Protect Your Orders</p>
+                  <p className="text-[11.5px] mb-4" style={{ color: C.textLight }}>
+                    Scan incoming orders against 47 fraudulent buyer risk indicators.
+                  </p>
+                  <Link
+                    href="/auth/signup"
+                    className="block w-full py-2.5 rounded-lg text-[12px] font-black font-syne transition-transform hover:scale-105"
+                    style={{ backgroundColor: C.accent, color: C.dark }}
+                  >
+                    Start Free Trial →
                   </Link>
                 </div>
 
-                {/* Popular */}
+                {/* Popular Posts */}
                 {popular.length > 0 && (
-                  <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-                    <div className="px-4 py-3 border-b" style={{ borderColor: C.border }}>
-                      <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>POPULAR ARTICLES</p>
-                    </div>
-                    {popular.map((p: any, i: number) => (
-                      <div key={p.id} className="p-3" style={{ borderBottom: i < popular.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                        <div className="flex items-start gap-2">
-                          <span className="text-[16px] font-black shrink-0 w-5 text-center" style={{ color: C.lime }}>{i + 1}</span>
-                          <div>
-                            <Link href={`/blog/${p.slug}`} className="text-[12px] font-black leading-snug hover:text-[#4a8f00] transition-colors line-clamp-2 block" style={{ color: C.dark }}>{p.title}</Link>
-                            <p className="text-[10px] mt-1" style={{ color: C.muted }}>{readingTime(p.word_count)} min · 👁 {p.views}</p>
+                  <div className="rounded-2xl border bg-white p-4 shadow-xs" style={{ borderColor: C.border }}>
+                    <p className="text-[11px] font-black font-syne uppercase tracking-wider mb-3" style={{ color: C.primary }}>
+                      POPULAR ARTICLES
+                    </p>
+                    <div className="flex flex-col divide-y" style={{ borderColor: C.border }}>
+                      {popular.map((p: any, i: number) => (
+                        <div key={p.id} className="py-2.5 flex items-start gap-2.5">
+                          <span className="text-[13px] font-black font-syne w-4 text-center shrink-0" style={{ color: C.primary }}>
+                            {i + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <Link
+                              href={`/blog/${p.slug}`}
+                              className="text-[12px] font-bold font-syne leading-snug hover:text-[#7530fb] transition-colors line-clamp-2"
+                              style={{ color: C.textDark }}
+                            >
+                              {p.title}
+                            </Link>
+                            <p className="text-[10px] mt-0.5" style={{ color: C.muted }}>
+                              {readingTime(p.word_count)} min read
+                            </p>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {/* Article info */}
-                <div className="p-5 rounded-2xl border" style={{ backgroundColor: '#fff', borderColor: C.border }}>
-                  <p className="text-[10px] font-black tracking-wider mb-3" style={{ color: C.muted }}>ARTICLE INFO</p>
-                  <div className="space-y-2">
+                {/* Article Metadata Spec Sheet */}
+                <div className="p-4 rounded-2xl border bg-white shadow-xs" style={{ borderColor: C.border }}>
+                  <p className="text-[11px] font-black font-syne uppercase tracking-wider mb-2.5" style={{ color: C.primary }}>
+                    ARTICLE INFO
+                  </p>
+                  <div className="space-y-2 text-[12px]">
                     <div className="flex justify-between">
-                      <span className="text-[12px]" style={{ color: C.muted }}>Published</span>
-                      <span className="text-[12px] font-bold" style={{ color: C.dark }}>{formatDate(post.created_at)}</span>
+                      <span style={{ color: C.muted }}>Published</span>
+                      <span className="font-bold" style={{ color: C.textDark }}>{formatDate(post.created_at)}</span>
                     </div>
                     {post.updated_at && post.updated_at !== post.created_at && (
                       <div className="flex justify-between">
-                        <span className="text-[12px]" style={{ color: C.muted }}>Updated</span>
-                        <span className="text-[12px] font-bold" style={{ color: C.dark }}>{formatDate(post.updated_at)}</span>
+                        <span style={{ color: C.muted }}>Updated</span>
+                        <span className="font-bold" style={{ color: C.textDark }}>{formatDate(post.updated_at)}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="text-[12px]" style={{ color: C.muted }}>Reading time</span>
-                      <span className="text-[12px] font-bold" style={{ color: C.dark }}>{rt} min</span>
+                      <span style={{ color: C.muted }}>Reading Time</span>
+                      <span className="font-bold" style={{ color: C.textDark }}>{rt} min</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[12px]" style={{ color: C.muted }}>Category</span>
-                      <span className="text-[12px] font-bold" style={{ color: C.limeDeep }}>{post.category}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[12px]" style={{ color: C.muted }}>Views</span>
-                      <span className="text-[12px] font-bold" style={{ color: C.dark }}>{(post.views || 0).toLocaleString()}</span>
+                      <span style={{ color: C.muted }}>Category</span>
+                      <span className="font-bold font-syne" style={{ color: C.primary }}>{post.category}</span>
                     </div>
                   </div>
                 </div>
+
               </div>
-            </div>
+            </aside>
           </div>
 
-          {/* ── Prev/Next navigation ── */}
+          {/* ── Prev / Next Navigation Strip ── */}
           {(prev || next) && (
-            <div className="max-w-6xl mx-auto px-6 pb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.lime }} />
-                <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>MORE ARTICLES</p>
-              </div>
+            <div className="mt-12 pt-8 border-t" style={{ borderColor: C.border }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {prev && (
-                  <a href={`/blog/${prev.slug}`}
-                    className="group flex items-center gap-4 p-5 rounded-2xl border hover:shadow-md transition-all"
-                    style={{ borderColor: C.border, backgroundColor: '#fff' }}>
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: C.limeTint }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                    </div>
+                  <Link
+                    href={`/blog/${prev.slug}`}
+                    className="group p-4 rounded-xl border bg-white hover:border-[#7530fb] transition-all shadow-xs flex items-center gap-3"
+                    style={{ borderColor: C.border }}
+                  >
+                    <ArrowLeft size={16} className="shrink-0 group-hover:-translate-x-1 transition-transform" style={{ color: C.primary }} />
                     <div className="min-w-0">
-                      <span className="text-[10px] font-black tracking-wider block mb-1" style={{ color: C.muted }}>PREVIOUS ARTICLE</span>
-                      <span className="text-[13px] font-black line-clamp-2 group-hover:text-[#4a8f00] transition-colors" style={{ color: C.dark }}>{prev.title}</span>
+                      <span className="text-[10px] font-black font-syne uppercase tracking-wider block" style={{ color: C.muted }}>
+                        PREVIOUS
+                      </span>
+                      <span className="text-[13px] font-bold font-syne line-clamp-1 group-hover:text-[#7530fb] transition-colors" style={{ color: C.textDark }}>
+                        {prev.title}
+                      </span>
                     </div>
-                  </a>
+                  </Link>
                 )}
                 {next && (
-                  <a href={`/blog/${next.slug}`}
-                    className="group flex items-center gap-4 p-5 rounded-2xl border hover:shadow-md transition-all"
-                    style={{ borderColor: C.border, backgroundColor: '#fff' }}>
+                  <Link
+                    href={`/blog/${next.slug}`}
+                    className="group p-4 rounded-xl border bg-white hover:border-[#7530fb] transition-all shadow-xs flex items-center justify-between gap-3 text-right"
+                    style={{ borderColor: C.border }}
+                  >
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] font-black tracking-wider block mb-1 text-right" style={{ color: C.muted }}>NEXT ARTICLE</span>
-                      <span className="text-[13px] font-black line-clamp-2 group-hover:text-[#4a8f00] transition-colors text-right block" style={{ color: C.dark }}>{next.title}</span>
+                      <span className="text-[10px] font-black font-syne uppercase tracking-wider block" style={{ color: C.muted }}>
+                        NEXT ARTICLE
+                      </span>
+                      <span className="text-[13px] font-bold font-syne line-clamp-1 group-hover:text-[#7530fb] transition-colors" style={{ color: C.textDark }}>
+                        {next.title}
+                      </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: C.limeTint }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.limeDeep} strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                    </div>
-                  </a>
+                    <ArrowRight size={16} className="shrink-0 group-hover:translate-x-1 transition-transform" style={{ color: C.primary }} />
+                  </Link>
                 )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Stats + Newsletter */}
-        <div style={{ backgroundColor: '#ffffff', borderTop: `1px solid ${C.border}` }}>
-          <div className="max-w-6xl mx-auto px-6 py-14">
-            <p className="text-center text-[13px] font-black tracking-wider mb-8" style={{ color: C.muted }}>OUR IMPACT FOR EBAY SELLERS</p>
-            <div className="grid grid-cols-3 gap-8 mb-10 text-center">
-              {[
-                { val: '12,000+', label: 'eBay sellers use Riazify' },
-                { val: '$2.4M+',  label: 'Profit generated by sellers' },
-                { val: '98%',     label: 'Order protection rate' },
-              ].map(s => (
-                <div key={s.label}>
-                  <p className="text-[36px] md:text-[44px] font-black mb-1" style={{ color: C.limeDeep }}>{s.val}</p>
-                  <p className="text-[13px]" style={{ color: C.muted }}>{s.label}</p>
-                </div>
-              ))}
-            </div>
-            <div className="rounded-3xl p-8 text-center" style={{ backgroundColor: C.dark, border: '1px solid rgba(143,255,0,0.15)' }}>
-              <p className="text-[11px] font-black tracking-wider mb-2" style={{ color: C.lime }}>FREE NEWSLETTER</p>
-              <h2 className="text-[22px] font-black mb-2" style={{ color: '#fff' }}>Subscribe to Riazify Blog</h2>
-              <p className="text-[13px] mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>Free eBay selling resources, insights and strategies. New articles every week.</p>
-              <div className="flex gap-2 max-w-md mx-auto">
-                <input type="email" id="nl-email" placeholder="Enter your email..."
-                  className="flex-1 h-12 px-4 rounded-xl border text-[13px] outline-none"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.15)', color: '#fff' }} />
-                <button id="nl-submit"
-                  className="h-12 px-6 rounded-xl text-[13px] font-black hover:opacity-90 transition-all flex items-center shrink-0"
-                  style={{ backgroundColor: C.lime, color: C.dark }}>
+        {/* ── Newsletter Footer Card ── */}
+        <section className="border-t bg-white py-14" style={{ borderColor: C.border }}>
+          <div className="max-w-3xl mx-auto px-6">
+            <div className="rounded-2xl p-8 text-center border shadow-lg" style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md mb-3 text-[11px] font-bold font-syne uppercase"
+                style={{ backgroundColor: 'rgba(117,48,251,0.25)', color: C.accent }}>
+                <CheckCircle2 size={13} />
+                <span>FREE SELLER NEWSLETTER</span>
+              </div>
+              <h2 className="text-[20px] md:text-[24px] font-black font-syne text-white mb-2">
+                Subscribe to Riazify Blog Intelligence
+              </h2>
+              <p className="text-[13px] mb-5 max-w-md mx-auto" style={{ color: C.textLight }}>
+                Get notified when new fee updates, VeRO alerts, and listing strategies go live.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+                <input
+                  type="email"
+                  id="nl-email"
+                  placeholder="seller@store.com"
+                  className="flex-1 h-11 px-3.5 rounded-lg border text-[13px] outline-none"
+                  style={{ backgroundColor: C.darkCard, borderColor: C.borderDark, color: '#ffffff' }}
+                />
+                <button
+                  id="nl-submit"
+                  className="h-11 px-5 rounded-lg text-[13px] font-black font-syne transition-transform hover:scale-105 shrink-0 cursor-pointer shadow-sm"
+                  style={{ backgroundColor: C.accent, color: C.dark }}
+                >
                   Subscribe →
                 </button>
               </div>
-              <p id="nl-msg" className="text-[12px] mt-2" style={{ minHeight: 20 }}></p>
-              <p className="text-[11px] mt-3" style={{ color: 'rgba(255,255,255,0.3)' }}>You may opt-out at any time.</p>
-              <div className="text-center mt-6">
-                <Link href="/blog" className="text-[13px] font-bold hover:opacity-80" style={{ color: 'rgba(255,255,255,0.4)' }}>← Back to all articles</Link>
-              </div>
+              <p id="nl-msg" className="text-[12px] mt-2 font-medium" style={{ minHeight: 18 }} />
             </div>
           </div>
-        </div>
+        </section>
+
         <Footer />
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: [
-        '.prose-blog { color: #1a2410; font-size: 16px; line-height: 1.85; }',
-        '.prose-blog h1 { font-size: 32px; font-weight: 900; margin: 32px 0 16px; color: #1a2410; }',
-        '.prose-blog h2 { font-size: 24px; font-weight: 800; margin: 40px 0 16px; color: #1a2410; }',
-        '.prose-blog h3 { font-size: 19px; font-weight: 700; margin: 28px 0 12px; color: #1a2410; }',
-        '.prose-blog p { margin: 0 0 18px; }',
-        '.prose-blog a { color: #4a8f00; text-decoration: underline; font-weight: 700; }',
-        '.prose-blog a:hover { opacity: 0.75; }',
-        '.prose-blog ul { list-style: disc; padding-left: 24px; margin: 16px 0; }',
-        '.prose-blog ol { list-style: decimal; padding-left: 24px; margin: 16px 0; }',
-        '.prose-blog li { margin: 8px 0; }',
-        '.prose-blog blockquote { border-left: 4px solid #8fff00; padding: 12px 20px; margin: 24px 0; background: #f4ffe6; border-radius: 0 12px 12px 0; color: #4a8f00; font-style: italic; }',
-        '.prose-blog pre { background: #1a2410; color: #8fff00; padding: 20px; border-radius: 12px; overflow-x: auto; font-size: 14px; margin: 20px 0; }',
-        '.prose-blog code { background: #f4ffe6; color: #4a8f00; padding: 2px 6px; border-radius: 4px; font-size: 14px; }',
-        '.prose-blog pre code { background: transparent; color: #8fff00; padding: 0; }',
-        '.prose-blog img { max-width: 100%; border-radius: 12px; margin: 20px 0; }',
-        '.prose-blog table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }',
-        '.prose-blog th { background: #1a2410; color: #8fff00; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 900; }',
-        '.prose-blog td { border-bottom: 1px solid #e8ede2; padding: 10px 14px; }',
-        '.prose-blog tr:nth-child(even) td { background: #f7f9f5; }',
-        '.prose-blog hr { border: none; border-top: 1px solid #e8ede2; margin: 32px 0; }',
-        '.prose-blog details { border: 1px solid #e8ede2; border-radius: 10px; overflow: hidden; margin: 8px 0; }',
-        '.prose-blog summary { padding: 12px 16px; font-weight: 700; cursor: pointer; background: #f7f9f5; }',
-        '.prose-blog details[open] summary { background: #f4ffe6; color: #4a8f00; }',
-      ].join(' ')}} />
+      {/* Prose CSS for Article Content */}
+      <style dangerouslySetInnerHTML={{
+        __html: [
+          '.prose-blog { color: #1f1d2e; font-size: 15.5px; line-height: 1.8; }',
+          '.prose-blog h1 { font-family: "Syne", sans-serif; font-size: 26px; font-weight: 900; margin: 32px 0 14px; color: #1e1535; }',
+          '.prose-blog h2 { font-family: "Syne", sans-serif; font-size: 21px; font-weight: 800; margin: 36px 0 14px; color: #1e1535; border-bottom: 1px solid #ede9fe; padding-bottom: 6px; }',
+          '.prose-blog h3 { font-family: "Syne", sans-serif; font-size: 17px; font-weight: 700; margin: 26px 0 10px; color: #1e1535; }',
+          '.prose-blog p { margin: 0 0 16px; }',
+          '.prose-blog a { color: #7530fb; text-decoration: underline; font-weight: 600; }',
+          '.prose-blog a:hover { opacity: 0.8; }',
+          '.prose-blog ul { list-style: disc; padding-left: 22px; margin: 14px 0; }',
+          '.prose-blog ol { list-style: decimal; padding-left: 22px; margin: 14px 0; }',
+          '.prose-blog li { margin: 6px 0; }',
+          '.prose-blog blockquote { border-left: 3.5px solid #7530fb; padding: 10px 18px; margin: 20px 0; background: #f3eeff; border-radius: 0 8px 8px 0; color: #1e1535; font-style: italic; }',
+          '.prose-blog pre { background: #1e1535; color: #b8fa33; padding: 18px; border-radius: 12px; overflow-x: auto; font-size: 13.5px; margin: 20px 0; border: 1px solid #2d1f4e; }',
+          '.prose-blog code { background: #f3eeff; color: #7530fb; padding: 2px 6px; border-radius: 4px; font-size: 13.5px; font-weight: 600; }',
+          '.prose-blog pre code { background: transparent; color: #b8fa33; padding: 0; }',
+          '.prose-blog img { max-width: 100%; border-radius: 12px; margin: 20px 0; border: 1px solid #ede9fe; }',
+          '.prose-blog table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13.5px; }',
+          '.prose-blog th { background: #1e1535; color: #ffffff; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 800; font-family: "Syne", sans-serif; }',
+          '.prose-blog td { border-bottom: 1px solid #ede9fe; padding: 9px 12px; }',
+          '.prose-blog tr:nth-child(even) td { background: #f8f7ff; }',
+          '.prose-blog hr { border: none; border-top: 1px solid #ede9fe; margin: 28px 0; }',
+        ].join(' ')
+      }} />
     </div>
   )
 }

@@ -1,298 +1,453 @@
 'use client'
+
 // app/contact/page.tsx
+// Riazify Support & Direct Contact Desk — v2.0
+
 import React, { useState } from 'react'
 import Navbar from '@/components/landing/Navbar'
 import Footer from '@/components/landing/Footer'
 import ProDropdown from '@/components/ui/ProDropdown'
-import { CheckCircle } from 'lucide-react'
+import {
+  CheckCircle2, Mail, Clock, Shield,
+  ArrowRight, ChevronDown, MessageSquare
+} from 'lucide-react'
+import Link from 'next/link'
 
+// ── Riazify Color Role Tokens (v2.0) ──────────────────────────
 const C = {
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark:     '#1a2410',
-  border:   '#e8ede2',
-  muted:    '#8a9e78',
-  bg:       '#f7f9f5',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  redBg:    '#fef2f2',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  accentHover: '#a3e635',
+  dark: '#1e1535',
+  darkHover: '#2d1f4e',
+  darkCard: '#271c42',
+  border: '#ede9fe',
+  borderDark: '#2d1f4e',
+  borderInput: '#e5e0f5',
+  bg: '#f8f7ff',
+  surface: '#ffffff',
+  text: '#1f1d2e',
+  textDark: '#1e1535',
+  muted: '#6b7280',
+  textLight: '#a89cc8',
+  red: '#dc2626',
+  redBg: '#fef2f2',
 }
 
 const SUBJECTS = [
-  { val: 'question',    label: 'General question',       enabled: true },
-  { val: 'bug',         label: 'Bug report',             enabled: true },
-  { val: 'billing',     label: 'Billing & subscription', enabled: true },
-  { val: 'feature',     label: 'Feature request',        enabled: true },
-  { val: 'partnership', label: 'Partnership',            enabled: true },
-  { val: 'press',       label: 'Press inquiry',          enabled: true },
-  { val: 'other',       label: 'Other',                  enabled: true },
+  { val: 'question', label: 'General Platform Question', enabled: true },
+  { val: 'bug', label: 'Technical / Bug Report', enabled: true },
+  { val: 'billing', label: 'Billing & Subscription', enabled: true },
+  { val: 'feature', label: 'Feature Request', enabled: true },
+  { val: 'partnership', label: 'Affiliate & Partnership', enabled: true },
+  { val: 'press', label: 'Media & Press Inquiry', enabled: true },
+  { val: 'other', label: 'Other Inquiry', enabled: true },
 ]
 
 const FAQS = [
-  { q: 'How do I cancel my subscription?',      a: 'You can cancel anytime from your dashboard under Billing. No penalties, no questions asked.' },
-  { q: 'Do you offer refunds?',                 a: 'Yes — we offer a 14-day money-back guarantee. Contact us within 14 days of purchase.' },
-  { q: 'Is there a free trial?',                a: 'Yes! Every new account gets a 14-day free trial with no credit card required.' },
-  { q: 'Can I connect multiple eBay accounts?', a: 'Currently one eBay account per Riazify account. Multi-account support is on our roadmap.' },
-  { q: 'How fast do you respond?',              a: 'We respond to all messages within 24 hours. Billing issues are handled within 4 hours.' },
-  { q: 'Is my eBay data safe?',                 a: 'Absolutely. We use OAuth 2.0 and never store your eBay password. All data is encrypted.' },
+  { q: 'How do I cancel or modify my subscription?', a: 'You can pause or cancel anytime directly from your dashboard under Settings → Billing with zero penalties.' },
+  { q: 'Do you offer a refund policy?', a: 'Yes. We offer a no-questions-asked 14-day money-back guarantee on all tier upgrades.' },
+  { q: 'Is there a free trial available?', a: 'Yes! Every new account gets full access to core features without requiring a credit card upfront.' },
+  { q: 'Can I monitor multiple eBay stores?', a: 'Currently one eBay store connection per workspace. Multi-store rollups are in active development.' },
+  { q: 'What are typical support response times?', a: 'General inquiries receive replies within 24 hours. Critical billing issues are handled within 4 hours.' },
+  { q: 'Is my store credentials and order data safe?', a: '100%. We utilize standard OAuth 2.0 tokens and never store passwords. All order data is encrypted with 256-bit SSL.' },
 ]
 
-const inputStyle = (hasError?: boolean): React.CSSProperties => ({
-  width: '100%', height: 44, padding: '0 14px', borderRadius: 10,
-  border: `1px solid ${hasError ? C.red : C.border}`, fontSize: 14,
-  color: C.dark, outline: 'none', boxSizing: 'border-box',
-  fontFamily: 'Inter, sans-serif', background: C.surface,
-})
-
 export default function ContactPage() {
-  const [name, setName]               = useState('')
-  const [email, setEmail]             = useState('')
-  const [subject, setSubject]         = useState('question')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [subject, setSubject] = useState('question')
   const [customSubject, setCustomSubject] = useState('')
-  const [message, setMessage]         = useState('')
-  const [errors, setErrors]           = useState<Record<string, string>>({})
-  const [loading, setLoading]         = useState(false)
-  const [success, setSuccess]         = useState(false)
-  const [openFaq, setOpenFaq]         = useState<number | null>(null)
+  const [message, setMessage] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   function validate() {
     const e: Record<string, string> = {}
-    if (!name.trim())                                            e.name    = 'Name is required'
-    if (!email.trim())                                           e.email   = 'Email is required'
-    else if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(email.trim()))  e.email   = 'Enter a valid email'
-    if (subject === 'other' && !customSubject.trim())            e.subject = 'Please enter a subject'
-    if (!message.trim())                                         e.message = 'Message is required'
-    else if (message.trim().length < 10)                         e.message = 'Message must be at least 10 characters'
+    if (!name.trim()) e.name = 'Your name is required'
+    if (!email.trim()) e.email = 'Email address is required'
+    else if (!/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(email.trim())) e.email = 'Please enter a valid email address'
+    if (subject === 'other' && !customSubject.trim()) e.subject = 'Please specify a subject line'
+    if (!message.trim()) e.message = 'Message text is required'
+    else if (message.trim().length < 10) e.message = 'Message must be at least 10 characters'
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
     if (!validate()) return
     setLoading(true)
     try {
       const finalSubject = subject === 'other' && customSubject.trim()
         ? customSubject.trim()
         : SUBJECTS.find(s => s.val === subject)?.label ?? subject
+
       const res = await fetch('/api/contact', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), subject: finalSubject, type: subject, message: message.trim() }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          subject: finalSubject,
+          type: subject,
+          message: message.trim(),
+        }),
       })
-      if (!res.ok) throw new Error('Failed to send')
+      if (!res.ok) throw new Error('Submission failed')
       setSuccess(true)
-      setName(''); setEmail(''); setMessage(''); setSubject('question'); setCustomSubject('')
+      setName('')
+      setEmail('')
+      setMessage('')
+      setSubject('question')
+      setCustomSubject('')
     } catch {
-      setErrors({ submit: 'Something went wrong. Please try again or email us directly.' })
+      setErrors({ submit: 'Unable to send message right now. Please email us directly at support@riazify.com.' })
     }
     setLoading(false)
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', backgroundColor: C.bg, minHeight: '100vh', overflowX: 'hidden' }}>
-      <Navbar/>
+    <div style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: C.bg, minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ paddingTop: '72px' }}>
 
-      {/* Hero — full width */}
-      <div style={{ padding: '48px 20px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'rgba(143,255,0,0.08)', pointerEvents: 'none' }}/>
-        <div style={{ position: 'absolute', bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'rgba(143,255,0,0.06)', pointerEvents: 'none' }}/>
-        <div style={{ position: 'absolute', top: 20, left: '30%', width: 140, height: 140, borderRadius: '50%', background: 'rgba(143,255,0,0.04)', pointerEvents: 'none' }}/>
+        {/* ── 1. Hero Header ── */}
+        <header className="border-b" style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+          <div className="max-w-4xl mx-auto px-6 py-16 md:py-20 text-center">
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 640, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', borderRadius: 100, background: C.limeTint, border: `1px solid ${C.lime}`, marginBottom: 20 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.limeDeep }}/>
-            <span style={{ fontSize: 12, fontWeight: 700, color: C.limeDeep }}>We respond within 24 hours</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 border"
+              style={{ backgroundColor: 'rgba(117,48,251,0.25)', borderColor: C.primary }}>
+              <Clock size={13} style={{ color: C.accent }} />
+              <span className="text-[11px] font-black tracking-wider uppercase font-syne" style={{ color: C.accent }}>
+                AVERAGE RESPONSE: &lt;24 HOURS
+              </span>
+            </div>
+
+            <h1 className="text-[36px] md:text-[50px] font-black leading-tight mb-3 font-syne text-white tracking-tight">
+              Get in touch with our team
+            </h1>
+
+            <p className="text-[15px] leading-relaxed max-w-md mx-auto mb-8 font-medium" style={{ color: C.textLight }}>
+              Have questions regarding Cassini title optimization, order risk verification, or custom integrations? We're here to help.
+            </p>
+
+            {/* Quick Email Badges */}
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              {[
+                { label: 'Technical Support', value: 'support@riazify.com' },
+                { label: 'Billing Inquiries', value: 'billing@riazify.com' },
+              ].map(item => (
+                <a
+                  key={item.label}
+                  href={`mailto:${item.value}`}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12.5px] font-bold border transition-colors hover:bg-[#271c42]"
+                  style={{ backgroundColor: C.darkCard, borderColor: C.borderDark, color: '#ffffff' }}
+                >
+                  <span style={{ color: C.textLight }}>{item.label}:</span>
+                  <span style={{ color: C.accent }}>{item.value}</span>
+                </a>
+              ))}
+            </div>
+
           </div>
-          <h1 style={{ fontSize: 'clamp(28px, 6vw, 52px)', fontWeight: 900, color: C.dark, margin: '0 0 14px', lineHeight: 1.1 }}>Get in touch</h1>
-          <p style={{ fontSize: 16, color: C.muted, margin: '0 auto 28px', lineHeight: 1.6, maxWidth: 420 }}>
-            Have a question, feedback, or need help? We read every message and respond personally.
-          </p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
-            {[
-              { label: 'Support', value: 'support@riazify.com' },
-              { label: 'Billing', value: 'billing@riazify.com' },
-            ].map(item => (
-              <a key={item.label} href={`mailto:${item.value}`}
-                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 100, background: C.surface, border: `1px solid ${C.border}`, textDecoration: 'none', fontSize: 12 }}>
-                <span style={{ color: C.muted, fontWeight: 600 }}>{item.label}:</span>
-                <span style={{ color: C.limeDeep, fontWeight: 700 }}>{item.value}</span>
-              </a>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/auth/signup" style={{ height: 46, padding: '0 24px', borderRadius: 12, background: C.lime, color: C.dark, fontSize: 14, fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-              Start free trial
-            </a>
-            <a href="#contact-form" style={{ height: 46, padding: '0 24px', borderRadius: 12, background: C.surface, color: C.dark, fontSize: 14, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', border: `1px solid ${C.border}` }}>
-              Send a message
-            </a>
-          </div>
-        </div>
-      </div>
+        </header>
 
-      <main style={{ maxWidth: 960, margin: '0 auto', padding: '32px 16px' }}>
+        {/* ── 2. Form & Support Details Container ── */}
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
 
-        {/* Form + Info grid */}
-        <div id="contact-form" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 48 }}>
-
-          {/* Contact form */}
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 24 }}>
-            {success ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', gap: 14, textAlign: 'center' }}>
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: C.limeTint, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CheckCircle size={28} style={{ color: C.limeDeep }}/>
-                </div>
-                <h2 style={{ fontSize: 20, fontWeight: 900, color: C.dark, margin: 0 }}>Message sent!</h2>
-                <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>We'll get back to you within 24 hours.</p>
-                <button onClick={() => setSuccess(false)} style={{ height: 36, padding: '0 16px', borderRadius: 100, border: `1px solid ${C.border}`, background: 'transparent', color: C.muted, fontSize: 12, cursor: 'pointer' }}>
-                  Send another message
-                </button>
-              </div>
-            ) : (
-              <>
-                <h2 style={{ fontSize: 18, fontWeight: 900, color: C.dark, margin: '0 0 20px' }}>Send us a message</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em' }}>Your name</label>
-                    <input type="text" placeholder="John Smith" value={name} onChange={e => setName(e.target.value)} style={inputStyle(!!errors.name)}/>
-                    {errors.name && <p style={{ fontSize: 11, color: C.red, margin: 0 }}>{errors.name}</p>}
+            {/* Contact Form Card */}
+            <div className="lg:col-span-7 bg-white rounded-2xl border p-6 md:p-8 shadow-xs" style={{ borderColor: C.border }}>
+              {success ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border"
+                    style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+                    <CheckCircle2 size={30} style={{ color: C.primary }} />
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em' }}>Email address</label>
-                    <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle(!!errors.email)}/>
-                    {errors.email && <p style={{ fontSize: 11, color: C.red, margin: 0 }}>{errors.email}</p>}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em' }}>Subject</label>
-                    <ProDropdown prefix="" currentValue={subject} options={SUBJECTS} onChanged={setSubject} width="full"/>
-                    {subject === 'other' && (
-                      <input type="text" placeholder="Type your subject..." value={customSubject} onChange={e => setCustomSubject(e.target.value)} autoFocus style={{ ...inputStyle(!!errors.subject), marginTop: 6 }}/>
-                    )}
-                    {errors.subject && <p style={{ fontSize: 11, color: C.red, margin: 0 }}>{errors.subject}</p>}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em' }}>Message</label>
-                    <textarea placeholder="Tell us how we can help..." value={message} onChange={e => setMessage(e.target.value)} rows={5}
-                              style={{ ...inputStyle(!!errors.message), height: 'auto', padding: '12px 14px', resize: 'vertical' as const }}/>
-                    {errors.message && <p style={{ fontSize: 11, color: C.red, margin: 0 }}>{errors.message}</p>}
-                  </div>
-                  {errors.submit && (
-                    <div style={{ padding: '10px 14px', background: C.redBg, border: `1px solid ${C.red}`, borderRadius: 10 }}>
-                      <p style={{ fontSize: 12, color: C.red, margin: 0 }}>{errors.submit}</p>
-                    </div>
-                  )}
-                  <button onClick={handleSubmit} disabled={loading}
-                          style={{ height: 46, borderRadius: 12, border: 'none', background: loading ? C.border : C.lime, color: loading ? C.muted : C.dark, fontSize: 14, fontWeight: 900, cursor: loading ? 'wait' : 'pointer' }}>
-                    {loading ? 'Sending...' : 'Send message'}
+                  <h2 className="text-[20px] font-bold font-syne mb-1" style={{ color: C.textDark }}>
+                    Message Received
+                  </h2>
+                  <p className="text-[13.5px] max-w-xs mb-6" style={{ color: C.muted }}>
+                    Thank you for reaching out. A team member will reply directly to your email within 24 hours.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSuccess(false)}
+                    className="px-5 py-2.5 rounded-lg border text-[13px] font-bold font-syne transition-colors hover:bg-[#f8f7ff] cursor-pointer"
+                    style={{ borderColor: C.border, color: C.textDark }}
+                  >
+                    Send Another Message
                   </button>
                 </div>
-              </>
-            )}
-          </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                  <div>
+                    <h2 className="text-[18px] font-bold font-syne mb-1" style={{ color: C.textDark }}>
+                      Send an inquiry
+                    </h2>
+                    <p className="text-[12.5px] mb-4" style={{ color: C.muted }}>
+                      Fill out the form below and we will route your request directly to the appropriate team.
+                    </p>
+                  </div>
 
-          {/* Right info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-            {/* Direct contact */}
-            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 20 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 900, color: C.dark, margin: '0 0 12px' }}>Direct contact</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { label: 'Support',      value: 'support@riazify.com',  desc: 'For help with your account'   },
-                  { label: 'Billing',      value: 'billing@riazify.com',  desc: 'For subscription questions'   },
-                  { label: 'Press',        value: 'press@riazify.com',    desc: 'For media inquiries'          },
-                  { label: 'Partnerships', value: 'partners@riazify.com', desc: 'For business opportunities'   },
-                ].map(item => (
-                  <div key={item.label} style={{ paddingBottom: 8, borderBottom: `1px solid ${C.border}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '.06em' }}>{item.label}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
-                      <a href={`mailto:${item.value}`} style={{ fontSize: 12, fontWeight: 700, color: C.limeDeep, textDecoration: 'none', wordBreak: 'break-all' }}>{item.value}</a>
+                  {errors.submit && (
+                    <div className="p-3 rounded-lg border text-[12.5px] font-medium"
+                      style={{ backgroundColor: C.redBg, borderColor: '#fecaca', color: C.red }}>
+                      {errors.submit}
                     </div>
-                    <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0' }}>{item.desc}</p>
+                  )}
+
+                  {/* Name Input */}
+                  <div>
+                    <label className="text-[12px] font-bold font-syne mb-1 block" style={{ color: C.textDark }}>
+                      YOUR NAME *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Alex Morgan"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      className="w-full h-10 px-3.5 rounded-lg text-[13.5px] outline-none border transition-colors bg-white"
+                      style={{ color: C.textDark, borderColor: errors.name ? C.red : C.borderInput }}
+                      onFocus={e => { e.currentTarget.style.borderColor = C.primary }}
+                      onBlur={e => { e.currentTarget.style.borderColor = errors.name ? C.red : C.borderInput }}
+                    />
+                    {errors.name && <p className="text-[11px] mt-1 font-medium" style={{ color: C.red }}>{errors.name}</p>}
                   </div>
-                ))}
-              </div>
+
+                  {/* Email Input */}
+                  <div>
+                    <label className="text-[12px] font-bold font-syne mb-1 block" style={{ color: C.textDark }}>
+                      EMAIL ADDRESS *
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="alex@store.com"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      className="w-full h-10 px-3.5 rounded-lg text-[13.5px] outline-none border transition-colors bg-white"
+                      style={{ color: C.textDark, borderColor: errors.email ? C.red : C.borderInput }}
+                      onFocus={e => { e.currentTarget.style.borderColor = C.primary }}
+                      onBlur={e => { e.currentTarget.style.borderColor = errors.email ? C.red : C.borderInput }}
+                    />
+                    {errors.email && <p className="text-[11px] mt-1 font-medium" style={{ color: C.red }}>{errors.email}</p>}
+                  </div>
+
+                  {/* Subject Dropdown */}
+                  <div>
+                    <label className="text-[12px] font-bold font-syne mb-1 block" style={{ color: C.textDark }}>
+                      INQUIRY TOPIC *
+                    </label>
+                    <ProDropdown prefix="" currentValue={subject} options={SUBJECTS} onChanged={setSubject} width="full" />
+                    {subject === 'other' && (
+                      <input
+                        type="text"
+                        placeholder="Specify subject..."
+                        value={customSubject}
+                        onChange={e => setCustomSubject(e.target.value)}
+                        className="w-full h-10 px-3.5 rounded-lg text-[13.5px] outline-none border transition-colors bg-white mt-2"
+                        style={{ color: C.textDark, borderColor: errors.subject ? C.red : C.borderInput }}
+                        onFocus={e => { e.currentTarget.style.borderColor = C.primary }}
+                        onBlur={e => { e.currentTarget.style.borderColor = errors.subject ? C.red : C.borderInput }}
+                      />
+                    )}
+                    {errors.subject && <p className="text-[11px] mt-1 font-medium" style={{ color: C.red }}>{errors.subject}</p>}
+                  </div>
+
+                  {/* Message Area */}
+                  <div>
+                    <label className="text-[12px] font-bold font-syne mb-1 block" style={{ color: C.textDark }}>
+                      MESSAGE *
+                    </label>
+                    <textarea
+                      placeholder="Describe your issue, feedback, or question in detail..."
+                      value={message}
+                      onChange={e => setMessage(e.target.value)}
+                      rows={5}
+                      className="w-full p-3 rounded-lg text-[13.5px] outline-none border transition-colors bg-white resize-vertical"
+                      style={{ color: C.textDark, borderColor: errors.message ? C.red : C.borderInput }}
+                      onFocus={e => { e.currentTarget.style.borderColor = C.primary }}
+                      onBlur={e => { e.currentTarget.style.borderColor = errors.message ? C.red : C.borderInput }}
+                    />
+                    {errors.message && <p className="text-[11px] mt-1 font-medium" style={{ color: C.red }}>{errors.message}</p>}
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 rounded-lg text-[14px] font-bold font-syne flex items-center justify-center gap-2 transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-md mt-2"
+                    style={{ backgroundColor: C.dark, color: C.accent }}
+                  >
+                    {loading ? (
+                      <span>Sending message...</span>
+                    ) : (
+                      <>
+                        <span>Submit Message</span>
+                        <ArrowRight size={15} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
 
-            {/* Office hours */}
-            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 20, padding: 20 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 900, color: C.dark, margin: '0 0 12px' }}>Office hours & response times</h3>
-              <div style={{ padding: '7px 12px', background: C.limeTint, border: `1px solid ${C.lime}`, borderRadius: 8, marginBottom: 10 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: C.limeDeep, margin: 0 }}>Mon - Fri, 9am - 6pm UTC</p>
+            {/* Right Information Column */}
+            <aside className="lg:col-span-5 flex flex-col gap-4">
+
+              {/* Direct Mail Routing Card */}
+              <div className="bg-white rounded-2xl border p-5 shadow-xs" style={{ borderColor: C.border }}>
+                <h3 className="text-[14px] font-bold font-syne mb-3" style={{ color: C.textDark }}>
+                  Department Directory
+                </h3>
+                <div className="flex flex-col divide-y" style={{ borderColor: C.border }}>
+                  {[
+                    { label: 'Customer Support', value: 'support@riazify.com', desc: 'Platform guidance & troubleshooting' },
+                    { label: 'Billing & Account', value: 'billing@riazify.com', desc: 'Subscriptions, receipts & plan changes' },
+                    { label: 'Partnerships & Press', value: 'partners@riazify.com', desc: 'Creator integrations & press outreach' },
+                  ].map(item => (
+                    <div key={item.label} className="py-2.5">
+                      <p className="text-[10.5px] font-bold uppercase font-syne tracking-wider" style={{ color: C.muted }}>{item.label}</p>
+                      <a href={`mailto:${item.value}`} className="text-[13px] font-bold hover:underline" style={{ color: C.primary }}>
+                        {item.value}
+                      </a>
+                      <p className="text-[11.5px] mt-0.5" style={{ color: C.muted }}>{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { type: 'General questions', time: 'Within 24 hours' },
-                  { type: 'Billing issues',    time: 'Within 4 hours'  },
-                  { type: 'Bug reports',       time: 'Within 12 hours' },
-                  { type: 'Urgent issues',     time: 'Within 2 hours'  },
-                ].map(item => (
-                  <div key={item.type} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, color: C.muted }}>{item.type}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: C.limeDeep, background: C.limeTint, border: `1px solid ${C.lime}`, borderRadius: 100, padding: '2px 8px', whiteSpace: 'nowrap' }}>{item.time}</span>
-                  </div>
-                ))}
+
+              {/* Service SLA & Support Hours */}
+              <div className="bg-white rounded-2xl border p-5 shadow-xs" style={{ borderColor: C.border }}>
+                <h3 className="text-[14px] font-bold font-syne mb-3" style={{ color: C.textDark }}>
+                  Coverage Hours &amp; SLAs
+                </h3>
+                <div className="p-3 rounded-lg border mb-3 flex items-center gap-2"
+                  style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+                  <Clock size={14} style={{ color: C.primary }} />
+                  <span className="text-[12px] font-bold font-syne" style={{ color: C.primary }}>
+                    Mon – Fri, 9:00 AM – 6:00 PM UTC
+                  </span>
+                </div>
+                <div className="space-y-2 text-[12.5px]">
+                  {[
+                    { type: 'General Inquiries', time: '<24 Hours' },
+                    { type: 'Billing Inquiries', time: '<4 Hours' },
+                    { type: 'Bug Reports', time: '<12 Hours' },
+                    { type: 'High-Priority Disputes', time: '<2 Hours' },
+                  ].map(item => (
+                    <div key={item.type} className="flex items-center justify-between">
+                      <span style={{ color: C.muted }}>{item.type}</span>
+                      <span className="font-bold px-2 py-0.5 rounded-md border text-[11px] font-syne"
+                        style={{ backgroundColor: C.bg, borderColor: C.border, color: C.textDark }}>
+                        {item.time}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              {/* Existing User Ticket Callout */}
+              <div className="p-5 rounded-2xl border" style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+                <h4 className="text-[14px] font-bold font-syne text-white mb-1">
+                  Active Subscriber?
+                </h4>
+                <p className="text-[12px] mb-3 leading-relaxed" style={{ color: C.textLight }}>
+                  Subscribers receive prioritized ticket queue routing directly from the merchant dashboard.
+                </p>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-bold font-syne transition-transform hover:scale-105"
+                  style={{ backgroundColor: C.accent, color: C.dark }}
+                >
+                  <span>Open Dashboard Ticket</span>
+                  <ArrowRight size={13} />
+                </Link>
+              </div>
+
+            </aside>
+          </div>
+
+          {/* ── 3. FAQ Accordion ── */}
+          <section className="max-w-3xl mx-auto mb-16">
+            <div className="text-center mb-8">
+              <p className="text-[11px] font-black uppercase tracking-wider font-syne mb-1" style={{ color: C.primary }}>
+                QUICK RESOLUTIONS
+              </p>
+              <h2 className="text-[26px] md:text-[30px] font-black font-syne" style={{ color: C.textDark }}>
+                Frequently asked questions
+              </h2>
             </div>
 
-            {/* Already a user */}
-            <div style={{ background: C.limeTint, border: `1px solid ${C.lime}`, borderRadius: 20, padding: 18 }}>
-              <p style={{ fontSize: 14, fontWeight: 900, color: C.dark, margin: '0 0 4px' }}>Already a Riazify user?</p>
-              <p style={{ fontSize: 12, color: C.muted, margin: '0 0 12px' }}>Submit a ticket from your dashboard for faster response.</p>
-              <a href="/dashboard" style={{ height: 34, padding: '0 14px', borderRadius: 100, background: C.lime, color: C.dark, fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                Dashboard
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* FAQ */}
-        <div style={{ maxWidth: 680, margin: '0 auto 48px' }}>
-          <h2 style={{ fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 900, color: C.dark, textAlign: 'center', margin: '0 0 6px' }}>Frequently asked questions</h2>
-          <p style={{ fontSize: 14, color: C.muted, textAlign: 'center', margin: '0 0 28px' }}>Quick answers to common questions</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {FAQS.map((faq, i) => (
-              <div key={i} style={{ background: C.surface, border: `1px solid ${openFaq === i ? C.lime : C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 12 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: C.dark }}>{faq.q}</span>
-                  <span style={{ fontSize: 16, color: openFaq === i ? C.lime : C.muted, flexShrink: 0, fontWeight: 300 }}>{openFaq === i ? '−' : '+'}</span>
-                </button>
-                {openFaq === i && (
-                  <div style={{ padding: '0 18px 14px' }}>
-                    <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.6 }}>{faq.a}</p>
+            <div className="flex flex-col gap-3">
+              {FAQS.map((faq, i) => {
+                const isOpen = openFaq === i
+                return (
+                  <div key={i} className="rounded-2xl border bg-white overflow-hidden shadow-2xs" style={{ borderColor: C.border }}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : i)}
+                      className="w-full flex items-center justify-between p-4 md:p-5 text-left transition-colors cursor-pointer"
+                    >
+                      <span className="text-[14px] font-bold font-syne" style={{ color: C.textDark }}>{faq.q}</span>
+                      <ChevronDown
+                        size={16}
+                        className="shrink-0 transition-transform duration-200"
+                        style={{ color: C.primary, transform: isOpen ? 'rotate(180deg)' : 'none' }}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="px-4 md:px-5 pb-5 pt-1 border-t" style={{ borderColor: C.border }}>
+                        <p className="text-[13px] leading-relaxed" style={{ color: C.muted }}>{faq.a}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+                )
+              })}
+            </div>
+          </section>
 
-        {/* CTA Banner */}
-        <div style={{ background: C.dark, borderRadius: 20, padding: '40px 20px', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 100, background: 'rgba(143,255,0,0.1)', border: '1px solid rgba(143,255,0,0.3)', marginBottom: 16 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: C.lime }}>14-day free trial</span>
-          </div>
-          <h2 style={{ fontSize: 'clamp(22px, 4vw, 36px)', fontWeight: 900, color: '#ffffff', margin: '0 0 10px', lineHeight: 1.1 }}>
-            Still not sure? Try Riazify free
-          </h2>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 24px' }}>
-            No credit card required. No commitment. Cancel anytime.
-          </p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/auth/signup" style={{ height: 46, padding: '0 24px', borderRadius: 12, background: C.lime, color: C.dark, fontSize: 14, fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-              Start free trial
-            </a>
-            <a href="/pricing" target="_blank" rel="noopener noreferrer"
-               style={{ height: 46, padding: '0 24px', borderRadius: 12, background: 'rgba(255,255,255,0.08)', color: '#ffffff', fontSize: 14, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>
-              View pricing
-            </a>
-          </div>
-        </div>
+          {/* ── 4. Final CTA Banner ── */}
+          <section className="rounded-3xl p-8 md:p-10 text-center border shadow-xl"
+            style={{ backgroundColor: C.dark, borderColor: C.borderDark }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md mb-3 text-[11px] font-bold font-syne uppercase"
+              style={{ backgroundColor: 'rgba(117,48,251,0.25)', color: C.accent }}>
+              <CheckCircle2 size={13} />
+              <span>14-DAY RISK-FREE TRIAL</span>
+            </div>
+            <h2 className="text-[24px] md:text-[30px] font-black font-syne text-white mb-2 tracking-tight">
+              Ready to protect and optimize your eBay listings?
+            </h2>
+            <p className="text-[13.5px] mb-6 max-w-md mx-auto" style={{ color: C.textLight }}>
+              No credit card required. Explore our order defense suite and Cassini title builder in seconds.
+            </p>
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <Link
+                href="/auth/signup"
+                className="px-7 py-3 rounded-xl font-black font-syne text-[13.5px] transition-transform hover:scale-105 shadow-md cursor-pointer"
+                style={{ backgroundColor: C.accent, color: C.dark }}
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                href="/pricing"
+                className="px-7 py-3 rounded-xl font-bold text-[13.5px] border transition-colors hover:bg-[#271c42] cursor-pointer"
+                style={{ borderColor: C.borderDark, color: '#ffffff' }}
+              >
+                View Pricing
+              </Link>
+            </div>
+          </section>
 
-      </main>
+        </main>
 
-      <Footer/>
+        <Footer />
+      </div>
     </div>
   )
 }

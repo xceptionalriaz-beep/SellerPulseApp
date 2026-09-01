@@ -1,106 +1,197 @@
 ﻿'use client'
-// components/landing/Footer.tsx
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import { Activity } from 'lucide-react'
 
-const T = {
-  white: '#ffffff',
-  surface: '#f7f9f5',
-  border: '#e8ede2',
-  accentBorder: 'rgba(143,255,0,0.35)',
-  lime: '#b8fa33',
-  limeDeep: '#4a8f00',
-  limeMid: '#6bcc00',
-  limeTint: '#f4ffe6',
-  limePale: '#e8ffcc',
-  carbon: '#1a2410',
-  sage: '#8a9e78',
-  black: '#0a0d08',
-}
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { Activity, ArrowRight } from 'lucide-react'
 
 export default function Footer() {
-  const [email, setEmail] = useState("")
-  const pathname = usePathname()
+  const [email, setEmail] = useState('')
+  const [subscribed, setSubscribed] = useState(false)
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) return
+    setSubscribed(true)
+    setTimeout(() => {
+      setEmail('')
+      setSubscribed(false)
+    }, 2500)
+  }
+
+  const productLinks = [
+    { label: 'Features', href: '/features' },
+    { label: 'Pricing', href: '/pricing' },
+    { label: 'Changelog', href: '/changelog' },
+    { label: 'Roadmap', href: '/roadmap' },
+    { label: 'Status', href: '/status' },
+    { label: 'Chrome Extension', href: '#' },
+  ]
+
+  const companyLinks = [
+    { label: 'About', href: '/about' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Contact', href: '/contact' },
+    { label: 'Careers', href: '/careers' },
+    { label: 'Press Kit', href: '/press-kit' },
+    { label: 'Affiliates', href: '/affiliate' },
+  ]
+
+  const legalLinks = [
+    { label: 'Privacy Policy', href: '/privacy-policy' },
+    { label: 'Terms of Service', href: '/terms-of-service' },
+    { label: 'Cookie Policy', href: '/cookie-policy' },
+    { label: 'GDPR', href: '/gdpr' },
+  ]
+
+  const socialLinks = [
+    { label: 'Twitter', href: 'https://twitter.com' },
+    { label: 'LinkedIn', href: 'https://linkedin.com' },
+    { label: 'YouTube', href: 'https://youtube.com' },
+    { label: 'Discord', href: 'https://discord.com' },
+  ]
+
   return (
-    <footer className="py-16 border-t" style={{ background: T.carbon, borderColor: "#1a2410" }}>
+    <footer
+      className="pt-16 pb-12 border-t font-sans"
+      style={{ backgroundColor: '#1e1535', borderColor: '#2d1f4e' }}
+    >
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: T.lime }}>
-                <Activity size={13} style={{ color: T.black }} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 mb-14">
+          {/* Brand & Newsletter Column */}
+          <div className="lg:col-span-2 space-y-5">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md"
+                style={{ backgroundColor: '#7530fb' }}
+              >
+                <Activity size={16} style={{ color: '#b8fa33' }} />
               </div>
-              <span className="text-[16px] font-black text-white">Riazify</span>
+              <span className="text-[20px] font-black font-syne tracking-tight" style={{ color: '#ffffff' }}>
+                Riazify
+              </span>
             </div>
-            <p className="text-[13px] leading-relaxed mb-5" style={{ color: T.sage }}>
+
+            <p className="text-[13px] leading-relaxed max-w-sm" style={{ color: '#ffffff' }}>
               Next-gen eBay intelligence for scaling operators. Built by sellers, for sellers.
             </p>
-            <div className="flex rounded-xl overflow-hidden border" style={{ borderColor: "rgba(143,255,0,0.2)" }}>
-              <input value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="Your email..."
-                className="flex-1 px-4 py-2.5 text-[13px] outline-none"
-                style={{ background: "rgba(255,255,255,0.05)", color: T.white }} />
-              <button className="px-4 py-2.5 text-[12px] font-black shrink-0"
-                style={{ background: T.lime, color: T.black }}>
-                Subscribe
+
+            <form
+              onSubmit={handleSubscribe}
+              className="flex rounded-xl overflow-hidden border p-1 max-w-md"
+              style={{ backgroundColor: '#271c42', borderColor: '#2d1f4e' }}
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email..."
+                required
+                className="flex-1 px-3.5 py-2 text-[13px] outline-none bg-transparent placeholder-[#ffffff]/60"
+                style={{ color: '#ffffff' }}
+              />
+              <button
+                type="submit"
+                className="px-5 py-2 text-[12px] font-black rounded-lg transition-all hover:scale-105 shrink-0 cursor-pointer shadow-sm flex items-center gap-1.5"
+                style={{ backgroundColor: '#b8fa33', color: '#1e1535' }}
+              >
+                <span>{subscribed ? 'Subscribed!' : 'Subscribe'}</span>
+                {!subscribed && <ArrowRight size={13} />}
               </button>
-            </div>
+            </form>
           </div>
 
-          {[
-            {
-              title: "Product", links: [
-                { label: "Features", href: "/features" },
-                { label: "Pricing", href: "/pricing" },
-                { label: "Changelog", href: "/changelog" },
-                { label: "Roadmap", href: "/roadmap" },
-                { label: "Status", href: "/status" },
-                { label: "Chrome Extension", href: "#" },
-              ]
-            },
-            {
-              title: "Company", links: [
-                { label: "About", href: "/about" },
-                { label: "Blog", href: "/blog" },
-                { label: "Contact", href: "/contact" },
-                { label: "Careers", href: "/careers" },
-                { label: "Press Kit", href: "/press-kit" },
-                { label: "Affiliates", href: "/affiliate" },
-              ]
-            },
-            {
-              title: "Legal", links: [
-                { label: "Privacy Policy", href: "/privacy-policy" },
-                { label: "Terms of Service", href: "/terms-of-service" },
-                { label: "Cookie Policy", href: "/cookie-policy" },
-                { label: "GDPR", href: "/gdpr" },
-              ]
-            },
-          ].map(col => (
-            <div key={col.title}>
-              <p className="text-[12px] font-black tracking-wider mb-4 text-white">{col.title.toUpperCase()}</p>
-              <div className="flex flex-col gap-2.5">
-                {col.links.map(l => (
-                  <a key={l.label} href={l.href}
-                    className="text-[13px] transition-opacity hover:opacity-100 opacity-60"
-                    style={{ color: l.href !== '#' ? T.lime : T.sage }}>
+          {/* PRODUCT Column */}
+          <div>
+            <p className="text-[12px] font-black tracking-wider mb-4 font-syne uppercase flex items-center gap-2" style={{ color: '#ffffff' }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#7530fb' }} />
+              <span>PRODUCT</span>
+            </p>
+            <ul className="space-y-2.5">
+              {productLinks.map((l) => (
+                <li key={l.label}>
+                  <Link
+                    href={l.href}
+                    className="text-[13px] block transition-all duration-200 hover:translate-x-1"
+                    style={{ color: '#ffffff' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#b8fa33')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  >
                     {l.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* COMPANY Column */}
+          <div>
+            <p className="text-[12px] font-black tracking-wider mb-4 font-syne uppercase flex items-center gap-2" style={{ color: '#ffffff' }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#7530fb' }} />
+              <span>COMPANY</span>
+            </p>
+            <ul className="space-y-2.5">
+              {companyLinks.map((l) => (
+                <li key={l.label}>
+                  <Link
+                    href={l.href}
+                    className="text-[13px] block transition-all duration-200 hover:translate-x-1"
+                    style={{ color: '#ffffff' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#b8fa33')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* LEGAL Column */}
+          <div>
+            <p className="text-[12px] font-black tracking-wider mb-4 font-syne uppercase flex items-center gap-2" style={{ color: '#ffffff' }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#7530fb' }} />
+              <span>LEGAL</span>
+            </p>
+            <ul className="space-y-2.5">
+              {legalLinks.map((l) => (
+                <li key={l.label}>
+                  <Link
+                    href={l.href}
+                    className="text-[13px] block transition-all duration-200 hover:translate-x-1"
+                    style={{ color: '#ffffff' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#b8fa33')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <p className="text-[12px] text-center md:text-left" style={{ color: T.sage }}>© 2026 Riazify — All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            {["Twitter", "LinkedIn", "YouTube", "Discord"].map(s => (
-              <a key={s} href="#" className="text-[12px] font-semibold transition-opacity hover:opacity-100 opacity-50"
-                style={{ color: T.sage }}>{s}</a>
+        {/* Bottom Copyright & Social Links */}
+        <div
+          className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4"
+          style={{ borderColor: '#2d1f4e' }}
+        >
+          <p className="text-[12px] text-center md:text-left font-medium" style={{ color: '#ffffff' }}>
+            © {new Date().getFullYear()} Riazify — All rights reserved.
+          </p>
+          <div className="flex items-center gap-6">
+            {socialLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[13px] font-medium transition-all duration-200 hover:-translate-y-0.5"
+                style={{ color: '#ffffff' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#b8fa33')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+              >
+                {s.label}
+              </a>
             ))}
           </div>
         </div>
