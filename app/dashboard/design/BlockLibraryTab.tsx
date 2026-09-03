@@ -10,7 +10,7 @@ const C = {
     bg: '#f8f7ff',
     surface: '#ffffff',
     border: '#ede9fe',
-    borderInput: '#e5e0f5',
+    borderInput: '#e3dff1',
     primary: '#7530fb',
     primaryLight: '#f3eeff',
     dark: '#1e1535',
