@@ -170,7 +170,8 @@ export default function TemplatePreviewModal({
 
     const html = current?.description_html ?? ''
     const doc = wrapHtml(html)
-    const placeholders = useMemo(() => extractPlaceholders(html), [html])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const placeholders = useMemo(() => extractPlaceholders(html), [current?.id, html])
     const charCount = html.length
     const lineCount = html.split('\n').length
     const isCopied = copiedId === current?.id

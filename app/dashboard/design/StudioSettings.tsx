@@ -365,12 +365,14 @@ export default function StudioSettings() {
                                         { value: '90', label: '90 Days' },
                                     ]} />
                             </Field>
-                            <Field label="Tab Size (Code Editor)">
+                            <Field label="Dispatch Cutoff Time" hint="Used in dispatch timer e.g. 'Order by 2pm for same day'">
                                 <Select value={settings.tabSize}
                                     onChange={v => update('tabSize', v)}
                                     options={[
-                                        { value: '2', label: '2 Spaces' },
-                                        { value: '4', label: '4 Spaces' },
+                                        { value: '12', label: '12:00 PM' },
+                                        { value: '14', label: '2:00 PM' },
+                                        { value: '15', label: '3:00 PM' },
+                                        { value: '16', label: '4:00 PM' },
                                     ]} />
                             </Field>
                         </div>

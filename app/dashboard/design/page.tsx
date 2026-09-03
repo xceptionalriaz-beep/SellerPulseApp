@@ -83,7 +83,7 @@ const CATEGORIES = [
     { id: 'fashion', label: 'Fashion & Beauty' },
     { id: 'home', label: 'Home & Garden' },
     { id: 'auto', label: 'Auto Parts' },
-    { id: 'pet', label: 'Pet Supplies' },
+    { id: 'pets', label: 'Pet Supplies' },
     { id: 'sports', label: 'Sports & Outdoors' },
     { id: 'toys', label: 'Toys & Games' },
     { id: 'general', label: 'General' },
@@ -262,13 +262,25 @@ function DesignStudioInner() {
     useEffect(() => { loadTemplates() }, [loadTemplates])
 
     // ── Filter + search ────────────────────────────────────────────────────
-    const allVisible = [...templates, ...myTemplates]
+    // allVisible is tab-aware — template gallery = admin only, my templates = user only
+    const allVisible = activeTab === 'my-templates' ? myTemplates : templates
+
     const filtered = allVisible.filter(t => {
         const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
         const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
             (t.description || '').toLowerCase().includes(search.toLowerCase())
         return matchCat && matchSearch
     })
+    // System templates only — sorted
+    const sortedTemplates = templates.filter(t => {
+        const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
+        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
+        return matchCat && matchSearch
+    }).sort((a, b) => {
+        if (sort === 'popular') return (b.use_count || 0) - (a.use_count || 0)
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    })
+
     const sorted = [...filtered].sort((a, b) => {
         if (sort === 'popular') return (b.use_count || 0) - (a.use_count || 0)
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
@@ -288,9 +300,30 @@ function DesignStudioInner() {
         }
     }
 
+    // ── Duplicate template ─────────────────────────────────────────────────
+    async function duplicateTemplate(t: ListingTemplate) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const newName = `${t.name} (Copy)`
+        await rawDb.from('listing_templates').insert({
+            user_id: user.id,
+            name: newName,
+            category: t.category,
+            description: t.description,
+            description_html: t.description_html,
+            is_system: false,
+            is_shared: false,
+            use_count: 0,
+            created_at: new Date().toISOString(),
+        })
+        loadTemplates()
+    }
+
     // ── Delete own template ────────────────────────────────────────────────
     async function deleteTemplate(id: string) {
-        if (id.startsWith('builtin-')) return
+        // Guard: only delete own templates, never system ones
+        const isSystem = [...templates].some(t => t.id === id)
+        if (isSystem) return
         setDeletingId(id)
         await rawDb.from('listing_templates').delete().eq('id', id)
         setMyTemplates((prev: ListingTemplate[]) => prev.filter((t: ListingTemplate) => t.id !== id))
@@ -620,7 +653,8 @@ function DesignStudioInner() {
                                                     onPreview={() => setPreviewTemplate(t)}
                                                     onCopy={() => copyHtml(t)}
                                                     onDelete={() => deleteTemplate(t.id)}
-                                                    onEdit={() => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                                                    onEdit={() => router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                                                    onDuplicate={() => duplicateTemplate(t)}
                                                 />
                                             ))}
                                         </div>
@@ -663,26 +697,22 @@ function DesignStudioInner() {
                                     )}
 
                                     {/* Has templates but search returns nothing */}
-                                    {templates.length > 0 && templates.filter(t => {
-                                        const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
-                                        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
-                                        return matchCat && matchSearch
-                                    }).length === 0 && (
-                                            <div className="flex flex-col items-center justify-center py-16 text-center">
-                                                <Search size={24} style={{ color: C.border, marginBottom: 12 }} />
-                                                <p className="text-[14px] font-semibold mb-1"
-                                                    style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                    No templates match &quot;{search || activeCategory}&quot;
-                                                </p>
-                                                <p className="text-[12px]"
-                                                    style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                    Try a different keyword or category
-                                                </p>
-                                            </div>
-                                        )}
+                                    {templates.length > 0 && sortedTemplates.length === 0 && (
+                                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                                            <Search size={24} style={{ color: C.border, marginBottom: 12 }} />
+                                            <p className="text-[14px] font-semibold mb-1"
+                                                style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                No templates match &quot;{search || activeCategory}&quot;
+                                            </p>
+                                            <p className="text-[12px]"
+                                                style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                Try a different keyword or category
+                                            </p>
+                                        </div>
+                                    )}
 
                                     {/* Template grid */}
-                                    {templates.length > 0 && (
+                                    {templates.length > 0 && sortedTemplates.length > 0 && (
                                         <>
                                             <h2 className="text-[14px] font-bold mb-3 flex items-center gap-2"
                                                 style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
@@ -691,19 +721,11 @@ function DesignStudioInner() {
                                                 </span>
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
                                                     style={{ backgroundColor: C.bg, color: C.muted }}>
-                                                    {templates.filter(t => {
-                                                        const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
-                                                        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
-                                                        return matchCat && matchSearch
-                                                    }).length}
+                                                    {sortedTemplates.length}
                                                 </span>
                                             </h2>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
-                                                {templates.filter(t => {
-                                                    const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
-                                                    const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
-                                                    return matchCat && matchSearch
-                                                }).map(t => (
+                                                {sortedTemplates.map(t => (
                                                     <TemplateCard
                                                         key={t.id}
                                                         template={t}
@@ -714,6 +736,7 @@ function DesignStudioInner() {
                                                         onCopy={() => copyHtml(t)}
                                                         onDelete={() => deleteTemplate(t.id)}
                                                         onEdit={() => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                                                        onDuplicate={() => duplicateTemplate(t)}
                                                     />
                                                 ))}
                                             </div>
@@ -745,6 +768,13 @@ function DesignStudioInner() {
                     setAiHtml(html)
                     setAiTemplateName(name)
                     setAiCategory(cat)
+                    // Store in sessionStorage so html-editor can pick it up
+                    if (typeof window !== 'undefined') {
+                        sessionStorage.setItem('ai_template_html', html)
+                        sessionStorage.setItem('ai_template_name', name)
+                        sessionStorage.setItem('ai_template_category', cat)
+                    }
+                    router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(name)}&from=ai`)
                 }}
             />
 
@@ -878,19 +908,22 @@ interface CardProps {
     onCopy: () => void
     onDelete: () => void
     onEdit: () => void
+    onDuplicate: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit, onDuplicate }: CardProps) {
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
 
     const badge = (() => {
-        if (!template.is_system && !template.id.startsWith('builtin-')) return null
-        if (template.category === 'electronics') return { label: 'TOP PICK', bg: '#7530fb', text: '#fff' }
-        if (template.category === 'fashion') return { label: 'MOBILE READY', bg: '#1e1535', text: '#b8fa33' }
+        if (!template.is_system) return null
         if ((template.use_count || 0) > 10) return { label: 'POPULAR', bg: '#b8fa33', text: '#1e1535' }
-        return { label: 'NEW', bg: '#16a34a', text: '#fff' }
+        // Only show NEW for templates created within 30 days
+        const createdAt = template.created_at ? new Date(template.created_at).getTime() : 0
+        const isNew = createdAt > 0 && (Date.now() - createdAt) < 30 * 24 * 60 * 60 * 1000
+        if (isNew) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
+        return null
     })()
 
     return (

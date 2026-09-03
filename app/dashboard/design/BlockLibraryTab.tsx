@@ -72,7 +72,20 @@ export default function BlockLibraryTab() {
             const def = BLOCK_DEFINITIONS.find(b => b.type === type)
             if (!def) return
             const html = safeToHtml(def)
-            await navigator.clipboard.writeText(html)
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(html)
+            } else {
+                // Fallback for mobile/non-HTTPS
+                const ta = document.createElement('textarea')
+                ta.value = html
+                ta.style.position = 'fixed'
+                ta.style.opacity = '0'
+                document.body.appendChild(ta)
+                ta.focus()
+                ta.select()
+                document.execCommand('copy')
+                document.body.removeChild(ta)
+            }
             setCopiedId(type)
             setTimeout(() => setCopiedId(null), 2000)
         } catch (e) {
