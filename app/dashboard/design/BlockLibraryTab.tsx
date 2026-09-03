@@ -21,15 +21,15 @@ const C = {
     successBg: '#dcfce7',
 }
 
-const CAT_COLOURS: Record<string, string> = {
-    Layout: '#7530fb',
-    Content: '#2563eb',
-    Product: '#16a34a',
-    Media: '#d97706',
+const CATEGORY_COLORS: Record<BlockCategory, string> = {
+    'Layout': '#7530fb',
+    'Content': '#0ea5e9',
+    'Product': '#16a34a',
+    'Media': '#d97706',
     'eBay Specific': '#dc2626',
-    Conversion: '#0891b2',
+    'Conversion': '#0891b2',
     'Header & Footer': '#7c3aed',
-    Typography: '#db2777',
+    'Typography': '#db2777',
 }
 
 // Short labels for tabs
@@ -92,7 +92,7 @@ export default function BlockLibraryTab() {
 
     const previewDef = previewBlock ? BLOCK_DEFINITIONS.find(b => b.type === previewBlock) : null
     const previewHtml = previewBlock ? (blockHtmlMap[previewBlock] ?? '') : ''
-    const colour = previewDef ? (CAT_COLOURS[previewDef.category] ?? C.primary) : C.primary
+    const colour = previewDef ? (CATEGORY_COLORS[previewDef.category] ?? C.primary) : C.primary
 
     async function copyBlock(type: string) {
         try {
@@ -160,7 +160,7 @@ export default function BlockLibraryTab() {
                         style={{ scrollbarWidth: 'none' }}>
                         {BLOCK_CATEGORIES.map(cat => {
                             const active = activeCategory === cat
-                            const colour = CAT_COLOURS[cat] ?? C.primary
+                            const colour = CATEGORY_COLORS[cat] ?? C.primary
                             const count = getByCategory(cat).length
                             return (
                                 <button key={cat} onClick={() => { setActiveCategory(cat); setPreviewBlock(null) }}
@@ -231,7 +231,7 @@ export default function BlockLibraryTab() {
                                 {visibleBlocks.map(def => {
                                     const isCopied = copiedId === def.type
                                     const isPreviewing = previewBlock === def.type
-                                    const catColour = CAT_COLOURS[def.category] ?? C.primary
+                                    const catColour = CATEGORY_COLORS[def.category] ?? C.primary
                                     const previewDoc = blockHtmlMap[def.type] ?? ''
 
                                     return (
