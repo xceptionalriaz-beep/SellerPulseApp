@@ -371,15 +371,6 @@ function DesignStudioInner() {
             {(activeTab === 'templates' || activeTab === 'my-templates') && (
                 <div className="px-4 md:px-8 pt-6 pb-4" style={{ backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
 
-                    {/* Breadcrumb */}
-                    <div className="flex items-center gap-1.5 mb-3">
-                        <span className="text-[12px]" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Design Studio</span>
-                        <span className="text-[12px]" style={{ color: C.muted }}>/</span>
-                        <span className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                            {activeTab === 'my-templates' ? 'My Templates' : 'Listing Templates'}
-                        </span>
-                    </div>
-
                     {/* Title row */}
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div>
@@ -391,8 +382,12 @@ function DesignStudioInner() {
                             </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                            <AIButton onClick={() => setShowAiModal(true)}>AI Generate</AIButton>
-                            <PrimaryButton onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')} icon={<Plus size={13} />}>New Template</PrimaryButton>
+                            <button
+                                onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')}
+                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
+                                style={{ backgroundColor: C.primary, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                <Plus size={14} /> New Template
+                            </button>
                         </div>
                     </div>
 
