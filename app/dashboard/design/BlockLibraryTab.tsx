@@ -21,7 +21,7 @@ const C = {
     successBg: '#dcfce7',
 }
 
-const CATEGORY_COLORS: Record<BlockCategory, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
     'Layout': '#7530fb', 'Content': '#0ea5e9', 'Product': '#16a34a',
     'Media': '#d97706', 'eBay Specific': '#dc2626', 'Conversion': '#0891b2',
     'Header & Footer': '#7c3aed', 'Typography': '#db2777',
