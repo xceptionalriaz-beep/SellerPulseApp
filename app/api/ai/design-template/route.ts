@@ -77,7 +77,7 @@ async function generateWithAnthropic(apiKey: string, prompt: string): Promise<st
         }),
         signal: AbortSignal.timeout(30_000),
     })
-    if (!res.ok) throw new Error(`Anthropic ${res.status}`)
+    if (!res.ok) throw new Error('Generation failed')
     const data = await res.json()
     return data.content?.[0]?.text?.trim() || ''
 }
@@ -96,7 +96,7 @@ async function generateWithGemini(apiKey: string, prompt: string): Promise<strin
             signal: AbortSignal.timeout(30_000),
         }
     )
-    if (!res.ok) throw new Error(`Gemini ${res.status}`)
+    if (!res.ok) throw new Error('Generation failed')
     const data = await res.json()
     return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
 }
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-        { error: 'No AI provider connected. Go to API Vault → Anthropic or Gemini and add your key.' },
+        { error: 'Template generation is temporarily unavailable. Please try again later.' },
         { status: 503 }
     )
 }

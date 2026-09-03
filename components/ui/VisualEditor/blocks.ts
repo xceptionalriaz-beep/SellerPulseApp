@@ -33,6 +33,8 @@ export type BlockCategory =
     | 'Media'
     | 'eBay Specific'
     | 'Conversion'
+    | 'Header & Footer'
+    | 'Typography'
 
 // ── All block type keys ──────────────────────────────────────────────────────
 export type BlockType =
@@ -41,27 +43,55 @@ export type BlockType =
     | 'two_column'
     | 'three_column'
     | 'container'
+    | 'four_column'
+    | 'sidebar_layout'
+    | 'full_width_hero'
+    | 'spacer'
+    | 'border_box'
     // Content
     | 'heading'
     | 'paragraph'
     | 'bullet_list'
     | 'divider'
+    | 'numbered_list'
+    | 'quote_block'
+    | 'warning_box'
+    | 'info_box'
+    | 'data_table'
+    | 'badge_row'
     // Product
     | 'product_title'
     | 'price_block'
     | 'product_image'
     | 'product_description'
     | 'specs_table'
+    | 'product_variants'
+    | 'compatibility_table'
+    | 'condition_details'
+    | 'whats_in_the_box'
+    | 'key_features_grid'
+    | 'product_comparison'
     // Media
     | 'image'
     | 'banner'
     | 'gallery_row'
+    | 'single_image'
+    | 'video_placeholder'
+    | 'logo_bar'
+    | 'before_after'
     // eBay Specific
     | 'trust_badges'
     | 'shipping_info'
     | 'returns_policy'
     | 'seller_info'
     | 'cta_banner'
+    | 'payment_methods'
+    | 'dispatch_timer'
+    | 'bundle_deal'
+    | 'feedback_score'
+    | 'vat_notice'
+    | 'international_shipping'
+    | 'authenticity_guarantee'
     // Conversion
     | 'policy_tabs'
     | 'nav_bar'
@@ -71,6 +101,24 @@ export type BlockType =
     | 'rectangle'
     | 'hero_header'
     | 'raw_html'
+    | 'money_back'
+    | 'free_shipping_banner'
+    | 'why_buy_from_us'
+    | 'satisfaction_guarantee'
+    | 'limited_time_offer'
+    // Header & Footer
+    | 'store_header'
+    | 'category_nav'
+    | 'seasonal_banner'
+    | 'store_footer'
+    | 'social_links'
+    | 'breadcrumb_bar'
+    // Typography
+    | 'page_title'
+    | 'section_label'
+    | 'pull_quote'
+    | 'highlight_text'
+    | 'price_tag'
 
 // ── Base block instance ─────────────────────────────────────────────────────
 export interface Block {
@@ -1802,6 +1850,681 @@ ${thumbCells}
 
 ]
 
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // EXTENDED BLOCK DEFINITIONS
+    // ─────────────────────────────────────────────────────────────────────────────
+    ; (BLOCK_DEFINITIONS as BlockDefinition[]).push(
+
+        // ── LAYOUT (new) ─────────────────────────────────────────────────────────
+
+        {
+            type: 'four_column' as BlockType,
+            label: 'Four Column',
+            category: 'Layout' as BlockCategory,
+            icon: 'columns',
+            description: '4 equal columns for specs or features',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('four_column' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr>
+  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 1</p></td>
+  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 2</p></td>
+  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 3</p></td>
+  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 4</p></td>
+</tr></table>`)
+            },
+        },
+
+        {
+            type: 'spacer' as BlockType,
+            label: 'Spacer',
+            category: 'Layout' as BlockCategory,
+            icon: 'minus',
+            description: 'Vertical whitespace gap between sections',
+            defaultProps: { ...DEFAULT_COMMON, paddingTop: 24, paddingBottom: 24 } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('spacer' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="height:${(p.paddingTop || 24) + (p.paddingBottom || 24)}px;background-color:${p.bgColor};font-size:1px;line-height:1px;">&nbsp;</td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'border_box' as BlockType,
+            label: 'Border Box',
+            category: 'Layout' as BlockCategory,
+            icon: 'square',
+            description: 'Content inside a decorative border frame',
+            defaultProps: { ...DEFAULT_COMMON, showBorder: true, borderWidth: 2, borderColor: '#7530fb', borderRadius: 8 } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('border_box' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:${p.borderWidth || 2}px solid ${p.borderColor || '#7530fb'};border-radius:${p.borderRadius || 8}px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;">Your content goes here inside this decorative border box.</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'sidebar_layout' as BlockType,
+            label: 'Sidebar Layout',
+            category: 'Layout' as BlockCategory,
+            icon: 'layout',
+            description: '70/30 split — image left, text right',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('sidebar_layout' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr>
+  <td width="70%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><img src="{{MAIN_IMAGE_URL}}" alt="Product" style="width:100%;max-width:100%;height:auto;display:block;"></td>
+  <td width="30%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><h3 style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:16px;color:#1e1535;">{{PRODUCT_TITLE}}</h3><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">{{ITEM_DESCRIPTION}}</p></td>
+</tr></table>`)
+            },
+        },
+
+        // ── CONTENT (new) ────────────────────────────────────────────────────────
+
+        {
+            type: 'numbered_list' as BlockType,
+            label: 'Numbered List',
+            category: 'Content' as BlockCategory,
+            icon: 'list',
+            description: 'Step-by-step numbered instructions',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const items = ['Step one — first instruction', 'Step two — second instruction', 'Step three — third instruction']
+                const rows = items.map((item, i) =>
+                    `<tr><td width="28" valign="top" style="padding-right:10px;padding-bottom:10px;"><span style="background-color:#7530fb;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-block;text-align:center;line-height:22px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;">${i + 1}</span></td><td valign="top" style="padding-bottom:10px;font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;line-height:1.6;">${item}</td></tr>`
+                ).join('')
+                return wrapBlock('numbered_list' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'quote_block' as BlockType,
+            label: 'Quote Block',
+            category: 'Content' as BlockCategory,
+            icon: 'quote',
+            description: 'Highlighted customer testimonial or review',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f3eeff' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('quote_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f3eeff;${pad(p)}border-left:4px solid #7530fb;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:22px;color:#7530fb;font-weight:700;">&ldquo;</p><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;line-height:1.7;font-style:italic;">Excellent product, exactly as described. Fast delivery and great packaging.</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;font-weight:700;">— Verified Buyer &#9733;&#9733;&#9733;&#9733;&#9733;</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'warning_box' as BlockType,
+            label: 'Warning Box',
+            category: 'Content' as BlockCategory,
+            icon: 'alert',
+            description: 'Amber warning notice — read before buying',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('warning_box' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#fef9c3;${pad(p)}border:1px solid #fbbf24;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;">&#9888;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#92400e;">Please Read Before Buying</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#78350f;line-height:1.6;">Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.</p></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'info_box' as BlockType,
+            label: 'Info Box',
+            category: 'Content' as BlockCategory,
+            icon: 'info',
+            description: 'Blue informational notice with icon',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('info_box' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#eff6ff;${pad(p)}border:1px solid #bfdbfe;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;">&#8505;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e40af;">Important Information</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1d4ed8;line-height:1.6;">This item ships from a UK warehouse. All items are genuine. VAT invoice available on request.</p></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'data_table' as BlockType,
+            label: 'Data Table',
+            category: 'Content' as BlockCategory,
+            icon: 'table',
+            description: 'Two-column alternating row data table',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const rows = [['Brand', '{{BRAND}}'], ['Model', '{{MPN}}'], ['Condition', '{{ITEM_CONDITION}}'], ['Weight', '{{WEIGHT}}'], ['Country', '{{ORIGIN}}']]
+                const rowHtml = rows.map((r, i) =>
+                    `<tr style="background-color:${i % 2 === 0 ? '#f8f7ff' : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;border:1px solid #ede9fe;width:40%;">${r[0]}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;border:1px solid #ede9fe;">${r[1]}</td></tr>`
+                ).join('')
+                return wrapBlock('data_table' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rowHtml}</table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'badge_row' as BlockType,
+            label: 'Badge Row',
+            category: 'Content' as BlockCategory,
+            icon: 'tag',
+            description: 'Inline badges — Genuine · New · UK Stock',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const badges = ['&#10003; Genuine', '&#128230; UK Stock', '&#9733; Top Rated', '&#128260; Easy Returns']
+                const cells = badges.map(b => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:4px 12px;background-color:#f3eeff;color:#7530fb;font-family:Arial,sans-serif;font-size:12px;font-weight:700;border-radius:100px;border:1px solid #ede9fe;">${b}</span></td>`).join('')
+                return wrapBlock('badge_row' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table cellpadding="0" cellspacing="4" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        // ── PRODUCT (new) ─────────────────────────────────────────────────────────
+
+        {
+            type: 'product_variants' as BlockType,
+            label: 'Product Variants',
+            category: 'Product' as BlockCategory,
+            icon: 'layers',
+            description: 'Colour and size options display',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const colours = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#000', '#fff']
+                const swatches = colours.map(c => `<td style="padding:3px;"><span style="display:inline-block;width:24px;height:24px;background-color:${c};border-radius:50%;border:2px solid #e5e7eb;"></span></td>`).join('')
+                const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+                const sizeCells = sizes.map(s => `<td style="padding:3px;"><span style="display:inline-block;padding:4px 10px;border:1px solid #ede9fe;border-radius:4px;font-family:Arial,sans-serif;font-size:12px;color:#1f1d2e;">${s}</span></td>`).join('')
+                return wrapBlock('product_variants' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">Colours:</p><table cellpadding="0" cellspacing="0" border="0"><tr>${swatches}</tr></table><p style="margin:12px 0 8px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">Sizes:</p><table cellpadding="0" cellspacing="0" border="0"><tr>${sizeCells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'compatibility_table' as BlockType,
+            label: 'Compatibility Table',
+            category: 'Product' as BlockCategory,
+            icon: 'check',
+            description: 'Compatible models list',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const models = ['Model A 2019-2023', 'Model B 2020-2024', 'Model C Pro All years', 'Model D Mini 2021+']
+                const rows = models.map((m, i) => `<tr style="background-color:${i % 2 === 0 ? '#f0fdf4' : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:#166534;border:1px solid #bbf7d0;">&#10003;</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;border:1px solid #bbf7d0;">${m}</td></tr>`).join('')
+                return wrapBlock('compatibility_table' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">&#9989; Compatible With:</p><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'condition_details' as BlockType,
+            label: 'Condition Details',
+            category: 'Product' as BlockCategory,
+            icon: 'star',
+            description: 'Graded condition explanation block',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('condition_details' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">Condition: <span style="color:#7530fb;">{{ITEM_CONDITION}}</span></p><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30%" style="padding:8px;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;text-align:center;"><p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#166534;">COSMETIC GRADE</p><p style="margin:4px 0 0;font-size:20px;">&#9733;&#9733;&#9733;&#9733;&#9733;</p></td><td width="4%"></td><td width="66%" style="padding:12px;background-color:#f8f7ff;border:1px solid #ede9fe;border-radius:6px;vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;line-height:1.7;">{{CONDITION_NOTES}}</p></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'whats_in_the_box' as BlockType,
+            label: "What's In The Box",
+            category: 'Product' as BlockCategory,
+            icon: 'package',
+            description: 'Checklist of included items',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const items = ['1x Main Unit', '1x Power Cable', '1x User Manual', '1x Warranty Card', '2x AAA Batteries']
+                const rows = items.map(item => `<tr><td width="24" valign="top" style="padding-right:8px;padding-bottom:6px;font-size:14px;color:#16a34a;">&#9632;</td><td valign="top" style="padding-bottom:6px;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;line-height:1.5;">${item}</td></tr>`).join('')
+                return wrapBlock('whats_in_the_box' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1e1535;">&#128230; What's In The Box</p><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'key_features_grid' as BlockType,
+            label: 'Key Features Grid',
+            category: 'Product' as BlockCategory,
+            icon: 'grid',
+            description: '3-column feature highlights with icons',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const features = [
+                    { icon: '&#9889;', title: 'High Performance', text: 'Engineered for maximum efficiency' },
+                    { icon: '&#128272;', title: 'Secure & Reliable', text: 'Built to last with premium materials' },
+                    { icon: '&#127775;', title: 'Premium Quality', text: 'Rigorously tested before dispatch' },
+                ]
+                const cells = features.map(f => `<td width="33%" style="padding:12px;text-align:center;vertical-align:top;"><p style="margin:0 0 6px;font-size:24px;">${f.icon}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">${f.title}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">${f.text}</p></td>`).join('')
+                return wrapBlock('key_features_grid' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'product_comparison' as BlockType,
+            label: 'Product Comparison',
+            category: 'Product' as BlockCategory,
+            icon: 'table',
+            description: 'This vs competitors comparison table',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const rows = [['Feature', 'Our Product', 'Competitor'], ['Quality', '&#9733;&#9733;&#9733;&#9733;&#9733;', '&#9733;&#9733;&#9733;'], ['Warranty', '2 Years', '6 Months'], ['UK Stock', '&#10003; Yes', '&#10007; No'], ['Returns', '30 Days', '14 Days']]
+                const rowHtml = rows.map((r, i) => `<tr style="background-color:${i === 0 ? '#7530fb' : i % 2 === 0 ? '#f8f7ff' : '#fff'};"><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '400'};color:${i === 0 ? '#fff' : '#1f1d2e'};border:1px solid ${i === 0 ? '#7530fb' : '#ede9fe'};">${r[0]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '600'};color:${i === 0 ? '#fff' : '#7530fb'};border:1px solid ${i === 0 ? '#7530fb' : '#ede9fe'};text-align:center;">${r[1]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;color:${i === 0 ? '#fff' : '#9ca3af'};border:1px solid ${i === 0 ? '#7530fb' : '#ede9fe'};text-align:center;">${r[2]}</td></tr>`).join('')
+                return wrapBlock('product_comparison' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rowHtml}</table></td></tr></table>`)
+            },
+        },
+
+        // ── MEDIA (new) ──────────────────────────────────────────────────────────
+
+        {
+            type: 'single_image' as BlockType,
+            label: 'Single Image',
+            category: 'Media' as BlockCategory,
+            icon: 'image',
+            description: 'Centred image with optional caption',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('single_image' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><img src="{{MAIN_IMAGE_URL}}" alt="{{PRODUCT_TITLE}}" style="max-width:100%;height:auto;display:inline-block;border-radius:8px;"><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#9ca3af;font-style:italic;">{{PRODUCT_TITLE}}</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'video_placeholder' as BlockType,
+            label: 'Video Placeholder',
+            category: 'Media' as BlockCategory,
+            icon: 'play',
+            description: 'YouTube thumbnail with play button overlay',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('video_placeholder' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><div style="display:inline-block;width:100%;max-width:560px;background-color:#000;border-radius:8px;position:relative;"><img src="{{VIDEO_THUMBNAIL_URL}}" alt="Product Video" style="width:100%;height:auto;display:block;opacity:0.8;border-radius:8px;"></div><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">&#9654; Watch the product video</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'logo_bar' as BlockType,
+            label: 'Logo Bar',
+            category: 'Media' as BlockCategory,
+            icon: 'image',
+            description: 'Brand and certification logos row',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const logos = ['&#127968;', '&#9989;', '&#127881;', '&#127942;', '&#128081;']
+                const cells = logos.map(l => `<td style="padding:8px 16px;text-align:center;font-size:28px;">${l}</td>`).join('')
+                return wrapBlock('logo_bar' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:2px;text-transform:uppercase;">Trusted Brands &amp; Certifications</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'before_after' as BlockType,
+            label: 'Before / After',
+            category: 'Media' as BlockCategory,
+            icon: 'columns',
+            description: 'Two images side by side comparison',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('before_after' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:#f3f4f6;border-radius:8px;padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Before</p><img src="{{IMAGE_BEFORE}}" alt="Before" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td><td width="4%" style="text-align:center;font-size:20px;color:#9ca3af;">&#8594;</td><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:#f0fdf4;border-radius:8px;padding:8px;border:1px solid #bbf7d0;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">After</p><img src="{{IMAGE_AFTER}}" alt="After" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        // ── EBAY SPECIFIC (new) ──────────────────────────────────────────────────
+
+        {
+            type: 'payment_methods' as BlockType,
+            label: 'Payment Methods',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'credit-card',
+            description: 'PayPal, Visa, Mastercard accepted icons',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const methods = ['PayPal', 'Visa', 'Mastercard', 'Amex', 'Apple Pay']
+                const cells = methods.map(m => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:5px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:4px;font-family:Arial,sans-serif;font-size:12px;color:#1f1d2e;font-weight:600;">&#128179; ${m}</span></td>`).join('')
+                return wrapBlock('payment_methods' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Secure Payment Methods</p><table align="center" cellpadding="0" cellspacing="4" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'dispatch_timer' as BlockType,
+            label: 'Dispatch Timer',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'clock',
+            description: 'Order today for same day dispatch notice',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f0fdf4' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('dispatch_timer' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f0fdf4;${pad(p)}border:1px solid #bbf7d0;border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:24px;">&#9201;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#166534;">Order in the next <span style="color:#dc2626;">{{HOURS_LEFT}} hours</span> for Same Day Dispatch</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#16a34a;">&#128230; Dispatched same working day if ordered by 2pm</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'bundle_deal' as BlockType,
+            label: 'Bundle Deal',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'gift',
+            description: 'Buy more save more offer block',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const deals = [{ qty: 'Buy 1', price: '{{ITEM_PRICE}}', save: '' }, { qty: 'Buy 2', price: '{{PRICE_2}}', save: 'Save 10%' }, { qty: 'Buy 3+', price: '{{PRICE_3}}', save: 'Save 20%' }]
+                const cells = deals.map((d, i) => `<td width="33%" style="padding:12px;text-align:center;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${i === 0 ? '#9ca3af' : '#b8fa33'};text-transform:uppercase;">${d.qty}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:20px;font-weight:700;color:#fff;">${d.price}</p>${d.save ? `<span style="background-color:#b8fa33;color:#1e1535;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;">${d.save}</span>` : '<span style="font-family:Arial,sans-serif;font-size:11px;color:#6b7280;">each</span>'}</td>`).join('<td style="width:1px;background-color:#3d3858;"></td>')
+                return wrapBlock('bundle_deal' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}border-radius:8px;"><p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#fff;text-align:center;">&#127873; Bundle &amp; Save</p><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'feedback_score' as BlockType,
+            label: 'Feedback Score',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'star',
+            description: 'Seller rating display with stars',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('feedback_score' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="60%" style="vertical-align:middle;padding-right:20px;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1e1535;">&#11088; {{SELLER_FEEDBACK}}% Positive Feedback</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">Top Rated eBay Seller</p><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:20px;color:#f59e0b;">&#9733;&#9733;&#9733;&#9733;&#9733;</p></td><td width="40%" style="text-align:center;vertical-align:middle;"><div style="background-color:#7530fb;color:#fff;border-radius:8px;padding:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Seller Since</p><p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;">{{MEMBER_SINCE}}</p></div></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'vat_notice' as BlockType,
+            label: 'VAT Notice',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'file',
+            description: 'VAT registered seller invoice notice',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8fafc' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('vat_notice' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f8fafc;${pad(p)}border:1px solid #e2e8f0;border-radius:6px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:16px;">&#128196;</td><td valign="top"><p style="margin:0 0 2px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">VAT Registered Business</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">VAT No: {{VAT_NUMBER}} &middot; Full VAT invoice included with your order.</p></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'international_shipping' as BlockType,
+            label: 'International Shipping',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'globe',
+            description: 'Customs and import duty warning notice',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#fff7ed' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('international_shipping' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#fff7ed;${pad(p)}border:1px solid #fed7aa;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;">&#127760;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#c2410c;">International Buyers — Import Duties Notice</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#9a3412;line-height:1.6;">Import duties and taxes are not included in the price. These are the buyer's responsibility. Please check your country's customs rules before purchasing.</p></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'authenticity_guarantee' as BlockType,
+            label: 'Authenticity Guarantee',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'shield',
+            description: 'Genuine product certificate style block',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('authenticity_guarantee' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:32px;">&#128737;</p><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#b8fa33;">100% Authenticity Guaranteed</p><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.7);">Every item verified genuine. Sourced directly from authorised distributors.</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Official Supplier</td><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Anti-counterfeit Checked</td><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Money Back</td></tr></table></td></tr></table>`)
+            },
+        },
+
+        // ── CONVERSION (new) ─────────────────────────────────────────────────────
+
+        {
+            type: 'money_back' as BlockType,
+            label: 'Money Back Guarantee',
+            category: 'Conversion' as BlockCategory,
+            icon: 'shield',
+            description: '30-day money back guarantee badge block',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f0fdf4' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('money_back' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f0fdf4;${pad(p)}border:1px solid #bbf7d0;border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;">&#128260;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#166534;">30-Day Money Back Guarantee</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#16a34a;">Not satisfied? Return it for a full refund. No questions asked.</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'free_shipping_banner' as BlockType,
+            label: 'Free Shipping Banner',
+            category: 'Conversion' as BlockCategory,
+            icon: 'truck',
+            description: 'Green free shipping callout banner',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#16a34a' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('free_shipping_banner' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#16a34a;${pad(p)}text-align:center;"><p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#fff;">&#128230; FREE Shipping &mdash; Dispatched Within 24 Hours &#9989;</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'why_buy_from_us' as BlockType,
+            label: 'Why Buy From Us',
+            category: 'Conversion' as BlockCategory,
+            icon: 'star',
+            description: '3-column trust icons block',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const points = [{ icon: '&#9989;', title: '100% Authentic', text: 'All items genuine & verified' }, { icon: '&#128230;', title: 'Fast Dispatch', text: 'Same day if ordered by 2pm' }, { icon: '&#128260;', title: 'Easy Returns', text: '30-day hassle-free returns' }]
+                const cells = points.map(pt => `<td width="33%" style="padding:16px 12px;text-align:center;vertical-align:top;"><p style="margin:0 0 6px;font-size:28px;">${pt.icon}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">${pt.title}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">${pt.text}</p></td>`).join('')
+                return wrapBlock('why_buy_from_us' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;text-align:center;">Why Shop With Us?</p><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'satisfaction_guarantee' as BlockType,
+            label: 'Satisfaction Guarantee',
+            category: 'Conversion' as BlockCategory,
+            icon: 'star',
+            description: 'Star rating and satisfaction guarantee block',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('satisfaction_guarantee' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid #ede9fe;border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:22px;color:#f59e0b;">&#9733;&#9733;&#9733;&#9733;&#9733;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#7530fb;">100% Satisfaction Guaranteed</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">Trusted by thousands of eBay buyers. Your satisfaction is our priority.</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'limited_time_offer' as BlockType,
+            label: 'Limited Time Offer',
+            category: 'Conversion' as BlockCategory,
+            icon: 'clock',
+            description: 'Countdown-style limited offer banner',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#dc2626' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('limited_time_offer' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#dc2626;${pad(p)}text-align:center;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:2px;">&#9200; Limited Time Offer</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:22px;font-weight:700;color:#fff;">{{DISCOUNT_PERCENT}}% OFF Today Only</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);">Was <s>{{ORIGINAL_PRICE}}</s> &mdash; Now <strong>{{ITEM_PRICE}}</strong></p></td></tr></table>`)
+            },
+        },
+
+        // ── HEADER & FOOTER ──────────────────────────────────────────────────────
+
+        {
+            type: 'store_header' as BlockType,
+            label: 'Store Header',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'store',
+            description: 'Logo, store name and tagline banner',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#7530fb' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('store_header' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background:linear-gradient(135deg,#7530fb 0%,#1e1535 100%);${pad(p)}text-align:center;"><h1 style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:700;color:#ffffff;">{{SELLER_NAME}}</h1><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:rgba(255,255,255,0.7);">Quality products &middot; Fast dispatch &middot; Trusted eBay seller</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'category_nav' as BlockType,
+            label: 'Category Navigation',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'menu',
+            description: 'Horizontal store category link bar',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535', paddingTop: 10, paddingBottom: 10 } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const cats = ['Electronics', 'Clothing', 'Home & Garden', 'Collectibles', 'Auto Parts']
+                const links = cats.map(c => `<td style="padding:0 12px;"><a href="#" style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);text-decoration:none;font-weight:600;">${c}</a></td>`).join('')
+                return wrapBlock('category_nav' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}"><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${links}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'seasonal_banner' as BlockType,
+            label: 'Seasonal Banner',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'star',
+            description: 'Seasonal sale themed header banner',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#dc2626' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('seasonal_banner' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background:linear-gradient(135deg,#dc2626 0%,#7f1d1d 100%);${pad(p)}text-align:center;"><p style="margin:0 0 4px;font-size:28px;">&#127873; &#127876; &#127873;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:20px;font-weight:700;color:#fff;">Seasonal Sale &mdash; Up To 50% Off!</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);">Limited time only &middot; While stocks last</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'store_footer' as BlockType,
+            label: 'Store Footer',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'layout',
+            description: 'Footer with links and copyright',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const links = ['All Listings', 'Contact Us', 'Returns Policy', 'Feedback']
+                const cells = links.map(l => `<td style="padding:0 12px;"><a href="#" style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.6);text-decoration:none;">${l}</a></td>`).join('')
+                return wrapBlock('store_footer' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}text-align:center;"><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table><p style="margin:12px 0 0;font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.3);">&copy; {{SELLER_NAME}} &middot; All rights reserved</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'social_links' as BlockType,
+            label: 'Social Links Bar',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'share',
+            description: 'Social media icon links row',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                const socials = [{ icon: '&#128248;', label: 'Instagram', color: '#e1306c' }, { icon: '&#128444;', label: 'Facebook', color: '#1877f2' }, { icon: '&#128140;', label: 'Twitter', color: '#1da1f2' }, { icon: '&#127910;', label: 'YouTube', color: '#ff0000' }]
+                const cells = socials.map(s => `<td style="padding:0 10px;text-align:center;"><p style="margin:0 0 2px;font-size:20px;">${s.icon}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${s.color};font-weight:700;">${s.label}</p></td>`).join('')
+                return wrapBlock('social_links' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">Follow us for deals &amp; updates</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'breadcrumb_bar' as BlockType,
+            label: 'Breadcrumb Bar',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'chevron-right',
+            description: 'Home > Category > Item navigation bar',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff', paddingTop: 10, paddingBottom: 10 } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('breadcrumb_bar' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#9ca3af;"><a href="#" style="color:#7530fb;text-decoration:none;">{{SELLER_NAME}}</a> &rsaquo; <a href="#" style="color:#7530fb;text-decoration:none;">{{ITEM_CATEGORY}}</a> &rsaquo; <span style="color:#1f1d2e;font-weight:600;">{{PRODUCT_TITLE}}</span></p></td></tr></table>`)
+            },
+        },
+
+        // ── TYPOGRAPHY ────────────────────────────────────────────────────────────
+
+        {
+            type: 'page_title' as BlockType,
+            label: 'Page Title',
+            category: 'Typography' as BlockCategory,
+            icon: 'type',
+            description: 'Large H1 with decorative underline',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('page_title' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#1e1535;line-height:1.2;">{{PRODUCT_TITLE}}</h1><div style="width:60px;height:4px;background-color:#7530fb;border-radius:2px;"></div></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'section_label' as BlockType,
+            label: 'Section Label',
+            category: 'Typography' as BlockCategory,
+            icon: 'type',
+            description: 'Small uppercase category label with accent',
+            defaultProps: { ...DEFAULT_COMMON, paddingTop: 8, paddingBottom: 4 } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('section_label' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#7530fb;text-transform:uppercase;letter-spacing:3px;">{{SECTION_LABEL}}</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'pull_quote' as BlockType,
+            label: 'Pull Quote',
+            category: 'Typography' as BlockCategory,
+            icon: 'quote',
+            description: 'Large styled quote with accent colour',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('pull_quote' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Georgia,serif;font-size:36px;color:#ede9fe;line-height:1;">&ldquo;</p><p style="margin:0;font-family:Georgia,serif;font-size:18px;color:#1e1535;line-height:1.6;font-style:italic;">Quality is not an act, it is a habit. Every item we sell reflects our commitment to excellence.</p><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#7530fb;font-weight:700;">— {{SELLER_NAME}}</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'highlight_text' as BlockType,
+            label: 'Highlight Text',
+            category: 'Typography' as BlockCategory,
+            icon: 'type',
+            description: 'Coloured background text callout',
+            defaultProps: { ...DEFAULT_COMMON, bgColor: '#b8fa33' } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('highlight_text' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#b8fa33;${pad(p)}text-align:center;border-radius:4px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1e1535;">&#9889; {{HIGHLIGHT_TEXT}}</p></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'price_tag' as BlockType,
+            label: 'Price Tag',
+            category: 'Typography' as BlockCategory,
+            icon: 'tag',
+            description: 'Decorative was/now price display',
+            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps
+                return wrapBlock('price_tag' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="vertical-align:bottom;padding-right:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:#9ca3af;text-decoration:line-through;">Was {{ORIGINAL_PRICE}}</p></td><td style="vertical-align:bottom;"><p style="margin:0;font-family:Arial,sans-serif;font-size:32px;font-weight:700;color:#7530fb;">{{ITEM_PRICE}}</p></td><td style="vertical-align:bottom;padding-left:10px;"><span style="display:inline-block;background-color:#dc2626;color:#fff;font-family:Arial,sans-serif;font-size:12px;font-weight:700;padding:4px 10px;border-radius:4px;">SAVE {{DISCOUNT_PERCENT}}%</span></td></tr></table></td></tr></table>`)
+            },
+        },
+
+    )
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // LOOKUP HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1824,6 +2547,8 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
     'Media',
     'eBay Specific',
     'Conversion',
+    'Header & Footer',
+    'Typography',
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
