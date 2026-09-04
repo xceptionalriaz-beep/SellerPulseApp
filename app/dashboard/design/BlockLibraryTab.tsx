@@ -22,6 +22,14 @@ const C = {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
+    'Layout': '#7530fb',
+    'Content': '#0ea5e9',
+    'Product': '#16a34a',
+    'Media': '#d97706',
+    'eBay Specific': '#dc2626',
+    'Conversion': '#0891b2',
+    'Header & Footer': '#7c3aed',
+    'Typography': '#db2777',
 }
 
 // Short labels for tabs
@@ -150,7 +158,7 @@ export default function BlockLibraryTab() {
                 {!search && (
                     <div className="flex items-center gap-1 overflow-x-auto pb-0.5"
                         style={{ scrollbarWidth: 'none' }}>
-                        {BLOCK_CATEGORIES.map(cat => {
+                        {BLOCK_CATEGORIES.map((cat: BlockCategory) => {
                             const active = activeCategory === cat
                             const colour = CATEGORY_COLORS[cat] ?? C.primary
                             const count = getByCategory(cat).length
@@ -210,7 +218,6 @@ export default function BlockLibraryTab() {
 
                     {visibleBlocks.length > 0 && (
                         <>
-                            {/* Section label when searching */}
                             {search && (
                                 <p className="text-[11px] font-bold uppercase tracking-wider mb-3"
                                     style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
@@ -218,7 +225,6 @@ export default function BlockLibraryTab() {
                                 </p>
                             )}
 
-                            {/* Single grid — active category or search results */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                                 {visibleBlocks.map(def => {
                                     const isCopied = copiedId === def.type
