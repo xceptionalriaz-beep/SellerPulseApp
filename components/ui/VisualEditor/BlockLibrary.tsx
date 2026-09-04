@@ -16,9 +16,10 @@ const C = {
     muted: '#9ca3af', inputBorder: '#e5e0f5',
 }
 
-const CATEGORY_COLORS: Record<BlockCategory, string> = {
+const CATEGORY_COLORS: Record<string, string> = {
     'Layout': '#7530fb', 'Content': '#0ea5e9', 'Product': '#16a34a',
     'Media': '#d97706', 'eBay Specific': '#16a34a', 'Conversion': '#ef4444',
+    'Header & Footer': '#7c3aed', 'Typography': '#db2877',
 }
 
 // ── SVG visual previews ───────────────────────────────────────────────────────
