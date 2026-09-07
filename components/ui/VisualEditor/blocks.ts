@@ -393,6 +393,12 @@ export interface ProductImageProps extends CommonProps {
     borderWidth: number       // border thickness in px (default 1)
     objectFit: 'contain' | 'cover' | 'fill'
     variant: string           // 'single' | 'split' | 'gallery' | 'fullwidth' | 'zoom'
+    // Single variant — optional centered caption rendered directly under the image.
+    // Sellers can use it for the item title, a feature note, or a short tagline.
+    // Empty string = caption row is omitted entirely (no empty <p> rendered).
+    caption: string
+    captionColor: string
+    captionFontSize: number
     // Split variant
     imagePosition: 'left' | 'right'
     imageWidthPercent: number // 30–60
@@ -428,6 +434,11 @@ export interface ProductImageProps extends CommonProps {
     nameFontSize: number
     // Polaroid variant
     polaroidCaption: string
+    // Optional inline box-shadow on the <img> — canvas-only depth treatment.
+    // Email clients strip box-shadow so the email falls back to the
+    // borderRadius + bgColor frame alone; the canvas preview shows the
+    // full treatment. Preserved across Layout Style preset switches.
+    shadow?: string
 }
 
 // ── Hero Product (2-column) ───────────────────────────────────────────────────
@@ -457,6 +468,14 @@ export interface HeroProductProps extends CommonProps {
     accentColor: string       // title underline, price, bullets
     scarcityBg: string
     scarcityColor: string
+
+    // Optional price-line reassurance tags (added v2.1 — opt-in per template)
+    stockBadgeText?: string   // e.g. "In Stock • Fast Shipping" — inline with price
+    showStockBadge?: boolean  // default true if stockBadgeText set
+    guaranteeTagText?: string // e.g. "100% Satisfaction Guarantee" — under price
+    showGuaranteeTag?: boolean
+    guaranteeTagBg?: string   // optional override; defaults to #f0fdf4
+    guaranteeTagColor?: string// optional override; defaults to #166534
 }
 
 // ── Product Description ───────────────────────────────────────────────────────
@@ -500,6 +519,9 @@ export interface ImageProps extends CommonProps {
     borderRadius: number
     linkUrl: string           // optional click-through URL
     bgColor: string           // container background colour
+    shadow?: string           // optional inline box-shadow on the <img>
+                              // (e.g. "0 4px 14px rgba(117,48,251,0.08)").
+                              // Canvas-only — email clients strip box-shadow.
 }
 
 // ── Banner ────────────────────────────────────────────────────────────────────
@@ -1204,8 +1226,11 @@ ${rows}
             image4Url: '{{IMAGE_4_URL}}',
             image5Url: '{{IMAGE_5_URL}}',
             imageCount: 4,
+            // thumbHeight is preserved for backward compatibility but the
+            // Gallery variant now renders thumbs as 1:1 squares (aspect-square)
+            // so the value is no longer used by toHtml.
             thumbHeight: 80,
-            thumbBorderRadius: 6,
+            thumbBorderRadius: 8,
             showThumbBorder: true,
             // Fullwidth
             minHeight: 300,
@@ -1222,6 +1247,13 @@ ${rows}
             lifestyleSubtext: '',
             nameFontSize: 20,
             polaroidCaption: '',
+            // Single variant — optional centered caption under the image
+            caption: '',
+            captionColor: '#475569',
+            captionFontSize: 13,
+            // Canvas-only depth treatment — preserved across Layout Style
+            // preset switches because it's a top-level prop on the schema.
+            shadow: '',
         } as ProductImageProps,
         toHtml(props, id) {
             const p = props as ProductImageProps
@@ -1362,6 +1394,22 @@ ${rows}
                 ? `<span style="display:inline-block;background-color:${p.scarcityBg ?? '#fef2f2'};color:${p.scarcityColor ?? '#991b1b'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
                 : ''
 
+            // Optional inline "In Stock • Fast Shipping" badge rendered next to the price
+            // (opt-in: present only when stockBadgeText is set AND not explicitly hidden)
+            const showStockBadge = p.showStockBadge !== false && !!p.stockBadgeText
+            const stockBadgeHtml = showStockBadge
+                ? `<span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-left:10px;letter-spacing:0.02em;vertical-align:middle;white-space:nowrap;">${p.stockBadgeText}</span>`
+                : ''
+
+            // Optional "100% Satisfaction Guarantee" reassurance tag rendered
+            // directly under the price row
+            const showGuaranteeTag = p.showGuaranteeTag !== false && !!p.guaranteeTagText
+            const guaranteeBg = p.guaranteeTagBg ?? '#f0fdf4'
+            const guaranteeColor = p.guaranteeTagColor ?? '#166534'
+            const guaranteeTagHtml = showGuaranteeTag
+                ? `<div style="margin:4px 0 0;"><span style="display:inline-block;background-color:${guaranteeBg};color:${guaranteeColor};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;letter-spacing:0.02em;">${p.guaranteeTagText}</span></div>`
+                : ''
+
             // 4 thumbnails
             const thumbs = [p.thumb1, p.thumb2, p.thumb3, p.thumb4]
             const thumbCells = thumbs.map(t =>
@@ -1400,8 +1448,9 @@ ${rows}
             <span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>
             <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#1e1535;line-height:1.3;">${p.rightTitle}</h1>
             <div style="margin:0 0 6px;">
-              <span style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:900;color:${accent};letter-spacing:-0.01em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${originalHtml}
+              <span style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:900;color:${accent};letter-spacing:-0.01em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${originalHtml}${stockBadgeHtml}
             </div>
+            ${guaranteeTagHtml}
             ${scarcityHtml}
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;border-top:1px solid #f3f4f6;padding-top:10px;">
               ${bullets}
@@ -1409,6 +1458,51 @@ ${rows}
           </td>
         </tr>
       </table>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
+        type: 'image',
+        label: 'Image',
+        category: 'Media',
+        icon: 'image',
+        description: 'Single image with optional caption and link',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            src: '{{MAIN_IMAGE_URL}}',
+            alt: '{{PRODUCT_TITLE}}',
+            width: 100,
+            widthUnit: '%',
+            align: 'center',
+            borderRadius: 8,
+            linkUrl: '',
+            bgColor: '#ffffff',
+        } as ImageProps,
+        toHtml(props, id) {
+            const p = props as ImageProps
+            // 'px' widths use a fixed pixel table, '%' widths stretch to the
+            // container's 700px max so the image is always responsive.
+            const widthStyle = p.widthUnit === 'px'
+                ? `width:${p.width}px;max-width:100%;`
+                : `width:100%;max-width:${p.width}%;`
+            // Optional inline shadow — opt-in per template. When set it gives
+            // the image a "premium banner" depth in the canvas preview; email
+            // clients strip box-shadow so the email falls back to the rounded
+            // corner + bgColor frame alone.
+            const shadowStyle = p.shadow ? `box-shadow:${p.shadow};` : ''
+            const imgHtml = `<img src="${p.src}" alt="${p.alt}" border="0" style="${widthStyle}height:auto;display:block;border-radius:${p.borderRadius}px;${shadowStyle}" />`
+            const linked = p.linkUrl
+                ? `<a href="${p.linkUrl}" style="text-decoration:none;display:inline-block;">${imgHtml}</a>`
+                : imgHtml
+            return wrapBlock('image', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}${textAlign(p.align)}">
+      ${linked}
     </td>
   </tr>
 </table>`

@@ -50,6 +50,12 @@ interface CategorySampleData {
     tokens: Record<string, string>
     mainImage: string
     thumbnails: string[]
+    // Extra gallery images used by templates that go beyond the hero+thumbs
+    // pair — e.g. the pet template's "See It In Action" 3-up gallery and the
+    // large lifestyle banner. Keys are the {{TOKEN}} names the template
+    // embeds in img src attrs (e.g. LIFESTYLE_IMAGE_URL, GALLERY_IMAGE_1..3).
+    // Any token not present here falls back to the category's main image.
+    galleryImages: Record<string, string>
     related: {
         tokens: Record<string, string>
         images: Record<string, string>
@@ -110,6 +116,16 @@ const PET_SAMPLE: CategorySampleData = {
         UT('photo-1450778869180-41d0601e046e'),
         UT('photo-1548199973-03cce0bbc87b'),
     ],
+    // 4 distinct pet-grooming / dog photos so the lifestyle banner and the
+    // 3-up "See It In Action" gallery don't all fall back to the same hero
+    // image. Each key is the {{TOKEN}} name embedded in the template's img
+    // src attrs (see pet.ts block 6 and block 10).
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: U('photo-1548199973-03cce0bbc87b'),   // long-haired dog being brushed
+        GALLERY_IMAGE_1:     U('photo-1450778869180-41d0601e046e'), // dog with loose fur
+        GALLERY_IMAGE_2:     U('photo-1518791841217-8f162f1e1131'), // dog bath time
+        GALLERY_IMAGE_3:     U('photo-1543466835-00a7907e9de1'),   // golden retriever portrait
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Ergonomic Pet Nail Clipper',
@@ -184,6 +200,7 @@ const ELECTRONICS_SAMPLE: CategorySampleData = {
         UT('photo-1546435770-a3e426bf472b'),
         UT('photo-1572569511254-d8f925fe2cbb'),
     ],
+    galleryImages: {},
     related: {
         tokens: {
             RELATED_TITLE_1: 'Portable Bluetooth Speaker',
@@ -258,6 +275,7 @@ const FASHION_SAMPLE: CategorySampleData = {
         UT('photo-1595950653106-6c9ebd614d3a'),
         UT('photo-1551107696-a4b0c5a0d9a2'),
     ],
+    galleryImages: {},
     related: {
         tokens: {
             RELATED_TITLE_1: 'Classic Cotton Hoodie',
@@ -332,6 +350,7 @@ const HOME_SAMPLE: CategorySampleData = {
         UT('photo-1416879595882-3373a0480b5b'),
         UT('photo-1459411552884-841db9b3cc2a'),
     ],
+    galleryImages: {},
     related: {
         tokens: {
             RELATED_TITLE_1: 'Indoor Plant Mister 500ml',
@@ -406,6 +425,7 @@ const SPORTS_SAMPLE: CategorySampleData = {
         UT('photo-1534438327276-14e5300c3a48'),
         UT('photo-1540497077202-7c8a3999166f'),
     ],
+    galleryImages: {},
     related: {
         tokens: {
             RELATED_TITLE_1: 'Yoga Mat 6mm',
@@ -480,6 +500,7 @@ const AUTO_SAMPLE: CategorySampleData = {
         UT('photo-1503376780353-7e6692767b70'),
         UT('photo-1542362567-b07e54358753'),
     ],
+    galleryImages: {},
     related: {
         tokens: {
             RELATED_TITLE_1: 'Brake Pad Set (Front)',
@@ -554,6 +575,7 @@ const GENERAL_SAMPLE: CategorySampleData = {
         UT('photo-1505740420928-5e560c06d30e'),
         UT('photo-1505740420928-5e560c06d30e'),
     ],
+    galleryImages: {},
     related: {
         tokens: {
             RELATED_TITLE_1: 'Related Item 1',
@@ -633,6 +655,14 @@ export const ICON_SVG: Record<string, string> = {
     ),
     'refresh-ccw': svg(
         `<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>`
+    ),
+    'heart-pulse': svg(
+        // Lucide heart-pulse: outlined heart with an EKG trace across it
+        `<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>`
+    ),
+    'paw-print': svg(
+        // Lucide paw-print: 4 toe pads (top-left, top-right, side, side) + main pad
+        `<circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>`
     ),
 }
 
@@ -724,6 +754,20 @@ export function renderForCanvas(
                 const t = data.thumbnails[thumbIdx % data.thumbnails.length]
                 thumbIdx++
                 return `<img ${before}src="${t ?? data.mainImage}"${after}>`
+            }
+        )
+        // Extra gallery tokens used by templates that go beyond the hero+thumbs
+        // pair — e.g. pet.ts block 6 (LIFESTYLE_IMAGE_URL) and block 10
+        // (GALLERY_IMAGE_1..3 for the "See It In Action" 3-up). Each token is
+        // mapped to a distinct category-specific image from data.galleryImages
+        // so the lifestyle banner and the 3-up don't all collapse onto the
+        // same hero photo. Tokens absent from the map fall through to the
+        // catch-all below.
+        out = out.replace(
+            /<img\b([^>]*?)src="[^"]*\{\{(LIFESTYLE_IMAGE_URL|GALLERY_IMAGE_\d+)\}\}[^"]*"([^>]*)>/gi,
+            (_m, before, token, after) => {
+                const url = data.galleryImages[token] ?? data.mainImage
+                return `<img ${before}src="${url}"${after}>`
             }
         )
         // Any remaining {{TOKEN}} in src (e.g. {{IMAGE_URL}} without _N) → main image

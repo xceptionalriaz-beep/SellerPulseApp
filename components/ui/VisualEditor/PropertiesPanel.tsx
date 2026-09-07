@@ -464,6 +464,19 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="56" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
         </svg>
     ),
+    // ── Product Image — split-right (text left, image right) ──────────────────
+    // Mirrors the split thumbnail: text column on the left, image on the right.
+    'split-right': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="28" height="36" fill={col} opacity="0.3" />
+            <rect x="28" width="52" height="36" rx="3" fill={col} opacity="0.7" />
+            <rect x="6" y="10" width="18" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="6" y="16" width="14" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="6" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="44" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="50" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
     // ── Product Image ─────────────────────────────────────────────────────────
     'single': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
@@ -1659,7 +1672,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 onChange={v => updateProps({ objectFit: v })} />
                         </Section>
                     )}
-                    {pv === 'split' && (
+                    {(pv === 'split' || pv === 'split-right') && (
                         <>
                             <Section title="Layout">
                                 <SelectInput label="Image position" value={props.imagePosition ?? 'left'}
@@ -1679,9 +1692,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                     )}
                     {pv === 'gallery' && (
                         <Section title="Gallery">
+                            <InfoBox>Thumbnails render as uniform 1:1 squares — first thumb is highlighted as the active image.</InfoBox>
                             <SliderInput label="Thumbnail count" value={props.imageCount ?? 4} min={2} max={5} onChange={v => updateProps({ imageCount: v })} />
-                            <SliderInput label="Thumbnail height" value={props.thumbHeight ?? 80} min={40} max={160} suffix="px" onChange={v => updateProps({ thumbHeight: v })} />
-                            <SliderInput label="Thumb radius" value={props.thumbBorderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v })} />
+                            <SliderInput label="Thumb radius" value={props.thumbBorderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v })} />
                             <ToggleRow label="Thumb border" value={props.showThumbBorder ?? true} onChange={v => updateProps({ showThumbBorder: v })} />
                             {props.showThumbBorder && <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />}
                             <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
@@ -2411,6 +2424,15 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                         <TextInput label="Alt text" value={props.alt ?? ''} onChange={v => updateProps({ alt: v })} />
                         {phButton('alt', 'alt text')}
                     </Section>
+                    {av === 'single' && (
+                        <Section title="Caption">
+                            <InfoBox>Optional centered text rendered directly below the image (e.g. item title or feature note).</InfoBox>
+                            <TextInput label="Caption" value={props.caption ?? ''} onChange={v => updateProps({ caption: v })} />
+                            {phButton('caption', 'caption')}
+                            <ColorRow label="Caption colour" value={props.captionColor ?? '#475569'} onChange={v => updateProps({ captionColor: v })} />
+                            <SliderInput label="Caption size" value={props.captionFontSize ?? 13} min={10} max={20} suffix="px" onChange={v => updateProps({ captionFontSize: v })} />
+                        </Section>
+                    )}
                     {av === 'gallery' && (
                         <Section title="Gallery images">
                             <InfoBox>Add extra images for the thumbnail strip.</InfoBox>
@@ -2428,7 +2450,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                             </>}
                         </Section>
                     )}
-                    {av === 'split' && (
+                    {(av === 'split' || av === 'split-right') && (
                         <Section title="Description content">
                             <TextInput label="Title" value={props.descriptionTitle ?? ''} onChange={v => updateProps({ descriptionTitle: v })} />
                             {phButton('descriptionTitle', 'title')}

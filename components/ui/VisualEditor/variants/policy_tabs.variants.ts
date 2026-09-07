@@ -39,9 +39,12 @@ export const policyTabsVariants: BlockVariant[] = [
         description: 'Classic tab buttons at top, content below',
         toHtml(p: any, id: string): string {
             const tabs = p.tabs?.length ? p.tabs : FALLBACK_TABS
+            // Tab button vertical padding mirrors the content box (16px) so the
+            // active tab's bottom edge sits flush against the top of the
+            // content panel — no extra empty whitespace between header & body.
             const tabBtns = tabs.map((t: any, i: number) => `
       <td style="padding:0;">
-        <div style="display:inline-block;padding:10px 20px;background-color:${i === 0 ? (p.activeBg ?? '#7530fb') : (p.inactiveBg ?? '#f3f4f6')};color:${i === 0 ? (p.activeText ?? '#ffffff') : (p.inactiveText ?? '#6b7280')};font-family:Arial,sans-serif;font-size:${p.fontSize ?? 12}px;font-weight:${i === 0 ? '700' : '500'};border-radius:${i === 0 ? '6px 6px 0 0' : '6px 6px 0 0'};cursor:pointer;">${t.label}</div>
+        <div style="display:inline-block;padding:16px 20px;background-color:${i === 0 ? (p.activeBg ?? '#7530fb') : (p.inactiveBg ?? '#f3f4f6')};color:${i === 0 ? (p.activeText ?? '#ffffff') : (p.inactiveText ?? '#6b7280')};font-family:Arial,sans-serif;font-size:${p.fontSize ?? 12}px;font-weight:${i === 0 ? '700' : '500'};border-radius:${i === 0 ? '6px 6px 0 0' : '6px 6px 0 0'};cursor:pointer;">${t.label}</div>
       </td>`).join('')
             const allContent = tabs.map((t: any, i: number) => `
       <tr ${i > 0 ? 'style="display:none;"' : ''}>
