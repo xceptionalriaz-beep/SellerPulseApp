@@ -73,6 +73,7 @@ import {
     RawHtmlProps,
 } from './blocks'
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
+import { auditHtml } from './audit'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -229,6 +230,14 @@ export default function PropertiesPanel({
     const def = getDefinition(block.type)
     const props = block.props as any
 
+    // ── Per-block compliance audit ────────────────────────────────────────────
+    // Runs the same audit as the status bar, but on the rendered HTML of THIS
+    // block only. Drives the badge below — the badge used to be a hard-coded
+    // "100% eBay Compliant" which lied to the user whenever the block contained
+    // a script tag or a http:// image.
+    const blockHtml = def ? def.toHtml(props, block.id) : ''
+    const blockAudit = auditHtml(blockHtml)
+
     // ─────────────────────────────────────────────────────────────────────────
     // PANEL WITH SELECTED BLOCK
     // ─────────────────────────────────────────────────────────────────────────
@@ -320,20 +329,35 @@ export default function PropertiesPanel({
                     </button>
                 </div>
 
-                {/* eBay compliant badge */}
-                <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    backgroundColor: C.successLight,
-                    border: `1px solid #86efac50`,
-                    borderRadius: 20,
-                    padding: '3px 10px',
-                    marginBottom: 10,
-                }}>
-                    <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
-                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.success }}>
-                        100% eBay Compliant
+                {/* eBay compliant badge — reflects THIS block's actual HTML */}
+                <div
+                    title={blockAudit.count === 0
+                        ? 'This block passes every eBay compliance check'
+                        : `Issues: ${blockAudit.issues.join(', ')}`}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        backgroundColor: blockAudit.count === 0 ? C.successLight : C.warningLight,
+                        border: `1px solid ${blockAudit.count === 0 ? '#86efac50' : '#fcd34d80'}`,
+                        borderRadius: 20,
+                        padding: '3px 10px',
+                        marginBottom: 10,
+                    }}>
+                    {blockAudit.count === 0 ? (
+                        <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
+                    ) : (
+                        <AlertTriangle size={11} style={{ color: C.warning, flexShrink: 0 }} />
+                    )}
+                    <span style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: blockAudit.count === 0 ? C.success : C.warning,
+                    }}>
+                        {blockAudit.count === 0
+                            ? '100% eBay Compliant'
+                            : `${blockAudit.count} issue${blockAudit.count > 1 ? 's' : ''}`}
                     </span>
                 </div>
 
@@ -2734,6 +2758,515 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                     </InfoBox>
                     <TextInput label="Internal label" value={props.label ?? 'Custom HTML Block'} onChange={v => updateProps({ label: v })} />
                 </Section>
+            )
+
+        // ── MEDIUM PRIORITY BLOCKS ───────────────────────────────────────────
+
+        case 'product_variants':
+            return (
+                <Section title="Variants">
+                    <InfoBox>Colour swatches and size options are rendered from fixed defaults. Styles tab controls background and spacing.</InfoBox>
+                    <ColorRow label="Swatch border colour" value={props.borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v })} />
+                    <ColorRow label="Size label colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
+                    <ColorRow label="Size border colour" value={props.sizeBorderColor ?? '#ede9fe'} onChange={v => updateProps({ sizeBorderColor: v })} />
+                </Section>
+            )
+
+        case 'whats_in_the_box':
+            return (
+                <Section title="Box contents">
+                    <InfoBox>One item per line.</InfoBox>
+                    <TextareaInput
+                        label="Items (one per line)"
+                        value={Array.isArray(props.items) ? props.items.join('\n') : '1x Main Unit\n1x Power Cable\n1x User Manual'}
+                        rows={5}
+                        onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <TextInput label="Heading" value={props.heading ?? "📦 What's In The Box"} onChange={v => updateProps({ heading: v })} />
+                    <ColorRow label="Heading colour" value={props.headingColor ?? '#1e1535'} onChange={v => updateProps({ headingColor: v })} />
+                    <ColorRow label="Bullet colour" value={props.bulletColor ?? '#16a34a'} onChange={v => updateProps({ bulletColor: v })} />
+                    <ColorRow label="Text colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
+                </Section>
+            )
+
+        case 'key_features_grid':
+            return (
+                <Section title="Feature grid">
+                    <InfoBox>3 feature columns — edit icons, titles and descriptions via the Styles tab background control. Content is fixed in the HTML output.</InfoBox>
+                    <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                    <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                </Section>
+            )
+
+        case 'payment_methods':
+            return (
+                <Section title="Payment methods">
+                    <InfoBox>Displays PayPal, Visa, Mastercard, Amex and Apple Pay. Background and spacing controlled in Styles tab.</InfoBox>
+                    <TextInput label="Section label" value={props.label ?? 'Secure Payment Methods'} onChange={v => updateProps({ label: v })} />
+                    <ColorRow label="Badge background" value={props.badgeBg ?? '#ffffff'} onChange={v => updateProps({ badgeBg: v })} />
+                    <ColorRow label="Badge text" value={props.badgeText ?? '#1f1d2e'} onChange={v => updateProps({ badgeText: v })} />
+                </Section>
+            )
+
+        case 'feedback_score':
+            return (
+                <>
+                    <Section title="Seller details">
+                        <TextInput label="Feedback %" value={props.feedbackPercent ?? '{{SELLER_FEEDBACK}}'} onChange={v => updateProps({ feedbackPercent: v })} />
+                        {phButton('feedbackPercent', 'feedback %')}
+                        <TextInput label="Member since" value={props.memberSince ?? '{{MEMBER_SINCE}}'} onChange={v => updateProps({ memberSince: v })} />
+                        {phButton('memberSince', 'member since')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'vat_notice':
+            return (
+                <>
+                    <Section title="VAT details">
+                        <TextInput label="VAT number" value={props.vatNumber ?? '{{VAT_NUMBER}}'} onChange={v => updateProps({ vatNumber: v })} />
+                        {phButton('vatNumber', 'VAT number')}
+                        <TextInput label="Notice text" value={props.text ?? 'Full VAT invoice included with your order.'} onChange={v => updateProps({ text: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8fafc'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_footer':
+            return (
+                <>
+                    <Section title="Copyright">
+                        <TextInput label="Copyright text" value={props.copyrightText ?? '© {{SELLER_NAME}} · All rights reserved'} onChange={v => updateProps({ copyrightText: v })} />
+                        {phButton('copyrightText', 'copyright text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? 'rgba(255,255,255,0.6)'} onChange={v => updateProps({ linkColor: v })} />
+                        <ColorRow label="Copyright colour" value={props.mutedColor ?? 'rgba(255,255,255,0.3)'} onChange={v => updateProps({ mutedColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'social_links':
+            return (
+                <>
+                    <Section title="Label">
+                        <TextInput label="Follow text" value={props.followText ?? 'Follow us for deals & updates'} onChange={v => updateProps({ followText: v })} />
+                        <ColorRow label="Label colour" value={props.labelColor ?? '#6b7280'} onChange={v => updateProps({ labelColor: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+                </>
+            )
+
+        // ── LOWER PRIORITY BLOCKS ────────────────────────────────────────────
+
+        case 'data_table':
+            return (
+                <Section title="Table rows">
+                    <InfoBox>One row per line in format: Label | Value</InfoBox>
+                    <TextareaInput
+                        label="Rows (Label | Value)"
+                        value={Array.isArray(props.rows)
+                            ? props.rows.map((r: string[]) => r.join(' | ')).join('\n')
+                            : 'Brand | {{BRAND}}\nModel | {{MPN}}\nCondition | {{ITEM_CONDITION}}'
+                        }
+                        rows={6}
+                        onChange={v => updateProps({
+                            rows: v.split('\n')
+                                .filter((s: string) => s.includes('|'))
+                                .map((s: string) => s.split('|').map((p: string) => p.trim()))
+                        })}
+                    />
+                    <ColorRow label="Alt row colour" value={props.altBg ?? '#f8f7ff'} onChange={v => updateProps({ altBg: v })} />
+                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                </Section>
+            )
+
+        case 'compatibility_table':
+            return (
+                <Section title="Compatible models">
+                    <InfoBox>One model per line.</InfoBox>
+                    <TextareaInput
+                        label="Models (one per line)"
+                        value={Array.isArray(props.models) ? props.models.join('\n') : 'Model A 2019-2023\nModel B 2020-2024\nModel C Pro All years'}
+                        rows={5}
+                        onChange={v => updateProps({ models: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <TextInput label="Heading" value={props.heading ?? '✅ Compatible With:'} onChange={v => updateProps({ heading: v })} />
+                    <ColorRow label="Check colour" value={props.checkColor ?? '#166534'} onChange={v => updateProps({ checkColor: v })} />
+                    <ColorRow label="Alt row colour" value={props.altBg ?? '#f0fdf4'} onChange={v => updateProps({ altBg: v })} />
+                </Section>
+            )
+
+        case 'product_comparison':
+            return (
+                <Section title="Comparison table">
+                    <InfoBox>Header row + data rows. Format: Feature | Our Product | Competitor (one per line)</InfoBox>
+                    <TextareaInput
+                        label="Rows (3 columns | separated)"
+                        value={Array.isArray(props.rows)
+                            ? props.rows.map((r: string[]) => r.join(' | ')).join('\n')
+                            : 'Feature | Our Product | Competitor\nWarranty | 2 Years | 6 Months\nUK Stock | ✓ Yes | ✗ No'
+                        }
+                        rows={6}
+                        onChange={v => updateProps({
+                            rows: v.split('\n')
+                                .filter((s: string) => s.includes('|'))
+                                .map((s: string) => s.split('|').map((p: string) => p.trim()))
+                        })}
+                    />
+                    <ColorRow label="Header background" value={props.headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                    <ColorRow label="Our column colour" value={props.ourColor ?? '#7530fb'} onChange={v => updateProps({ ourColor: v })} />
+                </Section>
+            )
+
+        case 'before_after':
+            return (
+                <>
+                    <Section title="Images">
+                        <TextInput label="Before image URL" value={props.beforeSrc ?? '{{IMAGE_BEFORE}}'} onChange={v => updateProps({ beforeSrc: v })} />
+                        {phButton('beforeSrc', 'before image URL')}
+                        <TextInput label="After image URL" value={props.afterSrc ?? '{{IMAGE_AFTER}}'} onChange={v => updateProps({ afterSrc: v })} />
+                        {phButton('afterSrc', 'after image URL')}
+                    </Section>
+                    <Section title="Labels">
+                        <TextInput label="Before label" value={props.beforeLabel ?? 'Before'} onChange={v => updateProps({ beforeLabel: v })} />
+                        <TextInput label="After label" value={props.afterLabel ?? 'After'} onChange={v => updateProps({ afterLabel: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'logo_bar':
+            return (
+                <>
+                    <Section title="Label">
+                        <TextInput label="Caption text" value={props.caption ?? 'Trusted Brands & Certifications'} onChange={v => updateProps({ caption: v })} />
+                        <ColorRow label="Caption colour" value={props.captionColor ?? '#9ca3af'} onChange={v => updateProps({ captionColor: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'bundle_deal':
+            return (
+                <>
+                    <Section title="Heading">
+                        <TextInput label="Heading" value={props.heading ?? '🎁 Bundle & Save'} onChange={v => updateProps({ heading: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Price colour" value={props.priceColor ?? '#ffffff'} onChange={v => updateProps({ priceColor: v })} />
+                        <ColorRow label="Badge colour" value={props.badgeColor ?? '#b8fa33'} onChange={v => updateProps({ badgeColor: v })} />
+                        <ColorRow label="Badge text" value={props.badgeText ?? '#1e1535'} onChange={v => updateProps({ badgeText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_header':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Store name" value={props.storeName ?? '{{SELLER_NAME}}'} onChange={v => updateProps({ storeName: v })} />
+                        {phButton('storeName', 'store name')}
+                        <TextInput label="Tagline" value={props.tagline ?? 'Quality products · Fast dispatch · Trusted eBay seller'} onChange={v => updateProps({ tagline: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#7530fb'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Name colour" value={props.nameColor ?? '#ffffff'} onChange={v => updateProps({ nameColor: v })} />
+                        <ColorRow label="Tagline colour" value={props.taglineColor ?? 'rgba(255,255,255,0.7)'} onChange={v => updateProps({ taglineColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'category_nav':
+            return (
+                <>
+                    <Section title="Categories">
+                        <InfoBox>One category per line.</InfoBox>
+                        <TextareaInput
+                            label="Categories (one per line)"
+                            value={Array.isArray(props.categories) ? props.categories.join('\n') : 'Electronics\nClothing\nHome & Garden\nCollectibles\nAuto Parts'}
+                            rows={5}
+                            onChange={v => updateProps({ categories: v.split('\n').filter((s: string) => s.trim()) })}
+                        />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? 'rgba(255,255,255,0.8)'} onChange={v => updateProps({ linkColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'seasonal_banner':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Seasonal Sale — Up To 50% Off!'} onChange={v => updateProps({ heading: v })} />
+                        <TextInput label="Sub text" value={props.subText ?? 'Limited time only · While stocks last'} onChange={v => updateProps({ subText: v })} />
+                        <TextInput label="Emoji row" value={props.emoji ?? '🎁 🎄 🎁'} onChange={v => updateProps({ emoji: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#dc2626'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'breadcrumb_bar':
+            return (
+                <>
+                    <Section title="Links">
+                        <TextInput label="Store name" value={props.storeName ?? '{{SELLER_NAME}}'} onChange={v => updateProps({ storeName: v })} />
+                        {phButton('storeName', 'store name')}
+                        <TextInput label="Category" value={props.category ?? '{{ITEM_CATEGORY}}'} onChange={v => updateProps({ category: v })} />
+                        {phButton('category', 'category')}
+                        <TextInput label="Product title" value={props.productTitle ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ productTitle: v })} />
+                        {phButton('productTitle', 'product title')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? '#7530fb'} onChange={v => updateProps({ linkColor: v })} />
+                        <ColorRow label="Current page colour" value={props.activeColor ?? '#1f1d2e'} onChange={v => updateProps({ activeColor: v })} />
+                    </Section>
+                </>
+            )
+
+        // ── HIGH PRIORITY BLOCKS ─────────────────────────────────────────────
+
+        case 'spacer':
+            return (
+                <Section title="Spacer">
+                    <InfoBox>Adjust height using the Top and Bottom padding controls in the Styles tab.</InfoBox>
+                </Section>
+            )
+
+        case 'single_image':
+            return (
+                <>
+                    <Section title="Image">
+                        <TextInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
+                        {phButton('src', 'image URL')}
+                        <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
+                        {phButton('alt', 'alt text')}
+                    </Section>
+                    <Section title="Caption">
+                        <TextInput label="Caption text" value={props.caption ?? ''} onChange={v => updateProps({ caption: v })} />
+                        {phButton('caption', 'caption')}
+                    </Section>
+                </>
+            )
+
+        case 'numbered_list':
+            return (
+                <Section title="List items">
+                    <InfoBox>One item per line. Use tokens for dynamic content.</InfoBox>
+                    <TextareaInput
+                        label="Items (one per line)"
+                        value={Array.isArray(props.items) ? props.items.join('\n') : 'Step one\nStep two\nStep three'}
+                        rows={5}
+                        onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <ColorRow label="Number bubble colour" value={props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ bulletColor: v })} />
+                    <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
+                </Section>
+            )
+
+        case 'quote_block':
+            return (
+                <>
+                    <Section title="Quote">
+                        <TextareaInput label="Quote text" value={props.quoteText ?? 'Excellent product, exactly as described.'} rows={3} onChange={v => updateProps({ quoteText: v })} />
+                        {phButton('quoteText', 'quote text')}
+                        <TextInput label="Attribution" value={props.attribution ?? '— Verified Buyer ★★★★★'} onChange={v => updateProps({ attribution: v })} />
+                        {phButton('attribution', 'attribution')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Quote mark colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
+                        <ColorRow label="Attribution colour" value={props.mutedColor ?? '#6b7280'} onChange={v => updateProps({ mutedColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'warning_box':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Please Read Before Buying'} onChange={v => updateProps({ heading: v })} />
+                        <TextareaInput label="Body text" value={props.text ?? 'Please check compatibility before purchasing.'} rows={3} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'body text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#fef9c3'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#92400e'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#78350f'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'info_box':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Important Information'} onChange={v => updateProps({ heading: v })} />
+                        <TextareaInput label="Body text" value={props.text ?? 'This item ships from a UK warehouse.'} rows={3} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'body text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#eff6ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#1e40af'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1d4ed8'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'badge_row':
+            return (
+                <Section title="Badges">
+                    <InfoBox>One badge per line. Use emoji + text e.g. ✓ Genuine</InfoBox>
+                    <TextareaInput
+                        label="Badges (one per line)"
+                        value={Array.isArray(props.badges) ? props.badges.join('\n') : '✓ Genuine\n📦 UK Stock\n★ Top Rated\n🔄 Easy Returns'}
+                        rows={4}
+                        onChange={v => updateProps({ badges: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <ColorRow label="Badge background" value={props.badgeBg ?? '#f3eeff'} onChange={v => updateProps({ badgeBg: v })} />
+                    <ColorRow label="Badge text" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
+                </Section>
+            )
+
+        case 'dispatch_timer':
+            return (
+                <>
+                    <Section title="Message">
+                        <TextInput label="Main text" value={props.text ?? 'Order in the next {{HOURS_LEFT}} hours for Same Day Dispatch'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'main text')}
+                        <TextInput label="Sub text" value={props.subText ?? 'Dispatched same working day if ordered by 2pm'} onChange={v => updateProps({ subText: v })} />
+                        {phButton('subText', 'sub text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Highlight colour" value={props.highlightColor ?? '#dc2626'} onChange={v => updateProps({ highlightColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'free_shipping_banner':
+            return (
+                <>
+                    <Section title="Message">
+                        <TextInput label="Banner text" value={props.text ?? '🚚 FREE Shipping — Dispatched Within 24 Hours ✅'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'banner text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#16a34a'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'why_buy_from_us':
+            return (
+                <>
+                    <Section title="Heading">
+                        <TextInput label="Section heading" value={props.heading ?? 'Why Shop With Us?'} onChange={v => updateProps({ heading: v })} />
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#1e1535'} onChange={v => updateProps({ headingColor: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'satisfaction_guarantee':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? '100% Satisfaction Guaranteed'} onChange={v => updateProps({ heading: v })} />
+                        <TextareaInput label="Sub text" value={props.text ?? 'Trusted by thousands of eBay buyers. Your satisfaction is our priority.'} rows={2} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'sub text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#7530fb'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'page_title':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title text" value={props.text ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'title text')}
+                    </Section>
+                    <Section title="Style">
+                        <ColorRow label="Text colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
+                        <ColorRow label="Underline colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 28} min={16} max={60} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'section_label':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Label text" value={props.text ?? '{{SECTION_LABEL}}'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'label text')}
+                    </Section>
+                    <Section title="Style">
+                        <ColorRow label="Text colour" value={props.color ?? '#7530fb'} onChange={v => updateProps({ color: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 11} min={8} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'pull_quote':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextareaInput label="Quote text" value={props.text ?? 'Quality is not an act, it is a habit.'} rows={3} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'quote text')}
+                        <TextInput label="Attribution" value={props.attribution ?? '— {{SELLER_NAME}}'} onChange={v => updateProps({ attribution: v })} />
+                        {phButton('attribution', 'attribution')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Quote text colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
+                        <ColorRow label="Quote mark colour" value={props.accentColor ?? '#ede9fe'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Attribution colour" value={props.attributionColor ?? '#7530fb'} onChange={v => updateProps({ attributionColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'highlight_text':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Highlight text" value={props.text ?? '{{HIGHLIGHT_TEXT}}'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'highlight text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#b8fa33'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
             )
 
         default:

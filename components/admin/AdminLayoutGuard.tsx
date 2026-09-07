@@ -1,32 +1,32 @@
 ﻿'use client'
 // components/admin/AdminLayoutGuard.tsx
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // RIAZIFY â€” Admin Layout Guard
 // Renders a hard 403 block BEFORE the tab content mounts.
 // Prevents URL tampering, data flash, and escape-key exploits.
 // Wrap each tab content in SettingsLayout with this component.
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 import { Shield, Lock } from 'lucide-react'
 import { AdminPermissions } from '@/hooks/useAdminPermissions'
 
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
+  dark: '#1e1535',
+  lime: '#b8fa33',
+  limeDeep: '#4d7c0f',
+  limeTint: '#f3eeff',
+  border: '#ede9fe',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
+  muted: '#6b7280',
+  surface: '#ffffff',
+  red: '#dc2626',
 }
 
 interface AdminLayoutGuardProps {
-  tabIndex:    number
+  tabIndex: number
   permissions: AdminPermissions
-  children:    React.ReactNode
+  children: React.ReactNode
 }
 
 export default function AdminLayoutGuard({
@@ -41,7 +41,7 @@ export default function AdminLayoutGuard({
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
         <div className="w-10 h-10 rounded-full border-2 border-transparent animate-spin"
-             style={{ borderTopColor: C.limeDeep }} />
+          style={{ borderTopColor: C.limeDeep }} />
         <p className="text-[13px] font-semibold" style={{ color: C.muted }}>
           Verifying access...
         </p>
@@ -54,7 +54,7 @@ export default function AdminLayoutGuard({
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-             style={{ backgroundColor: C.dark }}>
+          style={{ backgroundColor: C.dark }}>
           <Shield size={28} style={{ color: C.lime }} />
         </div>
         <p className="text-[18px] font-black" style={{ color: C.text }}>Access Denied</p>
@@ -70,18 +70,18 @@ export default function AdminLayoutGuard({
       <div className="flex flex-col items-center justify-center py-32 gap-5">
         {/* Hard 403 surface */}
         <div className="flex flex-col items-center gap-4 px-8 py-10 rounded-2xl border max-w-sm w-full"
-             style={{ backgroundColor: C.surface, borderColor: C.border }}>
+          style={{ backgroundColor: C.surface, borderColor: C.border }}>
 
           {/* Lock icon */}
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-               style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.08)' }}>
             <Lock size={28} style={{ color: C.red }} />
           </div>
 
           {/* 403 label */}
           <div className="text-center">
             <p className="text-[11px] font-black tracking-widest mb-1"
-               style={{ color: C.muted }}>
+              style={{ color: C.muted }}>
               403 FORBIDDEN
             </p>
             <p className="text-[18px] font-black" style={{ color: C.text }}>
@@ -96,7 +96,7 @@ export default function AdminLayoutGuard({
           {/* Role info */}
           {permissions.roleName && (
             <div className="flex items-center gap-2 px-4 py-2 rounded-xl border w-full"
-                 style={{ backgroundColor: C.bg, borderColor: C.border }}>
+              style={{ backgroundColor: C.bg, borderColor: C.border }}>
               <Shield size={13} style={{ color: C.muted }} />
               <p className="text-[12px] font-semibold" style={{ color: C.muted }}>
                 Your role: <span style={{ color: C.text }}>{permissions.roleName}</span>

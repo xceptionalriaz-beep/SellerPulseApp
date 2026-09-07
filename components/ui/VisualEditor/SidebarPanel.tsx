@@ -64,16 +64,22 @@ interface SidebarPanelProps {
     draggedType: BlockType | null
 
     // TemplatesTab props
-    onInsertTemplate: (blocks: Block[]) => void
+    /**
+     * Second arg is the inserted template's id (e.g. 'full-electronics') so
+     * the parent can switch the canvas into category-matched sample data mode.
+     */
+    onInsertTemplate: (blocks: Block[], templateId?: string) => void
 
     // BodySettings props
     canvasSettings: CanvasSettings
     onUpdateSettings: (settings: CanvasSettings) => void
 
     // ImagesTab props
-    onInsertImage: (url: string, alt: string) => void
+    onInsertImage: (url: string, alt: string, propKey?: string, propIndex?: number) => void
     selectedId: string | null
     blocks: Block[]
+    selectedSlot: { propKey: string; index?: number } | null
+    onSelectSlot: (slot: { propKey: string; index?: number } | null) => void
 
     // AuditTab props
     html: string
@@ -103,6 +109,8 @@ export default function SidebarPanel({
     canvasSettings,
     onUpdateSettings,
     onInsertImage,
+    selectedSlot,
+    onSelectSlot,
     selectedId,
     blocks,
     html,
@@ -169,6 +177,8 @@ export default function SidebarPanel({
                             onInsert={onInsertImage}
                             selectedId={selectedId}
                             blocks={blocks}
+                            selectedSlot={selectedSlot}
+                            onSelectSlot={onSelectSlot}
                         />
                     )}
 

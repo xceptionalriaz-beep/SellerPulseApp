@@ -161,7 +161,7 @@ export function SharedLinksPanel({ C }: Props) {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                     <span className={`fi fi-${FLAG[link.country] ?? 'us'}`} style={{ width: 20, height: 20, borderRadius: '50%', display: 'inline-block', backgroundSize: 'cover', flexShrink: 0 }} />
                                     <div>
-                                        <p style={{ fontSize: 12, fontWeight: 800, color: profit >= 0 ? '#16a34a' : '#b91c1c', margin: 0 }}>
+                                        <p style={{ fontSize: 12, fontWeight: 800, color: profit >= 0 ? '#4a7c00' : '#b91c1c', margin: 0 }}>
                                             {profit >= 0 ? '+' : ''}{sym}{Math.abs(profit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </p>
                                         <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>{margin.toFixed(1)}% margin</p>
@@ -189,7 +189,7 @@ export function SharedLinksPanel({ C }: Props) {
                             <div style={{ display: 'flex', gap: 6 }}>
                                 <button
                                     onClick={() => copyLink(link.id)}
-                                    style={{ flex: 1, height: 32, borderRadius: 6, border: `1px solid ${isCopied ? '#8fff00' : C.border}`, background: isCopied ? '#f0fdf4' : C.surface, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: isCopied ? '#4a7c00' : C.text, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+                                    style={{ flex: 1, height: 32, borderRadius: 6, border: `1px solid ${isCopied ? C.lime : C.border}`, background: isCopied ? C.limeBg || '#f3eeff' : C.surface, cursor: 'pointer', fontSize: 11, fontWeight: 700, color: isCopied ? C.lime : C.text, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
                                 >
                                     {isCopied ? <><Check size={12} color="#4a7c00" /> Copied!</> : <><Copy size={12} color={C.muted} /> Copy link</>}
                                 </button>

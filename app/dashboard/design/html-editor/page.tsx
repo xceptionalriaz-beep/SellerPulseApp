@@ -4,7 +4,7 @@
 
 import { useState, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import Link from 'next/link'
+// next/link removed — using router.push instead
 import {
     ChevronLeft, Save, X,
     Search, Plus, Image, Link2, ChevronDown,
@@ -96,23 +96,39 @@ const DEFAULT_HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; }
-    h1 { color: #333; }
-    .price { font-size: 24px; font-weight: bold; color: #e53e3e; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.6; color: #1f1d2e; background: #ffffff; }
+    table { border-collapse: collapse; }
+    img { max-width: 100%; height: auto; display: block; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>{{PRODUCT_TITLE}}</h1>
-    <!-- Main Product Image -->
-    <img src="{{MAIN_IMAGE_URL}}" alt="Product Image" style="max-width: 100%; height: auto;">
-    <p class="price">\${{ITEM_PRICE}}</p>
-    <div class="description">
-      {{ITEM_DESCRIPTION}}
-    </div>
-  </div>
+
+<!-- ═══════════════════════════════════════════════════
+     START BUILDING YOUR EBAY LISTING TEMPLATE HERE
+
+     TIPS:
+     • Use table-based layouts for best eBay compatibility
+     • Max width: 700px centred with align="center"
+     • All CSS must be inline — no <style> tags
+     • Use placeholders like {{PRODUCT_TITLE}}, {{ITEM_PRICE}}
+     • No JavaScript — eBay will strip it
+     ═══════════════════════════════════════════════════ -->
+
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td style="padding:20px;background-color:#ffffff;">
+
+      <!-- Your content here -->
+      <h1 style="margin:0 0 10px;font-size:22px;font-weight:700;color:#1e1535;">{{PRODUCT_TITLE}}</h1>
+      <p style="margin:0;font-size:14px;color:#6b7280;">{{ITEM_DESCRIPTION}}</p>
+
+    </td>
+  </tr>
+</table>
+
 </body>
 </html>`
 
@@ -230,17 +246,65 @@ function HtmlEditorInner() {
         }, 3000)
     }
 
+    const existingId = searchParams.get('id') || null
+    const isAdmin = searchParams.get('admin') === 'true'
+
     async function saveDraft() {
         setSaving(true)
-        await new Promise(r => setTimeout(r, 600))
-        setSaving(false)
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2000)
+        try {
+            const { createClient } = await import('@/lib/supabase')
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (existingId) {
+                // Update existing template
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await (supabase as any).from('listing_templates').update({
+                    name,
+                    description_html: html,
+                    updated_at: new Date().toISOString(),
+                }).eq('id', existingId)
+
+                // Track edit usage — only for real users, not admin
+                if (user && !isAdmin) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    await (supabase as any).from('template_usage').insert({
+                        template_id: existingId,
+                        user_id: user.id,
+                        action: 'edit',
+                    })
+                }
+            } else if (user) {
+                // Create new template
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await (supabase as any).from('listing_templates').insert({
+                    user_id: isAdmin ? null : user.id,
+                    name,
+                    description: isAdmin ? 'Admin template' : 'Custom template',
+                    category: searchParams.get('category') || 'general',
+                    description_html: html,
+                    is_system: false,
+                    is_shared: false,
+                    use_count: 0,
+                    created_at: new Date().toISOString(),
+                })
+            }
+        } catch (e) {
+            console.error('Save failed:', e)
+        } finally {
+            setSaving(false)
+            setSaved(true)
+            setTimeout(() => setSaved(false), 2000)
+        }
     }
 
     async function saveAndClose() {
         await saveDraft()
-        router.push('/dashboard/design?tab=templates')
+        if (isAdmin) {
+            router.push('/dashboard/admin?settings=26')
+        } else {
+            router.push('/dashboard/design?tab=my-templates')
+        }
     }
 
     // Test preview with real eBay data
@@ -289,11 +353,13 @@ function HtmlEditorInner() {
                 style={{ height: 52, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}`, gap: 12 }}>
 
                 <div className="flex items-center gap-3 min-w-0">
-                    <Link href="/dashboard/design?tab=templates"
+                    <button
+                        onClick={() => router.push(isAdmin ? '/dashboard/admin?settings=26' : '/dashboard/design?tab=templates')}
                         className="flex items-center gap-1 text-[12px] font-semibold shrink-0 hover:opacity-70 transition-all"
-                        style={{ color: C.primary, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
-                        <ChevronLeft size={14} /> Template Library
-                    </Link>
+                        style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                        <ChevronLeft size={14} />
+                        {isAdmin ? 'Admin Templates' : 'Template Library'}
+                    </button>
                     <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
                     <h1 className="text-[15px] font-bold truncate"
                         style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>

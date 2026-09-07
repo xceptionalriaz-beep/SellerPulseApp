@@ -6,13 +6,15 @@ import { useState } from 'react'
 import { Link, CheckCircle, AlertTriangle, X } from 'lucide-react'
 
 const C = {
-  lime: '#8fff00',
-  dark: '#1a2410',
-  border: '#e8ede2',
-  muted: '#8a9e78',
+  lime: '#7530fb',          // primary (Electric Violet)
+  limeDeep: '#6020e0',      // primary hover
+  accent: '#b8fa33',        // accent (Soft Lime)
+  dark: '#1f1d2e',
+  border: '#ede9fe',
+  muted: '#a89cc8',
   surface: '#ffffff',
-  bg: '#f7f9f5',
-  text: '#1a2410',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
   red: '#b91c1c',
   green: '#16a34a',
   amber: '#d97706',
@@ -149,7 +151,7 @@ export default function EbaySearchBar({ currentCountry, onFetch }: EbaySearchBar
 
   const borderColor =
     status === 'error' ? C.red :
-      status === 'success' ? C.green :
+      status === 'success' ? C.accent :
         focused ? C.lime : C.border
 
   return (
@@ -181,7 +183,7 @@ export default function EbaySearchBar({ currentCountry, onFetch }: EbaySearchBar
               fontSize: 13, color: C.text, background: 'transparent',
             }}
           />
-          {status === 'success' && <CheckCircle size={14} color={C.green} style={{ flexShrink: 0 }} />}
+          {status === 'success' && <CheckCircle size={14} color={C.accent} style={{ flexShrink: 0 }} />}
           {status === 'error' && <AlertTriangle size={14} color={C.red} style={{ flexShrink: 0 }} />}
           {url && (
             <button onClick={handleClear} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', padding: 0, color: C.muted }}>
@@ -196,7 +198,7 @@ export default function EbaySearchBar({ currentCountry, onFetch }: EbaySearchBar
           disabled={isFetching || !url.trim()}
           style={{
             height: 36, padding: '0 16px', borderRadius: 8,
-            border: 'none', background: C.lime, color: C.dark,
+            border: 'none', background: C.lime, color: '#ffffff',
             fontSize: 13, fontWeight: 700,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             minWidth: 70, flexShrink: 0,
@@ -208,7 +210,7 @@ export default function EbaySearchBar({ currentCountry, onFetch }: EbaySearchBar
             <div style={{
               width: 16, height: 16, borderRadius: '50%',
               border: '2px solid transparent',
-              borderTopColor: C.dark,
+              borderTopColor: '#ffffff',
               animation: 'spin 0.7s linear infinite',
             }} />
           ) : 'Fetch'}

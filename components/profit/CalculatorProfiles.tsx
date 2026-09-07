@@ -12,15 +12,16 @@ import {
 
 // ── Palette ──────────────────────────────────────────────────────────────────
 const C = {
-    lime: '#8fff00',
-    limeDeep: '#4a7c00',
-    limeBg: '#f0fdf4',
-    dark: '#1a2410',
-    border: '#e8ede2',
-    muted: '#8a9e78',
+    lime: '#7530fb',          // primary (Electric Violet)
+    limeDeep: '#6020e0',      // primary hover
+    limeBg: '#f3eeff',        // primary tint background
+    accent: '#b8fa33',        // accent (Soft Lime) — small highlights
+    dark: '#1f1d2e',
+    border: '#ede9fe',
+    muted: '#a89cc8',
     surface: '#ffffff',
-    bg: '#f7f9f5',
-    text: '#1a2410',
+    bg: '#f8f7ff',
+    text: '#1f1d2e',
     red: '#b91c1c',
     redBg: '#fef2f2',
     amber: '#d97706',
@@ -41,7 +42,7 @@ const ICONS = [
     { key: 'Gamepad2', Icon: Gamepad2 },
 ]
 
-const ACCENT_COLORS = ['#8fff00', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6']
+const ACCENT_COLORS = ['#b8fa33', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6']
 
 function ProfileIcon({ iconKey, size = 14, color = C.muted }: { iconKey: string; size?: number; color?: string }) {
     const found = ICONS.find(i => i.key === iconKey)

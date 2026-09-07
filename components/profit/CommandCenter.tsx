@@ -11,13 +11,15 @@ import ProDropdown from '@/components/ui/ProDropdown'
 
 // ── Brand palette (spec-exact) ─────────────────────────────────
 const C = {
-  lime: '#8fff00',
-  dark: '#1a2410',
-  border: '#e8ede2',
-  muted: '#8a9e78',
+  lime: '#7530fb',          // primary (Electric Violet)
+  limeDeep: '#6020e0',      // primary hover
+  accent: '#b8fa33',        // accent (Soft Lime)
+  dark: '#1f1d2e',
+  border: '#ede9fe',
+  muted: '#a89cc8',
   surface: '#ffffff',
-  bg: '#f7f9f5',
-  text: '#1a2410',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
   red: '#b91c1c',
   amber: '#d97706',
   green: '#16a34a',

@@ -1,36 +1,37 @@
 // components/ui/VisualEditor/templates/sports.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// COMPLETE Sports Template — 16 blocks, bold navy/orange theme
-// Professional UK eBay seller layout — 100% ready to use
+// Sports & Fitness Template — 16 blocks, 2-column hero + refined policy cards.
+// Category-consistent product theme: bold navy / orange.
 // ─────────────────────────────────────────────────────────────────────────────
 import { TemplateSection } from './types'
 
 export const sportsTemplate: TemplateSection = {
     id: 'full-sports',
     name: 'Sports & Fitness',
-    description: 'Bold navy & orange theme · 16 blocks · Pro UK seller layout',
+    description: 'Bold navy & orange theme · 16 blocks · Pro 2-column hero + crisp cards',
     category: 'full',
     thumbnail: 'sports',
     blocks: [
 
-        // ── 1. Store Hero Header — navy to orange gradient ────────────────────
+        // ── 1. Store Hero Header (compact) ───────────────────────────────────
         {
             type: 'hero_header', props: {
                 storeName: '{{SELLER_NAME}}',
                 tagline: 'Pro Sports Equipment · Fast UK Dispatch · Trusted Since 2015',
                 bgColor: '#0f2040',
                 bgGradient: true,
-                gradientFrom: '#0f2040',
-                gradientTo: '#c45000',
-                textColor: '#ffffff',
+                bgGradientFrom: '#0f2040',
+                bgGradientTo: '#c45000',
+                bgGradientDir: 135,
+                nameFontSize: 22,
+                nameFontWeight: '800',
+                nameColor: '#ffffff',
+                taglineFontSize: 12,
                 taglineColor: '#f97316',
                 showLogo: false,
-                height: 120,
+                height: 80,
                 align: 'center',
                 borderRadius: 0,
-                nameFontSize: 28,
-                nameFontWeight: '800',
-                taglineFontSize: 13,
                 paddingTop: 0,
                 paddingBottom: 0,
                 paddingLeft: 24,
@@ -39,7 +40,7 @@ export const sportsTemplate: TemplateSection = {
             }
         },
 
-        // ── 2. Navigation Bar — orange on navy ────────────────────────────────
+        // ── 2. Navigation Bar ─────────────────────────────────────────────────
         {
             type: 'nav_bar', props: {
                 bgColor: '#f97316',
@@ -57,85 +58,50 @@ export const sportsTemplate: TemplateSection = {
                 paddingLeft: 24,
                 paddingRight: 24,
                 links: [
-                    { label: 'All Items', url: '{{STORE_URL}}' },
-                    { label: 'Clothing', url: '#' },
-                    { label: 'Footwear', url: '#' },
-                    { label: 'Equipment', url: '#' },
-                    { label: 'Supplements', url: '#' },
-                    { label: 'Contact Us', url: '#' },
+                    { label: 'All Items',     url: '{{STORE_URL}}' },
+                    { label: 'Clothing',      url: '#' },
+                    { label: 'Footwear',      url: '#' },
+                    { label: 'Equipment',     url: '#' },
+                    { label: 'Supplements',   url: '#' },
+                    { label: 'Contact Us',    url: '#' },
                 ],
             }
         },
 
-        // ── 3. Product Title + Condition ──────────────────────────────────────
+        // ── 3. 2-Column Hero Product ──────────────────────────────────────────
         {
-            type: 'product_title', props: {
-                text: '{{PRODUCT_TITLE}}',
-                conditionText: 'Condition: {{ITEM_CONDITION}}',
-                showCondition: true,
-                color: '#0f2040',
-                conditionColor: '#f97316',
-                fontSize: 24,
-                fontWeight: '800',
-                align: 'left',
-                bgColor: '#f0f4fa',
-                paddingTop: 20,
-                paddingBottom: 8,
+            type: 'hero_product', props: {
+                paddingTop: 24,
+                paddingBottom: 24,
                 paddingLeft: 20,
                 paddingRight: 20,
-                fontFamily: 'Arial, Helvetica, sans-serif',
-            }
-        },
-
-        // ── 4. Product Image ──────────────────────────────────────────────────
-        {
-            type: 'product_image', props: {
-                src: '{{MAIN_IMAGE_URL}}',
-                alt: '{{PRODUCT_TITLE}}',
-                maxWidth: 520,
-                align: 'center',
-                borderRadius: 10,
-                showBorder: true,
-                borderColor: '#c8d4e8',
-                borderWidth: 1,
-                objectFit: 'contain',
-                bgColor: '#f0f4fa',
-                paddingTop: 20,
-                paddingBottom: 20,
-                paddingLeft: 20,
-                paddingRight: 20,
-            }
-        },
-
-        // ── 5. Price Block — orange badge ─────────────────────────────────────
-        {
-            type: 'price_block', props: {
-                priceText: '{{ITEM_PRICE}}',
-                priceColor: '#0f2040',
-                priceFontSize: 38,
-                priceFontWeight: '900',
-                priceAlign: 'left',
+                leftImage: '{{MAIN_IMAGE_URL}}',
+                thumb1: '{{IMAGE_2_URL}}',
+                thumb2: '{{IMAGE_3_URL}}',
+                thumb3: '{{IMAGE_4_URL}}',
+                thumb4: '{{IMAGE_5_URL}}',
+                leftBg: '#f0f4fa',
+                rightTitle: '{{PRODUCT_TITLE}}',
+                rightCondition: '{{ITEM_CONDITION}}',
+                rightPrice: '{{ITEM_PRICE}}',
+                rightOriginal: '{{ORIGINAL_PRICE}}',
                 showOriginal: true,
-                originalText: '{{ORIGINAL_PRICE}}',
-                originalColor: '#9ca3af',
-                originalSize: 16,
-                showBadge: true,
-                badgeText: 'FREE DELIVERY',
-                badgeBg: '#f97316',
-                badgeColor: '#ffffff',
-                badgeFontSize: 11,
-                badgeBorderRadius: 4,
-                bgColor: '#e8f0fc',
-                borderRadius: 0,
-                paddingTop: 16,
-                paddingBottom: 16,
-                paddingLeft: 20,
-                paddingRight: 20,
-                fontFamily: 'Arial, Helvetica, sans-serif',
+                rightQuantity: '{{QUANTITY}}',
+                showScarcity: true,
+                rightBadgeText: 'Brand New',
+                rightBullets: [
+                    'Professional grade — trusted by athletes and coaches',
+                    'Lightweight and durable — built for performance',
+                    '{{SPORT}} specific design — optimised for your game',
+                    'Official licensed product — 100% authentic',
+                ],
+                accentColor: '#f97316',
+                scarcityBg: '#fff7ed',
+                scarcityColor: '#9a3412',
             }
         },
 
-        // ── 6. Urgency Bar ────────────────────────────────────────────────────
+        // ── 4. Urgency Bar ────────────────────────────────────────────────────
         {
             type: 'urgency_bar', props: {
                 text: '⚡ Only {{QUANTITY}} left — {{WATCHERS}} athletes watching this right now!',
@@ -154,63 +120,40 @@ export const sportsTemplate: TemplateSection = {
             }
         },
 
-        // ── 7. Key Features Bullet List ───────────────────────────────────────
-        {
-            type: 'bullet_list', props: {
-                items: [
-                    'Professional grade — trusted by athletes and coaches',
-                    'Lightweight and durable — built for performance',
-                    '{{SPORT}} specific design — optimised for your game',
-                    'Official licensed product — 100% authentic',
-                    'Free UK returns within 30 days',
-                ],
-                bulletStyle: 'check',
-                bulletColor: '#f97316',
-                color: '#0f2040',
-                fontSize: 13,
-                bgColor: '#f0f4fa',
-                paddingTop: 16,
-                paddingBottom: 16,
-                paddingLeft: 20,
-                paddingRight: 20,
-                fontFamily: 'Arial, Helvetica, sans-serif',
-            }
-        },
-
-        // ── 8. Trust Badges ───────────────────────────────────────────────────
+        // ── 5. Trust Badges (white card grid) ────────────────────────────────
         {
             type: 'trust_badges', props: {
                 iconColor: '#f97316',
                 textColor: '#0f2040',
                 subTextColor: '#6b7280',
-                badgeBg: '#f0f4fa',
-                borderColor: '#c8d4e8',
-                borderRadius: 10,
+                borderColor: '#e5e7eb',
+                borderRadius: 12,
                 align: 'center',
                 bgColor: '#ffffff',
-                paddingTop: 20,
-                paddingBottom: 20,
+                paddingTop: 24,
+                paddingBottom: 24,
                 paddingLeft: 20,
                 paddingRight: 20,
+                variant: 'grid',
                 badges: [
-                    { icon: 'shield-check', text: 'Official Product', subText: '100% Authentic' },
-                    { icon: 'truck', text: 'Fast Dispatch', subText: 'Same Day if before 3pm' },
-                    { icon: 'rotate-ccw', text: '30-Day Returns', subText: 'Hassle Free' },
-                    { icon: 'star', text: 'Top Rated Seller', subText: '5000+ Reviews' },
+                    { icon: 'shield-check', text: 'Official Product',  subText: '100% Authentic' },
+                    { icon: 'truck',         text: 'Fast Dispatch',      subText: 'Same Day if before 3pm' },
+                    { icon: 'rotate-ccw',    text: '30-Day Returns',     subText: 'Hassle Free' },
+                    { icon: 'star',          text: 'Top Rated Seller',   subText: '5000+ Reviews' },
                 ],
             }
         },
 
-        // ── 9. Product Description ────────────────────────────────────────────
+        // ── 6. Product Description ────────────────────────────────────────────
         {
             type: 'product_description', props: {
                 text: '{{ITEM_DESCRIPTION}}',
                 titleText: 'About This Item',
                 showTitle: true,
                 titleColor: '#0f2040',
-                titleFontSize: 16,
+                titleFontSize: 18,
                 color: '#374151',
-                fontSize: 13,
+                fontSize: 14,
                 lineHeight: 1.8,
                 bgColor: '#ffffff',
                 paddingTop: 24,
@@ -221,11 +164,45 @@ export const sportsTemplate: TemplateSection = {
             }
         },
 
-        // ── 10. Divider — navy ────────────────────────────────────────────────
+        // ── 7. Specs Table (crisp 2-column alternating) ──────────────────────
+        {
+            type: 'specs_table', props: {
+                showTitle: true,
+                titleText: 'Item Specifics',
+                titleColor: '#0f2040',
+                titleFontSize: 16,
+                headerBg: '#1e1535',
+                headerText: '#ffffff',
+                altRowBg: '#f9fafb',
+                rowBg: '#ffffff',
+                borderColor: '#f3f4f6',
+                fontSize: 13,
+                bgColor: '#ffffff',
+                paddingTop: 0,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                variant: 'full',
+                rows: [
+                    { key: 'Brand',         value: '{{BRAND}}' },
+                    { key: 'Sport',         value: '{{SPORT}}' },
+                    { key: 'Size',          value: '{{SIZE}}' },
+                    { key: 'Colour',        value: '{{COLOUR}}' },
+                    { key: 'Material',      value: '{{MATERIAL}}' },
+                    { key: 'Gender',        value: '{{GENDER}}' },
+                    { key: 'Age Group',     value: '{{AGE_GROUP}}' },
+                    { key: 'Model Number',  value: '{{MPN}}' },
+                    { key: 'EAN / GTIN',    value: '{{EAN}}' },
+                    { key: 'Warranty',      value: '{{WARRANTY}}' },
+                ],
+            }
+        },
+
+        // ── 8. Divider ───────────────────────────────────────────────────────
         {
             type: 'divider', props: {
                 lineStyle: 'solid',
-                color: '#c8d4e8',
+                color: '#e5e7eb',
                 thickness: 1,
                 widthPercent: 100,
                 paddingTop: 4,
@@ -233,89 +210,59 @@ export const sportsTemplate: TemplateSection = {
             }
         },
 
-        // ── 11. Specs Table — sports specific ─────────────────────────────────
-        {
-            type: 'specs_table', props: {
-                showTitle: true,
-                titleText: 'Item Specifics',
-                titleColor: '#0f2040',
-                titleFontSize: 16,
-                headerBg: '#0f2040',
-                headerText: '#f97316',
-                altRowBg: '#f0f4fa',
-                rowBg: '#ffffff',
-                borderColor: '#c8d4e8',
-                fontSize: 13,
-                bgColor: '#ffffff',
-                paddingTop: 0,
-                paddingBottom: 0,
-                paddingLeft: 0,
-                paddingRight: 0,
-                rows: [
-                    { key: 'Brand', value: '{{BRAND}}' },
-                    { key: 'Sport', value: '{{SPORT}}' },
-                    { key: 'Size', value: '{{SIZE}}' },
-                    { key: 'Colour', value: '{{COLOUR}}' },
-                    { key: 'Material', value: '{{MATERIAL}}' },
-                    { key: 'Gender', value: '{{GENDER}}' },
-                    { key: 'Age Group', value: '{{AGE_GROUP}}' },
-                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
-                    { key: 'Model Number', value: '{{MPN}}' },
-                    { key: 'EAN / GTIN', value: '{{EAN}}' },
-                    { key: 'SKU', value: '{{ITEM_SKU}}' },
-                    { key: 'Warranty', value: '12 Months' },
-                ],
-            }
-        },
-
-        // ── 12. Shipping Info — navy green ────────────────────────────────────
+        // ── 9. Shipping Info (white card with truck SVG) ─────────────────────
         {
             type: 'shipping_info', props: {
-                bgColor: '#e8f0fc',
-                textColor: '#0f2040',
-                iconColor: '#2563eb',
-                borderRadius: 0,
-                shippingText: '✅ FREE Standard UK Delivery — Royal Mail 48 (2–3 business days)',
-                dispatchText: '⚡ Same-day dispatch on orders placed before 3pm Mon–Fri',
-                locationText: '📦 Dispatched from: United Kingdom',
-                paddingTop: 14,
-                paddingBottom: 14,
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
+                iconColor: '#16a34a',
+                accentColor: '#16a34a',
+                iconBg: '#f0fdf4',
+                borderRadius: 8,
+                shippingText: '{{SHIPPING_TIME}} — FREE Standard UK Delivery',
+                dispatchText: 'Same-day dispatch on orders placed before 3pm Mon–Fri',
+                locationText: 'Dispatched from: United Kingdom',
+                paddingTop: 16,
+                paddingBottom: 16,
                 paddingLeft: 20,
                 paddingRight: 20,
             }
         },
 
-        // ── 13. Returns Policy — orange accent ────────────────────────────────
+        // ── 10. Returns Policy (white card with rotate-ccw SVG) ──────────────
         {
             type: 'returns_policy', props: {
-                bgColor: '#fff7ed',
-                textColor: '#9a3412',
-                iconColor: '#f97316',
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
                 accentColor: '#f97316',
-                borderRadius: 0,
-                policyText: '↩ 30-day hassle-free returns. Items must be unused and in original packaging.',
+                iconColor: '#f97316',
+                iconBg: '#fff7ed',
+                borderRadius: 8,
+                policyText: '{{RETURN_POLICY}}. Items must be unused, unworn and in original packaging with all tags attached.',
                 showPeriod: true,
                 periodText: '30-Day Free Returns on items not as described',
-                paddingTop: 14,
-                paddingBottom: 14,
+                paddingTop: 16,
+                paddingBottom: 16,
                 paddingLeft: 20,
                 paddingRight: 20,
             }
         },
 
-        // ── 14. Policy Tabs ───────────────────────────────────────────────────
+        // ── 11. Policy Tabs ──────────────────────────────────────────────────
         {
             type: 'policy_tabs', props: {
                 activeBg: '#0f2040',
-                activeText: '#f97316',
+                activeText: '#ffffff',
                 inactiveBg: '#f0f4fa',
                 inactiveText: '#374151',
-                borderColor: '#c8d4e8',
+                borderColor: '#e5e7eb',
                 contentBg: '#ffffff',
                 fontSize: 13,
-                borderRadius: 0,
-                paddingTop: 0,
-                paddingBottom: 0,
+                borderRadius: 8,
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
                 tabs: [
                     {
                         label: 'Shipping',
@@ -337,7 +284,32 @@ export const sportsTemplate: TemplateSection = {
             }
         },
 
-        // ── 15. Seller Info ───────────────────────────────────────────────────
+        // ── 12. Cross-Sell ───────────────────────────────────────────────────
+        {
+            type: 'cross_sell', props: {
+                title: 'You May Also Like',
+                titleColor: '#0f2040',
+                titleFontSize: 16,
+                bgColor: '#f0f4fa',
+                cardBg: '#ffffff',
+                cardBorder: '#e5e7eb',
+                borderRadius: 12,
+                columns: 3,
+                showPrice: true,
+                gap: 12,
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                items: [
+                    { imageUrl: '{{RELATED_IMAGE_1}}', title: '{{RELATED_TITLE_1}}', price: '{{RELATED_PRICE_1}}', url: '{{RELATED_URL_1}}' },
+                    { imageUrl: '{{RELATED_IMAGE_2}}', title: '{{RELATED_TITLE_2}}', price: '{{RELATED_PRICE_2}}', url: '{{RELATED_URL_2}}' },
+                    { imageUrl: '{{RELATED_IMAGE_3}}', title: '{{RELATED_TITLE_3}}', price: '{{RELATED_PRICE_3}}', url: '{{RELATED_URL_3}}' },
+                ],
+            }
+        },
+
+        // ── 13. Seller Info ──────────────────────────────────────────────────
         {
             type: 'seller_info', props: {
                 sellerName: '{{SELLER_NAME}}',
@@ -348,10 +320,9 @@ export const sportsTemplate: TemplateSection = {
                 badgeColor: '#f97316',
                 avatarBg: '#0f2040',
                 avatarText: '#f97316',
-                bgColor: '#e8f0fc',
+                bgColor: '#f0f4fa',
                 textColor: '#0f2040',
                 subTextColor: '#6b7280',
-                accentColor: '#f97316',
                 borderRadius: 0,
                 paddingTop: 20,
                 paddingBottom: 20,
@@ -361,7 +332,7 @@ export const sportsTemplate: TemplateSection = {
             }
         },
 
-        // ── 16. CTA Footer Banner — navy/orange gradient ──────────────────────
+        // ── 14. CTA Footer Banner ─────────────────────────────────────────────
         {
             type: 'cta_banner', props: {
                 headingText: 'Gear Up & Perform — Trusted UK Sports Seller',
@@ -370,6 +341,8 @@ export const sportsTemplate: TemplateSection = {
                 bgGradient: true,
                 gradientFrom: '#0f2040',
                 gradientTo: '#c45000',
+                headingColor: '#ffffff',
+                subColor: 'rgba(255,255,255,0.75)',
                 textColor: '#ffffff',
                 subTextColor: 'rgba(255,255,255,0.75)',
                 align: 'center',

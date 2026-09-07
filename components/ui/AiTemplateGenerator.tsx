@@ -91,6 +91,7 @@ interface Props {
     open: boolean
     onClose: () => void
     onImport: (html: string, name: string, category: string) => void
+    isAdmin?: boolean
 }
 
 function wrapForPreview(html: string): string {
@@ -98,7 +99,7 @@ function wrapForPreview(html: string): string {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f1d2e;background:#fff;}img{max-width:100%;height:auto;display:block;}table{border-collapse:collapse;}</style></head><body>${html}</body></html>`
 }
 
-export default function AiTemplateGenerator({ open, onClose, onImport }: Props) {
+export default function AiTemplateGenerator({ open, onClose, onImport, isAdmin = false }: Props) {
     const router = useRouter()
     const supabase = createClient()
 
@@ -218,7 +219,7 @@ STRICT RULES — follow every single one:
             if (!user) throw new Error('Not logged in')
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (supabase.from('listing_templates') as any).insert({
-                user_id: user.id,
+                user_id: isAdmin ? null : user.id,
                 name: templateName,
                 category,
                 description_html: html,
@@ -559,7 +560,7 @@ STRICT RULES — follow every single one:
                                         ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</>
                                         : saved
                                             ? <><Check size={13} /> Saved!</>
-                                            : <><Save size={13} /> Save to My Templates</>
+                                            : <><Save size={13} /> {isAdmin ? 'Save as Admin Draft' : 'Save to My Templates'}</>
                                     }
                                 </button>
                             </div>

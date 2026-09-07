@@ -15,10 +15,10 @@ function pad(p: any): string {
 }
 
 const FALLBACK_BADGES = [
-    { icon: '🛡️', text: 'Genuine Product', subText: '100% Authentic' },
-    { icon: '🚚', text: 'Fast Dispatch', subText: 'Same Day if before 3pm' },
-    { icon: '↩', text: '30-Day Returns', subText: 'Hassle Free' },
-    { icon: '⭐', text: 'Top Rated Seller', subText: '5000+ Reviews' },
+    { icon: 'shield-check', text: 'Genuine Product', subText: '100% Authentic' },
+    { icon: 'truck',         text: 'Fast Dispatch',   subText: 'Same Day if before 3pm' },
+    { icon: 'rotate-ccw',    text: '30-Day Returns',  subText: 'Hassle Free' },
+    { icon: 'star',          text: 'Top Rated Seller', subText: '5000+ Reviews' },
 ]
 
 export const trustBadgesVariants: BlockVariant[] = [
@@ -27,14 +27,19 @@ export const trustBadgesVariants: BlockVariant[] = [
     {
         id: 'row',
         label: 'Row of 4',
-        description: 'Icons above text, 4 badges in a horizontal row',
+        description: 'White cards, Lucide icon above text — horizontal row',
         toHtml(p: any, id: string): string {
             const badges = (p.badges?.length ? p.badges : FALLBACK_BADGES).slice(0, 4)
+            const iconColor = p.iconColor ?? '#7530fb'
             const cols = badges.map((b: any) => `
-      <td width="${Math.floor(100 / badges.length)}%" style="text-align:center;vertical-align:top;padding:0 8px;">
-        <div style="display:block;font-size:28px;line-height:1;margin-bottom:8px;">${b.icon ?? '✓'}</div>
-        <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${p.textColor ?? '#1e1535'};">${b.text}</p>
-        ${b.subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.subTextColor ?? '#6b7280'};">${b.subText}</p>` : ''}
+      <td width="${Math.floor(100 / badges.length)}%" style="text-align:center;vertical-align:top;padding:0 4px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;">
+          <tr><td style="padding:14px 8px;text-align:center;">
+            <div style="display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;background-color:#f5f3ff;color:${iconColor};border-radius:8px;font-size:18px;">${b.icon ?? '✓'}</div>
+            <p style="margin:8px 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${p.textColor ?? '#1e1535'};">${b.text}</p>
+            ${b.subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.subTextColor ?? '#6b7280'};">${b.subText}</p>` : ''}
+          </td></tr>
+        </table>
       </td>`).join('')
             return `<!--[riazify:trust_badges:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};">
@@ -52,22 +57,23 @@ export const trustBadgesVariants: BlockVariant[] = [
     {
         id: 'grid',
         label: '2×2 Grid',
-        description: 'Four badges in a 2 column grid',
+        description: 'Crisp white cards with Lucide icon squares — 2 column grid',
         toHtml(p: any, id: string): string {
             const badges = (p.badges?.length ? p.badges : FALLBACK_BADGES).slice(0, 4)
+            const iconColor = p.iconColor ?? '#7530fb'
             const rows = [badges.slice(0, 2), badges.slice(2, 4)]
             const rowHtml = rows.map((row: any[]) => `
       <tr>${row.map((b: any) => `
-        <td width="50%" style="vertical-align:top;padding:8px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.badgeBg ?? '#f8f7ff'};border-radius:${p.borderRadius ?? 10}px;border:1px solid ${p.borderColor ?? '#ede9fe'};">
+        <td width="50%" style="vertical-align:top;padding:6px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:12px;border:1px solid #e5e7eb;">
             <tr>
               <td style="padding:14px 16px;vertical-align:middle;">
                 <table cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    <td style="padding-right:12px;vertical-align:middle;font-size:24px;line-height:1;">${b.icon ?? '✓'}</td>
+                    <td width="36" height="36" style="width:36px;height:36px;padding-right:12px;vertical-align:middle;text-align:center;background-color:#f5f3ff;border-radius:8px;color:${iconColor};font-size:18px;line-height:36px;">${b.icon ?? '✓'}</td>
                     <td style="vertical-align:middle;">
-                      <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${p.textColor ?? '#1e1535'};">${b.text}</p>
-                      ${b.subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.subTextColor ?? '#6b7280'};">${b.subText}</p>` : ''}
+                      <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#1e1535'};">${b.text}</p>
+                      ${b.subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:${p.subTextColor ?? '#6b7280'};">${b.subText}</p>` : ''}
                     </td>
                   </tr>
                 </table>

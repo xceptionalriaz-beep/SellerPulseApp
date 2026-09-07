@@ -1,33 +1,33 @@
-// components/ui/VisualEditor/templates/electronics.ts
+// components/ui/VisualEditor/templates/pet.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// Electronics Template — 16 blocks, 2-column hero + refined policy cards.
-// Category-consistent product theme: TechVault headphones.
+// Pet Supplies Template — 16 blocks, polished high-converting layout.
+// Showcases the new 2-column hero + refined policy/specs/trust cards.
 // ─────────────────────────────────────────────────────────────────────────────
 import { TemplateSection } from './types'
 
-export const electronicsTemplate: TemplateSection = {
-    id: 'full-electronics',
-    name: 'Electronics',
-    description: 'Dark tech theme · 16 blocks · Pro 2-column hero + crisp policy cards',
+export const petTemplate: TemplateSection = {
+    id: 'full-pet',
+    name: 'Pet Supplies',
+    description: 'Pet theme · 16 blocks · Pro 2-column hero + crisp policy cards',
     category: 'full',
-    thumbnail: 'electronics',
+    thumbnail: 'pet',
     blocks: [
 
         // ── 1. Store Hero Header (compact) ───────────────────────────────────
         {
             type: 'hero_header', props: {
                 storeName: '{{SELLER_NAME}}',
-                tagline: 'Authorised UK Reseller · Same-Day Dispatch · 5-Star Rated',
-                bgColor: '#0f172a',
+                tagline: 'Trusted Pet Supplies · UK Family-Run Store · 5-Star Rated',
+                bgColor: '#1e1535',
                 bgGradient: true,
-                bgGradientFrom: '#0f172a',
-                bgGradientTo: '#1e3a5f',
+                bgGradientFrom: '#1e1535',
+                bgGradientTo: '#3b2563',
                 bgGradientDir: 135,
                 nameFontSize: 22,
                 nameFontWeight: '800',
                 nameColor: '#ffffff',
                 taglineFontSize: 12,
-                taglineColor: '#93c5fd',
+                taglineColor: '#c4b5fd',
                 showLogo: false,
                 height: 80,
                 align: 'center',
@@ -43,10 +43,10 @@ export const electronicsTemplate: TemplateSection = {
         // ── 2. Navigation Bar ─────────────────────────────────────────────────
         {
             type: 'nav_bar', props: {
-                bgColor: '#1e293b',
-                textColor: '#94a3b8',
-                hoverColor: '#3b82f6',
-                activeColor: '#60a5fa',
+                bgColor: '#ffffff',
+                textColor: '#374151',
+                hoverColor: '#7530fb',
+                activeColor: '#7530fb',
                 separator: '|',
                 align: 'center',
                 fontSize: 12,
@@ -58,12 +58,13 @@ export const electronicsTemplate: TemplateSection = {
                 paddingLeft: 24,
                 paddingRight: 24,
                 links: [
-                    { label: 'All Items',    url: '{{STORE_URL}}' },
-                    { label: 'Smartphones',  url: '#' },
-                    { label: 'Laptops',      url: '#' },
-                    { label: 'Accessories',  url: '#' },
-                    { label: 'Bundles',      url: '#' },
-                    { label: 'Contact Us',   url: '#' },
+                    { label: 'All Items',  url: '{{STORE_URL}}' },
+                    { label: 'Dogs',       url: '#' },
+                    { label: 'Cats',       url: '#' },
+                    { label: 'Grooming',   url: '#' },
+                    { label: 'Feeding',    url: '#' },
+                    { label: 'Toys',       url: '#' },
+                    { label: 'Contact',    url: '#' },
                 ],
             }
         },
@@ -80,7 +81,7 @@ export const electronicsTemplate: TemplateSection = {
                 thumb2: '{{IMAGE_3_URL}}',
                 thumb3: '{{IMAGE_4_URL}}',
                 thumb4: '{{IMAGE_5_URL}}',
-                leftBg: '#f8fafc',
+                leftBg: '#f9fafb',
                 rightTitle: '{{PRODUCT_TITLE}}',
                 rightCondition: '{{ITEM_CONDITION}}',
                 rightPrice: '{{ITEM_PRICE}}',
@@ -90,12 +91,12 @@ export const electronicsTemplate: TemplateSection = {
                 showScarcity: true,
                 rightBadgeText: 'Brand New',
                 rightBullets: [
-                    'Hi-Res certified 40mm dynamic drivers',
-                    'Active Noise Cancellation with Transparency mode',
-                    '40-hour battery life — USB-C fast charging',
-                    'Bluetooth 5.3 multipoint pairing',
+                    'Veterinarian-recommended deshedding tool',
+                    'Self-cleaning retractable stainless-steel bristles',
+                    'Reduces shedding by up to 95% — all coat types',
+                    'Ergonomic non-slip handle — gentle on skin',
                 ],
-                accentColor: '#1d4ed8',
+                accentColor: '#7530fb',
                 scarcityBg: '#fef2f2',
                 scarcityColor: '#991b1b',
             }
@@ -104,7 +105,7 @@ export const electronicsTemplate: TemplateSection = {
         // ── 4. Urgency Bar ────────────────────────────────────────────────────
         {
             type: 'urgency_bar', props: {
-                text: '🔥 Only {{QUANTITY}} units left — {{WATCHERS}} people watching this item',
+                text: '🔥 Only {{QUANTITY}} left in stock — {{WATCHERS}} people are watching this right now',
                 bgColor: '#fef2f2',
                 textColor: '#991b1b',
                 iconColor: '#ef4444',
@@ -120,12 +121,12 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 5. Trust Badges (white card grid) ────────────────────────────────
+        // ── 5. Trust Badges (white card row) ─────────────────────────────────
         {
             type: 'trust_badges', props: {
-                iconColor: '#1d4ed8',
-                textColor: '#0f172a',
-                subTextColor: '#64748b',
+                iconColor: '#7530fb',
+                textColor: '#1e1535',
+                subTextColor: '#6b7280',
                 borderColor: '#e5e7eb',
                 borderRadius: 12,
                 align: 'center',
@@ -150,7 +151,7 @@ export const electronicsTemplate: TemplateSection = {
                 text: '{{ITEM_DESCRIPTION}}',
                 titleText: 'About This Item',
                 showTitle: true,
-                titleColor: '#0f172a',
+                titleColor: '#1e1535',
                 titleFontSize: 18,
                 color: '#475569',
                 fontSize: 14,
@@ -169,7 +170,7 @@ export const electronicsTemplate: TemplateSection = {
             type: 'specs_table', props: {
                 showTitle: true,
                 titleText: 'Item Specifics',
-                titleColor: '#0f172a',
+                titleColor: '#1e1535',
                 titleFontSize: 16,
                 headerBg: '#1e1535',
                 headerText: '#ffffff',
@@ -184,16 +185,14 @@ export const electronicsTemplate: TemplateSection = {
                 paddingRight: 20,
                 variant: 'full',
                 rows: [
-                    { key: 'Brand',             value: '{{BRAND}}' },
-                    { key: 'Model',             value: '{{MODEL}}' },
-                    { key: 'Model Number',      value: '{{MPN}}' },
-                    { key: 'Condition',         value: '{{ITEM_CONDITION}}' },
-                    { key: 'Connectivity',      value: '{{CONNECTIVITY}}' },
-                    { key: 'Network',           value: '{{NETWORK}}' },
-                    { key: 'Storage Capacity',  value: '{{STORAGE}}' },
-                    { key: 'Colour',            value: '{{COLOUR}}' },
-                    { key: 'EAN / GTIN',        value: '{{EAN}}' },
-                    { key: 'Warranty',          value: '{{WARRANTY}}' },
+                    { key: 'Brand',         value: '{{BRAND}}' },
+                    { key: 'MPN',           value: '{{MPN}}' },
+                    { key: 'Type',          value: '{{TYPE}}' },
+                    { key: 'Material',      value: '{{MATERIAL}}' },
+                    { key: 'Features',      value: '{{FEATURES}}' },
+                    { key: 'Suitable For',  value: '{{SUITABLE_FOR}}' },
+                    { key: 'EAN',           value: '{{EAN}}' },
+                    { key: 'Warranty',      value: '{{WARRANTY}}' },
                 ],
             }
         },
@@ -202,7 +201,7 @@ export const electronicsTemplate: TemplateSection = {
         {
             type: 'divider', props: {
                 lineStyle: 'solid',
-                color: '#e2e8f0',
+                color: '#e5e7eb',
                 thickness: 1,
                 widthPercent: 100,
                 paddingTop: 4,
@@ -214,12 +213,12 @@ export const electronicsTemplate: TemplateSection = {
         {
             type: 'shipping_info', props: {
                 bgColor: '#ffffff',
-                textColor: '#0f172a',
+                textColor: '#1e1535',
                 iconColor: '#16a34a',
                 accentColor: '#16a34a',
                 iconBg: '#f0fdf4',
                 borderRadius: 8,
-                shippingText: '{{SHIPPING_TIME}} — FREE Standard UK Delivery',
+                shippingText: '{{SHIPPING_TIME}} — FREE UK Delivery',
                 dispatchText: 'Same-day dispatch on orders placed before 3pm Mon–Fri',
                 locationText: 'Dispatched from: United Kingdom',
                 paddingTop: 16,
@@ -233,7 +232,7 @@ export const electronicsTemplate: TemplateSection = {
         {
             type: 'returns_policy', props: {
                 bgColor: '#ffffff',
-                textColor: '#0f172a',
+                textColor: '#1e1535',
                 accentColor: '#3b82f6',
                 iconColor: '#3b82f6',
                 iconBg: '#eff6ff',
@@ -251,11 +250,11 @@ export const electronicsTemplate: TemplateSection = {
         // ── 11. Policy Tabs ──────────────────────────────────────────────────
         {
             type: 'policy_tabs', props: {
-                activeBg: '#1d4ed8',
+                activeBg: '#7530fb',
                 activeText: '#ffffff',
-                inactiveBg: '#f8fafc',
-                inactiveText: '#475569',
-                borderColor: '#e2e8f0',
+                inactiveBg: '#f9fafb',
+                inactiveText: '#6b7280',
+                borderColor: '#e5e7eb',
                 contentBg: '#ffffff',
                 fontSize: 13,
                 borderRadius: 8,
@@ -266,7 +265,7 @@ export const electronicsTemplate: TemplateSection = {
                 tabs: [
                     {
                         label: 'Shipping',
-                        content: 'We offer FREE standard UK delivery on all orders via Royal Mail 48 (2–3 business days). Express next-day delivery is available at checkout for £3.99. Orders placed before 3pm Monday–Friday are dispatched the same day. International shipping is available via the eBay Global Shipping Programme — duties and taxes may apply for orders outside the UK.',
+                        content: 'We offer FREE standard UK delivery on all orders (2–3 business days via Royal Mail 48). Express next-day delivery is available at checkout for £3.99. Orders placed before 3pm Monday–Friday are dispatched the same day. International shipping is available via the eBay Global Shipping Programme.',
                     },
                     {
                         label: 'Returns',
@@ -274,11 +273,11 @@ export const electronicsTemplate: TemplateSection = {
                     },
                     {
                         label: 'Payment',
-                        content: 'We accept all major payment methods through eBay secure checkout including PayPal, Visa, Mastercard, American Express, Apple Pay and Google Pay. All transactions are protected by the eBay Money Back Guarantee. Payment must be completed within 4 days of purchase. We do not accept bank transfers or cheques.',
+                        content: 'We accept all major payment methods through eBay secure checkout including PayPal, Visa, Mastercard, American Express, Apple Pay and Google Pay. All transactions are protected by the eBay Money Back Guarantee. Payment must be completed within 4 days of purchase.',
                     },
                     {
                         label: 'Warranty',
-                        content: 'All electronics are covered by a minimum 12-month manufacturer warranty unless otherwise stated in the listing. If you experience any fault or issue with your item, please contact us directly before opening a case — we will resolve the matter promptly and professionally. Extended warranty options are available on selected products — please message us for details.',
+                        content: 'All products are covered by a minimum 12-month manufacturer warranty. If you experience any fault or issue with your item, please contact us directly before opening a case — we will resolve the matter promptly and professionally.',
                     },
                 ],
             }
@@ -288,13 +287,13 @@ export const electronicsTemplate: TemplateSection = {
         {
             type: 'cross_sell', props: {
                 title: 'You May Also Like',
-                titleColor: '#0f172a',
+                titleColor: '#1e1535',
                 titleFontSize: 16,
-                bgColor: '#f8fafc',
+                bgColor: '#f9fafb',
                 cardBg: '#ffffff',
-                cardBorder: '#e2e8f0',
+                cardBorder: '#e5e7eb',
                 borderRadius: 12,
-                columns: 3,
+                columns: 4,
                 showPrice: true,
                 gap: 12,
                 paddingTop: 24,
@@ -302,9 +301,10 @@ export const electronicsTemplate: TemplateSection = {
                 paddingLeft: 20,
                 paddingRight: 20,
                 items: [
-                    { imageUrl: '{{RELATED_IMAGE_1}}', title: '{{RELATED_TITLE_1}}', price: '{{RELATED_PRICE_1}}', url: '{{RELATED_URL_1}}' },
-                    { imageUrl: '{{RELATED_IMAGE_2}}', title: '{{RELATED_TITLE_2}}', price: '{{RELATED_PRICE_2}}', url: '{{RELATED_URL_2}}' },
-                    { imageUrl: '{{RELATED_IMAGE_3}}', title: '{{RELATED_TITLE_3}}', price: '{{RELATED_PRICE_3}}', url: '{{RELATED_URL_3}}' },
+                    { imageUrl: '{{RELATED_IMAGE_1}}', title: '{{RELATED_TITLE_1}}', price: '{{RELATED_PRICE_1}}', url: '#' },
+                    { imageUrl: '{{RELATED_IMAGE_2}}', title: '{{RELATED_TITLE_2}}', price: '{{RELATED_PRICE_2}}', url: '#' },
+                    { imageUrl: '{{RELATED_IMAGE_3}}', title: '{{RELATED_TITLE_3}}', price: '{{RELATED_PRICE_3}}', url: '#' },
+                    { imageUrl: '{{RELATED_IMAGE_4}}', title: '{{RELATED_TITLE_4}}', price: '{{RELATED_PRICE_4}}', url: '#' },
                 ],
             }
         },
@@ -313,16 +313,16 @@ export const electronicsTemplate: TemplateSection = {
         {
             type: 'seller_info', props: {
                 sellerName: '{{SELLER_NAME}}',
-                tagline: 'Authorised UK Reseller · Est. 2015 · 5,000+ Happy Customers',
+                tagline: 'Trusted Pet Supplies UK · Est. 2018 · 5,000+ Happy Pet Parents',
                 feedbackText: '{{FEEDBACK_SCORE}} positive feedback ({{FEEDBACK_PERCENT}}%)',
                 showBadge: true,
                 badgeText: 'Top Rated Seller',
-                badgeColor: '#1d4ed8',
-                avatarBg: '#1e3a5f',
-                avatarText: '#ffffff',
-                bgColor: '#f0f7ff',
-                textColor: '#0f172a',
-                subTextColor: '#475569',
+                badgeColor: '#7530fb',
+                avatarBg: '#f5f3ff',
+                avatarText: '#7530fb',
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
+                subTextColor: '#6b7280',
                 borderRadius: 0,
                 paddingTop: 20,
                 paddingBottom: 20,
@@ -335,16 +335,16 @@ export const electronicsTemplate: TemplateSection = {
         // ── 14. CTA Footer Banner ─────────────────────────────────────────────
         {
             type: 'cta_banner', props: {
-                headingText: 'Buy with Confidence — Trusted eBay Electronics Seller',
+                headingText: 'Buy with Confidence — Trusted UK Pet Supplies',
                 subText: 'Genuine products · Secure eBay checkout · Fast same-day dispatch · 30-day returns',
-                bgColor: '#0f172a',
+                bgColor: '#1e1535',
                 bgGradient: true,
-                gradientFrom: '#0f172a',
-                gradientTo: '#1e3a5f',
+                gradientFrom: '#1e1535',
+                gradientTo: '#7530fb',
                 headingColor: '#ffffff',
-                subColor: 'rgba(255,255,255,0.65)',
+                subColor: 'rgba(255,255,255,0.7)',
                 textColor: '#ffffff',
-                subTextColor: 'rgba(255,255,255,0.65)',
+                subTextColor: 'rgba(255,255,255,0.7)',
                 align: 'center',
                 minHeight: 90,
                 paddingTop: 28,

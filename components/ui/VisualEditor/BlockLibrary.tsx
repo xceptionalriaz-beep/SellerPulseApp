@@ -19,6 +19,10 @@ const C = {
 const CATEGORY_COLORS: Record<BlockCategory, string> = {
     'Layout': '#7530fb', 'Content': '#0ea5e9', 'Product': '#16a34a',
     'Media': '#d97706', 'eBay Specific': '#16a34a', 'Conversion': '#ef4444',
+    // Brand-consistent tail: 'Header & Footer' uses the deep brand purple
+    // (matches `C.dark` above), 'Typography' uses the secondary slate so the
+    // two new categories visually balance the existing six.
+    'Header & Footer': '#1e1535', 'Typography': '#6b7280',
 }
 
 // ── SVG visual previews ───────────────────────────────────────────────────────

@@ -39,7 +39,7 @@ interface SavedTemplate {
 }
 
 interface SavedTabProps {
-    onLoad: (name: string, blocks: Block[], settings: CanvasSettings) => void
+    onLoad: (name: string, blocks: Block[], settings: CanvasSettings, id: string) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: 6 }}>
                             <button
-                                onClick={() => onLoad(t.name, t.blocks_json, t.canvas_settings_json)}
+                                onClick={() => onLoad(t.name, t.blocks_json, t.canvas_settings_json, t.id)}
                                 style={{
                                     flex: 1,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,

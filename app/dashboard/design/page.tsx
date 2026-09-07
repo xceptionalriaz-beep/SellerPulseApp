@@ -239,7 +239,7 @@ function DesignStudioInner() {
             // User's own templates
             let own: ListingTemplate[] = []
             if (user) {
-                const { data: ownData } = await rawDb
+                const { data: ownData } = await (supabase as any)
                     .from('listing_templates')
                     .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
                     .eq('user_id', user.id)
@@ -619,7 +619,7 @@ function DesignStudioInner() {
                                 )}
 
                             {/* My Templates — has results */}
-                            {myTemplates.filter(t => {
+                            {activeTab === 'my-templates' && myTemplates.filter(t => {
                                 const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
                                 const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
                                 return matchCat && matchSearch
@@ -649,6 +649,7 @@ function DesignStudioInner() {
                                                     onCopy={() => copyHtml(t)}
                                                     onDelete={() => deleteTemplate(t.id)}
                                                     onEdit={() => router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                                                    onVisualEdit={() => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
                                                     onDuplicate={() => duplicateTemplate(t)}
                                                 />
                                             ))}
@@ -903,10 +904,11 @@ interface CardProps {
     onCopy: () => void
     onDelete: () => void
     onEdit: () => void
+    onVisualEdit?: () => void
     onDuplicate: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit, onDuplicate }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit, onVisualEdit, onDuplicate }: CardProps) {
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
@@ -978,6 +980,14 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                             style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                             <Pencil size={13} /> Edit
                         </button>
+                        {onVisualEdit && (
+                            <button
+                                onClick={e => { e.stopPropagation(); onVisualEdit() }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-90"
+                                style={{ backgroundColor: '#1e1535', color: '#b8fa33', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                <LayoutTemplate size={13} /> Visual
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -1000,7 +1010,12 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                         active={copied} variant={copied ? 'success' : 'default'} size={28} />
                     <IconButton onClick={onEdit}
                         icon={<Pencil size={12} />}
-                        tooltip="Edit template" size={28} />
+                        tooltip="Edit in Code Editor" size={28} />
+                    {onVisualEdit && (
+                        <IconButton onClick={onVisualEdit}
+                            icon={<LayoutTemplate size={12} />}
+                            tooltip="Edit in Visual Builder" size={28} />
+                    )}
                     {isOwn && (
                         <IconButton onClick={onDelete}
                             icon={deleting ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={12} />}

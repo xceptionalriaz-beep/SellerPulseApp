@@ -60,9 +60,11 @@ interface AssetFile {
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface ImagesTabProps {
-    onInsert: (url: string, alt: string) => void
+    onInsert: (url: string, alt: string, propKey?: string, propIndex?: number) => void
     selectedId: string | null
     blocks: Block[]
+    selectedSlot: { propKey: string; index?: number } | null
+    onSelectSlot: (slot: { propKey: string; index?: number } | null) => void
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -75,29 +77,86 @@ function formatSize(bytes: number): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function ImagesTab({ onInsert, selectedId, blocks }: ImagesTabProps) {
+export default function ImagesTab({ onInsert, selectedId, blocks, selectedSlot, onSelectSlot }: ImagesTabProps) {
     const [activeTab, setActiveTab] = useState<'assets' | 'stock'>('assets')
 
-    // ── Work out what the selected block is and if it accepts images ──────────
     const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const blockProps = selectedBlock?.props as any
-    const blockHasImageProp = selectedBlock
-        ? ['src', 'imageUrl', 'logoUrl', 'bgImage'].some(k => k in (blockProps ?? {}))
-        : false
+    const bp = selectedBlock?.props as any
 
-    // Label shown in the banner
-    const blockLabel: Record<string, string> = {
-        product_image: 'Product Image',
-        image: 'Image',
-        hero_header: 'Hero Header (logo)',
-        banner: 'Banner',
-        cta_banner: 'CTA Banner',
-        gallery_row: 'Gallery Row',
+    // ── Image slots — variant-aware per block type ────────────────────────────
+    const getImageSlots = (block: Block | null): Array<{ propKey: string; index?: number; label: string; hasImage: boolean }> => {
+        if (!block) return []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const p = block.props as any
+        switch (block.type) {
+            case 'product_image': {
+                // Gallery Strip — uses src + image2Url...image5Url individually
+                const slots = [{ propKey: 'src', label: 'Main Image', hasImage: !!(p.src && !p.src.includes('{{')) }]
+                if ('image2Url' in p) slots.push({ propKey: 'image2Url', label: 'Image 2', hasImage: !!(p.image2Url && !p.image2Url.includes('{{')) })
+                if ('image3Url' in p) slots.push({ propKey: 'image3Url', label: 'Image 3', hasImage: !!(p.image3Url && !p.image3Url.includes('{{')) })
+                if ('image4Url' in p) slots.push({ propKey: 'image4Url', label: 'Image 4', hasImage: !!(p.image4Url && !p.image4Url.includes('{{')) })
+                if ('image5Url' in p) slots.push({ propKey: 'image5Url', label: 'Image 5', hasImage: !!(p.image5Url && !p.image5Url.includes('{{')) })
+                // Rename for Front & Back / Before & After variants
+                if (slots.length === 2 && ('label1' in p || 'image2Url' in p)) {
+                    slots[0].label = p.label1 ?? 'Front'
+                    slots[1].label = p.label2 ?? 'Back'
+                }
+                return slots
+            }
+            case 'gallery_row':
+                return [
+                    { propKey: 'mainImageSrc', label: 'Main Image', hasImage: !!(p.mainImageSrc && !p.mainImageSrc.includes('{{')) },
+                    ...((p.images ?? []) as Array<{ src: string }>).map((img, i) => ({
+                        propKey: 'images', index: i, label: `View ${i + 2}`,
+                        hasImage: !!(img.src && !img.src.includes('{{')),
+                    })),
+                ]
+            case 'single_image':
+            case 'image':
+                return [{ propKey: 'src', label: 'Image', hasImage: !!(p.src && !p.src.includes('{{')) }]
+            case 'before_after':
+                if ('image2Url' in p) return [
+                    { propKey: 'src', label: 'Before', hasImage: !!(p.src && !p.src.includes('{{')) },
+                    { propKey: 'image2Url', label: 'After', hasImage: !!(p.image2Url && !p.image2Url.includes('{{')) },
+                ]
+                return [
+                    { propKey: 'beforeSrc', label: 'Before', hasImage: !!(p.beforeSrc && !p.beforeSrc.includes('{{')) },
+                    { propKey: 'afterSrc', label: 'After', hasImage: !!(p.afterSrc && !p.afterSrc.includes('{{')) },
+                ]
+            case 'logo_bar':
+                return [{ propKey: 'logoUrl', label: 'Logo', hasImage: !!(p.logoUrl && !p.logoUrl.includes('{{')) }]
+            case 'hero_header':
+                return [{ propKey: 'logoUrl', label: 'Store Logo', hasImage: !!(p.logoUrl && !p.logoUrl.includes('{{')) }]
+            case 'banner':
+                return [{ propKey: 'src', label: 'Banner Image', hasImage: !!(p.src && !p.src.includes('{{')) }]
+            default:
+                if ('src' in (p ?? {})) return [{ propKey: 'src', label: 'Image', hasImage: !!(p.src && !p.src.includes('{{')) }]
+                if ('imageUrl' in (p ?? {})) return [{ propKey: 'imageUrl', label: 'Image', hasImage: !!(p.imageUrl && !p.imageUrl.includes('{{')) }]
+                return []
+        }
     }
-    const selectedLabel = selectedBlock
-        ? (blockLabel[selectedBlock.type] ?? selectedBlock.type)
-        : null
+
+    const imageSlots = getImageSlots(selectedBlock)
+    const hasSlots = imageSlots.length > 0
+
+    const blockLabel: Record<string, string> = {
+        product_image: 'Product Image', image: 'Image',
+        hero_header: 'Hero Header', banner: 'Banner',
+        gallery_row: 'Gallery Row', single_image: 'Single Image',
+        before_after: 'Before & After', logo_bar: 'Logo Bar',
+    }
+    const selectedLabel = selectedBlock ? (blockLabel[selectedBlock.type] ?? selectedBlock.type) : null
+
+    const handleInsertWithSlot = (url: string, alt: string) => {
+        if (selectedSlot) {
+            onInsert(url, alt, selectedSlot.propKey, selectedSlot.index)
+        } else if (imageSlots.length === 1) {
+            onInsert(url, alt, imageSlots[0].propKey, imageSlots[0].index)
+        } else {
+            onInsert(url, alt)
+        }
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: C.bg }}>
@@ -143,58 +202,64 @@ export default function ImagesTab({ onInsert, selectedId, blocks }: ImagesTabPro
                 </div>
             </div>
 
-            {/* ── Smart insert banner ── */}
-            <div style={{
-                margin: '0 10px 6px',
-                padding: '7px 10px',
-                borderRadius: 8,
-                backgroundColor: blockHasImageProp
-                    ? 'rgba(184,250,51,0.15)'
-                    : selectedBlock && !blockHasImageProp
-                        ? 'rgba(239,68,68,0.08)'
-                        : 'rgba(117,48,251,0.07)',
-                border: `1px solid ${blockHasImageProp
-                        ? 'rgba(184,250,51,0.4)'
-                        : selectedBlock && !blockHasImageProp
-                            ? 'rgba(239,68,68,0.2)'
-                            : 'rgba(117,48,251,0.15)'
-                    }`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                flexShrink: 0,
-            }}>
-                <div style={{
-                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                    backgroundColor: blockHasImageProp
-                        ? '#16a34a'
-                        : selectedBlock && !blockHasImageProp
-                            ? '#ef4444'
-                            : '#7530fb',
-                }} />
-                <p style={{
-                    margin: 0,
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 10,
-                    color: blockHasImageProp ? '#15803d'
-                        : selectedBlock && !blockHasImageProp ? '#dc2626'
-                            : '#7530fb',
-                    lineHeight: 1.4,
-                }}>
-                    {blockHasImageProp
-                        ? `Inserting into: ${selectedLabel}`
-                        : selectedBlock && !blockHasImageProp
-                            ? `${selectedLabel} doesn't support images — will add new block`
-                            : 'No block selected — image will be added as new block'
-                    }
-                </p>
-            </div>
+            {/* ── Image slot selector ── */}
+            {hasSlots && (
+                <div style={{ margin: '8px 10px 0', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', flexShrink: 0, backgroundColor: C.surface }}>
+                    <div style={{ padding: '6px 10px', borderBottom: `1px solid ${C.border}`, backgroundColor: C.bg }}>
+                        <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.primary, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {selectedLabel} — select slot
+                        </p>
+                    </div>
+                    {imageSlots.map((slot, i) => {
+                        const isActive = selectedSlot?.propKey === slot.propKey && selectedSlot?.index === slot.index
+                        let currentSrc = ''
+                        if (slot.propKey === 'images' && slot.index !== undefined) {
+                            currentSrc = (bp?.images?.[slot.index]?.src) ?? ''
+                        } else {
+                            currentSrc = bp?.[slot.propKey] ?? ''
+                        }
+                        const hasReal = currentSrc && !currentSrc.includes('{{')
+                        return (
+                            <div key={`${slot.propKey}-${slot.index}`}
+                                onClick={e => { e.stopPropagation(); onSelectSlot(isActive ? null : slot) }}
+                                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', cursor: 'pointer', borderBottom: i < imageSlots.length - 1 ? `1px solid ${C.border}` : 'none', backgroundColor: isActive ? '#f3eeff' : 'transparent', transition: 'background 0.12s' }}
+                            >
+                                <div style={{ width: 34, height: 34, borderRadius: 6, border: `1.5px solid ${isActive ? C.primary : C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}>
+                                    {hasReal
+                                        ? <img src={currentSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
+                                    }
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: isActive ? 700 : 500, color: isActive ? C.primary : C.dark, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{slot.label}</p>
+                                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 9, color: C.muted }}>{hasReal ? 'Click to replace' : 'Empty — click to add'}</p>
+                                </div>
+                                {isActive && <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: C.primary, flexShrink: 0 }} />}
+                            </div>
+                        )
+                    })}
+                    {selectedSlot && (
+                        <div style={{ padding: '5px 10px', backgroundColor: '#f3eeff', borderTop: `1px solid ${C.border}` }}>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.primary, fontWeight: 600 }}>✓ Pick any image below to insert into {imageSlots.find(s => s.propKey === selectedSlot.propKey && s.index === selectedSlot.index)?.label}</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ── No slots / no selection banner ── */}
+            {!hasSlots && (
+                <div style={{ margin: '8px 10px 0', padding: '7px 10px', borderRadius: 8, backgroundColor: 'rgba(117,48,251,0.07)', border: '1px solid rgba(117,48,251,0.15)', flexShrink: 0 }}>
+                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#7530fb', lineHeight: 1.4 }}>
+                        {selectedBlock ? `${selectedLabel} has no image slots — will add as new image block` : 'Select an image block on canvas to see its slots'}
+                    </p>
+                </div>
+            )}
 
             {/* ── Tab content ── */}
-            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', marginTop: 8 }}>
                 {activeTab === 'assets'
-                    ? <AssetsTab onInsert={onInsert} />
-                    : <StockTab onInsert={onInsert} />
+                    ? <AssetsTab onInsert={handleInsertWithSlot} />
+                    : <StockTab onInsert={handleInsertWithSlot} />
                 }
             </div>
         </div>

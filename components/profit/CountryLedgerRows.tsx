@@ -7,6 +7,9 @@ const C = {
     amber: '#d97706',
     red: '#b91c1c',
     green: '#16a34a',
+    // Soft lime accent — used for positive ledger lines (e.g. GST saving).
+    // Matches the v2.0 brand palette used elsewhere in the dashboard.
+    accent: '#b8fa33',
 }
 
 function LedgerRow({ label, amount, color, symbol }: { label: string; amount: number; color: string; symbol: string }) {
@@ -80,7 +83,7 @@ export function CountryLedgerRows({
             {auGSTSaving > 0 && (
                 <LedgerRow
                     label="GST saving (ABN registered — 10% claimed back)"
-                    amount={auGSTSaving} color={C.green} symbol={sym}
+                    amount={auGSTSaving} color={C.accent} symbol={sym}
                 />
             )}
             {deIntlFee > 0 && (

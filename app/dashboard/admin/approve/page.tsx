@@ -13,32 +13,32 @@ import { createClient } from '@/lib/supabase'
 import { Shield, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  green:    '#16a34a',
-  amber:    '#d97706',
+  dark: '#1e1535',
+  lime: '#b8fa33',
+  limeDeep: '#4d7c0f',
+  limeTint: '#f3eeff',
+  border: '#ede9fe',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
+  muted: '#6b7280',
+  surface: '#ffffff',
+  red: '#dc2626',
+  green: '#16a34a',
+  amber: '#d97706',
 }
 
 function ApprovePageInner() {
-  const router       = useRouter()
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const token        = searchParams.get('token')
-  const autoAction   = searchParams.get('action') // 'approve' | 'reject' from email link
-  const supabase     = createClient()
+  const token = searchParams.get('token')
+  const autoAction = searchParams.get('action') // 'approve' | 'reject' from email link
+  const supabase = createClient()
 
-  const [state,      setState]      = useState<'loading' | 'pending' | 'processing' | 'done' | 'error'>('loading')
-  const [approval,   setApproval]   = useState<any>(null)
-  const [result,     setResult]     = useState<any>(null)
-  const [error,      setError]      = useState<string | null>(null)
-  const [timeLeft,   setTimeLeft]   = useState<string>('')
+  const [state, setState] = useState<'loading' | 'pending' | 'processing' | 'done' | 'error'>('loading')
+  const [approval, setApproval] = useState<any>(null)
+  const [result, setResult] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [timeLeft, setTimeLeft] = useState<string>('')
 
   useEffect(() => {
     if (token) loadApproval()
@@ -87,9 +87,9 @@ function ApprovePageInner() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/kill-switches/approve', {
-        method:  'POST',
+        method: 'POST',
         headers: {
-          'Content-Type':  'application/json',
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token ?? ''}`,
         },
         body: JSON.stringify({ token, action }),
@@ -106,26 +106,26 @@ function ApprovePageInner() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4"
-         style={{ backgroundColor: C.bg }}>
+      style={{ backgroundColor: C.bg }}>
       <div className="w-full max-w-md">
 
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-               style={{ backgroundColor: C.dark }}>
+            style={{ backgroundColor: C.dark }}>
             <Shield size={20} style={{ color: C.lime }} />
           </div>
           <span className="text-[22px] font-extrabold" style={{ color: C.dark }}>Riazify</span>
         </div>
 
         <div className="rounded-2xl overflow-hidden shadow-xl"
-             style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
+          style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
 
           {/* Loading */}
           {state === 'loading' && (
             <div className="flex flex-col items-center py-16 px-6 gap-3">
               <div className="w-10 h-10 rounded-full border-4 border-transparent animate-spin"
-                   style={{ borderTopColor: C.limeDeep }} />
+                style={{ borderTopColor: C.limeDeep }} />
               <p style={{ color: C.muted }}>Loading request...</p>
             </div>
           )}
@@ -143,7 +143,7 @@ function ApprovePageInner() {
               </div>
               <div className="p-8 flex flex-col gap-4">
                 <div className="flex flex-col gap-3 p-4 rounded-2xl border"
-                     style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                  style={{ backgroundColor: C.bg, borderColor: C.border }}>
                   <div className="flex justify-between">
                     <span style={{ color: C.muted, fontSize: 13 }}>Requested by</span>
                     <span style={{ color: C.dark, fontSize: 13, fontWeight: 700 }}>{approval.requester_name}</span>
@@ -161,7 +161,7 @@ function ApprovePageInner() {
                 </div>
 
                 <div className="p-3 rounded-xl border"
-                     style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.2)' }}>
+                  style={{ backgroundColor: 'rgba(220,38,38,0.06)', borderColor: 'rgba(220,38,38,0.25)' }}>
                   <p style={{ margin: 0, fontSize: 12, color: C.red }}>
                     Approving will immediately disable ALL tools for ALL users.
                   </p>
@@ -187,7 +187,7 @@ function ApprovePageInner() {
           {state === 'processing' && (
             <div className="flex flex-col items-center py-16 px-6 gap-3">
               <div className="w-10 h-10 rounded-full border-4 border-transparent animate-spin"
-                   style={{ borderTopColor: C.red }} />
+                style={{ borderTopColor: C.red }} />
               <p style={{ color: C.muted }}>Processing...</p>
             </div>
           )}
@@ -198,7 +198,7 @@ function ApprovePageInner() {
               {result.status === 'approved' ? (
                 <>
                   <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                       style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+                    style={{ backgroundColor: 'rgba(220,38,38,0.08)' }}>
                     <CheckCircle size={32} style={{ color: C.red }} />
                   </div>
                   <h2 style={{ color: C.dark, fontSize: 20, fontWeight: 900 }}>Kill All Approved</h2>
@@ -209,7 +209,7 @@ function ApprovePageInner() {
               ) : (
                 <>
                   <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                       style={{ backgroundColor: C.limeTint }}>
+                    style={{ backgroundColor: C.limeTint }}>
                     <XCircle size={32} style={{ color: C.limeDeep }} />
                   </div>
                   <h2 style={{ color: C.dark, fontSize: 20, fontWeight: 900 }}>Request Rejected</h2>
@@ -220,7 +220,7 @@ function ApprovePageInner() {
               )}
               <button onClick={() => router.push('/dashboard/admin')}
                 className="mt-2 px-6 py-3 rounded-2xl font-bold text-[14px]"
-                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                style={{ backgroundColor: C.lime, color: C.dark }}>
                 Go to Admin Panel
               </button>
             </div>
@@ -230,14 +230,14 @@ function ApprovePageInner() {
           {state === 'error' && (
             <div className="flex flex-col items-center py-12 px-6 gap-4 text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+                style={{ backgroundColor: 'rgba(220,38,38,0.08)' }}>
                 <AlertTriangle size={32} style={{ color: C.red }} />
               </div>
               <h2 style={{ color: C.dark, fontSize: 20, fontWeight: 900 }}>Something went wrong</h2>
               <p style={{ color: C.muted, fontSize: 14 }}>{error}</p>
               <button onClick={() => router.push('/dashboard/admin')}
                 className="mt-2 px-6 py-3 rounded-2xl font-bold text-[14px]"
-                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                style={{ backgroundColor: C.lime, color: C.dark }}>
                 Go to Admin Panel
               </button>
             </div>

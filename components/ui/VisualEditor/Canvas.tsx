@@ -47,6 +47,7 @@ import {
     getDefinition,
     BLOCK_DEFINITIONS,
 } from './blocks'
+import { renderForCanvas, extractTokens, type CategoryId } from './sampleData'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -113,10 +114,19 @@ interface CanvasProps {
     selectedId: string | null
     draggedType: BlockType | null
     zoom?: number
+    /** Set of block ids that match the current search. null = no search active. */
+    matchedIds?: Set<string> | null
+    /** @deprecated use matchedIds — kept for backwards-compat callers */
     canvasSearch?: string
     lockedIds?: Set<string>
     hiddenIds?: Set<string>
     deviceWidth: 'desktop' | 'tablet' | 'mobile'
+    /**
+     * Active template category — controls which set of sample data
+     * (product photos, brand name, spec values, cross-sell items) the
+     * canvas preview swaps in for {{TOKENS}}.
+     */
+    activeCategory?: CategoryId
     onSelect: (id: string) => void
     onDrop: (type: BlockType) => void
     onReorder: (fromIndex: number, toIndex: number) => void
@@ -140,10 +150,12 @@ export default function Canvas({
     selectedId,
     draggedType,
     zoom = 100,
+    matchedIds = null,
     canvasSearch = '',
     lockedIds = new Set(),
     hiddenIds = new Set(),
     deviceWidth,
+    activeCategory,
     onSelect,
     onDrop,
     onReorder,
@@ -241,7 +253,7 @@ export default function Canvas({
             onDrop={handleDrop}
         >
             {/* ── Drop overlay — shown when dragging from library ── */}
-            {draggedType && isDropTarget && blocks.length > 0 && (
+            {draggedType && isDropTarget && (
                 <div style={{
                     position: 'fixed',
                     inset: 0,
@@ -295,7 +307,16 @@ export default function Canvas({
                                 isSelected={isSelected}
                                 isLocked={lockedIds.has(block.id)}
                                 isHidden={hiddenIds.has(block.id)}
-                                searchMatch={!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true)}
+                                activeCategory={activeCategory}
+                                searchMatch={
+                                    // Prefer the parent's matchedIds set (single
+                                    // source of truth). Fall back to the legacy
+                                    // canvasSearch label-match for any other
+                                    // callers that haven't been updated yet.
+                                    matchedIds === null
+                                        ? (!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true))
+                                        : matchedIds.has(block.id)
+                                }
                                 isBeingDragged={isBeingDragged}
                                 onSelect={() => onSelect(block.id)}
                                 onDelete={() => onDelete(block.id)}
@@ -492,6 +513,7 @@ interface BlockCardProps {
     onReorderDragOver: (e: React.DragEvent) => void
     onReorderDrop: (e: React.DragEvent) => void
     onReorderDragEnd: () => void
+    activeCategory?: CategoryId
 }
 
 function BlockCard({
@@ -518,9 +540,23 @@ function BlockCard({
     onReorderDragOver,
     onReorderDrop,
     onReorderDragEnd,
+    activeCategory,
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
+
+    // ── Extract the {{TOKENS}} used in this block so we can surface them as a
+    //    hover badge — keeps the dynamic identifiers visible while the canvas
+    //    preview itself shows sample data.
+    const tokens = React.useMemo(() => {
+        try {
+            const blockDef = getDefinition(block.type)
+            if (!blockDef) return []
+            return extractTokens(blockDef.toHtml(block.props as any, block.id))
+        } catch {
+            return []
+        }
+    }, [block.type, block.id, block.props])
 
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -536,6 +572,7 @@ function BlockCard({
 
     return (
         <div
+            data-block-id={block.id}
             draggable
             onDragStart={e => {
                 // Canvas reorder — don't set dataTransfer type to prevent
@@ -634,8 +671,19 @@ function BlockCard({
             )}
 
             {/* ── Block preview content ── */}
-            <div style={{ padding: '14px 16px 12px', pointerEvents: 'none' }}>
-                <BlockPreview block={block} def={def} />
+            <div
+                ref={el => {
+                    if (el) {
+                        // Compute scale so 700px iframe fits the card width
+                        const w = el.getBoundingClientRect().width
+                        const scale = w > 0 ? (w / 700) : 1
+                        el.style.setProperty('--canvas-scale', String(scale))
+                        el.style.height = 'auto'
+                    }
+                }}
+                style={{ padding: '14px 16px 12px', pointerEvents: 'none', overflow: 'hidden' }}
+            >
+                <BlockPreview block={block} def={def} activeCategory={activeCategory} />
             </div>
 
             {/* ── Action toolbar — horizontal, top of block ── */}
@@ -719,6 +767,50 @@ function BlockCard({
                     >
                         <Trash2 size={13} />
                     </ActionButton>
+                </div>
+            )}
+
+            {/* ── Tokens-used hover badge (bottom-left) ── */}
+            {/* Shows which {{TOKENS}} are used in this block so the user can
+                still see what's dynamic, even though the canvas renders with
+                sample data. Visible on hover or when selected. */}
+            {(hovered || isSelected) && tokens.length > 0 && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 8,
+                    left: 8,
+                    backgroundColor: C.primary,
+                    color: '#fff',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    padding: '4px 9px',
+                    borderRadius: 20,
+                    letterSpacing: '0.02em',
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    maxWidth: 320,
+                    boxShadow: '0 2px 6px rgba(117, 48, 251, 0.25)',
+                }}>
+                    <span style={{
+                        fontFamily: 'monospace',
+                        fontSize: 9,
+                        opacity: 0.7,
+                        fontWeight: 700,
+                    }}>
+                        {'{{}}'}
+                    </span>
+                    <span style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {tokens.slice(0, 3).join(' · ')}
+                        {tokens.length > 3 && ` +${tokens.length - 3} more`}
+                    </span>
                 </div>
             )}
 
@@ -830,7 +922,7 @@ function ActionButton({
 // Renders the exact same HTML that goes to eBay, inside a sandboxed iframe.
 // What you see on canvas = what eBay renders. No more wireframe sketches.
 // ─────────────────────────────────────────────────────────────────────────────
-function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
+function BlockPreview({ block, def, activeCategory }: { block: Block; def: BlockDefinition; activeCategory?: CategoryId }) {
     const props = block.props as any
     const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
@@ -839,7 +931,27 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
         try {
             const blockDef = getDefinition(block.type)
             if (!blockDef) return ''
-            const blockHtml = blockDef.toHtml(props, block.id)
+            // 1) Render the eBay HTML as usual — still contains {{TOKENS}}
+            let blockHtml = blockDef.toHtml(props, block.id)
+
+            // 2) Canvas-only swap: replace {{TOKENS}} with sample data, swap
+            //    placeholder images for real product photos, and turn icon-name
+            //    strings (e.g. 'shield-check') into inline SVGs.
+            //    The block's props are NOT mutated — saved HTML stays tokenized.
+            //    Sample data is category-matched so the preview reflects the
+            //    active template's theme (pet / electronics / fashion / etc.).
+            blockHtml = renderForCanvas(blockHtml, block.type, activeCategory)
+
+            // 3) If any <img src> still references a {{TOKEN}} (defensive — should
+            //    be handled by renderForCanvas already), fall back to a small
+            //    transparent 1×1 so we never show the browser's broken-image icon.
+            if (/src="[^"]*\{\{[^}]*\}\}[^"]*"/i.test(blockHtml)) {
+                blockHtml = blockHtml.replace(
+                    /src="[^"]*\{\{[^}]*\}\}[^"]*"/gi,
+                    'src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221%22%20height%3D%221%22%2F%3E"'
+                )
+            }
+
             return `<!DOCTYPE html>
 <html>
 <head>
@@ -851,6 +963,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
     font-family: Arial, Helvetica, sans-serif;
     background: transparent;
     overflow: hidden;
+    width: 700px;
   }
   table { border-collapse: collapse; width: 100%; }
   img { border: 0; display: block; max-width: 100%; }
@@ -862,7 +975,7 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
         } catch {
             return ''
         }
-    }, [block.type, block.id, props])
+    }, [block.type, block.id, props, activeCategory])
 
     // Auto-resize iframe to fit content height
     const [height, setHeight] = React.useState(80)
@@ -896,22 +1009,31 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
 
     return (
         <div style={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
-            <iframe
-                ref={iframeRef}
-                srcDoc={html}
-                onLoad={onLoad}
-                sandbox="allow-same-origin"
-                scrolling="no"
-                style={{
-                    width: '100%',
-                    height: height,
-                    border: 'none',
-                    display: 'block',
-                    pointerEvents: 'none', // clicks go to canvas, not iframe
-                    backgroundColor: 'transparent',
-                }}
-                title={`Preview: ${def.label}`}
-            />
+            <div style={{
+                width: '100%',
+                overflow: 'hidden',
+                // Scale 700px content down to container width
+                transformOrigin: 'top left',
+            }}>
+                <iframe
+                    ref={iframeRef}
+                    srcDoc={html}
+                    onLoad={onLoad}
+                    sandbox="allow-same-origin"
+                    scrolling="no"
+                    style={{
+                        width: '700px',
+                        height: height,
+                        border: 'none',
+                        display: 'block',
+                        pointerEvents: 'none',
+                        backgroundColor: 'transparent',
+                        transformOrigin: 'top left',
+                        transform: 'scale(var(--canvas-scale, 1))',
+                    }}
+                    title={`Preview: ${def.label}`}
+                />
+            </div>
         </div>
     )
 }

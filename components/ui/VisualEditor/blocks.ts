@@ -71,6 +71,7 @@ export type BlockType =
     | 'whats_in_the_box'
     | 'key_features_grid'
     | 'product_comparison'
+    | 'hero_product'
     // Media
     | 'image'
     | 'banner'
@@ -145,6 +146,7 @@ export type BlockProps =
     | ProductDescriptionProps
     | SpecsTableProps
     | ImageProps
+    | HeroProductProps
     | BannerProps
     | GalleryRowProps
     | TrustBadgesProps
@@ -428,6 +430,35 @@ export interface ProductImageProps extends CommonProps {
     polaroidCaption: string
 }
 
+// ── Hero Product (2-column) ───────────────────────────────────────────────────
+export interface HeroProductProps extends CommonProps {
+    // Left column — image + thumbnails
+    leftImage: string         // default: {{MAIN_IMAGE_URL}}
+    thumb1: string            // default: {{IMAGE_2_URL}}
+    thumb2: string            // default: {{IMAGE_3_URL}}
+    thumb3: string            // default: {{IMAGE_4_URL}}
+    thumb4: string            // default: {{IMAGE_5_URL}}
+    leftBg: string            // image container background
+
+    // Right column — title + price + bullets
+    rightTitle: string        // default: {{PRODUCT_TITLE}}
+    rightCondition: string    // default: {{ITEM_CONDITION}}
+    rightPrice: string        // default: {{ITEM_PRICE}}
+    rightOriginal: string     // default: {{ORIGINAL_PRICE}}
+    showOriginal: boolean
+    rightQuantity: string     // default: {{QUANTITY}}
+    showScarcity: boolean
+    rightBadgeText: string    // small pill text (e.g. "Brand New")
+
+    // Bullets (4 hard-coded for high-converting eBay listings)
+    rightBullets: string[]
+
+    // Accent
+    accentColor: string       // title underline, price, bullets
+    scarcityBg: string
+    scarcityColor: string
+}
+
 // ── Product Description ───────────────────────────────────────────────────────
 export interface ProductDescriptionProps extends CommonProps {
     text: string              // default: {{ITEM_DESCRIPTION}}
@@ -523,6 +554,8 @@ export interface ShippingInfoProps extends CommonProps {
     bgColor: string
     textColor: string
     iconColor: string
+    accentColor: string       // left-edge accent stripe colour
+    iconBg: string            // icon-square background colour
     borderRadius: number
 }
 
@@ -533,8 +566,9 @@ export interface ReturnsPolicyProps extends CommonProps {
     periodText: string        // e.g. "30-Day Free Returns"
     bgColor: string
     textColor: string
-    accentColor: string
+    accentColor: string       // left-edge accent stripe colour
     iconColor: string         // icon colour
+    iconBg: string            // icon-square background colour
     borderRadius: number
 }
 
@@ -1266,6 +1300,122 @@ ${rows}
         }
     },
 
+    // ── HERO PRODUCT (2-column) ──────────────────────────────────────────────
+    {
+        type: 'hero_product',
+        label: 'Hero Product',
+        category: 'Product',
+        icon: 'layout-template',
+        description: 'High-converting 2-column hero: image + title + price + bullets',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 24,
+            paddingBottom: 24,
+            paddingLeft: 20,
+            paddingRight: 20,
+            // Left column
+            leftImage: '{{MAIN_IMAGE_URL}}',
+            thumb1: '{{IMAGE_2_URL}}',
+            thumb2: '{{IMAGE_3_URL}}',
+            thumb3: '{{IMAGE_4_URL}}',
+            thumb4: '{{IMAGE_5_URL}}',
+            leftBg: '#f9fafb',
+            // Right column
+            rightTitle: '{{PRODUCT_TITLE}}',
+            rightCondition: '{{ITEM_CONDITION}}',
+            rightPrice: '{{ITEM_PRICE}}',
+            rightOriginal: '{{ORIGINAL_PRICE}}',
+            showOriginal: true,
+            rightQuantity: '{{QUANTITY}}',
+            showScarcity: true,
+            rightBadgeText: 'Brand New',
+            rightBullets: [
+                'Veterinarian-recommended deshedding tool',
+                'Self-cleaning retractable bristles',
+                'Reduces shedding by up to 95%',
+                'Ergonomic non-slip handle — gentle on skin',
+            ],
+            // Accent
+            accentColor: '#7530fb',
+            scarcityBg: '#fef2f2',
+            scarcityColor: '#991b1b',
+        } as HeroProductProps,
+        toHtml(props, id) {
+            const p = props as HeroProductProps
+            const accent = p.accentColor ?? '#7530fb'
+
+            // Build the 4-bullet list with purple ✓ glyphs
+            const bullets = p.rightBullets.map(b =>
+                `<tr>
+                  <td width="18" valign="top" style="padding:3px 8px 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${accent};font-weight:700;line-height:1.5;">&#10003;</td>
+                  <td valign="top" style="padding:3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1f2937;line-height:1.5;">${b}</td>
+                </tr>`
+            ).join('')
+
+            // Original price (strikethrough) cell
+            const originalHtml = p.showOriginal
+                ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
+                : ''
+
+            // Scarcity pill
+            const scarcityHtml = p.showScarcity
+                ? `<span style="display:inline-block;background-color:${p.scarcityBg ?? '#fef2f2'};color:${p.scarcityColor ?? '#991b1b'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
+                : ''
+
+            // 4 thumbnails
+            const thumbs = [p.thumb1, p.thumb2, p.thumb3, p.thumb4]
+            const thumbCells = thumbs.map(t =>
+                `<td width="25%" style="padding:0 3px;">
+                   <img src="${t}" alt="" border="0" width="100%"
+                     style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:1px solid #e5e7eb;background-color:#f3f4f6;" />
+                 </td>`
+            ).join('')
+
+            return wrapBlock('hero_product', id,
+                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:#ffffff;${pad(p)}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <!-- LEFT COLUMN: image + thumbnails -->
+          <td width="48%" valign="top" style="padding-right:12px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
+              <tr>
+                <td style="padding:8px;">
+                  <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+                    style="width:100%;height:auto;display:block;border-radius:8px;aspect-ratio:1/1;object-fit:cover;" />
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:4px 8px 8px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>${thumbCells}</tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <!-- RIGHT COLUMN: title + price + scarcity + bullets -->
+          <td width="52%" valign="top" style="padding-left:12px;">
+            <span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>
+            <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#1e1535;line-height:1.3;">${p.rightTitle}</h1>
+            <div style="margin:0 0 6px;">
+              <span style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:900;color:${accent};letter-spacing:-0.01em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${originalHtml}
+            </div>
+            ${scarcityHtml}
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;border-top:1px solid #f3f4f6;padding-top:10px;">
+              ${bullets}
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
     {
         type: 'banner',
         label: 'Banner',
@@ -1377,10 +1527,10 @@ ${thumbCells}
             ...DEFAULT_COMMON,
             bgColor: '#f8f7ff',
             badges: [
-                { icon: 'check', text: 'Authentic Product' },
-                { icon: 'package', text: 'Fast Dispatch' },
-                { icon: 'rotate-ccw', text: '30-Day Returns' },
-                { icon: 'star', text: 'Top Rated Seller' },
+                { icon: '✅', text: 'Authentic Product' },
+                { icon: '🚚', text: 'Fast Dispatch' },
+                { icon: '↩️', text: '30-Day Returns' },
+                { icon: '⭐', text: 'Top Rated Seller' },
             ],
             iconColor: '#7530fb',
             textColor: '#1e1535',
@@ -1402,17 +1552,19 @@ ${thumbCells}
         label: 'Shipping Info Bar',
         category: 'eBay Specific',
         icon: 'truck',
-        description: 'Shipping time, dispatch and location bar',
+        description: 'White card with Lucide truck icon + green accent stripe',
         defaultProps: {
             ...DEFAULT_COMMON,
-            paddingTop: 14,
-            paddingBottom: 14,
+            paddingTop: 16,
+            paddingBottom: 16,
             shippingText: '{{SHIPPING_TIME}}',
             dispatchText: 'Same Day Dispatch Before 3pm',
             locationText: 'UK-Based Seller — Fast & Tracked',
-            bgColor: '#dcfce7',
-            textColor: '#166534',
+            bgColor: '#ffffff',
+            textColor: '#1e1535',
             iconColor: '#16a34a',
+            accentColor: '#16a34a',
+            iconBg: '#f0fdf4',
             borderRadius: 8,
         } as ShippingInfoProps,
         toHtml(props, id) {
@@ -1420,10 +1572,23 @@ ${thumbCells}
             return wrapBlock('shipping_info', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;">
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor};line-height:1.6;">
-        &#128230; <strong>${p.shippingText}</strong> &bull; ${p.dispatchText} &bull; ${p.locationText}
-      </p>
+    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;border:1px solid #e5e7eb;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="4" style="width:4px;background-color:${p.accentColor ?? '#16a34a'};border-radius:2px;">&nbsp;</td>
+          <td style="padding:0 0 0 14px;vertical-align:middle;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="36" height="36" style="width:36px;height:36px;text-align:center;background-color:${p.iconBg ?? '#f0fdf4'};color:${p.iconColor ?? '#16a34a'};border-radius:8px;font-size:18px;line-height:36px;vertical-align:middle;">truck</td>
+                <td style="padding-left:12px;vertical-align:middle;">
+                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${p.textColor};line-height:1.4;">${p.shippingText}</p>
+                  <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#475569;line-height:1.5;">${p.dispatchText} &bull; ${p.locationText}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>`
@@ -1436,31 +1601,46 @@ ${thumbCells}
         label: 'Returns Policy',
         category: 'eBay Specific',
         icon: 'rotate-ccw',
-        description: 'Returns policy block with period and terms',
+        description: 'White card with Lucide rotate-ccw icon + blue accent stripe',
         defaultProps: {
             ...DEFAULT_COMMON,
-            paddingTop: 14,
-            paddingBottom: 14,
+            paddingTop: 16,
+            paddingBottom: 16,
             policyText: '{{RETURN_POLICY}}',
             showPeriod: true,
             periodText: '30-Day Free Returns',
-            bgColor: '#e0f2fe',
-            textColor: '#075985',
-            accentColor: '#0ea5e9',
+            bgColor: '#ffffff',
+            textColor: '#1e1535',
+            accentColor: '#3b82f6',
+            iconColor: '#3b82f6',
+            iconBg: '#eff6ff',
             borderRadius: 8,
         } as ReturnsPolicyProps,
         toHtml(props, id) {
             const p = props as ReturnsPolicyProps
             const period = p.showPeriod
-                ? `<strong>${p.periodText}</strong> &bull; `
+                ? `<strong>${p.periodText}</strong> &mdash; `
                 : ''
             return wrapBlock('returns_policy', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;">
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;font-weight:600;color:${p.textColor};line-height:1.6;">
-        &#128260; ${period}${p.policyText}
-      </p>
+    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;border:1px solid #e5e7eb;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="4" style="width:4px;background-color:${p.accentColor ?? '#3b82f6'};border-radius:2px;">&nbsp;</td>
+          <td style="padding:0 0 0 14px;vertical-align:middle;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="36" height="36" style="width:36px;height:36px;text-align:center;background-color:${p.iconBg ?? '#eff6ff'};color:${p.iconColor ?? '#3b82f6'};border-radius:8px;font-size:18px;line-height:36px;vertical-align:middle;">rotate-ccw</td>
+                <td style="padding-left:12px;vertical-align:middle;">
+                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${p.textColor};line-height:1.4;">${period}${p.periodText}</p>
+                  <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#475569;line-height:1.5;">${p.policyText}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>`

@@ -1,5 +1,5 @@
 ﻿'use client'
-  // components/admin/settings-tabs/RoleBuilderTab.tsx
+// components/admin/settings-tabs/RoleBuilderTab.tsx
 import TeamMembersPanel from '@/components/admin/settings-tabs/TeamMembersPanel'
 import ProDropdown from '@/components/ui/ProDropdown'
 // --------------------------------------------------------------
@@ -13,25 +13,25 @@ import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
-    Shield, Lock, Plus, Trash2, Check, X, Users, AlertTriangle,
-    CheckCircle, RefreshCw, Activity, ChevronDown, UserPlus, Mail,
-    Settings, Key, BarChart2, Zap, Eye, Edit3, Save, Clock, Search, Download,
-  } from 'lucide-react'
+  Shield, Lock, Plus, Trash2, Check, X, Users, AlertTriangle,
+  CheckCircle, RefreshCw, Activity, ChevronDown, UserPlus, Mail,
+  Settings, Key, BarChart2, Zap, Eye, Edit3, Save, Clock, Search, Download,
+} from 'lucide-react'
 
 // -- Brand tokens -----------------------------------------------
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  amber:    '#d97706',
-  green:    '#16a34a',
+  dark: '#1e1535',
+  lime: '#b8fa33',
+  limeDeep: '#4d7c0f',
+  limeTint: '#f3eeff',
+  border: '#ede9fe',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
+  muted: '#6b7280',
+  surface: '#ffffff',
+  red: '#dc2626',
+  amber: '#d97706',
+  green: '#16a34a',
 }
 
 // -- Permission scope definitions -------------------------------
@@ -46,69 +46,69 @@ type AdminScope =
   | 'finance:view_mrr'
 
 interface ScopeDef {
-  key:         AdminScope
-  label:       string
+  key: AdminScope
+  label: string
   description: string
-  category:    'crm' | 'infra' | 'finance'
-  danger?:     boolean
+  category: 'crm' | 'infra' | 'finance'
+  danger?: boolean
 }
 
 const SCOPE_DEFS: ScopeDef[] = [
   // CRM
-  { key: 'crm:read',        label: 'CRM Read',         description: 'View user accounts, metrics and telemetry',           category: 'crm'     },
-  { key: 'crm:write_notes', label: 'Write Notes',       description: 'Write notes and entries to support / dispute logs',   category: 'crm'     },
-  { key: 'crm:edit_tiers',  label: 'Edit Billing',      description: 'Manually alter subscription tiers and billing status', category: 'crm'     },
-  { key: 'crm:danger_zone', label: 'Danger Zone',       description: 'Force logouts and permanently delete user accounts',   category: 'crm',     danger: true },
+  { key: 'crm:read', label: 'CRM Read', description: 'View user accounts, metrics and telemetry', category: 'crm' },
+  { key: 'crm:write_notes', label: 'Write Notes', description: 'Write notes and entries to support / dispute logs', category: 'crm' },
+  { key: 'crm:edit_tiers', label: 'Edit Billing', description: 'Manually alter subscription tiers and billing status', category: 'crm' },
+  { key: 'crm:danger_zone', label: 'Danger Zone', description: 'Force logouts and permanently delete user accounts', category: 'crm', danger: true },
   // Infrastructure
-  { key: 'infra:selectors',   label: 'Selector Overrides', description: 'Edit and save live HTML selector overrides',      category: 'infra'   },
-  { key: 'infra:kill_switch', label: 'Kill Switches',      description: 'Flip global system emergency bypass toggles',     category: 'infra',   danger: true },
-  { key: 'infra:ota_update',  label: 'OTA Updates',        description: 'Package and deploy over-the-air firmware updates', category: 'infra'   },
+  { key: 'infra:selectors', label: 'Selector Overrides', description: 'Edit and save live HTML selector overrides', category: 'infra' },
+  { key: 'infra:kill_switch', label: 'Kill Switches', description: 'Flip global system emergency bypass toggles', category: 'infra', danger: true },
+  { key: 'infra:ota_update', label: 'OTA Updates', description: 'Package and deploy over-the-air firmware updates', category: 'infra' },
   // Finance
-  { key: 'finance:view_mrr',  label: 'View Financials',    description: 'Read MRR, LTV maps and Founder Ops metrics',      category: 'finance' },
+  { key: 'finance:view_mrr', label: 'View Financials', description: 'Read MRR, LTV maps and Founder Ops metrics', category: 'finance' },
 ]
 
 const SCOPE_CATEGORIES = [
-  { key: 'crm',     label: 'USER CRM PERMISSIONS',          Icon: Users   },
-  { key: 'infra',   label: 'INFRASTRUCTURE CONFIGURATION',  Icon: Settings },
-  { key: 'finance', label: 'SYSTEM ANALYTICS',              Icon: BarChart2 },
+  { key: 'crm', label: 'USER CRM PERMISSIONS', Icon: Users },
+  { key: 'infra', label: 'INFRASTRUCTURE CONFIGURATION', Icon: Settings },
+  { key: 'finance', label: 'SYSTEM ANALYTICS', Icon: BarChart2 },
 ] as const
 
 // -- Role type --------------------------------------------------
 interface AdminRole {
-  id:             string
-  role_name:      string
-  description:    string
-  scopes:         AdminScope[]
+  id: string
+  role_name: string
+  description: string
+  scopes: AdminScope[]
   is_system_role: boolean
-  updated_at:     string
-  created_at:     string
-  member_count?:  number
+  updated_at: string
+  created_at: string
+  member_count?: number
 }
 
 // -- Profile type (for team seats) -----------------------------
 interface TeamMember {
-  id:             string
-  name:           string | null
-  email:          string
-  avatar_url:     string | null
-  role_id:        string | null
-  last_seen:      string | null
-  role_name?:     string | null
-  created_at?:    string | null
+  id: string
+  name: string | null
+  email: string
+  avatar_url: string | null
+  role_id: string | null
+  last_seen: string | null
+  role_name?: string | null
+  created_at?: string | null
   activityCount?: number
 }
 
 // -- Toast ------------------------------------------------------
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,   border: C.lime,   text: C.lime, Icon: CheckCircle  },
-    error:   { bg: '#FEF2F2', border: '#FECACA', text: C.red,  Icon: AlertTriangle },
-    info:    { bg: C.bg,     border: C.border, text: C.text, Icon: Shield       },
+    success: { bg: C.dark, border: C.lime, text: C.lime, Icon: CheckCircle },
+    error: { bg: '#FEF2F2', border: '#FECACA', text: C.red, Icon: AlertTriangle },
+    info: { bg: C.bg, border: C.border, text: C.text, Icon: Shield },
   }
   const { bg, border, text, Icon } = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: bg, border: `1px solid ${border}`, color: text }}>
+      style={{ backgroundColor: bg, border: `1px solid ${border}`, color: text }}>
       <Icon size={15} />
       <p className="text-[13px] font-bold">{msg}</p>
     </div>
@@ -139,7 +139,7 @@ function Avatar({ name, email, size = 32, avatarUrl }: {
 
   const display = name ?? email ?? 'U'
   const initials = getInitials()
-  const colors   = ['#4a8f00','#1d70f5','#d97706','#8b5cf6','#e11d48','#0891b2']
+  const colors = ['#4d7c0f', '#1d70f5', '#d97706', '#8b5cf6', '#e11d48', '#0891b2']
   let h = 0; for (const c of display) h = c.charCodeAt(0) + ((h << 5) - h)
   const bg = colors[Math.abs(h) % colors.length]
 
@@ -152,8 +152,10 @@ function Avatar({ name, email, size = 32, avatarUrl }: {
     )
   }
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: bg,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <div style={{
+      width: size, height: size, borderRadius: '50%', backgroundColor: bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+    }}>
       <span style={{ color: '#fff', fontSize: size * 0.35, fontWeight: 800 }}>{initials}</span>
     </div>
   )
@@ -163,8 +165,8 @@ function Avatar({ name, email, size = 32, avatarUrl }: {
 function timeAgo(iso: string | null) {
   if (!iso) return 'Never'
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (m < 1)    return 'Just now'
-  if (m < 60)   return `${m}m ago`
+  if (m < 1) return 'Just now'
+  if (m < 60) return `${m}m ago`
   if (m < 1440) return `${Math.floor(m / 60)}h ago`
   return `${Math.floor(m / 1440)}d ago`
 }
@@ -173,24 +175,24 @@ function timeAgo(iso: string | null) {
 // HUD CARDS
 // --------------------------------------------------------------
 function HudDeck({ roles, members, adminActionsToday }: {
-  roles:             AdminRole[]
-  members:           TeamMember[]
+  roles: AdminRole[]
+  members: TeamMember[]
   adminActionsToday: number
 }) {
-  const customRoles  = roles.filter(r => !r.is_system_role)
-  const systemRoles  = roles.filter(r => r.is_system_role)
-  const activeSeats  = members.length
+  const customRoles = roles.filter(r => !r.is_system_role)
+  const systemRoles = roles.filter(r => r.is_system_role)
+  const activeSeats = members.length
 
   // Security status: AUDIT REQUIRED if any member has no role assigned
   const orphanedMembers = members.filter(m => !m.role_id).length
-  const isSecure        = orphanedMembers === 0
+  const isSecure = orphanedMembers === 0
 
   function HudCard({ title, value, sub, children }: {
     title: string; value: string; sub: string; children: React.ReactNode
   }) {
     return (
       <div className="flex items-center gap-3 p-4 rounded-2xl border"
-           style={{ backgroundColor: C.surface, borderColor: C.border }}>
+        style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <div className="shrink-0">{children}</div>
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-bold truncate mb-1" style={{ color: C.muted }}>{title}</p>
@@ -208,7 +210,7 @@ function HudDeck({ roles, members, adminActionsToday }: {
         value={`${activeSeats} Member${activeSeats !== 1 ? 's' : ''}`}
         sub="Excluding founder account">
         <div className="w-11 h-11 rounded-full flex items-center justify-center"
-             style={{ backgroundColor: activeSeats > 0 ? 'rgba(143,255,0,0.12)' : C.bg }}>
+          style={{ backgroundColor: activeSeats > 0 ? 'rgba(184,250,51,0.15)' : C.bg }}>
           <Users size={20} style={{ color: activeSeats > 0 ? C.limeDeep : C.muted }} />
         </div>
       </HudCard>
@@ -218,8 +220,8 @@ function HudDeck({ roles, members, adminActionsToday }: {
         value={`${customRoles.length} Unique Role${customRoles.length !== 1 ? 's' : ''}`}
         sub={`${systemRoles.length} system · ${customRoles.length} custom`}>
         <div className="w-11 h-11 rounded-full flex items-center justify-center"
-             style={{ backgroundColor: 'rgba(139,92,246,0.1)' }}>
-          <Shield size={20} style={{ color: '#8b5cf6' }} />
+          style={{ backgroundColor: 'rgba(117,48,251,0.1)' }}>
+          <Shield size={20} style={{ color: '#7530fb' }} />
         </div>
       </HudCard>
 
@@ -228,7 +230,7 @@ function HudDeck({ roles, members, adminActionsToday }: {
         value={isSecure ? 'SECURE' : 'AUDIT REQUIRED'}
         sub={isSecure ? 'All seats have roles assigned' : `${orphanedMembers} unassigned seat${orphanedMembers !== 1 ? 's' : ''}`}>
         <div className="w-11 h-11 rounded-full flex items-center justify-center"
-             style={{ backgroundColor: isSecure ? 'rgba(22,163,74,0.08)' : 'rgba(185,28,28,0.08)' }}>
+          style={{ backgroundColor: isSecure ? 'rgba(22,163,74,0.08)' : 'rgba(220,38,38,0.08)' }}>
           {isSecure
             ? <CheckCircle size={20} style={{ color: C.green }} />
             : <AlertTriangle size={20} style={{ color: C.red }} />}
@@ -240,7 +242,7 @@ function HudDeck({ roles, members, adminActionsToday }: {
         value={`${adminActionsToday} Action${adminActionsToday !== 1 ? 's' : ''}`}
         sub="Across all team members today">
         <div className="w-11 h-11 rounded-full flex items-center justify-center"
-             style={{ backgroundColor: 'rgba(217,119,6,0.08)' }}>
+          style={{ backgroundColor: 'rgba(217,119,6,0.08)' }}>
           <Activity size={20} style={{ color: C.amber }} />
         </div>
       </HudCard>
@@ -252,20 +254,20 @@ function HudDeck({ roles, members, adminActionsToday }: {
 // DELETE CONFIRM MODAL — Hard block if users assigned
 // --------------------------------------------------------------
 function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted, onMembersReassigned, showToast }: {
-  role:                 AdminRole
-  allRoles:             AdminRole[]
-  blockedByMembers:     TeamMember[]
-  onClose:              () => void
-  onDeleted:            () => void
-  onMembersReassigned:  (updates: { userId: string; roleId: string }[]) => void
-  showToast:            (msg: string, type: 'success' | 'error' | 'info') => void
+  role: AdminRole
+  allRoles: AdminRole[]
+  blockedByMembers: TeamMember[]
+  onClose: () => void
+  onDeleted: () => void
+  onMembersReassigned: (updates: { userId: string; roleId: string }[]) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
 }) {
-  const supabase      = createClient()
-  const isBlocked     = blockedByMembers.length > 0
-  const otherRoles    = allRoles.filter(r => r.id !== role.id && !r.is_system_role)
-  const [reassignMap,    setReassignMap]    = useState<Record<string, string>>({})
-  const [deleting,       setDeleting]       = useState(false)
-  const [reassigning,    setReassigning]    = useState(false)
+  const supabase = createClient()
+  const isBlocked = blockedByMembers.length > 0
+  const otherRoles = allRoles.filter(r => r.id !== role.id && !r.is_system_role)
+  const [reassignMap, setReassignMap] = useState<Record<string, string>>({})
+  const [deleting, setDeleting] = useState(false)
+  const [reassigning, setReassigning] = useState(false)
   const [reassignedDone, setReassignedDone] = useState(false)
 
   // All blocked members must be reassigned before delete unlocks
@@ -281,9 +283,9 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
       for (const member of blockedByMembers) {
         const newRoleId = reassignMap[member.id]
         const res = await fetch('/api/admin/roles/assign', {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-          body:    JSON.stringify({ userId: member.id, roleId: newRoleId }),
+          body: JSON.stringify({ userId: member.id, roleId: newRoleId }),
         })
         if (!res.ok) {
           showToast('Failed to reassign some members', 'error')
@@ -308,9 +310,9 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/roles/delete', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ roleId: role.id }),
+        body: JSON.stringify({ roleId: role.id }),
       })
       const json = await res.json()
       if (!res.ok) { showToast(json.error ?? 'Delete failed', 'error'); setDeleting(false); return }
@@ -324,17 +326,17 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
 
   return (
     <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
+      style={{ backgroundColor: 'rgba(30,21,53,0.6)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-           style={{ border: `1px solid ${C.border}` }}>
+        style={{ border: `1px solid ${C.border}` }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b"
-             style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
+          style={{ borderColor: C.border, backgroundColor: 'rgba(220,38,38,0.04)' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                 style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+              style={{ backgroundColor: 'rgba(220,38,38,0.1)' }}>
               <Trash2 size={18} style={{ color: C.red }} />
             </div>
             <div>
@@ -352,7 +354,7 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
           {/* Hard block warning */}
           {isBlocked && (
             <div className="flex flex-col gap-3 px-4 py-3 rounded-xl border"
-                 style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.3)' }}>
+              style={{ backgroundColor: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.3)' }}>
               <div className="flex items-center gap-2">
                 <AlertTriangle size={15} style={{ color: C.red }} />
                 <p className="text-[13px] font-black" style={{ color: C.red }}>
@@ -368,7 +370,7 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
               <div className="flex flex-col gap-2 mt-1">
                 {blockedByMembers.map(member => (
                   <div key={member.id} className="flex items-center gap-3 px-3 py-2 rounded-xl border"
-                       style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                    style={{ borderColor: C.border, backgroundColor: C.bg }}>
                     <Avatar name={member.name} email={member.email} size={28} avatarUrl={member.avatar_url} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-bold truncate" style={{ color: C.dark }}>
@@ -396,7 +398,7 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
                   onClick={handleReassignAll}
                   disabled={reassigning}
                   className="flex items-center justify-center gap-2 py-2 rounded-xl text-[12px] font-bold"
-                  style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                  style={{ backgroundColor: C.lime, color: C.dark }}>
                   {reassigning
                     ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} /> Reassigning...</>
                     : <><Check size={13} /> Confirm Reassignments</>}
@@ -408,7 +410,7 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
           {/* Safe to delete */}
           {!isBlocked && (
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl border"
-                 style={{ backgroundColor: 'rgba(22,163,74,0.06)', borderColor: 'rgba(22,163,74,0.3)' }}>
+              style={{ backgroundColor: 'rgba(22,163,74,0.06)', borderColor: 'rgba(22,163,74,0.3)' }}>
               <CheckCircle size={15} style={{ color: C.green }} />
               <p className="text-[12px] font-semibold" style={{ color: C.green }}>
                 No members assigned — safe to delete.
@@ -443,43 +445,43 @@ function DeleteRoleModal({ role, allRoles, blockedByMembers, onClose, onDeleted,
 // PERMISSION MATRIX — Right panel editor
 // --------------------------------------------------------------
 function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMembersReassigned, showToast, isCreating, canEdit = true, canDelete = true }: {
-  role:                 AdminRole | null
-  allRoles:             AdminRole[]
-  allMembers:           TeamMember[]
-  onSaved:              (updated: AdminRole) => void
-  onDeleted:            () => void
-  onMembersReassigned:  (userId: string, roleId: string) => void
-  showToast:            (msg: string, type: 'success' | 'error' | 'info') => void
-  isCreating:           boolean
-  canEdit?:             boolean
-  canDelete?:           boolean
+  role: AdminRole | null
+  allRoles: AdminRole[]
+  allMembers: TeamMember[]
+  onSaved: (updated: AdminRole) => void
+  onDeleted: () => void
+  onMembersReassigned: (userId: string, roleId: string) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  isCreating: boolean
+  canEdit?: boolean
+  canDelete?: boolean
 }) {
   const supabase = createClient()
 
-  const [name,        setName]        = useState(role?.role_name    ?? '')
-  const [description, setDescription] = useState(role?.description  ?? '')
-  const [scopes,      setScopes]      = useState<Set<AdminScope>>(new Set(role?.scopes ?? []))
-  const [saving,      setSaving]      = useState(false)
-  const [showDelete,  setShowDelete]  = useState(false)
+  const [name, setName] = useState(role?.role_name ?? '')
+  const [description, setDescription] = useState(role?.description ?? '')
+  const [scopes, setScopes] = useState<Set<AdminScope>>(new Set(role?.scopes ?? []))
+  const [saving, setSaving] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
 
   // Track dirty state — has anything changed from original?
   const originalScopes = useMemo(() => new Set(role?.scopes ?? []), [role?.id, role?.updated_at])
   const isDirty = isCreating
     ? name.trim().length > 0
     : name !== role?.role_name ||
-      description !== role?.description ||
-      scopes.size !== originalScopes.size ||
-      [...scopes].some(s => !originalScopes.has(s))
+    description !== role?.description ||
+    scopes.size !== originalScopes.size ||
+    [...scopes].some(s => !originalScopes.has(s))
 
   // Reset when role changes
   useEffect(() => {
-    setName(role?.role_name   ?? '')
+    setName(role?.role_name ?? '')
     setDescription(role?.description ?? '')
     setScopes(new Set(role?.scopes ?? []))
   }, [role?.id, role?.updated_at, isCreating])
 
-  const isSystem   = role?.is_system_role ?? false
-    const isReadOnly = !canEdit
+  const isSystem = role?.is_system_role ?? false
+  const isReadOnly = !canEdit
 
   function toggleScope(scope: AdminScope) {
     if (isReadOnly) return
@@ -498,14 +500,14 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const endpoint = isCreating ? '/api/admin/roles/create' : '/api/admin/roles/update'
-      const body     = isCreating
+      const body = isCreating
         ? { roleName: name.trim(), description: description.trim(), scopes: [...scopes] }
         : { roleId: role!.id, roleName: name.trim(), description: description.trim(), scopes: [...scopes] }
 
-      const res  = await fetch(endpoint, {
-        method:  'POST',
+      const res = await fetch(endpoint, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify(body),
+        body: JSON.stringify(body),
       })
       const json = await res.json()
       if (!res.ok) { showToast(json.error ?? 'Save failed', 'error'); return }
@@ -531,7 +533,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
   if (!role && !isCreating) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 rounded-2xl border"
-           style={{ backgroundColor: C.surface, borderColor: C.border, minHeight: 400 }}>
+        style={{ backgroundColor: C.surface, borderColor: C.border, minHeight: 400 }}>
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.bg }}>
           <Shield size={24} style={{ color: C.muted }} />
         </div>
@@ -544,16 +546,16 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
   return (
     <>
       <div className="flex-1 flex flex-col rounded-2xl border overflow-hidden"
-           style={{ backgroundColor: C.surface, borderColor: C.border }}>
+        style={{ backgroundColor: C.surface, borderColor: C.border }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
+          style={{ borderColor: C.border, backgroundColor: C.bg }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                 style={{ backgroundColor: isSystem ? 'rgba(139,92,246,0.1)' : 'rgba(143,255,0,0.12)' }}>
+              style={{ backgroundColor: isSystem ? 'rgba(117,48,251,0.1)' : 'rgba(184,250,51,0.15)' }}>
               {isSystem
-                ? <Lock size={16} style={{ color: '#8b5cf6' }} />
+                ? <Lock size={16} style={{ color: '#7530fb' }} />
                 : <Edit3 size={16} style={{ color: C.limeDeep }} />}
             </div>
             <div>
@@ -573,7 +575,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
             <button
               onClick={() => setShowDelete(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold hover:opacity-80"
-              style={{ borderColor: 'rgba(185,28,28,0.3)', color: C.red, backgroundColor: 'rgba(185,28,28,0.06)' }}>
+              style={{ borderColor: 'rgba(220,38,38,0.3)', color: C.red, backgroundColor: 'rgba(220,38,38,0.06)' }}>
               <Trash2 size={12} /> Delete
             </button>
           )}
@@ -592,10 +594,10 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
                 placeholder="e.g. Operations Manager"
                 className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                 style={{
-                  borderColor:     isReadOnly ? C.border : name.length > 1 ? C.lime : C.border,
-                  backgroundColor: isReadOnly ? C.bg     : C.surface,
-                  color:           C.text,
-                  cursor:          isReadOnly ? 'not-allowed' : 'text',
+                  borderColor: isReadOnly ? C.border : name.length > 1 ? C.lime : C.border,
+                  backgroundColor: isReadOnly ? C.bg : C.surface,
+                  color: C.text,
+                  cursor: isReadOnly ? 'not-allowed' : 'text',
                 }} />
             </div>
             <div>
@@ -607,10 +609,10 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
                 placeholder="Brief description of this role's responsibilities"
                 className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                 style={{
-                  borderColor:     isReadOnly ? C.border : C.border,
-                  backgroundColor: isReadOnly ? C.bg     : C.surface,
-                  color:           C.text,
-                  cursor:          isReadOnly ? 'not-allowed' : 'text',
+                  borderColor: isReadOnly ? C.border : C.border,
+                  backgroundColor: isReadOnly ? C.bg : C.surface,
+                  color: C.text,
+                  cursor: isReadOnly ? 'not-allowed' : 'text',
                 }} />
             </div>
           </div>
@@ -626,44 +628,44 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
                 </div>
                 <div className="flex flex-col gap-1.5">
                   {catScopes.map(scope => {
-                    const isActive  = scopes.has(scope.key)
+                    const isActive = scopes.has(scope.key)
                     // Dirty check — was this scope different from original?
-                    const wasDirty  = !isCreating && (isActive !== originalScopes.has(scope.key))
+                    const wasDirty = !isCreating && (isActive !== originalScopes.has(scope.key))
                     return (
                       <div
                         key={scope.key}
                         onClick={() => toggleScope(scope.key)}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all"
                         style={{
-                          borderColor:     wasDirty ? C.amber : isActive ? (isReadOnly ? C.border : C.lime) : C.border,
+                          borderColor: wasDirty ? C.amber : isActive ? (isReadOnly ? C.border : C.lime) : C.border,
                           backgroundColor: wasDirty ? 'rgba(217,119,6,0.04)' : isActive ? (isReadOnly ? C.bg : C.limeTint) : C.bg,
-                          cursor:          isReadOnly ? 'default' : 'pointer',
-                          borderLeft:      wasDirty ? `3px solid ${C.amber}` : isActive ? `3px solid ${C.lime}` : `3px solid transparent`,
+                          cursor: isReadOnly ? 'default' : 'pointer',
+                          borderLeft: wasDirty ? `3px solid ${C.amber}` : isActive ? `3px solid ${C.lime}` : `3px solid transparent`,
                         }}>
                         {/* Checkbox */}
                         <div className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center shrink-0"
-                             style={{
-                               backgroundColor: isActive ? (isReadOnly ? '#8b5cf6' : C.dark) : 'transparent',
-                               borderColor:     isActive ? (isReadOnly ? '#8b5cf6' : C.dark) : C.border,
-                             }}>
+                          style={{
+                            backgroundColor: isActive ? (isReadOnly ? '#7530fb' : C.dark) : 'transparent',
+                            borderColor: isActive ? (isReadOnly ? '#7530fb' : C.dark) : C.border,
+                          }}>
                           {isActive && <Check size={9} style={{ color: isReadOnly ? '#fff' : C.lime }} />}
                         </div>
 
                         {/* Label */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-bold" style={{ color: isActive ? '#1a2410' : C.muted }}>
+                            <span className="text-[12px] font-bold" style={{ color: isActive ? '#1f1d2e' : C.muted }}>
                               {scope.key}
                             </span>
                             {scope.danger && (
                               <span className="text-[9px] font-black px-1.5 py-0.5 rounded"
-                                    style={{ backgroundColor: 'rgba(185,28,28,0.1)', color: C.red }}>
+                                style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: C.red }}>
                                 DANGER
                               </span>
                             )}
                             {wasDirty && (
                               <span className="text-[9px] font-black px-1.5 py-0.5 rounded"
-                                    style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: C.amber }}>
+                                style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: C.amber }}>
                                 CHANGED
                               </span>
                             )}
@@ -684,7 +686,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
         {/* Save footer */}
         {!isReadOnly && (
           <div className="px-5 py-4 border-t flex items-center justify-between"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            style={{ borderColor: C.border, backgroundColor: C.bg }}>
             <p className="text-[11px]" style={{ color: isDirty ? C.amber : C.muted }}>
               {isDirty ? 'Unsaved changes' : 'No changes'}
             </p>
@@ -694,7 +696,7 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40 transition-all"
               style={{
                 backgroundColor: isDirty ? C.lime : C.border,
-                color:           isDirty ? C.dark : C.muted,
+                color: isDirty ? C.dark : C.muted,
               }}>
               {saving
                 ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
@@ -726,12 +728,12 @@ function PermissionMatrix({ role, allRoles, allMembers, onSaved, onDeleted, onMe
 // ROLE LIST — Left panel
 // --------------------------------------------------------------
 function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCreate = true }: {
-  roles:       AdminRole[]
-  allMembers:  TeamMember[]
-  selectedId:  string | null
-  onSelect:    (role: AdminRole) => void
+  roles: AdminRole[]
+  allMembers: TeamMember[]
+  selectedId: string | null
+  onSelect: (role: AdminRole) => void
   onCreateNew: () => void
-  canCreate?:  boolean
+  canCreate?: boolean
 }) {
   function memberCount(roleId: string) {
     return allMembers.filter(m => m.role_id === roleId).length
@@ -743,21 +745,21 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCre
       <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
         {roles.map(role => {
           const isSelected = selectedId === role.id
-          const count      = memberCount(role.id)
+          const count = memberCount(role.id)
           return (
             <button
               key={role.id}
               onClick={() => onSelect(role)}
               className="flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all hover:opacity-90"
               style={{
-                backgroundColor: isSelected ? C.dark     : C.surface,
-                borderColor:     isSelected ? C.dark     : C.border,
+                backgroundColor: isSelected ? C.dark : C.surface,
+                borderColor: isSelected ? C.dark : C.border,
               }}>
               {/* Icon */}
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                   style={{ backgroundColor: isSelected ? 'rgba(143,255,0,0.15)' : role.is_system_role ? 'rgba(139,92,246,0.1)' : 'rgba(143,255,0,0.08)' }}>
+                style={{ backgroundColor: isSelected ? 'rgba(184,250,51,0.15)' : role.is_system_role ? 'rgba(117,48,251,0.1)' : 'rgba(184,250,51,0.1)' }}>
                 {role.is_system_role
-                  ? <Lock size={15} style={{ color: isSelected ? C.lime : '#8b5cf6' }} />
+                  ? <Lock size={15} style={{ color: isSelected ? C.lime : '#7530fb' }} />
                   : <Shield size={15} style={{ color: isSelected ? C.lime : C.limeDeep }} />}
               </div>
 
@@ -769,7 +771,7 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCre
                   </p>
                   {role.is_system_role && (
                     <span className="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0"
-                          style={{ backgroundColor: isSelected ? 'rgba(255,255,255,0.15)' : 'rgba(139,92,246,0.1)', color: isSelected ? '#fff' : '#8b5cf6' }}>
+                      style={{ backgroundColor: isSelected ? 'rgba(255,255,255,0.15)' : 'rgba(117,48,251,0.1)', color: isSelected ? '#fff' : '#7530fb' }}>
                       SYSTEM
                     </span>
                   )}
@@ -793,10 +795,10 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCre
         onClick={onCreateNew}
         className="flex items-center justify-center gap-2 py-3 rounded-2xl border text-[13px] font-bold transition-all hover:opacity-80"
         style={{
-          borderColor:     selectedId === '__new__' ? C.dark        : C.lime,
-          borderStyle:     selectedId === '__new__' ? 'solid'       : 'dashed',
-          backgroundColor: selectedId === '__new__' ? C.dark        : C.limeTint,
-          color:           selectedId === '__new__' ? C.lime        : C.limeDeep,
+          borderColor: selectedId === '__new__' ? C.dark : C.lime,
+          borderStyle: selectedId === '__new__' ? 'solid' : 'dashed',
+          backgroundColor: selectedId === '__new__' ? C.dark : C.limeTint,
+          color: selectedId === '__new__' ? C.lime : C.limeDeep,
         }}>
         <Plus size={15} />
         {selectedId === '__new__' ? 'Creating New Role...' : 'Create Custom Role'}
@@ -806,11 +808,11 @@ function RoleList({ roles, allMembers, selectedId, onSelect, onCreateNew, canCre
 }
 
 function RoleDropdown({ value, roles, onChange, disabled = false }: {
-    value:    string | null
-    roles:    AdminRole[]
-    onChange: (roleId: string | null) => void
-    disabled?: boolean
-  }) {
+  value: string | null
+  roles: AdminRole[]
+  onChange: (roleId: string | null) => void
+  disabled?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -825,18 +827,18 @@ function RoleDropdown({ value, roles, onChange, disabled = false }: {
     if (spaceBelow < menuHeight && rect.top > menuHeight) {
       setMenuStyle({
         position: 'fixed',
-        bottom:   window.innerHeight - rect.top + 4,
-        left:     rect.left,
-        width:    rect.width,
-        zIndex:   9999,
+        bottom: window.innerHeight - rect.top + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
       })
     } else {
       setMenuStyle({
         position: 'fixed',
-        top:      rect.bottom + 4,
-        left:     rect.left,
-        width:    rect.width,
-        zIndex:   9999,
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
       })
     }
     setOpen(true)
@@ -844,23 +846,23 @@ function RoleDropdown({ value, roles, onChange, disabled = false }: {
 
   return (
     <div className="relative">
-        <button
-          ref={triggerRef}
-          disabled={disabled}
-          onClick={() => !disabled && (open ? setOpen(false) : openMenu())}
-          className="w-full flex items-center justify-between h-8 px-3 rounded-xl border text-[11px] font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-          style={{
-            backgroundColor: C.surface,
-            borderColor:     open ? C.lime : C.border,
-            color:           C.text,
-          }}>
+      <button
+        ref={triggerRef}
+        disabled={disabled}
+        onClick={() => !disabled && (open ? setOpen(false) : openMenu())}
+        className="w-full flex items-center justify-between h-8 px-3 rounded-xl border text-[11px] font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        style={{
+          backgroundColor: C.surface,
+          borderColor: open ? C.lime : C.border,
+          color: C.text,
+        }}>
         <span style={{ color: selected ? C.text : C.muted }}>
           {selected ? selected.role_name : 'No role'}
         </span>
         <ChevronDown size={13}
           style={{
-            color:      C.muted,
-            transform:  open ? 'rotate(180deg)' : 'rotate(0deg)',
+            color: C.muted,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
             flexShrink: 0,
           }} />
@@ -870,87 +872,87 @@ function RoleDropdown({ value, roles, onChange, disabled = false }: {
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
           <div className="rounded-2xl border overflow-hidden"
-               style={{
-                 ...menuStyle,
-                 backgroundColor: C.surface,
-                 borderColor:     C.border,
-                 boxShadow:       '0 8px 24px rgba(0,0,0,0.12)',
-               }}>
+            style={{
+              ...menuStyle,
+              backgroundColor: C.surface,
+              borderColor: C.border,
+              boxShadow: '0 8px 24px rgba(30,21,53,0.12)',
+            }}>
             <div className="p-1.5 flex flex-col gap-0.5"
-                 style={{ maxHeight: 220, overflowY: 'auto' }}>
-            {/* No role option */}
-            <button
-              onClick={() => { onChange(null); setOpen(false) }}
-              className="w-full flex items-center px-3 py-2 text-left text-[12px] font-semibold rounded-xl transition-all duration-150"
-              style={{
-                backgroundColor: !value ? C.lime : 'transparent',
-                color:           !value ? C.dark : C.muted,
-              }}
-              onMouseEnter={e => { if (value) e.currentTarget.style.backgroundColor = C.limeTint }}
-              onMouseLeave={e => { if (value) e.currentTarget.style.backgroundColor = 'transparent' }}>
-              No role
-            </button>
-            {/* Role options */}
-            {roles.map((r) => {
-              const isSelected = r.id === value
-              return (
-                <button
-                  key={r.id}
-                  onClick={() => { onChange(r.id); setOpen(false) }}
-                  className="w-full flex items-center justify-between px-3 py-2 text-left text-[12px] font-semibold rounded-xl transition-all duration-150 group relative"
-                  style={{
-                    backgroundColor: isSelected ? C.lime : 'transparent',
-                    color:           isSelected ? C.dark : C.text,
-                  }}
-                  onMouseEnter={e => {
-                    if (!isSelected) e.currentTarget.style.backgroundColor = C.limeTint
-                    const tip = e.currentTarget.querySelector('.scope-tip') as HTMLElement | null
-                    if (tip) tip.style.display = 'block'
-                  }}
-                  onMouseLeave={e => {
-                    if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
-                    const tip = e.currentTarget.querySelector('.scope-tip') as HTMLElement | null
-                    if (tip) tip.style.display = 'none'
-                  }}>
-                  <div className="flex flex-col min-w-0">
-                    <span className="truncate">{r.role_name}</span>
-                    {!isSelected && (
-                      <span className="text-[9px] font-normal truncate" style={{ color: C.muted }}>
-                        {r.scopes.length} scope{r.scopes.length !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
-                  {/* Permission tooltip */}
-                  <div className="scope-tip"
-                       style={{
-                         display:         'none',
-                         position:        'absolute',
-                         left:            'calc(100% + 8px)',
-                         top:             '50%',
-                         transform:       'translateY(-50%)',
-                         backgroundColor: C.dark,
-                         borderRadius:    12,
-                         padding:         '8px 10px',
-                         minWidth:        180,
-                         zIndex:          99999,
-                         pointerEvents:   'none',
-                         boxShadow:       '0 4px 16px rgba(0,0,0,0.2)',
-                       }}>
-                    <p className="text-[9px] font-black tracking-wider mb-1.5"
-                       style={{ color: 'rgba(143,255,0,0.7)' }}>PERMISSIONS</p>
-                    {r.scopes.map(s => (
-                      <div key={s} className="flex items-center gap-1.5 mb-1">
-                        <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: C.lime }} />
-                        <span className="text-[10px] font-mono" style={{ color: '#fff' }}>{s}</span>
-                      </div>
-                    ))}
-                    {r.scopes.length === 0 && (
-                      <span className="text-[10px]" style={{ color: C.muted }}>No permissions</span>
-                    )}
-                  </div>
-                </button>
-              )
-            })}
+              style={{ maxHeight: 220, overflowY: 'auto' }}>
+              {/* No role option */}
+              <button
+                onClick={() => { onChange(null); setOpen(false) }}
+                className="w-full flex items-center px-3 py-2 text-left text-[12px] font-semibold rounded-xl transition-all duration-150"
+                style={{
+                  backgroundColor: !value ? C.lime : 'transparent',
+                  color: !value ? C.dark : C.muted,
+                }}
+                onMouseEnter={e => { if (value) e.currentTarget.style.backgroundColor = C.limeTint }}
+                onMouseLeave={e => { if (value) e.currentTarget.style.backgroundColor = 'transparent' }}>
+                No role
+              </button>
+              {/* Role options */}
+              {roles.map((r) => {
+                const isSelected = r.id === value
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => { onChange(r.id); setOpen(false) }}
+                    className="w-full flex items-center justify-between px-3 py-2 text-left text-[12px] font-semibold rounded-xl transition-all duration-150 group relative"
+                    style={{
+                      backgroundColor: isSelected ? C.lime : 'transparent',
+                      color: isSelected ? C.dark : C.text,
+                    }}
+                    onMouseEnter={e => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = C.limeTint
+                      const tip = e.currentTarget.querySelector('.scope-tip') as HTMLElement | null
+                      if (tip) tip.style.display = 'block'
+                    }}
+                    onMouseLeave={e => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
+                      const tip = e.currentTarget.querySelector('.scope-tip') as HTMLElement | null
+                      if (tip) tip.style.display = 'none'
+                    }}>
+                    <div className="flex flex-col min-w-0">
+                      <span className="truncate">{r.role_name}</span>
+                      {!isSelected && (
+                        <span className="text-[9px] font-normal truncate" style={{ color: C.muted }}>
+                          {r.scopes.length} scope{r.scopes.length !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                    {/* Permission tooltip */}
+                    <div className="scope-tip"
+                      style={{
+                        display: 'none',
+                        position: 'absolute',
+                        left: 'calc(100% + 8px)',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        backgroundColor: C.dark,
+                        borderRadius: 12,
+                        padding: '8px 10px',
+                        minWidth: 180,
+                        zIndex: 99999,
+                        pointerEvents: 'none',
+                        boxShadow: '0 4px 16px rgba(30,21,53,0.2)',
+                      }}>
+                      <p className="text-[9px] font-black tracking-wider mb-1.5"
+                        style={{ color: 'rgba(184,250,51,0.85)' }}>PERMISSIONS</p>
+                      {r.scopes.map(s => (
+                        <div key={s} className="flex items-center gap-1.5 mb-1">
+                          <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: C.lime }} />
+                          <span className="text-[10px] font-mono" style={{ color: '#fff' }}>{s}</span>
+                        </div>
+                      ))}
+                      {r.scopes.length === 0 && (
+                        <span className="text-[10px]" style={{ color: C.muted }}>No permissions</span>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
         </>
@@ -962,21 +964,21 @@ function RoleDropdown({ value, roles, onChange, disabled = false }: {
 // INVITE MEMBER MODAL
 // --------------------------------------------------------------
 function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = true }: {
-    roles:     AdminRole[]
-    onClose:   () => void
-    onInvited: () => void
-    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-    canInvite?: boolean
-  }) {
-  const supabase  = createClient()
-  const [email,   setEmail]   = useState('')
-  const [roleId,  setRoleId]  = useState<string>('')
+  roles: AdminRole[]
+  onClose: () => void
+  onInvited: () => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canInvite?: boolean
+}) {
+  const supabase = createClient()
+  const [email, setEmail] = useState('')
+  const [roleId, setRoleId] = useState<string>('')
   const [sending, setSending] = useState(false)
   const [success, setSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
 
   const isValidEmail = (e: string) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(e.trim())
-  const isValid      = isValidEmail(email) && roleId !== ''
+  const isValid = isValidEmail(email) && roleId !== ''
   const selectedRole = roles.find(r => r.id === roleId)
 
   async function handleInvite() {
@@ -985,9 +987,9 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/roles/invite', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ email: email.trim(), adminRoleId: roleId }),
+        body: JSON.stringify({ email: email.trim(), adminRoleId: roleId }),
       })
       const json = await res.json()
       if (!res.ok) { showToast(json.error ?? 'Failed to send invite', 'error'); setSending(false); return }
@@ -1005,17 +1007,17 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
 
   return (
     <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-         onClick={e => e.target === e.currentTarget && !sending && onClose()}>
+      style={{ backgroundColor: 'rgba(30,21,53,0.5)' }}
+      onClick={e => e.target === e.currentTarget && !sending && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-           style={{ border: `1px solid ${C.border}` }}>
+        style={{ border: `1px solid ${C.border}` }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b"
-             style={{ borderColor: C.border }}>
+          style={{ borderColor: C.border }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                 style={{ backgroundColor: C.dark }}>
+              style={{ backgroundColor: C.dark }}>
               <UserPlus size={16} style={{ color: C.lime }} />
             </div>
             <div>
@@ -1032,7 +1034,7 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
           {success ? (
             <div className="flex flex-col items-center py-6 gap-3 text-center">
               <div className="w-14 h-14 rounded-full flex items-center justify-center"
-                   style={{ backgroundColor: C.limeTint }}>
+                style={{ backgroundColor: C.limeTint }}>
                 <CheckCircle size={28} style={{ color: C.limeDeep }} />
               </div>
               <p className="text-[16px] font-black" style={{ color: C.dark }}>
@@ -1041,7 +1043,7 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
               <p className="text-[13px]" style={{ color: C.muted }}>{successMessage}</p>
               <button onClick={onClose}
                 className="mt-2 px-6 py-2.5 rounded-xl text-[13px] font-bold"
-                style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+                style={{ backgroundColor: C.lime, color: C.dark }}>
                 Done
               </button>
             </div>
@@ -1058,9 +1060,9 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
                   autoFocus
                   className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                   style={{
-                    borderColor:     email.length > 0 ? (isValidEmail(email) ? C.lime : C.red) : C.border,
+                    borderColor: email.length > 0 ? (isValidEmail(email) ? C.lime : C.red) : C.border,
                     backgroundColor: C.bg,
-                    color:           C.text,
+                    color: C.text,
                   }} />
                 {email.length > 0 && !isValidEmail(email) && (
                   <p className="text-[11px] mt-1" style={{ color: C.red }}>Enter a valid email address</p>
@@ -1079,11 +1081,11 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
                         onClick={() => setRoleId(r.id)}
                         className="flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all"
                         style={{
-                          borderColor:     isSelected ? C.lime     : C.border,
+                          borderColor: isSelected ? C.lime : C.border,
                           backgroundColor: isSelected ? C.limeTint : C.bg,
                         }}>
                         <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
-                             style={{ borderColor: isSelected ? C.limeDeep : C.border }}>
+                          style={{ borderColor: isSelected ? C.limeDeep : C.border }}>
                           {isSelected && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: C.limeDeep }} />}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -1114,11 +1116,11 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
                 <button
                   onClick={handleInvite}
                   disabled={!isValid || sending || !canInvite}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-                    style={{ backgroundColor: (isValid && canInvite) ? C.lime : C.border, color: (isValid && canInvite) ? C.dark : C.muted }}>
-                    {sending
-                      ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
-                      : <><UserPlus size={14} /> {canInvite ? 'Send Invite' : 'View only'}</>}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+                  style={{ backgroundColor: (isValid && canInvite) ? C.lime : C.border, color: (isValid && canInvite) ? C.dark : C.muted }}>
+                  {sending
+                    ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
+                    : <><UserPlus size={14} /> {canInvite ? 'Send Invite' : 'View only'}</>}
                 </button>
               </div>
             </>
@@ -1133,42 +1135,42 @@ function InviteMemberModal({ roles, onClose, onInvited, showToast, canInvite = t
 // TEAM SEATS TAB
 // --------------------------------------------------------------
 function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = true, canView = true, canInvite = true, canRevoke = true }: {
-    members:          TeamMember[]
-    roles:            AdminRole[]
-    onMemberUpdated:  (id: string, roleId: string | null) => void
-    showToast:        (msg: string, type: 'success' | 'error' | 'info') => void
-    canManage?:       boolean
-    canView?:         boolean
-    canInvite?:       boolean
-    canRevoke?:       boolean
-  }) {
+  members: TeamMember[]
+  roles: AdminRole[]
+  onMemberUpdated: (id: string, roleId: string | null) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canManage?: boolean
+  canView?: boolean
+  canInvite?: boolean
+  canRevoke?: boolean
+}) {
   const supabase = createClient()
-  const [loadingId,        setLoadingId]        = useState<string | null>(null)
-  const [revokeTarget,     setRevokeTarget]     = useState<TeamMember | null>(null)
-  const [revokeConfirmText,setRevokeConfirmText]= useState('')
-  const [showInvite,     setShowInvite]     = useState(false)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [revokeTarget, setRevokeTarget] = useState<TeamMember | null>(null)
+  const [revokeConfirmText, setRevokeConfirmText] = useState('')
+  const [showInvite, setShowInvite] = useState(false)
   const [pendingInvites, setPendingInvites] = useState<any[]>([])
   const [loadingInvites, setLoadingInvites] = useState(true)
-  const [cancellingId,   setCancellingId]   = useState<string | null>(null)
-  const [resendingId,    setResendingId]    = useState<string | null>(null)
-  const [pendingChange,  setPendingChange]  = useState<{
-    userId:    string
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [resendingId, setResendingId] = useState<string | null>(null)
+  const [pendingChange, setPendingChange] = useState<{
+    userId: string
     oldRoleId: string | null
     newRoleId: string
-    oldName:   string
-    newName:   string
+    oldName: string
+    newName: string
   } | null>(null)
-  const [undoTimer,    setUndoTimer]    = useState(0)
+  const [undoTimer, setUndoTimer] = useState(0)
   const [undoInterval, setUndoInterval] = useState<NodeJS.Timeout | null>(null)
-  const [searchQuery,    setSearchQuery]    = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null)
-  const [historyData,     setHistoryData]     = useState<Record<string, any[]>>({})
-  const [historyLoading,  setHistoryLoading]  = useState<string | null>(null)
-  const [selectedIds,     setSelectedIds]     = useState<Set<string>>(new Set())
-  const [showBulkRole,    setShowBulkRole]    = useState(false)
-  const [bulkRoleId,      setBulkRoleId]      = useState('')
-  const [bulkLoading,     setBulkLoading]     = useState(false)
-  const [showBulkRevoke,  setShowBulkRevoke]  = useState(false)
+  const [historyData, setHistoryData] = useState<Record<string, any[]>>({})
+  const [historyLoading, setHistoryLoading] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showBulkRole, setShowBulkRole] = useState(false)
+  const [bulkRoleId, setBulkRoleId] = useState('')
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const [showBulkRevoke, setShowBulkRevoke] = useState(false)
 
   async function fetchRoleHistory(userId: string) {
     if (historyData[userId]) {
@@ -1229,9 +1231,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       const { data: { session } } = await supabase.auth.getSession()
       for (const userId of Array.from(selectedIds)) {
         await fetch('/api/admin/roles/assign', {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-          body:    JSON.stringify({ userId, roleId: bulkRoleId }),
+          body: JSON.stringify({ userId, roleId: bulkRoleId }),
         })
         onMemberUpdated(userId, bulkRoleId)
       }
@@ -1250,14 +1252,14 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       const { data: { session } } = await supabase.auth.getSession()
       for (const userId of Array.from(selectedIds)) {
         await fetch('/api/admin/roles/assign', {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-          body:    JSON.stringify({ userId, roleId: null }),
+          body: JSON.stringify({ userId, roleId: null }),
         })
         await fetch('/api/admin/force-logout', {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-          body:    JSON.stringify({ userId }),
+          body: JSON.stringify({ userId }),
         })
         onMemberUpdated(userId, null)
       }
@@ -1286,7 +1288,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
 
   function exportRoster() {
     const headers = ['Name', 'Email', 'Role', 'Date Added', 'Last Active', 'Activity (7d)', 'Status']
-    const escape  = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
+    const escape = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
     const rows = members.map(m => [
       escape(m.name ?? m.email.split('@')[0]),
       escape(m.email),
@@ -1300,12 +1302,12 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       escape(m.activityCount ?? 0),
       escape(m.role_id ? 'Active' : 'No Role'),
     ])
-    const csv  = [headers.map(h => `"${h}"`).join(','), ...rows.map(r => r.join(','))].join('\n')
+    const csv = [headers.map(h => `"${h}"`).join(','), ...rows.map(r => r.join(','))].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url  = URL.createObjectURL(blob)
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     const date = new Date().toISOString().split('T')[0]
-    link.href     = url
+    link.href = url
     link.download = `riazify-team-roster-${date}.csv`
     document.body.appendChild(link)
     link.click()
@@ -1331,9 +1333,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/team/invite', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ email: invite.email, role: invite.role }),
+        body: JSON.stringify({ email: invite.email, role: invite.role }),
       })
       if (res.ok) { showToast(`Invite resent to ${invite.email}`, 'success'); loadPendingInvites() }
       else showToast('Failed to resend invite', 'error')
@@ -1343,7 +1345,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
 
   async function changeRole(userId: string, newRoleId: string) {
     // Find old and new role names for the confirmation bar
-    const member  = members.find(m => m.id === userId)
+    const member = members.find(m => m.id === userId)
     const oldName = roles.find(r => r.id === member?.role_id)?.role_name ?? 'No role'
     const newName = roles.find(r => r.id === newRoleId)?.role_name ?? newRoleId
     // Don't do anything if same role selected
@@ -1360,9 +1362,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/roles/assign', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ userId, roleId: newRoleId }),
+        body: JSON.stringify({ userId, roleId: newRoleId }),
       })
       const json = await res.json()
       if (!res.ok) { showToast(json.error ?? 'Failed to update role', 'error'); setLoadingId(null); return }
@@ -1398,9 +1400,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
     try {
       const { data: { session } } = await supabase.auth.getSession()
       await fetch('/api/admin/roles/assign', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ userId, roleId: oldRoleId }),
+        body: JSON.stringify({ userId, roleId: oldRoleId }),
       })
       onMemberUpdated(userId, oldRoleId)
       showToast('Role change undone', 'info')
@@ -1413,16 +1415,16 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/roles/assign', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ userId, roleId: null }),
+        body: JSON.stringify({ userId, roleId: null }),
       })
       const json = await res.json()
       if (!res.ok) { showToast(json.error ?? 'Failed to revoke access', 'error'); return }
       await fetch('/api/admin/force-logout', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ userId }),
+        body: JSON.stringify({ userId }),
       })
       onMemberUpdated(userId, null)
       showToast('Access revoked and session terminated', 'success')
@@ -1444,14 +1446,14 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
         <p className="text-[14px] font-bold" style={{ color: C.text }}>No team seats assigned</p>
         <p className="text-[12px]" style={{ color: C.muted }}>Invite a team member to get started</p>
         <button onClick={() => setShowInvite(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold"
+          style={{ backgroundColor: C.lime, color: C.dark }}>
           <UserPlus size={14} /> Invite Member
         </button>
         {showInvite && (
           <InviteMemberModal roles={roles} onClose={() => setShowInvite(false)}
-              onInvited={() => { setShowInvite(false); loadPendingInvites() }} showToast={showToast} canInvite={canInvite} />
-          )}
+            onInvited={() => { setShowInvite(false); loadPendingInvites() }} showToast={showToast} canInvite={canInvite} />
+        )}
       </div>
     )
   }
@@ -1477,29 +1479,29 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
             {/* Export CSV */}
             {members.length > 0 && (
               <button
-               onClick={exportRoster}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all border"
-                  style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-                  <Download size={13} /> Export CSV
+                onClick={exportRoster}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 transition-all border"
+                style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+                <Download size={13} /> Export CSV
               </button>
             )}
             {/* Invite Member */}
-              <div className="relative group">
-                <button
-                  onClick={() => !atLimit && setShowInvite(true)}
-                  disabled={atLimit}
+            <div className="relative group">
+              <button
+                onClick={() => !atLimit && setShowInvite(true)}
+                disabled={atLimit}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
-                  style={{
-                    backgroundColor: atLimit ? C.border : C.lime,
-                    color:           atLimit ? C.muted  : C.dark,
-                    cursor:          atLimit ? 'not-allowed' : 'pointer',
-                    opacity:         atLimit ? 0.6 : 1,
-                  }}>
-                  <UserPlus size={13} /> Invite Member
+                style={{
+                  backgroundColor: atLimit ? C.border : C.lime,
+                  color: atLimit ? C.muted : C.dark,
+                  cursor: atLimit ? 'not-allowed' : 'pointer',
+                  opacity: atLimit ? 0.6 : 1,
+                }}>
+                <UserPlus size={13} /> Invite Member
               </button>
               {atLimit && (
                 <div className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-xl text-[11px] font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-                     style={{ backgroundColor: C.dark, color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                  style={{ backgroundColor: C.dark, color: '#fff', boxShadow: '0 4px 12px rgba(30,21,53,0.2)' }}>
                   Seat limit reached — upgrade your plan
                 </div>
               )}
@@ -1509,7 +1511,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       </div>
 
       {/* Pending invites section */}
-        {canView && pendingInvites.length > 0 && (
+      {canView && pendingInvites.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>PENDING INVITES</p>
           <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
@@ -1520,83 +1522,83 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
               ))}
             </div>
             {pendingInvites.map((invite, i) => {
-                const isExpired    = new Date(invite.expires_at) < new Date()
-                const isCancelling = cancellingId === invite.id
-                const isResending  = resendingId  === invite.id
-                const daysLeft     = Math.ceil((new Date(invite.expires_at).getTime() - Date.now()) / 86400000)
-                const roleName     = invite.admin_role_id
-                  ? (roles.find(r => r.id === invite.admin_role_id)?.role_name ?? '—')
-                  : '—'
-                return (
-                  <div key={invite.id}
-                       className="grid px-4 py-3 items-center border-b last:border-b-0"
-                       style={{ gridTemplateColumns: '2fr 1.5fr 0.8fr 0.8fr 1fr', gap: 12, borderColor: C.border }}>
+              const isExpired = new Date(invite.expires_at) < new Date()
+              const isCancelling = cancellingId === invite.id
+              const isResending = resendingId === invite.id
+              const daysLeft = Math.ceil((new Date(invite.expires_at).getTime() - Date.now()) / 86400000)
+              const roleName = invite.admin_role_id
+                ? (roles.find(r => r.id === invite.admin_role_id)?.role_name ?? '—')
+                : '—'
+              return (
+                <div key={invite.id}
+                  className="grid px-4 py-3 items-center border-b last:border-b-0"
+                  style={{ gridTemplateColumns: '2fr 1.5fr 0.8fr 0.8fr 1fr', gap: 12, borderColor: C.border }}>
 
-                    {/* Email */}
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                           style={{ backgroundColor: 'rgba(217,119,6,0.1)' }}>
-                        <Mail size={14} style={{ color: C.amber }} />
-                      </div>
-                      <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>{invite.email}</p>
+                  {/* Email */}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: 'rgba(217,119,6,0.1)' }}>
+                      <Mail size={14} style={{ color: C.amber }} />
                     </div>
-
-                    {/* Role */}
-                    <div>
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
-                            style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                        {roleName}
-                      </span>
-                    </div>
-
-                    {/* Status */}
-                    <div>
-                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full"
-                            style={{
-                              backgroundColor: isExpired ? 'rgba(185,28,28,0.1)' : 'rgba(217,119,6,0.1)',
-                              color:           isExpired ? C.red : C.amber,
-                            }}>
-                        {isExpired ? 'EXPIRED' : 'PENDING'}
-                      </span>
-                    </div>
-
-                    {/* Expires */}
-                    <div>
-                      <p className="text-[11px] font-semibold"
-                         style={{ color: isExpired ? C.red : C.muted }}>
-                        {isExpired ? 'Expired' : `${daysLeft}d left`}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => resendInvite(invite)} disabled={isResending}
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
-                        style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                        {isResending ? '...' : 'Resend'}
-                      </button>
-                      <button onClick={() => cancelInvite(invite.id)} disabled={isCancelling}
-                        className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
-                        style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                        {isCancelling ? '...' : 'Cancel'}
-                      </button>
-                    </div>
+                    <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>{invite.email}</p>
                   </div>
-                )
-              })}
+
+                  {/* Role */}
+                  <div>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg"
+                      style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                      {roleName}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: isExpired ? 'rgba(220,38,38,0.1)' : 'rgba(217,119,6,0.1)',
+                        color: isExpired ? C.red : C.amber,
+                      }}>
+                      {isExpired ? 'EXPIRED' : 'PENDING'}
+                    </span>
+                  </div>
+
+                  {/* Expires */}
+                  <div>
+                    <p className="text-[11px] font-semibold"
+                      style={{ color: isExpired ? C.red : C.muted }}>
+                      {isExpired ? 'Expired' : `${daysLeft}d left`}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => resendInvite(invite)} disabled={isResending}
+                      className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
+                      style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                      {isResending ? '...' : 'Resend'}
+                    </button>
+                    <button onClick={() => cancelInvite(invite.id)} disabled={isCancelling}
+                      className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
+                      style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>
+                      {isCancelling ? '...' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
 
       {/* Active members table */}
-        {canView && members.length > 0 && (
+      {canView && members.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>ACTIVE MEMBERS</p>
 
           {/* Search bar */}
           <div className="flex items-center gap-2 h-10 px-3.5 rounded-xl border transition-all"
-               id="team-search-bar"
-               style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            id="team-search-bar"
+            style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <Search size={14} style={{ color: C.muted, flexShrink: 0 }} />
             <input
               value={searchQuery}
@@ -1606,7 +1608,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
               style={{ color: C.text, outline: 'none', border: 'none', boxShadow: 'none' }}
               onFocus={() => {
                 const bar = document.getElementById('team-search-bar')
-                if (bar) bar.style.borderColor = 'rgba(143,255,0,0.5)'
+                if (bar) bar.style.borderColor = C.lime
               }}
               onBlur={() => {
                 const bar = document.getElementById('team-search-bar')
@@ -1619,305 +1621,305 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
             )}
           </div>
 
-      {/* Table rows */}
-      <div className="rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.surface }}>
-        {/* Active members header */}
-        <div className="grid px-4 py-2.5 border-b"
-             style={{
-               gridTemplateColumns: '32px 2fr 1.5fr 1fr 0.7fr 0.7fr 0.8fr 0.7fr',
-               gap: 12,
-               borderColor:     C.border,
-               backgroundColor: C.bg,
-             }}>
-          <div
-            onClick={() => toggleAll(members)}
-            className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer mt-0.5"
-            style={{
-              backgroundColor: members.length > 0 && members.every(m => selectedIds.has(m.id)) ? C.dark : 'transparent',
-              borderColor:     members.length > 0 && members.every(m => selectedIds.has(m.id)) ? C.dark : C.border,
-            }}>
-            {members.length > 0 && members.every(m => selectedIds.has(m.id)) && (
-              <Check size={9} style={{ color: C.lime }} />
-            )}
-            {members.some(m => selectedIds.has(m.id)) && !members.every(m => selectedIds.has(m.id)) && (
-              <div className="w-2 h-0.5 rounded" style={{ backgroundColor: C.muted }} />
-            )}
-          </div>
-          {['TEAM MEMBER', 'ASSIGNED ROLE', 'DATE ADDED', 'STATUS', 'ACTIVITY', 'LAST ACTIVE', 'ACTIONS'].map(h => (
-            <span key={h} className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
-          ))}
-        </div>
-        {(() => {
-          const q = searchQuery.toLowerCase().trim()
-          const filtered = q
-            ? members.filter(m =>
-                (m.name  ?? '').toLowerCase().includes(q) ||
-                (m.email ?? '').toLowerCase().includes(q) ||
-                (m.role_name ?? '').toLowerCase().includes(q)
-              )
-            : members
-
-          if (filtered.length === 0) return (
-            <div className="flex flex-col items-center py-10 gap-2">
-              <Search size={20} style={{ color: C.muted }} />
-              <p className="text-[13px] font-bold" style={{ color: C.text }}>No members match</p>
-              <p className="text-[11px]" style={{ color: C.muted }}>Try a different name, email or role</p>
-            </div>
-          )
-
-          return filtered.map((member) => {
-          const isLoading   = loadingId === member.id
-
-          return (
-            <div key={member.id}>
-              <div className="grid px-4 py-3 items-center border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
-                   style={{
-                     gridTemplateColumns: '32px 2fr 1.5fr 1fr 0.7fr 0.7fr 0.8fr 0.7fr',
-                     gap: 12,
-                     borderColor: C.border,
-                     backgroundColor: selectedIds.has(member.id) ? C.limeTint : undefined,
-                   }}>
-                {/* Checkbox */}
-                <div
-                  onClick={() => toggleOne(member.id)}
-                  className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer shrink-0"
-                  style={{
-                    backgroundColor: selectedIds.has(member.id) ? C.dark : 'transparent',
-                    borderColor:     selectedIds.has(member.id) ? C.dark : C.border,
-                  }}>
-                  {selectedIds.has(member.id) && <Check size={9} style={{ color: C.lime }} />}
-                </div>
-
-                {/* Member */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Avatar name={member.name} email={member.email} size={32} avatarUrl={member.avatar_url} />
-                  <div className="min-w-0">
-                    <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>
-                      {member.name ?? member.email.split('@')[0]}
-                    </p>
-                    <p className="text-[10px] truncate" style={{ color: C.muted }}>{member.email}</p>
-                  </div>
-                </div>
-
-                {/* Role dropdown — clean, no date inside */}
-                <div>
-                  {isLoading ? (
-                    <div className="flex items-center gap-2 h-8">
-                      <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.limeDeep }} />
-                      <span className="text-[11px]" style={{ color: C.muted }}>Updating...</span>
-                    </div>
-                  ) : (
-                    <div style={{ pointerEvents: canManage ? 'auto' : 'none', opacity: canManage ? 1 : 0.6 }}>
-                        <ProDropdown
-                          prefix=""
-                          currentValue={member.role_id ?? 'none'}
-                          options={[
-                            { val: 'none', label: 'No role', enabled: true },
-                            ...roles.map(r => ({ val: r.id, label: r.role_name, enabled: true })),
-                          ]}
-                          onChanged={newRoleId => {
-                            if (newRoleId === 'none') revokeAccess(member.id)
-                            else changeRole(member.id, newRoleId)
-                          }}
-                          width="full"
-                          maxItems={6}
-                        />
-                      </div>
-                  )}
-                </div>
-
-                {/* Date Added — dedicated column */}
-                <div>
-                  <p className="text-[11px] font-semibold" style={{ color: C.text }}>
-                    {member.created_at
-                      ? new Date(member.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                      : '—'}
-                  </p>
-                </div>
-
-                {/* Status */}
-                <div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: member.role_id ? 'rgba(22,163,74,0.1)' : 'rgba(217,119,6,0.1)',
-                          color:           member.role_id ? C.green : C.amber,
-                        }}>
-                    {member.role_id ? 'Active' : 'No Role'}
-                  </span>
-                </div>
-
-                {/* Activity count */}
-                <div>
-                  {(() => {
-                    const count = member.activityCount ?? 0
-                    const color = count >= 10 ? C.green : count >= 1 ? C.amber : C.muted
-                    const bg    = count >= 10 ? 'rgba(22,163,74,0.1)' : count >= 1 ? 'rgba(217,119,6,0.1)' : C.bg
-                    return (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full w-fit"
-                              style={{ backgroundColor: bg, color }}>
-                          {count} action{count !== 1 ? 's' : ''}
-                        </span>
-                        <span className="text-[9px] px-1" style={{ color: C.muted }}>last 7 days</span>
-                      </div>
-                    )
-                  })()}
-                </div>
-
-                {/* Last active */}
-                <div>
-                  <p className="text-[11px]" style={{ color: C.muted }}>{timeAgo(member.last_seen)}</p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1.5">
-                  <button onClick={() => fetchRoleHistory(member.id)}
-                    className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
-                    style={{
-                      backgroundColor: expandedHistory === member.id ? C.dark : C.bg,
-                      color:           expandedHistory === member.id ? C.lime : C.muted,
-                      border:          `1px solid ${C.border}`,
-                    }}>
-                    {historyLoading === member.id ? '...' : 'History'}
-                  </button>
-                  {canRevoke && <button
-                      onClick={() => { setRevokeTarget(member); setRevokeConfirmText('') }}
-                    className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
-                    style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                    Revoke
-                  </button>}
-                </div>
+          {/* Table rows */}
+          <div className="rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.surface }}>
+            {/* Active members header */}
+            <div className="grid px-4 py-2.5 border-b"
+              style={{
+                gridTemplateColumns: '32px 2fr 1.5fr 1fr 0.7fr 0.7fr 0.8fr 0.7fr',
+                gap: 12,
+                borderColor: C.border,
+                backgroundColor: C.bg,
+              }}>
+              <div
+                onClick={() => toggleAll(members)}
+                className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer mt-0.5"
+                style={{
+                  backgroundColor: members.length > 0 && members.every(m => selectedIds.has(m.id)) ? C.dark : 'transparent',
+                  borderColor: members.length > 0 && members.every(m => selectedIds.has(m.id)) ? C.dark : C.border,
+                }}>
+                {members.length > 0 && members.every(m => selectedIds.has(m.id)) && (
+                  <Check size={9} style={{ color: C.lime }} />
+                )}
+                {members.some(m => selectedIds.has(m.id)) && !members.every(m => selectedIds.has(m.id)) && (
+                  <div className="w-2 h-0.5 rounded" style={{ backgroundColor: C.muted }} />
+                )}
               </div>
-              {/* Role history timeline */}
-              {expandedHistory === member.id && (
-                <div className="px-4 py-3 border-b"
-                     style={{ backgroundColor: C.bg, borderColor: C.border }}>
-                  {historyLoading === member.id ? (
-                    <div className="flex items-center gap-2 py-2">
-                      <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-                           style={{ borderTopColor: C.limeDeep }} />
-                      <span className="text-[11px]" style={{ color: C.muted }}>Loading history...</span>
-                    </div>
-                  ) : (
-                    <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
-
-                      {/* Left — Role Changes */}
-                      <div>
-                        <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>
-                          ROLE CHANGES
-                        </p>
-                        {((historyData[member.id] as any)?.events ?? []).length === 0 ? (
-                          <p className="text-[11px]" style={{ color: C.muted }}>No role changes recorded yet</p>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            {((historyData[member.id] as any)?.events ?? []).map((event: any, idx: number) => {
-                              const isAssign  = event.event_title === 'Role Assigned'
-                              const adminName = event.metadata?.admin_name ?? 'Admin'
-                              const date      = new Date(event.created_at).toLocaleDateString('en-US', {
-                                month: 'short', day: 'numeric', year: 'numeric'
-                              })
-                              return (
-                                <div key={event.id ?? idx} className="flex items-start gap-2 px-3 py-2 rounded-xl border"
-                                     style={{ borderColor: C.border, backgroundColor: C.surface }}>
-                                  <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
-                                       style={{ backgroundColor: isAssign ? C.limeDeep : C.red }} />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[11px] font-bold" style={{ color: C.dark }}>
-                                      {event.event_title}
-                                    </p>
-                                    <p className="text-[9px]" style={{ color: C.muted }}>
-                                      {date} · by {adminName}
-                                    </p>
-                                  </div>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Right — Recent Logins */}
-                      <div>
-                        <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>
-                          RECENT LOGINS
-                        </p>
-                        {((historyData[member.id] as any)?.logins ?? []).length === 0 ? (
-                          <p className="text-[11px]" style={{ color: C.muted }}>No login history found</p>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            {((historyData[member.id] as any)?.logins ?? []).map((login: any, idx: number) => (
-                              <div key={idx} className="flex items-start gap-2 px-3 py-2 rounded-xl border"
-                                   style={{ borderColor: C.border, backgroundColor: C.surface }}>
-                                <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
-                                     style={{ backgroundColor: C.green }} />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[11px] font-bold truncate" style={{ color: C.dark }}>
-                                    {login.location_name || 'Unknown location'}
-                                  </p>
-                                  <p className="text-[9px] font-mono truncate" style={{ color: C.muted }}>
-                                    {login.ip_address} · {login.device_info || 'Unknown'}
-                                  </p>
-                                  <p className="text-[9px]" style={{ color: C.muted }}>
-                                    {new Date(login.login_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
-                  )}
-                </div>
-              )}
-              {pendingChange?.userId === member.id && pendingChange.oldName !== '' && (
-                <div className="flex items-center gap-3 px-4 py-2.5 border-b"
-                     style={{ backgroundColor: 'rgba(143,255,0,0.06)', borderColor: C.lime }}>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold" style={{ color: C.dark }}>
-                      Change role from{' '}
-                      <span style={{ color: C.red }}>{pendingChange.oldName}</span>
-                      {' ? '}
-                      <span style={{ color: C.limeDeep }}>{pendingChange.newName}</span>
-                      ?
-                    </p>
-                    <p className="text-[9px]" style={{ color: C.muted }}>This will take effect on their next page load</p>
-                  </div>
-                  <button onClick={confirmRoleChange}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold"
-                    style={{ backgroundColor: C.lime, color: C.dark }}>
-                    <Check size={11} /> Confirm
-                  </button>
-                  <button onClick={() => setPendingChange(null)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold"
-                    style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}>
-                    <X size={11} /> Cancel
-                  </button>
-                </div>
-              )}
+              {['TEAM MEMBER', 'ASSIGNED ROLE', 'DATE ADDED', 'STATUS', 'ACTIVITY', 'LAST ACTIVE', 'ACTIONS'].map(h => (
+                <span key={h} className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+              ))}
             </div>
-          )
-          })
-        })()}
-      </div>
+            {(() => {
+              const q = searchQuery.toLowerCase().trim()
+              const filtered = q
+                ? members.filter(m =>
+                  (m.name ?? '').toLowerCase().includes(q) ||
+                  (m.email ?? '').toLowerCase().includes(q) ||
+                  (m.role_name ?? '').toLowerCase().includes(q)
+                )
+                : members
+
+              if (filtered.length === 0) return (
+                <div className="flex flex-col items-center py-10 gap-2">
+                  <Search size={20} style={{ color: C.muted }} />
+                  <p className="text-[13px] font-bold" style={{ color: C.text }}>No members match</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>Try a different name, email or role</p>
+                </div>
+              )
+
+              return filtered.map((member) => {
+                const isLoading = loadingId === member.id
+
+                return (
+                  <div key={member.id}>
+                    <div className="grid px-4 py-3 items-center border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
+                      style={{
+                        gridTemplateColumns: '32px 2fr 1.5fr 1fr 0.7fr 0.7fr 0.8fr 0.7fr',
+                        gap: 12,
+                        borderColor: C.border,
+                        backgroundColor: selectedIds.has(member.id) ? C.limeTint : undefined,
+                      }}>
+                      {/* Checkbox */}
+                      <div
+                        onClick={() => toggleOne(member.id)}
+                        className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer shrink-0"
+                        style={{
+                          backgroundColor: selectedIds.has(member.id) ? C.dark : 'transparent',
+                          borderColor: selectedIds.has(member.id) ? C.dark : C.border,
+                        }}>
+                        {selectedIds.has(member.id) && <Check size={9} style={{ color: C.lime }} />}
+                      </div>
+
+                      {/* Member */}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Avatar name={member.name} email={member.email} size={32} avatarUrl={member.avatar_url} />
+                        <div className="min-w-0">
+                          <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>
+                            {member.name ?? member.email.split('@')[0]}
+                          </p>
+                          <p className="text-[10px] truncate" style={{ color: C.muted }}>{member.email}</p>
+                        </div>
+                      </div>
+
+                      {/* Role dropdown — clean, no date inside */}
+                      <div>
+                        {isLoading ? (
+                          <div className="flex items-center gap-2 h-8">
+                            <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.limeDeep }} />
+                            <span className="text-[11px]" style={{ color: C.muted }}>Updating...</span>
+                          </div>
+                        ) : (
+                          <div style={{ pointerEvents: canManage ? 'auto' : 'none', opacity: canManage ? 1 : 0.6 }}>
+                            <ProDropdown
+                              prefix=""
+                              currentValue={member.role_id ?? 'none'}
+                              options={[
+                                { val: 'none', label: 'No role', enabled: true },
+                                ...roles.map(r => ({ val: r.id, label: r.role_name, enabled: true })),
+                              ]}
+                              onChanged={newRoleId => {
+                                if (newRoleId === 'none') revokeAccess(member.id)
+                                else changeRole(member.id, newRoleId)
+                              }}
+                              width="full"
+                              maxItems={6}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Date Added — dedicated column */}
+                      <div>
+                        <p className="text-[11px] font-semibold" style={{ color: C.text }}>
+                          {member.created_at
+                            ? new Date(member.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                            : '—'}
+                        </p>
+                      </div>
+
+                      {/* Status */}
+                      <div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: member.role_id ? 'rgba(22,163,74,0.1)' : 'rgba(217,119,6,0.1)',
+                            color: member.role_id ? C.green : C.amber,
+                          }}>
+                          {member.role_id ? 'Active' : 'No Role'}
+                        </span>
+                      </div>
+
+                      {/* Activity count */}
+                      <div>
+                        {(() => {
+                          const count = member.activityCount ?? 0
+                          const color = count >= 10 ? C.green : count >= 1 ? C.amber : C.muted
+                          const bg = count >= 10 ? 'rgba(22,163,74,0.1)' : count >= 1 ? 'rgba(217,119,6,0.1)' : C.bg
+                          return (
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full w-fit"
+                                style={{ backgroundColor: bg, color }}>
+                                {count} action{count !== 1 ? 's' : ''}
+                              </span>
+                              <span className="text-[9px] px-1" style={{ color: C.muted }}>last 7 days</span>
+                            </div>
+                          )
+                        })()}
+                      </div>
+
+                      {/* Last active */}
+                      <div>
+                        <p className="text-[11px]" style={{ color: C.muted }}>{timeAgo(member.last_seen)}</p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1.5">
+                        <button onClick={() => fetchRoleHistory(member.id)}
+                          className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
+                          style={{
+                            backgroundColor: expandedHistory === member.id ? C.dark : C.bg,
+                            color: expandedHistory === member.id ? C.lime : C.muted,
+                            border: `1px solid ${C.border}`,
+                          }}>
+                          {historyLoading === member.id ? '...' : 'History'}
+                        </button>
+                        {canRevoke && <button
+                          onClick={() => { setRevokeTarget(member); setRevokeConfirmText('') }}
+                          className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
+                          style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>
+                          Revoke
+                        </button>}
+                      </div>
+                    </div>
+                    {/* Role history timeline */}
+                    {expandedHistory === member.id && (
+                      <div className="px-4 py-3 border-b"
+                        style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                        {historyLoading === member.id ? (
+                          <div className="flex items-center gap-2 py-2">
+                            <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
+                              style={{ borderTopColor: C.limeDeep }} />
+                            <span className="text-[11px]" style={{ color: C.muted }}>Loading history...</span>
+                          </div>
+                        ) : (
+                          <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr' }}>
+
+                            {/* Left — Role Changes */}
+                            <div>
+                              <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>
+                                ROLE CHANGES
+                              </p>
+                              {((historyData[member.id] as any)?.events ?? []).length === 0 ? (
+                                <p className="text-[11px]" style={{ color: C.muted }}>No role changes recorded yet</p>
+                              ) : (
+                                <div className="flex flex-col gap-2">
+                                  {((historyData[member.id] as any)?.events ?? []).map((event: any, idx: number) => {
+                                    const isAssign = event.event_title === 'Role Assigned'
+                                    const adminName = event.metadata?.admin_name ?? 'Admin'
+                                    const date = new Date(event.created_at).toLocaleDateString('en-US', {
+                                      month: 'short', day: 'numeric', year: 'numeric'
+                                    })
+                                    return (
+                                      <div key={event.id ?? idx} className="flex items-start gap-2 px-3 py-2 rounded-xl border"
+                                        style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                                        <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
+                                          style={{ backgroundColor: isAssign ? C.limeDeep : C.red }} />
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-[11px] font-bold" style={{ color: C.dark }}>
+                                            {event.event_title}
+                                          </p>
+                                          <p className="text-[9px]" style={{ color: C.muted }}>
+                                            {date} · by {adminName}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right — Recent Logins */}
+                            <div>
+                              <p className="text-[10px] font-black tracking-wider mb-2" style={{ color: C.muted }}>
+                                RECENT LOGINS
+                              </p>
+                              {((historyData[member.id] as any)?.logins ?? []).length === 0 ? (
+                                <p className="text-[11px]" style={{ color: C.muted }}>No login history found</p>
+                              ) : (
+                                <div className="flex flex-col gap-2">
+                                  {((historyData[member.id] as any)?.logins ?? []).map((login: any, idx: number) => (
+                                    <div key={idx} className="flex items-start gap-2 px-3 py-2 rounded-xl border"
+                                      style={{ borderColor: C.border, backgroundColor: C.surface }}>
+                                      <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
+                                        style={{ backgroundColor: C.green }} />
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-[11px] font-bold truncate" style={{ color: C.dark }}>
+                                          {login.location_name || 'Unknown location'}
+                                        </p>
+                                        <p className="text-[9px] font-mono truncate" style={{ color: C.muted }}>
+                                          {login.ip_address} · {login.device_info || 'Unknown'}
+                                        </p>
+                                        <p className="text-[9px]" style={{ color: C.muted }}>
+                                          {new Date(login.login_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {pendingChange?.userId === member.id && pendingChange.oldName !== '' && (
+                      <div className="flex items-center gap-3 px-4 py-2.5 border-b"
+                        style={{ backgroundColor: 'rgba(184,250,51,0.15)', borderColor: C.lime }}>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-bold" style={{ color: C.dark }}>
+                            Change role from{' '}
+                            <span style={{ color: C.red }}>{pendingChange.oldName}</span>
+                            {' ? '}
+                            <span style={{ color: C.limeDeep }}>{pendingChange.newName}</span>
+                            ?
+                          </p>
+                          <p className="text-[9px]" style={{ color: C.muted }}>This will take effect on their next page load</p>
+                        </div>
+                        <button onClick={confirmRoleChange}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold"
+                          style={{ backgroundColor: C.lime, color: C.dark }}>
+                          <Check size={11} /> Confirm
+                        </button>
+                        <button onClick={() => setPendingChange(null)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold"
+                          style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}>
+                          <X size={11} /> Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            })()}
+          </div>
         </div>
       )}
 
       {/* Floating bulk action bar */}
       {selectedIds.size > 0 && (
         <div className="fixed bottom-8 left-1/2 z-[9990] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
-             style={{
-               transform:       'translateX(-50%)',
-               backgroundColor: C.dark,
-               border:          `1px solid rgba(143,255,0,0.3)`,
-               boxShadow:       '0 8px 32px rgba(0,0,0,0.35)',
-             }}>
+          style={{
+            transform: 'translateX(-50%)',
+            backgroundColor: C.dark,
+            border: `1px solid rgba(184,250,51,0.3)`,
+            boxShadow: '0 8px 32px rgba(30,21,53,0.35)',
+          }}>
           {/* Count */}
           <div className="flex items-center gap-2 pr-3"
-               style={{ borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+            style={{ borderRight: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="w-6 h-6 rounded-full flex items-center justify-center"
-                 style={{ backgroundColor: C.lime }}>
+              style={{ backgroundColor: C.lime }}>
               <span className="text-[10px] font-black" style={{ color: C.dark }}>{selectedIds.size}</span>
             </div>
             <span className="text-[12px] font-semibold text-white">
@@ -1939,14 +1941,14 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowBulkRole(false)} />
                 <div className="absolute bottom-full mb-2 left-0 z-50 rounded-2xl border overflow-hidden p-1.5 flex flex-col gap-0.5"
-                     style={{ backgroundColor: C.surface, borderColor: C.border, minWidth: 180, boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+                  style={{ backgroundColor: C.surface, borderColor: C.border, minWidth: 180, boxShadow: '0 8px 24px rgba(30,21,53,0.15)' }}>
                   {roles.filter(r => !r.is_system_role).map(r => (
                     <button key={r.id}
                       onClick={() => setBulkRoleId(r.id)}
                       className="flex items-center justify-between px-3 py-2 rounded-xl text-[12px] font-semibold text-left transition-all"
                       style={{
                         backgroundColor: bulkRoleId === r.id ? C.lime : 'transparent',
-                        color:           bulkRoleId === r.id ? C.dark : C.text,
+                        color: bulkRoleId === r.id ? C.dark : C.text,
                       }}
                       onMouseEnter={e => { if (bulkRoleId !== r.id) e.currentTarget.style.backgroundColor = C.limeTint }}
                       onMouseLeave={e => { if (bulkRoleId !== r.id) e.currentTarget.style.backgroundColor = 'transparent' }}>
@@ -1968,13 +1970,13 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
               </>
             )}
           </div>}
-          
+
           {/* Bulk Revoke */}
-            {canRevoke && <button
-              onClick={() => setShowBulkRevoke(true)}
-              disabled={bulkLoading}
+          {canRevoke && <button
+            onClick={() => setShowBulkRevoke(true)}
+            disabled={bulkLoading}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-50"
-            style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.3)', color: '#fca5a5' }}>
             Revoke {selectedIds.size}
           </button>}
 
@@ -1990,14 +1992,14 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       {/* Bulk revoke confirm modal */}
       {showBulkRevoke && (
         <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-             onClick={e => e.target === e.currentTarget && setShowBulkRevoke(false)}>
+          style={{ backgroundColor: 'rgba(30,21,53,0.5)' }}
+          onClick={e => e.target === e.currentTarget && setShowBulkRevoke(false)}>
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
-               style={{ border: `1px solid ${C.border}` }}>
+            style={{ border: `1px solid ${C.border}` }}>
             <div className="px-6 py-5 flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                     style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+                  style={{ backgroundColor: 'rgba(220,38,38,0.1)' }}>
                   <Shield size={18} style={{ color: C.red }} />
                 </div>
                 <div>
@@ -2027,16 +2029,16 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       {/* Revoke confirmation modal */}
       {revokeTarget && (
         <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-             style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-             onClick={e => e.target === e.currentTarget && setRevokeTarget(null)}>
+          style={{ backgroundColor: 'rgba(30,21,53,0.6)' }}
+          onClick={e => e.target === e.currentTarget && setRevokeTarget(null)}>
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-               style={{ border: `1px solid ${C.border}` }}>
+            style={{ border: `1px solid ${C.border}` }}>
 
             {/* Header */}
             <div className="flex items-center gap-3 px-6 py-4 border-b"
-                 style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
+              style={{ borderColor: C.border, backgroundColor: 'rgba(220,38,38,0.04)' }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+                style={{ backgroundColor: 'rgba(220,38,38,0.1)' }}>
                 <Shield size={18} style={{ color: C.red }} />
               </div>
               <div>
@@ -2053,7 +2055,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
 
               {/* Member info */}
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl border"
-                   style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                style={{ backgroundColor: C.bg, borderColor: C.border }}>
                 <Avatar name={revokeTarget.name} email={revokeTarget.email} size={36} avatarUrl={revokeTarget.avatar_url} />
                 <div className="min-w-0">
                   <p className="text-[13px] font-bold" style={{ color: C.dark }}>
@@ -2068,7 +2070,7 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
 
               {/* Warning */}
               <div className="flex flex-col gap-1.5 px-4 py-3 rounded-xl border"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.2)' }}>
+                style={{ backgroundColor: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.2)' }}>
                 <p className="text-[12px] font-bold" style={{ color: C.red }}>What will happen:</p>
                 {[
                   'Their admin role will be removed immediately',
@@ -2097,9 +2099,9 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
                   autoFocus
                   className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                   style={{
-                    borderColor:     revokeConfirmText === (revokeTarget.name ?? revokeTarget.email.split('@')[0]) ? C.red : C.border,
+                    borderColor: revokeConfirmText === (revokeTarget.name ?? revokeTarget.email.split('@')[0]) ? C.red : C.border,
                     backgroundColor: C.bg,
-                    color:           C.text,
+                    color: C.text,
                   }} />
               </div>
 
@@ -2128,22 +2130,22 @@ function TeamSeatsTab({ members, roles, onMemberUpdated, showToast, canManage = 
       {/* Invite modal */}
       {showInvite && (
         <InviteMemberModal
-            roles={roles}
-            onClose={() => setShowInvite(false)}
-            onInvited={() => { setShowInvite(false); loadPendingInvites() }}
-            showToast={showToast}
-            canInvite={canInvite}
-          />
-        )}
+          roles={roles}
+          onClose={() => setShowInvite(false)}
+          onInvited={() => { setShowInvite(false); loadPendingInvites() }}
+          showToast={showToast}
+          canInvite={canInvite}
+        />
+      )}
 
       {/* Undo toast — shows after role change is confirmed */}
       {undoTimer > 0 && pendingChange && (
         <div className="fixed bottom-6 left-1/2 z-[99999] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
-             style={{
-               transform:       'translateX(-50%)',
-               backgroundColor: C.dark,
-               border:          `1px solid rgba(143,255,0,0.3)`,
-             }}>
+          style={{
+            transform: 'translateX(-50%)',
+            backgroundColor: C.dark,
+            border: `1px solid rgba(184,250,51,0.3)`,
+          }}>
           <p className="text-[13px] font-semibold text-white">
             Role changed to <span style={{ color: C.lime }}>{pendingChange.newName}</span>
           </p>
@@ -2165,14 +2167,14 @@ export default function RoleBuilderTab() {
   const { can } = useTabPermissions('role_builder')
   const supabase = createClient()
 
-  const [roles,              setRoles]              = useState<AdminRole[]>([])
-  const [members,            setMembers]            = useState<TeamMember[]>([])
-  const [adminActionsToday,  setAdminActionsToday]  = useState(0)
-  const [loading,            setLoading]            = useState(true)
-  const [selectedRole,       setSelectedRole]       = useState<AdminRole | null>(null)
-  const [isCreating,         setIsCreating]         = useState(false)
-  const [activeTab,          setActiveTab]          = useState<'builder' | 'seats'>('builder')
-  const [toast,              setToast]              = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [roles, setRoles] = useState<AdminRole[]>([])
+  const [members, setMembers] = useState<TeamMember[]>([])
+  const [adminActionsToday, setAdminActionsToday] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [selectedRole, setSelectedRole] = useState<AdminRole | null>(null)
+  const [isCreating, setIsCreating] = useState(false)
+  const [activeTab, setActiveTab] = useState<'builder' | 'seats'>('builder')
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
 
   function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
     setToast({ msg, type })
@@ -2209,7 +2211,7 @@ export default function RoleBuilderTab() {
         if (!logsError) actionsToday = count ?? 0
       } catch { /* admin_logs table not built yet — skip silently */ }
 
-      const rolesArr   = (rolesData   ?? []) as AdminRole[]
+      const rolesArr = (rolesData ?? []) as AdminRole[]
       const membersArr = (membersData ?? []) as TeamMember[]
 
       // Fetch activity counts from admin_logs (silently skip if table doesn't exist)
@@ -2227,7 +2229,7 @@ export default function RoleBuilderTab() {
       // Enrich members with role_name + activityCount
       const enriched = membersArr.map(m => ({
         ...m,
-        role_name:     rolesArr.find(r => r.id === m.role_id)?.role_name ?? null,
+        role_name: rolesArr.find(r => r.id === m.role_id)?.role_name ?? null,
         activityCount: activityMap[m.id] ?? 0,
       }))
 
@@ -2278,7 +2280,7 @@ export default function RoleBuilderTab() {
     return (
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-4 gap-3">
-          {[1,2,3,4].map(i => <div key={i} className="h-20 rounded-2xl animate-pulse" style={{ backgroundColor: C.border }} />)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-20 rounded-2xl animate-pulse" style={{ backgroundColor: C.border }} />)}
         </div>
         <div className="h-10 rounded-2xl animate-pulse" style={{ backgroundColor: C.border }} />
         <div className="flex gap-4">
@@ -2298,29 +2300,29 @@ export default function RoleBuilderTab() {
       {/* Sub-tab switcher */}
       <div className="flex items-center gap-2">
         {[
-          { key: 'builder', label: 'Role Builder',  Icon: Shield },
-          { key: 'seats',   label: 'Team Seats',    Icon: Users  },
+          { key: 'builder', label: 'Role Builder', Icon: Shield },
+          { key: 'seats', label: 'Team Seats', Icon: Users },
         ].map(tab => {
           const isActive = activeTab === tab.key
           return (
             <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key as 'builder' | 'seats')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold transition-all"
-                style={{
-                  backgroundColor: isActive ? C.lime    : C.surface,
-                  borderColor: isActive ? C.lime : C.border,
-                  color:           isActive ? C.dark : C.muted,
-                }}>
-                <tab.Icon size={14} style={{ color: isActive ? C.dark : C.muted }} />
-                {tab.label}
-                {tab.key === 'seats' && members.length > 0 && (
-                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
-                        style={{ backgroundColor: isActive ? C.dark : C.bg, color: isActive ? C.lime : C.limeDeep }}>
-                    {members.length}
-                  </span>
-                )}
-              </button>
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as 'builder' | 'seats')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-bold transition-all"
+              style={{
+                backgroundColor: isActive ? C.lime : C.surface,
+                borderColor: isActive ? C.lime : C.border,
+                color: isActive ? C.dark : C.muted,
+              }}>
+              <tab.Icon size={14} style={{ color: isActive ? C.dark : C.muted }} />
+              {tab.label}
+              {tab.key === 'seats' && members.length > 0 && (
+                <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: isActive ? C.dark : C.bg, color: isActive ? C.lime : C.limeDeep }}>
+                  {members.length}
+                </span>
+              )}
+            </button>
           )
         })}
 
@@ -2336,31 +2338,31 @@ export default function RoleBuilderTab() {
       {activeTab === 'builder' && (
         <div className="flex gap-4" style={{ minHeight: 500 }}>
 
-        {/* Left — 35% role list */}
-            <div className="flex flex-col" style={{ width: '35%', minWidth: 240 }}>
-              {can('view_roles') ? (
-                <>
-                  <div className="mb-3">
-                    <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>ROLES REGISTRY</p>
-                    <p className="text-[11px]" style={{ color: C.muted }}>
-                      {roles.filter(r => r.is_system_role).length} system · {roles.filter(r => !r.is_system_role).length} custom
-                    </p>
-                  </div>
-                  <RoleList
-                    roles={roles}
-                    allMembers={members}
-                    selectedId={isCreating ? '__new__' : selectedRole?.id ?? null}
-                    onSelect={handleSelectRole}
-                    onCreateNew={handleCreateNew}
-                    canCreate={can('create_role')}
-                  />
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                  <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view roles</p>
+          {/* Left — 35% role list */}
+          <div className="flex flex-col" style={{ width: '35%', minWidth: 240 }}>
+            {can('view_roles') ? (
+              <>
+                <div className="mb-3">
+                  <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>ROLES REGISTRY</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>
+                    {roles.filter(r => r.is_system_role).length} system · {roles.filter(r => !r.is_system_role).length} custom
+                  </p>
                 </div>
-              )}
-            </div>
+                <RoleList
+                  roles={roles}
+                  allMembers={members}
+                  selectedId={isCreating ? '__new__' : selectedRole?.id ?? null}
+                  onSelect={handleSelectRole}
+                  onCreateNew={handleCreateNew}
+                  canCreate={can('create_role')}
+                />
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view roles</p>
+              </div>
+            )}
+          </div>
 
           {/* Right — 65% permission matrix */}
           <div className="flex flex-col flex-1">
@@ -2386,27 +2388,27 @@ export default function RoleBuilderTab() {
         </div>
       )}
 
-     {/* Team Seats view */}
-        {activeTab === 'seats' && (
-          <TeamSeatsTab
-            members={members}
-            roles={roles}
-            onMemberUpdated={handleMemberUpdated}
-            showToast={showToast}
-            canManage={can('manage_team')}
-            canView={can('view_team')}
-            canInvite={can('invite_member')}
-            canRevoke={can('revoke_access')}
-          />
-        )}
+      {/* Team Seats view */}
+      {activeTab === 'seats' && (
+        <TeamSeatsTab
+          members={members}
+          roles={roles}
+          onMemberUpdated={handleMemberUpdated}
+          showToast={showToast}
+          canManage={can('manage_team')}
+          canView={can('view_team')}
+          canInvite={can('invite_member')}
+          canRevoke={can('revoke_access')}
+        />
+      )}
 
       {toast && <Toast msg={toast.msg} type={toast.type} />}
-      <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #e8ede2' }}>
+      <div style={{ marginTop: 32, paddingTop: 24, borderTop: `1px solid ${C.border}` }}>
         {can('view_team') ? (
           <TeamMembersPanel canEdit={can('manage_team')} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: '#e8ede2', backgroundColor: '#f7f9f5' }}>
-            <p className="text-[13px] font-bold" style={{ color: '#8a9e78' }}>You don't have access to view team members</p>
+          <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view team members</p>
           </div>
         )}
       </div>
