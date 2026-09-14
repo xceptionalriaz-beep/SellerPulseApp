@@ -67,41 +67,35 @@ export const petTemplate: TemplateSection = {
             }
         },
 
-        // ── 2. 2-Column Hero Product ─────────────────────────────────────────
-        // Right column shows 4 evenly-spaced thumbnails under the main image.
-        // Left column stays clean below the gallery — no extra badge strip —
-        // so the thumbnails sit on a quiet ground with no text overflow.
+        // ── 2. Promotional Pet Banner ────────────────────────────────────────
         {
-            type: 'hero_product', props: {
+            type: 'banner', props: {
+                bgColor: '#f5f0ff',
+                bgGradient: false,
+                gradientFrom: '',
+                gradientTo: '',
+                headingText: 'Premium Pet Care',
+                headingColor: '#1e1535',
+                headingSize: 24,
+                subText: 'High‑quality grooming tools for your furry friends',
+                subColor: '#6b7280',
+                align: 'left',
+                minHeight: 200,
+                // Left Aligned with Badge variant
+                variant: 'left-badge',
                 paddingTop: 24,
-                paddingBottom: 12,
-                paddingLeft: 20,
-                paddingRight: 20,
-                leftImage: '{{MAIN_IMAGE_URL}}',
-                thumb1: '{{IMAGE_2_URL}}',
-                thumb2: '{{IMAGE_3_URL}}',
-                thumb3: '{{IMAGE_4_URL}}',
-                thumb4: '{{IMAGE_5_URL}}',
-                leftBg: '#f9fafb',
-                rightTitle: '{{PRODUCT_TITLE}}',
-                rightCondition: '{{ITEM_CONDITION}}',
-                rightPrice: '{{ITEM_PRICE}}',
-                rightOriginal: '{{ORIGINAL_PRICE}}',
-                showOriginal: true,
-                rightQuantity: '{{QUANTITY}}',
-                showScarcity: true,
-                rightBadgeText: 'Brand New',
-                rightBullets: [
-                    'Veterinarian-recommended deshedding tool',
-                    'Self-cleaning retractable stainless-steel bristles',
-                    'Reduces shedding by up to 95% — all coat types',
-                    'Ergonomic non-slip handle — gentle on skin',
-                ],
-                accentColor: '#7530fb',
-                scarcityBg: '#fef2f2',
-                scarcityColor: '#991b1b',
+                paddingRight: 24,
+                paddingBottom: 24,
+                paddingLeft: 24,
+                // Optional badge text (can be added via UI)
+                badgeText: '🐾 Pet Care Specialist',
+                badgeBg: '#ffffff',
+                badgeColor: '#7530fb',
             }
         },
+
+
+
 
         // ── 3. Urgency Bar ───────────────────────────────────────────────────
         {

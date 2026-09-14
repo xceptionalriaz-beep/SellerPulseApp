@@ -153,6 +153,7 @@ function VisualEditorInner() {
     const supabase = createClient()
     const router = useRouter()
     const searchParams = useSearchParams()
+    const isAdmin = searchParams.get('admin') === 'true'
 
     // templateId from query — if present, load existing template
     const templateId = searchParams.get('id')
@@ -335,18 +336,25 @@ function VisualEditorInner() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('Not logged in')
 
+            const publishPayload = {
+                name,
+                category,
+                description_html: html,
+                is_shared: true,
+                is_system: isAdmin,
+                thumbnail_url: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=200&h=150&fit=crop',
+            }
+
             if (savedId) {
                 await (supabase as any)
                     .from('listing_templates')
                     .update({
-                        name,
-                        category,
-                        description_html: html,
-                        is_shared: true,
+                        ...publishPayload,
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
                 setPublished(true)
+                router.refresh()
                 setTimeout(() => setPublished(false), 3000)
             } else {
                 // Save first, then publish
@@ -354,12 +362,8 @@ function VisualEditorInner() {
                     .from('listing_templates')
                     .insert({
                         user_id: user.id,
-                        name,
-                        category,
-                        description_html: html,
+                        ...publishPayload,
                         description: 'Visual Builder template',
-                        is_system: false,
-                        is_shared: true,
                         use_count: 0,
                     })
                     .select('id')
@@ -368,6 +372,7 @@ function VisualEditorInner() {
                     setSavedId(data.id)
                     window.history.replaceState(null, '', `?id=${data.id}`)
                     setPublished(true)
+                    router.push('/dashboard/design?tab=templates')
                     setTimeout(() => setPublished(false), 3000)
                 }
             }
@@ -376,7 +381,7 @@ function VisualEditorInner() {
         } finally {
             setPublishing(false)
         }
-    }, [savedId, name, category, html, supabase])
+    }, [savedId, name, category, html, supabase, isAdmin])
 
     // ── Name edit ─────────────────────────────────────────────────────────────
     const startEditingName = () => {

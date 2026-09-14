@@ -11,6 +11,8 @@ import {
     Zap, BarChart2,
 } from 'lucide-react'
 import AiTemplateGenerator from '@/components/ui/AiTemplateGenerator'
+import { wrapTemplateHtml, hydrateTemplateContent } from '@/lib/template-utils'
+import toast from 'react-hot-toast'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -63,38 +65,34 @@ interface ListingTemplate {
 }
 
 // ── Thumbnail ──────────────────────────────────────────────────────────────
-function TemplateThumbnail({ html }: { html: string }) {
-    const doc = html.trim().toLowerCase().startsWith('<!doctype') || html.trim().toLowerCase().startsWith('<html')
-        ? html
-        : `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#1f1d2e;background:#fff;padding:16px;}
-h1{font-size:20px;font-weight:700;color:#1e1535;margin:0 0 8px;}
-h2{font-size:15px;font-weight:700;color:#1e1535;margin:12px 0 5px;}
-p{font-size:12px;color:#6b7280;margin:0 0 8px;}
-table{width:100%;border-collapse:collapse;margin-bottom:10px;}
-td,th{padding:6px 10px;border:1px solid #ede9fe;font-size:12px;text-align:left;}
-th{background:#7530fb;color:#fff;font-weight:700;}
-img{max-width:100%;height:auto;display:block;}
-</style></head><body>${html}</body></html>`
+function TemplateThumbnail({ html }: { html: string | null | undefined }) {
+    // If html is missing, render a fallback placeholder
+    if (!html) {
+        return (
+            <div style={{ width: 80, height: 60, backgroundColor: '#f1f5f9', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#94a3b8' }}>
+                No Preview
+            </div>
+        );
+    }
 
+    const hydrated = hydrateTemplateContent(html);
+    const doc = wrapTemplateHtml(hydrated);
     return (
-        <div style={{ width: 60, height: 44, overflow: 'hidden', backgroundColor: '#f8f7ff', position: 'relative', borderRadius: 6, flexShrink: 0 }}>
+        <div style={{ width: 60, height: 60, overflow: 'hidden', backgroundColor: '#fff', position: 'relative', borderRadius: 4, flexShrink: 0, border: '1px solid #e2e8f0' }}>
             <iframe
                 srcDoc={doc}
                 sandbox="allow-same-origin"
-                scrolling="no"
                 style={{
                     position: 'absolute', top: 0, left: 0,
-                    width: '600px', height: '400px',
+                    width: '300px', height: '300px',
                     border: 'none', pointerEvents: 'none',
-                    transform: 'scale(0.1)', transformOrigin: 'top left',
+                    transform: 'scale(0.2)', transformOrigin: 'top left',
                     backgroundColor: '#fff',
                 }}
                 title="preview"
             />
         </div>
-    )
+    );
 }
 
 // ── Category badge ─────────────────────────────────────────────────────────
@@ -186,20 +184,19 @@ function ConfirmDeleteModal({
 // ── Preview Modal ──────────────────────────────────────────────────────────
 function PreviewModal({ template, onClose }: { template: ListingTemplate; onClose: () => void }) {
     const html = template.description_html || ''
-    const doc = html.trim().toLowerCase().startsWith('<!doctype') || html.trim().toLowerCase().startsWith('<html')
-        ? html
-        : `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.7;color:#1f1d2e;background:#fff;padding:20px;}
-h1{font-size:22px;font-weight:700;color:#1e1535;margin:0 0 8px;padding-bottom:8px;border-bottom:3px solid #7530fb;}
-h2{font-size:16px;font-weight:700;color:#1e1535;margin:16px 0 6px;padding-left:10px;border-left:3px solid #7530fb;}
-p{font-size:13px;color:#6b7280;margin:0 0 8px;line-height:1.6;}
-table{width:100%;border-collapse:collapse;margin-bottom:12px;}
-td,th{padding:8px 12px;border:1px solid #ede9fe;font-size:13px;text-align:left;}
-th{background:#7530fb;color:#fff;font-weight:700;}
-tr:nth-child(even){background:#f8f7ff;}
-img{max-width:100%;height:auto;display:block;border-radius:6px;margin-bottom:8px;}
-</style></head><body>${html}</body></html>`
+    // Use the centralized utility for consistent hydration
+    const hydrated = hydrateTemplateContent(html)
+
+    // Resolve relative image URLs
+    const processedHtml = hydrated.replace(/src=["']\/([^"'>]+)["']/gi, (match, p1) => {
+        try {
+            const absolute = `${window.location.origin}/${p1}`
+            return `src="${absolute}"`
+        } catch {
+            return match
+        }
+    })
+    const doc = wrapTemplateHtml(processedHtml)
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
@@ -273,15 +270,18 @@ export default function TemplatesTab() {
     const loadTemplates = useCallback(async () => {
         setLoading(true)
         try {
-            const { data, error } = await (supabase as any)
+            const { data, error } = await supabase
                 .from('listing_templates')
                 .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
+                // Ensure system templates (admin‑published) are included regardless of RLS user filtering
+                .or('is_system.eq.true,user_id.is.null')
                 .order('created_at', { ascending: false })
             if (error) throw error
             setTemplates((data as ListingTemplate[]) || [])
         } catch (err) {
             console.error('[TemplatesTab] load error:', err)
             setTemplates([])
+            toast.error('Failed to load templates')
         } finally {
             setLoading(false)
         }
@@ -309,6 +309,10 @@ export default function TemplatesTab() {
 
     // ── Publish / Unpublish ────────────────────────────────────────────────
     async function togglePublish(t: ListingTemplate) {
+        const action = t.is_system ? 'unpublish' : 'publish'
+        if (!window.confirm(`Are you sure you want to ${action} this template? It will ${action === 'publish' ? 'move it to the public gallery' : 'remove it from the public gallery'}.`)) {
+            return
+        }
         setTogglingId(t.id)
         try {
             const newValue = !t.is_system
@@ -322,6 +326,7 @@ export default function TemplatesTab() {
             setTimeout(() => setSuccessId(null), 2000)
         } catch (err) {
             console.error('[TemplatesTab] toggle error:', err)
+            toast.error('Failed to update template status')
         } finally {
             setTogglingId(null)
         }
@@ -332,15 +337,17 @@ export default function TemplatesTab() {
         if (!deleteTarget) return
         setDeleting(true)
         try {
-            const { error } = await (supabase as any)
+            const { error } = await supabase
                 .from('listing_templates')
                 .delete()
                 .eq('id', deleteTarget.id)
             if (error) throw error
             setTemplates(prev => prev.filter(t => t.id !== deleteTarget.id))
             setDeleteTarget(null)
+            toast.success('Template deleted')
         } catch (err) {
             console.error('[TemplatesTab] delete error:', err)
+            toast.error('Failed to delete template')
         } finally {
             setDeleting(false)
         }
@@ -547,7 +554,7 @@ export default function TemplatesTab() {
                                 {/* Table header */}
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: '56px 1fr 110px 100px 70px 110px 250px',
+                                    gridTemplateColumns: '140px 1fr 110px 100px 70px 110px 250px',
                                     padding: '10px 16px',
                                     borderBottom: `1px solid ${C.border}`,
                                     backgroundColor: C.bg,
@@ -573,7 +580,7 @@ export default function TemplatesTab() {
                                         <div key={t.id}
                                             style={{
                                                 display: 'grid',
-                                                gridTemplateColumns: '56px 1fr 110px 100px 70px 110px 250px',
+                                                gridTemplateColumns: '140px 1fr 110px 100px 70px 110px 250px',
                                                 padding: '12px 16px',
                                                 alignItems: 'center',
                                                 borderBottom: idx < filtered.length - 1 ? `1px solid ${C.border}` : 'none',

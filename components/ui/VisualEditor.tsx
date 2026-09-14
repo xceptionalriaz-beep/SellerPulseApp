@@ -46,6 +46,7 @@ import SidebarPanel from './VisualEditor/SidebarPanel'
 import Canvas from './VisualEditor/Canvas'
 import PropertiesPanel from './VisualEditor/PropertiesPanel'
 import LivePreview from './VisualEditor/LivePreview'
+import { EditorToolbar as RichEditorToolbar } from './EditorToolbar'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -148,7 +149,6 @@ export default function VisualEditor({
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
-    const [selectedSlot, setSelectedSlot] = useState<{ propKey: string; index?: number } | null>(null)
     const [copiedStyle, setCopiedStyle] = useState<Record<string, unknown> | null>(null)
     const [tokenFeedback, setTokenFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null)
     const [draggedType, setDraggedType] = useState<BlockType | null>(null)
@@ -180,19 +180,14 @@ export default function VisualEditor({
 
     useEffect(() => {
         if (!selectedId) {
-            setSelectedSlot(null)
             return
         }
         if (selectedBlockType === null) {
-            // Selected id no longer matches any block (e.g. after a delete)
-            setSelectedSlot(null)
             return
         }
         if (IMAGE_BLOCK_TYPES.has(selectedBlockType)) {
             setActiveTab('images')
             setPanelOpen(true)
-        } else {
-            setSelectedSlot(null)
         }
     }, [selectedId, selectedBlockType, IMAGE_BLOCK_TYPES])
 
@@ -201,6 +196,15 @@ export default function VisualEditor({
     const [livePreview, setLivePreview] = useState(false)
     const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(DEFAULT_CANVAS_SETTINGS)
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
+    const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
+    const [inlineToolbar, setInlineToolbar] = useState<{
+        visible: boolean;
+        x: number;
+        y: number;
+        blockId: string;
+        propKey: string;
+        text: string;
+    } | null>(null);
     const [focusMode, setFocusMode] = useState(false)        // hides sidebar + panel
     const [templateName, setTemplateName] = useState('My Template')
     /**
@@ -236,6 +240,16 @@ export default function VisualEditor({
     const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set()) // hidden blocks
     const [canvasSearch, setCanvasSearch] = useState('')          // search blocks on canvas
 
+    // Auto‑select the image sub‑slot when a split‑image banner is selected
+    useEffect(() => {
+        if (!selectedId) return
+        const block = blocks.find(b => b.id === selectedId)
+        if (!block) return
+        if (block.type === 'banner' && (block.props as any).variant === 'split-image-text') {
+            setSelectedSubSlot('imageUrl')
+        }
+    }, [selectedId, blocks])
+
     // ── Anti-feedback-loop refs ───────────────────────────────────────────────
     const isInternalChange = useRef(false)
     const hasInitialised = useRef(false)
@@ -267,7 +281,7 @@ export default function VisualEditor({
             setCurrentTemplateId(null)
             setIsDirty(false)
             setSelectedId(null)
-            setSelectedSlot(null)
+            // No selectedSlot management — direct asset focus removes slot cards
             setUndoStack([])
             setRedoStack([])
             setLockedIds(new Set())
@@ -292,7 +306,6 @@ export default function VisualEditor({
         setCurrentTemplateId(null)
         setIsDirty(false)
         setSelectedId(null)
-        setSelectedSlot(null)
         setUndoStack([])
         setRedoStack([])
         setLockedIds(new Set())
@@ -734,6 +747,36 @@ export default function VisualEditor({
         return () => window.removeEventListener('keydown', handler)
     }, [handleUndo, handleRedo, handleDelete, selectedId])
 
+    // ── Inline toolbar message listener ──────────────────────────────────────
+    useEffect(() => {
+        const handler = (event: MessageEvent) => {
+            console.log('--- Parent Received Message ---', event.data);
+            if (event.data?.type === 'RIAZIFY_EDIT_TEXT') {
+                const iframe = document.querySelector(`iframe[title*="${event.data.blockId}"]`) as HTMLIFrameElement;
+                if (iframe) {
+                    const rect = iframe.getBoundingClientRect();
+                    console.log('Iframe rect:', rect);
+                    console.log('Event data:', event.data);
+
+                    setInlineToolbar({
+                        visible: true,
+                        // Adjust position based on iframe offset in parent viewport
+                        x: Math.max(20, rect.left + event.data.x),
+                        y: Math.max(60, rect.top + event.data.y - 55),
+                        blockId: event.data.blockId,
+                        propKey: event.data.propKey || 'headingText',
+                        text: event.data.text
+                    });
+                    setSelectedId(event.data.blockId);
+                } else {
+                    console.error('Could not find iframe for block:', event.data.blockId);
+                }
+            }
+        };
+        window.addEventListener('message', handler);
+        return () => window.removeEventListener('message', handler);
+    }, []);
+
     const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
 
     // ── Search: compute matching block ids + ordered match list ───────────────
@@ -857,12 +900,11 @@ export default function VisualEditor({
                     // BodySettings
                     canvasSettings={canvasSettings}
                     onUpdateSettings={handleUpdateSettings}
-                    // ImagesTab
+                    // ImagesTab — direct asset focus (no slot cards)
                     onInsertImage={handleInsertImage}
                     selectedId={selectedId}
+                    selectedSubSlot={selectedSubSlot}
                     blocks={blocks}
-                    selectedSlot={selectedSlot}
-                    onSelectSlot={setSelectedSlot}
                     // AuditTab
                     html={currentHtml}
                     blockCount={blocks.length}
@@ -979,6 +1021,45 @@ export default function VisualEditor({
                 canvasZoom={canvasZoom}
                 templateName={templateName}
             />
+
+            {/* ── Inline Toolbar Overlay ── */}
+            {inlineToolbar?.visible && (
+                <div style={{
+                    position: 'fixed',
+                    top: inlineToolbar.y,
+                    left: inlineToolbar.x,
+                    zIndex: 99999,
+                    background: '#fff',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+                    borderRadius: 8,
+                    border: `1px solid ${C.border}`,
+                    padding: 4
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '2px 6px' }}>
+                        <button onClick={() => setInlineToolbar(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: C.muted }}>×</button>
+                    </div>
+                    <RichEditorToolbar
+                        activeFormats={new Set()}
+                        onExec={(cmd, val) => {
+                            const block = blocks.find(b => b.id === inlineToolbar.blockId);
+                            if (!block) return;
+                            const p = block.props as any;
+                            let currentText = p[inlineToolbar.propKey] || inlineToolbar.text;
+
+                            if (cmd === 'bold') currentText = `<strong>${currentText}</strong>`;
+                            else if (cmd === 'italic') currentText = `<em>${currentText}</em>`;
+
+                            const updatedBlock = {
+                                ...block,
+                                props: { ...p, [inlineToolbar.propKey]: currentText }
+                            };
+                            handleBlockChange(updatedBlock);
+                        }}
+                        descPreview="edit"
+                        onPreview={() => {}}
+                    />
+                </div>
+            )}
         </div>
     )
 }

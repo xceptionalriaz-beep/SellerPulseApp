@@ -19,6 +19,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useMemo } from 'react'
+import { hydrateTemplateContent } from '@/lib/template-utils'
 import {
     X, Copy, Check, Monitor, Tablet, Smartphone,
     Pencil, ChevronLeft, ChevronRight, Code2,
@@ -168,7 +169,8 @@ export default function TemplatePreviewModal({
     function goPrev() { if (hasPrev) setCurrent(templates[idx - 1]) }
     function goNext() { if (hasNext) setCurrent(templates[idx + 1]) }
 
-    const html = current?.description_html ?? ''
+    const rawHtml = current?.description_html ?? ''
+    const html = hydrateTemplateContent(rawHtml)
     const doc = wrapHtml(html)
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const placeholders = useMemo(() => extractPlaceholders(html), [current?.id, html])

@@ -1124,6 +1124,14 @@ function AdminPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // -- Force highlighting for TemplatesTab when it is the default view --
+  useEffect(() => {
+    if (!isSettingsMode && !isAnalyticsMode) {
+      setActiveSettingsTab(26)
+    }
+  }, [isSettingsMode, isAnalyticsMode])
+
+
   // -- Computed stat cards from real data ---------------------
   const statCards: StatCardData[] = [
     {

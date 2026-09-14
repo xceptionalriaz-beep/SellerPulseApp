@@ -47,7 +47,7 @@ import {
     getDefinition,
     BLOCK_DEFINITIONS,
 } from './blocks'
-import { renderForCanvas, extractTokens, type CategoryId } from './sampleData'
+import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -681,7 +681,7 @@ function BlockCard({
                         el.style.height = 'auto'
                     }
                 }}
-                style={{ padding: '14px 16px 12px', pointerEvents: 'none', overflow: 'hidden' }}
+                style={{ padding: '14px 16px 12px', pointerEvents: 'auto', overflow: 'hidden' }}
             >
                 <BlockPreview block={block} def={def} activeCategory={activeCategory} />
             </div>
@@ -940,7 +940,12 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
             //    The block's props are NOT mutated — saved HTML stays tokenized.
             //    Sample data is category-matched so the preview reflects the
             //    active template's theme (pet / electronics / fashion / etc.).
-            blockHtml = renderForCanvas(blockHtml, block.type, activeCategory)
+            if (block.type === 'banner') {
+                // Use the special helper to honor imageUrl, imagePosition, borderRadius
+                blockHtml = renderBannerForCanvas(block, activeCategory)
+            } else {
+                blockHtml = renderForCanvas(blockHtml, block.type, activeCategory)
+            }
 
             // 3) If any <img src> still references a {{TOKEN}} (defensive — should
             //    be handled by renderForCanvas already), fall back to a small
@@ -966,9 +971,167 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     width: 700px;
   }
   table { border-collapse: collapse; width: 100%; }
-  img { border: 0; display: block; max-width: 100%; }
+  img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }
+  /* Dropzone visual feedback */
+  div[data-canvas-dropzone]
+  div[data-canvas-dropzone][data-canvas-dropzone-active="true"] {
+    outline: 3px solid #7530fb !important;
+    outline-offset: 2px !important;
+    border-radius: 8px !important;
+  }
+  /* Active sub-slot visual indicator — highly specific with !important */
+  div[data-canvas-dropzone].riazify-active-slot,
+  div[data-canvas-dropzone][data-canvas-dropzone-active="true"],
+  img[data-slot].riazify-active-slot {
+    outline: 3px solid #7530fb !important;
+    outline-offset: 2px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 0 3px rgba(117,48,251,0.25) !important;
+  }
+  img[data-slot].riazify-active-slot {
+    transition: outline 0.15s ease !important;
+  }
 </style>
+<style id="canvas-hover-styles">
+  div[data-canvas-overlay] { opacity: 0; transition: opacity 0.15s ease; pointer-events: none; }
+  div[data-canvas-dropzone]:hover div[data-canvas-overlay],
+  div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
+</style>
+<script>
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    // Slot selection via image click or dropzone click
+    document.querySelectorAll('img[data-slot]').forEach(function(img) {
+      img.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var slot = img.getAttribute('data-slot');
+        if (slot && window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot }, '*');
+        }
+      });
+    });
+    // Dropzone click also triggers selection (for full-width / gallery thumbnails)
+    document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+      zone.addEventListener('click', function(e) {
+        // Only trigger if the click isn't on the overlay (overlay handles picker)
+        if (e.target && (e.target.getAttribute && e.target.getAttribute('data-canvas-overlay')) || e.target.closest && e.target.closest('[data-canvas-overlay]')) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        var slot = zone.getAttribute('data-canvas-dropzone');
+        if (slot && window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot }, '*');
+        }
+      });
+    });
+    // Dropzone drag/drop handling — supports file drops and URL drops
+    document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+      zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.setAttribute('data-canvas-dropzone-active', 'true');
+        e.dataTransfer.dropEffect = 'copy';
+      });
+      zone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.setAttribute('data-canvas-dropzone-active', 'false');
+      });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.setAttribute('data-canvas-dropzone-active', 'false');
+        var slot = zone.getAttribute('data-canvas-dropzone');
+        // Prefer file drop
+        var files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+          var file = files[0];
+          if (window.parent && slot) {
+            window.parent.postMessage({ type: 'RIAZIFY_DROP_ASSET', propKey: slot, fileName: file.name, fileType: file.type, fileUrl: URL.createObjectURL(file) }, '*');
+          }
+        } else {
+          // Try URL from dataTransfer
+          var url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+          if (url && window.parent && slot) {
+            window.parent.postMessage({ type: 'RIAZIFY_DROP_ASSET', propKey: slot, fileUrl: url }, '*');
+          }
+        }
+      });
+    });
+    // Highlight the active sub-slot image frame (visual indicator)
+    // Receives propKey updates via message from parent VisualEditor
+    window.addEventListener('message', function(msgEvent) {
+      if (msgEvent.data && msgEvent.data.type === 'RIAZIFY_UPDATE_ACTIVE_SLOT') {
+        var prop = msgEvent.data.propKey;
+        // Highlight the dropzone container (clear visual target for full-width and thumbnails)
+        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+          zone.classList.remove('riazify-active-slot');
+        });
+        document.querySelectorAll('img[data-slot]').forEach(function(img) {
+          img.classList.remove('riazify-active-slot');
+        });
+        // Apply only to the clicked/updated sub-slot
+        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+          if (zone.getAttribute('data-canvas-dropzone') === prop) {
+            zone.classList.add('riazify-active-slot');
+          }
+        });
+        document.querySelectorAll('img[data-slot]').forEach(function(img) {
+          if (img.getAttribute('data-slot') === prop) {
+            img.classList.add('riazify-active-slot');
+          }
+        });
+      }
+    });
+    // Overlay click triggers asset picker/modal
+    document.querySelectorAll('div[data-canvas-overlay]').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var slot = overlay.getAttribute('data-canvas-overlay');
+        if (slot && window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_OPEN_ASSET_PICKER', propKey: slot }, '*');
+        }
+      });
+    });
+
+    // Inline text editing click handler
+    document.addEventListener('click', function(e) {
+      console.log('---Iframe Click Handler Triggered---', e.target.tagName);
+      var target = e.target;
+      var editableTags = ['H1', 'H2', 'H3', 'P', 'SPAN', 'DIV', 'A', 'STRONG', 'TD', 'LI'];
+      if (target && editableTags.includes(target.tagName)) {
+        e.stopPropagation();
+        var propKey = target.getAttribute('data-prop-key');
+        if (!propKey) {
+          if (['H1', 'H2', 'H3'].includes(target.tagName)) {
+            propKey = 'headingText';
+          } else {
+            propKey = 'subText';
+          }
+        }
+        var rect = target.getBoundingClientRect();
+        window.parent.postMessage({
+          type: 'RIAZIFY_EDIT_TEXT',
+          blockId: '${block.id}',
+          propKey: propKey,
+          text: target.innerText || '',
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height
+        }, '*');
+      }
+      else {
+        console.log('Target not editable or wrong tag');
+      }
+    });
+  });
+})();
+</script>
 </head>
 <body>${blockHtml}</body>
 </html>`
@@ -1019,14 +1182,14 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
                     ref={iframeRef}
                     srcDoc={html}
                     onLoad={onLoad}
-                    sandbox="allow-same-origin"
+                    sandbox="allow-same-origin allow-scripts"
                     scrolling="no"
                     style={{
                         width: '700px',
                         height: height,
                         border: 'none',
                         display: 'block',
-                        pointerEvents: 'none',
+                        pointerEvents: 'auto',
                         backgroundColor: 'transparent',
                         transformOrigin: 'top left',
                         transform: 'scale(var(--canvas-scale, 1))',

@@ -107,6 +107,8 @@ export type BlockType =
     | 'why_buy_from_us'
     | 'satisfaction_guarantee'
     | 'limited_time_offer'
+    | 'features'
+    | 'features'
     // Header & Footer
     | 'store_header'
     | 'category_nav'
@@ -162,6 +164,7 @@ export type BlockProps =
     | RectangleProps
     | HeroHeaderProps
     | RawHtmlProps
+    | FeaturesProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -528,16 +531,32 @@ export interface ImageProps extends CommonProps {
 export interface BannerProps extends CommonProps {
     bgColor: string           // overrides CommonProps.bgColor for banner bg
     bgGradient: boolean
-    gradientFrom: string
-    gradientTo: string
+    bgGradientFrom?: string
+    bgGradientTo?: string
+    bgGradientMid?: string      // optional mid-stop for animated wave
+    gradientFrom?: string
+    gradientTo?: string
+    gradientSpeed?: number     // seconds per loop for animated wave
     headingText: string
     headingColor: string
     headingSize: number
     subText: string
     subColor: string
-    subTextColor: string      // alias for subColor for panel consistency
+    accentColor?: string      // optional accent stripe colour for diagonal variant
     align: 'left' | 'center' | 'right'
-    minHeight: number         // px
+    // Optional enhancements for pet store banner
+    badgeText?: string         // optional mini‑badge text above heading
+    badgeBg?: string           // badge background colour
+    badgeColor?: string        // badge text colour
+    ctaText?: string           // CTA button label
+    ctaUrl?: string            // CTA link URL
+    ctaBgColor?: string        // CTA background colour
+    ctaTextColor?: string      // CTA text colour
+    ctaHoverBgColor?: string   // CTA hover background colour
+    minHeight?: number         // optional min‑height override
+    variant?: string          // layout variant id (required by block system)
+    imageUrl?: string         // image url for split-image-text variant
+    imagePosition?: 'left' | 'right' // position for split-image-text variant
 }
 
 // ── Gallery Row ───────────────────────────────────────────────────────────────
@@ -618,6 +637,14 @@ export interface CtaBannerProps extends CommonProps {
     subTextColor: string
     align: 'left' | 'center' | 'right'
     minHeight: number
+}
+
+// ── Features / Trust Badges Bar ──────────────────────────────────────────────
+export interface FeaturesProps extends CommonProps {
+    features: Array<{ icon: string; label: string; subText?: string }>
+    iconColor: string
+    textColor: string
+    variant: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -752,6 +779,8 @@ import { getTrustBadgesVariant as _getTBVariant } from './variants/trust_badges.
 import { getNavBarVariant as _getNavBarVariant } from './variants/nav_bar.variants'
 import { getSpecsTableVariant as _getSpecsVariant } from './variants/specs_table.variants'
 import { getPolicyTabsVariant as _getPolicyTabsVariant } from './variants/policy_tabs.variants'
+import { getBannerVariant as _getBannerVariant } from './variants/banner.variants'
+import { getFeatureVariant as _getFeatureVariant } from './variants/features.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
@@ -1532,26 +1561,39 @@ ${rows}
             subTextColor: 'rgba(255,255,255,0.75)',
             align: 'center',
             minHeight: 120,
+            variant: 'simple',
+            imageUrl: '',
+            imagePosition: 'left',
+            borderRadius: 8,
         } as BannerProps,
         toHtml(props, id) {
             const p = props as BannerProps
-            const bg = p.bgGradient
-                ? `background:linear-gradient(135deg,${p.gradientFrom},${p.gradientTo});`
-                : `background-color:${p.bgColor};`
-            return wrapBlock('banner', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="${bg}${pad(p)}min-height:${p.minHeight}px;${textAlign(p.align)}">
-      <h2 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize}px;font-weight:800;color:${p.headingColor};line-height:1.3;">
-        ${p.headingText}
-      </h2>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.subColor};line-height:1.6;">
-        ${p.subText}
-      </p>
-    </td>
-  </tr>
-</table>`
-            )
+            return _getBannerVariant(p.variant ?? 'simple').toHtml(p, id)
+        },
+    },
+
+    {
+        type: 'features',
+        label: 'Features Bar',
+        category: 'Media',
+        icon: 'grid-2x2',
+        description: 'Icon-based feature highlights',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            paddingTop: 20,
+            paddingBottom: 20,
+            features: [
+                { icon: '⭐', label: 'Top Quality', subText: 'Premium Materials' },
+                { icon: '🚚', label: 'Fast Shipping', subText: 'Tracked Delivery' },
+                { icon: '↩️', label: 'Easy Returns', subText: '30-Day Policy' },
+            ],
+            iconColor: '#7530fb',
+            textColor: '#1e1535',
+            variant: 'simple-centered',
+        } as FeaturesProps,
+        toHtml(props, id) {
+            const p = props as FeaturesProps
+            return _getFeatureVariant(p.variant ?? 'simple-centered').toHtml(p, id)
         },
     },
 

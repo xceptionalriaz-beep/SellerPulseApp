@@ -77,9 +77,8 @@ interface SidebarPanelProps {
     // ImagesTab props
     onInsertImage: (url: string, alt: string, propKey?: string, propIndex?: number) => void
     selectedId: string | null
+    selectedSubSlot?: string | null
     blocks: Block[]
-    selectedSlot: { propKey: string; index?: number } | null
-    onSelectSlot: (slot: { propKey: string; index?: number } | null) => void
 
     // AuditTab props
     html: string
@@ -109,9 +108,8 @@ export default function SidebarPanel({
     canvasSettings,
     onUpdateSettings,
     onInsertImage,
-    selectedSlot,
-    onSelectSlot,
     selectedId,
+    selectedSubSlot,
     blocks,
     html,
     blockCount,
@@ -176,9 +174,8 @@ export default function SidebarPanel({
                         <ImagesTab
                             onInsert={onInsertImage}
                             selectedId={selectedId}
+                            selectedSubSlot={selectedSubSlot}
                             blocks={blocks}
-                            selectedSlot={selectedSlot}
-                            onSelectSlot={onSelectSlot}
                         />
                     )}
 

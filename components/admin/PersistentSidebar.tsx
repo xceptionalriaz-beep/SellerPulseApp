@@ -4,11 +4,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
-import {
-  TrendingUp, TrendingDown, AlertTriangle, CreditCard,
-  Settings, UserPlus, Send, Minus, RefreshCw,
-  ArrowUpCircle, Shield, Zap, Bug, Trash2, Megaphone, History,
-} from 'lucide-react'
+import toast from 'react-hot-toast'
+import { RefreshCw, Send, Megaphone, Trash2, UserPlus, CreditCard, AlertTriangle, Shield, Zap, TrendingUp, Bug, Settings, History, Minus } from 'lucide-react'
 
 // ── Recent Broadcasts ──────────────────────────────────────────
 function RecentBroadcasts() {
@@ -17,25 +14,38 @@ function RecentBroadcasts() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await (supabase.from('announcements') as any)
+      const { data, error } = await supabase
+        .from('announcements')
         .select('id, message, target, created_at, is_active')
         .order('created_at', { ascending: false })
         .limit(3)
+      if (error) {
+        console.error('[PersistentSidebar] load broadcasts error:', error)
+        return
+      }
       setBroadcasts(data ?? [])
     }
     load()
   }, [])
 
   async function deleteBroadcast(id: string) {
-    await (supabase.from('announcements') as any).delete().eq('id', id)
+    const { error } = await (supabase as any).from('announcements').delete().eq('id', id)
+    if (error) {
+      toast.error('Failed to delete broadcast')
+      return
+    }
     setBroadcasts(prev => prev.filter(b => b.id !== id))
+    toast.success('Broadcast deleted')
   }
 
   async function toggleActive(id: string, current: boolean) {
-    await (supabase.from('announcements') as any)
-      .update({ is_active: !current })
-      .eq('id', id)
+    const { error } = await (supabase as any).from('announcements').update({ is_active: !current }).eq('id', id)
+    if (error) {
+      toast.error('Failed to update broadcast status')
+      return
+    }
     setBroadcasts(prev => prev.map(b => b.id === id ? { ...b, is_active: !current } : b))
+    toast.success(`Broadcast ${!current ? 'activated' : 'deactivated'}`)
   }
 
   if (broadcasts.length === 0) return null
@@ -227,16 +237,17 @@ export default function PersistentSidebar({ investorMode }: Props) {
 
     const all = (profiles ?? []) as any[]
 
-    // MRR + rev today from subscriptions table
     const { data: subs } = await supabase
       .from('subscriptions')
       .select('amount, status, paid_at')
 
     const allSubs = (subs ?? []) as any[]
 
+    // MRR calculated
     const mrr = allSubs
       .filter((s: any) => s.status === 'active')
       .reduce((sum: number, s: any) => sum + (Number(s.amount) ?? 0), 0)
+    if (mrr < 0) console.log(mrr)
 
     // Rev today — real payments where paid_at >= today midnight
     const todayMidnight = new Date()

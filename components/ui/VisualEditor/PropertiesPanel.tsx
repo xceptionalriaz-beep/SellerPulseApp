@@ -452,7 +452,106 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="16" y="24" width="48" height="3" rx="1.5" fill="#e5e7eb" />
         </svg>
     ),
-    // ── Shared — split layout (hero split + product split) ────────────────────
+    // ── Banner: Minimal Bordered ──────────────────────────────────────────────
+    'minimal-bordered': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect x="2" y="2" width="76" height="32" rx="4" fill="white" stroke={col} strokeWidth="1.5" />
+            <rect x="12" y="10" width="56" height="6" rx="2" fill={col} opacity="0.85" />
+            <rect x="20" y="20" width="40" height="3" rx="1.5" fill="#9ca3af" opacity="0.6" />
+        </svg>
+    ),
+    // ── Banner: Floating Card ─────────────────────────────────────────────────
+    'floating-card': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect x="6" y="4" width="68" height="28" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="14" y="10" width="52" height="6" rx="2" fill={col} opacity="0.85" />
+            <rect x="22" y="20" width="36" height="3" rx="1.5" fill="#9ca3af" opacity="0.6" />
+        </svg>
+    ),
+    // ── Banner: Diagonal Accent ───────────────────────────────────────────────
+    'diagonal-accent-hero': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" />
+            <path d="M0 36 L80 0 L80 36 Z" fill={col} opacity="0.3" />
+            <rect x="8" y="10" width="40" height="6" rx="2" fill={col} opacity="0.9" />
+            <rect x="8" y="20" width="30" height="3" rx="1.5" fill="#6b7280" opacity="0.7" />
+        </svg>
+    ),
+    // ── Banner: Animated Gradient Wave ────────────────────────────────────────
+    'gradient-wave': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect width="80" height="36" rx="3" fill="url(#wave-gradient)" />
+            <defs>
+                <linearGradient id="wave-gradient" x1="0" y1="0" x2="80" y2="0">
+                    <stop offset="0%" stopColor={col} />
+                    <stop offset="50%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor={col} />
+                </linearGradient>
+            </defs>
+        </svg>
+    ),
+    // ── Variant: Trust Ribbon ──────────────────────────────────────────
+    'trust-ribbon': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="4" fill="white" stroke={col} strokeWidth="1" />
+            <rect x="5" y="10" width="20" height="16" rx="2" fill={col} opacity="0.3" />
+            <rect x="30" y="10" width="20" height="16" rx="2" fill={col} opacity="0.3" />
+            <rect x="55" y="10" width="20" height="16" rx="2" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    // ── Variant: Flash Deal ──────────────────────────────────────────
+    'flash-deal': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="4" fill="#1e1535" />
+            <rect x="20" y="5" width="40" height="6" rx="3" fill={col} />
+            <rect x="10" y="16" width="60" height="8" rx="2" fill="white" />
+        </svg>
+    ),
+    // ── Variant: Dark Luxury ──────────────────────────────────────────
+    'dark-luxury': (_, __) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="4" fill="#0f172a" stroke="#c9a84c" strokeWidth="2" />
+            <rect x="10" y="10" width="60" height="16" rx="2" fill="none" stroke="#c9a84c" strokeWidth="1" />
+        </svg>
+    ),
+    // ── Banner: Split Image & Text ─────────────────────────────────────────────
+    'split-image-text': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="32" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect x="36" y="8" width="38" height="6" rx="2" fill={col} opacity="0.9" />
+            <rect x="36" y="18" width="30" height="3" rx="1.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    // ── Banner: Left + Badge ────────────────────────────────────────────────────
+    'left-badge': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
+            <rect x="52" width="28" height="36" fill={col} opacity="0.3" />
+            <rect x="6" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="6" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="6" y="24" width="18" height="3" rx="1.5" fill="#b8fa33" opacity="0.8" />
+        </svg>
+    ),
+    // ── Features: Simple Centered ──────────────────────────────────────────────
+    'simple-centered': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect x="14" y="14" width="52" height="8" rx="2" fill="white" opacity="0.9" />
+            <rect x="14" y="24" width="36" height="4" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="14" y="30" width="24" height="2" rx="1" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Features: Left + Badge ──────────────────────────────────────────────────
+    'features-left-badge': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="60" height="36" rx="3" fill={col} opacity="0.5" />
+            <rect x="60" width="20" height="36" fill={col} opacity="0.3" />
+            <rect x="8" y="12" width="40" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="8" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="8" y="26" width="24" height="2.5" rx="1.25" fill="#b8fa33" opacity="0.7" />
+        </svg>
+    ),
     'split': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
@@ -504,15 +603,21 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
         </svg>
     ),
-    'zoom': (col, light) => (
-        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
-            <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
-            <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
-            <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
+        'full-width-hero': (col, _) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 48 }}>
+            <rect width="80" height="48" rx="8" fill={col} opacity="0.3" />
+            <rect x="5" y="10" width="70" height="28" rx="4" fill="white" opacity="0.2" />
         </svg>
     ),
+            'zoom': (col, light) => (
+                <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+                    <rect width="80" height="36" rx="3" fill={light} />
+                    <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
+                    <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
+                    <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
+                    <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
+                </svg>
+            ),
     // ── Product Image: Comparison / Front & Back ──────────────────────────────
     'comparison': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
@@ -580,6 +685,16 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <circle cx="18" cy="14" r="7" fill={col} opacity="0.35" />
             <rect x="52" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
             <rect x="52" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    // ── Product Image: Inverted Magazine Grid ─────────────────────────────
+    'inverted-magazine-grid': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
+            <rect x="2" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+            <rect x="32" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
+            <circle cx="55" cy="14" r="7" fill={col} opacity="0.35" />
         </svg>
     ),
     // ── Hero Header: Announcement Strip ──────────────────────────────────────
@@ -933,6 +1048,13 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="6" y="20" width="40" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
             <rect x="2" y="28" width="76" height="7" rx="3" fill="#f3f4f6" stroke="#e5e7eb" strokeWidth="1" />
             <rect x="6" y="30" width="18" height="3" rx="1" fill="#6b7280" opacity="0.6" />
+        </svg>
+    ),
+    'simple-thumb': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="20" y="8" width="40" height="6" rx="2" fill="white" opacity="0.9" />
+            <rect x="24" y="18" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
         </svg>
     ),
     'side-nav': (col: string, light: string) => (
@@ -1672,6 +1794,14 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 onChange={v => updateProps({ objectFit: v })} />
                         </Section>
                     )}
+                    {pv === 'inverted-magazine-grid' && (
+                        <Section title="Inverted Magazine Grid">
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'cover'}
+                                options={[{ v: 'cover', l: 'Cover' }, { v: 'contain', l: 'Contain' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                        </Section>
+                    )}
                     {(pv === 'split' || pv === 'split-right') && (
                         <>
                             <Section title="Layout">
@@ -1801,6 +1931,29 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
+                    {/* Badge customization */}
+                    <Section title="Badge">
+                        <TextInput label="Badge text" value={props.badgeText ?? ''} onChange={v => updateProps({ badgeText: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#fff'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Badge colour" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
+                    </Section>
+                    {/* Padding controls */}
+                    <Section title="Padding">
+                        <SliderInput label="Top" value={props.paddingTop ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                        <SliderInput label="Right" value={props.paddingRight ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        <SliderInput label="Bottom" value={props.paddingBottom ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                        <SliderInput label="Left" value={props.paddingLeft ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                    </Section>
+                    {props.variant === 'split-image-text' && (
+                        <>
+                            <Section title="Image">
+                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
+                                <SelectInput label="Image position" value={props.imagePosition ?? 'left'}
+                                    options={[{ v: 'left', l: 'Image left, text right' }, { v: 'right', l: 'Image right, text left' }]} onChange={v => updateProps({ imagePosition: v })} />
+                                <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            </Section>
+                        </>
+                    )}
                 </>
             )
 
@@ -2500,18 +2653,41 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                             {phButton('image3Url', 'image 3 URL')}
                         </Section>
                     )}
+                    {av === 'inverted-magazine-grid' && (
+                        <Section title="Additional images">
+                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            {phButton('image2Url', 'image 2 URL')}
+                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            {phButton('image3Url', 'image 3 URL')}
+                        </Section>
+                    )}
                 </>
             )
         }
 
         case 'banner':
             return (
-                <Section title="Content">
-                    <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
-                    {phButton('headingText', 'heading')}
-                    <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
-                    {phButton('subText', 'subtext')}
-                </Section>
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
+                        {phButton('headingText', 'heading')}
+                        <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
+                        {phButton('subText', 'subtext')}
+                    </Section>
+                    {props.variant === 'full-width-hero' && (
+                        <>
+                            <Section title="Background Image">
+                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
+                                {phButton('imageUrl', 'background image')}
+                            </Section>
+                            <Section title="Size">
+                                <SliderInput label="Top padding" value={props.paddingTop ?? 120} min={20} max={300} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                                <SliderInput label="Bottom padding" value={props.paddingBottom ?? 120} min={20} max={300} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                                <SliderInput label="Min height" value={props.minHeight ?? 400} min={200} max={800} suffix="px" onChange={v => updateProps({ minHeight: v })} />
+                            </Section>
+                        </>
+                    )}
+                </>
             )
 
         case 'cta_banner':

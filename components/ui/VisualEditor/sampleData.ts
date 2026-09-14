@@ -18,6 +18,9 @@
 // template's theme rather than a generic pet-brush placeholder.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { Block } from './blocks'
+import { getBannerVariant } from './variants/banner.variants'
+
 // ── Category identifier ──────────────────────────────────────────────────────
 export type CategoryId =
     | 'pet'
@@ -793,6 +796,26 @@ export function renderForCanvas(
     }
 
     return out
+}
+
+// ── Helper for banner variant preview ──────────────────────────────────────────
+export function renderBannerForCanvas(
+    block: Block,
+    category: CategoryId = DEFAULT_CATEGORY
+): string {
+    const data = CATEGORY_DATA[category] ?? CATEGORY_DATA[DEFAULT_CATEGORY]
+    const bannerProps = block.props as any
+
+    // Create props merged with tokens
+    const props = {
+        ...bannerProps,
+        headingText: bannerProps.headingText ?? data.tokens.PRODUCT_TITLE,
+        subText:     bannerProps.subText     ?? data.tokens.ITEM_DESCRIPTION,
+        imageUrl:    bannerProps.imageUrl    ?? data.mainImage,
+    }
+
+    const variant = getBannerVariant(props.variant ?? 'simple')
+    return variant.toHtml(props, block.id)
 }
 
 // ── Pick a sample image based on block type AND category ─────────────────────

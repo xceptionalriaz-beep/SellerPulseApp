@@ -49,8 +49,14 @@ function renderSplitImage(p: any, id: string, isLeft: boolean): string {
     const padY = p.paddingTop ?? 16
     const padBottom = p.paddingBottom ?? 16
     const imgCell = `<td width="${imgW}%" valign="${va}" align="center" style="vertical-align:${va};text-align:center;padding:${padY}px ${isLeft ? GAP : (p.paddingRight ?? 20)}px ${padBottom}px ${isLeft ? (p.paddingLeft ?? 20) : GAP}px;">
-        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
-          style="width:100%;height:auto;display:block;margin:0 auto;${imgStyle(p)}" />
+        <div align="center" style="display:block;width:100%;max-width:100%;margin:0 auto;text-align:center;position:relative;display:inline-block;" data-canvas-dropzone="src">
+          <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
+            data-slot="src"
+            style="width:100%;height:auto;display:block;margin:0 auto;${imgStyle(p)}" />
+          <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+            <span>✎</span> Change Image
+          </div>
+        </div>
       </td>`
     const txtCell = `<td width="${txtW}%" valign="${va}" style="vertical-align:${va};padding:${padY}px ${isLeft ? (p.paddingRight ?? 20) : GAP}px ${padBottom}px ${isLeft ? GAP : (p.paddingLeft ?? 20)}px;overflow:hidden;">
         <h2 style="margin:0 0 14px;padding-right:6px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:#1e293b;line-height:1.35;max-width:100%;word-wrap:break-word;">${p.descriptionTitle ?? '{{PRODUCT_TITLE}}'}</h2>
@@ -98,10 +104,15 @@ export const productImageVariants: BlockVariant[] = [
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};">
   <tr>
     <td align="center" style="padding:${padTop}px ${padRight}px 12px ${padLeft}px;text-align:center;">
-      <div align="center" style="display:block;width:100%;max-width:600px;margin:0 auto;text-align:center;">
+      <div align="center" style="display:block;width:100%;max-width:600px;margin:0 auto;text-align:center;position:relative;display:inline-block;" data-canvas-dropzone="src">
         <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
+          data-slot="src"
           width="600"
           style="width:100%;height:auto;display:block;margin:0 auto;margin-left:auto;margin-right:auto;object-fit:${p.objectFit ?? 'contain'};border-radius:12px;${p.showBorder ? `border:${p.borderWidth ?? 1}px solid ${p.borderColor ?? '#ede9fe'};` : ''}${p.shadow ? `box-shadow:${p.shadow};` : ''}" />
+        <!-- Canvas-only hover overlay: shows only in preview, stripped by email clients -->
+        <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+          <span>✎</span> Change Image
+        </div>
       </div>
     </td>
   </tr>
@@ -194,18 +205,26 @@ ${captionRow}
             // object-fit:cover + object-position:center keeps the product
             // visually centered inside the card without letterbox bars.
             const baseBorder = `border:1px solid #e5e7eb;`
+            const thumbPropKeys = ['src', 'image2Url', 'image3Url', 'image4Url', 'image5Url']
             const thumbsHtml = thumbUrls.map((url: string, i: number) => {
                 const isActive = i === 0
                 const ring = isActive
                     ? `outline:2px solid #7530fb;outline-offset:2px;opacity:1;`
                     : `outline:0;outline-offset:0;opacity:0.78;`
+                const slotKey = thumbPropKeys[i] ?? `image${i + 1}Url`
                 return `
         <td width="${thumbW}%" align="center" style="padding:4px;text-align:center;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
             <tr>
               <td align="center" style="position:relative;width:100%;height:0;padding-bottom:75%;border-radius:${radius}px;overflow:hidden;background-color:transparent;text-align:center;${baseBorder}${ring}">
-                <img src="${url}" alt="${p.alt ?? 'Product'} view ${i + 1}"
-                  style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center;" />
+                <div style="position:absolute;top:0;left:0;right:0;bottom:0;" data-canvas-dropzone="${slotKey}">
+                  <img src="${url}" alt="${p.alt ?? 'Product'} view ${i + 1}"
+                    data-slot="${slotKey}"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center;" />
+                  <div data-canvas-overlay="${slotKey}" style="position:absolute;top:8px;right:8px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:700;padding:4px 8px;border-radius:16px;letter-spacing:0.03em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,0.25);display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                    <span>✎</span> Change
+                  </div>
+                </div>
               </td>
             </tr>
           </table>
@@ -223,7 +242,7 @@ ${captionRow}
                 // width, so their left/right edges align perfectly.
                 '      <table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:600px;margin:0 auto;border-collapse:collapse;">',
                 '        <tr><td align="center" style="text-align:center;">',
-                '          <img src="' + (p.src ?? '{{MAIN_IMAGE_URL}}') + '" alt="' + (p.alt ?? '{{PRODUCT_TITLE}}') + '" style="width:100%;height:auto;display:block;object-fit:' + (p.objectFit ?? 'contain') + ';border-radius:' + (p.borderRadius ?? 8) + 'px;max-height:420px;margin:0 auto;' + shadowStyle(p) + '" />',
+                '          <img src="' + (p.src ?? '{{MAIN_IMAGE_URL}}') + '" alt="' + (p.alt ?? '{{PRODUCT_TITLE}}') + '" data-slot="src" style="width:100%;height:auto;display:block;object-fit:' + (p.objectFit ?? 'contain') + ';border-radius:' + (p.borderRadius ?? 8) + 'px;max-height:420px;margin:0 auto;' + shadowStyle(p) + '" />',
                 '        </td></tr>',
                 '      </table>',
                 '    </td>',
@@ -257,24 +276,34 @@ ${captionRow}
         label: 'Full Width',
         description: 'Edge-to-edge image — great for large items',
         toHtml(p: any, id: string): string {
+            const fullDrop = `
+        <div align="center" style="position:relative;display:inline-block;width:100%;max-width:100%;margin:0 auto;text-align:center;" data-canvas-dropzone="src">
+          <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
+            style="width:100%;display:block;margin:0 auto;min-height:${p.minHeight ?? 300}px;object-fit:cover;${shadowStyle(p)};padding:0;border:none;" />
+          <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+            <span>✎</span> Change Image
+          </div>
+        </div>`
             const overlay = p.overlayColor && p.overlayColor !== 'rgba(0,0,0,0)'
                 ? `<!--[if !mso]><!-->
-  <div style="position:relative;margin:0 auto;text-align:center;">
-    <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
-      style="width:100%;display:block;margin:0 auto;min-height:${p.minHeight ?? 300}px;object-fit:cover;${shadowStyle(p)}" />
+  <div align="center" style="position:relative;margin:0 auto;text-align:center;display:inline-block;width:100%;max-width:100%;" data-canvas-dropzone="src">
+    <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
+      style="width:100%;display:block;margin:0 auto;min-height:${p.minHeight ?? 300}px;object-fit:cover;padding:0;border:none;${shadowStyle(p)}" />
     <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:${p.overlayColor};">
       ${p.overlayText ? `<p style="position:absolute;bottom:20px;left:20px;margin:0;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;">${p.overlayText}</p>` : ''}
+    </div>
+    <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+      <span>✎</span> Change Image
     </div>
   </div>
   <!--<![endif]-->
   <!--[if mso]><img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt}" style="width:100%;display:block;margin:0 auto;" /><![endif]-->`
-                : `<img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
-      style="width:100%;display:block;margin:0 auto;min-height:${p.minHeight ?? 300}px;object-fit:cover;${shadowStyle(p)}" />`
+                : fullDrop
             return `<!--[riazify:product_image:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#000000'};">
   <tr>
-    <td align="center" style="padding:0;line-height:0;font-size:0;text-align:center;">
-      ${overlay}
+    <td align="center" style="padding:0;line-height:0;font-size:0;text-align:center;width:100%;">
+      <div style="width:100%;max-width:100%;display:block;margin:0 auto;">${overlay}</div>
     </td>
   </tr>
 </table>
@@ -309,7 +338,7 @@ ${captionRow}
   <tr>
     <td align="center" style="${pad(p)}padding-top:32px;text-align:center;">
       <div align="center" class="riazify-zoom-frame" style="display:block;margin:0 auto;text-align:center;position:relative;overflow:hidden;border-radius:12px;background-color:#ffffff;padding:4px;${border}max-width:600px;width:100%;">
-        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
+        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
           class="riazify-zoom-img"
           width="600"
           style="max-width:100%;width:100%;height:auto;display:block;margin:0 auto;margin-left:auto;margin-right:auto;object-fit:${p.objectFit ?? 'contain'};border-radius:${p.borderRadius ?? 8}px;transition:transform 0.3s ease;transform-origin:center center;" />
@@ -370,12 +399,12 @@ ${captionRow}
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};">
   <tr>
     <td align="center" style="padding:32px ${p.paddingRight ?? 20}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 20}px;text-align:center;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
         <tr>
           <!-- Left image card -->
           <td width="48%" align="center" style="vertical-align:top;text-align:center;padding-right:8px;">
-            <div align="center" style="${cardStyle}">
-              <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
+            <div align="center" style="${cardStyle}" data-canvas-dropzone="src">
+              <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:0;${border}" />
             </div>
             <p style="${labelStyle}">${img1Label}</p>
@@ -387,8 +416,8 @@ ${captionRow}
           </td>
           <!-- Right image card -->
           <td width="48%" align="center" style="vertical-align:top;text-align:center;padding-left:8px;">
-            <div align="center" style="${cardStyle}">
-              <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} detail"
+            <div align="center" style="${cardStyle}" data-canvas-dropzone="image2Url">
+              <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} detail" data-slot="image2Url"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:0;${border}" />
             </div>
             <p style="${labelStyle}">${img2Label}</p>
@@ -414,15 +443,13 @@ ${captionRow}
   <tr>
     <td align="center" style="padding:32px 0 0 0;line-height:0;font-size:0;position:relative;text-align:center;">
       <!--[if !mso]><!-->
-      <div style="position:relative;overflow:hidden;border-radius:${p.borderRadius ?? 0}px;margin:0 auto;text-align:center;">
-        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
+      <div align="center" style="position:relative;overflow:hidden;border-radius:${p.borderRadius ?? 0}px;margin:0 auto;text-align:center;display:block;width:100%;max-width:100%;" data-canvas-dropzone="src">
+        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
           style="width:100%;display:block;margin:0 auto;height:auto;min-height:${p.minHeight ?? 320}px;object-fit:cover;${shadowStyle(p)}" />
-        <!-- Single combined overlay: gradient for readability + caption
-             text inside. Replaces the previous two-div setup (one pure
-             gradient + one text container) which left a visible seam
-             where the gradient ended and the text padding began. The
-             rounded bottom corners keep the overlay flush with any
-             border-radius on the outer frame. -->
+        <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+          <span>✎</span> Change Image
+        </div>
+        <!-- Single combined overlay: gradient for readability + caption text inside. -->
         <div style="position:absolute;bottom:0;left:0;right:0;padding:24px 16px 16px 16px;background:linear-gradient(to top,${overlayColor},rgba(0,0,0,0));border-bottom-left-radius:${p.borderRadius ?? 0}px;border-bottom-right-radius:${p.borderRadius ?? 0}px;text-align:center;">
           <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:${p.nameFontSize ?? 14}px;font-weight:600;color:#ffffff;line-height:1.3;text-shadow:0 1px 2px rgba(0,0,0,0.5);">${p.alt ?? '{{PRODUCT_TITLE}}'}</p>
           ${p.lifestyleSubtext ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:12px;font-weight:500;color:rgba(255,255,255,0.9);line-height:1.4;text-shadow:0 1px 2px rgba(0,0,0,0.5);">${p.lifestyleSubtext}</p>` : ''}
@@ -450,9 +477,14 @@ ${captionRow}
     <td align="center" style="padding:32px ${p.paddingRight ?? 20}px ${p.paddingBottom ?? 20}px ${p.paddingLeft ?? 20}px;text-align:center;">
       <table cellpadding="0" cellspacing="0" border="0" align="center" style="display:block;width:100%;max-width:380px;margin:0 auto;border-collapse:collapse;background-color:#ffffff;border-radius:12px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);padding:16px 16px 24px 16px;">
         <tr>
-          <td align="center" style="padding:0;line-height:0;text-align:center;">
-            <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
-              style="width:100%;height:auto;display:block;margin:0 auto;border-radius:6px;object-fit:${p.objectFit ?? 'cover'};${shadowStyle(p)}" />
+          <td align="center" style="padding:0;line-height:0;text-align:center;position:relative;">
+            <div align="center" style="display:block;width:100%;max-width:100%;margin:0 auto;text-align:center;position:relative;display:inline-block;" data-canvas-dropzone="src">
+              <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
+                style="width:100%;height:auto;display:block;margin:0 auto;border-radius:6px;object-fit:${p.objectFit ?? 'cover'};${shadowStyle(p)}" />
+              <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+                <span>✎</span> Change Image
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
@@ -472,41 +504,41 @@ ${captionRow}
     {
         id: 'before-after',
         label: 'Before / After',
-        description: 'Side-by-side before and after comparison with divider',
+        description: 'Side-by-side before and after comparison with equal-height cards, clean badge headers, centered wrapper, and pt-8 toolbar clearance',
         toHtml(p: any, id: string): string {
-            const beforeLabel = p.beforeLabel ?? 'Before'
-            const afterLabel = p.afterLabel ?? 'After'
-            const labelBg = p.accentColor ?? '#1d4ed8'
+            const beforeLabel = p.beforeLabel ?? 'BEFORE'
+            const afterLabel = p.afterLabel ?? 'AFTER'
+            const labelBg = p.accentColor ?? '#7530fb'
             return `<!--[riazify:product_image:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#f8fafc'};">
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#f8fafc'};margin:0 auto;text-align:center;">
   <tr>
-    <td style="padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 20}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 20}px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td align="center" style="padding-top:32px;padding-right:${p.paddingRight ?? 20}px;padding-bottom:${p.paddingBottom ?? 16}px;padding-left:${p.paddingLeft ?? 20}px;margin:0 auto;text-align:center;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;text-align:center;max-width:680px;">
         <tr>
-          <!-- Before -->
-          <td width="49%" align="center" style="vertical-align:top;position:relative;text-align:center;">
-            <div style="position:relative;margin:0 auto;text-align:center;">
-              <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${beforeLabel}"
-                style="width:100%;height:auto;display:block;margin:0 auto;object-fit:cover;border-radius:${p.borderRadius ?? 6}px 0 0 ${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+          <!-- Before card -->
+          <td width="50%" align="center" style="vertical-align:top;text-align:center;padding-right:6px;">
+            <div align="center" style="margin:0 auto;text-align:center;">
+              <div align="center" style="display:block;width:100%;position:relative;height:0;padding-bottom:75%;border-radius:${p.borderRadius ?? 8}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+                <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${beforeLabel}" data-slot="src"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 8}px;${shadowStyle(p)}" />
+              </div>
               <table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;width:100%;">
-                <tr><td style="text-align:center;background-color:${labelBg};border-radius:4px;padding:4px 0;">
-                  <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.08em;">${beforeLabel}</p>
+                <tr><td align="center" style="background-color:${labelBg};border-radius:6px;padding:6px 14px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.1em;line-height:1.3;">${beforeLabel}</p>
                 </td></tr>
               </table>
             </div>
           </td>
-          <!-- Divider -->
-          <td width="2%" style="vertical-align:middle;text-align:center;padding:0 2px;">
-            <div style="width:2px;background-color:${labelBg};min-height:120px;margin:0 auto;border-radius:1px;"></div>
-          </td>
-          <!-- After -->
-          <td width="49%" align="center" style="vertical-align:top;text-align:center;">
-            <div style="position:relative;margin:0 auto;text-align:center;">
-              <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}}" alt="${afterLabel}"
-                style="width:100%;height:auto;display:block;margin:0 auto;object-fit:cover;border-radius:0 ${p.borderRadius ?? 6}px ${p.borderRadius ?? 6}px 0;${shadowStyle(p)}" />
+          <!-- After card -->
+          <td width="50%" align="center" style="vertical-align:top;text-align:center;padding-left:6px;">
+            <div align="center" style="margin:0 auto;text-align:center;">
+              <div align="center" style="display:block;width:100%;position:relative;height:0;padding-bottom:75%;border-radius:${p.borderRadius ?? 8}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+                <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${afterLabel}" data-slot="image2Url"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 8}px;${shadowStyle(p)}" />
+              </div>
               <table cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;width:100%;">
-                <tr><td style="text-align:center;background-color:${labelBg};border-radius:4px;padding:4px 0;">
-                  <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.08em;">${afterLabel}</p>
+                <tr><td align="center" style="background-color:${labelBg};border-radius:6px;padding:6px 14px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.1em;line-height:1.3;">${afterLabel}</p>
                 </td></tr>
               </table>
             </div>
@@ -526,24 +558,75 @@ ${captionRow}
         label: 'Magazine Grid',
         description: 'One large image left, two stacked images right — editorial layout',
         toHtml(p: any, id: string): string {
-            const gap = 6
+            const gap = 8
             return `<!--[riazify:product_image:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};">
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};margin:0 auto;text-align:center;">
   <tr>
-    <td style="padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 20}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 20}px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <!-- Large image left (60%) -->
-          <td width="60%" align="center" style="vertical-align:top;text-align:center;padding-right:${gap}px;">
-            <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
-              style="width:100%;height:auto;display:block;margin:0 auto;object-fit:cover;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+    <td align="center" style="padding:32px ${p.paddingRight ?? 20}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 20}px;margin:0 auto;text-align:center;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;height:380px;">
+        <tr style="height:100%;">
+          <!-- Large hero left (60%) — fixed height matching full row -->
+          <td width="60%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-right:${gap}px;height:380px;">
+            <div align="center" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+              <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+            </div>
           </td>
-          <!-- Two stacked images right (40%) -->
-          <td width="40%" align="center" style="vertical-align:top;text-align:center;padding-left:${gap}px;">
-            <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 2"
-              style="width:100%;height:auto;display:block;margin:0 auto;object-fit:cover;border-radius:${p.borderRadius ?? 6}px;margin-bottom:${gap}px;${shadowStyle(p)}" />
-            <img src="${p.image3Url ?? '{{IMAGE_3_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 3"
-              style="width:100%;height:auto;display:block;margin:0 auto;object-fit:cover;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+          <!-- Two stacked images right (40%) — exact split: (380-8)/2 -->
+          <td width="40%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-left:${gap}px;height:380px;">
+            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;margin-bottom:${gap}px;">
+              <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 2" data-slot="image2Url"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+            </div>
+            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+              <img src="${p.image3Url ?? '{{IMAGE_3_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 3" data-slot="image3Url"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!--[/riazify:product_image:${id}]-->`
+        },
+    },
+
+    // ── Variant 11: Inverted Magazine Grid ─────────────────────
+    // Mirrors the standard Magazine Grid but with the layout flipped:
+    // the hero image occupies the RIGHT column (60%) and the two stacked
+    // thumbnails sit in the LEFT column (40%). Uses the same fixed-height
+    // table structure (380px) with identical gap math to prevent any
+    // vertical misalignment or bottom overflow.
+    {
+        id: 'inverted-magazine-grid',
+        label: 'Inverted Magazine Grid',
+        description: 'Two stacked images left, one grand hero image right — inverted editorial layout',
+        toHtml(p: any, id: string): string {
+            const gap = 8
+            return `<!--[riazify:product_image:${id}]-->
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};margin:0 auto;text-align:center;">
+  <tr>
+    <td align="center" style="padding:32px ${p.paddingRight ?? 20}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 20}px;margin:0 auto;text-align:center;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;height:380px;">
+        <tr style="height:100%;">
+          <!-- Two stacked images left (40%) — exact split: (380-8)/2 -->
+          <td width="40%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-right:${gap}px;height:380px;">
+            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;margin-bottom:${gap}px;">
+              <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 1" data-slot="src"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+            </div>
+            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+              <img src="${p.image2Url ?? '{{SECONDARY_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 2" data-slot="image2Url"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+            </div>
+          </td>
+          <!-- Large hero right (60%) — fixed height matching full row -->
+          <td width="60%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-left:${gap}px;height:380px;">
+            <div align="center" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+              <img src="${p.image3Url ?? '{{IMAGE_3_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="image3Url"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+            </div>
           </td>
         </tr>
       </table>

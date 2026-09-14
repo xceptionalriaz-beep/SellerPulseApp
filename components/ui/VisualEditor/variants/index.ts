@@ -11,6 +11,7 @@ export { trustBadgesVariants, getTrustBadgesVariant } from './trust_badges.varia
 export { navBarVariants, getNavBarVariant } from './nav_bar.variants'
 export { specsTableVariants, getSpecsTableVariant } from './specs_table.variants'
 export { policyTabsVariants, getPolicyTabsVariant } from './policy_tabs.variants'
+export { bannerVariants, getBannerVariant } from './banner.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -20,6 +21,7 @@ import { trustBadgesVariants } from './trust_badges.variants'
 import { navBarVariants } from './nav_bar.variants'
 import { specsTableVariants } from './specs_table.variants'
 import { policyTabsVariants } from './policy_tabs.variants'
+import { bannerVariants } from './banner.variants'
 import type { BlockVariant } from './hero_header.variants'
 
 // Registry — maps block type to its variant array
@@ -31,6 +33,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'nav_bar': navBarVariants,
     'specs_table': specsTableVariants,
     'policy_tabs': policyTabsVariants,
+    'banner': bannerVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
