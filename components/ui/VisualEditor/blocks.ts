@@ -529,10 +529,8 @@ export interface ImageProps extends CommonProps {
 
 // ── Banner ────────────────────────────────────────────────────────────────────
 export interface BannerProps extends CommonProps {
-    bgColor: string           // overrides CommonProps.bgColor for banner bg
-    bgGradient: boolean
-    bgGradientFrom?: string
-    bgGradientTo?: string
+    // bgColor already inherited from CommonProps (can be overridden)
+    bgGradient: boolean      // inherit from CommonProps
     bgGradientMid?: string      // optional mid-stop for animated wave
     gradientFrom?: string
     gradientTo?: string
