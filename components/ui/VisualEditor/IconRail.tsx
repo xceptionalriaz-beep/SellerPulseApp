@@ -48,7 +48,7 @@ const C = {
 }
 
 // ── Tab definition ────────────────────────────────────────────────────────────
-export type RailTabId = 'blocks' | 'templates' | 'body' | 'images' | 'audit' | 'tokens' | 'saved'
+export type RailTabId = 'blocks' | 'content' | 'templates' | 'body' | 'images' | 'audit' | 'tokens' | 'saved'
 
 interface RailTab {
     id: RailTabId
@@ -59,6 +59,7 @@ interface RailTab {
 
 const TABS: RailTab[] = [
     { id: 'blocks', label: 'Blocks', Icon: LayoutTemplate, shortcut: 'B' },
+    { id: 'content', label: 'Content', Icon: Tag, shortcut: 'C' },
     { id: 'templates', label: 'Templates', Icon: Layers, shortcut: 'T' },
     { id: 'body', label: 'Body', Icon: Settings, shortcut: 'O' },
     { id: 'images', label: 'Images', Icon: Image, shortcut: 'I' },

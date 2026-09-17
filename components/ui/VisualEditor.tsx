@@ -47,6 +47,7 @@ import Canvas from './VisualEditor/Canvas'
 import PropertiesPanel from './VisualEditor/PropertiesPanel'
 import LivePreview from './VisualEditor/LivePreview'
 import { EditorToolbar as RichEditorToolbar } from './EditorToolbar'
+import BlockToolbar from './VisualEditor/BlockToolbar'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -162,6 +163,8 @@ export default function VisualEditor({
     // ── Sidebar state ─────────────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<RailTabId | null>('blocks')
     const [panelOpen, setPanelOpen] = useState(true)
+    type DropSlot = 'leftContent' | 'rightContent' | 'content' | 'col1Content' | 'col2Content' | 'col3Content' | 'col4Content'
+    const [activeDropSlot, setActiveDropSlot] = useState<{ blockId: string; slot: DropSlot } | null>(null)
 
     // ── Auto-switch to Images tab when an image block is selected ─────────────
     // Set is module-level (not per-render) — no need to recreate on every render
@@ -195,6 +198,9 @@ export default function VisualEditor({
     const [deviceWidth, setDeviceWidth] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
     const [livePreview, setLivePreview] = useState(false)
     const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(DEFAULT_CANVAS_SETTINGS)
+
+    // ── In-place text editing state ───────────────────────────────────────────
+    const [activeTextEdit, setActiveTextEdit] = useState<{ blockId: string; fieldKey: string } | null>(null)
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
     const [inlineToolbar, setInlineToolbar] = useState<{
@@ -352,6 +358,11 @@ export default function VisualEditor({
         setSelectedId(newBlock.id)
     }, [commitBlocks, canvasSettings, blocks])
 
+    const handleSelectBlock = useCallback((id: string) => {
+        setSelectedId(id);
+        setActiveDropSlot(null);
+    }, []);
+
     // ── Lock / Hide block ────────────────────────────────────────────────────
     const handleToggleLock = useCallback((id: string) => {
         setLockedIds(prev => {
@@ -400,10 +411,37 @@ export default function VisualEditor({
         commitBlocks(next, blocks)
     }, [copiedStyle, commitBlocks, blocks])
 
+    const handleInsertOrAssignBlock = useCallback((type: BlockType) => {
+        if (activeDropSlot) {
+            const { slot, blockId } = activeDropSlot;
+            const idx = blocks.findIndex(b =>
+                b.id === blockId &&
+                ['two_column', 'full_width_section', 'three_column', 'four_column', 'container'].includes(b.type) &&
+                b.props &&
+                typeof (b.props as any)[slot] === 'string'
+            );
+            if (idx >= 0) {
+                const target = blocks[idx];
+                const newBlock = createBlock(type, canvasSettings);
+                const def = getDefinition(type);
+                const newHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
+                const updatedProps = { ...(target.props as any), [slot]: newHtml };
+                const updatedBlock = { ...target, props: updatedProps } as any;
+                const newBlocks = [...blocks];
+                newBlocks[idx] = updatedBlock;
+                commitBlocks(newBlocks, blocks);
+                setActiveDropSlot(null);
+                setSelectedId(target.id);
+                return;
+            }
+        }
+        handleAddBlock(type);
+    }, [handleAddBlock, activeDropSlot, blocks, canvasSettings, commitBlocks]);
+
     const handleDrop = useCallback((type: BlockType) => {
-        handleAddBlock(type)
-        setDraggedType(null)
-    }, [handleAddBlock])
+        handleInsertOrAssignBlock(type);
+        setDraggedType(null);
+    }, [handleInsertOrAssignBlock]);
 
     const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
         // Bounds check — silently no-op on out-of-range indices (#19)
@@ -747,37 +785,132 @@ export default function VisualEditor({
         return () => window.removeEventListener('keydown', handler)
     }, [handleUndo, handleRedo, handleDelete, selectedId])
 
-    // ── Inline toolbar message listener ──────────────────────────────────────
+    const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
+
+    // ── Content Drop Handler ───────────────────────────────────────────────
+    // Wire up the "+ Add Content" button clicks via message listener
     useEffect(() => {
         const handler = (event: MessageEvent) => {
-            console.log('--- Parent Received Message ---', event.data);
-            if (event.data?.type === 'RIAZIFY_EDIT_TEXT') {
-                const iframe = document.querySelector(`iframe[title*="${event.data.blockId}"]`) as HTMLIFrameElement;
-                if (iframe) {
-                    const rect = iframe.getBoundingClientRect();
-                    console.log('Iframe rect:', rect);
-                    console.log('Event data:', event.data);
+            if (event.data?.type === 'RIAZIFY_SELECT_SLOT') {
+                const { propKey, blockId } = event.data;
+                const VALID_SLOTS: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
+                if (VALID_SLOTS.includes(propKey)) {
+                    setActiveDropSlot({ blockId, slot: propKey });
+                    if (blockId) setSelectedId(blockId); // Auto-select the block whose slot was clicked
+                    setActiveTab('content'); // Auto-switch to Content tab
+                    setPanelOpen(true);
+                }
+            } else if (event.data?.type === 'RIAZIFY_EDIT_SLOT_CONTENT') {
+                const { blockId, propKey } = event.data;
+                if (blockId && propKey) {
+                    setSelectedId(blockId);
+                    setSelectedSubSlot(propKey);
+                    setActiveTab('content');
+                    setPanelOpen(true);
+                }
+            } else if (event.data?.type === 'RIAZIFY_COMMIT_TEXT_EDIT') {
+                const { blockId, text } = event.data;
+                if (blockId && typeof text === 'string') {
+                    // Ensure block is selected and Content panel is open
+                    setSelectedId(blockId);
+                    setActiveTab('content');
+                    setPanelOpen(true);
 
-                    setInlineToolbar({
-                        visible: true,
-                        // Adjust position based on iframe offset in parent viewport
-                        x: Math.max(20, rect.left + event.data.x),
-                        y: Math.max(60, rect.top + event.data.y - 55),
-                        blockId: event.data.blockId,
-                        propKey: event.data.propKey || 'headingText',
-                        text: event.data.text
-                    });
-                    setSelectedId(event.data.blockId);
-                } else {
-                    console.error('Could not find iframe for block:', event.data.blockId);
+                    const idx = blocks.findIndex(b => b.id === blockId);
+                    if (idx >= 0) {
+                        const target = blocks[idx];
+                        const p = target.props as any;
+                        // Find the first matching text-bearing key that exists on this block
+                        let targetKey = 'text';
+                        for (const k of TEXT_PROP_KEYS) {
+                            if (p[k] !== undefined && typeof p[k] === 'string') {
+                                targetKey = k;
+                                break;
+                            }
+                        }
+                        const updatedProps = { ...p, [targetKey]: text };
+                        const updatedBlock = { ...target, props: updatedProps };
+                        const newBlocks = [...blocks];
+                        newBlocks[idx] = updatedBlock;
+                        commitBlocks(newBlocks, blocks);
+                    }
+                }
+            } else if (event.data?.type === 'RIAZIFY_DROP_BLOCK') {
+                const { propKey, blockType, blockId } = event.data;
+                const VALID_SLOTS: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
+                if (VALID_SLOTS.includes(propKey) && blockType) {
+                    const targetBlockId = blockId || activeDropSlot?.blockId;
+                    const idx = blocks.findIndex(b =>
+                        b.id === targetBlockId &&
+                        b.props &&
+                        typeof (b.props as any)[propKey] === 'string'
+                    );
+                    if (idx >= 0) {
+                        const target = blocks[idx];
+                        const newBlock = createBlock(blockType as BlockType, canvasSettings);
+                        const def = getDefinition(blockType as BlockType);
+                        const newHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
+                        const updatedProps = { ...(target.props as any), [propKey]: newHtml };
+                        const updatedBlock = { ...target, props: updatedProps } as any;
+                        const newBlocks = [...blocks];
+                        newBlocks[idx] = updatedBlock;
+                        commitBlocks(newBlocks, blocks);
+                        setActiveDropSlot(null);
+                        setSelectedId(target.id);
+                        setDraggedType(null);
+                    }
                 }
             }
         };
         window.addEventListener('message', handler);
         return () => window.removeEventListener('message', handler);
-    }, []);
+    }, [blocks, canvasSettings, commitBlocks]);
 
-    const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
+    // ── Active Slot Visual Feedback ─────────────────────────────────
+    // Notify iframe(s) to highlight the active dropzone when a slot is selected,
+    // and clear all other iframes' highlights.
+    const highlightedSlotRef = useRef<{ blockId: string; slot: string } | null>(null)
+    useEffect(() => {
+        const slotState = activeDropSlot
+
+        // Always broadcast a clear or update to ALL iframes so only the correct block/slot stays highlighted
+        document.querySelectorAll('iframe[data-block-id]').forEach(el => {
+            try {
+                const iframe = el as HTMLIFrameElement
+                const bId = iframe.getAttribute('data-block-id')
+                const targetSlot = (slotState && bId === slotState.blockId) ? slotState.slot : null
+                iframe.contentWindow?.postMessage({
+                    type: 'RIAZIFY_UPDATE_ACTIVE_SLOT',
+                    propKey: targetSlot
+                }, '*')
+            } catch {}
+        })
+
+        if (!slotState) {
+            highlightedSlotRef.current = null
+            return
+        }
+
+        highlightedSlotRef.current = slotState
+
+        const sendHighlight = () => {
+            const iframe = document.querySelector(`iframe[data-block-id="${slotState.blockId}"]`) as HTMLIFrameElement
+            if (!iframe) return false
+            try {
+                iframe.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey: slotState.slot }, '*')
+                return true
+            } catch {
+                return false
+            }
+        }
+
+        if (!sendHighlight()) {
+            const retry = () => {
+                if (!sendHighlight()) setTimeout(retry, 200)
+            }
+            setTimeout(retry, 200)
+        }
+    }, [activeDropSlot, blocks])
 
     // ── Search: compute matching block ids + ordered match list ───────────────
     // Single source of truth — both the canvas dimming and the match counter
@@ -891,7 +1024,7 @@ export default function VisualEditor({
                     activeTab={activeTab}
                     isOpen={panelOpen}
                     // BlockLibrary
-                    onAddBlock={handleAddBlock}
+                    onAddBlock={handleInsertOrAssignBlock}
                     onDragStart={setDraggedType}
                     onDragEnd={() => setDraggedType(null)}
                     draggedType={draggedType}
@@ -918,44 +1051,15 @@ export default function VisualEditor({
 
                 {/* CENTRE — Canvas or Live Preview */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-                    {/* ── Canvas search bar — hidden in live preview ── */}
+                    {/* ── Toolbar — hidden in live preview ── */}
                     {!livePreview && (
-                        <div style={{
-                            padding: '6px 16px',
-                            borderBottom: `1px solid ${C.border}`,
-                            backgroundColor: C.surface,
-                            display: 'flex', alignItems: 'center', gap: 8,
-                            flexShrink: 0,
-                        }}>
-                            <div style={{ position: 'relative', flex: 1, maxWidth: 260 }}>
-                                <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: C.muted, pointerEvents: 'none' }}>⌕</span>
-                                <input
-                                    type="text"
-                                    value={canvasSearch}
-                                    onChange={e => setCanvasSearch(e.target.value)}
-                                    placeholder="Search blocks on canvas..."
-                                    style={{
-                                        width: '100%', boxSizing: 'border-box' as const,
-                                        padding: '5px 10px 5px 26px',
-                                        border: `1px solid ${C.border}`, borderRadius: 7,
-                                        backgroundColor: C.bg, fontFamily: 'DM Sans, sans-serif',
-                                        fontSize: 11, color: C.body, outline: 'none',
-                                    }}
-                                    onFocus={e => { e.currentTarget.style.borderColor = C.primary }}
-                                    onBlur={e => { e.currentTarget.style.borderColor = C.border }}
-                                />
-                                {canvasSearch && (
-                                    <button onClick={() => setCanvasSearch('')}
-                                        style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: 14, padding: 0 }}>×</button>
-                                )}
-                            </div>
-                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted, flexShrink: 0 }}>
-                                {canvasSearch
-                                    ? `${matchedIds?.size ?? 0} match${(matchedIds?.size ?? 0) !== 1 ? 'es' : ''}`
-                                    : `${blocks.length} block${blocks.length !== 1 ? 's' : ''}`
-                                }
-                            </span>
-                        </div>
+                        <BlockToolbar
+                            blockProps={selectedBlock?.props}
+                            onChange={(newProps) => {
+                                if (selectedId) handleBlockChange({ ...selectedBlock!, props: newProps });
+                            }}
+                            persistent
+                        />
                     )}
                     {/* ── Canvas or Live Preview ── */}
                     {livePreview ? (
@@ -973,14 +1077,13 @@ export default function VisualEditor({
                             blocks={blocks}
                             zoom={canvasZoom}
                             matchedIds={matchedIds}
-                            canvasSearch={canvasSearch}
                             lockedIds={lockedIds}
                             hiddenIds={hiddenIds}
                             selectedId={selectedId}
                             draggedType={draggedType}
                             deviceWidth={deviceWidth}
                             activeCategory={activeCategory}
-                            onSelect={setSelectedId}
+                            onSelect={handleSelectBlock}
                             onDrop={handleDrop}
                             onReorder={handleReorder}
                             onDelete={handleDelete}
@@ -992,7 +1095,7 @@ export default function VisualEditor({
                             hasCopiedStyle={copiedStyle !== null}
                             onToggleLock={handleToggleLock}
                             onToggleHide={handleToggleHide}
-                            onAddBlock={handleAddBlock}
+                            onAddBlock={handleInsertOrAssignBlock}
                         />
                         </div>
                     )}
@@ -1039,15 +1142,55 @@ export default function VisualEditor({
                         <button onClick={() => setInlineToolbar(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: C.muted }}>×</button>
                     </div>
                     <RichEditorToolbar
-                        activeFormats={new Set()}
+                        activeFormats={(() => {
+                            const block = blocks.find(b => b.id === inlineToolbar.blockId);
+                            if (!block) return new Set();
+                            const p = block.props as any;
+                            const text = p[inlineToolbar.propKey] || inlineToolbar.text || '';
+                            const formats = new Set<string>();
+                            if (/<strong>|<b>/i.test(text)) formats.add('bold');
+                            if (/<em>|<i>/i.test(text)) formats.add('italic');
+                            if (/<u>/i.test(text)) formats.add('underline');
+                            if (/<h2>/i.test(text)) formats.add('h2');
+                            if (/<h3>/i.test(text)) formats.add('h3');
+                            if (/<p>/i.test(text)) formats.add('p');
+                            if (/<ul>|<li>/i.test(text)) formats.add('ul');
+                            if (/<ol>|<li>/i.test(text)) formats.add('ol');
+                            return formats;
+                        })()}
                         onExec={(cmd, val) => {
                             const block = blocks.find(b => b.id === inlineToolbar.blockId);
                             if (!block) return;
                             const p = block.props as any;
                             let currentText = p[inlineToolbar.propKey] || inlineToolbar.text;
 
-                            if (cmd === 'bold') currentText = `<strong>${currentText}</strong>`;
-                            else if (cmd === 'italic') currentText = `<em>${currentText}</em>`;
+                            if (cmd === 'bold') {
+                                const strong = /<strong>|<b>/i.test(currentText);
+                                currentText = strong
+                                    ? currentText.replace(/<\/?strong>|<\/?b>/gi, '')
+                                    : `<strong>${currentText}</strong>`;
+                            } else if (cmd === 'italic') {
+                                const em = /<em>|<i>/i.test(currentText);
+                                currentText = em
+                                    ? currentText.replace(/<\/?em>|<\/?i>/gi, '')
+                                    : `<em>${currentText}</em>`;
+                            } else if (cmd === 'underline') {
+                                const u = /<u>/i.test(currentText);
+                                currentText = u
+                                    ? currentText.replace(/<\/?u>/gi, '')
+                                    : `<u>${currentText}</u>`;
+                            } else if (cmd === 'formatBlock') {
+                                const tag = (val || '<p>').replace(/<\/?/g, '');
+                                const openTag = `<${tag}>`;
+                                const closeTag = `</${tag}>`;
+                                const hasOpen = currentText.startsWith(openTag);
+                                const hasClose = currentText.endsWith(closeTag);
+                                if (hasOpen && hasClose) {
+                                    currentText = currentText.slice(openTag.length, -closeTag.length);
+                                } else {
+                                    currentText = openTag + currentText + closeTag;
+                                }
+                            }
 
                             const updatedBlock = {
                                 ...block,

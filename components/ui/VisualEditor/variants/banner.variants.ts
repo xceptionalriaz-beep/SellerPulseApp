@@ -51,12 +51,12 @@ export const bannerVariants: BannerVariant[] = [
       ${badgeSection}
 
       <!-- Main heading with pet store typography -->
-      <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 28}px;font-weight:900;color:${p.headingColor || '#1e1535'};line-height:1.3;text-transform:uppercase;letter-spacing:0.03em;">
+      <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 28}px;font-weight:900;color:${p.headingColor || '#1e1535'};line-height:1.3;text-transform:uppercase;letter-spacing:0.03em;cursor:text;">
         ${p.headingText || ''}
       </h2>
 
       <!-- Subtitle with pet-friendly description -->
-      <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:${p.subColor || '#6b7280'};line-height:1.7;font-weight:400;">
+      <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:${p.subColor || '#6b7280'};line-height:1.7;font-weight:400;cursor:text;">
         ${p.subText || ''}
       </p>
 
@@ -97,10 +97,10 @@ export const bannerVariants: BannerVariant[] = [
   <tr>
     <td style="${bg}padding:${p.paddingTop || 0}px ${p.paddingRight || 0}px ${p.paddingBottom || 0}px ${p.paddingLeft || 0}px;text-align:left;min-height:${p.minHeight || 100}px;position:relative;">
       ${badgeSection}
-      <h2 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 28}px;font-weight:900;color:${p.headingColor || '#1e1535'};line-height:1.2;">
+      <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 28}px;font-weight:900;color:${p.headingColor || '#1e1535'};line-height:1.2;cursor:text;">
         ${p.headingText || ''}
       </h2>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:${p.subColor || '#6b7280'};line-height:1.5;">
+      <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:${p.subColor || '#6b7280'};line-height:1.5;cursor:text;">
         ${p.subText || ''}
       </p>
     </td>
@@ -132,8 +132,8 @@ export const bannerVariants: BannerVariant[] = [
 
             // Text cell
             const textCell = `<td width="62%" style="padding:10px;vertical-align:middle;text-align:${p.align || 'left'};">
-                <h2 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 28}px;font-weight:900;color:${p.headingColor || '#1e1535'};line-height:1.2;">${p.headingText || ''}</h2>
-                <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:${p.subColor || '#6b7280'};line-height:1.5;">${p.subText || ''}</p>
+                <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 28}px;font-weight:900;color:${p.headingColor || '#1e1535'};line-height:1.2;cursor:text;">${p.headingText || ''}</h2>
+                <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:${p.subColor || '#6b7280'};line-height:1.5;cursor:text;">${p.subText || ''}</p>
             </td>`;
 
             const content = p.imagePosition === 'right' ? textCell + imageCell : imageCell + textCell
@@ -261,8 +261,8 @@ export const bannerVariants: BannerVariant[] = [
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;border-radius:12px;overflow:hidden;">
   <tr>
     <td style="${bg}padding:${p.paddingTop || 60}px ${p.paddingRight || 30}px ${p.paddingBottom || 60}px ${p.paddingLeft || 30}px;min-height:${p.minHeight || 200}px;text-align:${p.align || 'left'};position:relative;">
-        <h2 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 32}px;font-weight:900;color:${p.headingColor || '#1e1535'};">${p.headingText || 'Diagonal Impact'}</h2>
-        <p style="margin:0;font-family:Arial,sans-serif;font-size:16px;color:${p.subColor || '#475569'};">${p.subText || 'High-impact diagonal accent layout.'}</p>
+        <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 32}px;font-weight:900;color:${p.headingColor || '#1e1535'};cursor:text;">${p.headingText || 'Diagonal Impact'}</h2>
+        <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial,sans-serif;font-size:16px;color:${p.subColor || '#475569'};cursor:text;">${p.subText || 'High-impact diagonal accent layout.'}</p>
     </td>
   </tr>
 </table>
@@ -293,8 +293,8 @@ export const bannerVariants: BannerVariant[] = [
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;border-radius:12px;overflow:hidden;">
   <tr>
     <td style="${bg}padding:${p.paddingTop || 60}px ${p.paddingRight || 30}px ${p.paddingBottom || 60}px ${p.paddingLeft || 30}px;text-align:${p.align || 'center'};">
-        <h2 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 32}px;font-weight:900;color:${p.headingColor || '#ffffff'};">${p.headingText || 'Gradient Wave'}</h2>
-        <p style="margin:0;font-family:Arial,sans-serif;font-size:16px;color:${p.subColor || '#ffffff'};">${p.subText || 'Dynamic 3-stop animated gradient banner.'}</p>
+        <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${p.headingSize || 32}px;font-weight:900;color:${p.headingColor || '#ffffff'};cursor:text;">${p.headingText || 'Gradient Wave'}</h2>
+        <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial,sans-serif;font-size:16px;color:${p.subColor || '#ffffff'};cursor:text;">${p.subText || 'Dynamic 3-stop animated gradient banner.'}</p>
     </td>
   </tr>
 </table>
@@ -335,7 +335,7 @@ export const bannerVariants: BannerVariant[] = [
   <tr>
     <td style="padding:${p.paddingTop || 40}px ${p.paddingRight || 30}px ${p.paddingBottom || 40}px ${p.paddingLeft || 30}px;text-align:center;">
         <div style="display:inline-block;background-color:${p.accentColor || '#b8fa33'};color:#000;font-weight:bold;padding:4px 12px;border-radius:20px;font-family:Arial;font-size:12px;margin-bottom:12px;">LIMITED TIME OFFER</div>
-        <h2 style="margin:0 0 12px;font-family:Arial;font-size:${p.headingSize || 32}px;font-weight:900;color:#ffffff;">${p.headingText || 'Flash Sale!'}</h2>
+        <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 12px;font-family:Arial;font-size:${p.headingSize || 32}px;font-weight:900;color:#ffffff;cursor:text;">${p.headingText || 'Flash Sale!'}</h2>
     </td>
   </tr>
 </table>
@@ -352,8 +352,8 @@ export const bannerVariants: BannerVariant[] = [
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:#0f172a;border-radius:12px;overflow:hidden;border:2px solid #c9a84c;">
   <tr>
     <td style="padding:${p.paddingTop || 60}px ${p.paddingRight || 30}px ${p.paddingBottom || 60}px ${p.paddingLeft || 30}px;text-align:center;">
-        <h2 style="margin:0 0 12px;font-family:Times New Roman,serif;font-size:${p.headingSize || 36}px;font-weight:400;color:#c9a84c;letter-spacing:2px;">${p.headingText || 'PREMIUM COLLECTION'}</h2>
-        <p style="margin:0;font-family:Arial;font-size:14px;color:#ffffff;letter-spacing:1px;">${p.subText || 'Exquisite quality, delivered.'}</p>
+        <h2 data-editable="true" data-prop-key="headingText" style="margin:0 0 12px;font-family:Times New Roman,serif;font-size:${p.headingSize || 36}px;font-weight:400;color:#c9a84c;letter-spacing:2px;cursor:text;">${p.headingText || 'PREMIUM COLLECTION'}</h2>
+        <p data-editable="true" data-prop-key="subText" style="margin:0;font-family:Arial;font-size:14px;color:#ffffff;letter-spacing:1px;cursor:text;">${p.subText || 'Exquisite quality, delivered.'}</p>
     </td>
   </tr>
 </table>

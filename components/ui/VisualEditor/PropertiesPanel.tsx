@@ -149,6 +149,7 @@ interface PropertiesPanelProps {
     placeholders: PlaceholderGroup[]
     onChange: (updated: Block) => void
     onDeselect: () => void
+    selectedSubSlot?: string | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -159,6 +160,7 @@ export default function PropertiesPanel({
     placeholders,
     onChange,
     onDeselect,
+    selectedSubSlot,
 }: PropertiesPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>('styles')
 
@@ -399,6 +401,7 @@ export default function PropertiesPanel({
                         props={props}
                         placeholders={placeholders}
                         updateProps={updateProps}
+                        selectedSubSlot={selectedSubSlot}
                     />
                 )}
                 {activeTab === 'ai' && (
@@ -2361,16 +2364,19 @@ function BlockStyleProps({ block, props, updateProps }: {
 // ATTRIBUTES TAB
 // Content properties — text, src, items, rows, toggles + placeholder picker
 // ─────────────────────────────────────────────────────────────────────────────
+
 function AttributesTab({
     block,
     props,
     placeholders,
     updateProps,
+    selectedSubSlot,
 }: {
     block: Block
     props: any
     placeholders: PlaceholderGroup[]
     updateProps: (p: any) => void
+    selectedSubSlot?: string | null
 }) {
     const [showPh, setShowPh] = useState(false)
     const [phTarget, setPhTarget] = useState<string | null>(null)
@@ -2389,6 +2395,7 @@ function AttributesTab({
             title={`Insert placeholder into ${label}`}
             style={{
                 marginTop: 3,
+                marginBottom: 8,
                 padding: '3px 8px',
                 border: `1px solid ${C.primaryBorder}`,
                 borderRadius: 6,
@@ -2421,15 +2428,17 @@ function AttributesTab({
                 props={props}
                 updateProps={updateProps}
                 phButton={phButton}
+                selectedSubSlot={selectedSubSlot}
             />
         </div>
     )
 }
 
 // Block-specific attribute controls
-function BlockAttributeProps({ block, props, updateProps, phButton }: {
+function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubSlot }: {
     block: Block, props: any, updateProps: (p: any) => void,
     phButton: (key: string, label: string) => React.ReactNode
+    selectedSubSlot?: string | null
 }) {
     switch (block.type) {
 
@@ -2669,7 +2678,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
             return (
                 <>
                     <Section title="Content">
-                        <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
+                        <TextareaInput label="Heading" value={props.headingText ?? ''} rows={2} onChange={v => updateProps({ headingText: v })} />
                         {phButton('headingText', 'heading')}
                         <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
                         {phButton('subText', 'subtext')}
@@ -2694,7 +2703,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
             return (
                 <>
                     <Section title="Content">
-                        <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
+                        <TextareaInput label="Heading" value={props.headingText ?? ''} rows={2} onChange={v => updateProps({ headingText: v })} />
                         {phButton('headingText', 'heading')}
                         <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
                         {phButton('subText', 'subtext')}
@@ -2778,9 +2787,109 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
             )
 
         case 'full_width_section':
+            if (selectedSubSlot === 'content') {
+                return (
+                    <Section title="Content">
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props['content'] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ content: v })}
+                        />
+                        {phButton('content', 'Content')}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
         case 'two_column':
+            if (block.type === 'two_column' && (selectedSubSlot === 'leftContent' || selectedSubSlot === 'rightContent')) {
+                return (
+                    <Section title={`Column: ${selectedSubSlot === 'leftContent' ? 'Left' : 'Right'}`}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, selectedSubSlot === 'leftContent' ? 'Left Column' : 'Right Column')}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
         case 'three_column':
+            if (selectedSubSlot === 'col1Content' || selectedSubSlot === 'col2Content' || selectedSubSlot === 'col3Content') {
+                const label = selectedSubSlot === 'col1Content' ? 'Column 1' : selectedSubSlot === 'col2Content' ? 'Column 2' : 'Column 3';
+                return (
+                    <Section title={label}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, label)}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'four_column':
+            if (selectedSubSlot === 'col1Content' || selectedSubSlot === 'col2Content' || selectedSubSlot === 'col3Content' || selectedSubSlot === 'col4Content') {
+                const label = selectedSubSlot === 'col1Content' ? 'Column 1' : selectedSubSlot === 'col2Content' ? 'Column 2' : selectedSubSlot === 'col3Content' ? 'Column 3' : 'Column 4';
+                return (
+                    <Section title={label}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, label)}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
         case 'container':
+            if (selectedSubSlot === 'content') {
+                return (
+                    <Section title="Content">
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props['content'] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ content: v })}
+                        />
+                        {phButton('content', 'Content')}
+                    </Section>
+                )
+            }
             return (
                 <div style={{ padding: '8px 0' }}>
                     <InfoBox>

@@ -59,6 +59,11 @@ export type BlockType =
     | 'info_box'
     | 'data_table'
     | 'badge_row'
+    | 'faq_block'
+    | 'testimonial_block'
+    | 'compatibility_block'
+    | 'bundle_discount_banner'
+    | 'store_nav_bar'
     // Product
     | 'product_title'
     | 'price_block'
@@ -122,6 +127,10 @@ export type BlockType =
     | 'pull_quote'
     | 'highlight_text'
     | 'price_tag'
+    | 'shipping_policy_block'
+    | 'payment_methods_block'
+    | 'urgency_timer_block'
+    | 'trust_badge_block'
 
 // ── Base block instance ─────────────────────────────────────────────────────
 export interface Block {
@@ -165,6 +174,15 @@ export type BlockProps =
     | HeroHeaderProps
     | RawHtmlProps
     | FeaturesProps
+    | FAQBlockProps
+    | TestimonialBlockProps
+    | CompatibilityBlockProps
+    | BundleDiscountBannerProps
+    | StoreNavBarProps
+    | ShippingPolicyBlockProps
+    | PaymentMethodsBlockProps
+    | UrgencyTimerBlockProps
+    | TrustBadgeBlockProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -263,6 +281,19 @@ export interface ThreeColumnProps extends CommonProps {
     col1Bg: string
     col2Bg: string
     col3Bg: string
+}
+
+// ── Four Column ─────────────────────────────────────────────────────────────
+export interface FourColumnProps extends CommonProps {
+    col1Content: string
+    col2Content: string
+    col3Content: string
+    col4Content: string
+    gap: number
+    col1Bg: string
+    col2Bg: string
+    col3Bg: string
+    col4Bg: string
 }
 
 // ── Container ────────────────────────────────────────────────────────────────
@@ -763,6 +794,85 @@ export interface HeroHeaderProps extends CommonProps {
     saleBadgeText: string     // seasonal variant badge text
 }
 
+// ── FAQ Block ─────────────────────────────────────────────────────────
+export interface FAQBlockProps extends CommonProps {
+    faqs: Array<{ question: string; answer: string }>
+    questionColor: string
+    answerColor: string
+    bgColor: string
+    borderRadius: number
+}
+
+// ── Testimonial Block ───────────────────────────────────────────────
+export interface TestimonialBlockProps extends CommonProps {
+    testimonials: Array<{
+        text: string
+        author: string
+        rating: number
+    }>
+    textColor: string
+    authorColor: string
+    starColor: string
+    bgColor: string
+    borderRadius: number
+}
+
+// ── Compatibility Block ─────────────────────────────────────────────
+export interface CompatibilityBlockProps extends CommonProps {
+    compatibleModels: string[]
+    incompatibleModels: string[]
+    title: string
+    iconColor: string
+    compatibleColor: string
+    incompatibleColor: string
+}
+
+// ── Bundle Discount Banner ────────────────────────────────────────
+export interface BundleDiscountBannerProps extends CommonProps {
+    discountPercentage: number
+    minimumQty: number
+    bannerText: string
+    bgColor: string
+    textColor: string
+    accentColor: string
+}
+
+// ── Store Navigation Bar ──────────────────────────────────────────
+export interface StoreNavBarProps extends CommonProps {
+    links: Array<{ label: string; url: string }>
+    bgColor: string
+    textColor: string
+    hoverColor: string
+    fontSize: number
+    fontWeight: string
+    borderRadius: number
+}
+
+export interface ShippingPolicyBlockProps extends CommonProps {
+    title: string
+    policyText: string
+    deliveryTime: string
+    accentColor: string
+}
+
+export interface PaymentMethodsBlockProps extends CommonProps {
+    title: string
+    showPayPal: boolean
+    showCreditCards: boolean
+}
+
+export interface UrgencyTimerBlockProps extends CommonProps {
+    text: string
+    timerColor: string
+    bgColor: string
+}
+
+export interface TrustBadgeBlockProps extends CommonProps {
+    badgeText: string
+    bgColor: string
+    textColor: string
+}
+
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
 export interface RawHtmlProps extends CommonProps {
     code: string              // raw HTML — passed through sanitiseHtml on export
@@ -847,7 +957,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Full-width container for any content',
         defaultProps: {
             ...DEFAULT_COMMON,
-            content: '<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;margin:0;">Your content here</p>',
+            content: '<div data-canvas-dropzone="content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
             borderColor: '#ede9fe',
             borderWidth: 0,
             borderRadius: 0,
@@ -876,8 +986,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Side-by-side two column layout',
         defaultProps: {
             ...DEFAULT_COMMON,
-            leftContent: '<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;margin:0;">Left column</p>',
-            rightContent: '<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;margin:0;">Right column</p>',
+            leftContent: '<div data-canvas-dropzone="leftContent"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            rightContent: '<div data-canvas-dropzone="rightContent"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
             leftWidth: 50,
             gap: 16,
             leftBg: '#ffffff',
@@ -915,9 +1025,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Three equal column layout',
         defaultProps: {
             ...DEFAULT_COMMON,
-            col1Content: '<p style="font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;margin:0;">Column 1</p>',
-            col2Content: '<p style="font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;margin:0;">Column 2</p>',
-            col3Content: '<p style="font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;margin:0;">Column 3</p>',
+            col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
             gap: 12,
             col1Bg: '#ffffff',
             col2Bg: '#ffffff',
@@ -952,7 +1062,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         defaultProps: {
             ...DEFAULT_COMMON,
             maxWidth: 600,
-            content: '<p style="font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;margin:0;">Container content</p>',
+            content: '<div data-canvas-dropzone="content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
             borderColor: '#ede9fe',
             borderWidth: 1,
             borderRadius: 8,
@@ -2178,16 +2288,35 @@ ${thumbCells}
             category: 'Layout' as BlockCategory,
             icon: 'columns',
             description: '4 equal columns for specs or features',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                col4Content: '<div data-canvas-dropzone="col4Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                gap: 8,
+                col1Bg: '#ffffff',
+                col2Bg: '#ffffff',
+                col3Bg: '#ffffff',
+                col4Bg: '#ffffff',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as FourColumnProps
                 return wrapBlock('four_column' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr>
-  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 1</p></td>
-  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 2</p></td>
-  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 3</p></td>
-  <td width="25%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;">Column 4</p></td>
-</tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="25%" valign="top" style="padding-right:${(p.gap || 8) / 2}px;">${p.col1Content}</td>
+          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;">${p.col2Content}</td>
+          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;">${p.col3Content}</td>
+          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;">${p.col4Content}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`)
             },
         },
 
@@ -2833,6 +2962,292 @@ ${thumbCells}
                 const p = props as CommonProps
                 return wrapBlock('price_tag' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="vertical-align:bottom;padding-right:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:#9ca3af;text-decoration:line-through;">Was {{ORIGINAL_PRICE}}</p></td><td style="vertical-align:bottom;"><p style="margin:0;font-family:Arial,sans-serif;font-size:32px;font-weight:700;color:#7530fb;">{{ITEM_PRICE}}</p></td><td style="vertical-align:bottom;padding-left:10px;"><span style="display:inline-block;background-color:#dc2626;color:#fff;font-family:Arial,sans-serif;font-size:12px;font-weight:700;padding:4px 10px;border-radius:4px;">SAVE {{DISCOUNT_PERCENT}}%</span></td></tr></table></td></tr></table>`)
+            },
+        },
+
+        // ── NEW PROFESSIONAL CONTENT BLOCKS ─────────────────────────────────
+
+        {
+            type: 'faq_block' as BlockType,
+            label: 'FAQ Section',
+            category: 'Content' as BlockCategory,
+            icon: 'help-circle',
+            description: 'Expandable FAQ list to reduce support queries',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 20,
+                paddingBottom: 20,
+                faqs: [
+                    { question: 'What is the warranty?', answer: 'All items come with a 30-day money back guarantee.' },
+                    { question: 'How long does shipping take?', answer: 'Most orders ship within 24 hours.' },
+                    { question: 'Do you accept returns?', answer: 'Yes, we accept returns within 30 days.' },
+                ],
+                questionColor: '#1e1535',
+                answerColor: '#6b7280',
+            } as FAQBlockProps,
+            toHtml(props, id) {
+                const p = props as FAQBlockProps
+                const rows = (p.faqs || []).map(f =>
+                    `<tr><td colspan="2" style="padding:10px 14px;border-bottom:1px solid ${p.borderColor};font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.questionColor};">${f.question}</td></tr>
+                     <tr><td colspan="2" style="padding:10px 14px 20px;border-bottom:1px solid ${p.borderColor};font-family:Arial,sans-serif;font-size:13px;color:${p.answerColor};line-height:1.6;">${f.answer}</td></tr>`
+                ).join('')
+                return wrapBlock('faq_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'testimonial_block' as BlockType,
+            label: 'Testimonials',
+            category: 'Content' as BlockCategory,
+            icon: 'quote',
+            description: 'Customer reviews and star ratings',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 20,
+                paddingBottom: 20,
+                testimonials: [
+                    { text: 'Amazing product! Exactly as described.', author: 'John D.', rating: 5 },
+                    { text: 'Fast shipping and great quality.', author: 'Sarah M.', rating: 4 },
+                    { text: 'Highly recommend this seller!', author: 'Mike T.', rating: 5 },
+                ],
+                textColor: '#1e1535',
+                authorColor: '#7530fb',
+                starColor: '#f59e0b',
+            } as TestimonialBlockProps,
+            toHtml(props, id) {
+                const p = props as TestimonialBlockProps
+                const cards = (p.testimonials || []).map(t => {
+                    const stars = '&#9733;'.repeat(t.rating || 5)
+                    return `<td width="33%" style="padding:12px;vertical-align:top;text-align:center;">
+                        <div style="background-color:${p.bgColor};border:1px solid ${p.borderColor};border-radius:8px;padding:16px;">
+                            <p style="margin:0 0 8px;font-size:16px;color:${p.starColor};">${stars}</p>
+                            <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:13px;font-style:italic;color:${p.textColor};line-height:1.5;">${t.text}</p>
+                            <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${p.authorColor};">— ${t.author}</p>
+                        </div>
+                    </td>`
+                }).join('')
+                return wrapBlock('testimonial_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cards}</tr></table>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'compatibility_block' as BlockType,
+            label: 'Compatibility Checker',
+            category: 'Content' as BlockCategory,
+            icon: 'check',
+            description: 'Fits/does not fit table for technical items',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 16,
+                paddingBottom: 16,
+                title: 'Check Compatibility',
+                compatibleModels: ['Model A 2020+', 'Model B Pro', 'Model C'],
+                incompatibleModels: ['Old Model X', 'Legacy Series'],
+                iconColor: '#16a34a',
+                compatibleColor: '#166534',
+                incompatibleColor: '#991b1b',
+            } as CompatibilityBlockProps,
+            toHtml(props, id) {
+                const p = props as CompatibilityBlockProps
+                const compatRows = (p.compatibleModels || []).map(m =>
+                    `<tr><td style="padding:6px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.compatibleColor};border-bottom:1px solid #e5e7eb;">&#10003; ${m}</td></tr>`
+                ).join('')
+                const incompatRows = (p.incompatibleModels || []).map(m =>
+                    `<tr><td style="padding:6px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.incompatibleColor};border-bottom:1px solid #e5e7eb;">&#10007; ${m}</td></tr>`
+                ).join('')
+                return wrapBlock('compatibility_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td style="padding:10px 14px;border-bottom:2px solid #16a34a;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.iconColor};">Compatible Models</td></tr>
+      ${compatRows}
+      <tr><td style="padding:10px 14px;border-top:2px solid #dc2626;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#dc2626;">Not Compatible</td></tr>
+      ${compatRows}
+    </table>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'bundle_discount_banner' as BlockType,
+            label: 'Bundle Discount',
+            category: 'Content' as BlockCategory,
+            icon: 'gift',
+            description: 'Save X% when buying multiple items',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 20,
+                paddingBottom: 20,
+                discountPercentage: 15,
+                minimumQty: 2,
+                bannerText: 'Buy {{QUANTITY}} or more and save!',
+                bgColor: '#7530fb',
+                textColor: '#ffffff',
+                accentColor: '#b8fa33',
+            } as BundleDiscountBannerProps,
+            toHtml(props, id) {
+                const p = props as BundleDiscountBannerProps
+                return wrapBlock('bundle_discount_banner' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background:linear-gradient(135deg,${p.bgColor},#1e1535);${pad(p)}text-align:center;border-radius:${p.borderRadius}px;">
+    <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.accentColor};text-transform:uppercase;letter-spacing:2px;">Special Offer</p>
+    <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:28px;font-weight:800;color:${p.textColor};">Save ${p.discountPercentage}%!</p>
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);">Buy ${p.minimumQty} or more items to unlock this discount</p>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'store_nav_bar' as BlockType,
+            label: 'Store Category Nav',
+            category: 'Content' as BlockCategory,
+            icon: 'menu',
+            description: 'Horizontal navigation bar linking store categories',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 10,
+                paddingBottom: 10,
+                bgColor: '#1e1535',
+                links: [
+                    { label: 'Electronics', url: '#' },
+                    { label: 'Home & Garden', url: '#' },
+                    { label: 'Fashion', url: '#' },
+                    { label: 'Deals', url: '#' },
+                ],
+                textColor: '#ffffff',
+                hoverColor: '#b8fa33',
+                fontSize: 12,
+                fontWeight: '700',
+            } as StoreNavBarProps,
+            toHtml(props, id) {
+                const p = props as StoreNavBarProps
+                const cells = (p.links || []).map(l =>
+                    `<td style="padding:0 12px;"><a href="${l.url}" style="font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};color:${p.textColor};text-decoration:none;">${l.label}</a></td>`
+                ).join('')
+                return wrapBlock('store_nav_bar' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;border-radius:${p.borderRadius}px;">
+    <table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'shipping_policy_block' as BlockType,
+            label: 'Shipping Policy',
+            category: 'Content' as BlockCategory,
+            icon: 'truck',
+            description: 'Fast dispatch and delivery details card',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 16,
+                paddingBottom: 16,
+                title: 'Fast & Reliable Shipping',
+                policyText: 'We ship all orders within 24 hours of payment clearance via tracked carrier services.',
+                deliveryTime: 'Estimated delivery: 2-5 business days',
+                accentColor: '#7530fb',
+            } as ShippingPolicyBlockProps,
+            toHtml(props, id) {
+                const p = props as ShippingPolicyBlockProps
+                return wrapBlock('shipping_policy_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.accentColor};">&#128666; ${p.title}</td></tr>
+      <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:13px;color:#4b5563;line-height:1.5;">${p.policyText}</td></tr>
+      <tr><td style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#1e1535;">${p.deliveryTime}</td></tr>
+    </table>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'payment_methods_block' as BlockType,
+            label: 'Payment Methods',
+            category: 'Content' as BlockCategory,
+            icon: 'credit-card',
+            description: 'Accepted payment badges and security notice',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 16,
+                paddingBottom: 16,
+                title: 'Secure Checkout via eBay Managed Payments',
+                showPayPal: true,
+                showCreditCards: true,
+            } as PaymentMethodsBlockProps,
+            toHtml(props, id) {
+                const p = props as PaymentMethodsBlockProps
+                return wrapBlock('payment_methods_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;text-align:center;">
+    <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">${p.title}</p>
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">We accept all major credit cards, debit cards, and secure payment options handled directly by eBay.</p>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'urgency_timer_block' as BlockType,
+            label: 'Limited Time Offer',
+            category: 'Content' as BlockCategory,
+            icon: 'clock',
+            description: 'Scarcity banner to boost conversion rate',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 14,
+                paddingBottom: 14,
+                text: 'Limited Time Promotional Price — Order Soon!',
+                timerColor: '#dc2626',
+                bgColor: '#fef2f2',
+            } as UrgencyTimerBlockProps,
+            toHtml(props, id) {
+                const p = props as UrgencyTimerBlockProps
+                return wrapBlock('urgency_timer_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid #fecaca;border-radius:${p.borderRadius}px;text-align:center;">
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.timerColor};">&#9202; ${p.text}</p>
+  </td></tr>
+</table>`)
+            },
+        },
+
+        {
+            type: 'trust_badge_block' as BlockType,
+            label: 'Trust & Satisfaction Badge',
+            category: 'Content' as BlockCategory,
+            icon: 'shield',
+            description: '100% Satisfaction Guarantee badge',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                paddingTop: 16,
+                paddingBottom: 16,
+                badgeText: '100% Satisfaction Guaranteed or Your Money Back',
+                bgColor: '#f3eeff',
+                textColor: '#7530fb',
+            } as TrustBadgeBlockProps,
+            toHtml(props, id) {
+                const p = props as TrustBadgeBlockProps
+                return wrapBlock('trust_badge_block' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr><td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;text-align:center;">
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:800;color:${p.textColor};">&#128737; ${p.badgeText}</p>
+  </td></tr>
+</table>`)
             },
         },
 

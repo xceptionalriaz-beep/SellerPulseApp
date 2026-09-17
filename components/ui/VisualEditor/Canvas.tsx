@@ -243,7 +243,7 @@ export default function Canvas({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                padding: '24px 24px 40px',
+                padding: '20px 20px 40px',
                 position: 'relative',
                 transformOrigin: 'top center',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
@@ -997,11 +997,14 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
   div[data-canvas-overlay] { opacity: 0; transition: opacity 0.15s ease; pointer-events: none; }
   div[data-canvas-dropzone]:hover div[data-canvas-overlay],
   div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
+
+  /* Removed inline text editing hover indicator */
 </style>
 <script>
 (function() {
   document.addEventListener('DOMContentLoaded', function() {
-    // Slot selection via image click or dropzone click
+    // In-place text editing on double click for p, h1, h2, h3, h4, span
+    // [REMOVED: Interactive content editing feature]
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
       img.addEventListener('click', function(e) {
         e.preventDefault();
@@ -1015,15 +1018,23 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     // Dropzone click also triggers selection (for full-width / gallery thumbnails)
     document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
       zone.addEventListener('click', function(e) {
-        // Only trigger if the click isn't on the overlay (overlay handles picker)
-        if (e.target && (e.target.getAttribute && e.target.getAttribute('data-canvas-overlay')) || e.target.closest && e.target.closest('[data-canvas-overlay]')) {
+        if (e.target && e.target.closest && e.target.closest('[data-canvas-overlay]')) {
           return;
         }
         e.preventDefault();
         e.stopPropagation();
         var slot = zone.getAttribute('data-canvas-dropzone');
+        // data-block-id is on the <iframe> element in the parent document,
+        // accessible from inside the iframe via window.frameElement
+        var blockId = '';
+        try { blockId = window.frameElement ? (window.frameElement.getAttribute('data-block-id') || '') : ''; } catch(e) {}
+        var hasContent = zone.querySelector('.add-btn') === null;
         if (slot && window.parent) {
-          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot }, '*');
+          if (hasContent) {
+            window.parent.postMessage({ type: 'RIAZIFY_EDIT_SLOT_CONTENT', propKey: slot, blockId: blockId }, '*');
+          } else {
+            window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: blockId }, '*');
+          }
         }
       });
     });
@@ -1045,6 +1056,16 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
         e.stopPropagation();
         zone.setAttribute('data-canvas-dropzone-active', 'false');
         var slot = zone.getAttribute('data-canvas-dropzone');
+        // Check if dropped item is a block type string from our library
+        var blockType = e.dataTransfer.getData('text/plain');
+        if (blockType && window.parent && slot) {
+          // data-block-id is on the <iframe> element in the parent document,
+          // accessible from inside the iframe via window.frameElement
+          var blockId = '';
+          try { blockId = window.frameElement ? (window.frameElement.getAttribute('data-block-id') || '') : ''; } catch(e) {}
+          window.parent.postMessage({ type: 'RIAZIFY_DROP_BLOCK', propKey: slot, blockType: blockType, blockId: blockId }, '*');
+          return;
+        }
         // Prefer file drop
         var files = e.dataTransfer.files;
         if (files && files.length > 0) {
@@ -1069,6 +1090,10 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
         // Highlight the dropzone container (clear visual target for full-width and thumbnails)
         document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
           zone.classList.remove('riazify-active-slot');
+          // ALSO remove from parent container if needed
+          if (zone.getAttribute('data-canvas-dropzone') !== prop) {
+              zone.classList.remove('riazify-active-slot');
+          }
         });
         document.querySelectorAll('img[data-slot]').forEach(function(img) {
           img.classList.remove('riazify-active-slot');
@@ -1098,37 +1123,6 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
       });
     });
 
-    // Inline text editing click handler
-    document.addEventListener('click', function(e) {
-      console.log('---Iframe Click Handler Triggered---', e.target.tagName);
-      var target = e.target;
-      var editableTags = ['H1', 'H2', 'H3', 'P', 'SPAN', 'DIV', 'A', 'STRONG', 'TD', 'LI'];
-      if (target && editableTags.includes(target.tagName)) {
-        e.stopPropagation();
-        var propKey = target.getAttribute('data-prop-key');
-        if (!propKey) {
-          if (['H1', 'H2', 'H3'].includes(target.tagName)) {
-            propKey = 'headingText';
-          } else {
-            propKey = 'subText';
-          }
-        }
-        var rect = target.getBoundingClientRect();
-        window.parent.postMessage({
-          type: 'RIAZIFY_EDIT_TEXT',
-          blockId: '${block.id}',
-          propKey: propKey,
-          text: target.innerText || '',
-          x: rect.left,
-          y: rect.top,
-          width: rect.width,
-          height: rect.height
-        }, '*');
-      }
-      else {
-        console.log('Target not editable or wrong tag');
-      }
-    });
   });
 })();
 </script>
@@ -1184,6 +1178,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
                     onLoad={onLoad}
                     sandbox="allow-same-origin allow-scripts"
                     scrolling="no"
+                    data-block-id={block.id}
                     style={{
                         width: '700px',
                         height: height,
