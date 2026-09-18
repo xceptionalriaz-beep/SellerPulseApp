@@ -794,8 +794,17 @@ export default function VisualEditor({
                 const VALID_SLOTS: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
                 if (VALID_SLOTS.includes(propKey)) {
                     setActiveDropSlot({ blockId, slot: propKey });
-                    if (blockId) setSelectedId(blockId); // Auto-select the block whose slot was clicked
-                    setActiveTab('content'); // Auto-switch to Content tab
+                    if (blockId) {
+                        setSelectedId(blockId);
+                        const targetBlock = blocks.find(b => b.id === blockId);
+                        if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
+                            setActiveTab('images');
+                        } else {
+                            setActiveTab('content');
+                        }
+                    } else {
+                        setActiveTab('content');
+                    }
                     setPanelOpen(true);
                 }
             } else if (event.data?.type === 'RIAZIFY_EDIT_SLOT_CONTENT') {
@@ -803,7 +812,12 @@ export default function VisualEditor({
                 if (blockId && propKey) {
                     setSelectedId(blockId);
                     setSelectedSubSlot(propKey);
-                    setActiveTab('content');
+                    const targetBlock = blocks.find(b => b.id === blockId);
+                    if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
+                        setActiveTab('images');
+                    } else {
+                        setActiveTab('content');
+                    }
                     setPanelOpen(true);
                 }
             } else if (event.data?.type === 'RIAZIFY_COMMIT_TEXT_EDIT') {
@@ -832,6 +846,78 @@ export default function VisualEditor({
                         newBlocks[idx] = updatedBlock;
                         commitBlocks(newBlocks, blocks);
                     }
+                }
+            } else if (event.data?.type === 'RIAZIFY_ADD_ROW') {
+                const { blockId } = event.data;
+                const idx = blocks.findIndex(b => b.id === blockId);
+                if (idx >= 0) {
+                    const target = blocks[idx];
+                    const p = target.props as any;
+
+                    let newRow: any = {};
+                    if (target.type === 'two_column') {
+                        newRow = {
+                            leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Drop file or content</span></div>',
+                            rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Drop content here</span></div>'
+                        };
+                    } else if (target.type === 'three_column') {
+                        newRow = {
+                            col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                            col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                            col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>'
+                        };
+                    } else if (target.type === 'four_column') {
+                        newRow = {
+                            col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                            col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                            col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                            col4Content: '<div data-canvas-dropzone="col4Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>'
+                        };
+                    } else {
+                        newRow = { leftContent: p.leftContent, rightContent: p.rightContent };
+                    }
+
+                    const defaultFirstRow = target.type === 'three_column'
+                        ? { col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content }
+                        : target.type === 'four_column'
+                        ? { col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content, col4Content: p.col4Content }
+                        : { leftContent: p.leftContent, rightContent: p.rightContent };
+
+                    const currentRows = p.rows && Array.isArray(p.rows) ? p.rows : [defaultFirstRow];
+                    const newRows = [...currentRows, newRow];
+                    const updatedBlock = { ...target, props: { ...p, rows: newRows } };
+                    const newBlocks = [...blocks];
+                    newBlocks[idx] = updatedBlock;
+                    commitBlocks(newBlocks, blocks);
+                }
+            } else if (event.data?.type === 'RIAZIFY_REMOVE_ROW') {
+                const { blockId, rowIndex } = event.data;
+                const idx = blocks.findIndex(b => b.id === blockId);
+                if (idx >= 0) {
+                    const target = blocks[idx];
+                    const p = target.props as any;
+                    const rows = p.rows || [{ leftContent: p.leftContent, rightContent: p.rightContent }];
+                    if (rows.length > 1) {
+                        const newRows = rows.filter((_: any, i: number) => i !== rowIndex);
+                        const updatedBlock = { ...target, props: { ...p, rows: newRows } };
+                        const newBlocks = [...blocks];
+                        newBlocks[idx] = updatedBlock;
+                        commitBlocks(newBlocks, blocks);
+                    }
+                }
+            } else if (event.data?.type === 'RIAZIFY_DUPLICATE_ROW') {
+                const { blockId, rowIndex } = event.data;
+                const idx = blocks.findIndex(b => b.id === blockId);
+                if (idx >= 0) {
+                    const target = blocks[idx];
+                    const p = target.props as any;
+                    const rows = p.rows || [{ leftContent: p.leftContent, rightContent: p.rightContent }];
+                    const newRows = [...rows];
+                    newRows.splice(rowIndex + 1, 0, { ...rows[rowIndex] });
+                    const updatedBlock = { ...target, props: { ...p, rows: newRows } };
+                    const newBlocks = [...blocks];
+                    newBlocks[idx] = updatedBlock;
+                    commitBlocks(newBlocks, blocks);
                 }
             } else if (event.data?.type === 'RIAZIFY_DROP_BLOCK') {
                 const { propKey, blockType, blockId } = event.data;

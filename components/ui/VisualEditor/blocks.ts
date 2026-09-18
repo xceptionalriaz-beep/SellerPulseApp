@@ -997,19 +997,23 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         toHtml(props, id) {
             const p = props as TwoColumnProps
             const rightWidth = 100 - p.leftWidth
+            const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ leftContent: p.leftContent, rightContent: p.rightContent }]
+            const rowsHtml = rows.map((r: any, idx: number) => `
+        <tr>
+          <td width="${p.leftWidth}%" valign="top" style="padding-right:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">
+            <div style="width:100%;box-sizing:border-box;">${r.leftContent}</div>
+          </td>
+          <td width="${rightWidth}%" valign="top" style="padding-left:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">
+            <div style="width:100%;box-sizing:border-box;">${r.rightContent}</div>
+          </td>
+        </tr>
+            `).join('')
             return wrapBlock('two_column', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td width="${p.leftWidth}%" valign="top" style="padding-right:${p.gap / 2}px;">
-            ${p.leftContent}
-          </td>
-          <td width="${rightWidth}%" valign="top" style="padding-left:${p.gap / 2}px;">
-            ${p.rightContent}
-          </td>
-        </tr>
+        ${rowsHtml}
       </table>
     </td>
   </tr>
@@ -1036,16 +1040,20 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         } as ThreeColumnProps,
         toHtml(props, id) {
             const p = props as ThreeColumnProps
+            const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content }]
+            const rowsHtml = rows.map((r: any, idx: number) => `
+        <tr>
+          <td width="33%" valign="top" style="padding-right:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="34%" valign="top" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="33%" valign="top" style="padding-left:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+        </tr>
+            `).join('')
             return wrapBlock('three_column', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td width="33%" valign="top" style="padding-right:${p.gap / 2}px;">${p.col1Content}</td>
-          <td width="34%" valign="top" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;">${p.col2Content}</td>
-          <td width="33%" valign="top" style="padding-left:${p.gap / 2}px;">${p.col3Content}</td>
-        </tr>
+        ${rowsHtml}
       </table>
     </td>
   </tr>
@@ -2291,17 +2299,21 @@ ${thumbCells}
             } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as FourColumnProps
+                const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content, col4Content: p.col4Content }]
+                const rowsHtml = rows.map((r: any, idx: number) => `
+        <tr>
+          <td width="25%" valign="top" style="padding-right:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
+        </tr>
+                `).join('')
                 return wrapBlock('four_column' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td width="25%" valign="top" style="padding-right:${(p.gap || 8) / 2}px;">${p.col1Content}</td>
-          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;">${p.col2Content}</td>
-          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;">${p.col3Content}</td>
-          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;">${p.col4Content}</td>
-        </tr>
+        ${rowsHtml}
       </table>
     </td>
   </tr>
@@ -2345,21 +2357,32 @@ ${thumbCells}
             description: '70/30 split — image left, text right with dropzones',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">🖼️ Drop image here</span></div>',
-                rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">📝 Drop content here</span></div>',
+                leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Drop file or content</span></div>',
+                rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Drop content here</span></div>',
+                rows: [
+                    {
+                        leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Drop file or content</span></div>',
+                        rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Drop content here</span></div>',
+                    }
+                ],
                 gap: 16,
             } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as any
+                const rowList = p.rows && Array.isArray(p.rows) ? p.rows : [{ leftContent: p.leftContent, rightContent: p.rightContent }];
+                const rowsHtml = rowList.map((r: any, idx: number) => `
+        <tr>
+          <td width="70%" valign="top" style="padding-right:${(p.gap || 16) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="width:100%;box-sizing:border-box;">${r.leftContent || ''}</div></td>
+          <td width="30%" valign="top" style="padding-left:${(p.gap || 16) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="width:100%;box-sizing:border-box;">${r.rightContent || ''}</div></td>
+        </tr>
+                `).join('');
+
                 return wrapBlock('sidebar_layout' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td width="70%" valign="top" style="padding-right:${(p.gap || 16) / 2}px;">${p.leftContent}</td>
-          <td width="30%" valign="top" style="padding-left:${(p.gap || 16) / 2}px;">${p.rightContent}</td>
-        </tr>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
+        ${rowsHtml}
       </table>
     </td>
   </tr>

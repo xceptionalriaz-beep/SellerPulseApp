@@ -238,7 +238,7 @@ export default function Canvas({
                 flex: 1,
                 height: '100%',
                 overflowY: 'auto',
-                overflowX: 'hidden',
+                overflowX: 'auto',
                 backgroundColor: '#e8e6f0',
                 display: 'flex',
                 flexDirection: 'column',
@@ -674,9 +674,9 @@ function BlockCard({
             <div
                 ref={el => {
                     if (el) {
-                        // Compute scale so 700px iframe fits the card width
+                        // Compute scale so 700px iframe fits the card width minus padding (16px left + 16px right = 32px)
                         const w = el.getBoundingClientRect().width
-                        const scale = w > 0 ? (w / 700) : 1
+                        const scale = w > 32 ? ((w - 32) / 700) : 1
                         el.style.setProperty('--canvas-scale', String(scale))
                         el.style.height = 'auto'
                     }
@@ -1002,7 +1002,37 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
 </style>
 <script>
 (function() {
+  // Block ID is baked into the script at render time so the iframe
+  // never depends on window.frameElement to identify itself to the parent.
+  // This is critical: window.frameElement may be null or inaccessible
+  // in some browser contexts, causing the blockId to be empty and the
+  // drop/edit messages to fail silently.
+  var BLOCK_ID = "${block.id}";
+  var BLOCK_TYPE = "${block.type}";
   document.addEventListener('DOMContentLoaded', function() {
+    // Inject controls for container blocks (sidebar_layout, two_column, etc)
+    if (['sidebar_layout', 'two_column', 'three_column', 'four_column'].includes(BLOCK_TYPE)) {
+      // 1. Add Row button
+      var addRowContainer = document.createElement('div');
+      addRowContainer.style.cssText = 'display:flex;justify-content:center;margin-top:12px;opacity:0;transition:opacity 0.2s;';
+      var addRowBtn = document.createElement('button');
+      addRowBtn.innerHTML = '+ Add Row';
+      addRowBtn.style.cssText = 'background:#7530fb;color:#fff;border:none;padding:6px 14px;border-radius:16px;font-family:Arial,sans-serif;font-size:12px;font-weight:600;cursor:pointer;';
+      addRowBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_ADD_ROW', blockId: BLOCK_ID }, '*');
+        }
+      });
+      addRowContainer.appendChild(addRowBtn);
+      document.body.appendChild(addRowContainer);
+
+      // Show controls on hover over the block container
+      document.body.addEventListener('mouseenter', function() { addRowContainer.style.opacity = '1'; });
+      document.body.addEventListener('mouseleave', function() { addRowContainer.style.opacity = '0'; });
+    }
+
     // In-place text editing on double click for p, h1, h2, h3, h4, span
     // [REMOVED: Interactive content editing feature]
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
@@ -1011,7 +1041,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
         e.stopPropagation();
         var slot = img.getAttribute('data-slot');
         if (slot && window.parent) {
-          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot }, '*');
+          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: BLOCK_ID }, '*');
         }
       });
     });
@@ -1024,10 +1054,9 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
         e.preventDefault();
         e.stopPropagation();
         var slot = zone.getAttribute('data-canvas-dropzone');
-        // data-block-id is on the <iframe> element in the parent document,
-        // accessible from inside the iframe via window.frameElement
-        var blockId = '';
-        try { blockId = window.frameElement ? (window.frameElement.getAttribute('data-block-id') || '') : ''; } catch(e) {}
+        // Use the pre-embedded BLOCK_ID constant instead of reading
+        // from window.frameElement which may not be available in all cases
+        var blockId = BLOCK_ID;
         var hasContent = zone.querySelector('.add-btn') === null;
         if (slot && window.parent) {
           if (hasContent) {
@@ -1059,11 +1088,10 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
         // Check if dropped item is a block type string from our library
         var blockType = e.dataTransfer.getData('text/plain');
         if (blockType && window.parent && slot) {
-          // data-block-id is on the <iframe> element in the parent document,
-          // accessible from inside the iframe via window.frameElement
-          var blockId = '';
-          try { blockId = window.frameElement ? (window.frameElement.getAttribute('data-block-id') || '') : ''; } catch(e) {}
-          window.parent.postMessage({ type: 'RIAZIFY_DROP_BLOCK', propKey: slot, blockType: blockType, blockId: blockId }, '*');
+          // Use the pre-embedded BLOCK_ID constant instead of
+          // reading from window.frameElement which may not be available
+          // in all browsers/contexts, causing the message to fail
+          window.parent.postMessage({ type: 'RIAZIFY_DROP_BLOCK', propKey: slot, blockType: blockType, blockId: BLOCK_ID }, '*');
           return;
         }
         // Prefer file drop
@@ -1137,6 +1165,15 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     // Auto-resize iframe to fit content height
     const [height, setHeight] = React.useState(80)
 
+    // Content hash to force iframe remount when html changes
+    // This is critical for drag-and-drop: without a changing key, React
+    // reuses the same iframe instance and the new srcDoc may not reload
+    // in all browsers, causing content to not visually update after drop.
+    // We use block.props as a proxy for content changes — when the slot
+    // content updates via drag-and-drop, props changes and the key changes,
+    // forcing React to unmount/remount the iframe so srcDoc reloads.
+    const htmlKey = `${block.id}-${block.type}-${JSON.stringify(props)}`
+
     const onLoad = React.useCallback(() => {
         const iframe = iframeRef.current
         if (!iframe) return
@@ -1173,6 +1210,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
                 transformOrigin: 'top left',
             }}>
                 <iframe
+                    key={htmlKey}
                     ref={iframeRef}
                     srcDoc={html}
                     onLoad={onLoad}
