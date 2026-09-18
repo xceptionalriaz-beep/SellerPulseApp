@@ -747,7 +747,7 @@ export interface CrossSellProps extends CommonProps {
 export interface ButtonBlockProps extends CommonProps {
     label: string
     url: string
-    variant: 'primary' | 'secondary' | 'outline' | 'dark' | 'accent'
+    variant: 'button-solid' | 'button-outline' | 'button-rounded' | 'button-shadow' | 'button-gradient' | 'button-icon-left' | 'button-icon-right' | 'button-full-width' | 'button-minimal' | 'button-pulse' | 'solid' | 'outline' | 'rounded' | 'shadow' | 'gradient' | 'icon_left' | 'icon_right' | 'full_width' | 'minimal' | 'pulse' | 'primary' | 'secondary' | 'dark' | 'accent'
     bgColor: string
     textColor: string
     borderColor: string
@@ -888,6 +888,7 @@ import { getNavBarVariant as _getNavBarVariant } from './variants/nav_bar.varian
 import { getSpecsTableVariant as _getSpecsVariant } from './variants/specs_table.variants'
 import { getPolicyTabsVariant as _getPolicyTabsVariant } from './variants/policy_tabs.variants'
 import { getBannerVariant as _getBannerVariant } from './variants/banner.variants'
+import { getButtonVariant as _getButtonVariant } from './variants/button_block.variants'
 import { getFeatureVariant as _getFeatureVariant } from './variants/features.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2151,7 +2152,7 @@ ${thumbCells}
             paddingBottom: 16,
             label: 'Buy It Now',
             url: '#',
-            variant: 'primary',
+            variant: 'button-solid',
             bgColor: '#7530fb',
             textColor: '#ffffff',
             borderColor: '#7530fb',
@@ -2165,19 +2166,7 @@ ${thumbCells}
         } as ButtonBlockProps,
         toHtml(props, id) {
             const p = props as ButtonBlockProps
-            const width = p.fullWidth ? 'width:100%;display:block;' : 'display:inline-block;'
-            return wrapBlock('button_block', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}text-align:${p.align};">
-      <a href="${p.url}"
-        style="${width}padding:${p.paddingV}px ${p.paddingH}px;background-color:${p.bgColor};color:${p.textColor};font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};text-decoration:none;border-radius:${p.borderRadius}px;border:2px solid ${p.borderColor};letter-spacing:0.03em;text-align:center;">
-        ${p.label}
-      </a>
-    </td>
-  </tr>
-</table>`
-            )
+            return wrapBlock('button_block', id, _getButtonVariant(p.variant ?? 'solid').toHtml(p, id))
         },
     },
 
@@ -2353,15 +2342,28 @@ ${thumbCells}
             label: 'Sidebar Layout',
             category: 'Layout' as BlockCategory,
             icon: 'layout',
-            description: '70/30 split — image left, text right',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: '70/30 split — image left, text right with dropzones',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">🖼️ Drop image here</span></div>',
+                rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">📝 Drop content here</span></div>',
+                gap: 16,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as any
                 return wrapBlock('sidebar_layout' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr>
-  <td width="70%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><img src="{{MAIN_IMAGE_URL}}" alt="Product" style="width:100%;max-width:100%;height:auto;display:block;"></td>
-  <td width="30%" style="background-color:${p.bgColor};${pad(p)}vertical-align:top;"><h3 style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:16px;color:#1e1535;">{{PRODUCT_TITLE}}</h3><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">{{ITEM_DESCRIPTION}}</p></td>
-</tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  <tr>
+    <td style="background-color:${p.bgColor};${pad(p)}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="70%" valign="top" style="padding-right:${(p.gap || 16) / 2}px;">${p.leftContent}</td>
+          <td width="30%" valign="top" style="padding-left:${(p.gap || 16) / 2}px;">${p.rightContent}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>`)
             },
         },
 

@@ -26,7 +26,7 @@ function renderLinks(links: any[], sep: string, textColor: string, fontSize: num
     return links.map((l: any, i: number) => `
           ${i > 0 && sep ? `<td style="padding:0 6px;color:${textColor};opacity:0.3;font-size:${fontSize}px;">${sep}</td>` : ''}
           <td style="white-space:nowrap;">
-            <a href="${l.url ?? '#'}" style="font-family:Arial,Helvetica,sans-serif;font-size:${fontSize}px;font-weight:${fontWeight};color:${textColor};text-decoration:none;letter-spacing:${(letterSpacing ?? 3) * 0.01}em;">${l.label}</a>
+            <a href="${l.url ?? '#'}" style="font-family:Arial,Helvetica,sans-serif;font-size:${fontSize}px;font-weight:${fontWeight};color:${textColor};text-decoration:none;letter-spacing:${(letterSpacing ?? 3) * 0.01}em;pointer-events:none;">${l.label}</a>
           </td>`).join('')
 }
 

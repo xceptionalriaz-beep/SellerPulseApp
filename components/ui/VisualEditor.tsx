@@ -199,8 +199,6 @@ export default function VisualEditor({
     const [livePreview, setLivePreview] = useState(false)
     const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(DEFAULT_CANVAS_SETTINGS)
 
-    // ── In-place text editing state ───────────────────────────────────────────
-    const [activeTextEdit, setActiveTextEdit] = useState<{ blockId: string; fieldKey: string } | null>(null)
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
     const [inlineToolbar, setInlineToolbar] = useState<{
@@ -416,7 +414,7 @@ export default function VisualEditor({
             const { slot, blockId } = activeDropSlot;
             const idx = blocks.findIndex(b =>
                 b.id === blockId &&
-                ['two_column', 'full_width_section', 'three_column', 'four_column', 'container'].includes(b.type) &&
+                ['two_column', 'full_width_section', 'three_column', 'four_column', 'container', 'sidebar_layout'].includes(b.type) &&
                 b.props &&
                 typeof (b.props as any)[slot] === 'string'
             );

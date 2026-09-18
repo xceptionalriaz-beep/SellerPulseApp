@@ -1100,6 +1100,81 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="6" y="24" width="36" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
         </svg>
     ),
+    // ── Button Block Variants ─────────────────────────────────────────────────
+    'button-solid': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-outline': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill="white" stroke={col} strokeWidth="2" />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill={col} opacity="0.8" />
+        </svg>
+    ),
+    'button-rounded': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="10" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-shadow': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="10" width="60" height="20" rx="4" fill="rgba(0,0,0,0.15)" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-gradient': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-icon-left': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <circle cx="20" cy="18" r="4" fill="white" opacity="0.9" />
+            <rect x="30" y="15" width="25" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-icon-right': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="20" y="15" width="25" height="6" rx="3" fill="white" opacity="0.9" />
+            <circle cx="60" cy="18" r="4" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-full-width': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="2" y="8" width="76" height="20" rx="4" fill={col} />
+            <rect x="20" y="15" width="40" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-minimal': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="20" y="15" width="40" height="4" rx="2" fill={col} />
+            <line x1="20" y1="22" x2="60" y2="22" stroke={col} strokeWidth="1.5" />
+        </svg>
+    ),
+    'button-pulse': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="8" y="6" width="64" height="24" rx="6" fill="#dc2626" opacity="0.2" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill="#dc2626" />
+            <rect x="20" y="15" width="40" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -2876,17 +2951,18 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </div>
             )
 
-        case 'container':
-            if (selectedSubSlot === 'content') {
+        case 'sidebar_layout':
+            if (selectedSubSlot === 'leftContent' || selectedSubSlot === 'rightContent') {
+                const label = selectedSubSlot === 'leftContent' ? 'Left Column' : 'Right Column';
                 return (
-                    <Section title="Content">
+                    <Section title={label}>
                         <TextareaInput
                             label="Content (HTML)"
-                            value={props['content'] ?? ''}
+                            value={props[selectedSubSlot] ?? ''}
                             rows={8}
-                            onChange={v => updateProps({ content: v })}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
                         />
-                        {phButton('content', 'Content')}
+                        {phButton(selectedSubSlot, label)}
                     </Section>
                 )
             }
