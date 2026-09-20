@@ -2354,35 +2354,30 @@ ${thumbCells}
             label: 'Sidebar Layout',
             category: 'Layout' as BlockCategory,
             icon: 'layout',
-            description: '70/30 split — image left, text right with dropzones',
+            description: '70/30 split — image left, text right with dropzones. Supports multi-row (add more rows for stacked sections).',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Drop file or content</span></div>',
-                rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Drop content here</span></div>',
-                rows: [
-                    {
-                        leftContent: '<div data-canvas-dropzone="leftContent" style="width:100%;min-height:200px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Drop file or content</span></div>',
-                        rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Drop content here</span></div>',
-                    }
-                ],
+                leftImage: '<div data-canvas-dropzone="leftImage" style="width:100%;min-height:200px;background:#f3f4f6;border:2px solid #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Click to add image</span></div>',
+                rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Add content here</span></div>',
                 gap: 16,
             } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as any
-                const rowList = p.rows && Array.isArray(p.rows) ? p.rows : [{ leftContent: p.leftContent, rightContent: p.rightContent }];
-                const rowsHtml = rowList.map((r: any, idx: number) => `
-        <tr>
-          <td width="70%" valign="top" style="padding-right:${(p.gap || 16) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="width:100%;box-sizing:border-box;">${r.leftContent || ''}</div></td>
-          <td width="30%" valign="top" style="padding-left:${(p.gap || 16) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="width:100%;box-sizing:border-box;">${r.rightContent || ''}</div></td>
-        </tr>
-                `).join('');
-
+                const leftHtml = p.leftImage || ''
+                const rightHtml = p.rightContent || ''
                 return wrapBlock('sidebar_layout' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
-        ${rowsHtml}
+        <tr>
+          <td width="70%" valign="top" style="padding-right:${(p.gap || 16) / 2}px;">
+            <div style="width:100%;box-sizing:border-box;">${leftHtml}</div>
+          </td>
+          <td width="30%" valign="top" style="padding-left:${(p.gap || 16) / 2}px;">
+            <div style="width:100%;box-sizing:border-box;">${rightHtml}</div>
+          </td>
+        </tr>
       </table>
     </td>
   </tr>

@@ -987,6 +987,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     outline: 3px solid #7530fb !important;
     outline-offset: 2px !important;
     border-radius: 8px !important;
+    background-color: #f3eeff !important;
     box-shadow: 0 0 0 3px rgba(117,48,251,0.25) !important;
   }
   img[data-slot].riazify-active-slot {
@@ -1010,28 +1011,6 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
   var BLOCK_ID = "${block.id}";
   var BLOCK_TYPE = "${block.type}";
   document.addEventListener('DOMContentLoaded', function() {
-    // Inject controls for container blocks (sidebar_layout, two_column, etc)
-    if (['sidebar_layout', 'two_column', 'three_column', 'four_column'].includes(BLOCK_TYPE)) {
-      // 1. Add Row button
-      var addRowContainer = document.createElement('div');
-      addRowContainer.style.cssText = 'display:flex;justify-content:center;margin-top:12px;opacity:0;transition:opacity 0.2s;';
-      var addRowBtn = document.createElement('button');
-      addRowBtn.innerHTML = '+ Add Row';
-      addRowBtn.style.cssText = 'background:#7530fb;color:#fff;border:none;padding:6px 14px;border-radius:16px;font-family:Arial,sans-serif;font-size:12px;font-weight:600;cursor:pointer;';
-      addRowBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (window.parent) {
-          window.parent.postMessage({ type: 'RIAZIFY_ADD_ROW', blockId: BLOCK_ID }, '*');
-        }
-      });
-      addRowContainer.appendChild(addRowBtn);
-      document.body.appendChild(addRowContainer);
-
-      // Show controls on hover over the block container
-      document.body.addEventListener('mouseenter', function() { addRowContainer.style.opacity = '1'; });
-      document.body.addEventListener('mouseleave', function() { addRowContainer.style.opacity = '0'; });
-    }
 
     // In-place text editing on double click for p, h1, h2, h3, h4, span
     // [REMOVED: Interactive content editing feature]
@@ -1069,6 +1048,8 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     });
     // Dropzone drag/drop handling — supports file drops and URL drops
     document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+      var slot = zone.getAttribute('data-canvas-dropzone');
+
       zone.addEventListener('dragover', function(e) {
         e.preventDefault();
         e.stopPropagation();

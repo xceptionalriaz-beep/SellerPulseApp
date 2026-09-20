@@ -76,25 +76,16 @@ function formatSize(bytes: number): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function ImagesTab({ onInsert, selectedId, selectedSubSlot, blocks }: ImagesTabProps) {
+export default function ImagesTab({ onInsert, selectedSubSlot }: { onInsert: (url: string, alt: string, propKey?: string, propIndex?: number) => void; selectedId: string | null; selectedSubSlot?: string | null; blocks: Block[] }) {
     const [activeTab, setActiveTab] = useState<'assets' | 'stock'>('assets')
 
-    const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
-
-    const blockLabel: Record<string, string> = {
-        product_image: 'Product Image', image: 'Image',
-        hero_header: 'Hero Header', banner: 'Banner',
-        gallery_row: 'Gallery Row', single_image: 'Single Image',
-        before_after: 'Before & After', logo_bar: 'Logo Bar',
-    }
-
-    const handleInsertDirect = (url: string, alt: string) => {
+    const handleInsertDirect = useCallback((url: string, alt: string) => {
         // Direct asset-browser focus: apply to the actively targeted sub-slot
         // (e.g. 'src', 'image2Url', 'image3Url', 'image4Url', 'image5Url')
         // if a canvas message set selectedSubSlot; otherwise fall back to generic.
         const propKey = selectedSubSlot || 'src'
         onInsert(url, alt, propKey)
-    }
+    }, [onInsert, selectedSubSlot])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: C.bg }}>
@@ -143,8 +134,8 @@ export default function ImagesTab({ onInsert, selectedId, selectedSubSlot, block
             {/* ── Tab content ── */}
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 {activeTab === 'assets'
-                    ? <AssetsTab onInsert={(url, alt) => handleInsertDirect(url, alt)} selectedSubSlot={selectedSubSlot} />
-                    : <StockTab onInsert={(url, alt) => handleInsertDirect(url, alt)} selectedSubSlot={selectedSubSlot} />
+                    ? <AssetsTab onInsert={handleInsertDirect} selectedSubSlot={selectedSubSlot} />
+                    : <StockTab onInsert={handleInsertDirect} selectedSubSlot={selectedSubSlot} />
                 }
             </div>
         </div>
@@ -155,13 +146,8 @@ export default function ImagesTab({ onInsert, selectedId, selectedSubSlot, block
 // ASSETS TAB — Supabase Storage
 // ─────────────────────────────────────────────────────────────────────────────
 function AssetsTab({ onInsert, selectedSubSlot }: { onInsert: (url: string, alt: string, propKey?: string) => void; selectedSubSlot?: string | null }) {
-    // Propagate selectedSubSlot back through insert so parent knows which prop was used
-    const handleInsertWithSlot = useCallback((url: string, name: string) => {
-        onInsert(url, name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '), selectedSubSlot || 'src')
-    }, [onInsert, selectedSubSlot])
     const supabase = createClient()
     const fileInputRef = useRef<HTMLInputElement>(null)
-
     const [assets, setAssets] = useState<AssetFile[]>([])
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)

@@ -1,3 +1,1 @@
-- [x] Update iframe script in `Canvas.tsx` to add per-column add buttons
-- [x] Update `VisualEditor.tsx` if new message handling is needed (already supported)
-- [x] Verify UI on hover for Sidebar Layout and Two Column blocks
+- [x] Remove row addition features and associated UI elements completely

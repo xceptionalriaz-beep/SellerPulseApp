@@ -2952,6 +2952,30 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
 
         case 'sidebar_layout':
+            if (selectedSubSlot === 'leftImage' || selectedSubSlot === null) {
+                const isImageSlot = selectedSubSlot === 'leftImage';
+                return (
+                    <>
+                        <Section title={isImageSlot ? 'Left Image' : 'Sidebar Layout — Image Slot'}>
+                            <TextareaInput
+                                label="Left Image HTML (drop image here)"
+                                value={(props as any).leftImage ?? ''}
+                                rows={4}
+                                onChange={v => updateProps({ leftImage: v })}
+                            />
+                        </Section>
+                        <Section title={isImageSlot ? 'Left Content' : 'Sidebar Layout — Content Slot'}>
+                            <TextareaInput
+                                label="Right Content HTML (drop content here)"
+                                value={(props as any).rightContent ?? ''}
+                                rows={6}
+                                onChange={v => updateProps({ rightContent: v })}
+                            />
+                            {phButton('rightContent', 'Right Content')}
+                        </Section>
+                    </>
+                )
+            }
             if (selectedSubSlot === 'leftContent' || selectedSubSlot === 'rightContent') {
                 const label = selectedSubSlot === 'leftContent' ? 'Left Column' : 'Right Column';
                 return (
