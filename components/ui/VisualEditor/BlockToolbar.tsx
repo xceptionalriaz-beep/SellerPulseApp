@@ -14,6 +14,7 @@ import {
     Palette, Grid, Minus,
     Link, Quote, Eraser,
     ExternalLink, AlertCircle, CheckCircle2,
+    RefreshCw, Trash2,
 } from 'lucide-react'
 
 const C = {
@@ -119,7 +120,7 @@ export default function BlockToolbar({
                             cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
                         }}
                     >
-                        🔄 Replace
+                        <RefreshCw size={11} /> Replace
                     </button>
                     <button
                         onClick={() => onClearSlot?.(slotEdit.blockId, slotEdit.propKey)}
@@ -131,7 +132,7 @@ export default function BlockToolbar({
                             cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
                         }}
                     >
-                        🗑️ Clear Slot
+                        <Trash2 size={11} /> Clear Slot
                     </button>
                     <div style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: 11 }}>
                         Click Replace to swap content
