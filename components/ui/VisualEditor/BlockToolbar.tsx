@@ -69,7 +69,7 @@ interface BlockToolbarProps {
 }
 
 export default function BlockToolbar({
-    blockProps = {},
+    blockProps = null,
     onChange,
     onClose,
     persistent = false,
