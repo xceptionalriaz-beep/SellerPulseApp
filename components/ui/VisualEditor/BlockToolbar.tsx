@@ -137,31 +137,28 @@ export default function BlockToolbar({
                 <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0' }} />
                 <button
                     onClick={onReplaceSlot}
+                    title="Replace slot content"
                     style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '4px 10px', border: '1px solid #e2e8f0',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28, border: '1px solid #e2e8f0',
                         borderRadius: 6, backgroundColor: '#fff',
-                        color: '#1e1535', fontSize: 11, fontWeight: 600,
-                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                        color: '#1e1535', cursor: 'pointer',
                     }}
                 >
-                    <RefreshCw size={11} /> Replace
+                    <RefreshCw size={13} />
                 </button>
                 <button
                     onClick={() => onClearSlot?.(slotEdit.blockId, slotEdit.propKey)}
+                    title="Clear slot"
                     style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '4px 10px', border: '1px solid #fecaca',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 28, height: 28, border: '1px solid #fecaca',
                         borderRadius: 6, backgroundColor: '#fff8f8',
-                        color: '#ef4444', fontSize: 11, fontWeight: 600,
-                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                        color: '#ef4444', cursor: 'pointer',
                     }}
                 >
-                    <Trash2 size={11} /> Clear Slot
+                    <Trash2 size={13} />
                 </button>
-                <div style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: 11 }}>
-                    Click Replace to swap content
-                </div>
             </div>
         )
     }
