@@ -819,6 +819,8 @@ export default function VisualEditor({
     }, [handleUndo, handleRedo, handleDelete, selectedId])
 
     const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
+    const LAYOUT_BLOCK_TYPES = new Set(['two_column', 'three_column', 'four_column', 'full_width_section', 'container', 'sidebar_layout', 'spacer', 'border_box'])
+    const isLayoutBlock = selectedBlock ? LAYOUT_BLOCK_TYPES.has(selectedBlock.type) : false
 
     // ── Content Drop Handler ───────────────────────────────────────────────
     // Wire up the "+ Add Content" button clicks via message listener
@@ -1117,19 +1119,15 @@ export default function VisualEditor({
                 {/* CENTRE — Canvas or Live Preview */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
                     {/* ── Toolbar — hidden in live preview and for layout container blocks ── */}
-                    {!livePreview && (() => {
-                        const LAYOUT_BLOCKS = new Set(['two_column', 'three_column', 'four_column', 'full_width_section', 'container', 'sidebar_layout', 'spacer', 'border_box'])
-                        const isLayoutBlock = selectedBlock ? LAYOUT_BLOCKS.has(selectedBlock.type) : false
-                        return (
-                            <BlockToolbar
-                                blockProps={isLayoutBlock ? null : selectedBlock?.props}
-                                onChange={(newProps) => {
-                                    if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
-                                }}
-                                persistent
-                            />
-                        )
-                    })()}
+                    {!livePreview && (
+                        <BlockToolbar
+                            blockProps={isLayoutBlock ? null : (selectedBlock?.props ?? null)}
+                            onChange={(newProps) => {
+                                if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
+                            }}
+                            persistent
+                        />
+                    )}
                     {/* ── Canvas or Live Preview ── */}
                     {livePreview ? (
                         <LivePreview

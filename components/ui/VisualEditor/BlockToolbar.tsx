@@ -75,9 +75,13 @@ export default function BlockToolbar({
     persistent = false,
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
+    const [showLinkModal, setShowLinkModal] = useState(false)
+    const [linkInput, setLinkInput] = useState('')
+    const [linkError, setLinkError] = useState<string | null>(null)
     const safeProps = blockProps ?? {}
 
     // Layout blocks (two_column, sidebar_layout etc.) don't use toolbar props
+    // Early return MUST come after all hooks
     if (blockProps === null) {
         return (
             <div style={{
@@ -92,9 +96,6 @@ export default function BlockToolbar({
             </div>
         )
     }
-    const [showLinkModal, setShowLinkModal] = useState(false)
-    const [linkInput, setLinkInput] = useState(safeProps.linkUrl ?? '')
-    const [linkError, setLinkError] = useState<string | null>(null)
 
     // Close on outside click — disabled in persistent mode
     useEffect(() => {
