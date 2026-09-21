@@ -86,6 +86,32 @@ export default function BlockToolbar({
     const [linkError, setLinkError] = useState<string | null>(null)
     const safeProps = blockProps ?? {}
 
+    // ── ALL HOOKS MUST COME BEFORE ANY EARLY RETURN ──────────────────────────
+
+    // Close on outside click — disabled in persistent mode
+    useEffect(() => {
+        if (persistent || !onClose) return
+        function handleClickOutside(e: MouseEvent) {
+            if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
+                onClose!()
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [onClose, persistent])
+
+    // Escape key to close — disabled in persistent mode
+    useEffect(() => {
+        if (persistent || !onClose) return
+        function handleEscape(e: KeyboardEvent) {
+            if (e.key === 'Escape') onClose!()
+        }
+        document.addEventListener('keydown', handleEscape)
+        return () => document.removeEventListener('keydown', handleEscape)
+    }, [onClose, persistent])
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     if (blockProps === null && slotEdit) {
         const slotLabel = slotEdit.propKey
             .replace(/([A-Z])/g, ' $1')
@@ -153,28 +179,6 @@ export default function BlockToolbar({
             </div>
         )
     }
-
-    // Close on outside click — disabled in persistent mode
-    useEffect(() => {
-        if (persistent || !onClose) return
-        function handleClickOutside(e: MouseEvent) {
-            if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
-                onClose!()
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [onClose, persistent])
-
-    // Escape key to close — disabled in persistent mode
-    useEffect(() => {
-        if (persistent || !onClose) return
-        function handleEscape(e: KeyboardEvent) {
-            if (e.key === 'Escape') onClose!()
-        }
-        document.addEventListener('keydown', handleEscape)
-        return () => document.removeEventListener('keydown', handleEscape)
-    }, [onClose, persistent])
 
     const handleAlign = (align: string) => {
         onChange({ ...blockProps, align })
