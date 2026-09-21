@@ -2341,11 +2341,20 @@ ${thumbCells}
             category: 'Layout' as BlockCategory,
             icon: 'square',
             description: 'Content inside a decorative border frame',
-            defaultProps: { ...DEFAULT_COMMON, showBorder: true, borderWidth: 2, borderColor: '#7530fb', borderRadius: 8 } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                showBorder: true,
+                borderWidth: 2,
+                borderColor: '#7530fb',
+                borderRadius: 8,
+                content: 'Your content goes here inside this decorative border box.',
+                textColor: '#1f1d2e',
+                fontSize: 14,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as any
                 return wrapBlock('border_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:${p.borderWidth || 2}px solid ${p.borderColor || '#7530fb'};border-radius:${p.borderRadius || 8}px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;">Your content goes here inside this decorative border box.</p></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:${p.borderWidth || 2}px solid ${p.borderColor || '#7530fb'};border-radius:${p.borderRadius || 8}px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:${p.fontSize || 14}px;color:${p.textColor || '#1f1d2e'};">${p.content || 'Your content goes here inside this decorative border box.'}</p></td></tr></table>`)
             },
         },
 
