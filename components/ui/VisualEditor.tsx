@@ -439,7 +439,9 @@ export default function VisualEditor({
                 const target = blocks[idx];
                 const newBlock = createBlock(type, canvasSettings);
                 const def = getDefinition(type);
-                const newHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
+                const rawHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
+                // Wrap in dropzone div so clicking filled content fires RIAZIFY_EDIT_SLOT_CONTENT
+                const newHtml = `<div data-canvas-dropzone="${slot}">${rawHtml}</div>`;
                 const updatedProps = { ...(target.props as any), [slot]: newHtml };
                 const updatedBlock = { ...target, props: updatedProps } as any;
                 const newBlocks = [...blocks];
