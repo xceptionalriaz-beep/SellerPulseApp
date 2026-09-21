@@ -76,6 +76,22 @@ export default function BlockToolbar({
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
     const safeProps = blockProps ?? {}
+
+    // Layout blocks (two_column, sidebar_layout etc.) don't use toolbar props
+    if (blockProps === null) {
+        return (
+            <div style={{
+                height: 40, display: 'flex', alignItems: 'center',
+                padding: '0 16px', backgroundColor: '#ffffff',
+                borderBottom: '1px solid #e2e8f0',
+                fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+                color: '#94a3b8', gap: 6,
+            }}>
+                <Grid size={13} />
+                Layout block selected — click inside a content slot to edit text
+            </div>
+        )
+    }
     const [showLinkModal, setShowLinkModal] = useState(false)
     const [linkInput, setLinkInput] = useState(safeProps.linkUrl ?? '')
     const [linkError, setLinkError] = useState<string | null>(null)

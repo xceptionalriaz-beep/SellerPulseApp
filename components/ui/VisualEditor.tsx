@@ -1116,16 +1116,20 @@ export default function VisualEditor({
 
                 {/* CENTRE — Canvas or Live Preview */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-                    {/* ── Toolbar — hidden in live preview ── */}
-                    {!livePreview && (
-                        <BlockToolbar
-                            blockProps={selectedBlock?.props}
-                            onChange={(newProps) => {
-                                if (selectedId) handleBlockChange({ ...selectedBlock!, props: newProps });
-                            }}
-                            persistent
-                        />
-                    )}
+                    {/* ── Toolbar — hidden in live preview and for layout container blocks ── */}
+                    {!livePreview && (() => {
+                        const LAYOUT_BLOCKS = new Set(['two_column', 'three_column', 'four_column', 'full_width_section', 'container', 'sidebar_layout', 'spacer', 'border_box'])
+                        const isLayoutBlock = selectedBlock ? LAYOUT_BLOCKS.has(selectedBlock.type) : false
+                        return (
+                            <BlockToolbar
+                                blockProps={isLayoutBlock ? null : selectedBlock?.props}
+                                onChange={(newProps) => {
+                                    if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
+                                }}
+                                persistent
+                            />
+                        )
+                    })()}
                     {/* ── Canvas or Live Preview ── */}
                     {livePreview ? (
                         <LivePreview
