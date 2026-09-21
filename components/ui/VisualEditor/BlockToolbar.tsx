@@ -64,8 +64,10 @@ interface BlockToolbarProps {
     blockProps: any
     onChange: (props: any) => void
     onClose?: () => void
-    /** When true the bar is persistent (no auto-close on outside click / Escape). */
     persistent?: boolean
+    slotEdit?: { blockId: string; propKey: string } | null
+    onClearSlot?: (blockId: string, propKey: string) => void
+    onReplaceSlot?: () => void
 }
 
 export default function BlockToolbar({
@@ -73,6 +75,9 @@ export default function BlockToolbar({
     onChange,
     onClose,
     persistent = false,
+    slotEdit = null,
+    onClearSlot,
+    onReplaceSlot,
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
     const [showLinkModal, setShowLinkModal] = useState(false)
@@ -80,9 +85,60 @@ export default function BlockToolbar({
     const [linkError, setLinkError] = useState<string | null>(null)
     const safeProps = blockProps ?? {}
 
-    // Layout blocks (two_column, sidebar_layout etc.) don't use toolbar props
-    // Early return MUST come after all hooks
     if (blockProps === null) {
+        if (slotEdit) {
+            const slotLabel = slotEdit.propKey
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, s => s.toUpperCase())
+                .trim()
+            return (
+                <div style={{
+                    height: 40, display: 'flex', alignItems: 'center',
+                    padding: '0 12px', backgroundColor: '#ffffff',
+                    borderBottom: '1px solid #e2e8f0',
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+                    gap: 8,
+                }}>
+                    <span style={{
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        padding: '2px 8px', borderRadius: 4,
+                        backgroundColor: '#f3eeff', color: '#7530fb',
+                        fontWeight: 700, fontSize: 11,
+                    }}>
+                        <Grid size={11} />
+                        {slotLabel}
+                    </span>
+                    <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0' }} />
+                    <button
+                        onClick={onReplaceSlot}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '4px 10px', border: '1px solid #e2e8f0',
+                            borderRadius: 6, backgroundColor: '#fff',
+                            color: '#1e1535', fontSize: 11, fontWeight: 600,
+                            cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                        }}
+                    >
+                        🔄 Replace
+                    </button>
+                    <button
+                        onClick={() => onClearSlot?.(slotEdit.blockId, slotEdit.propKey)}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '4px 10px', border: '1px solid #fecaca',
+                            borderRadius: 6, backgroundColor: '#fff8f8',
+                            color: '#ef4444', fontSize: 11, fontWeight: 600,
+                            cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                        }}
+                    >
+                        🗑️ Clear Slot
+                    </button>
+                    <div style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: 11 }}>
+                        Click Replace to swap content
+                    </div>
+                </div>
+            )
+        }
         return (
             <div style={{
                 height: 40, display: 'flex', alignItems: 'center',
@@ -92,7 +148,7 @@ export default function BlockToolbar({
                 color: '#94a3b8', gap: 6,
             }}>
                 <Grid size={13} />
-                Layout block selected — click inside a content slot to edit text
+                Layout block — click a content slot to see actions
             </div>
         )
     }

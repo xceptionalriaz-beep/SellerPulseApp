@@ -206,6 +206,7 @@ export default function VisualEditor({
 
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
+    const [activeSlotEdit, setActiveSlotEdit] = useState<{ blockId: string; propKey: string } | null>(null)
     const [inlineToolbar, setInlineToolbar] = useState<{
         visible: boolean;
         x: number;
@@ -364,6 +365,7 @@ export default function VisualEditor({
     const handleSelectBlock = useCallback((id: string) => {
         setSelectedId(id);
         setActiveDropSlot(null);
+        setActiveSlotEdit(null);
     }, []);
 
     // ── Lock / Hide block ────────────────────────────────────────────────────
@@ -466,6 +468,20 @@ export default function VisualEditor({
         next.splice(toIndex, 0, moved)
         commitBlocks(next, blocks)
     }, [commitBlocks, blocks])
+
+    const handleClearSlot = useCallback((blockId: string, propKey: string) => {
+        const EMPTY_SLOT = (slot: string) =>
+            `<div data-canvas-dropzone="${slot}"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>`
+        const idx = blocks.findIndex(b => b.id === blockId)
+        if (idx < 0) return
+        const target = blocks[idx]
+        const updatedProps = { ...(target.props as any), [propKey]: EMPTY_SLOT(propKey) }
+        const newBlocks = [...blocks]
+        newBlocks[idx] = { ...target, props: updatedProps } as any
+        commitBlocks(newBlocks, blocks)
+        setActiveSlotEdit(null)
+        setSelectedSubSlot(null)
+    }, [blocks, commitBlocks])
 
     const handleDelete = useCallback((id: string) => {
         const next = blocks.filter(b => b.id !== id)
@@ -854,6 +870,7 @@ export default function VisualEditor({
                 if (blockId && propKey) {
                     setSelectedId(blockId);
                     setSelectedSubSlot(propKey);
+                    setActiveSlotEdit({ blockId, propKey });
                     const targetBlock = blocks.find(b => b.id === blockId);
                     if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
                         setActiveTab('images');
@@ -1124,6 +1141,12 @@ export default function VisualEditor({
                             blockProps={isLayoutBlock ? null : (selectedBlock?.props ?? null)}
                             onChange={(newProps) => {
                                 if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
+                            }}
+                            slotEdit={isLayoutBlock ? activeSlotEdit : null}
+                            onClearSlot={(blockId, propKey) => handleClearSlot(blockId, propKey)}
+                            onReplaceSlot={() => {
+                                setActiveTab('content')
+                                setPanelOpen(true)
                             }}
                             persistent
                         />
