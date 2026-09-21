@@ -2115,6 +2115,9 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'full_width_section':
             return (
                 <>
+                    <Section title="Background">
+                        <ColorRow label="Background colour" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
                     <Section title="Border">
                         <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
                         <SliderInput label="Border width" value={props.borderWidth ?? 0} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
