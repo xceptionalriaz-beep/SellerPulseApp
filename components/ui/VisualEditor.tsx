@@ -1162,6 +1162,7 @@ export default function VisualEditor({
                                 onToggleHide={handleToggleHide}
                                 onAddBlock={handleInsertOrAssignBlock}
                                 onAddBlockBelow={handleAddBlockBelow}
+                                hasActiveSlot={activeDropSlot !== null}
                             />
                         </div>
                     )}\

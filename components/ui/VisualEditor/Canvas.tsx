@@ -142,6 +142,7 @@ interface CanvasProps {
     onToggleHide?: (id: string) => void
     onAddBlock?: (type: BlockType) => void
     onAddBlockBelow?: (blockId: string, type: BlockType) => void
+    hasActiveSlot?: boolean
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -172,6 +173,7 @@ export default function Canvas({
     onToggleHide,
     onAddBlock,
     onAddBlockBelow,
+    hasActiveSlot = false,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -327,6 +329,7 @@ export default function Canvas({
                                 onReorderDrop={(e) => handleReorderDrop(e, index)}
                                 onReorderDragEnd={handleReorderDragEnd}
                                 onAddBelow={(type) => onAddBlockBelow?.(block.id, type)}
+                                hasActiveSlot={hasActiveSlot}
                             />
 
                             {/* Reorder drop indicator — line below this block */}
@@ -510,6 +513,7 @@ interface BlockCardProps {
     onReorderDrop: (e: React.DragEvent) => void
     onReorderDragEnd: () => void
     onAddBelow: (type: BlockType) => void
+    hasActiveSlot?: boolean
     activeCategory?: CategoryId
 }
 
@@ -538,6 +542,7 @@ function BlockCard({
     onReorderDrop,
     onReorderDragEnd,
     onAddBelow,
+    hasActiveSlot,
     activeCategory,
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
@@ -768,15 +773,16 @@ function BlockCard({
 
                     <Divider />
 
-                    {/* Add block below — always adds a spacer, never touches drop slots */}
-                    <ActionButton
-                        onClick={() => onAddBelow('spacer')}
-                        title="Add spacer below"
-                        color={C.success}
-                        bg={C.successLight}
-                    >
-                        <PlusCircle size={13} />
-                    </ActionButton>
+                    {!hasActiveSlot && (
+                        <ActionButton
+                            onClick={() => onAddBelow('spacer')}
+                            title="Add spacer below"
+                            color={C.success}
+                            bg={C.successLight}
+                        >
+                            <PlusCircle size={13} />
+                        </ActionButton>
+                    )}
                 </div>
             )}
 
