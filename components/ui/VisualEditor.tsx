@@ -414,6 +414,16 @@ export default function VisualEditor({
         commitBlocks(next, blocks)
     }, [copiedStyle, commitBlocks, blocks])
 
+    const handleAddBlockBelow = useCallback((afterBlockId: string, type: BlockType) => {
+        const idx = blocks.findIndex(b => b.id === afterBlockId)
+        const newBlock = createBlock(type, canvasSettings)
+        const newBlocks = [...blocks]
+        newBlocks.splice(idx + 1, 0, newBlock)
+        commitBlocks(newBlocks, blocks)
+        setSelectedId(newBlock.id)
+        setActiveDropSlot(null)
+    }, [blocks, canvasSettings, commitBlocks])
+
     const handleInsertOrAssignBlock = useCallback((type: BlockType) => {
         if (activeDropSlot) {
             const { slot, blockId } = activeDropSlot;
@@ -1151,9 +1161,10 @@ export default function VisualEditor({
                                 onToggleLock={handleToggleLock}
                                 onToggleHide={handleToggleHide}
                                 onAddBlock={handleInsertOrAssignBlock}
+                                onAddBlockBelow={handleAddBlockBelow}
                             />
                         </div>
-                    )}
+                    )}\
                 </div>
 
                 {/* RIGHT — Properties Panel */}

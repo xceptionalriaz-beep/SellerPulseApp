@@ -170,6 +170,7 @@ export default function Canvas({
     onToggleLock,
     onToggleHide,
     onAddBlock,
+    onAddBlockBelow,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -324,7 +325,7 @@ export default function Canvas({
                                 onReorderDragOver={(e) => handleReorderDragOver(e, index)}
                                 onReorderDrop={(e) => handleReorderDrop(e, index)}
                                 onReorderDragEnd={handleReorderDragEnd}
-                                onAddBelow={() => onAddBlock?.(block.type)}
+                                onAddBelow={(type) => onAddBlockBelow?.(block.id, type)}
                             />
 
                             {/* Reorder drop indicator — line below this block */}
@@ -371,6 +372,7 @@ function EmptyState({
     isDropTarget: boolean
     draggedType: BlockType | null
     onAddBlock?: (type: BlockType) => void
+    onAddBlockBelow?: (blockId: string, type: BlockType) => void
 }) {
     const def = draggedType ? getDefinition(draggedType) : null
 
@@ -506,7 +508,7 @@ interface BlockCardProps {
     onReorderDragOver: (e: React.DragEvent) => void
     onReorderDrop: (e: React.DragEvent) => void
     onReorderDragEnd: () => void
-    onAddBelow: () => void
+    onAddBelow: (type: BlockType) => void
     activeCategory?: CategoryId
 }
 
@@ -765,10 +767,10 @@ function BlockCard({
 
                     <Divider />
 
-                    {/* Add block below */}
+                    {/* Add block below — always adds a spacer, never touches drop slots */}
                     <ActionButton
-                        onClick={onAddBelow}
-                        title="Add block below"
+                        onClick={() => onAddBelow('spacer')}
+                        title="Add spacer below"
                         color={C.success}
                         bg={C.successLight}
                     >
