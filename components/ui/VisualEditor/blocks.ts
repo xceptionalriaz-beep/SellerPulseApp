@@ -2374,16 +2374,18 @@ ${thumbCells}
                 const p = props as any
                 const leftHtml = p.leftImage || ''
                 const rightHtml = p.rightContent || ''
+                const leftWidth = p.imageWidth ?? 70
+                const rightWidth = 100 - leftWidth
                 return wrapBlock('sidebar_layout' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
         <tr>
-          <td width="70%" valign="top" style="padding-right:${(p.gap || 16) / 2}px;">
+          <td width="${leftWidth}%" valign="top" style="padding-right:${(p.gap || 16) / 2}px;">
             <div style="width:100%;box-sizing:border-box;">${leftHtml}</div>
           </td>
-          <td width="30%" valign="top" style="padding-left:${(p.gap || 16) / 2}px;">
+          <td width="${rightWidth}%" valign="top" style="padding-left:${(p.gap || 16) / 2}px;">
             <div style="width:100%;box-sizing:border-box;">${rightHtml}</div>
           </td>
         </tr>
