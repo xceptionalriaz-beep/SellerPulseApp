@@ -606,21 +606,21 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
         </svg>
     ),
-        'full-width-hero': (col, _) => (
+    'full-width-hero': (col, _) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 48 }}>
             <rect width="80" height="48" rx="8" fill={col} opacity="0.3" />
             <rect x="5" y="10" width="70" height="28" rx="4" fill="white" opacity="0.2" />
         </svg>
     ),
-            'zoom': (col, light) => (
-                <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-                    <rect width="80" height="36" rx="3" fill={light} />
-                    <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
-                    <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
-                    <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
-                    <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
-                </svg>
-            ),
+    'zoom': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
+            <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
+            <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
+            <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
+        </svg>
+    ),
     // ── Product Image: Comparison / Front & Back ──────────────────────────────
     'comparison': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
@@ -2159,6 +2159,66 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Col 1 background" value={props.col1Bg ?? '#ffffff'} onChange={v => updateProps({ col1Bg: v })} />
                         <ColorRow label="Col 2 background" value={props.col2Bg ?? '#ffffff'} onChange={v => updateProps({ col2Bg: v })} />
                         <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'four_column':
+            return (
+                <>
+                    <Section title="Layout">
+                        <SliderInput label="Column gap" value={props.gap ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ gap: v })} />
+                    </Section>
+                    <Section title="Column backgrounds">
+                        <ColorRow label="Col 1 background" value={props.col1Bg ?? '#ffffff'} onChange={v => updateProps({ col1Bg: v })} />
+                        <ColorRow label="Col 2 background" value={props.col2Bg ?? '#ffffff'} onChange={v => updateProps({ col2Bg: v })} />
+                        <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
+                        <ColorRow label="Col 4 background" value={props.col4Bg ?? '#ffffff'} onChange={v => updateProps({ col4Bg: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'spacer':
+            return (
+                <>
+                    <Section title="Height">
+                        <SliderInput label="Top spacing" value={props.paddingTop ?? 24} min={4} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                        <SliderInput label="Bottom spacing" value={props.paddingBottom ?? 24} min={4} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'border_box':
+            return (
+                <>
+                    <Section title="Border">
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#7530fb'} onChange={v => updateProps({ borderColor: v })} />
+                        <SliderInput label="Border width" value={props.borderWidth ?? 2} min={1} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'sidebar_layout':
+            return (
+                <>
+                    <Section title="Layout">
+                        <SliderInput label="Image column width" value={props.imageWidth ?? 70} min={30} max={75} suffix="%" onChange={v => updateProps({ imageWidth: v })} />
+                        <SliderInput label="Column gap" value={props.gap ?? 0} min={0} max={32} suffix="px" onChange={v => updateProps({ gap: v })} />
+                        <SelectInput
+                            label="Image side"
+                            value={props.imageSide ?? 'left'}
+                            options={[{ v: 'left', l: 'Image left' }, { v: 'right', l: 'Image right' }]}
+                            onChange={v => updateProps({ imageSide: v })}
+                        />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
                     </Section>
                 </>
             )
