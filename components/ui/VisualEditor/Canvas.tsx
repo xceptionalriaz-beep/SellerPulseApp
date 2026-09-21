@@ -141,6 +141,7 @@ interface CanvasProps {
     onToggleLock?: (id: string) => void
     onToggleHide?: (id: string) => void
     onAddBlock?: (type: BlockType) => void
+    onAddBlockBelow?: (blockId: string, type: BlockType) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
