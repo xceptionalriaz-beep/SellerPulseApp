@@ -1147,6 +1147,9 @@ export default function VisualEditor({
                             slotEdit={isLayoutBlock ? activeSlotEdit : null}
                             onClearSlot={(blockId, propKey) => handleClearSlot(blockId, propKey)}
                             onReplaceSlot={() => {
+                                if (activeSlotEdit) {
+                                    setActiveDropSlot({ blockId: activeSlotEdit.blockId, slot: activeSlotEdit.propKey as any })
+                                }
                                 setActiveTab('content')
                                 setPanelOpen(true)
                             }}
