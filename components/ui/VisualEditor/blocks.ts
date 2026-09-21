@@ -554,8 +554,8 @@ export interface ImageProps extends CommonProps {
     linkUrl: string           // optional click-through URL
     bgColor: string           // container background colour
     shadow?: string           // optional inline box-shadow on the <img>
-                              // (e.g. "0 4px 14px rgba(117,48,251,0.08)").
-                              // Canvas-only — email clients strip box-shadow.
+    // (e.g. "0 4px 14px rgba(117,48,251,0.08)").
+    // Canvas-only — email clients strip box-shadow.
 }
 
 // ── Banner ────────────────────────────────────────────────────────────────────
@@ -2283,7 +2283,7 @@ ${thumbCells}
             type: 'four_column' as BlockType,
             label: 'Four Column',
             category: 'Layout' as BlockCategory,
-            icon: 'columns',
+            icon: 'columns-2',
             description: '4 equal columns for specs or features',
             defaultProps: {
                 ...DEFAULT_COMMON,
