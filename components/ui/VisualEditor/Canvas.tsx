@@ -38,6 +38,7 @@ import {
     Check, ArrowRight, Star, Package,
     ChevronUp, ChevronDown, Copy, Clipboard,
     Lock, Unlock, Eye, EyeOff, Trash2, CopySlash,
+    PlusCircle,
     type LucideIcon,
 } from 'lucide-react'
 import {
@@ -307,16 +308,7 @@ export default function Canvas({
                                 isSelected={isSelected}
                                 isLocked={lockedIds.has(block.id)}
                                 isHidden={hiddenIds.has(block.id)}
-                                activeCategory={activeCategory}
-                                searchMatch={
-                                    // Prefer the parent's matchedIds set (single
-                                    // source of truth). Fall back to the legacy
-                                    // canvasSearch label-match for any other
-                                    // callers that haven't been updated yet.
-                                    matchedIds === null
-                                        ? (!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true))
-                                        : matchedIds.has(block.id)
-                                }
+                                searchMatch={!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true)}
                                 isBeingDragged={isBeingDragged}
                                 onSelect={() => onSelect(block.id)}
                                 onDelete={() => onDelete(block.id)}
@@ -332,6 +324,7 @@ export default function Canvas({
                                 onReorderDragOver={(e) => handleReorderDragOver(e, index)}
                                 onReorderDrop={(e) => handleReorderDrop(e, index)}
                                 onReorderDragEnd={handleReorderDragEnd}
+                                onAddBelow={() => onAddBlock?.(block.type)}
                             />
 
                             {/* Reorder drop indicator — line below this block */}
@@ -513,6 +506,7 @@ interface BlockCardProps {
     onReorderDragOver: (e: React.DragEvent) => void
     onReorderDrop: (e: React.DragEvent) => void
     onReorderDragEnd: () => void
+    onAddBelow: () => void
     activeCategory?: CategoryId
 }
 
@@ -540,6 +534,7 @@ function BlockCard({
     onReorderDragOver,
     onReorderDrop,
     onReorderDragEnd,
+    onAddBelow,
     activeCategory,
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
@@ -766,6 +761,18 @@ function BlockCard({
                         bg={deleteConfirm ? C.dangerLight : undefined}
                     >
                         <Trash2 size={13} />
+                    </ActionButton>
+
+                    <Divider />
+
+                    {/* Add block below */}
+                    <ActionButton
+                        onClick={onAddBelow}
+                        title="Add block below"
+                        color={C.success}
+                        bg={C.successLight}
+                    >
+                        <PlusCircle size={13} />
                     </ActionButton>
                 </div>
             )}
