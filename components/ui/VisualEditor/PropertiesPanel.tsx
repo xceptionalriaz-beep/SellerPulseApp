@@ -2915,7 +2915,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     <Section title="Badge">
                         <ToggleRow label="Show badge" value={props.showBadge ?? true} onChange={v => updateProps({ showBadge: v })} />
                         {props.showBadge && (
-                            <TextInput label="Badge text" value={props.badgeText ?? 'Top Rated Seller'} onChange={v => updateProps({ badgeText: v })} />
+                            <TextInput label="Badge textx" value={props.badgeText ?? 'Top Rated Seller'} onChange={v => updateProps({ badgeText: v })} />
                         )}
                     </Section>
                 </>
