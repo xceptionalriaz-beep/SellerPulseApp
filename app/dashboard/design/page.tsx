@@ -18,15 +18,16 @@
 //   ✓ Fully mobile responsive
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     Plus, Search, X, Copy, Trash2,
     Eye, Check, Loader2, Code2, Zap,
-    Save, RefreshCw, LayoutTemplate, Layers, Pencil,
+    Save, LayoutTemplate, Layers, Pencil,
 } from 'lucide-react'
+import { hydrateTemplateContent } from '@/lib/template-utils'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, PrimaryButton, SecondaryButton, GhostButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -98,49 +99,67 @@ const SORT_OPTIONS: DropdownOption[] = [
 // ── Built-in system templates (shown when DB has none) ─────────────────────
 // ── Tiny HTML thumbnail preview ────────────────────────────────────────────
 function TemplateThumbnail({ html }: { html: string }) {
-    const doc = html.trim().toLowerCase().startsWith('<!doctype') || html.trim().toLowerCase().startsWith('<html')
-        ? html
+    const hydrated = hydrateTemplateContent(html)
+    const doc = hydrated.trim().toLowerCase().startsWith('<!doctype') || hydrated.trim().toLowerCase().startsWith('<html')
+        ? hydrated
         : `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.7; color: #1f1d2e; background: #fff; padding: 20px; }
-  h1 { font-size: 22px; font-weight: 700; color: #1e1535; margin: 0 0 8px; padding-bottom: 8px; border-bottom: 3px solid #7530fb; }
-  h2 { font-size: 16px; font-weight: 700; color: #1e1535; margin: 16px 0 6px; padding-left: 10px; border-left: 3px solid #7530fb; }
-  h3 { font-size: 14px; font-weight: 700; color: #1e1535; margin: 12px 0 4px; }
-  p  { font-size: 13px; color: #6b7280; margin: 0 0 8px; line-height: 1.6; }
-  ul, ol { padding-left: 18px; margin: 0 0 8px; }
-  li { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  td, th { padding: 8px 12px; border: 1px solid #ede9fe; font-size: 13px; text-align: left; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #1f1d2e;
+    background: #fff;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+  }
+  html {
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+  }
+  .wrapper { padding: 5px; width: 100%; box-sizing: border-box; }
+  h1 { font-size: 16px; font-weight: 700; color: #1e1535; margin: 0 0 6px; padding-bottom: 4px; border-bottom: 2px solid #7530fb; }
+  h2 { font-size: 13px; font-weight: 700; color: #1e1535; margin: 10px 0 4px; padding-left: 6px; border-left: 2px solid #7530fb; }
+  h3 { font-size: 11px; font-weight: 700; color: #1e1535; margin: 8px 0 2px; }
+  p  { font-size: 10px; color: #6b7280; margin: 0 0 4px; line-height: 1.4; }
+  ul, ol { padding-left: 14px; margin: 0 0 4px; }
+  li { font-size: 10px; color: #6b7280; margin-bottom: 2px; }
+  table { width: 100% !important; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+  td, th { padding: 4px 6px; border: 1px solid #ede9fe; font-size: 10px; text-align: left; word-wrap: break-word; }
   th { background: #7530fb; color: #fff; font-weight: 700; }
   tr:nth-child(even) { background: #f8f7ff; }
-  img { max-width: 100%; height: auto; display: block; border-radius: 6px; margin-bottom: 8px; }
+  img { max-width: 100% !important; height: auto !important; display: block; border-radius: 4px; margin-bottom: 4px; }
   .placeholder { display: inline-block; background: #f3eeff; color: #7530fb; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-family: monospace; }
 </style>
 </head>
-<body>${html}</body>
+<body><div class="wrapper">${hydrated}</div></body>
 </html>`
 
     return (
-        <div style={{ width: '100%', height: 420, overflow: 'hidden', backgroundColor: '#ffffff', position: 'relative' }}>
+        <div style={{ width: '100%', height: 650, overflow: 'hidden', backgroundColor: '#ffffff', position: 'relative' }}>
             <iframe
                 srcDoc={doc}
                 sandbox="allow-same-origin"
-                scrolling="no"
                 style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
-                    width: '700px',
-                    height: '840px',
+                    width: '222%',
+                    height: '222%',
                     border: 'none',
                     pointerEvents: 'none',
-                    transform: 'scale(0.5)',
-                    transformOrigin: 'top left',
                     backgroundColor: '#ffffff',
+                    transform: 'scale(0.45)',
+                    transformOrigin: 'top left',
+                    overflow: 'hidden',
                 }}
                 title="Template Preview"
             />
@@ -209,9 +228,6 @@ function DesignStudioInner() {
 
     // AI Generator modal
     const [showAiModal, setShowAiModal] = useState(false)
-    const [aiHtml, setAiHtml] = useState('')
-    const [aiTemplateName, setAiTemplateName] = useState('')
-    const [aiCategory, setAiCategory] = useState('general')
 
     // Custom HTML Builder modal
     const [showBuilderModal, setShowBuilderModal] = useState(false)
@@ -301,23 +317,8 @@ function DesignStudioInner() {
     }
 
     // ── Duplicate template ─────────────────────────────────────────────────
-    async function duplicateTemplate(t: ListingTemplate) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-        const newName = `${t.name} (Copy)`
-        await rawDb.from('listing_templates').insert({
-            user_id: user.id,
-            name: newName,
-            category: t.category,
-            description: t.description,
-            description_html: t.description_html,
-            is_system: false,
-            is_shared: false,
-            use_count: 0,
-            created_at: new Date().toISOString(),
-        })
-        loadTemplates()
-    }
+    // Function removed – duplicate feature not currently exposed in UI.
+
 
     // ── Delete own template ────────────────────────────────────────────────
     async function deleteTemplate(id: string) {
@@ -649,7 +650,6 @@ function DesignStudioInner() {
                                                     onCopy={() => copyHtml(t)}
                                                     onDelete={() => deleteTemplate(t.id)}
                                                     onEdit={() => router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
-                                                    onDuplicate={() => duplicateTemplate(t)}
                                                 />
                                             ))}
                                         </div>
@@ -730,8 +730,7 @@ function DesignStudioInner() {
                                                         onPreview={() => setPreviewTemplate(t)}
                                                         onCopy={() => copyHtml(t)}
                                                         onDelete={() => deleteTemplate(t.id)}
-                                                        onEdit={() => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
-                                                        onDuplicate={() => duplicateTemplate(t)}
+                                                        onEdit={() => router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
                                                     />
                                                 ))}
                                             </div>
@@ -760,9 +759,6 @@ function DesignStudioInner() {
                 open={showAiModal}
                 onClose={() => setShowAiModal(false)}
                 onImport={(html, name, cat) => {
-                    setAiHtml(html)
-                    setAiTemplateName(name)
-                    setAiCategory(cat)
                     // Store in sessionStorage so html-editor can pick it up
                     if (typeof window !== 'undefined') {
                         sessionStorage.setItem('ai_template_html', html)
@@ -903,10 +899,9 @@ interface CardProps {
     onCopy: () => void
     onDelete: () => void
     onEdit: () => void
-    onDuplicate: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit, onDuplicate }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit }: CardProps) {
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
@@ -934,10 +929,10 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
             }}
         >
             {/* Thumbnail */}
-            <div className="relative" style={{ cursor: 'pointer' }} onClick={onPreview}>
+            <div className="relative" style={{ cursor: 'pointer', height: 650, overflow: 'hidden' }} onClick={onPreview}>
                 {template.description_html
                     ? <TemplateThumbnail html={template.description_html} />
-                    : <div className="w-full flex items-center justify-center" style={{ height: 420, backgroundColor: C.bg }}>
+                    : <div className="w-full flex items-center justify-center" style={{ height: 650, backgroundColor: C.bg }}>
                         <LayoutTemplate size={28} style={{ color: C.border }} />
                     </div>
                 }

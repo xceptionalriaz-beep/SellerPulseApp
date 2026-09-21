@@ -16,11 +16,13 @@ function pad(p: any): string {
 
 const FALLBACK_ROWS = [
     { key: 'Brand', value: '{{BRAND}}' },
-    { key: 'Model', value: '{{MODEL}}' },
-    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
-    { key: 'Colour', value: '{{COLOUR}}' },
-    { key: 'SKU', value: '{{ITEM_SKU}}' },
-    { key: 'Warranty', value: '12 Months' },
+    { key: 'MPN', value: '{{MPN}}' },
+    { key: 'Type', value: '{{TYPE}}' },
+    { key: 'Material', value: '{{MATERIAL}}' },
+    { key: 'Features', value: '{{FEATURES}}' },
+    { key: 'Suitable For', value: '{{SUITABLE_FOR}}' },
+    { key: 'EAN', value: '{{EAN}}' },
+    { key: 'Warranty', value: '{{WARRANTY}}' },
 ]
 
 export const specsTableVariants: BlockVariant[] = [
@@ -29,20 +31,20 @@ export const specsTableVariants: BlockVariant[] = [
     {
         id: 'full',
         label: 'Full Table',
-        description: 'Standard two-column key/value table with header',
+        description: 'Crisp 2-column key/value table with navy header and alternating rows',
         toHtml(p: any, id: string): string {
             const rows = p.rows?.length ? p.rows : FALLBACK_ROWS
             const rowsHtml = rows.map((r: any, i: number) => `
-      <tr style="background-color:${i % 2 === 0 ? (p.rowBg ?? '#ffffff') : (p.altRowBg ?? '#f8fafc')};">
-        <td style="width:40%;padding:10px 16px;font-family:Arial,sans-serif;font-size:${p.fontSize ?? 13}px;font-weight:600;color:#374151;border-bottom:1px solid ${p.borderColor ?? '#e5e7eb'};">${r.key}</td>
-        <td style="padding:10px 16px;font-family:Arial,sans-serif;font-size:${p.fontSize ?? 13}px;color:#6b7280;border-bottom:1px solid ${p.borderColor ?? '#e5e7eb'};">${r.value}</td>
+      <tr style="background-color:${i % 2 === 0 ? (p.rowBg ?? '#ffffff') : (p.altRowBg ?? '#f9fafb')};">
+        <td style="width:38%;padding:11px 16px;font-family:Arial,sans-serif;font-size:${p.fontSize ?? 13}px;font-weight:600;color:#374151;border-bottom:1px solid ${p.borderColor ?? '#f3f4f6'};">${r.key}</td>
+        <td style="padding:11px 16px;font-family:Arial,sans-serif;font-size:${p.fontSize ?? 13}px;font-weight:500;color:#1f2937;border-bottom:1px solid ${p.borderColor ?? '#f3f4f6'};">${r.value}</td>
       </tr>`).join('')
             const titleHtml = p.showTitle !== false
-                ? `<tr><td colspan="2" style="background-color:${p.headerBg ?? '#1e1535'};padding:10px 16px;">
-                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${p.headerText ?? '#ffffff'};">${p.titleText ?? 'Item Specifics'}</p>
+                ? `<tr><td colspan="2" style="background-color:#1e1535;padding:12px 16px;">
+                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:0.05em;">${p.titleText ?? 'Item Specifics'}</p>
                   </td></tr>` : ''
             return `<!--[riazify:specs_table:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};border:1px solid ${p.borderColor ?? '#e5e7eb'};">
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
   ${titleHtml}${rowsHtml}
 </table>
 <!--[/riazify:specs_table:${id}]-->`

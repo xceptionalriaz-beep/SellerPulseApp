@@ -60,8 +60,9 @@ interface AssetFile {
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface ImagesTabProps {
-    onInsert: (url: string, alt: string) => void
+    onInsert: (url: string, alt: string, propKey?: string, propIndex?: number) => void
     selectedId: string | null
+    selectedSubSlot?: string | null
     blocks: Block[]
 }
 
@@ -75,29 +76,16 @@ function formatSize(bytes: number): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function ImagesTab({ onInsert, selectedId, blocks }: ImagesTabProps) {
+export default function ImagesTab({ onInsert, selectedSubSlot }: { onInsert: (url: string, alt: string, propKey?: string, propIndex?: number) => void; selectedId: string | null; selectedSubSlot?: string | null; blocks: Block[] }) {
     const [activeTab, setActiveTab] = useState<'assets' | 'stock'>('assets')
 
-    // ── Work out what the selected block is and if it accepts images ──────────
-    const selectedBlock = blocks.find(b => b.id === selectedId) ?? null
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const blockProps = selectedBlock?.props as any
-    const blockHasImageProp = selectedBlock
-        ? ['src', 'imageUrl', 'logoUrl', 'bgImage'].some(k => k in (blockProps ?? {}))
-        : false
-
-    // Label shown in the banner
-    const blockLabel: Record<string, string> = {
-        product_image: 'Product Image',
-        image: 'Image',
-        hero_header: 'Hero Header (logo)',
-        banner: 'Banner',
-        cta_banner: 'CTA Banner',
-        gallery_row: 'Gallery Row',
-    }
-    const selectedLabel = selectedBlock
-        ? (blockLabel[selectedBlock.type] ?? selectedBlock.type)
-        : null
+    const handleInsertDirect = useCallback((url: string, alt: string) => {
+        // Direct asset-browser focus: apply to the actively targeted sub-slot
+        // (e.g. 'src', 'image2Url', 'image3Url', 'image4Url', 'image5Url')
+        // if a canvas message set selectedSubSlot; otherwise fall back to generic.
+        const propKey = selectedSubSlot || 'src'
+        onInsert(url, alt, propKey)
+    }, [onInsert, selectedSubSlot])
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: C.bg }}>
@@ -143,58 +131,11 @@ export default function ImagesTab({ onInsert, selectedId, blocks }: ImagesTabPro
                 </div>
             </div>
 
-            {/* ── Smart insert banner ── */}
-            <div style={{
-                margin: '0 10px 6px',
-                padding: '7px 10px',
-                borderRadius: 8,
-                backgroundColor: blockHasImageProp
-                    ? 'rgba(184,250,51,0.15)'
-                    : selectedBlock && !blockHasImageProp
-                        ? 'rgba(239,68,68,0.08)'
-                        : 'rgba(117,48,251,0.07)',
-                border: `1px solid ${blockHasImageProp
-                        ? 'rgba(184,250,51,0.4)'
-                        : selectedBlock && !blockHasImageProp
-                            ? 'rgba(239,68,68,0.2)'
-                            : 'rgba(117,48,251,0.15)'
-                    }`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                flexShrink: 0,
-            }}>
-                <div style={{
-                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                    backgroundColor: blockHasImageProp
-                        ? '#16a34a'
-                        : selectedBlock && !blockHasImageProp
-                            ? '#ef4444'
-                            : '#7530fb',
-                }} />
-                <p style={{
-                    margin: 0,
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 10,
-                    color: blockHasImageProp ? '#15803d'
-                        : selectedBlock && !blockHasImageProp ? '#dc2626'
-                            : '#7530fb',
-                    lineHeight: 1.4,
-                }}>
-                    {blockHasImageProp
-                        ? `Inserting into: ${selectedLabel}`
-                        : selectedBlock && !blockHasImageProp
-                            ? `${selectedLabel} doesn't support images — will add new block`
-                            : 'No block selected — image will be added as new block'
-                    }
-                </p>
-            </div>
-
             {/* ── Tab content ── */}
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 {activeTab === 'assets'
-                    ? <AssetsTab onInsert={onInsert} />
-                    : <StockTab onInsert={onInsert} />
+                    ? <AssetsTab onInsert={handleInsertDirect} selectedSubSlot={selectedSubSlot} />
+                    : <StockTab onInsert={handleInsertDirect} selectedSubSlot={selectedSubSlot} />
                 }
             </div>
         </div>
@@ -204,10 +145,9 @@ export default function ImagesTab({ onInsert, selectedId, blocks }: ImagesTabPro
 // ─────────────────────────────────────────────────────────────────────────────
 // ASSETS TAB — Supabase Storage
 // ─────────────────────────────────────────────────────────────────────────────
-function AssetsTab({ onInsert }: { onInsert: (url: string, alt: string) => void }) {
+function AssetsTab({ onInsert, selectedSubSlot }: { onInsert: (url: string, alt: string, propKey?: string) => void; selectedSubSlot?: string | null }) {
     const supabase = createClient()
     const fileInputRef = useRef<HTMLInputElement>(null)
-
     const [assets, setAssets] = useState<AssetFile[]>([])
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
@@ -316,12 +256,13 @@ function AssetsTab({ onInsert }: { onInsert: (url: string, alt: string) => void 
         setTimeout(() => setCopiedUrl(null), 2000)
     }, [])
 
-    // Insert into block
+    // Insert into block — applies selectedSubSlot propKey when active
     const handleInsert = useCallback((url: string, name: string) => {
-        onInsert(url, name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '))
+        const propKey = selectedSubSlot || 'src'
+        onInsert(url, name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '), propKey)
         setInsertedUrl(url)
         setTimeout(() => setInsertedUrl(null), 1500)
-    }, [onInsert])
+    }, [onInsert, selectedSubSlot])
 
     // Drag over
     const [dragOver, setDragOver] = useState(false)
@@ -579,7 +520,7 @@ interface PixabayPhoto {
     webformatHeight: number
 }
 
-function StockTab({ onInsert }: { onInsert: (url: string, alt: string) => void }) {
+function StockTab({ onInsert, selectedSubSlot }: { onInsert: (url: string, alt: string, propKey?: string) => void; selectedSubSlot?: string | null }) {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<PixabayPhoto[]>([])
     const [loading, setLoading] = useState(false)
@@ -622,7 +563,8 @@ function StockTab({ onInsert }: { onInsert: (url: string, alt: string) => void }
     }
 
     const handleInsert = (photo: PixabayPhoto) => {
-        onInsert(photo.largeImageURL, photo.tags.split(',')[0]?.trim() || query)
+        const propKey = selectedSubSlot || 'src'
+        onInsert(photo.largeImageURL, photo.tags.split(',')[0]?.trim() || query, propKey)
         // Show tick — insert either patched selected block or added new block
         // Both are valid outcomes so feedback is always accurate
         setInsertedId(photo.id)

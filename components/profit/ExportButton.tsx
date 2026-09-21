@@ -16,14 +16,15 @@ const supabase = createClient(
 
 // ── Palette ──────────────────────────────────────────────────────────────────
 const C = {
-    lime: '#8fff00',
-    limeDeep: '#4a7c00',
-    dark: '#1a2410',
-    border: '#e8ede2',
-    muted: '#8a9e78',
+    lime: '#7530fb',          // primary (Electric Violet)
+    limeDeep: '#6020e0',      // primary hover
+    accent: '#b8fa33',        // accent (Soft Lime)
+    dark: '#1f1d2e',
+    border: '#ede9fe',
+    muted: '#a89cc8',
     surface: '#ffffff',
-    bg: '#f7f9f5',
-    text: '#1a2410',
+    bg: '#f8f7ff',
+    text: '#1f1d2e',
     red: '#b91c1c',
     amber: '#d97706',
     green: '#16a34a',
@@ -225,55 +226,55 @@ function buildPrintHTML(state: any, result: any, country: string, meta: any, sym
 <title>Riazify Profit Report — ${COUNTRY_LABEL[country]} — ${today()}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-  body { font-family: 'Inter', -apple-system, sans-serif; background: #f7f9f5; color: #1a2410; padding: 32px; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #f8f7ff; color: #1f1d2e; padding: 32px; }
   .page { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-  .header { background: #1a2410; padding: 24px 32px; text-align: center; }
+  .header { background: #1f1d2e; padding: 24px 32px; text-align: center; }
 
   /* Header */
-  .header-brand { font-size: 22px; font-weight: 900; color: #8fff00; letter-spacing: -0.5px; }
-  .header-sub { font-size: 12px; color: #8a9e78; margin-top: 2px; }
-  .header-date { font-size: 11px; color: #8a9e78; text-align: right; }
+  .header-brand { font-size: 22px; font-weight: 900; color: #b8fa33; letter-spacing: -0.5px; }
+  .header-sub { font-size: 12px; color: #a89cc8; margin-top: 2px; }
+  .header-date { font-size: 11px; color: #a89cc8; text-align: right; }
 
   /* Hero stats */
-  .hero { padding: 24px 32px; background: #fff; border-bottom: 1px solid #e8ede2; }
+  .hero { padding: 24px 32px; background: #fff; border-bottom: 1px solid #ede9fe; }
   .hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .hero-card { background: #fff; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #e8ede2; }
-  .hero-label { font-size: 9px; font-weight: 700; color: #8a9e78; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .hero-card { background: #fff; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #ede9fe; }
+  .hero-label { font-size: 9px; font-weight: 700; color: #a89cc8; letter-spacing: 0.5px; margin-bottom: 6px; }
   .hero-value { font-size: 20px; font-weight: 900; }
   .hero-value.profit { color: ${profitColor}; }
-  .hero-value.neutral { color: #1a2410; }
+  .hero-value.neutral { color: #1f1d2e; }
 
   /* Two column layout */
   .body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
   .col { padding: 24px 32px; }
-  .col:first-child { border-right: 1px solid #e8ede2; }
+  .col:first-child { border-right: 1px solid #ede9fe; }
 
   /* Section */
-  .section-title { font-size: 9px; font-weight: 800; color: #8a9e78; letter-spacing: 0.6px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e8ede2; }
+  .section-title { font-size: 9px; font-weight: 800; color: #a89cc8; letter-spacing: 0.6px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #ede9fe; }
   .row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #f0f0ec; }
   .row:last-child { border-bottom: none; }
-  .row-label { font-size: 11px; color: #8a9e78; }
-  .row-value { font-size: 11px; font-weight: 700; color: #1a2410; }
+  .row-label { font-size: 11px; color: #a89cc8; }
+  .row-value { font-size: 11px; font-weight: 700; color: #1f1d2e; }
   .row-value.positive { color: #16a34a; }
   .row-value.negative { color: #b91c1c; }
-  .row-value.highlight { font-size: 13px; color: #1a2410; }
+  .row-value.highlight { font-size: 13px; color: #1f1d2e; }
 
   /* Ledger total row */
-  .row.total { border-top: 2px solid #1a2410; margin-top: 4px; padding-top: 8px; }
-  .row.total .row-label { font-weight: 800; font-size: 12px; color: #1a2410; }
+  .row.total { border-top: 2px solid #1f1d2e; margin-top: 4px; padding-top: 8px; }
+  .row.total .row-label { font-weight: 800; font-size: 12px; color: #1f1d2e; }
   .row.total .row-value { font-size: 14px; font-weight: 900; }
 
   /* Multi section */
-  .multi-box { background: #f0fdf4; border: 1px solid #8fff00; border-radius: 8px; padding: 12px; margin-top: 12px; }
+  .multi-box { background: #f0fdf4; border: 1px solid #b8fa33; border-radius: 8px; padding: 12px; margin-top: 12px; }
   .multi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
   .multi-card { background: #fff; border-radius: 6px; padding: 8px; text-align: center; }
-  .multi-label { font-size: 8px; font-weight: 700; color: #8a9e78; letter-spacing: 0.4px; }
-  .multi-value { font-size: 13px; font-weight: 800; color: #1a2410; margin-top: 2px; }
+  .multi-label { font-size: 8px; font-weight: 700; color: #a89cc8; letter-spacing: 0.4px; }
+  .multi-value { font-size: 13px; font-weight: 800; color: #1f1d2e; margin-top: 2px; }
 
   /* Footer */
-  .footer { padding: 16px 32px; background: #fff; border-top: 1px solid #e8ede2; display: flex; justify-content: space-between; align-items: center; }
-  .footer-left { font-size: 10px; color: #8a9e78; }
-  .footer-right { font-size: 10px; color: #8a9e78; text-align: right; }
+  .footer { padding: 16px 32px; background: #fff; border-top: 1px solid #ede9fe; display: flex; justify-content: space-between; align-items: center; }
+  .footer-left { font-size: 10px; color: #a89cc8; }
+  .footer-right { font-size: 10px; color: #a89cc8; text-align: right; }
 
   @media print {
     body { background: #fff; padding: 0; margin: 0; }
@@ -531,17 +532,17 @@ export function ExportButton({ state, result, country, meta, sym }: ExportProps)
   body { font-family: -apple-system, sans-serif; background: #fff; margin: 0; }
   .topbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
-    background: #1a2410; padding: 12px 24px;
+    background: #1f1d2e; padding: 12px 24px;
     display: flex; align-items: center; justify-content: space-between;
     box-shadow: 0 2px 12px rgba(0,0,0,0.2);
   }
   .topbar-left { display: flex; flex-direction: column; gap: 2px; }
-  .topbar-title { font-size: 13px; font-weight: 700; color: #8fff00; }
-  .topbar-sub { font-size: 11px; color: #8a9e78; }
+  .topbar-title { font-size: 13px; font-weight: 700; color: #b8fa33; }
+  .topbar-sub { font-size: 11px; color: #a89cc8; }
   .topbar-right { display: flex; align-items: center; gap: 10px; }
   .btn-print {
     display: flex; align-items: center; gap: 8px;
-    background: #8fff00; color: #1a2410;
+    background: #b8fa33; color: #1f1d2e;
     border: none; border-radius: 8px;
     padding: 10px 20px; font-size: 13px; font-weight: 800;
     cursor: pointer;

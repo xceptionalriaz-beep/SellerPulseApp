@@ -68,15 +68,16 @@ import { ExportButton } from '@/components/profit/ExportButton'
 
 // ──? Brand palette (spec-exact) ──────────────────────────────────────────────?
 const C = {
-    lime: '#8fff00',
-    limeDeep: '#4a8f00',
-    limeTint: '#f4ffe6',
-    dark: '#1a2410',
-    border: '#e8ede2',
-    muted: '#8a9e78',
+    lime: '#7530fb',          // primary (Electric Violet) — was lime green in old theme
+    limeDeep: '#6020e0',      // primary hover (darker violet)
+    limeTint: '#f3eeff',      // primary tint (light violet)
+    accent: '#b8fa33',        // accent (Soft Lime) — small highlights, grade badges
+    dark: '#1e1535',
+    border: '#ede9fe',
+    muted: '#a89cc8',
     surface: '#ffffff',
-    bg: '#f7f9f5',
-    text: '#1a2410',
+    bg: '#f8f7ff',
+    text: '#1f1d2e',
     red: '#b91c1c',
     amber: '#d97706',
     green: '#16a34a',
@@ -787,7 +788,7 @@ function LedgerRow({ label, amount, color, symbol }: { label: string; amount: nu
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }} title={fullVal}>
             <span style={{ fontSize: 11, color: C.muted, fontWeight: 500 }}>{label}</span>
-            <span style={{ fontSize: 12, fontWeight: 800, color, opacity: visible ? 1 : 0, transition: 'opacity 0.12s ease' }}>{displayed}</span>
+            <span style={{ fontSize: 12, fontWeight: 800, color: color === C.accent ? '#16a34a' : color, opacity: visible ? 1 : 0, transition: 'opacity 0.12s ease' }}>{displayed}</span>
         </div>
     )
 }
@@ -813,7 +814,7 @@ function DonutChart({ revenue, profit, costs, fees, sym }: { revenue: number; pr
     }
     let off = 0
     const segs = []
-    if (profitPct > 0.005) { segs.push(arc(profitPct, off, C.lime)); off += profitPct }
+    if (profitPct > 0.005) { segs.push(arc(profitPct, off, C.accent)); off += profitPct }
     if (costsPct > 0.005) { segs.push(arc(costsPct, off, C.red)); off += costsPct }
     if (feesPct > 0.005) { segs.push(arc(feesPct, off, C.amber)) }
     return (
@@ -821,7 +822,7 @@ function DonutChart({ revenue, profit, costs, fees, sym }: { revenue: number; pr
             <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.border} strokeWidth={sw} />
             {segs}
             <text x={cx} y={cy - 5} textAnchor="middle" fontSize={7} fill={C.muted} fontFamily="sans-serif">Total rev</text>
-            <text x={cx} y={cy + 10} textAnchor="middle" fontSize={revenue >= 1000000000 ? 10 : revenue >= 1000000 ? 11 : revenue >= 10000 ? 12 : 14} fontWeight="bold" fill={profit > 0 ? C.green : profit < 0 ? C.red : C.text} fontFamily="'Inter', sans-serif" style={{ fontWeight: 900 }}>
+            <text x={cx} y={cy + 10} textAnchor="middle" fontSize={revenue >= 1000000000 ? 10 : revenue >= 1000000 ? 11 : revenue >= 10000 ? 12 : 14} fontWeight="bold" fill={profit > 0 ? '#16a34a' : profit < 0 ? C.red : C.text} fontFamily="'Inter', sans-serif" style={{ fontWeight: 900 }}>
                 {sym}{revenue >= 1000000000 ? `${(revenue / 1000000000).toFixed(1)}B` : revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M` : revenue >= 10000 ? `${(revenue / 1000).toFixed(1)}K` : revenue.toFixed(2)}
             </text>
         </svg>
@@ -1042,7 +1043,14 @@ export default function ProfitCalculatorPage() {
     }
 
     function profitColor(n: number) {
-        if (n > 0) return C.green
+        if (n > 0) return C.accent
+        if (n < 0) return C.red
+        return C.muted
+    }
+    // Text variant — positive values use #16a34a for legibility on light backgrounds
+    // (lime #b8fa33 text is unreadable on white). Keep profitColor for fills/indicators.
+    function profitTextColor(n: number) {
+        if (n > 0) return '#16a34a'
         if (n < 0) return C.red
         return C.muted
     }
@@ -1256,8 +1264,8 @@ export default function ProfitCalculatorPage() {
 
     // Velocity tier color mapping (UI concern, stays in page)
     const velocityTier = {
-        EXCELLENT: { label: 'EXCELLENT', color: C.green },
-        GOOD: { label: 'GOOD', color: C.green },
+        EXCELLENT: { label: 'EXCELLENT', color: C.accent },
+        GOOD: { label: 'GOOD', color: C.accent },
         OK: { label: 'OK', color: C.amber },
         POOR: { label: 'POOR', color: C.red },
     }[bulkVelocityTier]
@@ -1327,7 +1335,7 @@ export default function ProfitCalculatorPage() {
     ${C.red} 0%,
     ${C.red} ${wifBreakEvenPct.toFixed(1)}%,
     #facc15 ${wifMarginalPct.toFixed(1)}%,
-    ${C.lime} 100%)`
+    ${C.accent} 100%)`
 
     // 2. Best Offer ? red below break-even of listing, yellow marginal, lime healthy
     const boMin = 0.01
@@ -1338,7 +1346,7 @@ export default function ProfitCalculatorPage() {
     ${C.red} 0%,
     ${C.red} ${boBreakEvenPct.toFixed(1)}%,
     #facc15 ${boMarginalPct.toFixed(1)}%,
-    ${C.lime} 100%)`
+    ${C.accent} 100%)`
 
     // 3. Sell-through ? fixed zones: <60% red, 60-75% yellow, >75% lime
     // Slider min=30, max=100 ? convert thresholds to %
@@ -1349,7 +1357,7 @@ export default function ProfitCalculatorPage() {
     ${C.red} 0%,
     ${C.red} ${st60Pct.toFixed(1)}%,
     #facc15 ${st75Pct.toFixed(1)}%,
-    ${C.lime} 100%)`
+    ${C.accent} 100%)`
 
     // 4. Return rate ? inverted: 0-5% lime, 5-15% yellow, >15% red
     // Slider min=0, max=50 ? convert thresholds to %
@@ -1357,8 +1365,8 @@ export default function ProfitCalculatorPage() {
     const rr5Pct = ((5 - rrMin) / (rrMax - rrMin)) * 100  // 10%
     const rr15Pct = ((15 - rrMin) / (rrMax - rrMin)) * 100  // 30%
     const returnRateGradient = `linear-gradient(to right,
-    ${C.lime} 0%,
-    ${C.lime} ${rr5Pct.toFixed(1)}%,
+    ${C.accent} 0%,
+    ${C.accent} ${rr5Pct.toFixed(1)}%,
     #facc15 ${rr15Pct.toFixed(1)}%,
     ${C.red} 100%)`
 
@@ -1843,7 +1851,7 @@ export default function ProfitCalculatorPage() {
                             disabled={!productName.trim() || saveStatus === 'saving'}
                             style={{
                                 height: 36, padding: '0 14px', borderRadius: 8, border: 'none',
-                                background: !productName.trim() ? C.border : (saveStatus === 'saved' ? C.green : C.dark),
+                                background: !productName.trim() ? C.border : (saveStatus === 'saved' ? C.accent : C.dark),
                                 color: !productName.trim() ? C.muted : (saveStatus === 'saved' ? C.surface : C.lime),
                                 fontWeight: 700, fontSize: 12, cursor: productName.trim() ? 'pointer' : 'not-allowed',
                                 display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s', flexShrink: 0,
@@ -1933,7 +1941,7 @@ export default function ProfitCalculatorPage() {
                             <History size={14} />
                             History
                             {savedItems.length > 0 && (
-                                <span style={{ background: C.lime, color: C.dark, padding: '1px 7px', borderRadius: 999, fontSize: 10, fontWeight: 800 }}>
+                                <span style={{ background: C.lime, color: '#ffffff', padding: '1px 7px', borderRadius: 999, fontSize: 10, fontWeight: 800 }}>
                                     {savedItems.length}
                                 </span>
                             )}
@@ -1967,7 +1975,7 @@ export default function ProfitCalculatorPage() {
                                         eBay {fetchedItem.marketplace}
                                     </span>
                                     {/* Price with correct currency symbol */}
-                                    <span style={{ fontSize: 12, fontWeight: 800, color: C.green, flexShrink: 0 }}>
+                                    <span style={{ fontSize: 12, fontWeight: 800, color: C.accent, flexShrink: 0 }}>
                                         {fetchedItem.currency === 'GBP' ? '£' : fetchedItem.currency === 'EUR' ? '€' : fetchedItem.currency === 'CHF' ? 'CHF ' : fetchedItem.currency === 'AUD' ? 'A$' : fetchedItem.currency === 'CAD' ? 'C$' : fetchedItem.currency === 'PLN' ? 'zł' : '$'}{fetchedItem.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
                                     {/* Shipping */}
@@ -1976,7 +1984,7 @@ export default function ProfitCalculatorPage() {
                                             · +{fetchedItem.currency === 'GBP' ? '£' : fetchedItem.currency === 'EUR' ? '€' : fetchedItem.currency === 'CHF' ? 'CHF ' : fetchedItem.currency === 'AUD' ? 'A$' : fetchedItem.currency === 'CAD' ? 'C$' : fetchedItem.currency === 'PLN' ? 'zł' : '$'}{fetchedItem.shipping.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ship
                                         </span>
                                     ) : (
-                                        <span style={{ fontSize: 11, color: C.green, flexShrink: 0 }}>· Free shipping</span>
+                                        <span style={{ fontSize: 11, color: C.accent, flexShrink: 0 }}>· Free shipping</span>
                                     )}
                                     {/* Condition */}
                                     {fetchedItem.condition && (
@@ -2052,12 +2060,12 @@ export default function ProfitCalculatorPage() {
                                     title={COUNTRIES[c].label}
                                     style={{
                                         width: 38, height: 38, borderRadius: '50%',
-                                        border: `2.5px solid ${country === c ? C.lime : C.border}`,
+                                        border: `2.5px solid ${country === c ? C.accent : C.border}`,
                                         background: C.surface,
                                         cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         transition: 'border-color 0.15s, box-shadow 0.15s',
-                                        boxShadow: country === c ? `0 0 0 2px ${C.lime}` : 'none',
+                                        boxShadow: country === c ? `0 0 0 2px ${C.accent}` : 'none',
                                         flexShrink: 0,
                                         padding: 0,
                                         overflow: 'hidden',
@@ -2291,7 +2299,7 @@ export default function ProfitCalculatorPage() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <SectionLabel>LISTING / INSERTION FEE</SectionLabel>
                                 {isUnlimited && (
-                                    <span style={{ fontSize: 9, fontWeight: 700, color: C.green, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>
+                                    <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: C.limeTint, padding: '2px 6px', borderRadius: 999 }}>
                                         UNLIMITED ? NO FEE
                                     </span>
                                 )}
@@ -2355,7 +2363,7 @@ export default function ProfitCalculatorPage() {
                                             <span style={{ color: C.muted }}>Free allowance used</span>
                                             <Tooltip text="How many of your free monthly listings you have used. Extra listings beyond this incur a fee."><Info size={10} color={C.muted} /></Tooltip>
                                         </div>
-                                        <span style={{ fontWeight: 700, color: listingsUsed > freeAllowance ? C.red : C.green }}>
+                                        <span style={{ fontWeight: 700, color: listingsUsed > freeAllowance ? C.red : C.accent }}>
                                             {listingsUsed.toLocaleString()} / {freeAllowance.toLocaleString()}
                                         </span>
                                     </div>
@@ -2404,7 +2412,7 @@ export default function ProfitCalculatorPage() {
                                             <Tooltip text={`Exact: ${adjustedNetProfit >= 0 ? '+' : '-'}${sym}${Math.abs(adjustedNetProfit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}><Info size={10} color={C.muted} /></Tooltip>
                                         </div>
                                         <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.5px', margin: '0 0 6px' }}>NET PROFIT</p>
-                                        <p style={{ fontSize: formatNum(adjustedNetProfit, sym).length > 10 ? 14 : formatNum(adjustedNetProfit, sym).length > 7 ? 18 : 22, fontWeight: 800, color: profitColor(adjustedNetProfit), margin: 0, lineHeight: 1 }}>
+                                        <p style={{ fontSize: formatNum(adjustedNetProfit, sym).length > 10 ? 14 : formatNum(adjustedNetProfit, sym).length > 7 ? 18 : 22, fontWeight: 800, color: profitTextColor(adjustedNetProfit), margin: 0, lineHeight: 1 }}>
                                             {adjustedNetProfit >= 0 ? '+' : '-'}{formatNum(adjustedNetProfit, sym)}
                                         </p>
                                         {hourlyRate > 0 && (
@@ -2415,12 +2423,12 @@ export default function ProfitCalculatorPage() {
                                     </div>
                                     <StatCard label="MARGIN"
                                         value={`${margin >= 0 ? '' : '-'}${formatPct(margin)}`}
-                                        color={profitColor(margin)}
+                                        color={profitTextColor(margin)}
                                         tooltip={`Profit margin: how much of each sale you keep after all costs and fees. Exact: ${margin.toFixed(2)}%`}
                                     />
                                     <StatCard label="ROI"
                                         value={`${roi >= 0 ? '' : '-'}${formatPct(roi)}`}
-                                        color={profitColor(roi)}
+                                        color={profitTextColor(roi)}
                                         tooltip={`Return on investment: profit as % of your total costs. Exact: ${roi.toFixed(2)}%`}
                                     />
                                     <StatCard label="BREAK EVEN"
@@ -2437,7 +2445,7 @@ export default function ProfitCalculatorPage() {
                                             <span style={{ fontSize: 11, fontWeight: 800, color: C.text, letterSpacing: '0.4px' }}>
                                                 {isMultiLot ? `LOT OF ${lotSizeN}` : ''}{isMultiLot && isMultiQty ? ' · ' : ''}{isMultiQty ? `${sellQtyN}× SALES` : ''}
                                             </span>
-                                            <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>MULTI</span>
+                                            <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: C.limeTint, padding: '2px 6px', borderRadius: 999 }}>MULTI</span>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                                             {isMultiLot && (
@@ -2449,13 +2457,13 @@ export default function ProfitCalculatorPage() {
                                             )}
                                             <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                                 <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>PROFIT PER UNIT</p>
-                                                <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(adjustedNetProfit), margin: 0 }}>{adjustedNetProfit >= 0 ? '+' : ''}{formatNum(adjustedNetProfit, sym)}</p>
+                                                <p style={{ fontSize: 16, fontWeight: 800, color: profitTextColor(adjustedNetProfit), margin: 0 }}>{adjustedNetProfit >= 0 ? '+' : ''}{formatNum(adjustedNetProfit, sym)}</p>
                                                 <p style={{ fontSize: 9, color: C.muted, margin: '3px 0 0' }}>per sale</p>
                                             </div>
                                             {isMultiQty && (
                                                 <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                                     <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>TOTAL PROFIT</p>
-                                                    <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(totalProfit), margin: 0 }}>{totalProfit >= 0 ? '+' : ''}{formatNum(totalProfit, sym)}</p>
+                                                    <p style={{ fontSize: 16, fontWeight: 800, color: profitTextColor(totalProfit), margin: 0 }}>{totalProfit >= 0 ? '+' : ''}{formatNum(totalProfit, sym)}</p>
                                                     <p style={{ fontSize: 9, color: C.muted, margin: '3px 0 0' }}>across {sellQtyN} sales</p>
                                                 </div>
                                             )}
@@ -2464,7 +2472,7 @@ export default function ProfitCalculatorPage() {
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                                                 <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                                     <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>TOTAL REVENUE ({sellQtyN}× sales)</p>
-                                                    <p style={{ fontSize: 13, fontWeight: 800, color: C.green, margin: 0 }}>{formatNum(totalRevQty, sym)}</p>
+                                                    <p style={{ fontSize: 13, fontWeight: 800, color: '#16a34a', margin: 0 }}>{formatNum(totalRevQty, sym)}</p>
                                                 </div>
                                                 <div style={{ background: C.bg, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                                     <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 4px' }}>TOTAL EBAY FEES ({sellQtyN}× sales)</p>
@@ -2489,7 +2497,7 @@ export default function ProfitCalculatorPage() {
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                                                 <SectionLabel>TRANSACTION LEDGER</SectionLabel>
                                                 <div style={{ display: 'flex', gap: 8 }}>
-                                                    {[{ dot: C.lime, label: 'Net profit' }, { dot: C.red, label: 'Your costs' }, { dot: C.amber, label: 'eBay fees' }].map(({ dot, label }) => (
+                                                    {[{ dot: C.accent, label: 'Net profit' }, { dot: C.red, label: 'Your costs' }, { dot: C.amber, label: 'eBay fees' }].map(({ dot, label }) => (
                                                         <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                                                             <div style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
                                                             <span style={{ fontSize: 9, color: C.muted, whiteSpace: 'nowrap' }}>{label}</span>
@@ -2498,7 +2506,7 @@ export default function ProfitCalculatorPage() {
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                                <LedgerRow label="Revenue (price + ship)" amount={revenue} color={C.green} symbol={sym} />
+                                                <LedgerRow label="Revenue (price + ship)" amount={revenue} color={C.accent} symbol={sym} />
                                                 <div style={{ height: 1, background: C.border }} />
                                                 <LedgerRow label="Item and shipping costs" amount={-totalCosts} color={C.red} symbol={sym} />
                                                 {isMultiLot && (
@@ -2535,7 +2543,7 @@ export default function ProfitCalculatorPage() {
                                                     <LedgerRow label={`Cross-border fee (${meta.crossBorderFee}%)`} amount={-(revenue * meta.crossBorderFee / 100)} color={C.amber} symbol={sym} />
                                                 )}
                                                 {topRatedDiscount > 0 && (
-                                                    <LedgerRow label="Top Rated Plus discount (?10% FVF)" amount={topRatedDiscount} color={C.green} symbol={sym} />
+                                                    <LedgerRow label="Top Rated Plus discount (?10% FVF)" amount={topRatedDiscount} color={C.accent} symbol={sym} />
                                                 )}
                                                 {belowStdPenalty > 0 && (
                                                     <LedgerRow
@@ -2590,7 +2598,7 @@ export default function ProfitCalculatorPage() {
                                                     <LedgerRow label={`FX conversion (1 ${state.buyCurrency} = ${state.fxRate} ${country === 'UK' ? 'GBP' : country === 'US' ? 'USD' : country === 'CA' ? 'CAD' : country === 'AU' ? 'AUD' : country === 'PL' ? 'PLN' : country === 'CH' ? 'CHF' : 'EUR'})`} amount={-(result?.fxCost ?? 0)} color={C.amber} symbol={sym} />
                                                 )}
                                                 {state.isAdvancedEnabled && cashbackVal > 0 && (
-                                                    <LedgerRow label="Cashback / rewards" amount={cashbackVal} color={C.green} symbol={sym} />
+                                                    <LedgerRow label="Cashback / rewards" amount={cashbackVal} color={C.accent} symbol={sym} />
                                                 )}
                                                 {state.paypalEnabled && (result?.paypalFee ?? 0) > 0 && (
                                                     <LedgerRow label={`PayPal fee (${state.paypalType === 'goods' ? 'Goods & Services' : state.paypalType === 'micropayment' ? 'Micropayment' : state.paypalType === 'international' ? 'International' : 'Custom'} ${state.paypalRate}%)`} amount={-(result?.paypalFee ?? 0)} color={C.red} symbol={sym} />
@@ -2604,7 +2612,7 @@ export default function ProfitCalculatorPage() {
                                                 <span style={{ fontSize: 10, fontWeight: 700, color: C.muted }}>AD DANGER ZONE</span>
                                                 <span style={{ fontSize: 10, fontWeight: 700, color: C.red }}>Max safe: {formatPct(maxSafeAdRate)}</span>
                                             </div>
-                                            <div style={{ position: 'relative', height: 8, borderRadius: 999, overflow: 'hidden', background: `linear-gradient(to right, ${C.lime}, #facc15, ${C.red})` }}>
+                                            <div style={{ position: 'relative', height: 8, borderRadius: 999, overflow: 'hidden', background: `linear-gradient(to right, ${C.accent}, #facc15, ${C.red})` }}>
                                                 <div style={{ position: 'absolute', top: -2, left: `${Math.max(0, Math.min(state.adRatePercent > 0 ? adDangerProgress - 1 : 0, 98))}%`, width: 3, height: 12, background: C.dark, borderRadius: 2 }} />
                                             </div>
                                         </div>
@@ -2616,8 +2624,8 @@ export default function ProfitCalculatorPage() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                                         <SectionLabel>WHAT-IF FORECASTER (DRAG TO TEST)</SectionLabel>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: C.dark, borderRadius: 999, padding: '3px 10px' }}>
-                                            <Zap size={10} color={C.lime} />
-                                            <span style={{ fontSize: 10, fontWeight: 700, color: C.lime }}>INTERACTIVE</span>
+                                            <Zap size={10} color={C.accent} />
+                                            <span style={{ fontSize: 10, fontWeight: 700, color: C.accent }}>INTERACTIVE</span>
                                         </div>
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 12 }}>
@@ -2628,15 +2636,15 @@ export default function ProfitCalculatorPage() {
                                         </div>
                                         <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simNet)}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>Est. profit</p>
-                                            <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(simNet), margin: 0 }}>{simNet >= 0 ? '+' : '-'}{formatNum(simNet, sym)}</p>
+                                            <p style={{ fontSize: 16, fontWeight: 800, color: profitTextColor(simNet), margin: 0 }}>{simNet >= 0 ? '+' : '-'}{formatNum(simNet, sym)}</p>
                                         </div>
                                         <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simRoi)}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>ROI</p>
-                                            <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(simRoi), margin: 0 }}>{formatPct(simRoi)}</p>
+                                            <p style={{ fontSize: 16, fontWeight: 800, color: profitTextColor(simRoi), margin: 0 }}>{formatPct(simRoi)}</p>
                                         </div>
                                         <div style={{ border: `1px solid ${C.border}`, borderTop: `3px solid ${profitColor(simMargin)}`, borderRadius: 8, padding: 10, textAlign: 'center' }}>
                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: '0 0 2px' }}>Margin</p>
-                                            <p style={{ fontSize: 16, fontWeight: 800, color: profitColor(simMargin), margin: 0 }}>{formatPct(simMargin)}</p>
+                                            <p style={{ fontSize: 16, fontWeight: 800, color: profitTextColor(simMargin), margin: 0 }}>{formatPct(simMargin)}</p>
                                         </div>
                                     </div>
                                     <div style={{ position: 'relative', width: '100%', height: 20, display: 'flex', alignItems: 'center' }}>
@@ -2647,7 +2655,7 @@ export default function ProfitCalculatorPage() {
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 700, marginTop: 4 }}>
                                         <span style={{ color: C.red }}>Break even: {formatNum(breakEven, sym)}</span>
-                                        <span style={{ color: C.green }}>High profit area</span>
+                                        <span style={{ color: C.accent }}>High profit area</span>
                                     </div>
                                 </div>
 
@@ -2657,7 +2665,7 @@ export default function ProfitCalculatorPage() {
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <SectionLabel>PRICE EXPLORER</SectionLabel>
-                                                <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>DRAG</span>
+                                                <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: C.limeTint, padding: '2px 6px', borderRadius: 999 }}>DRAG</span>
                                             </div>
                                             {sliderPrice !== null && (
                                                 <button onClick={() => setSliderPrice(null)} style={{ fontSize: 9, fontWeight: 700, color: C.muted, background: 'none', border: `1px solid ${C.border}`, borderRadius: 6, padding: '2px 8px', cursor: 'pointer' }}>
@@ -2670,15 +2678,15 @@ export default function ProfitCalculatorPage() {
                                                 <span style={{ fontSize: 8, fontWeight: 800, color: C.red, letterSpacing: '0.3px', whiteSpace: 'nowrap', position: 'relative', left: `${Math.min(Math.max(breakEvenPct, 8), 88) - breakEvenPct}%` }}>BREAK-EVEN {formatNum(breakEven, sym)}</span>
                                                 <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: `8px solid ${C.red}`, marginTop: 2 }} />
                                             </div>
-                                            <div style={{ height: 10, borderRadius: 999, position: 'relative', overflow: 'hidden', marginTop: 20, background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${breakEvenPct}%, #22c55e ${breakEvenPct}%, #22c55e 100%)`, transition: 'background 0.05s ease' }}>
-                                                <div style={{ position: 'absolute', top: '50%', left: `${explorerPct}%`, transform: 'translate(-50%, -50%)', width: 16, height: 16, borderRadius: '50%', background: explorerProfit >= 0 ? C.lime : C.red, border: `2px solid ${C.surface}`, boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, transition: 'left 0.05s ease, background 0.2s ease' }} />
+                                            <div style={{ height: 10, borderRadius: 999, position: 'relative', overflow: 'hidden', marginTop: 20, background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${breakEvenPct}%, ${C.accent} ${breakEvenPct}%, ${C.accent} 100%)`, transition: 'background 0.05s ease' }}>
+                                                <div style={{ position: 'absolute', top: '50%', left: `${explorerPct}%`, transform: 'translate(-50%, -50%)', width: 16, height: 16, borderRadius: '50%', background: explorerProfit >= 0 ? C.accent : C.red, border: `2px solid ${C.surface}`, boxShadow: '0 2px 6px rgba(0,0,0,0.3)', zIndex: 2, transition: 'left 0.05s ease, background 0.2s ease' }} />
                                             </div>
                                             <input type="range" min={sliderMin} max={sliderMax} step={0.01} value={explorerPrice}
                                                 onChange={e => setSliderPrice(parseFloat(e.target.value))}
                                                 style={{ position: 'absolute', top: 20, left: 0, width: '100%', opacity: 0, cursor: 'pointer', height: 10, zIndex: 10 }} />
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
                                                 <span style={{ fontSize: 9, color: C.muted }}>{formatNum(sliderMin, sym)}</span>
-                                                <span style={{ fontSize: 10, fontWeight: 800, color: explorerProfit >= 0 ? C.limeDeep : C.red }}>
+                                                <span style={{ fontSize: 10, fontWeight: 800, color: explorerProfit >= 0 ? '#16a34a' : C.red }}>
                                                     {formatNum(explorerPrice, sym)}
                                                     {sliderPrice !== null && sliderPrice !== state.sellingPrice && (
                                                         <span style={{ fontSize: 9, color: C.muted, fontWeight: 400 }}> (exploring)</span>
@@ -2690,15 +2698,15 @@ export default function ProfitCalculatorPage() {
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                                             <div style={{ background: C.bg, borderRadius: 8, padding: 8, textAlign: 'center' }}>
                                                 <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 3px' }}>PROFIT</p>
-                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitColor(explorerProfit), margin: 0, transition: 'color 0.2s ease' }}>{explorerProfit >= 0 ? '+' : ''}{formatNum(explorerProfit, sym)}</p>
+                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitTextColor(explorerProfit), margin: 0, transition: 'color 0.2s ease' }}>{explorerProfit >= 0 ? '+' : ''}{formatNum(explorerProfit, sym)}</p>
                                             </div>
                                             <div style={{ background: C.bg, borderRadius: 8, padding: 8, textAlign: 'center' }}>
                                                 <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 3px' }}>MARGIN</p>
-                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitColor(explorerMargin), margin: 0 }}>{explorerMargin >= 0 ? '' : '-'}{formatPct(explorerMargin)}</p>
+                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitTextColor(explorerMargin), margin: 0 }}>{explorerMargin >= 0 ? '' : '-'}{formatPct(explorerMargin)}</p>
                                             </div>
                                             <div style={{ background: C.bg, borderRadius: 8, padding: 8, textAlign: 'center' }}>
                                                 <p style={{ fontSize: 9, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 3px' }}>ROI</p>
-                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitColor(explorerROI), margin: 0 }}>{explorerROI >= 0 ? '' : '-'}{formatPct(explorerROI)}</p>
+                                                <p style={{ fontSize: 14, fontWeight: 800, color: profitTextColor(explorerROI), margin: 0 }}>{explorerROI >= 0 ? '' : '-'}{formatPct(explorerROI)}</p>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -2713,9 +2721,9 @@ export default function ProfitCalculatorPage() {
                                                     <div key={i} onClick={() => setSliderPrice(price)} style={{ display: 'grid', gridTemplateColumns: '70px 1fr 60px 60px', gap: 6, alignItems: 'center', padding: '5px 8px', borderRadius: 6, cursor: 'pointer', background: isExploring ? C.surface : isCurrentPrice ? C.bg : 'transparent', border: `1px solid ${isCurrentPrice ? C.lime : isExploring ? C.border : 'transparent'}` }}>
                                                         <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>{formatNum(price, sym)}</span>
                                                         <div style={{ height: 4, borderRadius: 999, background: C.border, overflow: 'hidden' }}>
-                                                            <div style={{ height: '100%', width: `${Math.min(Math.max(m, 0), 50) * 2}%`, background: p >= 0 ? C.lime : C.red, borderRadius: 999 }} />
+                                                            <div style={{ height: '100%', width: `${Math.min(Math.max(m, 0), 50) * 2}%`, background: p >= 0 ? C.accent : C.red, borderRadius: 999 }} />
                                                         </div>
-                                                        <span style={{ fontSize: 10, fontWeight: 700, color: profitColor(p), textAlign: 'right' }}>{p >= 0 ? '+' : ''}{formatNum(p, sym)}</span>
+                                                        <span style={{ fontSize: 10, fontWeight: 700, color: profitTextColor(p), textAlign: 'right' }}>{p >= 0 ? '+' : ''}{formatNum(p, sym)}</span>
                                                         <span style={{ fontSize: 10, color: C.muted, textAlign: 'right' }}>{m >= 0 ? '' : '-'}{formatPct(Math.abs(m))}</span>
                                                     </div>
                                                 )
@@ -2780,18 +2788,18 @@ export default function ProfitCalculatorPage() {
                                             </div>
 
                                             {/* Min for 25% margin */}
-                                            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '12px 14px' }}>
+                                            <div style={{ background: '#f3eeff', border: `1px solid ${C.limeTint}`, borderRadius: 10, padding: '12px 14px' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
-                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
-                                                    <span style={{ fontSize: 9, fontWeight: 800, color: C.green, letterSpacing: '0.5px' }}>SWEET SPOT</span>
+                                                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.accent, flexShrink: 0 }} />
+                                                    <span style={{ fontSize: 9, fontWeight: 800, color: '#16a34a', letterSpacing: '0.5px' }}>SWEET SPOT</span>
                                                 </div>
-                                                <p style={{ fontSize: 20, fontWeight: 900, color: C.green, margin: '0 0 3px', lineHeight: 1 }}>
+                                                <p style={{ fontSize: 20, fontWeight: 900, color: '#16a34a', margin: '0 0 3px', lineHeight: 1 }}>
                                                     {minFor25 > 0 ? formatNum(minFor25, sym) : '—'}
                                                 </p>
-                                                <p style={{ fontSize: 10, color: C.green, margin: 0 }}>25% margin — healthy profit zone</p>
+                                                <p style={{ fontSize: 10, color: '#16a34a', margin: 0 }}>25% margin — healthy profit zone</p>
                                                 {revenue > 0 && minFor25 > 0 && (
-                                                    <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(22,163,74,0.08)', borderRadius: 6 }}>
-                                                        <p style={{ fontSize: 9, color: C.green, margin: 0, fontWeight: 600 }}>
+                                                    <div style={{ marginTop: 8, padding: '4px 8px', background: 'rgba(184,250,51,0.15)', borderRadius: 6 }}>
+                                                        <p style={{ fontSize: 9, color: '#16a34a', margin: 0, fontWeight: 600 }}>
                                                             {revenue >= minFor25
                                                                 ? `✓ You're in the sweet spot!`
                                                                 : `? Need ${formatNum(minFor25 - revenue, sym)} more to hit 25%`}
@@ -2814,7 +2822,7 @@ export default function ProfitCalculatorPage() {
                                                     {/* Zone colours */}
                                                     <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.min((breakEven / poSliderMax) * 100, 40)}%`, background: '#fecaca' }} />
                                                     <div style={{ position: 'absolute', left: `${Math.min((breakEven / poSliderMax) * 100, 40)}%`, top: 0, bottom: 0, width: `${Math.min(((minFor15 - breakEven) / poSliderMax) * 100, 25)}%`, background: '#fde68a' }} />
-                                                    <div style={{ position: 'absolute', left: `${Math.min((minFor15 / poSliderMax) * 100, 65)}%`, top: 0, bottom: 0, right: 0, background: '#bbf7d0' }} />
+                                                    <div style={{ position: 'absolute', left: `${Math.min((minFor15 / poSliderMax) * 100, 65)}%`, top: 0, bottom: 0, right: 0, background: C.limeTint }} />
                                                     {/* Current price marker */}
                                                     <div style={{
                                                         position: 'absolute', top: -2, bottom: -2,
@@ -2828,7 +2836,7 @@ export default function ProfitCalculatorPage() {
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: C.muted, marginTop: 3 }}>
                                                     <span style={{ color: C.red }}>{formatNum(breakEven, sym)}</span>
                                                     <span style={{ color: C.amber }}>{formatNum(minFor15, sym)}</span>
-                                                    <span style={{ color: C.green }}>{formatNum(minFor25, sym)}</span>
+                                                    <span style={{ color: '#16a34a' }}>{formatNum(minFor25, sym)}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -2845,7 +2853,7 @@ export default function ProfitCalculatorPage() {
                                                                 style={{
                                                                     padding: '3px 10px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 700,
                                                                     background: poReverseMode === mode ? C.lime : 'transparent',
-                                                                    color: poReverseMode === mode ? C.dark : C.muted,
+                                                                    color: poReverseMode === mode ? '#ffffff' : C.muted,
                                                                     transition: 'all 0.15s',
                                                                 }}>
                                                                 {mode === 'margin' ? 'By margin %' : `By profit ${sym}`}
@@ -2883,12 +2891,12 @@ export default function ProfitCalculatorPage() {
                                                         background: (() => {
                                                             const result = poReverseMode === 'margin' ? minForTargetMargin : minForTargetProfit
                                                             if (!result) return C.bg
-                                                            return result <= revenue ? '#f0fdf4' : '#fef2f2'
+                                                            return result <= revenue ? C.limeTint : '#fef2f2'
                                                         })(),
                                                         border: `1px solid ${(() => {
                                                             const result = poReverseMode === 'margin' ? minForTargetMargin : minForTargetProfit
                                                             if (!result) return C.border
-                                                            return result <= revenue ? '#bbf7d0' : '#fecaca'
+                                                            return result <= revenue ? C.limeTint : '#fecaca'
                                                         })()}`,
                                                     }}>
                                                         {(() => {
@@ -2903,13 +2911,13 @@ export default function ProfitCalculatorPage() {
                                                             const achievable = result <= revenue
                                                             return (
                                                                 <>
-                                                                    <p style={{ fontSize: 9, fontWeight: 700, color: achievable ? C.green : C.red, margin: '0 0 2px', letterSpacing: '0.5px' }}>
+                                                                    <p style={{ fontSize: 9, fontWeight: 700, color: achievable ? '#16a34a' : C.red, margin: '0 0 2px', letterSpacing: '0.5px' }}>
                                                                         {achievable ? 'MIN PRICE' : 'NEED TO LIST AT'}
                                                                     </p>
-                                                                    <p style={{ fontSize: 18, fontWeight: 900, color: achievable ? C.green : C.red, margin: '0 0 2px', lineHeight: 1 }}>
+                                                                    <p style={{ fontSize: 18, fontWeight: 900, color: achievable ? '#16a34a' : C.red, margin: '0 0 2px', lineHeight: 1 }}>
                                                                         {sym}{result.toFixed(2)}
                                                                     </p>
-                                                                    <p style={{ fontSize: 9, color: achievable ? C.green : C.red, margin: 0 }}>
+                                                                    <p style={{ fontSize: 9, color: achievable ? '#16a34a' : C.red, margin: 0 }}>
                                                                         {achievable
                                                                             ? `Your ${sym}${revenue.toFixed(2)} beats this by ${sym}${(revenue - result).toFixed(2)}`
                                                                             : `Raise by ${sym}${(result - revenue).toFixed(2)} to hit target`}
@@ -2981,15 +2989,15 @@ export default function ProfitCalculatorPage() {
                                                                     {sym}{poSliderValue.toFixed(2)}
                                                                 </p>
                                                             </div>
-                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: poSliderProfit >= 0 ? '#f0fdf4' : '#fef2f2', borderRadius: 8, border: `1px solid ${poSliderProfit >= 0 ? '#bbf7d0' : '#fecaca'}` }}>
+                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: poSliderProfit >= 0 ? C.limeTint : '#fef2f2', borderRadius: 8, border: `1px solid ${poSliderProfit >= 0 ? C.limeTint : '#fecaca'}` }}>
                                                                 <p style={{ fontSize: 9, color: C.muted, margin: '0 0 2px', fontWeight: 700 }}>PROFIT</p>
-                                                                <p style={{ fontSize: 16, fontWeight: 900, color: poSliderProfit >= 0 ? C.green : C.red, margin: 0, lineHeight: 1 }}>
+                                                                <p style={{ fontSize: 16, fontWeight: 900, color: poSliderProfit >= 0 ? '#16a34a' : C.red, margin: 0, lineHeight: 1 }}>
                                                                     {poSliderProfit >= 0 ? '+' : ''}{sym}{Math.abs(poSliderProfit).toFixed(2)}
                                                                 </p>
                                                             </div>
-                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: poSliderMargin >= 15 ? '#f0fdf4' : poSliderMargin >= 0 ? '#fffbeb' : '#fef2f2', borderRadius: 8, border: `1px solid ${poSliderMargin >= 15 ? '#bbf7d0' : poSliderMargin >= 0 ? '#fde68a' : '#fecaca'}` }}>
+                                                            <div style={{ textAlign: 'center', padding: '8px 0', background: poSliderMargin >= 15 ? C.limeTint : poSliderMargin >= 0 ? '#fffbeb' : '#fef2f2', borderRadius: 8, border: `1px solid ${poSliderMargin >= 15 ? C.limeTint : poSliderMargin >= 0 ? '#fde68a' : '#fecaca'}` }}>
                                                                 <p style={{ fontSize: 9, color: C.muted, margin: '0 0 2px', fontWeight: 700 }}>MARGIN</p>
-                                                                <p style={{ fontSize: 16, fontWeight: 900, color: poSliderMargin >= 15 ? C.green : poSliderMargin >= 0 ? C.amber : C.red, margin: 0, lineHeight: 1 }}>
+                                                                <p style={{ fontSize: 16, fontWeight: 900, color: poSliderMargin >= 15 ? '#16a34a' : poSliderMargin >= 0 ? C.amber : C.red, margin: 0, lineHeight: 1 }}>
                                                                     {poSliderMargin.toFixed(1)}%
                                                                 </p>
                                                             </div>
@@ -3010,7 +3018,7 @@ export default function ProfitCalculatorPage() {
                                                                     position: 'absolute', top: 0, bottom: 0,
                                                                     left: `${((breakEven - poSliderMin) / (poSliderMax - poSliderMin)) * 100}%`,
                                                                     width: `${minFor15 > 0 ? ((minFor15 - breakEven) / (poSliderMax - poSliderMin)) * 100 : 10}%`,
-                                                                    background: 'linear-gradient(to right, #fde68a, #bbf7d0)',
+                                                                    background: `linear-gradient(to right, #fde68a, ${C.limeTint})`,
                                                                 }} />
                                                                 {/* Green zone: minFor15 ? poSliderMax */}
                                                                 <div style={{
@@ -3046,7 +3054,7 @@ export default function ProfitCalculatorPage() {
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                                                                 <span style={{ fontSize: 9, color: C.red, fontWeight: 700 }}>LOSS</span>
                                                                 <span style={{ fontSize: 9, color: C.amber, fontWeight: 700 }}>THIN</span>
-                                                                <span style={{ fontSize: 9, color: C.green, fontWeight: 700 }}>PROFIT ?</span>
+                                                                <span style={{ fontSize: 9, color: '#16a34a', fontWeight: 700 }}>PROFIT ?</span>
                                                             </div>
                                                         </div>
 
@@ -3056,7 +3064,7 @@ export default function ProfitCalculatorPage() {
                                                             {[
                                                                 { label: `Break-even ${sym}${breakEven.toFixed(2)}`, value: breakEven, color: C.red },
                                                                 { label: `15% floor ${sym}${minFor15.toFixed(2)}`, value: minFor15, color: C.amber },
-                                                                { label: `25% target ${sym}${minFor25.toFixed(2)}`, value: minFor25, color: C.green },
+                                                                { label: `25% target ${sym}${minFor25.toFixed(2)}`, value: minFor25, color: '#16a34a' },
                                                             ].filter(s => s.value > 0).map(snap => (
                                                                 <button key={snap.label}
                                                                     onClick={() => {
@@ -3079,13 +3087,13 @@ export default function ProfitCalculatorPage() {
                                                         {/* Smart verdict */}
                                                         <div style={{
                                                             marginTop: 10, padding: '8px 12px', borderRadius: 8,
-                                                            background: poSliderMargin >= 25 ? '#f0fdf4'
+                                                            background: poSliderMargin >= 25 ? C.limeTint
                                                                 : poSliderMargin >= 15 ? '#fffbeb'
                                                                     : poSliderMargin >= 0 ? '#fef2f2'
                                                                         : '#fef2f2',
-                                                            border: `1px solid ${poSliderMargin >= 25 ? '#bbf7d0' : poSliderMargin >= 15 ? '#fde68a' : '#fecaca'}`,
+                                                            border: `1px solid ${poSliderMargin >= 25 ? C.limeTint : poSliderMargin >= 15 ? '#fde68a' : '#fecaca'}`,
                                                         }}>
-                                                            <p style={{ fontSize: 11, fontWeight: 700, margin: 0, color: poSliderMargin >= 25 ? C.green : poSliderMargin >= 15 ? C.amber : C.red }}>
+                                                            <p style={{ fontSize: 11, fontWeight: 700, margin: 0, color: poSliderMargin >= 25 ? '#16a34a' : poSliderMargin >= 15 ? C.amber : C.red }}>
                                                                 {poSliderMargin >= 25 ? `Sweet spot — strong margin at ${sym}${poSliderValue.toFixed(2)}`
                                                                     : poSliderMargin >= 15 ? `Acceptable — thin but positive at ${sym}${poSliderValue.toFixed(2)}`
                                                                         : poSliderMargin >= 0 ? `Danger zone — barely covering costs`
@@ -3123,7 +3131,7 @@ export default function ProfitCalculatorPage() {
                                                     flex: 1, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
                                                     fontSize: 12, fontWeight: 700, letterSpacing: '0.2px',
                                                     background: scenarioTab === tab.id ? C.dark : 'transparent',
-                                                    color: scenarioTab === tab.id ? C.lime : C.muted,
+                                                    color: scenarioTab === tab.id ? C.accent : C.muted,
                                                     transition: 'all 0.15s',
                                                 }}
                                             >
@@ -3150,9 +3158,9 @@ export default function ProfitCalculatorPage() {
                                                         {state.sellingPrice > 0 ? `${((bestOfferPrice / state.sellingPrice) * 100).toFixed(0)}%` : '0%'} of your listing ({formatNum(state.sellingPrice, sym)})
                                                     </p>
                                                 </div>
-                                                <div style={{ background: profitColor(bestOfferNet) === C.green ? C.limeTint : profitColor(bestOfferNet) === C.red ? '#fee2e2' : C.bg, border: `1px solid ${profitColor(bestOfferNet)}`, borderRadius: 10, padding: 12 }}>
+                                                <div style={{ background: profitColor(bestOfferNet) === C.accent ? C.limeTint : profitColor(bestOfferNet) === C.red ? '#fee2e2' : C.bg, border: `1px solid ${profitColor(bestOfferNet)}`, borderRadius: 10, padding: 12 }}>
                                                     <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: 0 }}>YOUR NET PROFIT</p>
-                                                    <p style={{ fontSize: 26, fontWeight: 900, color: profitColor(bestOfferNet), margin: '4px 0 0', lineHeight: 1 }}>
+                                                    <p style={{ fontSize: 26, fontWeight: 900, color: profitTextColor(bestOfferNet), margin: '4px 0 0', lineHeight: 1 }}>
                                                         {bestOfferNet >= 0 ? "+" : "-"}{formatNum(bestOfferNet, sym)}
                                                     </p>
                                                     <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>
@@ -3186,7 +3194,7 @@ export default function ProfitCalculatorPage() {
                                                 border: `1px solid ${profitColor(bestOfferNet)}`,
                                                 borderRadius: 8, padding: 10,
                                             }}>
-                                                <p style={{ fontSize: 12, fontWeight: 700, color: profitColor(bestOfferNet), margin: 0 }}>
+                                                <p style={{ fontSize: 12, fontWeight: 700, color: profitTextColor(bestOfferNet), margin: 0 }}>
                                                     {bestOfferNet > originalNet * 0.7 ? 'Accept — solid profit'
                                                         : bestOfferNet > 0 ? 'Marginal ? accept only if you want the sale'
                                                             : bestOfferNet === 0 ? 'Break even ? no reason to accept'
@@ -3219,7 +3227,7 @@ export default function ProfitCalculatorPage() {
                                                             padding: '4px 12px', borderRadius: 999, border: 'none', cursor: 'pointer',
                                                             fontSize: 11, fontWeight: 700,
                                                             background: reverseMode === m ? C.dark : 'transparent',
-                                                            color: reverseMode === m ? C.lime : C.muted,
+                                                            color: reverseMode === m ? C.accent : C.muted,
                                                         }}
                                                     >
                                                         Target {m === 'profit' ? 'Profit ($)' : 'Margin (%)'}
@@ -3273,7 +3281,7 @@ export default function ProfitCalculatorPage() {
                                                         </div>
                                                         <div style={{ background: C.bg, borderRadius: 8, padding: 10 }}>
                                                             <p style={{ fontSize: 10, color: C.muted, fontWeight: 600, margin: 0 }}>Gap</p>
-                                                            <p style={{ fontSize: 16, fontWeight: 800, color: currentPriceGap > 0 ? C.red : C.green, margin: '2px 0 0' }}>
+                                                            <p style={{ fontSize: 16, fontWeight: 800, color: currentPriceGap > 0 ? C.red : '#16a34a', margin: '2px 0 0' }}>
                                                                 {currentPriceGap >= 0 ? "+" : "-"}{formatNum(currentPriceGap, sym)}
                                                             </p>
                                                         </div>
@@ -3306,7 +3314,7 @@ export default function ProfitCalculatorPage() {
                                                 <div>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                                                         <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Return rate</label>
-                                                        <span style={{ fontSize: 13, fontWeight: 800, color: returnRate <= 5 ? C.green : returnRate <= 15 ? C.amber : C.red }}>
+                                                        <span style={{ fontSize: 13, fontWeight: 800, color: returnRate <= 5 ? '#16a34a' : returnRate <= 15 ? C.amber : C.red }}>
                                                             {returnRate}%
                                                         </span>
                                                     </div>
@@ -3346,7 +3354,7 @@ export default function ProfitCalculatorPage() {
                                             <div style={{ background: C.bg, borderRadius: 10, padding: 12, marginBottom: 10 }}>
                                                 <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.4px', margin: '0 0 8px' }}>PER {Math.max(1, Math.round(parseFloat(salesVolumeStr) || 100)).toLocaleString()} SALES / MONTH</p>
                                                 <div style={{ display: 'flex', height: 24, borderRadius: 6, overflow: 'hidden', marginBottom: 6 }}>
-                                                    <div style={{ width: `${(successCount / (successCount + returnCount || 1) * 100).toFixed(1)}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div style={{ width: `${(successCount / (successCount + returnCount || 1) * 100).toFixed(1)}%`, background: C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                         {(successCount / (successCount + returnCount || 1) * 100) >= 15 && <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{successCount.toLocaleString()} sold</span>}
                                                     </div>
                                                     <div style={{ width: `${(returnCount / (successCount + returnCount || 1) * 100).toFixed(1)}%`, background: C.red, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3354,7 +3362,7 @@ export default function ProfitCalculatorPage() {
                                                     </div>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                                                    <span style={{ color: C.green, fontWeight: 700 }}>+ {formatNum(totalSuccessProfit, sym)} from {successCount.toLocaleString()} sales</span>
+                                                    <span style={{ color: '#16a34a', fontWeight: 700 }}>+ {formatNum(totalSuccessProfit, sym)} from {successCount.toLocaleString()} sales</span>
                                                     {returnCount > 0 && (
                                                         <span style={{ color: C.red, fontWeight: 700 }}>▼ {formatNum(totalReturnLoss, sym)} from {returnCount.toLocaleString()} returns</span>
                                                     )}
@@ -3370,8 +3378,8 @@ export default function ProfitCalculatorPage() {
                                                         <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', margin: 0 }}>per unit (no returns)</p>
                                                     </div>
                                                     <div>
-                                                        <p style={{ fontSize: 9, color: C.lime, fontWeight: 600, margin: 0, letterSpacing: '0.3px' }}>EFFECTIVE PROFIT</p>
-                                                        <p style={{ fontSize: 18, fontWeight: 800, color: effectivePerUnit >= 0 ? C.lime : '#fca5a5', margin: '2px 0 0' }}>
+                                                        <p style={{ fontSize: 9, color: C.accent, fontWeight: 600, margin: 0, letterSpacing: '0.3px' }}>EFFECTIVE PROFIT</p>
+                                                        <p style={{ fontSize: 18, fontWeight: 800, color: effectivePerUnit >= 0 ? C.accent : '#fca5a5', margin: '2px 0 0' }}>
                                                             {effectivePerUnit >= 0 ? "" : "-"}{formatNum(effectivePerUnit, sym)}
                                                         </p>
                                                         <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', margin: 0 }}>per unit (with returns)</p>
@@ -3459,7 +3467,7 @@ export default function ProfitCalculatorPage() {
                                                 <div>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                                                         <label style={{ fontSize: 11, fontWeight: 600, color: C.text }}>Expected sell-through rate</label>
-                                                        <span style={{ fontSize: 13, fontWeight: 800, color: sellThroughPct >= 75 ? C.green : sellThroughPct >= 60 ? C.amber : C.red }}>
+                                                        <span style={{ fontSize: 13, fontWeight: 800, color: sellThroughPct >= 75 ? '#16a34a' : sellThroughPct >= 60 ? C.amber : C.red }}>
                                                             {sellThroughPct.toFixed(0)}%
                                                         </span>
                                                     </div>
@@ -3521,7 +3529,7 @@ export default function ProfitCalculatorPage() {
 
                                         {/* Profit Reality box */}
                                         <div style={{ background: C.dark, borderRadius: 12, padding: 16, color: C.surface, marginBottom: 10 }}>
-                                            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: C.lime, margin: '0 0 12px' }}>PROFIT REALITY</p>
+                                            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', color: C.accent, margin: '0 0 12px' }}>PROFIT REALITY</p>
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, marginBottom: 12 }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -3549,8 +3557,8 @@ export default function ProfitCalculatorPage() {
                                             {/* Real profit hero */}
                                             <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: 12 }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                                    <span style={{ fontSize: 12, fontWeight: 700, color: C.lime, letterSpacing: '0.5px' }}>REAL PROFIT</span>
-                                                    <span style={{ fontSize: 26, fontWeight: 900, color: realBulkProfit >= 0 ? C.lime : '#fca5a5', lineHeight: 1 }}>
+                                                    <span style={{ fontSize: 12, fontWeight: 700, color: C.accent, letterSpacing: '0.5px' }}>REAL PROFIT</span>
+                                                    <span style={{ fontSize: 26, fontWeight: 900, color: realBulkProfit >= 0 ? C.accent : '#fca5a5', lineHeight: 1 }}>
                                                         {realBulkProfit >= 0 ? "+" : "-"}{formatNum(realBulkProfit, sym)}
                                                     </span>
                                                 </div>
@@ -3615,7 +3623,7 @@ export default function ProfitCalculatorPage() {
                                                                     <span style={{ fontSize: 10, fontWeight: 800, color: C.surface }}>{recoveryUnits}</span>
                                                                 )}
                                                             </div>
-                                                            <div style={{ width: `${profitPct2}%`, background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <div style={{ width: `${profitPct2}%`, background: C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                 {profitPct2 >= 15 && (
                                                                     <span style={{ fontSize: 10, fontWeight: 800, color: C.dark }}>{profitUnits}</span>
                                                                 )}
@@ -3634,7 +3642,7 @@ export default function ProfitCalculatorPage() {
                                                                 <span style={{ color: C.muted, fontWeight: 600 }}>Recover cost</span>
                                                             </div>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                                <div style={{ width: 8, height: 8, background: C.lime, borderRadius: 2 }} />
+                                                                <div style={{ width: 8, height: 8, background: C.accent, borderRadius: 2 }} />
                                                                 <span style={{ color: C.muted, fontWeight: 600 }}>Pure profit</span>
                                                             </div>
                                                             {deadStockUnits > 0 && (
@@ -3661,7 +3669,7 @@ export default function ProfitCalculatorPage() {
                                                             {profitUnits > 0 && (
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: C.muted }}>
                                                                     <span>Pure profit (units {currentBreakEven + 1} ? {recoveryUnits + profitUnits})</span>
-                                                                    <span style={{ color: C.green, fontWeight: 700 }}>+{formatNum(pureProfitValue, sym)}</span>
+                                                                    <span style={{ color: C.accent, fontWeight: 700 }}>+{formatNum(pureProfitValue, sym)}</span>
                                                                 </div>
                                                             )}
                                                             {bulkMode === 'realistic' && deadStockUnits > 0 && (
@@ -3672,7 +3680,7 @@ export default function ProfitCalculatorPage() {
                                                             )}
                                                             <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 6, paddingTop: 6, display: 'flex', justifyContent: 'space-between' }}>
                                                                 <span style={{ fontWeight: 700, color: C.text }}>Real net</span>
-                                                                <span style={{ fontWeight: 800, color: realBulkProfit >= 0 ? C.green : C.red }}>
+                                                                <span style={{ fontWeight: 800, color: realBulkProfit >= 0 ? '#16a34a' : C.red }}>
                                                                     {realBulkProfit >= 0 ? "+" : "-"}{formatNum(realBulkProfit, sym)}
                                                                 </span>
                                                             </div>
@@ -3716,16 +3724,16 @@ export default function ProfitCalculatorPage() {
 
                                                     <div style={{ color: C.muted }}>Total profit</div>
                                                     <div style={{ textAlign: 'center' }}>{sym}{singleSaleProfit.toFixed(2)}</div>
-                                                    <div style={{ textAlign: 'center', fontWeight: 700, color: C.green }}>{formatNum(realBulkProfit, sym)}</div>
+                                                    <div style={{ textAlign: 'center', fontWeight: 700, color: C.accent }}>{formatNum(realBulkProfit, sym)}</div>
                                                 </div>
 
                                                 {shippingSavingPerUnit > 0.01 && (
-                                                    <p style={{ fontSize: 10, color: C.green, margin: '10px 0 0', fontWeight: 600 }}>
+                                                    <p style={{ fontSize: 10, color: '#16a34a', margin: '10px 0 0', fontWeight: 600 }}>
                                                         Bulk shipping saves you {sym}{shippingSavingPerUnit.toFixed(2)} per unit ({sym}{(shippingSavingPerUnit * unitsExpectedToSell).toFixed(2)} total)
                                                     </p>
                                                 )}
                                                 {bulkVsSingleDiff !== 0 && singleSaleProfit > 0 && (
-                                                    <p style={{ fontSize: 11, textAlign: 'center', margin: '10px 0 0', fontWeight: 700, color: bulkVsSingleDiff > 0 ? C.green : C.red }}>
+                                                    <p style={{ fontSize: 11, textAlign: 'center', margin: '10px 0 0', fontWeight: 700, color: bulkVsSingleDiff > 0 ? '#16a34a' : C.red }}>
                                                         Bulk {bulkVsSingleDiff > 0 ? 'wins' : 'loses'} by {Math.abs(bulkVsSingleDiff).toFixed(1)}% per unit
                                                     </p>
                                                 )}
@@ -3779,7 +3787,7 @@ export default function ProfitCalculatorPage() {
                             <div style={{ display: 'flex', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
                                 {(['Calculations', 'Shared Links'] as const).map(tab => (
                                     <button key={tab} onClick={() => setHistoryDrawerTab(tab === 'Calculations' ? 'saved' : 'shared')}
-                                        style={{ flex: 1, padding: '10px 0', fontSize: 11, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', color: (tab === 'Calculations' ? historyDrawerTab === 'saved' : historyDrawerTab === 'shared') ? C.text : C.muted, borderBottom: (tab === 'Calculations' ? historyDrawerTab === 'saved' : historyDrawerTab === 'shared') ? `2px solid ${C.lime}` : '2px solid transparent' }}>
+                                        style={{ flex: 1, padding: '10px 0', fontSize: 11, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', color: (tab === 'Calculations' ? historyDrawerTab === 'saved' : historyDrawerTab === 'shared') ? C.text : C.muted, borderBottom: (tab === 'Calculations' ? historyDrawerTab === 'saved' : historyDrawerTab === 'shared') ? `2px solid ${C.accent}` : '2px solid transparent' }}>
                                         {tab}
                                     </button>
                                 ))}
@@ -3856,19 +3864,19 @@ export default function ProfitCalculatorPage() {
                                                 <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
                                                     <div>
                                                         <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>PROFIT</p>
-                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.net_profit) >= 0 ? C.green : C.red, margin: 0 }}>
+                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.net_profit) >= 0 ? '#16a34a' : C.red, margin: 0 }}>
                                                             {Number(item.net_profit) >= 0 ? '+' : '-'}{COUNTRIES[item.country as CountryCode]?.symbol ?? '$'}{Math.abs(Number(item.net_profit)).toFixed(2)}
                                                         </p>
                                                     </div>
                                                     <div>
                                                         <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>MARGIN</p>
-                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.margin) >= 0 ? C.green : C.red, margin: 0 }}>
+                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.margin) >= 0 ? '#16a34a' : C.red, margin: 0 }}>
                                                             {Number(item.margin).toFixed(1)}%
                                                         </p>
                                                     </div>
                                                     <div>
                                                         <p style={{ fontSize: 9, color: C.muted, fontWeight: 600, margin: 0 }}>ROI</p>
-                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.roi) >= 0 ? C.green : C.red, margin: 0 }}>
+                                                        <p style={{ fontSize: 13, fontWeight: 800, color: Number(item.roi) >= 0 ? '#16a34a' : C.red, margin: 0 }}>
                                                             {Number(item.roi).toFixed(1)}%
                                                         </p>
                                                     </div>
@@ -4085,7 +4093,7 @@ export default function ProfitCalculatorPage() {
 
                 {/* ── Fee verification trust label ── */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, flexShrink: 0 }} />
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.accent, flexShrink: 0 }} />
                     <p style={{ fontSize: 10, color: C.muted, margin: 0, fontWeight: 600 }}>
                         Fees for {country} last verified February 2026 — {meta.regFeeConfirmed ? 'regulatory fee confirmed' : 'regulatory fee unconfirmed, verify on your seller invoice'}
                     </p>
@@ -4096,8 +4104,8 @@ export default function ProfitCalculatorPage() {
           @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
           input[type=range]::-webkit-slider-runnable-track { background: transparent; height: 6px; }
           input[type=range]::-moz-range-track { background: transparent; height: 6px; }
-          input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #8fff00; border: 2px solid #fff; box-shadow: 0 0 0 1px #8fff00; margin-top: -5px; cursor: pointer; }
-          input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #8fff00; border: 2px solid #fff; box-shadow: 0 0 0 1px #8fff00; cursor: pointer; }
+          input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #7530fb; border: 2px solid #fff; box-shadow: 0 0 0 1px #7530fb; margin-top: -5px; cursor: pointer; }
+          input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #7530fb; border: 2px solid #fff; box-shadow: 0 0 0 1px #7530fb; cursor: pointer; }
         `}</style>
             </div>
         </KillSwitchBanner>

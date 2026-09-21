@@ -64,12 +64,21 @@ export default function KillSwitchGate({ switchTitle, children }: Props) {
 
   async function checkSwitch() {
     try {
-      const { data } = await (supabase.from('kill_switches') as any)
+      const { data, error } = await (supabase as any)
+        .from('kill_switches')
         .select('is_enabled, is_read_only, change_note, user_message, updated_at')
         .eq('title', switchTitle)
         .single()
+
+      if (error) {
+        console.error('KillSwitch check error:', error);
+        // Fail open — if DB check fails, allow access
+        return;
+      }
+
       if (data) setState(data as SwitchState)
-    } catch {
+    } catch (error) {
+      console.error('KillSwitch check error:', error);
       // Fail open — if DB check fails, allow access
     } finally {
       setLoading(false)

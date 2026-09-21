@@ -30,7 +30,7 @@ export default function ProfitCalculatorCard({ salePrice }: ProfitCalculatorCard
       {/* Header â€” NeonIcon + title */}
       <div className="flex items-center gap-2.5 mb-5">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-             style={{ backgroundColor: '#1a2410' }}>
+             style={{ backgroundColor: '#1f1d2e' }}>
           <Calculator size={16} style={{ color: '#8FFF00' }} />
         </div>
         <span className="text-[16px] font-bold" style={{ color: '#1E293B' }}>Profit Calculator</span>

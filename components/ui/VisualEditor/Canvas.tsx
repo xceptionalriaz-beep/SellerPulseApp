@@ -47,6 +47,7 @@ import {
     getDefinition,
     BLOCK_DEFINITIONS,
 } from './blocks'
+import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -113,10 +114,19 @@ interface CanvasProps {
     selectedId: string | null
     draggedType: BlockType | null
     zoom?: number
+    /** Set of block ids that match the current search. null = no search active. */
+    matchedIds?: Set<string> | null
+    /** @deprecated use matchedIds — kept for backwards-compat callers */
     canvasSearch?: string
     lockedIds?: Set<string>
     hiddenIds?: Set<string>
     deviceWidth: 'desktop' | 'tablet' | 'mobile'
+    /**
+     * Active template category — controls which set of sample data
+     * (product photos, brand name, spec values, cross-sell items) the
+     * canvas preview swaps in for {{TOKENS}}.
+     */
+    activeCategory?: CategoryId
     onSelect: (id: string) => void
     onDrop: (type: BlockType) => void
     onReorder: (fromIndex: number, toIndex: number) => void
@@ -140,10 +150,12 @@ export default function Canvas({
     selectedId,
     draggedType,
     zoom = 100,
+    matchedIds = null,
     canvasSearch = '',
     lockedIds = new Set(),
     hiddenIds = new Set(),
     deviceWidth,
+    activeCategory,
     onSelect,
     onDrop,
     onReorder,
@@ -226,12 +238,12 @@ export default function Canvas({
                 flex: 1,
                 height: '100%',
                 overflowY: 'auto',
-                overflowX: 'hidden',
+                overflowX: 'auto',
                 backgroundColor: '#e8e6f0',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                padding: '24px 24px 40px',
+                padding: '20px 20px 40px',
                 position: 'relative',
                 transformOrigin: 'top center',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
@@ -241,7 +253,7 @@ export default function Canvas({
             onDrop={handleDrop}
         >
             {/* ── Drop overlay — shown when dragging from library ── */}
-            {draggedType && isDropTarget && blocks.length > 0 && (
+            {draggedType && isDropTarget && (
                 <div style={{
                     position: 'fixed',
                     inset: 0,
@@ -295,7 +307,16 @@ export default function Canvas({
                                 isSelected={isSelected}
                                 isLocked={lockedIds.has(block.id)}
                                 isHidden={hiddenIds.has(block.id)}
-                                searchMatch={!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true)}
+                                activeCategory={activeCategory}
+                                searchMatch={
+                                    // Prefer the parent's matchedIds set (single
+                                    // source of truth). Fall back to the legacy
+                                    // canvasSearch label-match for any other
+                                    // callers that haven't been updated yet.
+                                    matchedIds === null
+                                        ? (!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true))
+                                        : matchedIds.has(block.id)
+                                }
                                 isBeingDragged={isBeingDragged}
                                 onSelect={() => onSelect(block.id)}
                                 onDelete={() => onDelete(block.id)}
@@ -492,6 +513,7 @@ interface BlockCardProps {
     onReorderDragOver: (e: React.DragEvent) => void
     onReorderDrop: (e: React.DragEvent) => void
     onReorderDragEnd: () => void
+    activeCategory?: CategoryId
 }
 
 function BlockCard({
@@ -518,9 +540,23 @@ function BlockCard({
     onReorderDragOver,
     onReorderDrop,
     onReorderDragEnd,
+    activeCategory,
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
+
+    // ── Extract the {{TOKENS}} used in this block so we can surface them as a
+    //    hover badge — keeps the dynamic identifiers visible while the canvas
+    //    preview itself shows sample data.
+    const tokens = React.useMemo(() => {
+        try {
+            const blockDef = getDefinition(block.type)
+            if (!blockDef) return []
+            return extractTokens(blockDef.toHtml(block.props as any, block.id))
+        } catch {
+            return []
+        }
+    }, [block.type, block.id, block.props])
 
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -536,6 +572,7 @@ function BlockCard({
 
     return (
         <div
+            data-block-id={block.id}
             draggable
             onDragStart={e => {
                 // Canvas reorder — don't set dataTransfer type to prevent
@@ -634,8 +671,19 @@ function BlockCard({
             )}
 
             {/* ── Block preview content ── */}
-            <div style={{ padding: '14px 16px 12px', pointerEvents: 'none' }}>
-                <BlockPreview block={block} def={def} />
+            <div
+                ref={el => {
+                    if (el) {
+                        // Compute scale so 700px iframe fits the card width minus padding (16px left + 16px right = 32px)
+                        const w = el.getBoundingClientRect().width
+                        const scale = w > 32 ? ((w - 32) / 700) : 1
+                        el.style.setProperty('--canvas-scale', String(scale))
+                        el.style.height = 'auto'
+                    }
+                }}
+                style={{ padding: '14px 16px 12px', pointerEvents: 'auto', overflow: 'hidden' }}
+            >
+                <BlockPreview block={block} def={def} activeCategory={activeCategory} />
             </div>
 
             {/* ── Action toolbar — horizontal, top of block ── */}
@@ -719,6 +767,50 @@ function BlockCard({
                     >
                         <Trash2 size={13} />
                     </ActionButton>
+                </div>
+            )}
+
+            {/* ── Tokens-used hover badge (bottom-left) ── */}
+            {/* Shows which {{TOKENS}} are used in this block so the user can
+                still see what's dynamic, even though the canvas renders with
+                sample data. Visible on hover or when selected. */}
+            {(hovered || isSelected) && tokens.length > 0 && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: 8,
+                    left: 8,
+                    backgroundColor: C.primary,
+                    color: '#fff',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 600,
+                    padding: '4px 9px',
+                    borderRadius: 20,
+                    letterSpacing: '0.02em',
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    maxWidth: 320,
+                    boxShadow: '0 2px 6px rgba(117, 48, 251, 0.25)',
+                }}>
+                    <span style={{
+                        fontFamily: 'monospace',
+                        fontSize: 9,
+                        opacity: 0.7,
+                        fontWeight: 700,
+                    }}>
+                        {'{{}}'}
+                    </span>
+                    <span style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {tokens.slice(0, 3).join(' · ')}
+                        {tokens.length > 3 && ` +${tokens.length - 3} more`}
+                    </span>
                 </div>
             )}
 
@@ -830,7 +922,7 @@ function ActionButton({
 // Renders the exact same HTML that goes to eBay, inside a sandboxed iframe.
 // What you see on canvas = what eBay renders. No more wireframe sketches.
 // ─────────────────────────────────────────────────────────────────────────────
-function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
+function BlockPreview({ block, def, activeCategory }: { block: Block; def: BlockDefinition; activeCategory?: CategoryId }) {
     const props = block.props as any
     const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
@@ -839,7 +931,32 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
         try {
             const blockDef = getDefinition(block.type)
             if (!blockDef) return ''
-            const blockHtml = blockDef.toHtml(props, block.id)
+            // 1) Render the eBay HTML as usual — still contains {{TOKENS}}
+            let blockHtml = blockDef.toHtml(props, block.id)
+
+            // 2) Canvas-only swap: replace {{TOKENS}} with sample data, swap
+            //    placeholder images for real product photos, and turn icon-name
+            //    strings (e.g. 'shield-check') into inline SVGs.
+            //    The block's props are NOT mutated — saved HTML stays tokenized.
+            //    Sample data is category-matched so the preview reflects the
+            //    active template's theme (pet / electronics / fashion / etc.).
+            if (block.type === 'banner') {
+                // Use the special helper to honor imageUrl, imagePosition, borderRadius
+                blockHtml = renderBannerForCanvas(block, activeCategory)
+            } else {
+                blockHtml = renderForCanvas(blockHtml, block.type, activeCategory)
+            }
+
+            // 3) If any <img src> still references a {{TOKEN}} (defensive — should
+            //    be handled by renderForCanvas already), fall back to a small
+            //    transparent 1×1 so we never show the browser's broken-image icon.
+            if (/src="[^"]*\{\{[^}]*\}\}[^"]*"/i.test(blockHtml)) {
+                blockHtml = blockHtml.replace(
+                    /src="[^"]*\{\{[^}]*\}\}[^"]*"/gi,
+                    'src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221%22%20height%3D%221%22%2F%3E"'
+                )
+            }
+
             return `<!DOCTYPE html>
 <html>
 <head>
@@ -851,21 +968,192 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
     font-family: Arial, Helvetica, sans-serif;
     background: transparent;
     overflow: hidden;
+    width: 700px;
   }
   table { border-collapse: collapse; width: 100%; }
-  img { border: 0; display: block; max-width: 100%; }
+  img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }
+  /* Dropzone visual feedback */
+  div[data-canvas-dropzone]
+  div[data-canvas-dropzone][data-canvas-dropzone-active="true"] {
+    outline: 3px solid #7530fb !important;
+    outline-offset: 2px !important;
+    border-radius: 8px !important;
+  }
+  /* Active sub-slot visual indicator — highly specific with !important */
+  div[data-canvas-dropzone].riazify-active-slot,
+  div[data-canvas-dropzone][data-canvas-dropzone-active="true"],
+  img[data-slot].riazify-active-slot {
+    outline: 3px solid #7530fb !important;
+    outline-offset: 2px !important;
+    border-radius: 8px !important;
+    background-color: #f3eeff !important;
+    box-shadow: 0 0 0 3px rgba(117,48,251,0.25) !important;
+  }
+  img[data-slot].riazify-active-slot {
+    transition: outline 0.15s ease !important;
+  }
 </style>
+<style id="canvas-hover-styles">
+  div[data-canvas-overlay] { opacity: 0; transition: opacity 0.15s ease; pointer-events: none; }
+  div[data-canvas-dropzone]:hover div[data-canvas-overlay],
+  div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
+
+  /* Removed inline text editing hover indicator */
+</style>
+<script>
+(function() {
+  // Block ID is baked into the script at render time so the iframe
+  // never depends on window.frameElement to identify itself to the parent.
+  // This is critical: window.frameElement may be null or inaccessible
+  // in some browser contexts, causing the blockId to be empty and the
+  // drop/edit messages to fail silently.
+  var BLOCK_ID = "${block.id}";
+  var BLOCK_TYPE = "${block.type}";
+  document.addEventListener('DOMContentLoaded', function() {
+
+    // In-place text editing on double click for p, h1, h2, h3, h4, span
+    // [REMOVED: Interactive content editing feature]
+    document.querySelectorAll('img[data-slot]').forEach(function(img) {
+      img.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var slot = img.getAttribute('data-slot');
+        if (slot && window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: BLOCK_ID }, '*');
+        }
+      });
+    });
+    // Dropzone click also triggers selection (for full-width / gallery thumbnails)
+    document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+      zone.addEventListener('click', function(e) {
+        if (e.target && e.target.closest && e.target.closest('[data-canvas-overlay]')) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        var slot = zone.getAttribute('data-canvas-dropzone');
+        // Use the pre-embedded BLOCK_ID constant instead of reading
+        // from window.frameElement which may not be available in all cases
+        var blockId = BLOCK_ID;
+        var hasContent = zone.querySelector('.add-btn') === null;
+        if (slot && window.parent) {
+          if (hasContent) {
+            window.parent.postMessage({ type: 'RIAZIFY_EDIT_SLOT_CONTENT', propKey: slot, blockId: blockId }, '*');
+          } else {
+            window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: blockId }, '*');
+          }
+        }
+      });
+    });
+    // Dropzone drag/drop handling — supports file drops and URL drops
+    document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+      var slot = zone.getAttribute('data-canvas-dropzone');
+
+      zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.setAttribute('data-canvas-dropzone-active', 'true');
+        e.dataTransfer.dropEffect = 'copy';
+      });
+      zone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.setAttribute('data-canvas-dropzone-active', 'false');
+      });
+      zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.setAttribute('data-canvas-dropzone-active', 'false');
+        var slot = zone.getAttribute('data-canvas-dropzone');
+        // Check if dropped item is a block type string from our library
+        var blockType = e.dataTransfer.getData('text/plain');
+        if (blockType && window.parent && slot) {
+          // Use the pre-embedded BLOCK_ID constant instead of
+          // reading from window.frameElement which may not be available
+          // in all browsers/contexts, causing the message to fail
+          window.parent.postMessage({ type: 'RIAZIFY_DROP_BLOCK', propKey: slot, blockType: blockType, blockId: BLOCK_ID }, '*');
+          return;
+        }
+        // Prefer file drop
+        var files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+          var file = files[0];
+          if (window.parent && slot) {
+            window.parent.postMessage({ type: 'RIAZIFY_DROP_ASSET', propKey: slot, fileName: file.name, fileType: file.type, fileUrl: URL.createObjectURL(file) }, '*');
+          }
+        } else {
+          // Try URL from dataTransfer
+          var url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+          if (url && window.parent && slot) {
+            window.parent.postMessage({ type: 'RIAZIFY_DROP_ASSET', propKey: slot, fileUrl: url }, '*');
+          }
+        }
+      });
+    });
+    // Highlight the active sub-slot image frame (visual indicator)
+    // Receives propKey updates via message from parent VisualEditor
+    window.addEventListener('message', function(msgEvent) {
+      if (msgEvent.data && msgEvent.data.type === 'RIAZIFY_UPDATE_ACTIVE_SLOT') {
+        var prop = msgEvent.data.propKey;
+        // Highlight the dropzone container (clear visual target for full-width and thumbnails)
+        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+          zone.classList.remove('riazify-active-slot');
+          // ALSO remove from parent container if needed
+          if (zone.getAttribute('data-canvas-dropzone') !== prop) {
+              zone.classList.remove('riazify-active-slot');
+          }
+        });
+        document.querySelectorAll('img[data-slot]').forEach(function(img) {
+          img.classList.remove('riazify-active-slot');
+        });
+        // Apply only to the clicked/updated sub-slot
+        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+          if (zone.getAttribute('data-canvas-dropzone') === prop) {
+            zone.classList.add('riazify-active-slot');
+          }
+        });
+        document.querySelectorAll('img[data-slot]').forEach(function(img) {
+          if (img.getAttribute('data-slot') === prop) {
+            img.classList.add('riazify-active-slot');
+          }
+        });
+      }
+    });
+    // Overlay click triggers asset picker/modal
+    document.querySelectorAll('div[data-canvas-overlay]').forEach(function(overlay) {
+      overlay.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var slot = overlay.getAttribute('data-canvas-overlay');
+        if (slot && window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_OPEN_ASSET_PICKER', propKey: slot }, '*');
+        }
+      });
+    });
+
+  });
+})();
+</script>
 </head>
 <body>${blockHtml}</body>
 </html>`
         } catch {
             return ''
         }
-    }, [block.type, block.id, props])
+    }, [block.type, block.id, props, activeCategory])
 
     // Auto-resize iframe to fit content height
     const [height, setHeight] = React.useState(80)
+
+    // Content hash to force iframe remount when html changes
+    // This is critical for drag-and-drop: without a changing key, React
+    // reuses the same iframe instance and the new srcDoc may not reload
+    // in all browsers, causing content to not visually update after drop.
+    // We use block.props as a proxy for content changes — when the slot
+    // content updates via drag-and-drop, props changes and the key changes,
+    // forcing React to unmount/remount the iframe so srcDoc reloads.
+    const htmlKey = `${block.id}-${block.type}-${JSON.stringify(props)}`
 
     const onLoad = React.useCallback(() => {
         const iframe = iframeRef.current
@@ -896,22 +1184,33 @@ function BlockPreview({ block, def }: { block: Block; def: BlockDefinition }) {
 
     return (
         <div style={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
-            <iframe
-                ref={iframeRef}
-                srcDoc={html}
-                onLoad={onLoad}
-                sandbox="allow-same-origin"
-                scrolling="no"
-                style={{
-                    width: '100%',
-                    height: height,
-                    border: 'none',
-                    display: 'block',
-                    pointerEvents: 'none', // clicks go to canvas, not iframe
-                    backgroundColor: 'transparent',
-                }}
-                title={`Preview: ${def.label}`}
-            />
+            <div style={{
+                width: '100%',
+                overflow: 'hidden',
+                // Scale 700px content down to container width
+                transformOrigin: 'top left',
+            }}>
+                <iframe
+                    key={htmlKey}
+                    ref={iframeRef}
+                    srcDoc={html}
+                    onLoad={onLoad}
+                    sandbox="allow-same-origin allow-scripts"
+                    scrolling="no"
+                    data-block-id={block.id}
+                    style={{
+                        width: '700px',
+                        height: height,
+                        border: 'none',
+                        display: 'block',
+                        pointerEvents: 'auto',
+                        backgroundColor: 'transparent',
+                        transformOrigin: 'top left',
+                        transform: 'scale(var(--canvas-scale, 1))',
+                    }}
+                    title={`Preview: ${def.label}`}
+                />
+            </div>
         </div>
     )
 }

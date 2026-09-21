@@ -40,7 +40,12 @@ const C = {
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface TemplatesTabProps {
-    onInsert: (blocks: Block[]) => void
+    /**
+     * Insert a template's blocks into the canvas. The second argument is the
+     * template's id (e.g. 'full-electronics') so the parent can track which
+     * category's sample data the canvas should preview.
+     */
+    onInsert: (blocks: Block[], templateId: string) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -289,7 +294,7 @@ export default function TemplatesTab({ onInsert }: TemplatesTabProps) {
             }
             return block
         })
-        onInsert(blocks)
+        onInsert(blocks, template.id)
         setTimeout(() => setInserting(null), 800)
     }
 

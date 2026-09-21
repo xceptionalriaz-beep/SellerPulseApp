@@ -73,6 +73,7 @@ import {
     RawHtmlProps,
 } from './blocks'
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
+import { auditHtml } from './audit'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -148,6 +149,7 @@ interface PropertiesPanelProps {
     placeholders: PlaceholderGroup[]
     onChange: (updated: Block) => void
     onDeselect: () => void
+    selectedSubSlot?: string | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -158,6 +160,7 @@ export default function PropertiesPanel({
     placeholders,
     onChange,
     onDeselect,
+    selectedSubSlot,
 }: PropertiesPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>('styles')
 
@@ -228,6 +231,14 @@ export default function PropertiesPanel({
 
     const def = getDefinition(block.type)
     const props = block.props as any
+
+    // ── Per-block compliance audit ────────────────────────────────────────────
+    // Runs the same audit as the status bar, but on the rendered HTML of THIS
+    // block only. Drives the badge below — the badge used to be a hard-coded
+    // "100% eBay Compliant" which lied to the user whenever the block contained
+    // a script tag or a http:// image.
+    const blockHtml = def ? def.toHtml(props, block.id) : ''
+    const blockAudit = auditHtml(blockHtml)
 
     // ─────────────────────────────────────────────────────────────────────────
     // PANEL WITH SELECTED BLOCK
@@ -320,20 +331,35 @@ export default function PropertiesPanel({
                     </button>
                 </div>
 
-                {/* eBay compliant badge */}
-                <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    backgroundColor: C.successLight,
-                    border: `1px solid #86efac50`,
-                    borderRadius: 20,
-                    padding: '3px 10px',
-                    marginBottom: 10,
-                }}>
-                    <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
-                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.success }}>
-                        100% eBay Compliant
+                {/* eBay compliant badge — reflects THIS block's actual HTML */}
+                <div
+                    title={blockAudit.count === 0
+                        ? 'This block passes every eBay compliance check'
+                        : `Issues: ${blockAudit.issues.join(', ')}`}
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        backgroundColor: blockAudit.count === 0 ? C.successLight : C.warningLight,
+                        border: `1px solid ${blockAudit.count === 0 ? '#86efac50' : '#fcd34d80'}`,
+                        borderRadius: 20,
+                        padding: '3px 10px',
+                        marginBottom: 10,
+                    }}>
+                    {blockAudit.count === 0 ? (
+                        <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
+                    ) : (
+                        <AlertTriangle size={11} style={{ color: C.warning, flexShrink: 0 }} />
+                    )}
+                    <span style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: blockAudit.count === 0 ? C.success : C.warning,
+                    }}>
+                        {blockAudit.count === 0
+                            ? '100% eBay Compliant'
+                            : `${blockAudit.count} issue${blockAudit.count > 1 ? 's' : ''}`}
                     </span>
                 </div>
 
@@ -375,6 +401,7 @@ export default function PropertiesPanel({
                         props={props}
                         placeholders={placeholders}
                         updateProps={updateProps}
+                        selectedSubSlot={selectedSubSlot}
                     />
                 )}
                 {activeTab === 'ai' && (
@@ -428,7 +455,106 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="16" y="24" width="48" height="3" rx="1.5" fill="#e5e7eb" />
         </svg>
     ),
-    // ── Shared — split layout (hero split + product split) ────────────────────
+    // ── Banner: Minimal Bordered ──────────────────────────────────────────────
+    'minimal-bordered': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect x="2" y="2" width="76" height="32" rx="4" fill="white" stroke={col} strokeWidth="1.5" />
+            <rect x="12" y="10" width="56" height="6" rx="2" fill={col} opacity="0.85" />
+            <rect x="20" y="20" width="40" height="3" rx="1.5" fill="#9ca3af" opacity="0.6" />
+        </svg>
+    ),
+    // ── Banner: Floating Card ─────────────────────────────────────────────────
+    'floating-card': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect x="6" y="4" width="68" height="28" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="14" y="10" width="52" height="6" rx="2" fill={col} opacity="0.85" />
+            <rect x="22" y="20" width="36" height="3" rx="1.5" fill="#9ca3af" opacity="0.6" />
+        </svg>
+    ),
+    // ── Banner: Diagonal Accent ───────────────────────────────────────────────
+    'diagonal-accent-hero': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" />
+            <path d="M0 36 L80 0 L80 36 Z" fill={col} opacity="0.3" />
+            <rect x="8" y="10" width="40" height="6" rx="2" fill={col} opacity="0.9" />
+            <rect x="8" y="20" width="30" height="3" rx="1.5" fill="#6b7280" opacity="0.7" />
+        </svg>
+    ),
+    // ── Banner: Animated Gradient Wave ────────────────────────────────────────
+    'gradient-wave': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect width="80" height="36" rx="3" fill="url(#wave-gradient)" />
+            <defs>
+                <linearGradient id="wave-gradient" x1="0" y1="0" x2="80" y2="0">
+                    <stop offset="0%" stopColor={col} />
+                    <stop offset="50%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor={col} />
+                </linearGradient>
+            </defs>
+        </svg>
+    ),
+    // ── Variant: Trust Ribbon ──────────────────────────────────────────
+    'trust-ribbon': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="4" fill="white" stroke={col} strokeWidth="1" />
+            <rect x="5" y="10" width="20" height="16" rx="2" fill={col} opacity="0.3" />
+            <rect x="30" y="10" width="20" height="16" rx="2" fill={col} opacity="0.3" />
+            <rect x="55" y="10" width="20" height="16" rx="2" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    // ── Variant: Flash Deal ──────────────────────────────────────────
+    'flash-deal': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="4" fill="#1e1535" />
+            <rect x="20" y="5" width="40" height="6" rx="3" fill={col} />
+            <rect x="10" y="16" width="60" height="8" rx="2" fill="white" />
+        </svg>
+    ),
+    // ── Variant: Dark Luxury ──────────────────────────────────────────
+    'dark-luxury': (_, __) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="4" fill="#0f172a" stroke="#c9a84c" strokeWidth="2" />
+            <rect x="10" y="10" width="60" height="16" rx="2" fill="none" stroke="#c9a84c" strokeWidth="1" />
+        </svg>
+    ),
+    // ── Banner: Split Image & Text ─────────────────────────────────────────────
+    'split-image-text': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="32" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect x="36" y="8" width="38" height="6" rx="2" fill={col} opacity="0.9" />
+            <rect x="36" y="18" width="30" height="3" rx="1.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    // ── Banner: Left + Badge ────────────────────────────────────────────────────
+    'left-badge': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
+            <rect x="52" width="28" height="36" fill={col} opacity="0.3" />
+            <rect x="6" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="6" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="6" y="24" width="18" height="3" rx="1.5" fill="#b8fa33" opacity="0.8" />
+        </svg>
+    ),
+    // ── Features: Simple Centered ──────────────────────────────────────────────
+    'simple-centered': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
+            <rect x="14" y="14" width="52" height="8" rx="2" fill="white" opacity="0.9" />
+            <rect x="14" y="24" width="36" height="4" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="14" y="30" width="24" height="2" rx="1" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Features: Left + Badge ──────────────────────────────────────────────────
+    'features-left-badge': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="60" height="36" rx="3" fill={col} opacity="0.5" />
+            <rect x="60" width="20" height="36" fill={col} opacity="0.3" />
+            <rect x="8" y="12" width="40" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="8" y="20" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="8" y="26" width="24" height="2.5" rx="1.25" fill="#b8fa33" opacity="0.7" />
+        </svg>
+    ),
     'split': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="52" height="36" rx="3" fill={col} opacity="0.7" />
@@ -438,6 +564,19 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="56" y="10" width="18" height="3" rx="1.5" fill="white" opacity="0.6" />
             <rect x="56" y="16" width="14" height="2.5" rx="1.25" fill="white" opacity="0.4" />
             <rect x="56" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── Product Image — split-right (text left, image right) ──────────────────
+    // Mirrors the split thumbnail: text column on the left, image on the right.
+    'split-right': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="28" height="36" fill={col} opacity="0.3" />
+            <rect x="28" width="52" height="36" rx="3" fill={col} opacity="0.7" />
+            <rect x="6" y="10" width="18" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect x="6" y="16" width="14" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="6" y="22" width="16" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="44" y="10" width="30" height="4" rx="2" fill="white" opacity="0.9" />
+            <rect x="50" y="18" width="24" height="3" rx="1.5" fill="white" opacity="0.6" />
         </svg>
     ),
     // ── Product Image ─────────────────────────────────────────────────────────
@@ -465,6 +604,12 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect width="80" height="36" rx="3" fill={col} opacity="0.25" />
             <circle cx="20" cy="16" r="7" fill={col} opacity="0.3" />
             <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
+        </svg>
+    ),
+    'full-width-hero': (col, _) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 48 }}>
+            <rect width="80" height="48" rx="8" fill={col} opacity="0.3" />
+            <rect x="5" y="10" width="70" height="28" rx="4" fill="white" opacity="0.2" />
         </svg>
     ),
     'zoom': (col, light) => (
@@ -543,6 +688,16 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <circle cx="18" cy="14" r="7" fill={col} opacity="0.35" />
             <rect x="52" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
             <rect x="52" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    // ── Product Image: Inverted Magazine Grid ─────────────────────────────
+    'inverted-magazine-grid': (col, light) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={light} />
+            <rect x="2" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
+            <rect x="2" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+            <rect x="32" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
+            <circle cx="55" cy="14" r="7" fill={col} opacity="0.35" />
         </svg>
     ),
     // ── Hero Header: Announcement Strip ──────────────────────────────────────
@@ -898,6 +1053,13 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="6" y="30" width="18" height="3" rx="1" fill="#6b7280" opacity="0.6" />
         </svg>
     ),
+    'simple-thumb': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
+            <rect x="20" y="8" width="40" height="6" rx="2" fill="white" opacity="0.9" />
+            <rect x="24" y="18" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+        </svg>
+    ),
     'side-nav': (col: string, light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
@@ -936,6 +1098,81 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="0" y="12" width="80" height="24" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
             <rect x="6" y="19" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
             <rect x="6" y="24" width="36" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+        </svg>
+    ),
+    // ── Button Block Variants ─────────────────────────────────────────────────
+    'button-solid': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-outline': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill="white" stroke={col} strokeWidth="2" />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill={col} opacity="0.8" />
+        </svg>
+    ),
+    'button-rounded': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="10" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-shadow': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="10" width="60" height="20" rx="4" fill="rgba(0,0,0,0.15)" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-gradient': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="25" y="15" width="30" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-icon-left': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <circle cx="20" cy="18" r="4" fill="white" opacity="0.9" />
+            <rect x="30" y="15" width="25" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-icon-right': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill={col} />
+            <rect x="20" y="15" width="25" height="6" rx="3" fill="white" opacity="0.9" />
+            <circle cx="60" cy="18" r="4" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-full-width': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="2" y="8" width="76" height="20" rx="4" fill={col} />
+            <rect x="20" y="15" width="40" height="6" rx="3" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'button-minimal': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="20" y="15" width="40" height="4" rx="2" fill={col} />
+            <line x1="20" y1="22" x2="60" y2="22" stroke={col} strokeWidth="1.5" />
+        </svg>
+    ),
+    'button-pulse': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f9fafb" />
+            <rect x="8" y="6" width="64" height="24" rx="6" fill="#dc2626" opacity="0.2" />
+            <rect x="10" y="8" width="60" height="20" rx="4" fill="#dc2626" />
+            <rect x="20" y="15" width="40" height="6" rx="3" fill="white" opacity="0.9" />
         </svg>
     ),
 }
@@ -1635,7 +1872,15 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 onChange={v => updateProps({ objectFit: v })} />
                         </Section>
                     )}
-                    {pv === 'split' && (
+                    {pv === 'inverted-magazine-grid' && (
+                        <Section title="Inverted Magazine Grid">
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <SelectInput label="Image fit" value={props.objectFit ?? 'cover'}
+                                options={[{ v: 'cover', l: 'Cover' }, { v: 'contain', l: 'Contain' }]}
+                                onChange={v => updateProps({ objectFit: v })} />
+                        </Section>
+                    )}
+                    {(pv === 'split' || pv === 'split-right') && (
                         <>
                             <Section title="Layout">
                                 <SelectInput label="Image position" value={props.imagePosition ?? 'left'}
@@ -1655,9 +1900,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                     )}
                     {pv === 'gallery' && (
                         <Section title="Gallery">
+                            <InfoBox>Thumbnails render as uniform 1:1 squares — first thumb is highlighted as the active image.</InfoBox>
                             <SliderInput label="Thumbnail count" value={props.imageCount ?? 4} min={2} max={5} onChange={v => updateProps({ imageCount: v })} />
-                            <SliderInput label="Thumbnail height" value={props.thumbHeight ?? 80} min={40} max={160} suffix="px" onChange={v => updateProps({ thumbHeight: v })} />
-                            <SliderInput label="Thumb radius" value={props.thumbBorderRadius ?? 6} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v })} />
+                            <SliderInput label="Thumb radius" value={props.thumbBorderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v })} />
                             <ToggleRow label="Thumb border" value={props.showThumbBorder ?? true} onChange={v => updateProps({ showThumbBorder: v })} />
                             {props.showThumbBorder && <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />}
                             <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
@@ -1764,6 +2009,29 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
+                    {/* Badge customization */}
+                    <Section title="Badge">
+                        <TextInput label="Badge text" value={props.badgeText ?? ''} onChange={v => updateProps({ badgeText: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#fff'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Badge colour" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
+                    </Section>
+                    {/* Padding controls */}
+                    <Section title="Padding">
+                        <SliderInput label="Top" value={props.paddingTop ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                        <SliderInput label="Right" value={props.paddingRight ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        <SliderInput label="Bottom" value={props.paddingBottom ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                        <SliderInput label="Left" value={props.paddingLeft ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                    </Section>
+                    {props.variant === 'split-image-text' && (
+                        <>
+                            <Section title="Image">
+                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
+                                <SelectInput label="Image position" value={props.imagePosition ?? 'left'}
+                                    options={[{ v: 'left', l: 'Image left, text right' }, { v: 'right', l: 'Image right, text left' }]} onChange={v => updateProps({ imagePosition: v })} />
+                                <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            </Section>
+                        </>
+                    )}
                 </>
             )
 
@@ -1891,6 +2159,66 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Col 1 background" value={props.col1Bg ?? '#ffffff'} onChange={v => updateProps({ col1Bg: v })} />
                         <ColorRow label="Col 2 background" value={props.col2Bg ?? '#ffffff'} onChange={v => updateProps({ col2Bg: v })} />
                         <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'four_column':
+            return (
+                <>
+                    <Section title="Layout">
+                        <SliderInput label="Column gap" value={props.gap ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ gap: v })} />
+                    </Section>
+                    <Section title="Column backgrounds">
+                        <ColorRow label="Col 1 background" value={props.col1Bg ?? '#ffffff'} onChange={v => updateProps({ col1Bg: v })} />
+                        <ColorRow label="Col 2 background" value={props.col2Bg ?? '#ffffff'} onChange={v => updateProps({ col2Bg: v })} />
+                        <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
+                        <ColorRow label="Col 4 background" value={props.col4Bg ?? '#ffffff'} onChange={v => updateProps({ col4Bg: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'spacer':
+            return (
+                <>
+                    <Section title="Height">
+                        <SliderInput label="Top spacing" value={props.paddingTop ?? 24} min={4} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                        <SliderInput label="Bottom spacing" value={props.paddingBottom ?? 24} min={4} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'border_box':
+            return (
+                <>
+                    <Section title="Border">
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#7530fb'} onChange={v => updateProps({ borderColor: v })} />
+                        <SliderInput label="Border width" value={props.borderWidth ?? 2} min={1} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'sidebar_layout':
+            return (
+                <>
+                    <Section title="Layout">
+                        <SliderInput label="Image column width" value={props.imageWidth ?? 70} min={30} max={75} suffix="%" onChange={v => updateProps({ imageWidth: v })} />
+                        <SliderInput label="Column gap" value={props.gap ?? 0} min={0} max={32} suffix="px" onChange={v => updateProps({ gap: v })} />
+                        <SelectInput
+                            label="Image side"
+                            value={props.imageSide ?? 'left'}
+                            options={[{ v: 'left', l: 'Image left' }, { v: 'right', l: 'Image right' }]}
+                            onChange={v => updateProps({ imageSide: v })}
+                        />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
                     </Section>
                 </>
             )
@@ -2171,16 +2499,19 @@ function BlockStyleProps({ block, props, updateProps }: {
 // ATTRIBUTES TAB
 // Content properties — text, src, items, rows, toggles + placeholder picker
 // ─────────────────────────────────────────────────────────────────────────────
+
 function AttributesTab({
     block,
     props,
     placeholders,
     updateProps,
+    selectedSubSlot,
 }: {
     block: Block
     props: any
     placeholders: PlaceholderGroup[]
     updateProps: (p: any) => void
+    selectedSubSlot?: string | null
 }) {
     const [showPh, setShowPh] = useState(false)
     const [phTarget, setPhTarget] = useState<string | null>(null)
@@ -2199,6 +2530,7 @@ function AttributesTab({
             title={`Insert placeholder into ${label}`}
             style={{
                 marginTop: 3,
+                marginBottom: 8,
                 padding: '3px 8px',
                 border: `1px solid ${C.primaryBorder}`,
                 borderRadius: 6,
@@ -2231,15 +2563,17 @@ function AttributesTab({
                 props={props}
                 updateProps={updateProps}
                 phButton={phButton}
+                selectedSubSlot={selectedSubSlot}
             />
         </div>
     )
 }
 
 // Block-specific attribute controls
-function BlockAttributeProps({ block, props, updateProps, phButton }: {
+function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubSlot }: {
     block: Block, props: any, updateProps: (p: any) => void,
     phButton: (key: string, label: string) => React.ReactNode
+    selectedSubSlot?: string | null
 }) {
     switch (block.type) {
 
@@ -2387,6 +2721,15 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                         <TextInput label="Alt text" value={props.alt ?? ''} onChange={v => updateProps({ alt: v })} />
                         {phButton('alt', 'alt text')}
                     </Section>
+                    {av === 'single' && (
+                        <Section title="Caption">
+                            <InfoBox>Optional centered text rendered directly below the image (e.g. item title or feature note).</InfoBox>
+                            <TextInput label="Caption" value={props.caption ?? ''} onChange={v => updateProps({ caption: v })} />
+                            {phButton('caption', 'caption')}
+                            <ColorRow label="Caption colour" value={props.captionColor ?? '#475569'} onChange={v => updateProps({ captionColor: v })} />
+                            <SliderInput label="Caption size" value={props.captionFontSize ?? 13} min={10} max={20} suffix="px" onChange={v => updateProps({ captionFontSize: v })} />
+                        </Section>
+                    )}
                     {av === 'gallery' && (
                         <Section title="Gallery images">
                             <InfoBox>Add extra images for the thumbnail strip.</InfoBox>
@@ -2404,7 +2747,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                             </>}
                         </Section>
                     )}
-                    {av === 'split' && (
+                    {(av === 'split' || av === 'split-right') && (
                         <Section title="Description content">
                             <TextInput label="Title" value={props.descriptionTitle ?? ''} onChange={v => updateProps({ descriptionTitle: v })} />
                             {phButton('descriptionTitle', 'title')}
@@ -2454,25 +2797,48 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                             {phButton('image3Url', 'image 3 URL')}
                         </Section>
                     )}
+                    {av === 'inverted-magazine-grid' && (
+                        <Section title="Additional images">
+                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            {phButton('image2Url', 'image 2 URL')}
+                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            {phButton('image3Url', 'image 3 URL')}
+                        </Section>
+                    )}
                 </>
             )
         }
 
         case 'banner':
             return (
-                <Section title="Content">
-                    <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
-                    {phButton('headingText', 'heading')}
-                    <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
-                    {phButton('subText', 'subtext')}
-                </Section>
+                <>
+                    <Section title="Content">
+                        <TextareaInput label="Heading" value={props.headingText ?? ''} rows={2} onChange={v => updateProps({ headingText: v })} />
+                        {phButton('headingText', 'heading')}
+                        <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
+                        {phButton('subText', 'subtext')}
+                    </Section>
+                    {props.variant === 'full-width-hero' && (
+                        <>
+                            <Section title="Background Image">
+                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
+                                {phButton('imageUrl', 'background image')}
+                            </Section>
+                            <Section title="Size">
+                                <SliderInput label="Top padding" value={props.paddingTop ?? 120} min={20} max={300} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                                <SliderInput label="Bottom padding" value={props.paddingBottom ?? 120} min={20} max={300} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                                <SliderInput label="Min height" value={props.minHeight ?? 400} min={200} max={800} suffix="px" onChange={v => updateProps({ minHeight: v })} />
+                            </Section>
+                        </>
+                    )}
+                </>
             )
 
         case 'cta_banner':
             return (
                 <>
                     <Section title="Content">
-                        <TextInput label="Heading" value={props.headingText ?? ''} onChange={v => updateProps({ headingText: v })} />
+                        <TextareaInput label="Heading" value={props.headingText ?? ''} rows={2} onChange={v => updateProps({ headingText: v })} />
                         {phButton('headingText', 'heading')}
                         <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
                         {phButton('subText', 'subtext')}
@@ -2556,9 +2922,134 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
             )
 
         case 'full_width_section':
+            if (selectedSubSlot === 'content') {
+                return (
+                    <Section title="Content">
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props['content'] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ content: v })}
+                        />
+                        {phButton('content', 'Content')}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
         case 'two_column':
+            if (block.type === 'two_column' && (selectedSubSlot === 'leftContent' || selectedSubSlot === 'rightContent')) {
+                return (
+                    <Section title={`Column: ${selectedSubSlot === 'leftContent' ? 'Left' : 'Right'}`}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, selectedSubSlot === 'leftContent' ? 'Left Column' : 'Right Column')}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
         case 'three_column':
-        case 'container':
+            if (selectedSubSlot === 'col1Content' || selectedSubSlot === 'col2Content' || selectedSubSlot === 'col3Content') {
+                const label = selectedSubSlot === 'col1Content' ? 'Column 1' : selectedSubSlot === 'col2Content' ? 'Column 2' : 'Column 3';
+                return (
+                    <Section title={label}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, label)}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'four_column':
+            if (selectedSubSlot === 'col1Content' || selectedSubSlot === 'col2Content' || selectedSubSlot === 'col3Content' || selectedSubSlot === 'col4Content') {
+                const label = selectedSubSlot === 'col1Content' ? 'Column 1' : selectedSubSlot === 'col2Content' ? 'Column 2' : selectedSubSlot === 'col3Content' ? 'Column 3' : 'Column 4';
+                return (
+                    <Section title={label}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, label)}
+                    </Section>
+                )
+            }
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'sidebar_layout':
+            if (selectedSubSlot === 'leftImage' || selectedSubSlot === null) {
+                const isImageSlot = selectedSubSlot === 'leftImage';
+                return (
+                    <>
+                        <Section title={isImageSlot ? 'Left Image' : 'Sidebar Layout — Image Slot'}>
+                            <TextareaInput
+                                label="Left Image HTML (drop image here)"
+                                value={(props as any).leftImage ?? ''}
+                                rows={4}
+                                onChange={v => updateProps({ leftImage: v })}
+                            />
+                        </Section>
+                        <Section title={isImageSlot ? 'Left Content' : 'Sidebar Layout — Content Slot'}>
+                            <TextareaInput
+                                label="Right Content HTML (drop content here)"
+                                value={(props as any).rightContent ?? ''}
+                                rows={6}
+                                onChange={v => updateProps({ rightContent: v })}
+                            />
+                            {phButton('rightContent', 'Right Content')}
+                        </Section>
+                    </>
+                )
+            }
+            if (selectedSubSlot === 'leftContent' || selectedSubSlot === 'rightContent') {
+                const label = selectedSubSlot === 'leftContent' ? 'Left Column' : 'Right Column';
+                return (
+                    <Section title={label}>
+                        <TextareaInput
+                            label="Content (HTML)"
+                            value={props[selectedSubSlot] ?? ''}
+                            rows={8}
+                            onChange={v => updateProps({ [selectedSubSlot]: v })}
+                        />
+                        {phButton(selectedSubSlot, label)}
+                    </Section>
+                )
+            }
             return (
                 <div style={{ padding: '8px 0' }}>
                     <InfoBox>
@@ -2734,6 +3225,515 @@ function BlockAttributeProps({ block, props, updateProps, phButton }: {
                     </InfoBox>
                     <TextInput label="Internal label" value={props.label ?? 'Custom HTML Block'} onChange={v => updateProps({ label: v })} />
                 </Section>
+            )
+
+        // ── MEDIUM PRIORITY BLOCKS ───────────────────────────────────────────
+
+        case 'product_variants':
+            return (
+                <Section title="Variants">
+                    <InfoBox>Colour swatches and size options are rendered from fixed defaults. Styles tab controls background and spacing.</InfoBox>
+                    <ColorRow label="Swatch border colour" value={props.borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v })} />
+                    <ColorRow label="Size label colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
+                    <ColorRow label="Size border colour" value={props.sizeBorderColor ?? '#ede9fe'} onChange={v => updateProps({ sizeBorderColor: v })} />
+                </Section>
+            )
+
+        case 'whats_in_the_box':
+            return (
+                <Section title="Box contents">
+                    <InfoBox>One item per line.</InfoBox>
+                    <TextareaInput
+                        label="Items (one per line)"
+                        value={Array.isArray(props.items) ? props.items.join('\n') : '1x Main Unit\n1x Power Cable\n1x User Manual'}
+                        rows={5}
+                        onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <TextInput label="Heading" value={props.heading ?? "📦 What's In The Box"} onChange={v => updateProps({ heading: v })} />
+                    <ColorRow label="Heading colour" value={props.headingColor ?? '#1e1535'} onChange={v => updateProps({ headingColor: v })} />
+                    <ColorRow label="Bullet colour" value={props.bulletColor ?? '#16a34a'} onChange={v => updateProps({ bulletColor: v })} />
+                    <ColorRow label="Text colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
+                </Section>
+            )
+
+        case 'key_features_grid':
+            return (
+                <Section title="Feature grid">
+                    <InfoBox>3 feature columns — edit icons, titles and descriptions via the Styles tab background control. Content is fixed in the HTML output.</InfoBox>
+                    <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                    <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                </Section>
+            )
+
+        case 'payment_methods':
+            return (
+                <Section title="Payment methods">
+                    <InfoBox>Displays PayPal, Visa, Mastercard, Amex and Apple Pay. Background and spacing controlled in Styles tab.</InfoBox>
+                    <TextInput label="Section label" value={props.label ?? 'Secure Payment Methods'} onChange={v => updateProps({ label: v })} />
+                    <ColorRow label="Badge background" value={props.badgeBg ?? '#ffffff'} onChange={v => updateProps({ badgeBg: v })} />
+                    <ColorRow label="Badge text" value={props.badgeText ?? '#1f1d2e'} onChange={v => updateProps({ badgeText: v })} />
+                </Section>
+            )
+
+        case 'feedback_score':
+            return (
+                <>
+                    <Section title="Seller details">
+                        <TextInput label="Feedback %" value={props.feedbackPercent ?? '{{SELLER_FEEDBACK}}'} onChange={v => updateProps({ feedbackPercent: v })} />
+                        {phButton('feedbackPercent', 'feedback %')}
+                        <TextInput label="Member since" value={props.memberSince ?? '{{MEMBER_SINCE}}'} onChange={v => updateProps({ memberSince: v })} />
+                        {phButton('memberSince', 'member since')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'vat_notice':
+            return (
+                <>
+                    <Section title="VAT details">
+                        <TextInput label="VAT number" value={props.vatNumber ?? '{{VAT_NUMBER}}'} onChange={v => updateProps({ vatNumber: v })} />
+                        {phButton('vatNumber', 'VAT number')}
+                        <TextInput label="Notice text" value={props.text ?? 'Full VAT invoice included with your order.'} onChange={v => updateProps({ text: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8fafc'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_footer':
+            return (
+                <>
+                    <Section title="Copyright">
+                        <TextInput label="Copyright text" value={props.copyrightText ?? '© {{SELLER_NAME}} · All rights reserved'} onChange={v => updateProps({ copyrightText: v })} />
+                        {phButton('copyrightText', 'copyright text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? 'rgba(255,255,255,0.6)'} onChange={v => updateProps({ linkColor: v })} />
+                        <ColorRow label="Copyright colour" value={props.mutedColor ?? 'rgba(255,255,255,0.3)'} onChange={v => updateProps({ mutedColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'social_links':
+            return (
+                <>
+                    <Section title="Label">
+                        <TextInput label="Follow text" value={props.followText ?? 'Follow us for deals & updates'} onChange={v => updateProps({ followText: v })} />
+                        <ColorRow label="Label colour" value={props.labelColor ?? '#6b7280'} onChange={v => updateProps({ labelColor: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+                </>
+            )
+
+        // ── LOWER PRIORITY BLOCKS ────────────────────────────────────────────
+
+        case 'data_table':
+            return (
+                <Section title="Table rows">
+                    <InfoBox>One row per line in format: Label | Value</InfoBox>
+                    <TextareaInput
+                        label="Rows (Label | Value)"
+                        value={Array.isArray(props.rows)
+                            ? props.rows.map((r: string[]) => r.join(' | ')).join('\n')
+                            : 'Brand | {{BRAND}}\nModel | {{MPN}}\nCondition | {{ITEM_CONDITION}}'
+                        }
+                        rows={6}
+                        onChange={v => updateProps({
+                            rows: v.split('\n')
+                                .filter((s: string) => s.includes('|'))
+                                .map((s: string) => s.split('|').map((p: string) => p.trim()))
+                        })}
+                    />
+                    <ColorRow label="Alt row colour" value={props.altBg ?? '#f8f7ff'} onChange={v => updateProps({ altBg: v })} />
+                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                </Section>
+            )
+
+        case 'compatibility_table':
+            return (
+                <Section title="Compatible models">
+                    <InfoBox>One model per line.</InfoBox>
+                    <TextareaInput
+                        label="Models (one per line)"
+                        value={Array.isArray(props.models) ? props.models.join('\n') : 'Model A 2019-2023\nModel B 2020-2024\nModel C Pro All years'}
+                        rows={5}
+                        onChange={v => updateProps({ models: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <TextInput label="Heading" value={props.heading ?? '✅ Compatible With:'} onChange={v => updateProps({ heading: v })} />
+                    <ColorRow label="Check colour" value={props.checkColor ?? '#166534'} onChange={v => updateProps({ checkColor: v })} />
+                    <ColorRow label="Alt row colour" value={props.altBg ?? '#f0fdf4'} onChange={v => updateProps({ altBg: v })} />
+                </Section>
+            )
+
+        case 'product_comparison':
+            return (
+                <Section title="Comparison table">
+                    <InfoBox>Header row + data rows. Format: Feature | Our Product | Competitor (one per line)</InfoBox>
+                    <TextareaInput
+                        label="Rows (3 columns | separated)"
+                        value={Array.isArray(props.rows)
+                            ? props.rows.map((r: string[]) => r.join(' | ')).join('\n')
+                            : 'Feature | Our Product | Competitor\nWarranty | 2 Years | 6 Months\nUK Stock | ✓ Yes | ✗ No'
+                        }
+                        rows={6}
+                        onChange={v => updateProps({
+                            rows: v.split('\n')
+                                .filter((s: string) => s.includes('|'))
+                                .map((s: string) => s.split('|').map((p: string) => p.trim()))
+                        })}
+                    />
+                    <ColorRow label="Header background" value={props.headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                    <ColorRow label="Our column colour" value={props.ourColor ?? '#7530fb'} onChange={v => updateProps({ ourColor: v })} />
+                </Section>
+            )
+
+        case 'before_after':
+            return (
+                <>
+                    <Section title="Images">
+                        <TextInput label="Before image URL" value={props.beforeSrc ?? '{{IMAGE_BEFORE}}'} onChange={v => updateProps({ beforeSrc: v })} />
+                        {phButton('beforeSrc', 'before image URL')}
+                        <TextInput label="After image URL" value={props.afterSrc ?? '{{IMAGE_AFTER}}'} onChange={v => updateProps({ afterSrc: v })} />
+                        {phButton('afterSrc', 'after image URL')}
+                    </Section>
+                    <Section title="Labels">
+                        <TextInput label="Before label" value={props.beforeLabel ?? 'Before'} onChange={v => updateProps({ beforeLabel: v })} />
+                        <TextInput label="After label" value={props.afterLabel ?? 'After'} onChange={v => updateProps({ afterLabel: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'logo_bar':
+            return (
+                <>
+                    <Section title="Label">
+                        <TextInput label="Caption text" value={props.caption ?? 'Trusted Brands & Certifications'} onChange={v => updateProps({ caption: v })} />
+                        <ColorRow label="Caption colour" value={props.captionColor ?? '#9ca3af'} onChange={v => updateProps({ captionColor: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'bundle_deal':
+            return (
+                <>
+                    <Section title="Heading">
+                        <TextInput label="Heading" value={props.heading ?? '🎁 Bundle & Save'} onChange={v => updateProps({ heading: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Price colour" value={props.priceColor ?? '#ffffff'} onChange={v => updateProps({ priceColor: v })} />
+                        <ColorRow label="Badge colour" value={props.badgeColor ?? '#b8fa33'} onChange={v => updateProps({ badgeColor: v })} />
+                        <ColorRow label="Badge text" value={props.badgeText ?? '#1e1535'} onChange={v => updateProps({ badgeText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_header':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Store name" value={props.storeName ?? '{{SELLER_NAME}}'} onChange={v => updateProps({ storeName: v })} />
+                        {phButton('storeName', 'store name')}
+                        <TextInput label="Tagline" value={props.tagline ?? 'Quality products · Fast dispatch · Trusted eBay seller'} onChange={v => updateProps({ tagline: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#7530fb'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Name colour" value={props.nameColor ?? '#ffffff'} onChange={v => updateProps({ nameColor: v })} />
+                        <ColorRow label="Tagline colour" value={props.taglineColor ?? 'rgba(255,255,255,0.7)'} onChange={v => updateProps({ taglineColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'category_nav':
+            return (
+                <>
+                    <Section title="Categories">
+                        <InfoBox>One category per line.</InfoBox>
+                        <TextareaInput
+                            label="Categories (one per line)"
+                            value={Array.isArray(props.categories) ? props.categories.join('\n') : 'Electronics\nClothing\nHome & Garden\nCollectibles\nAuto Parts'}
+                            rows={5}
+                            onChange={v => updateProps({ categories: v.split('\n').filter((s: string) => s.trim()) })}
+                        />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? 'rgba(255,255,255,0.8)'} onChange={v => updateProps({ linkColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'seasonal_banner':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Seasonal Sale — Up To 50% Off!'} onChange={v => updateProps({ heading: v })} />
+                        <TextInput label="Sub text" value={props.subText ?? 'Limited time only · While stocks last'} onChange={v => updateProps({ subText: v })} />
+                        <TextInput label="Emoji row" value={props.emoji ?? '🎁 🎄 🎁'} onChange={v => updateProps({ emoji: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#dc2626'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'breadcrumb_bar':
+            return (
+                <>
+                    <Section title="Links">
+                        <TextInput label="Store name" value={props.storeName ?? '{{SELLER_NAME}}'} onChange={v => updateProps({ storeName: v })} />
+                        {phButton('storeName', 'store name')}
+                        <TextInput label="Category" value={props.category ?? '{{ITEM_CATEGORY}}'} onChange={v => updateProps({ category: v })} />
+                        {phButton('category', 'category')}
+                        <TextInput label="Product title" value={props.productTitle ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ productTitle: v })} />
+                        {phButton('productTitle', 'product title')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? '#7530fb'} onChange={v => updateProps({ linkColor: v })} />
+                        <ColorRow label="Current page colour" value={props.activeColor ?? '#1f1d2e'} onChange={v => updateProps({ activeColor: v })} />
+                    </Section>
+                </>
+            )
+
+        // ── HIGH PRIORITY BLOCKS ─────────────────────────────────────────────
+
+        case 'spacer':
+            return (
+                <Section title="Spacer">
+                    <InfoBox>Adjust height using the Top and Bottom padding controls in the Styles tab.</InfoBox>
+                </Section>
+            )
+
+        case 'single_image':
+            return (
+                <>
+                    <Section title="Image">
+                        <TextInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
+                        {phButton('src', 'image URL')}
+                        <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
+                        {phButton('alt', 'alt text')}
+                    </Section>
+                    <Section title="Caption">
+                        <TextInput label="Caption text" value={props.caption ?? ''} onChange={v => updateProps({ caption: v })} />
+                        {phButton('caption', 'caption')}
+                    </Section>
+                </>
+            )
+
+        case 'numbered_list':
+            return (
+                <Section title="List items">
+                    <InfoBox>One item per line. Use tokens for dynamic content.</InfoBox>
+                    <TextareaInput
+                        label="Items (one per line)"
+                        value={Array.isArray(props.items) ? props.items.join('\n') : 'Step one\nStep two\nStep three'}
+                        rows={5}
+                        onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <ColorRow label="Number bubble colour" value={props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ bulletColor: v })} />
+                    <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
+                </Section>
+            )
+
+        case 'quote_block':
+            return (
+                <>
+                    <Section title="Quote">
+                        <TextareaInput label="Quote text" value={props.quoteText ?? 'Excellent product, exactly as described.'} rows={3} onChange={v => updateProps({ quoteText: v })} />
+                        {phButton('quoteText', 'quote text')}
+                        <TextInput label="Attribution" value={props.attribution ?? '— Verified Buyer ★★★★★'} onChange={v => updateProps({ attribution: v })} />
+                        {phButton('attribution', 'attribution')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Quote mark colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
+                        <ColorRow label="Attribution colour" value={props.mutedColor ?? '#6b7280'} onChange={v => updateProps({ mutedColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'warning_box':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Please Read Before Buying'} onChange={v => updateProps({ heading: v })} />
+                        <TextareaInput label="Body text" value={props.text ?? 'Please check compatibility before purchasing.'} rows={3} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'body text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#fef9c3'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#92400e'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#78350f'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'info_box':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Important Information'} onChange={v => updateProps({ heading: v })} />
+                        <TextareaInput label="Body text" value={props.text ?? 'This item ships from a UK warehouse.'} rows={3} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'body text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#eff6ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#1e40af'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1d4ed8'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'badge_row':
+            return (
+                <Section title="Badges">
+                    <InfoBox>One badge per line. Use emoji + text e.g. ✓ Genuine</InfoBox>
+                    <TextareaInput
+                        label="Badges (one per line)"
+                        value={Array.isArray(props.badges) ? props.badges.join('\n') : '✓ Genuine\n📦 UK Stock\n★ Top Rated\n🔄 Easy Returns'}
+                        rows={4}
+                        onChange={v => updateProps({ badges: v.split('\n').filter((s: string) => s.trim()) })}
+                    />
+                    <ColorRow label="Badge background" value={props.badgeBg ?? '#f3eeff'} onChange={v => updateProps({ badgeBg: v })} />
+                    <ColorRow label="Badge text" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
+                </Section>
+            )
+
+        case 'dispatch_timer':
+            return (
+                <>
+                    <Section title="Message">
+                        <TextInput label="Main text" value={props.text ?? 'Order in the next {{HOURS_LEFT}} hours for Same Day Dispatch'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'main text')}
+                        <TextInput label="Sub text" value={props.subText ?? 'Dispatched same working day if ordered by 2pm'} onChange={v => updateProps({ subText: v })} />
+                        {phButton('subText', 'sub text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Highlight colour" value={props.highlightColor ?? '#dc2626'} onChange={v => updateProps({ highlightColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'free_shipping_banner':
+            return (
+                <>
+                    <Section title="Message">
+                        <TextInput label="Banner text" value={props.text ?? '🚚 FREE Shipping — Dispatched Within 24 Hours ✅'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'banner text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#16a34a'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'why_buy_from_us':
+            return (
+                <>
+                    <Section title="Heading">
+                        <TextInput label="Section heading" value={props.heading ?? 'Why Shop With Us?'} onChange={v => updateProps({ heading: v })} />
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#1e1535'} onChange={v => updateProps({ headingColor: v })} />
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'satisfaction_guarantee':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? '100% Satisfaction Guaranteed'} onChange={v => updateProps({ heading: v })} />
+                        <TextareaInput label="Sub text" value={props.text ?? 'Trusted by thousands of eBay buyers. Your satisfaction is our priority.'} rows={2} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'sub text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#7530fb'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'page_title':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title text" value={props.text ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'title text')}
+                    </Section>
+                    <Section title="Style">
+                        <ColorRow label="Text colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
+                        <ColorRow label="Underline colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 28} min={16} max={60} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'section_label':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Label text" value={props.text ?? '{{SECTION_LABEL}}'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'label text')}
+                    </Section>
+                    <Section title="Style">
+                        <ColorRow label="Text colour" value={props.color ?? '#7530fb'} onChange={v => updateProps({ color: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 11} min={8} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'pull_quote':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextareaInput label="Quote text" value={props.text ?? 'Quality is not an act, it is a habit.'} rows={3} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'quote text')}
+                        <TextInput label="Attribution" value={props.attribution ?? '— {{SELLER_NAME}}'} onChange={v => updateProps({ attribution: v })} />
+                        {phButton('attribution', 'attribution')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Quote text colour" value={props.color ?? '#1e1535'} onChange={v => updateProps({ color: v })} />
+                        <ColorRow label="Quote mark colour" value={props.accentColor ?? '#ede9fe'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Attribution colour" value={props.attributionColor ?? '#7530fb'} onChange={v => updateProps({ attributionColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'highlight_text':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Highlight text" value={props.text ?? '{{HIGHLIGHT_TEXT}}'} onChange={v => updateProps({ text: v })} />
+                        {phButton('text', 'highlight text')}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#b8fa33'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
             )
 
         default:

@@ -65,7 +65,7 @@ const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard' },
   { icon: Search, label: 'Product Research', href: '/dashboard/product-research' },
   { icon: Type, label: 'Title Builder', href: '/dashboard/title-builder' },
-  { icon: Calculator, label: 'Profit Calculator', href: '/tools/profitcalculator' },
+  { icon: Calculator, label: 'Profit Calculator', href: '/dashboard/tools/profit-calculator' },
   { icon: ListChecks, label: 'Listings', href: '/dashboard/listing-generator' },
   { icon: Palette, label: 'Design Studio', href: '/dashboard/design' },
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
@@ -955,6 +955,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                 { icon: BarChart2, label: 'Infrastructure Monitor', tab: 22, permKey: 'infra_monitor' },
                 { icon: Search, label: 'Competitor X-Ray', tab: 23, permKey: 'competitor_xray' },
                 { icon: Package, label: 'Chrome Extension', tab: 24, permKey: 'chrome_extension' },
+                { icon: Palette, label: 'Templates', tab: 26, permKey: 'templates' },
 
               ].filter(item => {
                 // Super admin or no permissions set ? show all

@@ -11,126 +11,126 @@ import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
-    Shield, AlertTriangle, Lock, Globe, RefreshCw,
-    Download, Ban, CheckCircle, Activity, Search, X,
-    ChevronDown, Trash2,
-  } from 'lucide-react'
+  Shield, AlertTriangle, Lock, Globe, RefreshCw,
+  Download, Ban, CheckCircle, Activity, Search, X,
+  ChevronDown, Trash2,
+} from 'lucide-react'
 
 // -- Design tokens ----------------------------------------------
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  amber:    '#d97706',
-  green:    '#16a34a',
-  blue:     '#1d4ed8',
+  dark: '#1e1535',
+  lime: '#b8fa33',
+  limeDeep: '#4d7c0f',
+  limeTint: '#f3eeff',
+  border: '#ede9fe',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
+  muted: '#6b7280',
+  surface: '#ffffff',
+  red: '#dc2626',
+  amber: '#d97706',
+  green: '#16a34a',
+  blue: '#2563eb',
 }
 
 // -- Data interfaces --------------------------------------------
 interface AdminLogEntry {
-  id:         string
-  admin_id:   string | null
-  target_id:  string | null
-  action:     string
-  details:    string | null
-  metadata:   Record<string, any>
+  id: string
+  admin_id: string | null
+  target_id: string | null
+  action: string
+  details: string | null
+  metadata: Record<string, any>
   ip_address: string | null
   created_at: string
 }
 
 interface SecurityEvent {
-  id:          string
-  user_id:     string
-  event_type:  string
+  id: string
+  user_id: string
+  event_type: string
   event_title: string
-  event_desc:  string | null
-  metadata:    Record<string, any>
-  created_at:  string
+  event_desc: string | null
+  metadata: Record<string, any>
+  created_at: string
 }
 
 interface LoginRecord {
-  id:            string
-  user_id:       string
-  ip_address:    string | null
-  device_info:   string | null
-  login_at:      string
+  id: string
+  user_id: string
+  ip_address: string | null
+  device_info: string | null
+  login_at: string
   location_name: string | null
-  user_name?:    string | null
-  user_email?:   string | null
+  user_name?: string | null
+  user_email?: string | null
 }
 
 interface BlockedIP {
-  id:           string
-  ip_address:   string
-  reason:       string | null
-  blocked_by:   string | null
-  created_at:   string
+  id: string
+  ip_address: string
+  reason: string | null
+  blocked_by: string | null
+  created_at: string
   blocker_name?: string | null
 }
 
 interface HudStats {
-  adminActionsToday:  number
-  failedLoginsDay:    number
-  blockedIpsTotal:    number
-  activeAlerts:       number
+  adminActionsToday: number
+  failedLoginsDay: number
+  blockedIpsTotal: number
+  activeAlerts: number
 }
 
 // -- Time ago helper --------------------------------------------
 function timeAgo(iso: string): string {
-  const diffMs    = Date.now() - new Date(iso).getTime()
-  const diffMins  = Math.floor(diffMs / 60000)
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const diffMins = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays  = Math.floor(diffMs / 86400000)
-  if (diffMins  <  1)  return 'Just now'
-  if (diffMins  < 60)  return `${diffMins}m ago`
-  if (diffHours < 24)  return `${diffHours}h ago`
+  const diffDays = Math.floor(diffMs / 86400000)
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
   return `${diffDays}d ago`
 }
 
 // -- Action label + color mapper --------------------------------
 function mapAction(action: string): { label: string; color: string; bg: string } {
   const map: Record<string, { label: string; color: string; bg: string }> = {
-    suspend_user:  { label: 'Suspended User',    color: C.red,      bg: 'rgba(185,28,28,0.08)'   },
-    delete_user:   { label: 'Deleted User',      color: C.red,      bg: 'rgba(185,28,28,0.08)'   },
-    force_logout:  { label: 'Force Logout',      color: C.amber,    bg: 'rgba(217,119,6,0.08)'   },
-    change_plan:   { label: 'Changed Plan',      color: C.blue,     bg: 'rgba(29,78,216,0.08)'   },
-    assign_role:   { label: 'Assigned Role',     color: C.limeDeep, bg: 'rgba(74,143,0,0.08)'    },
-    write_note:    { label: 'Wrote Note',        color: C.muted,    bg: 'rgba(138,158,120,0.08)' },
-    send_email:    { label: 'Sent Email',        color: C.blue,     bg: 'rgba(29,78,216,0.08)'   },
-    revoke_role:   { label: 'Revoked Role',      color: C.red,      bg: 'rgba(185,28,28,0.08)'   },
-    impersonate:   { label: 'Impersonated User', color: C.red,      bg: 'rgba(185,28,28,0.08)'   },
+    suspend_user: { label: 'Suspended User', color: C.red, bg: 'rgba(220,38,38,0.08)' },
+    delete_user: { label: 'Deleted User', color: C.red, bg: 'rgba(220,38,38,0.08)' },
+    force_logout: { label: 'Force Logout', color: C.amber, bg: 'rgba(217,119,6,0.08)' },
+    change_plan: { label: 'Changed Plan', color: C.blue, bg: 'rgba(37,99,235,0.08)' },
+    assign_role: { label: 'Assigned Role', color: C.limeDeep, bg: 'rgba(77,124,15,0.08)' },
+    write_note: { label: 'Wrote Note', color: C.muted, bg: 'rgba(107,114,128,0.08)' },
+    send_email: { label: 'Sent Email', color: C.blue, bg: 'rgba(37,99,235,0.08)' },
+    revoke_role: { label: 'Revoked Role', color: C.red, bg: 'rgba(220,38,38,0.08)' },
+    impersonate: { label: 'Impersonated User', color: C.red, bg: 'rgba(220,38,38,0.08)' },
   }
   return map[action] ?? { label: action.replace(/_/g, ' '), color: C.muted, bg: C.bg }
 }
 
 // -- Event color mapper -----------------------------------------
 function mapEventColor(eventTitle: string): { color: string; bg: string } {
-  if (eventTitle.toLowerCase().includes('failed'))     return { color: C.red,      bg: 'rgba(185,28,28,0.08)'   }
-  if (eventTitle.toLowerCase().includes('impossible')) return { color: C.red,      bg: 'rgba(185,28,28,0.08)'   }
-  if (eventTitle.toLowerCase().includes('multi'))      return { color: C.amber,    bg: 'rgba(217,119,6,0.08)'   }
-  if (eventTitle.toLowerCase().includes('password'))   return { color: C.blue,     bg: 'rgba(29,78,216,0.08)'   }
-  if (eventTitle.toLowerCase().includes('reset'))      return { color: C.blue,     bg: 'rgba(29,78,216,0.08)'   }
+  if (eventTitle.toLowerCase().includes('failed')) return { color: C.red, bg: 'rgba(220,38,38,0.08)' }
+  if (eventTitle.toLowerCase().includes('impossible')) return { color: C.red, bg: 'rgba(220,38,38,0.08)' }
+  if (eventTitle.toLowerCase().includes('multi')) return { color: C.amber, bg: 'rgba(217,119,6,0.08)' }
+  if (eventTitle.toLowerCase().includes('password')) return { color: C.blue, bg: 'rgba(37,99,235,0.08)' }
+  if (eventTitle.toLowerCase().includes('reset')) return { color: C.blue, bg: 'rgba(37,99,235,0.08)' }
   return { color: C.muted, bg: C.bg }
 }
 
 // -- Toast component --------------------------------------------
 function SecurityToast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,    border: C.lime,   text: C.lime, icon: '?' },
-    error:   { bg: '#FEF2F2', border: '#FECACA', text: C.red,  icon: '?' },
-    info:    { bg: C.bg,      border: C.border,  text: C.text, icon: 'i' },
+    success: { bg: C.dark, border: C.lime, text: C.lime, icon: '?' },
+    error: { bg: '#FEF2F2', border: '#FECACA', text: C.red, icon: '?' },
+    info: { bg: C.bg, border: C.border, text: C.text, icon: 'i' },
   }
   const t = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
+      style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
       <span className="text-[13px] font-black" style={{ color: t.text }}>{t.icon}</span>
       <p className="text-[13px] font-bold" style={{ color: t.text }}>{msg}</p>
     </div>
@@ -139,18 +139,18 @@ function SecurityToast({ msg, type }: { msg: string; type: 'success' | 'error' |
 
 // -- Custom Dropdown --------------------------------------------
 function CustomDropdown({ value, options, onChange }: {
-  value:    string
-  options:  { value: string; label: string }[]
+  value: string
+  options: { value: string; label: string }[]
   onChange: (v: string) => void
 }) {
-  const [open, setOpen]       = useState(false)
+  const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
-  const triggerRef            = useRef<HTMLButtonElement>(null)
-  const selected              = options.find(o => o.value === value)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const selected = options.find(o => o.value === value)
 
   function openMenu() {
     if (!triggerRef.current) return
-    const rect       = triggerRef.current.getBoundingClientRect()
+    const rect = triggerRef.current.getBoundingClientRect()
     const menuHeight = options.length * 40
     const spaceBelow = window.innerHeight - rect.bottom
     if (spaceBelow < menuHeight && rect.top > menuHeight) {
@@ -169,14 +169,14 @@ function CustomDropdown({ value, options, onChange }: {
         className="flex items-center justify-between h-9 px-3 rounded-xl border text-[12px] font-semibold transition-all"
         style={{
           backgroundColor: C.surface,
-          borderColor:     open ? C.lime : C.border,
-          color:           C.text,
-          minWidth:        140,
+          borderColor: open ? C.lime : C.border,
+          color: C.text,
+          minWidth: 140,
         }}>
         <span>{selected?.label ?? 'Select...'}</span>
         <ChevronDown size={12} style={{
-          color:      C.muted,
-          transform:  open ? 'rotate(180deg)' : 'rotate(0deg)',
+          color: C.muted,
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.2s ease',
           marginLeft: 8,
           flexShrink: 0,
@@ -187,12 +187,12 @@ function CustomDropdown({ value, options, onChange }: {
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
           <div className="rounded-2xl border overflow-hidden p-1.5 flex flex-col gap-0.5"
-               style={{
-                 ...menuStyle,
-                 backgroundColor: C.surface,
-                 borderColor:     C.border,
-                 boxShadow:       '0 8px 24px rgba(0,0,0,0.12)',
-               }}>
+            style={{
+              ...menuStyle,
+              backgroundColor: C.surface,
+              borderColor: C.border,
+              boxShadow: '0 8px 24px rgba(30,21,53,0.12)',
+            }}>
             {options.map(o => {
               const isSelected = o.value === value
               return (
@@ -202,7 +202,7 @@ function CustomDropdown({ value, options, onChange }: {
                   className="flex items-center justify-between px-3 py-2 rounded-xl text-[12px] font-semibold text-left transition-all duration-150"
                   style={{
                     backgroundColor: isSelected ? C.lime : 'transparent',
-                    color:           isSelected ? C.dark : C.text,
+                    color: isSelected ? C.dark : C.text,
                   }}
                   onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor = C.limeTint }}
                   onMouseLeave={e => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent' }}>
@@ -219,36 +219,36 @@ function CustomDropdown({ value, options, onChange }: {
 function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
   const cards = [
     {
-      title:    'Admin Actions Today',
-      value:    stats.adminActionsToday,
-      sub:      'across all team members',
-      icon:     Activity,
-      color:    C.limeDeep,
-      bg:       C.limeTint,
+      title: 'Admin Actions Today',
+      value: stats.adminActionsToday,
+      sub: 'across all team members',
+      icon: Activity,
+      color: C.limeDeep,
+      bg: C.limeTint,
     },
     {
-      title:    'Security Alerts',
-      value:    stats.failedLoginsDay,
-      sub:      'failed logins & anomalies',
-      icon:     AlertTriangle,
-      color:    C.amber,
-      bg:       'rgba(217,119,6,0.08)',
+      title: 'Security Alerts',
+      value: stats.failedLoginsDay,
+      sub: 'failed logins & anomalies',
+      icon: AlertTriangle,
+      color: C.amber,
+      bg: 'rgba(217,119,6,0.08)',
     },
     {
-      title:    'Blocked IPs',
-      value:    stats.blockedIpsTotal,
-      sub:      'permanently blocked',
-      icon:     Ban,
-      color:    C.red,
-      bg:       'rgba(185,28,28,0.08)',
+      title: 'Blocked IPs',
+      value: stats.blockedIpsTotal,
+      sub: 'permanently blocked',
+      icon: Ban,
+      color: C.red,
+      bg: 'rgba(220,38,38,0.08)',
     },
     {
-      title:    'Active Alerts',
-      value:    stats.activeAlerts,
-      sub:      'need review now',
-      icon:     Shield,
-      color:    stats.activeAlerts > 0 ? C.red : C.green,
-      bg:       stats.activeAlerts > 0 ? 'rgba(185,28,28,0.08)' : 'rgba(22,163,74,0.08)',
+      title: 'Active Alerts',
+      value: stats.activeAlerts,
+      sub: 'need review now',
+      icon: Shield,
+      color: stats.activeAlerts > 0 ? C.red : C.green,
+      bg: stats.activeAlerts > 0 ? 'rgba(220,38,38,0.08)' : 'rgba(22,163,74,0.08)',
     },
   ]
 
@@ -258,13 +258,13 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
         const Icon = card.icon
         return (
           <div key={i} className="flex flex-col gap-3 p-4 rounded-2xl border"
-               style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <div className="flex items-center justify-between">
               <p className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>
                 {card.title.toUpperCase()}
               </p>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: card.bg }}>
+                style={{ backgroundColor: card.bg }}>
                 <Icon size={15} style={{ color: card.color }} />
               </div>
             </div>
@@ -283,18 +283,18 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
 // FRAUD SENTINEL BANNER
 // --------------------------------------------------------------
 function FraudSentinelBanner({
-    alerts,
-    onLockAccount,
-    onDismiss,
-    canLock = true,
-    canDismiss = true,
-  }: {
-    alerts:          SecurityEvent[]
-    onLockAccount:   (userId: string, eventId: string) => void
-    onDismiss:       (eventId: string) => void
-    canLock?:        boolean
-    canDismiss?:     boolean
-  }) {
+  alerts,
+  onLockAccount,
+  onDismiss,
+  canLock = true,
+  canDismiss = true,
+}: {
+  alerts: SecurityEvent[]
+  onLockAccount: (userId: string, eventId: string) => void
+  onDismiss: (eventId: string) => void
+  canLock?: boolean
+  canDismiss?: boolean
+}) {
   const criticalAlerts = alerts.filter(a =>
     a.event_title.toLowerCase().includes('impossible') ||
     a.event_title.toLowerCase().includes('multi') ||
@@ -305,7 +305,7 @@ function FraudSentinelBanner({
 
   return (
     <div className="flex flex-col gap-2 p-4 rounded-2xl border"
-         style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.25)' }}>
+      style={{ backgroundColor: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.25)' }}>
       <div className="flex items-center gap-2 mb-1">
         <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.red }} />
         <p className="text-[13px] font-black" style={{ color: C.red }}>
@@ -314,8 +314,8 @@ function FraudSentinelBanner({
       </div>
       {criticalAlerts.map(alert => (
         <div key={alert.id}
-             className="flex items-center gap-3 px-4 py-3 rounded-xl border"
-             style={{ backgroundColor: C.surface, borderColor: 'rgba(185,28,28,0.2)' }}>
+          className="flex items-center gap-3 px-4 py-3 rounded-xl border"
+          style={{ backgroundColor: C.surface, borderColor: 'rgba(220,38,38,0.2)' }}>
           <AlertTriangle size={15} style={{ color: C.red, flexShrink: 0 }} />
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-bold" style={{ color: C.dark }}>{alert.event_title}</p>
@@ -327,14 +327,14 @@ function FraudSentinelBanner({
           {canLock && <button
             onClick={() => onLockAccount(alert.user_id, alert.id)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+            style={{ backgroundColor: C.lime, color: C.dark }}>
             <Lock size={11} /> Lock Account
           </button>}
           {canDismiss && <button
-              onClick={() => onDismiss(alert.id)}
-              className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 shrink-0">
-              <X size={13} style={{ color: C.muted }} />
-            </button>}
+            onClick={() => onDismiss(alert.id)}
+            className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 shrink-0">
+            <X size={13} style={{ color: C.muted }} />
+          </button>}
         </div>
       ))}
     </div>
@@ -345,43 +345,43 @@ function FraudSentinelBanner({
 // FILTERS BAR
 // --------------------------------------------------------------
 function FiltersBar({
-    eventFilter,    setEventFilter,
-    timeFilter,     setTimeFilter,
-    searchQuery,    setSearchQuery,
-    isAutoRefresh,
-    lastUpdated,
-    onExport,
-    onManualRefresh,
-    canExport = true,
-    onClearLogs,
-    canClear = true,
-  }: {
-    eventFilter:      string
-    setEventFilter:   (v: string) => void
-    timeFilter:       string
-    setTimeFilter:    (v: string) => void
-    searchQuery:      string
-    setSearchQuery:   (v: string) => void
-    isAutoRefresh:    boolean
-    lastUpdated:      number
-    onExport:         () => void
-    onManualRefresh:  () => void
-    canExport?:       boolean
-    onClearLogs?:     () => void
-    canClear?:        boolean
+  eventFilter, setEventFilter,
+  timeFilter, setTimeFilter,
+  searchQuery, setSearchQuery,
+  isAutoRefresh,
+  lastUpdated,
+  onExport,
+  onManualRefresh,
+  canExport = true,
+  onClearLogs,
+  canClear = true,
+}: {
+  eventFilter: string
+  setEventFilter: (v: string) => void
+  timeFilter: string
+  setTimeFilter: (v: string) => void
+  searchQuery: string
+  setSearchQuery: (v: string) => void
+  isAutoRefresh: boolean
+  lastUpdated: number
+  onExport: () => void
+  onManualRefresh: () => void
+  canExport?: boolean
+  onClearLogs?: () => void
+  canClear?: boolean
 }) {
   const eventOptions = [
-    { value: 'all',            label: 'All Events'       },
-    { value: 'admin_action',   label: 'Admin Actions'    },
-    { value: 'security_alert', label: 'Security Alerts'  },
-    { value: 'password_reset', label: 'Password Resets'  },
+    { value: 'all', label: 'All Events' },
+    { value: 'admin_action', label: 'Admin Actions' },
+    { value: 'security_alert', label: 'Security Alerts' },
+    { value: 'password_reset', label: 'Password Resets' },
   ]
 
   const timeOptions = [
-    { value: '1h',  label: 'Last 1 hour'  },
-    { value: '6h',  label: 'Last 6 hours' },
-    { value: '24h', label: 'Last 24 hours'},
-    { value: '7d',  label: 'Last 7 days'  },
+    { value: '1h', label: 'Last 1 hour' },
+    { value: '6h', label: 'Last 6 hours' },
+    { value: '24h', label: 'Last 24 hours' },
+    { value: '7d', label: 'Last 7 days' },
     { value: '30d', label: 'Last 30 days' },
   ]
 
@@ -413,8 +413,8 @@ function FiltersBar({
 
       {/* Search */}
       <div className="flex items-center gap-2 h-9 px-3 rounded-xl border flex-1 min-w-[200px]"
-           id="security-search-bar"
-           style={{ backgroundColor: C.surface, borderColor: C.border }}>
+        id="security-search-bar"
+        style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <Search size={13} style={{ color: C.muted, flexShrink: 0 }} />
         <input
           value={searchQuery}
@@ -424,7 +424,7 @@ function FiltersBar({
           style={{ color: C.text, outline: 'none', border: 'none' }}
           onFocus={() => {
             const el = document.getElementById('security-search-bar')
-            if (el) el.style.borderColor = 'rgba(143,255,0,0.5)'
+            if (el) el.style.borderColor = C.lime
           }}
           onBlur={() => {
             const el = document.getElementById('security-search-bar')
@@ -439,9 +439,9 @@ function FiltersBar({
 
       {/* Auto refresh indicator */}
       <div className="flex items-center gap-1.5 h-9 px-3 rounded-xl border"
-           style={{ backgroundColor: C.surface, borderColor: C.border }}>
+        style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <div className="w-1.5 h-1.5 rounded-full animate-pulse"
-             style={{ backgroundColor: isAutoRefresh ? C.green : C.muted }} />
+          style={{ backgroundColor: isAutoRefresh ? C.green : C.muted }} />
         <p className="text-[11px] font-semibold" style={{ color: C.muted }}>
           {isAutoRefresh ? `Updated ${secondsAgo}s ago` : 'Paused'}
         </p>
@@ -456,36 +456,36 @@ function FiltersBar({
       </button>
 
       {/* Export */}
-     {canExport && <button
-          onClick={onExport}
-          className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
-          style={{ backgroundColor: '#8fff00', color: '#1a2410', borderColor: C.dark }}>
-          <Download size={13} /> Export
-        </button>}
-        {canClear && onClearLogs && <button
-          onClick={onClearLogs}
-          className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
-          style={{ backgroundColor: '#FEF2F2', color: '#b91c1c', borderColor: '#FECACA' }}>
-          <Trash2 size={13} /> Clear Logs
-        </button>}
-      </div>
-    )
-  }
+      {canExport && <button
+        onClick={onExport}
+        className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
+        style={{ backgroundColor: C.lime, color: C.dark, borderColor: C.dark }}>
+        <Download size={13} /> Export
+      </button>}
+      {canClear && onClearLogs && <button
+        onClick={onClearLogs}
+        className="flex items-center gap-1.5 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80"
+        style={{ backgroundColor: '#FEF2F2', color: C.red, borderColor: '#FECACA' }}>
+        <Trash2 size={13} /> Clear Logs
+      </button>}
+    </div>
+  )
+}
 
 // --------------------------------------------------------------
 // ADMIN ACTION LOGS — Left column
 // --------------------------------------------------------------
 function AdminActionLogs({ logs, loading, obscureEmail }: {
-  logs:          AdminLogEntry[]
-  loading:       boolean
-  obscureEmail:  (email: string) => string
+  logs: AdminLogEntry[]
+  loading: boolean
+  obscureEmail: (email: string) => string
 }) {
   return (
     <div className="flex flex-col gap-3 flex-1 min-w-0">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>ADMIN ACTION LOGS</p>
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+          style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
           {logs.length} entries
         </span>
       </div>
@@ -502,16 +502,16 @@ function AdminActionLogs({ logs, loading, obscureEmail }: {
           </div>
         ) : (
           logs.map(log => {
-            const mapped     = mapAction(log.action)
-            const adminName  = log.metadata?.admin_name  ?? 'Unknown Admin'
+            const mapped = mapAction(log.action)
+            const adminName = log.metadata?.admin_name ?? 'Unknown Admin'
             const targetName = log.metadata?.target_name ?? 'Unknown User'
             return (
               <div key={log.id}
-                   className="flex items-start gap-3 px-4 py-3 rounded-2xl border"
-                   style={{ backgroundColor: C.surface, borderColor: C.border }}>
+                className="flex items-start gap-3 px-4 py-3 rounded-2xl border"
+                style={{ backgroundColor: C.surface, borderColor: C.border }}>
                 {/* Action badge */}
                 <div className="px-2 py-0.5 rounded-lg shrink-0 mt-0.5"
-                     style={{ backgroundColor: mapped.bg }}>
+                  style={{ backgroundColor: mapped.bg }}>
                   <p className="text-[9px] font-black tracking-wide" style={{ color: mapped.color }}>
                     {mapped.label.toUpperCase()}
                   </p>
@@ -545,22 +545,22 @@ function AdminActionLogs({ logs, loading, obscureEmail }: {
 // USER SECURITY EVENTS — Right column
 // --------------------------------------------------------------
 function UserSecurityEvents({
-    events,
-    loading,
-    onBlockIp,
-    dismissedIds,
-    founderIps,
-    blockedIps,
-    canBlock = true,
-  }: {
-    events:       SecurityEvent[]
-    loading:      boolean
-    onBlockIp:    (ip: string, defaultReason: string) => void
-    dismissedIds: Set<string>
-    founderIps:   Set<string>
-    blockedIps:   Set<string>
-    canBlock?:    boolean
-  }) {
+  events,
+  loading,
+  onBlockIp,
+  dismissedIds,
+  founderIps,
+  blockedIps,
+  canBlock = true,
+}: {
+  events: SecurityEvent[]
+  loading: boolean
+  onBlockIp: (ip: string, defaultReason: string) => void
+  dismissedIds: Set<string>
+  founderIps: Set<string>
+  blockedIps: Set<string>
+  canBlock?: boolean
+}) {
   const visible = events.filter(e => !dismissedIds.has(e.id))
 
   return (
@@ -568,7 +568,7 @@ function UserSecurityEvents({
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-black tracking-wider" style={{ color: C.muted }}>USER SECURITY EVENTS</p>
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+          style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>
           {visible.filter(e => e.event_type === 'security_alert').length} alerts
         </span>
       </div>
@@ -585,19 +585,19 @@ function UserSecurityEvents({
           </div>
         ) : (
           visible.map(event => {
-            const mapped    = mapEventColor(event.event_title)
+            const mapped = mapEventColor(event.event_title)
             const ipAddress = event.metadata?.ip_address ?? null
-            const isAlert   = event.event_type === 'security_alert'
+            const isAlert = event.event_type === 'security_alert'
             return (
               <div key={event.id}
-                   className="flex items-start gap-3 px-4 py-3 rounded-2xl border"
-                   style={{
-                     backgroundColor: C.surface,
-                     borderColor:     isAlert ? 'rgba(185,28,28,0.2)' : C.border,
-                   }}>
+                className="flex items-start gap-3 px-4 py-3 rounded-2xl border"
+                style={{
+                  backgroundColor: C.surface,
+                  borderColor: isAlert ? 'rgba(220,38,38,0.2)' : C.border,
+                }}>
                 {/* Dot */}
                 <div className="w-2 h-2 rounded-full shrink-0 mt-1.5"
-                     style={{ backgroundColor: mapped.color }} />
+                  style={{ backgroundColor: mapped.color }} />
                 {/* Details */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-bold" style={{ color: C.dark }}>{event.event_title}</p>
@@ -611,21 +611,21 @@ function UserSecurityEvents({
                   {timeAgo(event.created_at)}
                 </p>
                 {/* Block IP — hidden if founder IP, badge if already blocked */}
-                  {isAlert && ipAddress && !founderIps.has(ipAddress) && (
-                    blockedIps.has(ipAddress) ? (
-                      <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0"
-                            style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                        <Ban size={10} /> Already Blocked
-                      </span>
-                    ) : canBlock ? (
-                      <button
-                        onClick={() => onBlockIp(ipAddress, `Security alert: ${event.event_title}`)}
-                        className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 hover:opacity-80"
-                        style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                        <Ban size={10} /> Block IP
-                      </button>
-                    ) : null
-                  )}
+                {isAlert && ipAddress && !founderIps.has(ipAddress) && (
+                  blockedIps.has(ipAddress) ? (
+                    <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0"
+                      style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>
+                      <Ban size={10} /> Already Blocked
+                    </span>
+                  ) : canBlock ? (
+                    <button
+                      onClick={() => onBlockIp(ipAddress, `Security alert: ${event.event_title}`)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 hover:opacity-80"
+                      style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>
+                      <Ban size={10} /> Block IP
+                    </button>
+                  ) : null
+                )}
               </div>
             )
           })
@@ -639,24 +639,24 @@ function UserSecurityEvents({
 // LOGIN ANOMALIES TABLE
 // --------------------------------------------------------------
 function LoginAnomaliesTable({
-    logins,
-    loading,
-    onBlockIp,
-    blockedIps,
-    founderIps,
-    canBlock = true,
-  }: {
-    logins:     LoginRecord[]
-    loading:    boolean
-    onBlockIp:  (ip: string, defaultReason: string) => void
-    blockedIps: Set<string>
-    founderIps: Set<string>
-    canBlock?:  boolean
-  }) {
+  logins,
+  loading,
+  onBlockIp,
+  blockedIps,
+  founderIps,
+  canBlock = true,
+}: {
+  logins: LoginRecord[]
+  loading: boolean
+  onBlockIp: (ip: string, defaultReason: string) => void
+  blockedIps: Set<string>
+  founderIps: Set<string>
+  canBlock?: boolean
+}) {
   const [page, setPage] = useState(0)
-  const pageSize        = 20
-  const totalPages      = Math.ceil(logins.length / pageSize)
-  const pageLogins      = logins.slice(page * pageSize, (page + 1) * pageSize)
+  const pageSize = 20
+  const totalPages = Math.ceil(logins.length / pageSize)
+  const pageLogins = logins.slice(page * pageSize, (page + 1) * pageSize)
 
   return (
     <div className="flex flex-col gap-3">
@@ -690,12 +690,12 @@ function LoginAnomaliesTable({
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
         {/* Header */}
         <div className="grid px-4 py-2.5 border-b"
-             style={{
-               gridTemplateColumns: '2fr 1.5fr 1.2fr 1.5fr 0.8fr 0.8fr',
-               gap: 12,
-               borderColor:     C.border,
-               backgroundColor: C.bg,
-             }}>
+          style={{
+            gridTemplateColumns: '2fr 1.5fr 1.2fr 1.5fr 0.8fr 0.8fr',
+            gap: 12,
+            borderColor: C.border,
+            backgroundColor: C.bg,
+          }}>
           {['USER', 'IP ADDRESS', 'LOCATION', 'DEVICE', 'TIME', 'ACTION'].map(h => (
             <span key={h} className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
           ))}
@@ -715,13 +715,13 @@ function LoginAnomaliesTable({
             const isBlocked = login.ip_address ? blockedIps.has(login.ip_address) : false
             return (
               <div key={login.id}
-                   className="grid px-4 py-3 items-center border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
-                   style={{
-                     gridTemplateColumns: '2fr 1.5fr 1.2fr 1.5fr 0.8fr 0.8fr',
-                     gap:             12,
-                     borderColor:     C.border,
-                     backgroundColor: isBlocked ? 'rgba(185,28,28,0.03)' : undefined,
-                   }}>
+                className="grid px-4 py-3 items-center border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
+                style={{
+                  gridTemplateColumns: '2fr 1.5fr 1.2fr 1.5fr 0.8fr 0.8fr',
+                  gap: 12,
+                  borderColor: C.border,
+                  backgroundColor: isBlocked ? 'rgba(220,38,38,0.03)' : undefined,
+                }}>
                 {/* User */}
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold truncate" style={{ color: C.dark }}>
@@ -735,7 +735,7 @@ function LoginAnomaliesTable({
                     <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: C.red }} />
                   )}
                   <p className="text-[11px] font-mono truncate"
-                     style={{ color: isBlocked ? C.red : C.text }}>
+                    style={{ color: isBlocked ? C.red : C.text }}>
                     {login.ip_address ?? '—'}
                   </p>
                 </div>
@@ -756,22 +756,22 @@ function LoginAnomaliesTable({
                 <div>
                   {isBlocked ? (
                     <span className="text-[9px] font-black px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: 'rgba(185,28,28,0.1)', color: C.red }}>
+                      style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: C.red }}>
                       BLOCKED
                     </span>
                   ) : founderIps.has(login.ip_address ?? '') ? (
                     <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                      style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
                       YOUR IP
                     </span>
                   ) : login.ip_address && canBlock ? (
-                      <button
-                        onClick={() => onBlockIp(login.ip_address!, `Manually blocked from login history`)}
-                        className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
-                        style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
-                        Block
-                      </button>
-                    ) : null}
+                    <button
+                      onClick={() => onBlockIp(login.ip_address!, `Manually blocked from login history`)}
+                      className="text-[10px] font-bold px-2 py-1 rounded-lg hover:opacity-80"
+                      style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>
+                      Block
+                    </button>
+                  ) : null}
                 </div>
               </div>
             )
@@ -786,16 +786,16 @@ function LoginAnomaliesTable({
 // BLOCKED IPS MANAGEMENT
 // --------------------------------------------------------------
 function BlockedIpsPanel({
-    blockedIps,
-    loading,
-    onUnblock,
-    canUnblock = true,
-  }: {
-    blockedIps: BlockedIP[]
-    loading:    boolean
-    onUnblock:  (id: string) => void
-    canUnblock?: boolean
-  }) {
+  blockedIps,
+  loading,
+  onUnblock,
+  canUnblock = true,
+}: {
+  blockedIps: BlockedIP[]
+  loading: boolean
+  onUnblock: (id: string) => void
+  canUnblock?: boolean
+}) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -807,12 +807,12 @@ function BlockedIpsPanel({
       <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
         {/* Header */}
         <div className="grid px-4 py-2.5 border-b"
-             style={{
-               gridTemplateColumns: '1.5fr 2fr 1fr 0.8fr',
-               gap:             12,
-               borderColor:     C.border,
-               backgroundColor: C.bg,
-             }}>
+          style={{
+            gridTemplateColumns: '1.5fr 2fr 1fr 0.8fr',
+            gap: 12,
+            borderColor: C.border,
+            backgroundColor: C.bg,
+          }}>
           {['IP ADDRESS', 'REASON', 'BLOCKED', 'ACTION'].map(h => (
             <span key={h} className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
           ))}
@@ -830,12 +830,12 @@ function BlockedIpsPanel({
         ) : (
           blockedIps.map(entry => (
             <div key={entry.id}
-                 className="grid px-4 py-3 items-center border-b last:border-b-0"
-                 style={{
-                   gridTemplateColumns: '1.5fr 2fr 1fr 0.8fr',
-                   gap:         12,
-                   borderColor: C.border,
-                 }}>
+              className="grid px-4 py-3 items-center border-b last:border-b-0"
+              style={{
+                gridTemplateColumns: '1.5fr 2fr 1fr 0.8fr',
+                gap: 12,
+                borderColor: C.border,
+              }}>
               {/* IP */}
               <p className="text-[12px] font-mono font-bold" style={{ color: C.red }}>
                 {entry.ip_address}
@@ -847,12 +847,12 @@ function BlockedIpsPanel({
               {/* Time */}
               <p className="text-[10px]" style={{ color: C.muted }}>{timeAgo(entry.created_at)}</p>
               {/* Unblock */}
-                {canUnblock && <button
-                  onClick={() => onUnblock(entry.id)}
-                  className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
-                  style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
-                  Unblock
-                </button>}
+              {canUnblock && <button
+                onClick={() => onUnblock(entry.id)}
+                className="text-[10px] font-bold px-2.5 py-1 rounded-lg hover:opacity-80"
+                style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                Unblock
+              </button>}
             </div>
           ))
         )}
@@ -883,34 +883,34 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
   // -- Block IP modal state -----------------------------------
   const [blockIpModal, setBlockIpModal] = useState<string | null>(null)
-  const [blockReason,  setBlockReason]  = useState('')
-  const [blocking,     setBlocking]     = useState(false)
-  const [hudStats,        setHudStats]        = useState<HudStats>({ adminActionsToday: 0, failedLoginsDay: 0, blockedIpsTotal: 0, activeAlerts: 0 })
-  const [adminLogs,       setAdminLogs]        = useState<AdminLogEntry[]>([])
-  const [securityEvents,  setSecurityEvents]   = useState<SecurityEvent[]>([])
-  const [loginRecords,    setLoginRecords]     = useState<LoginRecord[]>([])
-  const [blockedIpsList,  setBlockedIpsList]   = useState<BlockedIP[]>([])
-  const [dismissedIds,    setDismissedIds]     = useState<Set<string>>(new Set())
-  const [loading,         setLoading]          = useState(true)
-  const [silentRefresh,   setSilentRefresh]    = useState(false)
+  const [blockReason, setBlockReason] = useState('')
+  const [blocking, setBlocking] = useState(false)
+  const [hudStats, setHudStats] = useState<HudStats>({ adminActionsToday: 0, failedLoginsDay: 0, blockedIpsTotal: 0, activeAlerts: 0 })
+  const [adminLogs, setAdminLogs] = useState<AdminLogEntry[]>([])
+  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([])
+  const [loginRecords, setLoginRecords] = useState<LoginRecord[]>([])
+  const [blockedIpsList, setBlockedIpsList] = useState<BlockedIP[]>([])
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
+  const [silentRefresh, setSilentRefresh] = useState(false)
 
   // -- Filter state -------------------------------------------
-  const [eventFilter,  setEventFilter]  = useState('all')
-  const [timeFilter,   setTimeFilter]   = useState('24h')
-  const [searchQuery,  setSearchQuery]  = useState('')
+  const [eventFilter, setEventFilter] = useState('all')
+  const [timeFilter, setTimeFilter] = useState('24h')
+  const [searchQuery, setSearchQuery] = useState('')
 
   // -- Auto-refresh state -------------------------------------
-  const [lastUpdated,   setLastUpdated]   = useState(Date.now())
+  const [lastUpdated, setLastUpdated] = useState(Date.now())
   const [isAutoRefresh, setIsAutoRefresh] = useState(true)
-  const intervalRef                       = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // -- Parse time filter to milliseconds ---------------------
   function parseInterval(filter: string): number {
     const map: Record<string, number> = {
-      '1h':  1  * 60 * 60 * 1000,
-      '6h':  6  * 60 * 60 * 1000,
+      '1h': 1 * 60 * 60 * 1000,
+      '6h': 6 * 60 * 60 * 1000,
       '24h': 24 * 60 * 60 * 1000,
-      '7d':  7  * 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
       '30d': 30 * 24 * 60 * 60 * 1000,
     }
     return map[filter] ?? 24 * 60 * 60 * 1000
@@ -940,12 +940,12 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
       // Normalize audit_logs to AdminLogEntry shape
       const normalizedAuditLogs: AdminLogEntry[] = (auditLogsData ?? []).map((l: any) => ({
-        id:         l.id,
-        admin_id:   l.user_id ?? null,
-        target_id:  null,
-        action:     l.action_type ?? l.action ?? 'unknown',
-        details:    l.details ?? null,
-        metadata:   { admin_name: 'Admin', location: l.location ?? null },
+        id: l.id,
+        admin_id: l.user_id ?? null,
+        target_id: null,
+        action: l.action_type ?? l.action ?? 'unknown',
+        details: l.details ?? null,
+        metadata: { admin_name: 'Admin', location: l.location ?? null },
         ip_address: l.ip_address ?? null,
         created_at: l.created_at,
       }))
@@ -987,7 +987,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
           const profile = profileMap.get(login.user_id)
           enrichedLogins.push({
             ...login,
-            user_name:  profile?.name  ?? null,
+            user_name: profile?.name ?? null,
             user_email: profile?.email ?? null,
           })
         }
@@ -1011,7 +1011,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
       ).length
 
       const blockedIpsTotal = (blockedData ?? []).length
-      const totalAlerts     = (eventsData ?? []).filter((e: any) =>
+      const totalAlerts = (eventsData ?? []).filter((e: any) =>
         e.event_type === 'security_alert'
       ).length
 
@@ -1104,7 +1104,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
       if (!session) return
       await (supabase.from('blocked_ips') as any).insert({
         ip_address: blockIpModal,
-        reason:     blockReason.trim(),
+        reason: blockReason.trim(),
         blocked_by: session.user.id,
       })
       showToast(`${blockIpModal} has been blocked`, 'success')
@@ -1137,9 +1137,9 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
       const res = await fetch('/api/admin/suspend-user', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-        body:    JSON.stringify({ userId, action: 'suspend' }),
+        body: JSON.stringify({ userId, action: 'suspend' }),
       })
       if (!res.ok) {
         const json = await res.json()
@@ -1162,32 +1162,32 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
   // -- Export CSV ---------------------------------------------
   const [showClearLogs, setShowClearLogs] = useState(false)
-    const [clearConfirmText, setClearConfirmText] = useState('')
-    const [clearing, setClearing] = useState(false)
+  const [clearConfirmText, setClearConfirmText] = useState('')
+  const [clearing, setClearing] = useState(false)
 
-    async function handleClearLogs() {
-      if (clearConfirmText !== 'DELETE' || clearing) return
-      setClearing(true)
-      try {
-        await Promise.all([
-          (supabase.from('admin_logs') as any).delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-          (supabase.from('audit_logs') as any).delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-          (supabase.from('user_events') as any).delete().in('event_type', ['security_alert', 'password_reset']),
-        ])
-        setAdminLogs([])
-        setSecurityEvents([])
-        showToast('Security logs cleared', 'success')
-        setShowClearLogs(false)
-        setClearConfirmText('')
-      } catch (e) {
-        console.error('[SecurityLogsTab] clearLogs error:', e)
-        showToast('Failed to clear logs', 'error')
-      }
-      setClearing(false)
+  async function handleClearLogs() {
+    if (clearConfirmText !== 'DELETE' || clearing) return
+    setClearing(true)
+    try {
+      await Promise.all([
+        (supabase.from('admin_logs') as any).delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        (supabase.from('audit_logs') as any).delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        (supabase.from('user_events') as any).delete().in('event_type', ['security_alert', 'password_reset']),
+      ])
+      setAdminLogs([])
+      setSecurityEvents([])
+      showToast('Security logs cleared', 'success')
+      setShowClearLogs(false)
+      setClearConfirmText('')
+    } catch (e) {
+      console.error('[SecurityLogsTab] clearLogs error:', e)
+      showToast('Failed to clear logs', 'error')
     }
+    setClearing(false)
+  }
 
-    function handleExport() {
-      const escape  = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
+  function handleExport() {
+    const escape = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`
     const headers = ['Type', 'Action/Event', 'User', 'IP Address', 'Details', 'Time']
 
     const adminRows = adminLogs.map(log => [
@@ -1208,12 +1208,12 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
       escape(new Date(event.created_at).toLocaleString()),
     ])
 
-    const csv  = [headers.map(h => `"${h}"`).join(','), ...[...adminRows, ...eventRows].map(r => r.join(','))].join('\n')
+    const csv = [headers.map(h => `"${h}"`).join(','), ...[...adminRows, ...eventRows].map(r => r.join(','))].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url  = URL.createObjectURL(blob)
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     const date = new Date().toISOString().split('T')[0]
-    link.href     = url
+    link.href = url
     link.download = `riazify-security-logs-${date}.csv`
     document.body.appendChild(link)
     link.click()
@@ -1261,8 +1261,8 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
   const filteredLogins = loginRecords.filter(login => {
     if (!searchQuery) return true
     return (
-      (login.ip_address    ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (login.user_email    ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (login.ip_address ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (login.user_email ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (login.location_name ?? '').toLowerCase().includes(searchQuery.toLowerCase())
     )
   })
@@ -1274,12 +1274,12 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
       {/* Sub-tab switcher */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1 p-1 rounded-2xl border"
-             style={{ backgroundColor: C.bg, borderColor: C.border }}>
+          style={{ backgroundColor: C.bg, borderColor: C.border }}>
           {([
             { key: 'activity', label: 'Activity Workspace', icon: Activity },
-            { key: 'network',  label: 'Network Guard',      icon: Globe    },
+            { key: 'network', label: 'Network Guard', icon: Globe },
           ] as const).map(tab => {
-            const Icon     = tab.icon
+            const Icon = tab.icon
             const isActive = activeTab === tab.key
             return (
               <button
@@ -1287,11 +1287,11 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
                 onClick={() => setActiveTab(tab.key)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all"
                 style={{
-                  backgroundColor: isActive ? '#8fff00' : 'transparent',
-                    color:           isActive ? '#1a2410'      : C.muted,
-                  }}>
-                  <Icon size={14} style={{ color: isActive ? '#1a2410' : C.muted }} />
-                  {tab.label}
+                  backgroundColor: isActive ? C.lime : 'transparent',
+                  color: isActive ? C.dark : C.muted,
+                }}>
+                <Icon size={14} style={{ color: isActive ? C.dark : C.muted }} />
+                {tab.label}
               </button>
             )
           })}
@@ -1321,53 +1321,53 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
           {/* Fraud Sentinel */}
           <FraudSentinelBanner
-              alerts={securityEvents.filter(e => !dismissedIds.has(e.id))}
-              onLockAccount={handleLockAccount}
-              onDismiss={handleDismissAlert}
-              canLock={can('lock_account')}
-              canDismiss={can('dismiss_alert')}
-            />
+            alerts={securityEvents.filter(e => !dismissedIds.has(e.id))}
+            onLockAccount={handleLockAccount}
+            onDismiss={handleDismissAlert}
+            canLock={can('lock_account')}
+            canDismiss={can('dismiss_alert')}
+          />
 
           {/* Filters Bar */}
           <FiltersBar
-            eventFilter={eventFilter}       setEventFilter={setEventFilter}
-            timeFilter={timeFilter}         setTimeFilter={setTimeFilter}
-           searchQuery={searchQuery}       setSearchQuery={setSearchQuery}
-              isAutoRefresh={isAutoRefresh}
-              lastUpdated={lastUpdated}
-              onExport={handleExport}
-              onManualRefresh={() => loadData(false)}
-              canExport={can('export_logs')}
-              onClearLogs={() => setShowClearLogs(true)}
-              canClear={can('clear_logs')}
-            />
+            eventFilter={eventFilter} setEventFilter={setEventFilter}
+            timeFilter={timeFilter} setTimeFilter={setTimeFilter}
+            searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+            isAutoRefresh={isAutoRefresh}
+            lastUpdated={lastUpdated}
+            onExport={handleExport}
+            onManualRefresh={() => loadData(false)}
+            canExport={can('export_logs')}
+            onClearLogs={() => setShowClearLogs(true)}
+            canClear={can('clear_logs')}
+          />
 
           {/* Two column logs */}
-            {can('view_logs') ? (
-              <div className="flex gap-4 items-start">
-                <AdminActionLogs
-                  logs={filteredAdminLogs}
-                  loading={loading}
-                  obscureEmail={obscureEmail}
-                />
-                <UserSecurityEvents
-                    events={filteredSecurityEvents}
-                    loading={loading}
-                    onBlockIp={openBlockIpModal}
-                    dismissedIds={dismissedIds}
-                    founderIps={currentUserIps}
-                    blockedIps={blockedIpSet}
-                    canBlock={can('block_ip')}
-                  />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view security logs</p>
-              </div>
-            )}
+          {can('view_logs') ? (
+            <div className="flex gap-4 items-start">
+              <AdminActionLogs
+                logs={filteredAdminLogs}
+                loading={loading}
+                obscureEmail={obscureEmail}
+              />
+              <UserSecurityEvents
+                events={filteredSecurityEvents}
+                loading={loading}
+                onBlockIp={openBlockIpModal}
+                dismissedIds={dismissedIds}
+                founderIps={currentUserIps}
+                blockedIps={blockedIpSet}
+                canBlock={can('block_ip')}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view security logs</p>
+            </div>
+          )}
 
-          </div>
-        )}
+        </div>
+      )}
 
       {/* -- NETWORK GUARD ---------------------------------- */}
       {activeTab === 'network' && (
@@ -1375,54 +1375,54 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
 
           {/* Filters Bar */}
           <FiltersBar
-              eventFilter={eventFilter}       setEventFilter={setEventFilter}
-              timeFilter={timeFilter}         setTimeFilter={setTimeFilter}
-              searchQuery={searchQuery}       setSearchQuery={setSearchQuery}
-              isAutoRefresh={isAutoRefresh}
-              lastUpdated={lastUpdated}
-              onExport={handleExport}
-              onManualRefresh={() => loadData(false)}
-              canExport={can('export_logs')}
-            />
+            eventFilter={eventFilter} setEventFilter={setEventFilter}
+            timeFilter={timeFilter} setTimeFilter={setTimeFilter}
+            searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+            isAutoRefresh={isAutoRefresh}
+            lastUpdated={lastUpdated}
+            onExport={handleExport}
+            onManualRefresh={() => loadData(false)}
+            canExport={can('export_logs')}
+          />
 
-            {/* Login Anomalies Table */}
+          {/* Login Anomalies Table */}
           <LoginAnomaliesTable
-              logins={filteredLogins}
-              loading={loading}
-              onBlockIp={openBlockIpModal}
-              blockedIps={blockedIpSet}
-              founderIps={currentUserIps}
-              canBlock={can('block_ip')}
-            />
+            logins={filteredLogins}
+            loading={loading}
+            onBlockIp={openBlockIpModal}
+            blockedIps={blockedIpSet}
+            founderIps={currentUserIps}
+            canBlock={can('block_ip')}
+          />
 
           {/* Blocked IPs Panel */}
           {can('view_blocked_ips') ? (
-              <BlockedIpsPanel
-                blockedIps={blockedIpsList}
-                loading={loading}
-                onUnblock={handleUnblockIp}
-                canUnblock={can('unblock_ip')}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
-                <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view blocked IPs</p>
-              </div>
-            )}
+            <BlockedIpsPanel
+              blockedIps={blockedIpsList}
+              loading={loading}
+              onUnblock={handleUnblockIp}
+              canUnblock={can('unblock_ip')}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view blocked IPs</p>
+            </div>
+          )}
 
-          </div>
+        </div>
       )}
 
       {/* Block IP confirmation modal */}
       {blockIpModal && (
         <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-             style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-             onClick={e => e.target === e.currentTarget && !blocking && setBlockIpModal(null)}>
+          style={{ backgroundColor: 'rgba(30,21,53,0.6)' }}
+          onClick={e => e.target === e.currentTarget && !blocking && setBlockIpModal(null)}>
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-               style={{ border: `1px solid ${C.border}` }}>
+            style={{ border: `1px solid ${C.border}` }}>
             <div className="flex items-center gap-3 px-6 py-4 border-b"
-                 style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
+              style={{ borderColor: C.border, backgroundColor: 'rgba(220,38,38,0.04)' }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+                style={{ backgroundColor: 'rgba(220,38,38,0.1)' }}>
                 <Ban size={18} style={{ color: C.red }} />
               </div>
               <div>
@@ -1436,7 +1436,7 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
             </div>
             <div className="px-6 py-5 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5 px-4 py-3 rounded-xl border"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.2)' }}>
+                style={{ backgroundColor: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.2)' }}>
                 {[
                   'All traffic from this IP will be blocked immediately',
                   'Any active sessions from this IP will be terminated',
@@ -1459,9 +1459,9 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
                   autoFocus
                   className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
                   style={{
-                    borderColor:     blockReason.trim().length > 5 ? C.lime : C.border,
+                    borderColor: blockReason.trim().length > 5 ? C.lime : C.border,
                     backgroundColor: C.bg,
-                    color:           C.text,
+                    color: C.text,
                   }} />
                 <p className="text-[10px] mt-1" style={{ color: C.muted }}>
                   Minimum 5 characters — saved to blocked IPs registry
@@ -1480,71 +1480,71 @@ export default function SecurityLogsTab({ isInvestorMode = false }: { isInvestor
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
                   style={{ backgroundColor: C.red, color: '#fff' }}>
                   {blocking
-                      ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
-                      : <><Ban size={14} /> Block IP</>}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Clear Logs confirmation modal */}
-        {showClearLogs && (
-          <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-               style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-               onClick={e => e.target === e.currentTarget && !clearing && setShowClearLogs(false)}>
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-                 style={{ border: `1px solid ${C.border}` }}>
-              <div className="flex items-center gap-3 px-6 py-4 border-b"
-                   style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                     style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
-                  <Trash2 size={18} style={{ color: C.red }} />
-                </div>
-                <div>
-                  <p className="text-[15px] font-black" style={{ color: C.dark }}>Clear Security Logs</p>
-                  <p className="text-[11px]" style={{ color: C.muted }}>This cannot be undone</p>
-                </div>
-                <button onClick={() => { setShowClearLogs(false); setClearConfirmText('') }}
-                  className="ml-auto w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100">
-                  <X size={15} style={{ color: C.muted }} />
+                    ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
+                    : <><Ban size={14} /> Block IP</>}
                 </button>
               </div>
-              <div className="px-6 py-5 flex flex-col gap-4">
-                <p className="text-[13px]" style={{ color: C.muted }}>
-                  This permanently deletes all admin action logs and security alert history. Login and impersonation records elsewhere are not affected.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Logs confirmation modal */}
+      {showClearLogs && (
+        <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(30,21,53,0.6)' }}
+          onClick={e => e.target === e.currentTarget && !clearing && setShowClearLogs(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+            style={{ border: `1px solid ${C.border}` }}>
+            <div className="flex items-center gap-3 px-6 py-4 border-b"
+              style={{ borderColor: C.border, backgroundColor: 'rgba(220,38,38,0.04)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(220,38,38,0.1)' }}>
+                <Trash2 size={18} style={{ color: C.red }} />
+              </div>
+              <div>
+                <p className="text-[15px] font-black" style={{ color: C.dark }}>Clear Security Logs</p>
+                <p className="text-[11px]" style={{ color: C.muted }}>This cannot be undone</p>
+              </div>
+              <button onClick={() => { setShowClearLogs(false); setClearConfirmText('') }}
+                className="ml-auto w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100">
+                <X size={15} style={{ color: C.muted }} />
+              </button>
+            </div>
+            <div className="px-6 py-5 flex flex-col gap-4">
+              <p className="text-[13px]" style={{ color: C.muted }}>
+                This permanently deletes all admin action logs and security alert history. Login and impersonation records elsewhere are not affected.
+              </p>
+              <div>
+                <p className="text-[12px] font-bold mb-2" style={{ color: C.dark }}>
+                  Type <code style={{ backgroundColor: C.bg, padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace' }}>DELETE</code> to confirm:
                 </p>
-                <div>
-                  <p className="text-[12px] font-bold mb-2" style={{ color: C.dark }}>
-                    Type <code style={{ backgroundColor: C.bg, padding: '1px 5px', borderRadius: 4, fontFamily: 'monospace' }}>DELETE</code> to confirm:
-                  </p>
-                  <input value={clearConfirmText} onChange={e => setClearConfirmText(e.target.value.toUpperCase())}
-                    placeholder="DELETE" autoFocus
-                    className="w-full px-3 py-2.5 rounded-xl border text-[13px] outline-none"
-                    style={{ borderColor: C.border }} />
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => { setShowClearLogs(false); setClearConfirmText('') }} disabled={clearing}
-                    className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
-                    style={{ borderColor: C.border, color: C.muted }}>
-                    Cancel
-                  </button>
-                  <button onClick={handleClearLogs}
-                    disabled={clearConfirmText !== 'DELETE' || clearing}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-                    style={{ backgroundColor: C.red, color: '#fff' }}>
-                    {clearing
-                      ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
-                      : <><Trash2 size={14} /> Clear Logs</>}
-                  </button>
-                </div>
+                <input value={clearConfirmText} onChange={e => setClearConfirmText(e.target.value.toUpperCase())}
+                  placeholder="DELETE" autoFocus
+                  className="w-full px-3 py-2.5 rounded-xl border text-[13px] outline-none"
+                  style={{ borderColor: C.border }} />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => { setShowClearLogs(false); setClearConfirmText('') }} disabled={clearing}
+                  className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
+                  style={{ borderColor: C.border, color: C.muted }}>
+                  Cancel
+                </button>
+                <button onClick={handleClearLogs}
+                  disabled={clearConfirmText !== 'DELETE' || clearing}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
+                  style={{ backgroundColor: C.red, color: '#fff' }}>
+                  {clearing
+                    ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />
+                    : <><Trash2 size={14} /> Clear Logs</>}
+                </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Toast notifications */}
+      {/* Toast notifications */}
       {toast && <SecurityToast msg={toast.msg} type={toast.type} />}
 
     </div>

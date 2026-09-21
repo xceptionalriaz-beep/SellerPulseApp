@@ -16,21 +16,32 @@ const C = {
     muted: '#9ca3af', inputBorder: '#e5e0f5',
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
+const CATEGORY_COLORS: Record<BlockCategory, string> = {
     'Layout': '#7530fb', 'Content': '#0ea5e9', 'Product': '#16a34a',
     'Media': '#d97706', 'eBay Specific': '#16a34a', 'Conversion': '#ef4444',
-    'Header & Footer': '#7c3aed', 'Typography': '#db2877',
+    // Brand-consistent tail: 'Header & Footer' uses the deep brand purple
+    // (matches `C.dark` above), 'Typography' uses the secondary slate so the
+    // two new categories visually balance the existing six.
+    'Header & Footer': '#1e1535', 'Typography': '#6b7280',
 }
 
 // ── SVG visual previews ───────────────────────────────────────────────────────
 const P: Record<string, () => JSX.Element> = {
     full_width_section: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="14" y="14" width="72" height="5" rx="2" fill="#c4b5fd" /><rect x="20" y="23" width="60" height="3" rx="1.5" fill="#ddd6fe" /><rect x="26" y="30" width="48" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
 
-    two_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="43" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="53" y="4" width="43" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="10" y="12" width="31" height="4" rx="2" fill="#c4b5fd" /><rect x="10" y="20" width="25" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="10" y="26" width="28" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="59" y="12" width="31" height="4" rx="2" fill="#c4b5fd" /><rect x="59" y="20" width="25" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="59" y="26" width="28" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+    two_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="43" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="53" y="4" width="43" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="10" y="12" width="31" height="4" rx="2" fill="#c4b5fd" /><rect x="59" y="12" width="31" height="4" rx="2" fill="#c4b5fd" /></svg>,
 
-    three_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="3" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="36" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="69" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="7" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="7" y="19" width="16" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="40" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="40" y="19" width="16" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="73" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="73" y="19" width="16" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+    three_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="3" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="36" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="69" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="7" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="40" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="73" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    four_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="3" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="27" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="51" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="75" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="5" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /><rect x="29" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /><rect x="53" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /><rect x="77" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    spacer: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="18" width="92" height="8" rx="2" fill="#ede9fe" /><line x1="50" y1="4" x2="50" y2="18" stroke="#7530fb" strokeWidth="1" strokeDasharray="3 3" /><line x1="50" y1="26" x2="50" y2="40" stroke="#7530fb" strokeWidth="1" strokeDasharray="3 3" /></svg>,
+
+    border_box: () => <svg viewBox="0 0 100 44" fill="none"><rect x="10" y="6" width="80" height="32" rx="6" stroke="#7530fb" strokeWidth="2" fill="#f3eeff" /><rect x="20" y="14" width="60" height="4" rx="2" fill="#c4b5fd" /><rect x="20" y="22" width="45" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
 
     container: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f8f7ff" stroke="#ddd6fe" strokeWidth="1" strokeDasharray="4 2" /><rect x="14" y="10" width="72" height="24" rx="3" fill="#f3eeff" stroke="#c4b5fd" strokeWidth="1" /><rect x="24" y="17" width="52" height="4" rx="2" fill="#c4b5fd" /><rect x="28" y="25" width="44" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    sidebar_layout: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="66" height="36" rx="3" fill="#ddd6fe" /><rect x="74" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="78" y="10" width="14" height="3" rx="1.5" fill="#1e1535" opacity="0.6" /><rect x="78" y="16" width="14" height="2" rx="1" fill="#c4b5fd" /></svg>,
 
     heading: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="13" width="80" height="8" rx="4" fill="#7530fb" opacity="0.85" /><rect x="22" y="27" width="56" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
 
@@ -81,6 +92,27 @@ const P: Record<string, () => JSX.Element> = {
     hero_header: () => <svg viewBox="0 0 100 44" fill="none"><defs><linearGradient id="g2" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#7530fb" /><stop offset="1" stopColor="#1e1535" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#g2)" /><rect x="24" y="11" width="52" height="8" rx="4" fill="white" opacity="0.9" /><rect x="32" y="23" width="36" height="3" rx="1.5" fill="white" opacity="0.45" /><rect x="36" y="30" width="28" height="7" rx="3.5" fill="#b8fa33" /></svg>,
 
     raw_html: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#1e1535" /><rect x="10" y="10" width="20" height="3.5" rx="1.75" fill="#7530fb" opacity="0.8" /><rect x="16" y="17" width="56" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.7" /><rect x="16" y="23" width="44" height="2.5" rx="1.25" fill="#b8fa33" opacity="0.6" /><rect x="16" y="29" width="36" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.5" /><rect x="10" y="33" width="14" height="3.5" rx="1.75" fill="#7530fb" opacity="0.8" /><rect x="32" y="9" width="3" height="26" rx="1.5" fill="#374151" /></svg>,
+
+    // ── New Content Block Previews ──
+
+    faq_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="12" y="10" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="24" y="11" width="50" height="4" rx="2" fill="#1e1535" opacity="0.7" /><rect x="12" y="20" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="24" y="21" width="60" height="4" rx="2" fill="#c4b5fd" /><rect x="12" y="29" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="24" y="30" width="45" height="4" rx="2" fill="#ddd6fe" /></svg>,
+
+    testimonial_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><path d="M14 10 L14 22 L11 22 L11 32 Q11 35 14 35 L20 35 L20 10 Z" fill="#7530fb" opacity="0.4" /><rect x="22" y="10" width="30" height="5" rx="2" fill="#1e1535" opacity="0.7" /><rect x="22" y="18" width="35" height="3" rx="1.5" fill="#7530fb" opacity="0.4" /><rect x="22" y="24" width="25" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    compatibility_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" /><rect x="10" y="8" width="30" height="3" rx="1.5" fill="#16a34a" opacity="0.7" /><rect x="10" y="14" width="75" height="2" rx="1" fill="#16a34a" opacity="0.4" /><rect x="10" y="22" width="30" height="3" rx="1.5" fill="#dc2626" opacity="0.7" /><rect x="10" y="28" width="60" height="2" rx="1" fill="#fca5a5" /></svg>,
+
+    bundle_discount_banner: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#gb)" /><defs><linearGradient id="gb" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#7530fb" /><stop offset="1" stopColor="#b8fa33" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#gb)" opacity="0.85" /><rect x="16" y="11" width="44" height="7" rx="3" fill="white" opacity="0.9" /><rect x="16" y="22" width="36" height="3" rx="1.5" fill="white" opacity="0.7" /></svg>,
+
+    store_nav_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="18" width="92" height="8" rx="3" fill="#1e1535" /><rect x="12" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="26" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="40" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="54" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="72" y="18" width="18" height="8" rx="4" fill="#b8fa33" /></svg>,
+
+    shipping_policy_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" /><rect x="10" y="8" width="10" height="10" rx="3" fill="#16a34a" opacity="0.3" /><path d="M15 12 L13 15 L18 17" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="26" y="9" width="60" height="4" rx="2" fill="#1e1535" opacity="0.6" /><rect x="26" y="16" width="50" height="3" rx="1.5" fill="#16a34a" opacity="0.4" /><rect x="26" y="22" width="35" height="2.5" rx="1.25" fill="#c4b5fd" /></svg>,
+
+    payment_methods_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#eff6ff" stroke="#93c5fd" strokeWidth="1" /><rect x="10" y="8" width="14" height="10" rx="3" fill="#3b82f6" opacity="0.3" /><path d="M14 12 L13 14 L17 14 L16 12 Z" fill="white" opacity="0.7" /><rect x="10" y="20" width="75" height="4" rx="2" fill="#3b82f6" opacity="0.4" /><rect x="10" y="28" width="55" height="3" rx="1.5" fill="#93c5fd" /></svg>,
+
+    urgency_timer_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#fef2f2" stroke="#fca5a5" strokeWidth="1" /><circle cx="18" cy="22" r="8" fill="#ef4444" opacity="0.3" /><path d="M18 18 V22 L21 24" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="34" y="14" width="44" height="5" rx="2.5" fill="#ef4444" opacity="0.6" /><rect x="34" y="23" width="30" height="3" rx="1.5" fill="#fca5a5" /></svg>,
+
+    trust_badge_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#c4b5fd" strokeWidth="1" /><path d="M50 8 L54 15 L62 15 L56 20 L58 28 L50 23 L42 28 L44 20 L38 15 L46 15 Z" fill="#7530fb" opacity="0.6" /><rect x="20" y="32" width="60" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
 }
 
 function Fallback({ color }: { color: string }) {
@@ -148,6 +180,7 @@ export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, dragg
                     </div>
                 ) : (
                     BLOCK_CATEGORIES.map(cat => {
+                        if (cat === 'Content') return null
                         const defs = BLOCK_DEFINITIONS.filter(d => d.category === cat)
                         const isCollapsed = collapsed.has(cat)
                         return (
@@ -179,13 +212,13 @@ export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, dragg
     )
 }
 
-interface VisualCardProps {
+export interface VisualCardProps {
     def: BlockDefinition; hovered: boolean; dragging: boolean; accentColor: string
     onHover: (t: BlockType | null) => void; onAdd: (t: BlockType) => void
     onDragStart: (e: React.DragEvent, t: BlockType) => void; onDragEnd: () => void
 }
 
-function VisualCard({ def, hovered, dragging, accentColor, onHover, onAdd, onDragStart, onDragEnd }: VisualCardProps) {
+export function VisualCard({ def, hovered, dragging, accentColor, onHover, onAdd, onDragStart, onDragEnd }: VisualCardProps) {
     const Preview = P[def.type]
     return (
         <div

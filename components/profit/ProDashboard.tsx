@@ -303,7 +303,7 @@ export default function ProDashboard({ currency, currentPrice, result }: ProDash
           <span className="text-[11px] font-bold tracking-[1px]" style={{ color: '#64748B' }}>
             WHAT-IF FORECASTER (DRAG TO TEST)
           </span>
-          <div className="px-2 py-1 rounded-md" style={{ backgroundColor: '#1a2410' }}>
+          <div className="px-2 py-1 rounded-md" style={{ backgroundColor: '#1f1d2e' }}>
             <span className="text-[9px] font-bold" style={{ color: '#8FFF00' }}>INTERACTIVE</span>
           </div>
         </div>

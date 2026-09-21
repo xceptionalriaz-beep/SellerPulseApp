@@ -22,42 +22,42 @@ import {
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
-  surface:  '#ffffff',
-  red:      '#b91c1c',
-  amber:    '#d97706',
-  green:    '#16a34a',
+  dark: '#1e1535',
+  lime: '#b8fa33',
+  limeDeep: '#4d7c0f',
+  limeTint: '#f3eeff',
+  border: '#ede9fe',
+  bg: '#f8f7ff',
+  text: '#1f1d2e',
+  muted: '#6b7280',
+  surface: '#ffffff',
+  red: '#dc2626',
+  amber: '#d97706',
+  green: '#16a34a',
 }
 
 // ── Types ──────────────────────────────────────────────────────
 interface KillSwitch {
-  id:           string
-  title:        string
-  description:  string | null
-  is_enabled:   boolean
-  is_visible:   boolean
+  id: string
+  title: string
+  description: string | null
+  is_enabled: boolean
+  is_visible: boolean
   is_read_only: boolean
-  changed_by:   string | null
-  change_note:  string | null
+  changed_by: string | null
+  change_note: string | null
   user_message: string | null
   re_enable_at: string | null
-  updated_at:   string
+  updated_at: string
   changer_name?: string | null
 }
 
 interface AuditEntry {
-  id:         string
-  admin_id:   string | null
-  action:     string
-  details:    string | null
-  metadata:   Record<string, any>
+  id: string
+  admin_id: string | null
+  action: string
+  details: string | null
+  metadata: Record<string, any>
   ip_address: string | null
   created_at: string
   admin_name?: string | null
@@ -65,23 +65,23 @@ interface AuditEntry {
 
 // ── Helpers ────────────────────────────────────────────────────
 function timeAgo(iso: string): string {
-  const diff  = Date.now() - new Date(iso).getTime()
-  const mins  = Math.floor(diff / 60000)
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
-  const days  = Math.floor(diff / 86400000)
-  if (mins  <  1) return 'Just now'
-  if (mins  < 60) return `${mins}m ago`
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
   if (hours < 24) return `${hours}h ago`
   return `${days}d ago`
 }
 
 function offlineDuration(iso: string): string {
-  const diff  = Date.now() - new Date(iso).getTime()
-  const mins  = Math.floor(diff / 60000)
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
-  const days  = Math.floor(diff / 86400000)
-  if (mins  <  1) return 'just now'
-  if (mins  < 60) return `${mins} min`
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins} min`
   if (hours < 24) return `${hours}h`
   return `${days} day${days !== 1 ? 's' : ''}`
 }
@@ -113,9 +113,9 @@ function SyncIndicator({ lastSync, isAutoRefresh }: { lastSync: number; isAutoRe
 
   return (
     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border"
-         style={{ backgroundColor: C.surface, borderColor: C.border }}>
+      style={{ backgroundColor: C.surface, borderColor: C.border }}>
       <div className="w-1.5 h-1.5 rounded-full animate-pulse"
-           style={{ backgroundColor: isAutoRefresh ? C.green : C.muted }} />
+        style={{ backgroundColor: isAutoRefresh ? C.green : C.muted }} />
       <p className="text-[11px] font-semibold" style={{ color: C.muted }}>
         {isAutoRefresh ? label : 'Paused'}
       </p>
@@ -145,14 +145,14 @@ function LiveCountdown({ iso }: { iso: string }) {
 }
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,    border: C.lime,   color: C.lime },
-    error:   { bg: '#FEF2F2', border: '#FECACA', color: C.red  },
-    info:    { bg: C.bg,      border: C.border,  color: C.text },
+    success: { bg: C.dark, border: C.lime, color: C.lime },
+    error: { bg: '#FEF2F2', border: '#FECACA', color: C.red },
+    info: { bg: C.bg, border: C.border, color: C.text },
   }
   const t = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
+      style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
       <CheckCircle size={15} style={{ color: t.color }} />
       <p className="text-[13px] font-bold" style={{ color: t.color }}>{msg}</p>
     </div>
@@ -161,75 +161,75 @@ function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' 
 
 // ── HUD Cards ──────────────────────────────────────────────────
 function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: boolean }) {
-  const online     = switches.filter(s => s.is_enabled).length
-  const offline    = switches.filter(s => !s.is_enabled).length
-  const hidden     = switches.filter(s => !s.is_visible).length
-  const readOnly   = switches.filter(s => s.is_read_only && s.is_enabled).length
-  const total      = switches.length
+  const online = switches.filter(s => s.is_enabled).length
+  const offline = switches.filter(s => !s.is_enabled).length
+  const hidden = switches.filter(s => !s.is_visible).length
+  const readOnly = switches.filter(s => s.is_read_only && s.is_enabled).length
+  const total = switches.length
   const lastChange = switches.length > 0
     ? switches.reduce((a, b) => new Date(a.updated_at) > new Date(b.updated_at) ? a : b)
     : null
 
   // Platform health
-  const healthPct  = total > 0 ? Math.round((online / total) * 100) : 100
+  const healthPct = total > 0 ? Math.round((online / total) * 100) : 100
   const healthLabel = offline === 0 ? 'ALL SYSTEMS GO'
-    : offline <= 2  ? 'DEGRADED'
-    : 'CRITICAL'
+    : offline <= 2 ? 'DEGRADED'
+      : 'CRITICAL'
   const healthColor = offline === 0 ? C.limeDeep
-    : offline <= 2  ? C.amber
-    : C.red
-  const healthBg    = offline === 0 ? C.limeTint
-    : offline <= 2  ? 'rgba(217,119,6,0.08)'
-    : 'rgba(185,28,28,0.08)'
+    : offline <= 2 ? C.amber
+      : C.red
+  const healthBg = offline === 0 ? C.limeTint
+    : offline <= 2 ? 'rgba(217,119,6,0.08)'
+      : 'rgba(220,38,38,0.08)'
 
   const cards = [
     {
       title: 'Online Features',
       value: String(online),
-      sub:   'currently active',
-      icon:  Shield,
+      sub: 'currently active',
+      icon: Shield,
       color: C.limeDeep,
-      bg:    C.limeTint,
+      bg: C.limeTint,
     },
     {
       title: 'Offline Features',
       value: String(offline),
-      sub:   offline > 0 ? 'needs attention' : 'all clear',
-      icon:  ShieldOff,
+      sub: offline > 0 ? 'needs attention' : 'all clear',
+      icon: ShieldOff,
       color: offline > 0 ? C.red : C.muted,
-      bg:    offline > 0 ? 'rgba(185,28,28,0.08)' : C.bg,
+      bg: offline > 0 ? 'rgba(220,38,38,0.08)' : C.bg,
     },
     {
       title: 'Hidden Tools',
       value: String(hidden),
-      sub:   hidden > 0 ? 'invisible to users' : 'all visible',
-      icon:  hidden > 0 ? ShieldOff : Shield,
+      sub: hidden > 0 ? 'invisible to users' : 'all visible',
+      icon: hidden > 0 ? ShieldOff : Shield,
       color: hidden > 0 ? C.amber : C.muted,
-      bg:    hidden > 0 ? 'rgba(217,119,6,0.08)' : C.bg,
+      bg: hidden > 0 ? 'rgba(217,119,6,0.08)' : C.bg,
     },
     {
       title: 'Read-Only',
       value: String(readOnly),
-      sub:   readOnly > 0 ? 'view only mode' : 'all full access',
-      icon:  Activity,
+      sub: readOnly > 0 ? 'view only mode' : 'all full access',
+      icon: Activity,
       color: readOnly > 0 ? C.amber : C.muted,
-      bg:    readOnly > 0 ? 'rgba(217,119,6,0.08)' : C.bg,
+      bg: readOnly > 0 ? 'rgba(217,119,6,0.08)' : C.bg,
     },
     {
       title: 'Platform Health',
       value: `${healthPct}%`,
-      sub:   healthLabel,
-      icon:  Activity,
+      sub: healthLabel,
+      icon: Activity,
       color: healthColor,
-      bg:    healthBg,
+      bg: healthBg,
     },
     {
       title: 'Last Change',
       value: lastChange ? timeAgo(lastChange.updated_at) : '—',
-      sub:   lastChange?.changer_name ?? 'No changes yet',
-      icon:  Clock,
+      sub: lastChange?.changer_name ?? 'No changes yet',
+      icon: Clock,
       color: C.muted,
-      bg:    C.bg,
+      bg: C.bg,
     },
   ]
 
@@ -239,21 +239,21 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
         const Icon = card.icon
         return (
           <div key={i} className="flex flex-col gap-3 p-4 rounded-2xl border"
-               style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
                 {card.title.toUpperCase()}
               </p>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: card.bg }}>
+                style={{ backgroundColor: card.bg }}>
                 <Icon size={15} style={{ color: card.color }} />
               </div>
             </div>
             {loading
               ? <div className="h-8 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
               : <p className="text-[28px] font-black tracking-tight leading-none" style={{ color: card.color === C.muted ? C.dark : card.color }}>
-                  {card.value}
-                </p>
+                {card.value}
+              </p>
             }
             <p className="text-[11px] font-semibold" style={{ color: C.muted }}>{card.sub}</p>
           </div>
@@ -265,31 +265,31 @@ function HudCards({ switches, loading }: { switches: KillSwitch[]; loading: bool
 
 // ── Kill Switch Row (table row) ───────────────────────────────
 function KillSwitchRow({
-    sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount, canToggle = true, canToggleVisibility = true, canToggleReadOnly = true, canSchedule = true,
-  }: {
-    sw:                  KillSwitch
-    onDisable:           (sw: KillSwitch) => void
-    onEnable:            (sw: KillSwitch) => void
-    onToggleVisibility:  (sw: KillSwitch) => void
-    onToggleReadOnly:    (sw: KillSwitch) => void
-    onSchedule:          (sw: KillSwitch) => void
-    toggling:            string | null
-    visibilityToggling:  string | null
-    readOnlyToggling:    string | null
-    currentUserName:     string
-    scheduleCount:       number
-    incidentCount:       number
-    canToggle?:          boolean
-    canToggleVisibility?: boolean
-    canToggleReadOnly?:   boolean
-    canSchedule?:         boolean
-  }) {
-  const isOffline            = !sw.is_enabled
-  const isHidden             = !sw.is_visible
-  const isToggling           = toggling === sw.id
+  sw, onDisable, onEnable, onToggleVisibility, onToggleReadOnly, onSchedule, toggling, visibilityToggling, readOnlyToggling, currentUserName, scheduleCount, incidentCount, canToggle = true, canToggleVisibility = true, canToggleReadOnly = true, canSchedule = true,
+}: {
+  sw: KillSwitch
+  onDisable: (sw: KillSwitch) => void
+  onEnable: (sw: KillSwitch) => void
+  onToggleVisibility: (sw: KillSwitch) => void
+  onToggleReadOnly: (sw: KillSwitch) => void
+  onSchedule: (sw: KillSwitch) => void
+  toggling: string | null
+  visibilityToggling: string | null
+  readOnlyToggling: string | null
+  currentUserName: string
+  scheduleCount: number
+  incidentCount: number
+  canToggle?: boolean
+  canToggleVisibility?: boolean
+  canToggleReadOnly?: boolean
+  canSchedule?: boolean
+}) {
+  const isOffline = !sw.is_enabled
+  const isHidden = !sw.is_visible
+  const isToggling = toggling === sw.id
   const isVisibilityToggling = visibilityToggling === sw.id
 
-  const offlineDur  = isOffline ? offlineDuration(sw.updated_at) : null
+  const offlineDur = isOffline ? offlineDuration(sw.updated_at) : null
   const offlineDays = isOffline
     ? Math.floor((Date.now() - new Date(sw.updated_at).getTime()) / 86400000)
     : 0
@@ -299,12 +299,12 @@ function KillSwitchRow({
     if (spinning) return (
       <div className="w-11 h-6 flex items-center justify-center">
         <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-             style={{ borderTopColor: C.limeDeep }} />
+          style={{ borderTopColor: C.limeDeep }} />
       </div>
     )
     return (
       <div onClick={onClick} className="relative w-11 h-6 rounded-full cursor-pointer"
-           style={{ backgroundColor: on ? C.dark : 'rgba(185,28,28,0.35)', transition: 'background-color 0.25s ease' }}>
+        style={{ backgroundColor: on ? C.dark : 'rgba(220,38,38,0.35)', transition: 'background-color 0.25s ease' }}>
         <div style={{
           position: 'absolute', top: '2px', left: '2px',
           width: '20px', height: '20px', borderRadius: '50%',
@@ -320,12 +320,12 @@ function KillSwitchRow({
     if (spinning) return (
       <div className="w-11 h-6 flex items-center justify-center">
         <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-             style={{ borderTopColor: C.limeDeep }} />
+          style={{ borderTopColor: C.limeDeep }} />
       </div>
     )
     return (
       <div onClick={onClick} className="relative w-11 h-6 rounded-full cursor-pointer"
-           style={{ backgroundColor: on ? C.dark : 'rgba(100,116,139,0.35)', transition: 'background-color 0.25s ease' }}>
+        style={{ backgroundColor: on ? C.dark : 'rgba(107,114,128,0.35)', transition: 'background-color 0.25s ease' }}>
         <div style={{
           position: 'absolute', top: '2px', left: '2px',
           width: '20px', height: '20px', borderRadius: '50%',
@@ -339,36 +339,36 @@ function KillSwitchRow({
 
   return (
     <div className="grid items-center px-4 py-3 border-b last:border-b-0 transition-all hover:bg-[#fafcf8]"
-         style={{
-           gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
-           gap: 12,
-           borderColor: C.border,
-           backgroundColor: isOffline ? 'rgba(185,28,28,0.02)' : sw.is_read_only ? 'rgba(217,119,6,0.02)' : 'transparent',
-         }}>
+      style={{
+        gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
+        gap: 12,
+        borderColor: C.border,
+        backgroundColor: isOffline ? 'rgba(220,38,38,0.02)' : sw.is_read_only ? 'rgba(217,119,6,0.02)' : 'transparent',
+      }}>
 
       {/* TOOL NAME */}
       <div className="min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <p className="text-[12px] font-black truncate"
-             style={{ color: isOffline ? C.red : C.dark }}>
+            style={{ color: isOffline ? C.red : C.dark }}>
             {sw.title}
           </p>
           {isHidden && (
             <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0"
-                  style={{ backgroundColor: 'rgba(100,116,139,0.1)', color: C.muted }}>
+              style={{ backgroundColor: 'rgba(107,114,128,0.1)', color: C.muted }}>
               HIDDEN
             </span>
           )}
           {sw.is_read_only && !isOffline && (
             <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0"
-                  style={{ backgroundColor: 'rgba(217,119,6,0.1)', color: C.amber }}>
+              style={{ backgroundColor: 'rgba(217,119,6,0.1)', color: C.amber }}>
               READ-ONLY
             </span>
           )}
           {incidentCount > 0 && (
             <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0"
-                  style={{ backgroundColor: 'rgba(217,119,6,0.1)', color: C.amber }}
-                  title={`${incidentCount} incident${incidentCount > 1 ? 's' : ''} this month`}>
+              style={{ backgroundColor: 'rgba(217,119,6,0.1)', color: C.amber }}
+              title={`${incidentCount} incident${incidentCount > 1 ? 's' : ''} this month`}>
               {incidentCount}x
             </span>
           )}
@@ -378,12 +378,12 @@ function KillSwitchRow({
       {/* STATUS */}
       <div>
         <span className="inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full"
-              style={{
-                backgroundColor: isOffline ? 'rgba(185,28,28,0.08)' : 'rgba(74,143,0,0.08)',
-                color:           isOffline ? C.red : C.green,
-              }}>
+          style={{
+            backgroundColor: isOffline ? 'rgba(220,38,38,0.08)' : 'rgba(77,124,15,0.08)',
+            color: isOffline ? C.red : C.green,
+          }}>
           <div className="w-1.5 h-1.5 rounded-full shrink-0"
-               style={{ backgroundColor: isOffline ? C.red : C.green }} />
+            style={{ backgroundColor: isOffline ? C.red : C.green }} />
           {isOffline ? 'OFFLINE' : 'ONLINE'}
         </span>
       </div>
@@ -393,7 +393,7 @@ function KillSwitchRow({
         {isOffline && offlineDur ? (
           <div className="flex flex-col gap-0.5">
             <span className="flex items-center gap-1 text-[9px] font-bold"
-                  style={{ color: offlineDays >= 1 ? C.amber : C.red }}>
+              style={{ color: offlineDays >= 1 ? C.amber : C.red }}>
               <AlertTriangle size={9} />
               {offlineDur}
             </span>
@@ -441,12 +441,12 @@ function KillSwitchRow({
         {readOnlyToggling === sw.id ? (
           <div className="w-11 h-6 flex items-center justify-center">
             <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-                 style={{ borderTopColor: C.amber }} />
+              style={{ borderTopColor: C.amber }} />
           </div>
         ) : (
-            <div onClick={() => canToggleReadOnly && onToggleReadOnly(sw)}
-                 className="relative w-11 h-6 rounded-full cursor-pointer"
-                 style={{ backgroundColor: sw.is_read_only ? C.amber : 'rgba(100,116,139,0.35)', transition: 'background-color 0.25s ease', opacity: canToggleReadOnly ? 1 : 0.5, cursor: canToggleReadOnly ? 'pointer' : 'not-allowed' }}>
+          <div onClick={() => canToggleReadOnly && onToggleReadOnly(sw)}
+            className="relative w-11 h-6 rounded-full cursor-pointer"
+            style={{ backgroundColor: sw.is_read_only ? C.amber : 'rgba(107,114,128,0.35)', transition: 'background-color 0.25s ease', opacity: canToggleReadOnly ? 1 : 0.5, cursor: canToggleReadOnly ? 'pointer' : 'not-allowed' }}>
             <div style={{
               position: 'absolute', top: '2px', left: '2px',
               width: '20px', height: '20px', borderRadius: '50%',
@@ -483,42 +483,42 @@ function KillSwitchRow({
       </div>
 
       {/* SCHEDULE */}
-        {canSchedule && <div className="flex items-center gap-1.5">
-          <button
-              onClick={() => onSchedule(sw)}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
-              <Calendar size={9} />
-            {scheduleCount > 0 ? `${scheduleCount}` : '+'}
-          </button>
-        </div>}
+      {canSchedule && <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => onSchedule(sw)}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold hover:opacity-80 transition-opacity"
+          style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.limeDeep}33` }}>
+          <Calendar size={9} />
+          {scheduleCount > 0 ? `${scheduleCount}` : '+'}
+        </button>
+      </div>}
 
-      </div>
-    )
-  }
+    </div>
+  )
+}
 
-  // ── Disable Confirmation Modal ─────────────────────────────────
+// ── Disable Confirmation Modal ─────────────────────────────────
 function DisableConfirmModal({
   sw, onClose, onConfirm,
 }: {
-  sw:        KillSwitch
-  onClose:   () => void
+  sw: KillSwitch
+  onClose: () => void
   onConfirm: (reason: string, userMessage: string, reEnableMinutes: number) => void
 }) {
-  const [reason,          setReason]          = useState('')
-  const [userMessage,     setUserMessage]     = useState('')
+  const [reason, setReason] = useState('')
+  const [userMessage, setUserMessage] = useState('')
   const [reEnableMinutes, setReEnableMinutes] = useState(0)
-  const [confirming,      setConfirming]      = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const isValid = reason.trim().length >= 5
 
   const RE_ENABLE_OPTIONS = [
-    { label: 'No auto re-enable', value: 0    },
-    { label: '15 minutes',        value: 15   },
-    { label: '30 minutes',        value: 30   },
-    { label: '1 hour',            value: 60   },
-    { label: '2 hours',           value: 120  },
-    { label: '4 hours',           value: 240  },
-    { label: '8 hours',           value: 480  },
+    { label: 'No auto re-enable', value: 0 },
+    { label: '15 minutes', value: 15 },
+    { label: '30 minutes', value: 30 },
+    { label: '1 hour', value: 60 },
+    { label: '2 hours', value: 120 },
+    { label: '4 hours', value: 240 },
+    { label: '8 hours', value: 480 },
   ]
 
   async function handleConfirm() {
@@ -533,14 +533,14 @@ function DisableConfirmModal({
 
   return (
     <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}
-         onClick={e => e.target === e.currentTarget && !confirming && onClose()}>
+      style={{ backgroundColor: 'rgba(30,21,53,0.65)' }}
+      onClick={e => e.target === e.currentTarget && !confirming && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-           style={{ border: '1px solid rgba(185,28,28,0.3)' }}>
+        style={{ border: '1px solid rgba(220,38,38,0.3)' }}>
         <div className="flex items-center gap-3 px-6 py-4 border-b"
-             style={{ borderColor: 'rgba(185,28,28,0.15)', backgroundColor: 'rgba(185,28,28,0.04)' }}>
+          style={{ borderColor: 'rgba(220,38,38,0.15)', backgroundColor: 'rgba(220,38,38,0.04)' }}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-               style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.1)' }}>
             <ShieldOff size={18} style={{ color: C.red }} />
           </div>
           <div>
@@ -554,13 +554,13 @@ function DisableConfirmModal({
         </div>
         <div className="px-6 py-5 flex flex-col gap-4">
           <div className="px-4 py-3 rounded-2xl border"
-               style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.2)' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.2)' }}>
             <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.red }}>DISABLING</p>
             <p className="text-[15px] font-black" style={{ color: C.dark }}>{sw.title}</p>
             <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>{sw.description}</p>
           </div>
           <div className="flex flex-col gap-1.5 px-4 py-3 rounded-xl border"
-               style={{ backgroundColor: 'rgba(185,28,28,0.03)', borderColor: 'rgba(185,28,28,0.15)' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.03)', borderColor: 'rgba(220,38,38,0.15)' }}>
             {[
               'Feature will go offline for ALL users immediately',
               'Users mid-session will lose access instantly',
@@ -584,10 +584,10 @@ function DisableConfirmModal({
               autoFocus
               className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
               style={{
-                borderColor:     isValid ? C.lime : C.border,
+                borderColor: isValid ? C.lime : C.border,
                 backgroundColor: C.bg, color: C.text,
-                boxShadow:       isValid ? '0 0 0 3px rgba(143,255,0,0.12)' : 'none',
-                transition:      'border-color 0.2s, box-shadow 0.2s',
+                boxShadow: isValid ? '0 0 0 3px rgba(184,250,51,0.15)' : 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
               }} />
             <p className="text-[10px] mt-1" style={{ color: C.muted }}>
               Admin only — never shown to users
@@ -604,7 +604,7 @@ function DisableConfirmModal({
               placeholder="e.g. We're upgrading our eBay connection. Back in 30 minutes."
               className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
               style={{
-                borderColor:     C.border,
+                borderColor: C.border,
                 backgroundColor: C.bg, color: C.text,
               }} />
             <p className="text-[10px] mt-1" style={{ color: C.muted }}>
@@ -618,13 +618,13 @@ function DisableConfirmModal({
               AUTO RE-ENABLE <span style={{ color: C.muted, fontWeight: 400 }}>(optional)</span>
             </p>
             <ProDropdown
-                prefix=""
-                currentValue={String(reEnableMinutes)}
-                options={RE_ENABLE_OPTIONS.map(o => ({ val: String(o.value), label: o.label, enabled: true }))}
-                onChanged={v => setReEnableMinutes(Number(v))}
-                width="full"
-                maxItems={7}
-              />
+              prefix=""
+              currentValue={String(reEnableMinutes)}
+              options={RE_ENABLE_OPTIONS.map(o => ({ val: String(o.value), label: o.label, enabled: true }))}
+              onChanged={v => setReEnableMinutes(Number(v))}
+              width="full"
+              maxItems={7}
+            />
             {reEnableMinutes > 0 && (
               <p className="text-[10px] mt-1" style={{ color: C.limeDeep }}>
                 Will automatically re-enable in {RE_ENABLE_OPTIONS.find(o => o.value === reEnableMinutes)?.label}
@@ -657,10 +657,10 @@ function KillAllModal({
   activeCount, onClose, onConfirm,
 }: {
   activeCount: number
-  onClose:     () => void
-  onConfirm:   (reason: string) => void
+  onClose: () => void
+  onConfirm: (reason: string) => void
 }) {
-  const [reason,     setReason]     = useState('')
+  const [reason, setReason] = useState('')
   const [confirming, setConfirming] = useState(false)
   const isValid = reason.trim().length >= 5
 
@@ -676,14 +676,14 @@ function KillAllModal({
 
   return (
     <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
-         onClick={e => e.target === e.currentTarget && !confirming && onClose()}>
+      style={{ backgroundColor: 'rgba(30,21,53,0.75)' }}
+      onClick={e => e.target === e.currentTarget && !confirming && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-           style={{ border: '2px solid rgba(185,28,28,0.5)' }}>
+        style={{ border: '2px solid rgba(220,38,38,0.5)' }}>
         <div className="flex items-center gap-3 px-6 py-4 border-b"
-             style={{ borderColor: 'rgba(185,28,28,0.2)', backgroundColor: 'rgba(185,28,28,0.06)' }}>
+          style={{ borderColor: 'rgba(220,38,38,0.2)', backgroundColor: 'rgba(220,38,38,0.06)' }}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-               style={{ backgroundColor: 'rgba(185,28,28,0.15)' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.15)' }}>
             <Zap size={18} style={{ color: C.red }} />
           </div>
           <div>
@@ -700,7 +700,7 @@ function KillAllModal({
         <div className="px-6 py-5 flex flex-col gap-4">
           {/* Impact warning */}
           <div className="px-4 py-3 rounded-2xl border"
-               style={{ backgroundColor: 'rgba(185,28,28,0.06)', borderColor: 'rgba(185,28,28,0.3)' }}>
+            style={{ backgroundColor: 'rgba(220,38,38,0.06)', borderColor: 'rgba(220,38,38,0.3)' }}>
             <p className="text-[11px] font-black tracking-wider mb-2" style={{ color: C.red }}>
               PLATFORM IMPACT
             </p>
@@ -727,10 +727,10 @@ function KillAllModal({
               autoFocus
               className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
               style={{
-                borderColor:     isValid ? C.lime : C.border,
+                borderColor: isValid ? C.lime : C.border,
                 backgroundColor: C.bg, color: C.text,
-                boxShadow:       isValid ? '0 0 0 3px rgba(143,255,0,0.12)' : 'none',
-                transition:      'border-color 0.2s, box-shadow 0.2s',
+                boxShadow: isValid ? '0 0 0 3px rgba(184,250,51,0.15)' : 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
               }} />
             <p className="text-[10px] mt-1" style={{ color: C.muted }}>
               Minimum 5 characters — logged as high-priority emergency event
@@ -759,29 +759,29 @@ function KillAllModal({
 // ── Audit Trail Panel ──────────────────────────────────────────
 function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEntry[]; loading: boolean; onViewHistory: () => void }) {
   function actionLabel(action: string): { label: string; color: string; bg: string } {
-    if (action === 'disable_kill_switch')  return { label: 'DISABLED',    color: C.red,      bg: 'rgba(185,28,28,0.08)'  }
-    if (action === 'enable_kill_switch')   return { label: 'ENABLED',     color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
-    if (action === 'kill_all_switches')    return { label: 'KILL ALL',    color: '#fff',     bg: C.red                   }
-    if (action === 'schedule_created')     return { label: 'SCHEDULED',   color: C.limeDeep, bg: C.limeTint              }
-    if (action === 'schedule_deleted')     return { label: 'UNSCHEDULED', color: C.amber,    bg: 'rgba(217,119,6,0.08)'  }
-    if (action === 'set_read_only')        return { label: 'READ-ONLY',   color: C.amber,    bg: 'rgba(217,119,6,0.08)'  }
-    if (action === 'unset_read_only')      return { label: 'FULL ACCESS', color: C.green,    bg: 'rgba(22,163,74,0.08)'  }
+    if (action === 'disable_kill_switch') return { label: 'DISABLED', color: C.red, bg: 'rgba(220,38,38,0.08)' }
+    if (action === 'enable_kill_switch') return { label: 'ENABLED', color: C.green, bg: 'rgba(22,163,74,0.08)' }
+    if (action === 'kill_all_switches') return { label: 'KILL ALL', color: '#fff', bg: C.red }
+    if (action === 'schedule_created') return { label: 'SCHEDULED', color: C.limeDeep, bg: C.limeTint }
+    if (action === 'schedule_deleted') return { label: 'UNSCHEDULED', color: C.amber, bg: 'rgba(217,119,6,0.08)' }
+    if (action === 'set_read_only') return { label: 'READ-ONLY', color: C.amber, bg: 'rgba(217,119,6,0.08)' }
+    if (action === 'unset_read_only') return { label: 'FULL ACCESS', color: C.green, bg: 'rgba(22,163,74,0.08)' }
     return { label: action.toUpperCase(), color: C.muted, bg: C.bg }
   }
 
   return (
     <div className="rounded-2xl border overflow-hidden"
-         style={{ borderColor: C.border, backgroundColor: C.surface }}>
+      style={{ borderColor: C.border, backgroundColor: C.surface }}>
 
       {/* Panel header */}
       <div className="flex items-center gap-2 px-5 py-3 border-b"
-           style={{ borderColor: C.border, backgroundColor: C.bg }}>
+        style={{ borderColor: C.border, backgroundColor: C.bg }}>
         <Activity size={14} style={{ color: C.muted }} />
         <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
           EMERGENCY OPERATIONS AUDIT TRAIL
         </p>
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-auto"
-              style={{ backgroundColor: C.surface, color: C.muted, border: `1px solid ${C.border}` }}>
+          style={{ backgroundColor: C.surface, color: C.muted, border: `1px solid ${C.border}` }}>
           Last 10 events
         </span>
         <button onClick={onViewHistory}
@@ -795,14 +795,14 @@ function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEn
         // First load skeleton — match table column layout
         <div className="overflow-x-auto">
           <div className="grid px-4 py-2 border-b"
-               style={{ gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
+            style={{ gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr', gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
             {['ACTION', 'SWITCH NAME', 'BEFORE→AFTER', 'ADMIN', 'REASON', 'TIME'].map(h => (
               <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
             ))}
           </div>
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="grid px-4 py-3 border-b last:border-b-0 items-center animate-pulse"
-                 style={{ gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr', gap: 12, borderColor: C.border }}>
+              style={{ gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr', gap: 12, borderColor: C.border }}>
               <div className="h-5 w-16 rounded-lg" style={{ backgroundColor: C.bg }} />
               <div className="h-4 w-32 rounded-full" style={{ backgroundColor: C.bg }} />
               <div className="h-4 w-20 rounded-full" style={{ backgroundColor: C.bg }} />
@@ -821,12 +821,12 @@ function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEn
         <div className="overflow-x-auto" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.3s ease' }}>
           {/* Table header */}
           <div className="grid px-4 py-2 border-b"
-               style={{
-                 gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr',
-                 gap: 12,
-                 borderColor: C.border,
-                 backgroundColor: C.bg,
-               }}>
+            style={{
+              gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr',
+              gap: 12,
+              borderColor: C.border,
+              backgroundColor: C.bg,
+            }}>
             {['ACTION', 'SWITCH NAME', 'BEFORE→AFTER', 'ADMIN', 'REASON', 'TIME'].map(h => (
               <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
                 {h}
@@ -836,37 +836,37 @@ function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEn
 
           {/* Table rows */}
           {entries.map((entry, idx) => {
-            const mapped    = actionLabel(entry.action)
+            const mapped = actionLabel(entry.action)
             const isKillAll = entry.action === 'kill_all_switches'
-            const prevVal   = entry.metadata?.previous
-            const newVal    = entry.metadata?.new_value
+            const prevVal = entry.metadata?.previous
+            const newVal = entry.metadata?.new_value
             const hasBefore = typeof prevVal === 'boolean' && typeof newVal === 'boolean'
-            const ipRaw     = entry.ip_address
-            const ip        = ipRaw ? ipRaw : '—'
-            const reason    = entry.metadata?.change_note ?? entry.metadata?.label ?? null
+            const ipRaw = entry.ip_address
+            const ip = ipRaw ? ipRaw : '—'
+            const reason = entry.metadata?.change_note ?? entry.metadata?.label ?? null
             const reEnableMinutes = entry.metadata?.re_enable_minutes ?? null
             const reasonDisplay = reason
               ? reEnableMinutes
-                ? `${reason} · ⏱ ${reEnableMinutes >= 60 ? `${reEnableMinutes/60}h` : `${reEnableMinutes}m`} timer`
+                ? `${reason} · ⏱ ${reEnableMinutes >= 60 ? `${reEnableMinutes / 60}h` : `${reEnableMinutes}m`} timer`
                 : reason
               : reEnableMinutes
-                ? `⏱ ${reEnableMinutes >= 60 ? `${reEnableMinutes/60}h` : `${reEnableMinutes}m`} auto-timer`
+                ? `⏱ ${reEnableMinutes >= 60 ? `${reEnableMinutes / 60}h` : `${reEnableMinutes}m`} auto-timer`
                 : null
             const switchTitle = entry.metadata?.switch_title ?? (entry.details ?? '—')
 
             return (
               <div key={entry.id}
-                   className="grid px-4 py-3 border-b last:border-b-0 items-center hover:bg-[#fafcf8] transition-colors"
-                   style={{
-                     gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr',
-                     gap:         12,
-                     borderColor: C.border,
-                   }}>
+                className="grid px-4 py-3 border-b last:border-b-0 items-center hover:bg-[#fafcf8] transition-colors"
+                style={{
+                  gridTemplateColumns: '0.7fr 1.4fr 0.6fr 0.6fr 1fr 0.7fr',
+                  gap: 12,
+                  borderColor: C.border,
+                }}>
 
                 {/* ACTION */}
                 <div>
                   <span className="text-[9px] font-black px-2 py-0.5 rounded-lg"
-                        style={{ backgroundColor: mapped.bg, color: mapped.color }}>
+                    style={{ backgroundColor: mapped.bg, color: mapped.color }}>
                     {mapped.label}
                   </span>
                 </div>
@@ -892,12 +892,12 @@ function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEn
                   {hasBefore ? (
                     <div className="flex items-center gap-1">
                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ backgroundColor: prevVal ? C.limeTint : 'rgba(185,28,28,0.08)', color: prevVal ? C.limeDeep : C.red }}>
+                        style={{ backgroundColor: prevVal ? C.limeTint : 'rgba(220,38,38,0.08)', color: prevVal ? C.limeDeep : C.red }}>
                         {prevVal ? 'ON' : 'OFF'}
                       </span>
                       <span className="text-[9px]" style={{ color: C.muted }}>→</span>
                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ backgroundColor: newVal ? C.limeTint : 'rgba(185,28,28,0.08)', color: newVal ? C.limeDeep : C.red }}>
+                        style={{ backgroundColor: newVal ? C.limeTint : 'rgba(220,38,38,0.08)', color: newVal ? C.limeDeep : C.red }}>
                         {newVal ? 'ON' : 'OFF'}
                       </span>
                     </div>
@@ -905,7 +905,7 @@ function AuditTrailPanel({ entries, loading, onViewHistory }: { entries: AuditEn
                     <div className="flex items-center gap-1">
                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>ON</span>
                       <span className="text-[9px]" style={{ color: C.muted }}>→</span>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>OFF</span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: C.red }}>OFF</span>
                     </div>
                   ) : (
                     <span className="text-[10px]" style={{ color: C.muted }}>—</span>
@@ -954,22 +954,22 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
   const { can } = useTabPermissions('kill_switches')
   const supabase = createClient()
 
-  const [switches,       setSwitches]       = useState<KillSwitch[]>([])
-  const [auditEntries,   setAuditEntries]   = useState<AuditEntry[]>([])
-  const [loading,        setLoading]        = useState(true)
-  const [auditLoading,   setAuditLoading]   = useState(true)
-  const [toggling,       setToggling]       = useState<string | null>(null)
+  const [switches, setSwitches] = useState<KillSwitch[]>([])
+  const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [auditLoading, setAuditLoading] = useState(true)
+  const [toggling, setToggling] = useState<string | null>(null)
   const [visibilityToggling, setVisibilityToggling] = useState<string | null>(null)
-  const [readOnlyToggling,   setReadOnlyToggling]   = useState<string | null>(null)
-  const [killingAll,     setKillingAll]     = useState(false)
-  const [disableTarget,  setDisableTarget]  = useState<KillSwitch | null>(null)
-  const [showKillAll,    setShowKillAll]    = useState(false)
-  const [toast,          setToast]          = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
-  const [lastSync,       setLastSync]       = useState(Date.now())
-  const [isAutoRefresh,  setIsAutoRefresh]  = useState(true)
-  const [currentUserId,  setCurrentUserId]  = useState<string | null>(null)
-  const [currentUserName,setCurrentUserName]= useState<string>('Admin')
-  const intervalRef                         = useRef<NodeJS.Timeout | null>(null)
+  const [readOnlyToggling, setReadOnlyToggling] = useState<string | null>(null)
+  const [killingAll, setKillingAll] = useState(false)
+  const [disableTarget, setDisableTarget] = useState<KillSwitch | null>(null)
+  const [showKillAll, setShowKillAll] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [lastSync, setLastSync] = useState(Date.now())
+  const [isAutoRefresh, setIsAutoRefresh] = useState(true)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [currentUserName, setCurrentUserName] = useState<string>('Admin')
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
     setToast({ msg, type })
@@ -1119,21 +1119,21 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/kill-switches/toggle', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: sw.id, is_enabled: false, change_note: reason, user_message: userMessage || null, re_enable_minutes: reEnableMinutes || null }),
+        body: JSON.stringify({ id: sw.id, is_enabled: false, change_note: reason, user_message: userMessage || null, re_enable_minutes: reEnableMinutes || null }),
       })
       if (res.ok) {
         const json = await res.json()
         setSwitches(prev => prev.map(s =>
           s.id === sw.id ? {
             ...s,
-            is_enabled:   false,
-            change_note:  reason,
+            is_enabled: false,
+            change_note: reason,
             user_message: userMessage || null,
             re_enable_at: reEnableMinutes > 0 ? new Date(Date.now() + reEnableMinutes * 60000).toISOString() : null,
             changer_name: currentUserName,
-            updated_at:   json.switch?.updated_at ?? new Date().toISOString(),
+            updated_at: json.switch?.updated_at ?? new Date().toISOString(),
           } : s
         ))
         showToast(`${sw.title} disabled${reEnableMinutes > 0 ? ` · auto-enables in ${reEnableMinutes}m` : ''}`, 'error')
@@ -1154,19 +1154,19 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/kill-switches/toggle', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: sw.id, is_enabled: true, change_note: null }),
+        body: JSON.stringify({ id: sw.id, is_enabled: true, change_note: null }),
       })
       if (res.ok) {
         const json = await res.json()
         setSwitches(prev => prev.map(s =>
           s.id === sw.id ? {
             ...s,
-            is_enabled:   true,
-            change_note:  null,
+            is_enabled: true,
+            change_note: null,
             changer_name: currentUserName,
-            updated_at:   json.switch?.updated_at ?? new Date().toISOString(),
+            updated_at: json.switch?.updated_at ?? new Date().toISOString(),
           } : s
         ))
         showToast(`${sw.title} is back online`, 'success')
@@ -1188,9 +1188,9 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/kill-switches/toggle', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: sw.id, is_visible: newVisibility }),
+        body: JSON.stringify({ id: sw.id, is_visible: newVisibility }),
       })
       if (res.ok) {
         setSwitches(prev => prev.map(s =>
@@ -1216,9 +1216,9 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/kill-switches/toggle', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: sw.id, is_read_only: newReadOnly }),
+        body: JSON.stringify({ id: sw.id, is_read_only: newReadOnly }),
       })
       if (res.ok) {
         setSwitches(prev => prev.map(s =>
@@ -1247,9 +1247,9 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/kill-switches/request-kill-all', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ reason }),
+        body: JSON.stringify({ reason }),
       })
       const json = await res.json()
       if (res.ok) {
@@ -1257,10 +1257,10 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
           // Single admin — executed immediately
           setSwitches(prev => prev.map(s => ({
             ...s,
-            is_enabled:   false,
-            change_note:  reason,
+            is_enabled: false,
+            change_note: reason,
             changer_name: currentUserName,
-            updated_at:   new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           })))
           showToast('All systems killed — platform in emergency mode', 'error')
           loadAudit()
@@ -1278,7 +1278,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
     setKillingAll(false)
   }
 
-  const [showEmergency,  setShowEmergency]  = useState(false)
+  const [showEmergency, setShowEmergency] = useState(false)
   const [scheduleTarget, setScheduleTarget] = useState<KillSwitch | null>(null)
   const [scheduleCounts, setScheduleCounts] = useState<Record<string, number>>({})
   const [incidentCounts, setIncidentCounts] = useState<Record<string, number>>({})
@@ -1315,7 +1315,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
       {/* Pending approval banner */}
       {pendingApproval && (
         <div className="flex items-center gap-3 px-5 py-4 rounded-2xl border"
-             style={{ backgroundColor: 'rgba(185,28,28,0.04)', borderColor: 'rgba(185,28,28,0.3)' }}>
+          style={{ backgroundColor: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.3)' }}>
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.red }} />
           <div className="flex-1">
             <p className="text-[13px] font-black" style={{ color: C.red }}>Kill All — Awaiting Approval</p>
@@ -1335,11 +1335,11 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
 
       {/* Kill Switch Matrix */}
       <div className="flex flex-col gap-3 p-5 rounded-2xl border"
-           style={{
-             borderColor:     switches.some(s => !s.is_enabled) ? 'rgba(185,28,28,0.3)' : C.border,
-             backgroundColor: C.surface,
-             boxShadow:       switches.some(s => !s.is_enabled) ? '0 0 24px rgba(185,28,28,0.06)' : 'none',
-           }}>
+        style={{
+          borderColor: switches.some(s => !s.is_enabled) ? 'rgba(220,38,38,0.3)' : C.border,
+          backgroundColor: C.surface,
+          boxShadow: switches.some(s => !s.is_enabled) ? '0 0 24px rgba(220,38,38,0.06)' : 'none',
+        }}>
         <div className="flex items-center justify-between mb-1">
           <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
             KILL SWITCH MATRIX — {switches.length} switches
@@ -1359,82 +1359,82 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
             <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view kill switches</p>
           </div>
         ) : loading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-12 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
-            ))
-          ) : switches.length === 0 ? (
-            <div className="flex flex-col items-center py-10 gap-2">
-              <Shield size={22} style={{ color: C.border }} />
-              <p className="text-[13px]" style={{ color: C.muted }}>No kill switches configured</p>
-            </div>
-          ) : (
-            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
-              {/* Table header */}
-              <div className="grid px-4 py-2 border-b"
-                   style={{
-                     gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
-                     gap: 12,
-                     borderColor: C.border,
-                     backgroundColor: C.bg,
-                   }}>
-                {['TOOL NAME', 'STATUS', 'OFFLINE FOR', 'DESCRIPTION', 'MAINTENANCE', 'VISIBLE', 'READ ONLY', 'LAST BY', 'REASON', 'SCHEDULE'].map(h => (
-                  <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
-                    {h}
-                  </span>
-                ))}
-              </div>
-              {/* Table rows */}
-              {switches.map(sw => (
-                <KillSwitchRow
-                  key={sw.id}
-                  sw={sw}
-                  onDisable={s => setDisableTarget(s)}
-                  onEnable={handleEnable}
-                  onToggleVisibility={handleToggleVisibility}
-                  onToggleReadOnly={handleToggleReadOnly}
-                  onSchedule={s => setScheduleTarget(s)}
-                    toggling={toggling}
-                    visibilityToggling={visibilityToggling}
-                    readOnlyToggling={readOnlyToggling}
-                    currentUserName={currentUserName}
-                    scheduleCount={scheduleCounts[sw.id] ?? 0}
-                    incidentCount={incidentCounts[sw.title] ?? 0}
-                  canToggle={can('toggle_switch')}
-                  canToggleVisibility={can('toggle_visibility')}
-                  canToggleReadOnly={can('toggle_readonly')}
-                  canSchedule={can('schedule_maintenance')}
-                />
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-12 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
+          ))
+        ) : switches.length === 0 ? (
+          <div className="flex flex-col items-center py-10 gap-2">
+            <Shield size={22} style={{ color: C.border }} />
+            <p className="text-[13px]" style={{ color: C.muted }}>No kill switches configured</p>
+          </div>
+        ) : (
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border }}>
+            {/* Table header */}
+            <div className="grid px-4 py-2 border-b"
+              style={{
+                gridTemplateColumns: '1.4fr 0.6fr 0.7fr 1.6fr 0.8fr 0.8fr 0.6fr 0.8fr 1fr 0.5fr',
+                gap: 12,
+                borderColor: C.border,
+                backgroundColor: C.bg,
+              }}>
+              {['TOOL NAME', 'STATUS', 'OFFLINE FOR', 'DESCRIPTION', 'MAINTENANCE', 'VISIBLE', 'READ ONLY', 'LAST BY', 'REASON', 'SCHEDULE'].map(h => (
+                <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
+                  {h}
+                </span>
               ))}
             </div>
-          )}
-        </div>
+            {/* Table rows */}
+            {switches.map(sw => (
+              <KillSwitchRow
+                key={sw.id}
+                sw={sw}
+                onDisable={s => setDisableTarget(s)}
+                onEnable={handleEnable}
+                onToggleVisibility={handleToggleVisibility}
+                onToggleReadOnly={handleToggleReadOnly}
+                onSchedule={s => setScheduleTarget(s)}
+                toggling={toggling}
+                visibilityToggling={visibilityToggling}
+                readOnlyToggling={readOnlyToggling}
+                currentUserName={currentUserName}
+                scheduleCount={scheduleCounts[sw.id] ?? 0}
+                incidentCount={incidentCounts[sw.title] ?? 0}
+                canToggle={can('toggle_switch')}
+                canToggleVisibility={can('toggle_visibility')}
+                canToggleReadOnly={can('toggle_readonly')}
+                canSchedule={can('schedule_maintenance')}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* Audit Trail */}
-        {can('view_audit') && <AuditTrailPanel entries={auditEntries} loading={auditLoading} onViewHistory={() => can('view_history') && setShowFullHistory(true)} />}
+      {/* Audit Trail */}
+      {can('view_audit') && <AuditTrailPanel entries={auditEntries} loading={auditLoading} onViewHistory={() => can('view_history') && setShowFullHistory(true)} />}
 
       {/* Emergency Actions — collapsed by default to prevent accidental clicks */}
       <div className="rounded-2xl border overflow-hidden"
-           style={{ borderColor: showEmergency ? 'rgba(185,28,28,0.4)' : C.border }}>
+        style={{ borderColor: showEmergency ? 'rgba(220,38,38,0.4)' : C.border }}>
 
         {/* Collapsed header — always visible */}
         <button
           onClick={() => setShowEmergency(s => !s)}
           className="w-full flex items-center justify-between px-5 py-3 hover:opacity-80 transition-all"
-          style={{ backgroundColor: showEmergency ? 'rgba(185,28,28,0.05)' : C.bg }}>
+          style={{ backgroundColor: showEmergency ? 'rgba(220,38,38,0.05)' : C.bg }}>
           <div className="flex items-center gap-2">
             <Zap size={14} style={{ color: showEmergency ? C.red : C.muted }} />
             <p className="text-[11px] font-black tracking-wider"
-               style={{ color: showEmergency ? C.red : C.muted }}>
+              style={{ color: showEmergency ? C.red : C.muted }}>
               EMERGENCY ACTIONS
             </p>
             <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                  style={{ backgroundColor: C.bg, color: C.muted }}>
+              style={{ backgroundColor: C.bg, color: C.muted }}>
               Click to expand
             </span>
           </div>
           <ChevronDown size={14} style={{
-            color:      C.muted,
-            transform:  showEmergency ? 'rotate(180deg)' : 'rotate(0deg)',
+            color: C.muted,
+            transform: showEmergency ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
           }} />
         </button>
@@ -1442,7 +1442,7 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
         {/* Expanded content */}
         {showEmergency && (
           <div className="px-5 py-4 border-t"
-               style={{ borderColor: 'rgba(185,28,28,0.2)', backgroundColor: C.surface }}>
+            style={{ borderColor: 'rgba(220,38,38,0.2)', backgroundColor: C.surface }}>
             <div className="flex items-start gap-4">
               <div className="flex-1">
                 <p className="text-[13px] font-black mb-1" style={{ color: C.red }}>
@@ -1453,9 +1453,9 @@ export default function KillSwitchesTab({ isInvestorMode = false }: { isInvestor
                 </p>
               </div>
               {can('kill_all') && <button
-                  onClick={() => setShowKillAll(true)}
-                  disabled={killingAll || activeCount === 0}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-black hover:opacity-80 disabled:opacity-40 shrink-0"
+                onClick={() => setShowKillAll(true)}
+                disabled={killingAll || activeCount === 0}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-black hover:opacity-80 disabled:opacity-40 shrink-0"
                 style={{ backgroundColor: C.red, color: '#fff' }}>
                 {killingAll
                   ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#fff' }} />

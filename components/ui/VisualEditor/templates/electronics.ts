@@ -1,19 +1,19 @@
 // components/ui/VisualEditor/templates/electronics.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// COMPLETE Electronics Template — 16 blocks, dark tech theme
-// Professional UK eBay seller layout — 100% ready to use
+// Electronics Template — 16 blocks, 2-column hero + refined policy cards.
+// Category-consistent product theme: TechVault headphones.
 // ─────────────────────────────────────────────────────────────────────────────
 import { TemplateSection } from './types'
 
 export const electronicsTemplate: TemplateSection = {
     id: 'full-electronics',
     name: 'Electronics',
-    description: 'Dark tech theme · 16 blocks · Pro UK seller layout',
+    description: 'Dark tech theme · 16 blocks · Pro 2-column hero + crisp policy cards',
     category: 'full',
     thumbnail: 'electronics',
     blocks: [
 
-        // ── 1. Store Hero Header ──────────────────────────────────────────────
+        // ── 1. Store Hero Header (compact) ───────────────────────────────────
         {
             type: 'hero_header', props: {
                 storeName: '{{SELLER_NAME}}',
@@ -23,13 +23,13 @@ export const electronicsTemplate: TemplateSection = {
                 bgGradientFrom: '#0f172a',
                 bgGradientTo: '#1e3a5f',
                 bgGradientDir: 135,
-                nameFontSize: 28,
+                nameFontSize: 22,
                 nameFontWeight: '800',
                 nameColor: '#ffffff',
-                taglineFontSize: 13,
+                taglineFontSize: 12,
                 taglineColor: '#93c5fd',
                 showLogo: false,
-                height: 120,
+                height: 80,
                 align: 'center',
                 borderRadius: 0,
                 paddingTop: 0,
@@ -58,88 +58,53 @@ export const electronicsTemplate: TemplateSection = {
                 paddingLeft: 24,
                 paddingRight: 24,
                 links: [
-                    { label: 'All Items', url: '{{STORE_URL}}' },
-                    { label: 'Smartphones', url: '#' },
-                    { label: 'Laptops', url: '#' },
-                    { label: 'Accessories', url: '#' },
-                    { label: 'Bundles', url: '#' },
-                    { label: 'Contact Us', url: '#' },
+                    { label: 'All Items',    url: '{{STORE_URL}}' },
+                    { label: 'Smartphones',  url: '#' },
+                    { label: 'Laptops',      url: '#' },
+                    { label: 'Accessories',  url: '#' },
+                    { label: 'Bundles',      url: '#' },
+                    { label: 'Contact Us',   url: '#' },
                 ],
             }
         },
 
-        // ── 3. Product Title + Condition ──────────────────────────────────────
+        // ── 3. 2-Column Hero Product ──────────────────────────────────────────
         {
-            type: 'product_title', props: {
-                text: '{{PRODUCT_TITLE}}',           // FIX: was 'title'
-                conditionText: 'Condition: {{ITEM_CONDITION}}',
-                showCondition: true,
-                color: '#0f172a',
-                conditionColor: '#3b82f6',
-                fontSize: 24,
-                fontWeight: '800',
-                align: 'left',
-                bgColor: '#ffffff',
-                paddingTop: 20,
-                paddingBottom: 8,
+            type: 'hero_product', props: {
+                paddingTop: 24,
+                paddingBottom: 24,
                 paddingLeft: 20,
                 paddingRight: 20,
-                fontFamily: 'Arial, Helvetica, sans-serif',
-            }
-        },
-
-        // ── 4. Product Image ──────────────────────────────────────────────────
-        {
-            type: 'product_image', props: {
-                src: '{{MAIN_IMAGE_URL}}',
-                alt: '{{PRODUCT_TITLE}}',
-                maxWidth: 520,
-                align: 'center',
-                borderRadius: 12,
-                showBorder: true,
-                borderColor: '#e2e8f0',
-                borderWidth: 1,
-                objectFit: 'contain',
-                bgColor: '#f8fafc',
-                paddingTop: 20,
-                paddingBottom: 20,
-                paddingLeft: 20,
-                paddingRight: 20,
-            }
-        },
-
-        // ── 5. Price Block ────────────────────────────────────────────────────
-        {
-            type: 'price_block', props: {
-                priceText: '{{ITEM_PRICE}}',
-                priceColor: '#1d4ed8',
-                priceFontSize: 38,
-                priceFontWeight: '900',
-                priceAlign: 'left',
+                leftImage: '{{MAIN_IMAGE_URL}}',
+                thumb1: '{{IMAGE_2_URL}}',
+                thumb2: '{{IMAGE_3_URL}}',
+                thumb3: '{{IMAGE_4_URL}}',
+                thumb4: '{{IMAGE_5_URL}}',
+                leftBg: '#f8fafc',
+                rightTitle: '{{PRODUCT_TITLE}}',
+                rightCondition: '{{ITEM_CONDITION}}',
+                rightPrice: '{{ITEM_PRICE}}',
+                rightOriginal: '{{ORIGINAL_PRICE}}',
                 showOriginal: true,
-                originalText: '{{ORIGINAL_PRICE}}',
-                originalColor: '#94a3b8',
-                originalSize: 16,
-                showBadge: true,
-                badgeText: 'FREE DELIVERY',
-                badgeBg: '#1d4ed8',
-                badgeColor: '#ffffff',
-                badgeFontSize: 11,
-                badgeBorderRadius: 4,
-                bgColor: '#f0f7ff',
-                borderRadius: 0,
-                paddingTop: 16,
-                paddingBottom: 16,
-                paddingLeft: 20,
-                paddingRight: 20,
-                fontFamily: 'Arial, Helvetica, sans-serif',
+                rightQuantity: '{{QUANTITY}}',
+                showScarcity: true,
+                rightBadgeText: 'Brand New',
+                rightBullets: [
+                    'Hi-Res certified 40mm dynamic drivers',
+                    'Active Noise Cancellation with Transparency mode',
+                    '40-hour battery life — USB-C fast charging',
+                    'Bluetooth 5.3 multipoint pairing',
+                ],
+                accentColor: '#1d4ed8',
+                scarcityBg: '#fef2f2',
+                scarcityColor: '#991b1b',
             }
         },
 
-        // ── 6. Urgency Bar ────────────────────────────────────────────────────
+        // ── 4. Urgency Bar ────────────────────────────────────────────────────
         {
             type: 'urgency_bar', props: {
-                text: '🔥 Only {{QUANTITY}} units left — {{WATCHERS}} people watching this item',  // FIX: was 'message'
+                text: '🔥 Only {{QUANTITY}} units left — {{WATCHERS}} people watching this item',
                 bgColor: '#fef2f2',
                 textColor: '#991b1b',
                 iconColor: '#ef4444',
@@ -155,40 +120,40 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 7. Trust Badges ───────────────────────────────────────────────────
+        // ── 5. Trust Badges (white card grid) ────────────────────────────────
         {
             type: 'trust_badges', props: {
                 iconColor: '#1d4ed8',
-                textColor: '#1e3a5f',
+                textColor: '#0f172a',
                 subTextColor: '#64748b',
-                badgeBg: '#f0f9ff',
-                borderColor: '#bfdbfe',
-                borderRadius: 10,
+                borderColor: '#e5e7eb',
+                borderRadius: 12,
                 align: 'center',
                 bgColor: '#ffffff',
-                paddingTop: 20,
-                paddingBottom: 20,
+                paddingTop: 24,
+                paddingBottom: 24,
                 paddingLeft: 20,
                 paddingRight: 20,
+                variant: 'grid',
                 badges: [
-                    { icon: 'shield-check', text: 'Genuine Product', subText: '100% Authentic' },
-                    { icon: 'truck', text: 'Fast Dispatch', subText: 'Same Day if before 3pm' },
-                    { icon: 'rotate-ccw', text: '30-Day Returns', subText: 'Hassle Free' },
-                    { icon: 'star', text: 'Top Rated Seller', subText: '5000+ Positive Reviews' },
+                    { icon: 'shield-check', text: 'Genuine Product',  subText: '100% Authentic' },
+                    { icon: 'truck',         text: 'Fast Dispatch',     subText: 'Same Day if before 3pm' },
+                    { icon: 'rotate-ccw',    text: '30-Day Returns',    subText: 'Hassle Free' },
+                    { icon: 'star',          text: 'Top Rated Seller',  subText: '5000+ Positive Reviews' },
                 ],
             }
         },
 
-        // ── 8. Product Description ────────────────────────────────────────────
+        // ── 6. Product Description ────────────────────────────────────────────
         {
             type: 'product_description', props: {
-                text: '{{ITEM_DESCRIPTION}}',        // FIX: was 'description'
+                text: '{{ITEM_DESCRIPTION}}',
                 titleText: 'About This Item',
                 showTitle: true,
                 titleColor: '#0f172a',
-                titleFontSize: 16,
+                titleFontSize: 18,
                 color: '#475569',
-                fontSize: 13,
+                fontSize: 14,
                 lineHeight: 1.8,
                 bgColor: '#ffffff',
                 paddingTop: 24,
@@ -199,42 +164,41 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 9. Specs Table ────────────────────────────────────────────────────
+        // ── 7. Specs Table (crisp 2-column alternating) ──────────────────────
         {
             type: 'specs_table', props: {
                 showTitle: true,
                 titleText: 'Item Specifics',
                 titleColor: '#0f172a',
                 titleFontSize: 16,
-                headerBg: '#1e3a5f',
+                headerBg: '#1e1535',
                 headerText: '#ffffff',
-                altRowBg: '#f8fafc',
+                altRowBg: '#f9fafb',
                 rowBg: '#ffffff',
-                borderColor: '#e2e8f0',
+                borderColor: '#f3f4f6',
                 fontSize: 13,
                 bgColor: '#ffffff',
                 paddingTop: 0,
-                paddingBottom: 0,
-                paddingLeft: 0,
-                paddingRight: 0,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                variant: 'full',
                 rows: [
-                    { key: 'Brand', value: '{{BRAND}}' },
-                    { key: 'Model', value: '{{MODEL}}' },
-                    { key: 'Model Number', value: '{{MPN}}' },
-                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
-                    { key: 'Colour', value: '{{COLOUR}}' },
-                    { key: 'Storage', value: '{{STORAGE}}' },
-                    { key: 'Network', value: '{{NETWORK}}' },
-                    { key: 'Connectivity', value: '{{CONNECTIVITY}}' },
-                    { key: 'EAN / GTIN', value: '{{EAN}}' },
-                    { key: 'SKU', value: '{{ITEM_SKU}}' },
-                    { key: 'Warranty', value: '12 Months Manufacturer Warranty' },
-                    { key: 'Country of Origin', value: 'United Kingdom' },
+                    { key: 'Brand',             value: '{{BRAND}}' },
+                    { key: 'Model',             value: '{{MODEL}}' },
+                    { key: 'Model Number',      value: '{{MPN}}' },
+                    { key: 'Condition',         value: '{{ITEM_CONDITION}}' },
+                    { key: 'Connectivity',      value: '{{CONNECTIVITY}}' },
+                    { key: 'Network',           value: '{{NETWORK}}' },
+                    { key: 'Storage Capacity',  value: '{{STORAGE}}' },
+                    { key: 'Colour',            value: '{{COLOUR}}' },
+                    { key: 'EAN / GTIN',        value: '{{EAN}}' },
+                    { key: 'Warranty',          value: '{{WARRANTY}}' },
                 ],
             }
         },
 
-        // ── 10. Divider ───────────────────────────────────────────────────────
+        // ── 8. Divider ───────────────────────────────────────────────────────
         {
             type: 'divider', props: {
                 lineStyle: 'solid',
@@ -246,42 +210,45 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 11. Shipping Info ─────────────────────────────────────────────────
+        // ── 9. Shipping Info (white card with truck SVG) ─────────────────────
         {
             type: 'shipping_info', props: {
-                bgColor: '#f0fdf4',
-                textColor: '#166534',
+                bgColor: '#ffffff',
+                textColor: '#0f172a',
                 iconColor: '#16a34a',
-                borderRadius: 0,
-                shippingText: '✅ FREE Standard UK Delivery — Royal Mail 48 (2–3 business days)',
-                dispatchText: '⚡ Same-day dispatch on orders placed before 3pm Mon–Fri',
-                locationText: '📦 Dispatched from: United Kingdom',
-                paddingTop: 14,
-                paddingBottom: 14,
+                accentColor: '#16a34a',
+                iconBg: '#f0fdf4',
+                borderRadius: 8,
+                shippingText: '{{SHIPPING_TIME}} — FREE Standard UK Delivery',
+                dispatchText: 'Same-day dispatch on orders placed before 3pm Mon–Fri',
+                locationText: 'Dispatched from: United Kingdom',
+                paddingTop: 16,
+                paddingBottom: 16,
                 paddingLeft: 20,
                 paddingRight: 20,
             }
         },
 
-        // ── 12. Returns Policy ────────────────────────────────────────────────
+        // ── 10. Returns Policy (white card with rotate-ccw SVG) ──────────────
         {
             type: 'returns_policy', props: {
-                bgColor: '#eff6ff',
-                textColor: '#1e40af',
-                iconColor: '#3b82f6',
-                borderRadius: 0,
-                policyText: '↩ 30-day hassle-free returns. Items must be unused and in original packaging.',
-                showPeriod: true,
-                periodText: '30-Day Free Returns on items not as described',
+                bgColor: '#ffffff',
+                textColor: '#0f172a',
                 accentColor: '#3b82f6',
-                paddingTop: 14,
-                paddingBottom: 14,
+                iconColor: '#3b82f6',
+                iconBg: '#eff6ff',
+                borderRadius: 8,
+                policyText: '{{RETURN_POLICY}}. We cover return postage on items that are faulty or not as described.',
+                showPeriod: true,
+                periodText: '30-Day Free Returns',
+                paddingTop: 16,
+                paddingBottom: 16,
                 paddingLeft: 20,
                 paddingRight: 20,
             }
         },
 
-        // ── 13. Policy Tabs ───────────────────────────────────────────────────
+        // ── 11. Policy Tabs ──────────────────────────────────────────────────
         {
             type: 'policy_tabs', props: {
                 activeBg: '#1d4ed8',
@@ -291,9 +258,11 @@ export const electronicsTemplate: TemplateSection = {
                 borderColor: '#e2e8f0',
                 contentBg: '#ffffff',
                 fontSize: 13,
-                borderRadius: 0,
-                paddingTop: 0,
-                paddingBottom: 0,
+                borderRadius: 8,
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
                 tabs: [
                     {
                         label: 'Shipping',
@@ -315,7 +284,7 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 14. Cross-Sell ────────────────────────────────────────────────────
+        // ── 12. Cross-Sell ───────────────────────────────────────────────────
         {
             type: 'cross_sell', props: {
                 title: 'You May Also Like',
@@ -324,7 +293,7 @@ export const electronicsTemplate: TemplateSection = {
                 bgColor: '#f8fafc',
                 cardBg: '#ffffff',
                 cardBorder: '#e2e8f0',
-                borderRadius: 10,
+                borderRadius: 12,
                 columns: 3,
                 showPrice: true,
                 gap: 12,
@@ -340,7 +309,7 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 15. Seller Info ───────────────────────────────────────────────────
+        // ── 13. Seller Info ──────────────────────────────────────────────────
         {
             type: 'seller_info', props: {
                 sellerName: '{{SELLER_NAME}}',
@@ -363,7 +332,7 @@ export const electronicsTemplate: TemplateSection = {
             }
         },
 
-        // ── 16. CTA Footer Banner ─────────────────────────────────────────────
+        // ── 14. CTA Footer Banner ─────────────────────────────────────────────
         {
             type: 'cta_banner', props: {
                 headingText: 'Buy with Confidence — Trusted eBay Electronics Seller',

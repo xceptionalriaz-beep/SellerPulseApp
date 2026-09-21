@@ -1,16 +1,15 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import EditableSection from '@/components/EditableSection'
 import { useRouter } from 'next/navigation'
 import { useBrand } from '@/hooks/useBrand'
 import ToolsMegaMenu from '@/components/landing/ToolsMegaMenu'
 import {
   Zap, TrendingUp, BarChart2, Shield, ArrowRight,
-  ChevronRight, ChevronDown, Star, Check, Menu, X,
-  Activity, AlertTriangle, Target, Package, Search,
+  ChevronRight, ChevronDown, Star, Menu, X,
+  AlertTriangle, Target, Package, Search,
   DollarSign, ShoppingBag, Users, Eye, Cpu, Plus, Minus,
-  ShieldCheck, Lock
+  ShieldCheck, Wand2, Palette
 } from 'lucide-react'
 import Pricing from '@/components/landing/Pricing'
 import BlogStrip from '@/components/landing/BlogStrip'
@@ -83,41 +82,6 @@ function Counter({ to, prefix = '', suffix = '', duration = 2000 }: {
   return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>
 }
 
-// -- Mini sparkline SVG -----------------------------------------
-function MiniChart({ scanned }: { scanned: boolean }) {
-  return (
-    <svg viewBox="0 0 320 80" className="w-full" style={{ height: 80 }}>
-      <defs>
-        <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7530fb" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#7530fb" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#7530fb" />
-          <stop offset="100%" stopColor="#b8fa33" />
-        </linearGradient>
-      </defs>
-      <path d="M0,60 C20,55 40,45 60,48 C80,51 100,35 120,30 C140,25 160,38 180,32 C200,26 220,20 240,18 L240,80 L0,80 Z"
-        fill="url(#fillGrad)" />
-      <path d="M0,60 C20,55 40,45 60,48 C80,51 100,35 120,30 C140,25 160,38 180,32 C200,26 220,20 240,18"
-        fill="none" stroke="url(#lineGrad)" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="240" y1="0" x2="240" y2="80" stroke="#9ca3af" strokeWidth="1" strokeDasharray="3 3" />
-      <text x="236" y="10" fontSize="7" fill="#9ca3af" textAnchor="end" fontWeight="bold">TODAY</text>
-      <path d="M240,18 C260,16 280,14 300,12" fill="none" stroke="#7530fb"
-        strokeWidth="2.5" strokeDasharray="6 4" strokeLinecap="round" />
-      <circle cx="300" cy="12" r="4" fill="#ffffff" stroke="#7530fb" strokeWidth="2" />
-      <text x="304" y="16" fontSize="7" fill="#7530fb" fontWeight="900">AI Projection</text>
-      <line x1="140" y1="0" x2="140" y2="80" stroke="#ef4444" strokeWidth="1" strokeDasharray="4 3" />
-      <text x="144" y="10" fontSize="6.5" fill="#ef4444" fontWeight="bold">Price Drop</text>
-      {scanned && (
-        <circle cx="120" cy="30" r="5" fill="#b8fa33" opacity="0.9">
-          <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.5s" repeatCount="indefinite" />
-        </circle>
-      )}
-    </svg>
-  )
-}
-
 // -- Navbar -----------------------------------------------------
 function Navbar() {
   const router = useRouter()
@@ -145,10 +109,11 @@ function Navbar() {
   }, [])
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+    <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-300" role="navigation" aria-label="Main navigation"
       style={{
-        background: scrolled ? T.dark : T.dark,
+        background: T.dark,
         borderBottom: `1px solid ${T.borderDark}`,
+        boxShadow: scrolled ? '0 4px 12px rgba(0,0,0,0.1)' : 'none',
       }}>
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => router.push('/')}>
@@ -181,18 +146,20 @@ function Navbar() {
 
         <div className="hidden md:flex items-center gap-3">
           <button onClick={() => router.push('/auth/login')}
-            className="text-[14px] font-semibold px-4 py-2 rounded-xl text-white hover:bg-[#2d1f4e] transition-colors">
+            className="text-[14px] font-semibold px-4 py-2 rounded-xl text-white hover:bg-[#2d1f4e] transition-colors focus:outline-none focus:ring-2 focus:ring-purple-300"
+            aria-label="Log in to your account">
             Log In
           </button>
           <button onClick={() => router.push('/auth/signup')}
-            className="text-[14px] font-black px-5 py-2.5 rounded-xl transition-all hover:scale-105 hover:bg-[#a3e635] shadow-md flex items-center gap-2 cursor-pointer"
-            style={{ background: T.accent, color: T.dark }}>
+            className="text-[14px] font-black px-5 py-2.5 rounded-xl transition-all hover:scale-105 hover:bg-[#a3e635] shadow-md flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-lime-300"
+            style={{ background: T.accent, color: T.dark }}
+            aria-label="Sign up for free account">
             <span>Get Started Free</span>
             <ArrowRight size={15} />
           </button>
         </div>
 
-        <button className="md:hidden text-white" onClick={() => setOpen(s => !s)}>
+        <button className="md:hidden text-white" onClick={() => setOpen(s => !s)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
@@ -221,160 +188,132 @@ function Navbar() {
 function HeroSection() {
   const router = useRouter()
   const [niche, setNiche] = useState('')
-  const [scanned, setScanned] = useState(false)
-  const [scanning, setScanning] = useState(false)
 
   function handleScan() {
     if (!niche.trim()) return
-    setScanning(true)
-    setTimeout(() => { setScanning(false); setScanned(true) }, 1500)
+    router.push(`/dashboard/product-research?q=${encodeURIComponent(niche)}`)
   }
 
   return (
-    <EditableSection sectionId="hero" label="Hero Section" fields={[
-      { key: 'headline', label: 'Headline', value: 'Stop Guessing eBay Demand. Spot Winning Trends Fast.', type: 'textarea' },
-      { key: 'subtitle', label: 'Subtitle', value: 'Riazify combines live marketplace analytics, automated supplier event tracking, and predictive AI forecasting into a single, lightning-fast dashboard built for scaling operators.', type: 'textarea' },
-      { key: 'cta', label: 'CTA Button', value: 'Scan Niche →', type: 'text' },
-    ]}>
-      <section className="min-h-screen flex items-center pt-24 pb-16" style={{ background: T.bgApp }}>
-        <div className="max-w-7xl mx-auto px-6 w-full py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            <div className="lg:col-span-5 flex flex-col gap-7">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full w-fit border"
-                style={{ background: T.primaryLight, borderColor: T.border }}>
-                <Zap size={12} style={{ color: T.primary }} className="fill-current" />
-                <span className="text-[11px] font-black tracking-[1.5px]" style={{ color: T.primary }}>
-                  NEXT-GEN EBAY INTELLIGENCE
-                </span>
-              </div>
-              <h1 className="text-[40px] sm:text-[46px] lg:text-[54px] font-black leading-[1.08] tracking-tight font-syne" style={{ color: T.textDark }}>
-                <span>Stop Guessing</span><br />
-                <span style={{ color: T.primary }}>eBay Demand.</span><br />
-                <span>Spot Winning</span><br />
-                <span className="relative inline-block">
-                  <span className="relative z-10">Trends Fast.</span>
-                  <span className="absolute bottom-1.5 left-0 right-0 h-3 bg-[#b8fa33] -rotate-1 rounded -z-0" />
-                </span>
-              </h1>
-              <p className="text-[16px] leading-relaxed" style={{ color: T.textSecondary }}>
-                Riazify combines live marketplace analytics, automated supplier event tracking, and predictive AI forecasting into a single, lightning-fast dashboard built for{' '}
-                <span className="font-bold px-1.5 py-0.5 rounded" style={{ background: T.accent, color: T.textDark }}>
-                  scaling operators.
-                </span>
-              </p>
-              <div className="flex items-center rounded-2xl border overflow-hidden p-1 bg-white shadow-sm"
-                style={{ borderColor: T.borderInput }}>
-                <input value={niche} onChange={e => setNiche(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleScan()}
-                  placeholder="Enter sample niche (e.g., Cat Brushes...)"
-                  className="flex-1 px-4 py-3 text-[14px] outline-none bg-transparent"
-                  style={{ color: T.textPrimary }} />
-                <button onClick={handleScan} disabled={scanning}
-                  className="px-6 py-3 font-black text-[14px] rounded-xl transition-all hover:bg-[#a3e635] shrink-0 cursor-pointer"
-                  style={{ background: T.accent, color: T.textDark }}>
-                  {scanning ? 'Scanning...' : 'Scan Niche →'}
-                </button>
-              </div>
-              <div className="flex items-center gap-5 flex-wrap">
-                {['No credit card', 'Free scan included', '30-sec setup'].map(t => (
-                  <div key={t} className="flex items-center gap-1.5">
-                    <Check size={13} style={{ color: T.primary }} />
-                    <span className="text-[12px] font-medium" style={{ color: T.textSecondary }}>{t}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-3 gap-4 pt-2">
-                {[
-                  { val: 12000, label: 'Active Sellers', suffix: '+' },
-                  { val: 4200000, label: 'Revenue Protected', prefix: '$', suffix: '+' },
-                  { val: 98, label: 'AI Accuracy', suffix: '%' },
-                ].map((s, i) => (
-                  <div key={i} className="p-3.5 rounded-2xl text-center bg-white border shadow-xs"
-                    style={{ borderColor: T.border }}>
-                    <p className="text-[18px] font-black font-syne" style={{ color: T.primary }}>
-                      <Counter to={s.val} prefix={s.prefix ?? ''} suffix={s.suffix} />
-                    </p>
-                    <p className="text-[11px] font-semibold mt-0.5" style={{ color: T.textSecondary }}>{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+    <section className="relative pt-32 pb-20 overflow-hidden" style={{ background: '#ffffff' }}>
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#faf9ff] to-white pointer-events-none" />
 
-            <div className="lg:col-span-7">
-              <div className="rounded-3xl border p-6 relative overflow-hidden bg-white shadow-xl"
-                style={{
-                  borderColor: T.border,
-                  boxShadow: '0 20px 50px rgba(117,48,251,0.08)'
-                }}>
-                <div className="absolute -top-3 -left-3 px-3 py-1.5 rounded-full border text-[11px] font-black shadow-md"
-                  style={{ background: T.primaryLight, borderColor: T.border, color: T.primary }}>
-                  +33.8% this week
-                </div>
-                <div className="absolute -top-3 right-8 px-3 py-1.5 rounded-full border text-[11px] font-black shadow-md"
-                  style={{ background: T.bgWhite, borderColor: T.border, color: T.textDark }}>
-                  312 active sellers
-                </div>
-                <div className="absolute -bottom-3 left-8 px-3 py-1.5 rounded-full border text-[11px] font-black shadow-md"
-                  style={{ background: T.accent, borderColor: T.border, color: T.textDark }}>
-                  AI Confidence: {scanned ? '95%' : '70%'}
-                </div>
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <p className="text-[11px] font-black tracking-[1.1px] mb-1 uppercase" style={{ color: T.textSecondary }}>
-                      Sales Trend &amp; Forecast {scanned && niche ? `("${niche}")` : '("Overall Market")'}
-                    </p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-[20px] font-black font-syne" style={{ color: T.primary }}>+33.8%</span>
-                      <span className="text-[12px]" style={{ color: T.textSecondary }}>vs last period</span>
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px]"
-                        style={{ background: T.bgApp, borderColor: T.border }}>
-                        <span style={{ color: T.textSecondary }}>Saturation:</span>
-                        <div className="w-12 h-1.5 rounded-full"
-                          style={{ background: `linear-gradient(to right, ${T.danger}, ${T.warning}, ${T.primary})` }} />
-                        <span className="font-bold" style={{ color: T.primary }}>Low (Ideal)</span>
-                      </div>
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-black"
-                        style={{ background: T.primaryLight, borderColor: T.border, color: T.primary }}>
-                        <Zap size={10} className="fill-current" />
-                        AI Confidence: {scanned ? '95%' : '70%'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex bg-[#f8f7ff] p-1 rounded-lg border gap-0.5" style={{ borderColor: T.border }}>
-                    {['7D', '30D', '90D', '1Y'].map((t, i) => (
-                      <button key={t} className="px-2.5 py-1 text-[10px] font-bold rounded-md cursor-pointer transition-colors"
-                        style={{
-                          background: i === 1 ? T.primary : 'transparent', color: i === 1 ? T.textWhite : T.textSecondary,
-                        }}>
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-2xl p-4 mb-4 border" style={{ background: T.bgApp, borderColor: T.border }}>
-                  <MiniChart scanned={scanned} />
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-bold" style={{ color: T.textSecondary }}>Saturation:</span>
-                  <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: T.primaryLight }}>
-                    <div className="h-full rounded-full transition-all duration-1000"
-                      style={{
-                        width: scanned ? '22%' : '28%',
-                        background: `linear-gradient(to right, ${T.primary}, ${T.accent})`,
-                        boxShadow: `0 0 8px rgba(117,48,251,0.4)`
-                      }} />
-                  </div>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full"
-                    style={{ background: T.accent, color: T.textDark }}>Low (Ideal)</span>
-                </div>
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-3xl pointer-events-none"
-                  style={{ background: 'rgba(117,48,251,0.08)' }} />
-              </div>
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="w-full text-center">
+
+          {/* Simple badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border border-gray-200 bg-white shadow-sm">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-sm font-medium text-gray-700">Trusted by 12,000+ eBay sellers</span>
+          </div>
+
+          {/* Clean headline - Auto responsive */}
+          <h1 className="text-[clamp(2rem,5vw,4rem)] font-black mb-6 tracking-tight leading-[1.15] max-w-[90vw] mx-auto" style={{ color: T.textPrimary }}>
+            The{' '}
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-ai-gradient font-black">
+                AI-Powered
+              </span>
+              <span className="absolute -top-1.5 -right-5 text-[0.22em] font-black tracking-tight px-1.5 py-0.5 rounded-full bg-purple-600 text-white whitespace-nowrap shadow-sm">
+                NEW
+              </span>
+            </span>
+            {' '}eBay Intelligence Platform.{' '}
+            <span style={{ color: T.primary }}>Find Winners.</span>{' '}
+            <span style={{ color: T.textPrimary }}>List Faster.</span>{' '}
+            <span style={{ color: T.primary }}>Protect Profit.</span>
+          </h1>
+
+          {/* Simple subheadline */}
+          <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+            Real-time market insights, AI-powered listing creation, smart order management, and inventory tracking — everything you need to scale your eBay business without the guesswork.
+          </p>
+
+          <style jsx>{`
+            @keyframes ai-gradient {
+              0% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+              }
+              50% {
+                background-position: 100% 50%;
+                filter: hue-rotate(20deg);
+              }
+              100% {
+                background-position: 0% 50%;
+                filter: hue-rotate(0deg);
+              }
+            }
+            .animate-ai-gradient {
+              background-size: 200% 200%;
+              animation: ai-gradient 4s ease-in-out infinite;
+            }
+          `}</style>
+
+          {/* Clean search input */}
+          <div className="max-w-xl mx-auto mb-8">
+            <div className="flex items-center gap-2 bg-white rounded-2xl border-2 border-gray-200 p-2 shadow-sm hover:border-gray-300 transition-colors focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-100">
+              <input
+                value={niche}
+                onChange={(e) => setNiche(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleScan()}
+                placeholder="Enter an eBay product or niche (e.g., iPhone 14 cases)"
+                className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
+                style={{ color: T.textPrimary }}
+                aria-label="Product or niche search"
+              />
+              <button
+                onClick={handleScan}
+                className="px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-purple-300"
+                style={{ background: T.primary, color: 'white' }}
+                aria-label="Analyze product niche"
+              >
+                Analyze Now
+                <ArrowRight size={16} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-3">Free analysis • No credit card required</p>
+          </div>
+
+          {/* Simple trust indicators */}
+          <div className="flex items-center justify-center gap-8 text-sm text-gray-600 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Shield size={16} className="text-gray-400" />
+              <span>No credit card</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap size={16} className="text-gray-400" />
+              <span>30-second setup</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp size={16} className="text-gray-400" />
+              <span>98% AI accuracy</span>
             </div>
           </div>
+
+          {/* Clean stats row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto mt-16 pt-12 border-t border-gray-200">
+            <div className="text-center">
+              <p className="text-3xl font-bold mb-1" style={{ color: T.primary }}>12K+</p>
+              <p className="text-sm text-gray-600">Active sellers</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold mb-1" style={{ color: T.primary }}>$4.2M+</p>
+              <p className="text-sm text-gray-600">Revenue protected</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold mb-1" style={{ color: T.primary }}>98%</p>
+              <p className="text-sm text-gray-600">Forecast accuracy</p>
+            </div>
+          </div>
+
         </div>
-      </section>
-    </EditableSection>
+      </div>
+
+      {/* Subtle bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f8f7ff] to-transparent pointer-events-none" />
+    </section>
   )
 }
 
@@ -387,8 +326,8 @@ function SocialProofStrip() {
   ]
   const doubled = [...items, ...items]
   return (
-    <div className="py-4 border-y overflow-hidden" style={{ background: T.dark, borderColor: T.borderDark }}>
-      <div className="flex gap-12 whitespace-nowrap" style={{ animation: 'marquee 30s linear infinite' }}>
+    <div className="py-4 border-y overflow-hidden group" style={{ background: T.dark, borderColor: T.borderDark }}>
+      <div className="flex gap-12 whitespace-nowrap group-hover:[animation-play-state:paused]" style={{ animation: 'marquee 30s linear infinite' }}>
         {doubled.map((item, i) => (
           <span key={i} className="text-[13px] font-black shrink-0 flex items-center gap-2 text-white">
             <span className="w-1.5 h-1.5 rounded-full bg-[#b8fa33]" />
@@ -459,13 +398,14 @@ function AntiLossBanner() {
 
 // -- Tool Showcase ----------------------------------------------
 function ToolShowcase() {
+  const router = useRouter()
   const tools = [
-    { icon: Search, name: 'Product Research', desc: 'Scan any eBay niche in seconds. Get saturation score, sell-through rate, market volume, and AI demand forecasting before spending a single dollar.', badge: 'Most Used' },
-    { icon: BarChart2, name: 'Title Builder', desc: 'AI-powered eBay title generator with keyword injection, VeRO protection, real-time character counter, and a spin engine for unlimited variations.', badge: 'AI Powered' },
-    { icon: Eye, name: 'Competitor X-Ray', desc: 'Deep scan any eBay seller — their revenue, active listings, top products, keyword gaps, and sell-through rate. Know your competition inside out.', badge: 'Exclusive' },
-    { icon: ShoppingBag, name: 'Orders Manager', desc: 'Risk-scored order management with buyer profile analysis, dropshipping detection, dispute protection checklists, and smart deadline reminders.', badge: 'Essential' },
-    { icon: DollarSign, name: 'Profit Calculator', desc: 'Calculate true eBay net profit with eBay fees, shipping, FX rates, sourcing tax, ad costs, and cashback — all in one real-time calculation engine.', badge: 'Pro Tool' },
-    { icon: Package, name: 'Inventory Manager', desc: 'Track your full inventory pipeline with AI demand forecasting, reorder alerts, dead stock warnings, and supplier performance scoring in one view.', badge: 'New' },
+    { icon: BarChart2, name: 'Title Builder', desc: 'AI-powered eBay title generator with keyword injection, VeRO protection, and unlimited variations.', badge: 'AI Powered', link: '/tools/title-builder' },
+    { icon: Palette, name: 'Templates Studio', desc: 'Design beautiful custom eBay listing templates with drag-and-drop and HTML builders.', badge: 'Design', link: '/tools/templates-studio' },
+    { icon: Wand2, name: 'Listing Generator', desc: 'Create beautiful, SEO-optimized eBay listings in seconds with AI-driven descriptions.', badge: 'New', link: '/tools/listing-generator' },
+    { icon: ShoppingBag, name: 'Orders Manager', desc: 'Risk-scored order management with buyer profile analysis and dispute protection.', badge: 'Essential', link: '/tools/orders' },
+    { icon: DollarSign, name: 'Profit Calculator', desc: 'Calculate true eBay net profit with fees, shipping, FX rates, and ad costs in real-time.', badge: 'Pro Tool', link: '/tools/profit-calculator' },
+    { icon: Package, name: 'Inventory Manager', desc: 'Track your full inventory pipeline with AI forecasting, reorder alerts, and dead stock warnings.', badge: 'New', link: '/tools/inventory' },
   ]
   return (
     <section id="features" className="py-24" style={{ background: T.bgWhite }}>
@@ -488,10 +428,17 @@ function ToolShowcase() {
             const Icon = tool.icon
             return (
               <div key={i}
-                className="group rounded-3xl border p-8 flex flex-col gap-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 bg-white"
+                onClick={() => router.push(tool.link)}
+                className="group rounded-3xl border p-8 flex flex-col gap-5 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl bg-white"
                 style={{ borderColor: T.border, boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 32px rgba(117,48,251,0.12)'; e.currentTarget.style.borderColor = T.primary }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'; e.currentTarget.style.borderColor = T.border }}>
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(117,48,251,0.12)';
+                  e.currentTarget.style.borderColor = T.primary
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+                  e.currentTarget.style.borderColor = T.border
+                }}>
                 <div className="flex items-start justify-between">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
                     style={{ background: T.primaryLight, border: `1px solid ${T.border}` }}>
@@ -771,7 +718,7 @@ function HowItWorks() {
 function FAQ() {
   const [open, setOpen] = useState<number | null>(null)
   const faqs = [
-    { q: 'Is Riazify only for eBay sellers?', a: "Currently yes — Riazify is purpose-built for eBay operators. We're expanding to Amazon and Walmart in Q3 2026. eBay-focused tools mean deeper data, better accuracy, and zero feature bloat from other marketplaces." },
+    { q: 'Is Riazify only for eBay sellers?', a: "Currently yes — Riazify is purpose-built for eBay operators. We're expanding to Amazon and Walmart in Q4 2026. eBay-focused tools mean deeper data, better accuracy, and zero feature bloat from other marketplaces." },
     { q: 'How accurate is the AI forecast?', a: 'Our hybrid regressor model achieves 98% accuracy on 7-day forecasts and 91% on 30-day projections, validated against 18 months of live eBay sales data. Each prediction comes with a confidence score so you always know how much to trust it.' },
     { q: 'What does the free plan include?', a: "The free plan includes 5 niche scans per day, basic trend charts, a saturation meter, and the profit calculator. No credit card required. Upgrade to Pro when you're ready to scale." },
     { q: 'Can I cancel my subscription anytime?', a: 'Absolutely. Cancel in one click from your account settings. No lock-in contracts, no cancellation fees, no questions asked. Your data remains accessible for 30 days after cancellation.' },
@@ -827,7 +774,7 @@ function TrustBadges() {
         <p className="text-center text-[11px] font-black tracking-[2px] mb-8" style={{ color: T.textSecondary }}>
           ENTERPRISE-GRADE SECURITY &amp; COMPLIANCE
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {badges.map((b, i) => (
             <div key={i} className="flex flex-col items-center gap-1.5 p-4 rounded-2xl border text-center bg-white shadow-xs"
               style={{ borderColor: T.border }}>
@@ -844,10 +791,11 @@ function TrustBadges() {
 
 // -- Who Is Riazify For -----------------------------------------
 function WhoIsItFor() {
+  const router = useRouter()
   const personas = [
-    { title: 'New eBay Sellers', pain: "You don't know which products to sell or how to avoid overcrowded niches that kill margins.", solution: "Riazify's saturation meter and AI demand forecasting tells you exactly where to start — before you spend a single dollar on inventory.", cta: 'Start for free →', stats: [{ val: '< 30 sec', label: 'to first niche scan' }, { val: '5 scans', label: 'free every day' }] },
-    { title: 'Scaling Operators', pain: "You're growing but flying blind — no reliable data on where demand is heading or when to restock.", solution: "Riazify's hybrid AI regressor gives you 7, 30, and 90-day forecasts with confidence scores — so you source ahead of the curve, not behind it.", cta: 'Upgrade to Pro →', stats: [{ val: '98%', label: 'AI forecast accuracy' }, { val: '$4.2M+', label: 'revenue protected' }], highlight: true },
-    { title: 'Agencies & Resellers', pain: 'Managing multiple eBay accounts with no centralized intelligence layer is burning time and leaving money on the table.', solution: 'Riazify Business gives you 5 user seats, API access, white-label reports, and a dedicated success manager — everything agencies need to deliver results at scale.', cta: 'Contact Sales →', stats: [{ val: '5 seats', label: 'per Business plan' }, { val: 'API', label: 'full access' }] },
+    { title: 'New eBay Sellers', pain: "You don't know which products to sell or how to avoid overcrowded niches that kill margins.", solution: "Riazify's saturation meter and AI demand forecasting tells you exactly where to start — before you spend a single dollar on inventory.", cta: 'Start for free →', stats: [{ val: '< 30 sec', label: 'to first niche scan' }, { val: '5 scans', label: 'free every day' }], link: '/auth/signup' },
+    { title: 'Scaling Operators', pain: "You're growing but flying blind — no reliable data on where demand is heading or when to restock.", solution: "Riazify's hybrid AI regressor gives you 7, 30, and 90-day forecasts with confidence scores — so you source ahead of the curve, not behind it.", cta: 'Upgrade to Pro →', stats: [{ val: '98%', label: 'AI forecast accuracy' }, { val: '$4.2M+', label: 'revenue protected' }], highlight: true, link: '/pricing' },
+    { title: 'Agencies & Resellers', pain: 'Managing multiple eBay accounts with no centralized intelligence layer is burning time and leaving money on the table.', solution: 'Riazify Business gives you 5 user seats, API access, white-label reports, and a dedicated success manager — everything agencies need to deliver results at scale.', cta: 'Contact Sales →', stats: [{ val: '5 seats', label: 'per Business plan' }, { val: 'API', label: 'full access' }], link: '/contact' },
   ]
   return (
     <section className="py-24" style={{ background: T.bgWhite }}>
@@ -896,7 +844,9 @@ function WhoIsItFor() {
                   </div>
                 ))}
               </div>
-              <button className="w-full py-3.5 rounded-xl font-black text-[14px] transition-all hover:scale-105 mt-auto cursor-pointer"
+              <button
+                onClick={() => router.push(p.link)}
+                className="w-full py-3.5 rounded-xl font-black text-[14px] transition-all hover:scale-105 mt-auto cursor-pointer"
                 style={{
                   background: p.highlight ? T.accent : T.primaryLight, color: p.highlight ? T.textDark : T.primary,
                   border: p.highlight ? 'none' : `1px solid ${T.border}`
@@ -972,8 +922,9 @@ function BackToTop() {
   }, [])
   return (
     <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      className={`fixed bottom-24 right-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-      style={{ background: T.accent, color: T.textDark }}>
+      className={`fixed bottom-24 right-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-lime-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+      style={{ background: T.accent, color: T.textDark }}
+      aria-label="Back to top">
       <ChevronRight size={18} className="-rotate-90" />
     </button>
   )
@@ -1069,8 +1020,9 @@ function FinalCTA() {
             Join thousands of eBay operators who replaced guesswork with intelligence. Your first scan is free — no card required.
           </p>
           <button onClick={() => router.push("/auth/signup")}
-            className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-black text-[18px] transition-all hover:scale-105 hover:bg-[#a3e635] shadow-lg cursor-pointer"
-            style={{ background: T.accent, color: T.textDark }}>
+            className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-black text-[18px] transition-all hover:scale-105 hover:bg-[#a3e635] shadow-lg cursor-pointer focus:outline-none focus:ring-4 focus:ring-lime-300"
+            style={{ background: T.accent, color: T.textDark }}
+            aria-label="Sign up for free account">
             <span>Get Started Free</span>
             <ArrowRight size={20} />
           </button>
@@ -1162,7 +1114,7 @@ function Footer() {
 
         <div className="pt-8 border-t flex items-center justify-between flex-wrap gap-4"
           style={{ borderColor: T.borderDark }}>
-          <p className="text-[12px] text-[#a89cc8]">© 2026 Riazify • All rights reserved.</p>
+          <p className="text-[12px] text-[#a89cc8]">© {new Date().getFullYear()} Riazify • All rights reserved.</p>
           <div className="flex items-center gap-4">
             {["Twitter", "LinkedIn", "YouTube", "Discord"].map(s => (
               <a key={s} href="#" className="text-[12px] font-semibold transition-colors hover:text-[#b8fa33] text-[#a89cc8]">

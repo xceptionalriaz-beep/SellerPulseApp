@@ -28,6 +28,7 @@ import {
     Globe, LayoutTemplate, Code2,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
+import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -90,15 +91,15 @@ const PLACEHOLDER_GROUPS = [
 ]
 
 // ── Category options ──────────────────────────────────────────────────────────
-const CATEGORIES = [
-    { id: 'general', label: 'General' },
-    { id: 'electronics', label: 'Electronics' },
-    { id: 'fashion', label: 'Fashion & Beauty' },
-    { id: 'home', label: 'Home & Garden' },
-    { id: 'auto', label: 'Auto Parts' },
-    { id: 'pet', label: 'Pet Supplies' },
-    { id: 'sports', label: 'Sports & Outdoors' },
-    { id: 'toys', label: 'Toys & Games' },
+const CATEGORIES: DropdownOption[] = [
+    { val: 'general',     label: 'General',           enabled: true },
+    { val: 'electronics', label: 'Electronics',       enabled: true },
+    { val: 'fashion',     label: 'Fashion & Beauty',  enabled: true },
+    { val: 'home',        label: 'Home & Garden',     enabled: true },
+    { val: 'auto',        label: 'Auto Parts',        enabled: true },
+    { val: 'pet',         label: 'Pet Supplies',      enabled: true },
+    { val: 'sports',      label: 'Sports & Outdoors', enabled: true },
+    { val: 'toys',        label: 'Toys & Games',      enabled: true },
 ]
 
 // ── Supabase raw client (listing_templates not yet typed) ─────────────────────
@@ -152,6 +153,7 @@ function VisualEditorInner() {
     const supabase = createClient()
     const router = useRouter()
     const searchParams = useSearchParams()
+    const isAdmin = searchParams.get('admin') === 'true'
 
     // templateId from query — if present, load existing template
     const templateId = searchParams.get('id')
@@ -171,6 +173,13 @@ function VisualEditorInner() {
     const [editingName, setEditingName] = useState(false)
     const nameInputRef = useRef<HTMLInputElement>(null)
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    // ── Dirty / baseline tracking ────────────────────────────────────────────
+    // dirty = true only after a real user edit (VisualEditor onChange,
+    // name typed, or category changed). Auto-save skips while dirty is false,
+    // so opening a blank page and leaving won't write a blank template.
+    const dirtyRef = useRef(false)
+    const baselineRef = useRef<{ html: string; name: string; category: string } | null>(null)
 
     // ── Load existing template ────────────────────────────────────────────────
     useEffect(() => {
@@ -197,9 +206,18 @@ function VisualEditorInner() {
             })()
     }, [templateId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    // ── Auto-save on html change (debounced 3s) ───────────────────────────────
+    // ── Capture baseline once loading finishes ───────────────────────────────
+    // Records the loaded state as the comparison point. dirty starts at false.
     useEffect(() => {
         if (loading) return
+        baselineRef.current = { html, name, category }
+        dirtyRef.current = false
+    }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── Auto-save on real edit (debounced 3s, only when dirty) ───────────────
+    useEffect(() => {
+        if (loading) return
+        if (!dirtyRef.current) return
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
         setAutoSaveLabel('idle')
         autoSaveTimer.current = setTimeout(() => {
@@ -219,7 +237,7 @@ function VisualEditorInner() {
 
             if (savedId) {
                 // Update existing
-                await rawDb
+                await (supabase as any)
                     .from('listing_templates')
                     .update({
                         name,
@@ -230,7 +248,7 @@ function VisualEditorInner() {
                     .eq('id', savedId)
             } else {
                 // Create new draft
-                const { data, error } = await rawDb
+                const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
                         user_id: user.id,
@@ -252,6 +270,11 @@ function VisualEditorInner() {
             }
             setAutoSaveLabel('saved')
             setTimeout(() => setAutoSaveLabel('idle'), 2000)
+            // Reset dirty after successful save — next edit will re-trigger.
+            dirtyRef.current = false
+            // Update baseline so subsequent name/category diffs compare against
+            // the just-saved values (not the originally-loaded ones).
+            baselineRef.current = { html, name, category }
         } catch (err) {
             console.error('[visual-editor] auto-save error:', err)
             setAutoSaveLabel('idle')
@@ -267,7 +290,7 @@ function VisualEditorInner() {
             if (!user) throw new Error('Not logged in')
 
             if (savedId) {
-                await rawDb
+                await (supabase as any)
                     .from('listing_templates')
                     .update({
                         name,
@@ -277,7 +300,7 @@ function VisualEditorInner() {
                     })
                     .eq('id', savedId)
             } else {
-                const { data, error } = await rawDb
+                const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
                         user_id: user.id,
@@ -313,31 +336,34 @@ function VisualEditorInner() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('Not logged in')
 
+            const publishPayload = {
+                name,
+                category,
+                description_html: html,
+                is_shared: true,
+                is_system: isAdmin,
+                thumbnail_url: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=200&h=150&fit=crop',
+            }
+
             if (savedId) {
-                await rawDb
+                await (supabase as any)
                     .from('listing_templates')
                     .update({
-                        name,
-                        category,
-                        description_html: html,
-                        is_shared: true,
+                        ...publishPayload,
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
                 setPublished(true)
+                router.refresh()
                 setTimeout(() => setPublished(false), 3000)
             } else {
                 // Save first, then publish
-                const { data, error } = await rawDb
+                const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
                         user_id: user.id,
-                        name,
-                        category,
-                        description_html: html,
+                        ...publishPayload,
                         description: 'Visual Builder template',
-                        is_system: false,
-                        is_shared: true,
                         use_count: 0,
                     })
                     .select('id')
@@ -346,6 +372,7 @@ function VisualEditorInner() {
                     setSavedId(data.id)
                     window.history.replaceState(null, '', `?id=${data.id}`)
                     setPublished(true)
+                    router.push('/dashboard/design?tab=templates')
                     setTimeout(() => setPublished(false), 3000)
                 }
             }
@@ -354,7 +381,7 @@ function VisualEditorInner() {
         } finally {
             setPublishing(false)
         }
-    }, [savedId, name, category, html, supabase])
+    }, [savedId, name, category, html, supabase, isAdmin])
 
     // ── Name edit ─────────────────────────────────────────────────────────────
     const startEditingName = () => {
@@ -490,7 +517,10 @@ function VisualEditorInner() {
                         <input
                             ref={nameInputRef}
                             value={name}
-                            onChange={e => setName(e.target.value)}
+                            onChange={e => {
+                                dirtyRef.current = true
+                                setName(e.target.value)
+                            }}
                             onBlur={commitName}
                             onKeyDown={e => {
                                 if (e.key === 'Enter' || e.key === 'Escape') commitName()
@@ -576,25 +606,16 @@ function VisualEditorInner() {
                     }}>
                         Category:
                     </span>
-                    <select
-                        value={category}
-                        onChange={e => setCategory(e.target.value)}
-                        style={{
-                            fontFamily: 'DM Sans, sans-serif',
-                            fontSize: 12,
-                            color: C.body,
-                            border: `1px solid ${C.borderInput}`,
-                            borderRadius: 7,
-                            padding: '4px 8px',
-                            backgroundColor: C.surface,
-                            cursor: 'pointer',
-                            outline: 'none',
+                    <ProDropdown
+                        prefix=""
+                        currentValue={category}
+                        options={CATEGORIES}
+                        onChanged={(v) => {
+                            dirtyRef.current = true
+                            setCategory(v)
                         }}
-                    >
-                        {CATEGORIES.map(c => (
-                            <option key={c.id} value={c.id}>{c.label}</option>
-                        ))}
-                    </select>
+                        width={200}
+                    />
                 </div>
 
                 {/* Right — Open in Code Editor + Save Draft + Publish */}
@@ -711,8 +732,24 @@ function VisualEditorInner() {
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                 <VisualEditor
                     value={html}
-                    onChange={setHtml}
+                    onChange={(next) => {
+                        // VisualEditor only emits onChange from real user
+                        // actions (add/move/edit/delete/undo/redo), so this
+                        // is a safe signal that the user actually edited.
+                        dirtyRef.current = true
+                        setHtml(next)
+                    }}
                     placeholders={PLACEHOLDER_GROUPS}
+                    // Seed the canvas with the saved template's DB category so
+                    // its previews use category-matched sample data
+                    // (e.g. electronics → headphones, fashion → sneakers).
+                    // Falls back to 'pet' if category is unknown.
+                    initialCategory={
+                        (['pet','electronics','fashion','home','sports','auto','general'] as const)
+                            .includes(category as any)
+                            ? (category as any)
+                            : 'pet'
+                    }
                 />
             </div>
 

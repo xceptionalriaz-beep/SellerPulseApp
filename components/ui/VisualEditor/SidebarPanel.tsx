@@ -22,6 +22,7 @@ import React from 'react'
 import { RailTabId } from './IconRail'
 import { Block, BlockType, CanvasSettings } from './blocks'
 import BlockLibrary from './BlockLibrary'
+import ContentLibrary from './ContentLibrary'
 import TemplatesTab from './TemplatesTab'
 import BodySettings from './BodySettings'
 import ImagesTab from './ImagesTab'
@@ -64,15 +65,20 @@ interface SidebarPanelProps {
     draggedType: BlockType | null
 
     // TemplatesTab props
-    onInsertTemplate: (blocks: Block[]) => void
+    /**
+     * Second arg is the inserted template's id (e.g. 'full-electronics') so
+     * the parent can switch the canvas into category-matched sample data mode.
+     */
+    onInsertTemplate: (blocks: Block[], templateId?: string) => void
 
     // BodySettings props
     canvasSettings: CanvasSettings
     onUpdateSettings: (settings: CanvasSettings) => void
 
     // ImagesTab props
-    onInsertImage: (url: string, alt: string) => void
+    onInsertImage: (url: string, alt: string, propKey?: string, propIndex?: number) => void
     selectedId: string | null
+    selectedSubSlot?: string | null
     blocks: Block[]
 
     // AuditTab props
@@ -104,6 +110,7 @@ export default function SidebarPanel({
     onUpdateSettings,
     onInsertImage,
     selectedId,
+    selectedSubSlot,
     blocks,
     html,
     blockCount,
@@ -151,6 +158,15 @@ export default function SidebarPanel({
                         />
                     )}
 
+                    {activeTab === 'content' && (
+                        <ContentLibrary
+                            onAddBlock={onAddBlock}
+                            onDragStart={onDragStart}
+                            onDragEnd={onDragEnd}
+                            draggedType={draggedType}
+                        />
+                    )}
+
                     {activeTab === 'templates' && (
                         <TemplatesTab
                             onInsert={onInsertTemplate}
@@ -168,6 +184,7 @@ export default function SidebarPanel({
                         <ImagesTab
                             onInsert={onInsertImage}
                             selectedId={selectedId}
+                            selectedSubSlot={selectedSubSlot}
                             blocks={blocks}
                         />
                     )}
@@ -227,7 +244,8 @@ export default function SidebarPanel({
 // Thin dark header showing the active tab name — matches icon rail design
 // ─────────────────────────────────────────────────────────────────────────────
 const TAB_LABELS: Record<RailTabId, string> = {
-    blocks: 'Content & Blocks',
+    blocks: 'Blocks',
+    content: 'Contents',
     templates: 'Section Templates',
     body: 'Canvas Settings',
     images: 'Images',

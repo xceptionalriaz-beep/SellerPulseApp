@@ -1,15 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-    Search,
-    Radio,
     Package,
     Palette,
     Boxes,
     Sparkles,
     Calculator,
-    Receipt,
-    Code2,
+    Wand2,
     Zap,
     ArrowRight,
     type LucideIcon,
@@ -31,74 +28,46 @@ export interface ToolsMegaMenuProps {
 
 const CORE_APPS: ToolItem[] = [
     {
-        id: 'tool-product-research',
-        name: 'Product Research',
-        description: 'Discover high-margin winning products to sell.',
-        href: '#product-research',
-        icon: Search,
+        id: 'tool-title-builder',
+        name: 'Title Builder',
+        description: 'AI-driven title optimization tool.',
+        href: '/tools/title-builder',
+        icon: Sparkles,
+        badge: 'AI',
     },
     {
-        id: 'tool-competitor-xray',
-        name: 'Competitor X-Ray',
-        description: 'Analyze top sellers and reveal hidden strategies.',
-        href: '#competitor-xray',
-        icon: Radio,
+        id: 'tool-listing-generator',
+        name: 'Listing Generator',
+        description: 'Create beautiful, SEO-optimized eBay listings in seconds.',
+        href: '/tools/listing-generator',
+        icon: Wand2,
+        badge: 'NEW',
     },
     {
         id: 'tool-orders-manager',
         name: 'Orders Manager',
         description: 'Centralize tracking and streamline fulfillment.',
-        href: '#orders-manager',
+        href: '/tools/orders',
         icon: Package,
     },
     {
         id: 'tool-inventory-manager',
         name: 'Inventory Manager',
         description: 'Smart stock alerts and automated syncing.',
-        href: '#inventory-manager',
+        href: '/tools/inventory',
         icon: Boxes,
-    },
-    {
-        id: 'tool-inventory-manager',
-        name: 'Listing Studio',
-        description: 'Smart stock alerts and automated syncing.',
-        href: '#inventory-manager',
-        icon: Boxes,
-    },
-];
-
-const FREE_TOOLS: ToolItem[] = [
-    {
-        id: 'tool-title-builder-free',
-        name: 'Title Builder',
-        description: 'AI-driven title optimization tool.',
-        href: '/tools/title-builder',
-        icon: Sparkles,
-        badge: 'FREE',
     },
     {
         id: 'tool-profit-calculator',
         name: 'Profit Calculator',
         description: 'Calculate true margins with complex fee logic.',
-        href: '/tools/profitcalculator',
+        href: '/tools/profit-calculator',
         icon: Calculator,
-        badge: 'FREE'
+        badge: 'PRO',
     },
-    {
-        id: 'tool-ebay-fee-calculator',
-        name: 'eBay Fee Calculator',
-        description: 'Instant breakdown of marketplace fees.',
-        href: '#ebay-fee-calculator',
-        icon: Receipt,
-        badge: 'FREE'
-    },
-    {
-        id: 'tool-html-listing-generator',
-        name: 'HTML Listing Generator',
-        description: 'Create beautiful responsive descriptions.',
-        href: '#html-listing-generator',
-        icon: Code2,
-    },
+];
+
+const FREE_TOOLS: ToolItem[] = [
     {
         id: 'tool-templates-studio',
         name: 'Templates Studio',

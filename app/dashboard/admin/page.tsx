@@ -10,7 +10,7 @@ import {
   EyeOff, Users, DollarSign, TrendingUp, TrendingDown,
   Wrench, Trophy, Zap, UserPlus, Key, FileText,
   Power, MoreVertical, Menu, X, ChevronDown, Globe, Mail, CreditCard,
-  MessageCircle, ExternalLink, Briefcase,
+  MessageCircle, ExternalLink, Briefcase, Palette,
 } from 'lucide-react'
 import PersistentSidebar from '@/components/admin/PersistentSidebar'
 import AnalyticsHub from '@/components/admin/AnalyticsHub'
@@ -41,16 +41,27 @@ import FeatureRoadmapTab from '@/components/admin/tabs/FeatureRoadmapTab'
 import InfrastructureMonitorTab from '@/components/admin/tabs/InfrastructureMonitorTab'
 import CompetitorXRayTab from '@/components/admin/tabs/CompetitorXRayTab'
 import ChromeExtensionTab from '@/components/admin/tabs/ChromeExtensionTab'
+import TemplatesTab from '@/components/admin/tabs/TemplatesTab'
 
-// -- Design tokens ----------------------------------------------
+// ── Riazify Color Role Tokens (v2.0) ──────────────────────────
 const C = {
-  dark: '#1a2410',
-  lime: '#8FFF00',
-  border: '#E2E8F0',
-  bg: '#F8FAFC',
-  text: '#0F172A',
-  muted: '#64748B',
-  hint: '#94A3B8',
+  dark: '#1e1535', // Deep Purple Dark
+  darkHover: '#2d1f4e', // Deep Purple Hover / Elevated
+  darkCard: '#271c42', // Dark Surface Container
+  primary: '#7530fb', // Electric Violet (Primary Action)
+  primaryHover: '#6020e0', // Electric Violet Hover
+  primaryLight: '#f3eeff', // Soft Purple Tint Background
+  lime: '#b8fa33', // Soft Lime (Accent / High Visibility)
+  limeHover: '#a3e635', // Soft Lime Hover
+  border: '#ede9fe', // Soft Purple Line Border
+  borderDark: '#2d1f4e', // Dark Shell Border
+  borderInput: '#e5e0f5', // Input Field Border
+  bg: '#f8f7ff', // Purple White Canvas
+  surface: '#ffffff', // Pure White Card Surface
+  text: '#1f1d2e', // High-Contrast Primary Text
+  textDark: '#1e1535', // Deep Heading Text
+  muted: '#6b7280', // Secondary Body Text
+  hint: '#a89cc8', // Subtle Muted / Placeholder Text
 }
 
 // -- Settings menu ----------------------------------------------
@@ -75,16 +86,17 @@ const SETTINGS_MENU = [
   { title: 'Careers', icon: Briefcase },
   { title: 'Page Editor', icon: FileText },
   { title: 'Affiliate Center', icon: Users },
+  { title: 'Templates', icon: Palette },
 ]
 
 // -- Tool definitions (static metadata only — no dummy stats) --
 const TOOL_DEFS = [
-  { name: 'Orders', dbKey: 'ebay_orders', desc: 'Protect orders from risky buyers & disputes', icon: Shield, isLive: true, accent: '#8FFF00', eta: '' },
-  { name: 'Profit Calculator', dbKey: 'profit_calculator', desc: 'Calculate real eBay profit after all fees', icon: BarChart2, isLive: true, accent: '#FBBF24', eta: '' },
-  { name: 'Title Builder', dbKey: 'title_builder', desc: 'AI-powered eBay listing title optimizer', icon: FileText, isLive: true, accent: '#60A5FA', eta: '' },
-  { name: 'Product Research', dbKey: 'product_research', desc: 'Find winning products with demand data', icon: Search, isLive: false, accent: '#A78BFA', eta: 'Q3 2025' },
-  { name: 'Competitor Research', dbKey: 'competitor_research', desc: 'Spy on top sellers in any niche', icon: EyeOff, isLive: false, accent: '#FB923C', eta: 'Q3 2025' },
-  { name: 'Dropship Analyzer', dbKey: 'dropship_analyzer', desc: 'Analyze dropship margins & supplier risk', icon: Wrench, isLive: false, accent: '#2DD4BF', eta: 'Q4 2025' },
+  { name: 'Orders', dbKey: 'ebay_orders', desc: 'Protect orders from risky buyers & disputes', icon: Shield, isLive: true, accent: '#b8fa33', eta: '' },
+  { name: 'Profit Calculator', dbKey: 'profit_calculator', desc: 'Calculate real eBay profit after all fees', icon: BarChart2, isLive: true, accent: '#7530fb', eta: '' },
+  { name: 'Title Builder', dbKey: 'title_builder', desc: 'AI-powered eBay listing title optimizer', icon: FileText, isLive: true, accent: '#3b82f6', eta: '' },
+  { name: 'Product Research', dbKey: 'product_research', desc: 'Find winning products with demand data', icon: Search, isLive: false, accent: '#9333ea', eta: 'Q3 2025' },
+  { name: 'Competitor Research', dbKey: 'competitor_research', desc: 'Spy on top sellers in any niche', icon: EyeOff, isLive: false, accent: '#f59e0b', eta: 'Q3 2025' },
+  { name: 'Dropship Analyzer', dbKey: 'dropship_analyzer', desc: 'Analyze dropship margins & supplier risk', icon: Wrench, isLive: false, accent: '#06b6d4', eta: 'Q4 2025' },
 ]
 
 // -- Admin stats shape ------------------------------------------
@@ -121,9 +133,9 @@ function AnalyticsHubButton({ isActive, onTap }: { isActive: boolean; onTap: () 
     <button onClick={onTap}
       className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-[13px] font-bold transition-all"
       style={{
-        backgroundColor: isActive ? '#8fff00' : C.bg,
-        borderColor: isActive ? '#8fff00' : C.border,
-        color: isActive ? C.lime : C.text,
+        backgroundColor: isActive ? C.lime : C.bg,
+        borderColor: isActive ? C.lime : C.border,
+        color: isActive ? C.dark : C.text,
       }}>
       <BarChart2 size={15} />
       Analytics Hub
@@ -143,20 +155,20 @@ function StatCard({ d, isMobile }: { d: StatCardData; isMobile: boolean }) {
   return (
     <div className="flex flex-col gap-3 p-4 rounded-2xl border transition-all"
       style={{
-        backgroundColor: d.isHighlight ? '#1a2410' : d.isToolCard ? '#1a2410' : '#fff',
-        borderColor: d.isHighlight ? 'transparent' : d.isToolCard ? 'rgba(143,255,0,0.4)' : C.border,
+        backgroundColor: d.isHighlight ? C.dark : d.isToolCard ? C.dark : '#fff',
+        borderColor: d.isHighlight ? 'transparent' : d.isToolCard ? 'rgba(184,250,51,0.4)' : C.border,
         borderWidth: d.isToolCard ? 1.5 : 1,
         boxShadow: d.isHighlight
-          ? '0 5px 14px rgba(15,23,42,0.25)'
-          : d.isToolCard ? '0 4px 12px rgba(143,255,0,0.12)' : '0 3px 8px rgba(0,0,0,0.03)',
+          ? '0 5px 14px rgba(30,21,53,0.25)'
+          : d.isToolCard ? '0 4px 12px rgba(184,250,51,0.12)' : '0 3px 8px rgba(0,0,0,0.03)',
       }}>
       <div className="flex items-center justify-between">
         <span className="text-[12px] font-bold truncate"
-          style={{ color: d.isHighlight || d.isToolCard ? 'rgba(143,255,0,0.7)' : C.muted }}>
+          style={{ color: d.isHighlight || d.isToolCard ? 'rgba(184,250,51,0.85)' : C.muted }}>
           {isMobile ? d.titleMobile : d.title}
         </span>
         <div className="p-1.5 rounded-lg shrink-0"
-          style={{ backgroundColor: d.isHighlight || d.isToolCard ? 'rgba(143,255,0,0.15)' : '#F1F5F9' }}>
+          style={{ backgroundColor: d.isHighlight || d.isToolCard ? 'rgba(184,250,51,0.15)' : C.bg }}>
           <Icon size={14} style={{ color: d.isHighlight || d.isToolCard ? C.lime : C.hint }} />
         </div>
       </div>
@@ -167,7 +179,7 @@ function StatCard({ d, isMobile }: { d: StatCardData; isMobile: boolean }) {
       <div className="flex items-center gap-1.5">
         {d.isTopTool && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: C.lime }} />}
         <span className="text-[11px] font-bold truncate"
-          style={{ color: d.isHighlight ? C.lime : d.isToolCard ? 'rgba(143,255,0,0.8)' : d.isGood ? '#16A34A' : C.muted }}>
+          style={{ color: d.isHighlight ? C.lime : d.isToolCard ? 'rgba(184,250,51,0.9)' : d.isGood ? '#16A34A' : C.muted }}>
           {d.sub}
         </span>
       </div>
@@ -178,11 +190,11 @@ function StatCard({ d, isMobile }: { d: StatCardData; isMobile: boolean }) {
 // -- Tool Card --------------------------------------------------
 function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; users: number } }) {
   const Icon = tool.icon
-  const isLime = tool.accent === '#8FFF00'
+  const isLime = tool.accent === '#b8fa33'
   return (
     <div className="flex flex-col p-3.5 rounded-2xl border"
       style={{
-        backgroundColor: tool.isLive ? '#fff' : '#F8FAFC',
+        backgroundColor: tool.isLive ? '#fff' : C.bg,
         borderColor: tool.isLive ? tool.accent + '59' : C.border,
         borderWidth: tool.isLive ? 1.5 : 1,
         boxShadow: tool.isLive ? `0 4px 12px ${tool.accent}1A` : 'none',
@@ -193,20 +205,21 @@ function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; us
           style={{ backgroundColor: tool.accent + (tool.isLive ? '1F' : '14') }}>
           <Icon size={18} style={{ color: tool.accent }} />
           {!tool.isLive && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center">
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border bg-white flex items-center justify-center"
+              style={{ borderColor: C.border }}>
               <span style={{ fontSize: 7, color: C.hint }}>??</span>
             </div>
           )}
         </div>
         <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full border"
           style={{
-            backgroundColor: tool.isLive ? tool.accent + '1F' : '#F1F5F9',
+            backgroundColor: tool.isLive ? tool.accent + '1F' : C.bg,
             borderColor: tool.isLive ? tool.accent + '66' : C.border,
           }}>
           <div className="w-1.5 h-1.5 rounded-full"
             style={{ backgroundColor: tool.isLive ? tool.accent : C.hint }} />
           <span className="text-[9px] font-extrabold tracking-[0.4px]"
-            style={{ color: tool.isLive ? (isLime ? '#4A8F00' : tool.accent) : C.hint }}>
+            style={{ color: tool.isLive ? (isLime ? '#4d7c0f' : tool.accent) : C.hint }}>
             {tool.isLive ? 'LIVE' : 'SOON'}
           </span>
         </div>
@@ -217,7 +230,7 @@ function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; us
       {tool.isLive ? (
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <p className="text-[15px] font-extrabold" style={{ color: isLime ? '#4A8F00' : tool.accent }}>
+            <p className="text-[15px] font-extrabold" style={{ color: isLime ? '#4d7c0f' : tool.accent }}>
               {tool.sessions.toLocaleString()}
             </p>
             <p className="text-[9px] font-semibold" style={{ color: C.hint }}>sessions</p>
@@ -234,7 +247,7 @@ function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; us
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-bold" style={{ color: C.hint }}>Est. {tool.eta}</span>
           <div className="ml-auto px-1.5 py-0.5 rounded-md text-[9px] font-bold"
-            style={{ backgroundColor: '#F1F5F9', color: tool.accent + 'CC' }}>
+            style={{ backgroundColor: C.bg, color: tool.accent + 'CC' }}>
             Coming Soon
           </div>
         </div>
@@ -247,10 +260,10 @@ function ToolCard({ tool }: { tool: typeof TOOL_DEFS[0] & { sessions: number; us
 function CommandPalette({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24"
-      style={{ backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}
+      style={{ backgroundColor: 'rgba(30,21,53,0.45)', backdropFilter: 'blur(10px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="w-full max-w-[650px] rounded-2xl border overflow-hidden"
-        style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}>
+        style={{ backgroundColor: '#fff', borderColor: C.border, boxShadow: '0 20px 40px rgba(30,21,53,0.15)' }}>
         <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: C.border }}>
           <Search size={22} style={{ color: C.muted }} />
           <input autoFocus placeholder="Search users, settings, or execute commands..."
@@ -305,7 +318,7 @@ function CustomDropdown({ value, options, onChange }: {
         className="w-full flex items-center justify-between h-10 px-3 rounded-xl border text-[13px] font-semibold transition-all"
         style={{
           backgroundColor: '#fff',
-          borderColor: open ? C.lime : C.border,
+          borderColor: open ? C.primary : C.border,
           color: C.text,
         }}>
         <span>{selected?.label ?? 'Select...'}</span>
@@ -325,7 +338,7 @@ function CustomDropdown({ value, options, onChange }: {
             style={{
               backgroundColor: '#fff',
               borderColor: C.border,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+              boxShadow: '0 8px 24px rgba(30,21,53,0.10)',
               animation: 'slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1)',
             }}>
             {options.map((o, i) => {
@@ -439,7 +452,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.25s ease-out' }}
+      style={{ backgroundColor: 'rgba(30,21,53,0.5)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.25s ease-out' }}
       onClick={e => e.target === e.currentTarget && !isSubmitting && onClose()}>
       <style>{`
         @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
@@ -474,7 +487,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
         {success ? (
           <div className="flex flex-col items-center justify-center py-10 px-6">
             <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
+              style={{ backgroundColor: 'rgba(184,250,51,0.15)' }}>
               <span className="text-3xl">??</span>
             </div>
             <p className="text-[18px] font-bold mb-1" style={{ color: C.text }}>User Created!</p>
@@ -490,7 +503,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
               </span>
               <button onClick={copyPassword}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
-                style={{ backgroundColor: copied ? 'rgba(143,255,0,0.1)' : C.border, color: copied ? '#4A8F00' : C.muted }}>
+                style={{ backgroundColor: copied ? 'rgba(184,250,51,0.2)' : C.border, color: copied ? '#4d7c0f' : C.muted }}>
                 {copied ? '? Copied!' : '?? Copy'}
               </button>
             </div>
@@ -515,7 +528,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
               <input value={name} onChange={e => setName(e.target.value)}
                 placeholder="Enter full name"
                 className="w-full h-10 px-3 rounded-lg border text-[13px] outline-none"
-                style={{ borderColor: name.trim().length >= 2 ? C.lime : C.border, color: C.text, backgroundColor: C.bg }} />
+                style={{ borderColor: name.trim().length >= 2 ? C.primary : C.border, color: C.text, backgroundColor: C.bg }} />
             </div>
 
             {/* Email */}
@@ -524,7 +537,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
               <input value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="email@example.com" type="email"
                 className="w-full h-10 px-3 rounded-lg border text-[13px] outline-none"
-                style={{ borderColor: email && !isValidEmail(email) ? '#F87171' : email && isValidEmail(email) ? C.lime : C.border, color: C.text, backgroundColor: C.bg }} />
+                style={{ borderColor: email && !isValidEmail(email) ? '#F87171' : email && isValidEmail(email) ? C.primary : C.border, color: C.text, backgroundColor: C.bg }} />
               {email && !isValidEmail(email) && (
                 <p className="text-[11px] mt-1" style={{ color: '#F87171' }}>Enter a valid email address</p>
               )}
@@ -590,7 +603,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
                   style={{ color: C.hint }}>??</button>
                 <button onClick={copyPassword}
                   className="text-[11px] px-2 py-1 rounded hover:bg-gray-100"
-                  style={{ color: copied ? '#4A8F00' : C.hint }}>
+                  style={{ color: copied ? '#4d7c0f' : C.hint }}>
                   {copied ? '?' : '??'}
                 </button>
               </div>
@@ -598,7 +611,7 @@ function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated?
 
             {/* Send Welcome Email toggle */}
             <div className="flex items-center justify-between px-4 py-3 rounded-xl border"
-              style={{ backgroundColor: '#F8FAFC', borderColor: C.border }}>
+              style={{ backgroundColor: C.bg, borderColor: C.border }}>
               <div>
                 <p className="text-[13px] font-bold" style={{ color: C.text }}>Send Welcome Email</p>
                 <p className="text-[11px]" style={{ color: C.muted }}>Includes temporary password</p>
@@ -684,7 +697,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease-out' }}
+      style={{ backgroundColor: 'rgba(30,21,53,0.5)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease-out' }}
       onClick={e => e.target === e.currentTarget && !resetting && onClose()}>
       <style>{`
         @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
@@ -715,7 +728,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
           /* Success state */
           <div className="flex flex-col items-center py-8 px-5">
             <div className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
-              style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
+              style={{ backgroundColor: 'rgba(184,250,51,0.15)' }}>
               <span className="text-2xl">?</span>
             </div>
             <p className="text-[16px] font-bold mb-1" style={{ color: C.text }}>Reset Complete!</p>
@@ -738,7 +751,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
                 onClick={() => item.set(s => !s)}
                 className="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all"
                 style={{
-                  backgroundColor: item.val ? 'rgba(143,255,0,0.05)' : C.bg,
+                  backgroundColor: item.val ? 'rgba(184,250,51,0.08)' : C.bg,
                   borderColor: item.val ? C.lime : C.border,
                 }}>
                 <div className="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all"
@@ -748,7 +761,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
                   }}>
                   {item.val && (
                     <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="#000" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M1 4L3.5 6.5L9 1" stroke="#1e1535" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                   )}
                 </div>
@@ -800,7 +813,7 @@ function ResetApiDialog({ onClose }: { onClose: () => void }) {
 function KillSwitchDialog({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+      style={{ backgroundColor: 'rgba(30,21,53,0.4)' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="rounded-2xl border p-6 w-full max-w-sm" style={{ backgroundColor: '#FEF2F2', borderColor: '#FFCDD2' }}>
         <div className="flex items-center gap-2.5 mb-3">
@@ -1111,6 +1124,14 @@ function AdminPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // -- Force highlighting for TemplatesTab when it is the default view --
+  useEffect(() => {
+    if (!isSettingsMode && !isAnalyticsMode) {
+      setActiveSettingsTab(26)
+    }
+  }, [isSettingsMode, isAnalyticsMode])
+
+
   // -- Computed stat cards from real data ---------------------
   const statCards: StatCardData[] = [
     {
@@ -1172,7 +1193,8 @@ function AdminPage() {
       8: 'gamification', 9: 'api_vault', 10: 'affiliate_vault', 11: 'founder_ops',
       12: 'marketing', 13: 'payments', 14: 'tickets', 15: 'blog',
       16: 'changelog', 17: 'careers', 18: 'page_editor',
-      19: 'api_fleet', 20: 'feature_roadmap', 21: 'vero_center', 22: 'infra_monitor', 23: 'competitor_xray', 24: 'chrome_extension'
+      19: 'api_fleet', 20: 'feature_roadmap', 21: 'vero_center', 22: 'infra_monitor', 23: 'competitor_xray', 24: 'chrome_extension',
+      25: 'affiliate_center', 26: 'templates',
     }
     const key = tabKeyMap[activeSettingsTab]
     if (key && tabPermissions[key]?.access === 'none') {
@@ -1261,6 +1283,8 @@ function AdminPage() {
       case 23: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.competitor_xray?.access === 'view'} tabLabel="Competitor X-Ray"><CompetitorXRayTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
       case 24: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.chrome_extension?.access === 'view'} tabLabel="Chrome Extension"><ChromeExtensionTab isInvestorMode={investorMode} isMobile={isMobile} startChartAnimation={true} /></PermissionWrapper>
       case 25: return <PermissionWrapper viewOnly={!isSuperAdmin && tabPermissions?.affiliate_center?.access === 'view'} tabLabel="Affiliate Center"><AffiliateCenterTab isInvestorMode={investorMode} isMobile={isMobile} /></PermissionWrapper>
+      case 26: return <TemplatesTab />
+
       default: return null
     }
   }
@@ -1284,9 +1308,9 @@ function AdminPage() {
         ) : <div className="w-10" />}
         <div className="flex-1 flex flex-col items-center gap-2">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
-            style={{ backgroundColor: 'rgba(143,255,0,0.10)', borderColor: 'rgba(143,255,0,0.35)' }}>
+            style={{ backgroundColor: 'rgba(184,250,51,0.15)', borderColor: 'rgba(184,250,51,0.4)' }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: C.lime }} />
-            <span className="text-[10px] font-bold" style={{ color: '#4A8F00' }}>All systems operational</span>
+            <span className="text-[10px] font-bold" style={{ color: '#4d7c0f' }}>All systems operational</span>
           </div>
         </div>
         <button className="w-10 h-10 flex items-center justify-center rounded-lg border"
@@ -1305,7 +1329,7 @@ function AdminPage() {
 
         {/* Real quick stats bar */}
         <div className="flex items-center gap-0 px-3 py-1.5 rounded-full border ml-auto"
-          style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.2)' }}>
+          style={{ backgroundColor: C.dark, borderColor: 'rgba(184,250,51,0.25)' }}>
           {[
             { val: stats.loading ? '—' : String(stats.onlineNow), label: 'online', color: C.lime },
             { val: stats.loading ? '—' : String(stats.signupsToday), label: 'signups', color: '#60A5FA' },
@@ -1323,7 +1347,7 @@ function AdminPage() {
         {/* View User Dashboard */}
         <button onClick={() => window.open('/dashboard?usermode=1', '_blank')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all hover:opacity-80"
-          style={{ backgroundColor: C.dark, borderColor: 'rgba(143,255,0,0.3)', color: C.lime }}>
+          style={{ backgroundColor: C.dark, borderColor: 'rgba(184,250,51,0.3)', color: C.lime }}>
           <ExternalLink size={12} style={{ color: C.lime }} />
           <span className="text-[11px] font-bold">User View</span>
         </button>
@@ -1340,15 +1364,15 @@ function AdminPage() {
         <button onClick={() => setInvestorMode(m => !m)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all"
           style={{
-            backgroundColor: investorMode ? 'rgba(168,85,247,0.08)' : 'transparent',
-            borderColor: investorMode ? 'rgba(192,132,252,0.4)' : C.border,
+            backgroundColor: investorMode ? 'rgba(117,48,251,0.12)' : 'transparent',
+            borderColor: investorMode ? 'rgba(117,48,251,0.4)' : C.border,
           }}>
-          <EyeOff size={14} style={{ color: investorMode ? '#C084FC' : C.hint }} />
-          <span className="text-[12px] font-bold" style={{ color: investorMode ? '#C084FC' : C.muted }}>
+          <EyeOff size={14} style={{ color: investorMode ? C.primary : C.hint }} />
+          <span className="text-[12px] font-bold" style={{ color: investorMode ? C.primary : C.muted }}>
             Investor Mode
           </span>
           <div className="relative w-8 h-4 rounded-full transition-colors"
-            style={{ backgroundColor: investorMode ? 'rgba(168,85,247,0.3)' : '#CBD5E1' }}>
+            style={{ backgroundColor: investorMode ? 'rgba(117,48,251,0.3)' : '#CBD5E1' }}>
             <span className="absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all"
               style={{ left: investorMode ? '18px' : '2px' }} />
           </div>
@@ -1369,11 +1393,11 @@ function AdminPage() {
       <button onClick={() => setActiveSettingsTab(index)}
         className="w-full flex items-center gap-3 mx-3 px-4 py-3 rounded-xl border transition-all text-left"
         style={{
-          backgroundColor: isActive ? 'rgba(143,255,0,0.10)' : 'transparent',
-          borderColor: isActive ? 'rgba(143,255,0,0.3)' : 'transparent',
+          backgroundColor: isActive ? 'rgba(184,250,51,0.15)' : 'transparent',
+          borderColor: isActive ? 'rgba(184,250,51,0.4)' : 'transparent',
           width: 'calc(100% - 24px)',
         }}>
-        <Icon size={17} style={{ color: isActive ? '#4A8F00' : C.muted }} />
+        <Icon size={17} style={{ color: isActive ? '#4d7c0f' : C.muted }} />
         <span className="text-[13px] flex-1"
           style={{ color: isActive ? C.text : C.muted, fontWeight: isActive ? 700 : 600 }}>
           {item.title}
@@ -1403,8 +1427,8 @@ function AdminPage() {
         <div className="flex gap-2 overflow-x-auto">
           {[
             { icon: UserPlus, label: 'Add User', bg: C.lime, color: C.dark, border: null, action: () => setShowAddUser(true) },
-            { icon: Key, label: 'Reset API', bg: '#F1F5F9', color: C.text, border: null, action: () => setShowResetApi(true) },
-            { icon: FileText, label: 'Export Report', bg: '#F1F5F9', color: C.text, border: null, action: () => { } },
+            { icon: Key, label: 'Reset API', bg: C.bg, color: C.text, border: null, action: () => setShowResetApi(true) },
+            { icon: FileText, label: 'Export Report', bg: C.bg, color: C.text, border: null, action: () => { } },
             { icon: Power, label: 'Kill Switch', bg: '#FEF2F2', color: '#F87171', border: '#FFCDD2', action: () => { setIsSettingsMode(true); setIsAnalyticsMode(false); setActiveSettingsTab(4) } },
           ].map((a, i) => {
             const Icon = a.icon
@@ -1500,8 +1524,8 @@ function AdminPage() {
                       const isFailed = tx.status === 'failed'
                       const statusColor = isPaid ? '#16A34A' : isFailed ? '#EF4444' : '#F59E0B'
                       const statusDot = isPaid ? '#16A34A' : isFailed ? '#EF4444' : '#F59E0B'
-                      const planColor = tx.plan === 'growth' ? { bg: 'rgba(143,255,0,0.1)', color: '#4a8f00' }
-                        : tx.plan === 'starter' ? { bg: 'rgba(99,102,241,0.1)', color: '#6366f1' }
+                      const planColor = tx.plan === 'growth' ? { bg: 'rgba(184,250,51,0.15)', color: '#4d7c0f' }
+                        : tx.plan === 'starter' ? { bg: 'rgba(117,48,251,0.12)', color: C.primary }
                           : tx.plan === 'custom' ? { bg: 'rgba(217,119,6,0.1)', color: '#d97706' }
                             : { bg: C.bg, color: C.muted }
                       return (
@@ -1585,7 +1609,7 @@ function AdminPage() {
                   const pct = stats.totalUsers > 0
                     ? Math.round((c.count / stats.totalUsers) * 100)
                     : 0
-                  const barColor = i === 0 ? C.lime : i === 1 ? '#60A5FA' : i === 2 ? '#FB923C' : i === 3 ? '#A78BFA' : C.border
+                  const barColor = i === 0 ? C.lime : i === 1 ? '#60A5FA' : i === 2 ? '#FB923C' : i === 3 ? C.primary : C.border
                   return (
                     <div key={i}>
                       <div className="flex items-center justify-between mb-1">
@@ -1646,7 +1670,7 @@ function AdminPage() {
               return (
                 <button key={i} onClick={() => { setActiveSettingsTab(i); setMobileDrawerOpen(false) }}
                   className="w-full flex items-center gap-3 px-5 py-3 transition-colors"
-                  style={{ backgroundColor: isActive ? '#F1F5F9' : 'transparent' }}>
+                  style={{ backgroundColor: isActive ? C.bg : 'transparent' }}>
                   <Icon size={18} style={{ color: isActive ? C.text : C.muted }} />
                   <span className="text-[14px]"
                     style={{ color: isActive ? C.text : C.muted, fontWeight: isActive ? 700 : 600 }}>
@@ -1657,17 +1681,17 @@ function AdminPage() {
             })}
           </div>
         </div>
-        <div className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} />
+        <div className="flex-1" style={{ backgroundColor: 'rgba(30,21,53,0.45)' }} />
       </div>
     )
   }
 
   return (
-    <div ref={containerRef} className="min-h-full" style={{ backgroundColor: '#F7F9F5' }}>
+    <div ref={containerRef} className="min-h-full" style={{ backgroundColor: C.bg }}>
       <style>{`
         ${!isSettingsMode && !isAnalyticsMode ? `
           ::-webkit-scrollbar { width: 6px; }
-          ::-webkit-scrollbar-thumb { background: #8FFF00; border-radius: 10px; }
+          ::-webkit-scrollbar-thumb { background: #b8fa33; border-radius: 10px; }
         ` : `
           ::-webkit-scrollbar-thumb { background: transparent; }
         `}

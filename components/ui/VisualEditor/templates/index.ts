@@ -8,6 +8,7 @@ export { autoTemplate } from './auto'
 export { minimalTemplate } from './minimal'
 export { homeGardenTemplate } from './home_garden'
 export { sportsTemplate } from './sports'
+export { petTemplate } from './pet'
 
 // Re-export as ordered array for TemplatesTab
 import { electronicsTemplate } from './electronics'
@@ -16,9 +17,11 @@ import { autoTemplate } from './auto'
 import { minimalTemplate } from './minimal'
 import { homeGardenTemplate } from './home_garden'
 import { sportsTemplate } from './sports'
+import { petTemplate } from './pet'
 import { TemplateSection } from './types'
 
 export const FULL_TEMPLATES: TemplateSection[] = [
+    petTemplate,
     electronicsTemplate,
     fashionTemplate,
     homeGardenTemplate,

@@ -7,14 +7,15 @@ import ProDropdown from '@/components/ui/ProDropdown'
 
 // ── Brand palette (must match page.tsx) ───────────────────────
 const C = {
-    lime: '#8fff00',
-    limeDeep: '#4a7c00',
-    dark: '#1a2410',
-    border: '#e8ede2',
-    muted: '#8a9e78',
+    lime: '#7530fb',          // primary (Electric Violet)
+    limeDeep: '#6020e0',      // primary hover
+    accent: '#b8fa33',        // accent (Soft Lime)
+    dark: '#1f1d2e',
+    border: '#ede9fe',
+    muted: '#a89cc8',
     surface: '#ffffff',
-    bg: '#f7f9f5',
-    text: '#1a2410',
+    bg: '#f8f7ff',
+    text: '#1f1d2e',
     red: '#b91c1c',
     amber: '#d97706',
     green: '#16a34a',
@@ -46,7 +47,7 @@ function VATThresholdWarning({ country, state, patch }: { country: string; state
     const status = pct >= 100 ? 'exceeded' : pct >= 85 ? 'approaching' : 'safe'
     const headroom = Math.max(data.amount - annualRev, 0)
     const overage = Math.max(annualRev - data.amount, 0)
-    const barColor = status === 'exceeded' ? C.red : status === 'approaching' ? C.amber : C.green
+    const barColor = status === 'exceeded' ? C.red : status === 'approaching' ? C.amber : C.accent
     const bgColor = status === 'exceeded' ? '#fef2f2' : status === 'approaching' ? '#fffbeb' : C.bg
     const bdrColor = status === 'exceeded' ? C.red : status === 'approaching' ? C.amber : C.border
 
@@ -81,7 +82,7 @@ function VATThresholdWarning({ country, state, patch }: { country: string; state
                     <div style={{ height: 6, borderRadius: 999, background: C.border, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: Math.min(pct, 100) + '%', background: barColor, borderRadius: 999, transition: 'width 0.3s' }} />
                     </div>
-                    {status === 'safe' && <p style={{ fontSize: 10, color: C.green, margin: 0 }}>{data.sym}{headroom.toLocaleString()} headroom before {data.name} registration required.</p>}
+                    {status === 'safe' && <p style={{ fontSize: 10, color: C.accent, margin: 0 }}>{data.sym}{headroom.toLocaleString()} headroom before {data.name} registration required.</p>}
                     {status === 'approaching' && <p style={{ fontSize: 10, color: C.amber, margin: 0 }}>Only {data.sym}{headroom.toLocaleString()} until the {data.label} threshold. Consider registering now.</p>}
                     {status === 'exceeded' && (
                         <div>
@@ -196,7 +197,7 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                             <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>
                                 Reduced per-order fee
                             </span>
-                            <span style={{ fontSize: 9, fontWeight: 700, color: C.green, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: C.limeDeep, background: '#dcfce7', padding: '2px 6px', borderRadius: 999 }}>
                                 AUTO
                             </span>
                         </div>
@@ -281,8 +282,8 @@ export function CountrySettings({ country, state, patch }: CountrySettingsProps)
                         </button>
                     </div>
                     {state.isGSTRegistered && (
-                        <div style={{ background: '#f0fdf4', border: `1px solid ${C.green}`, borderRadius: 8, padding: 10 }}>
-                            <p style={{ fontSize: 11, fontWeight: 600, color: C.green, margin: 0 }}>GST saving applied — your effective fees are 9.09% lower</p>
+                        <div style={{ background: '#f3eeff', border: `1px solid ${C.accent}`, borderRadius: 8, padding: 10 }}>
+                            <p style={{ fontSize: 11, fontWeight: 600, color: C.accent, margin: 0 }}>GST saving applied — your effective fees are 9.09% lower</p>
                             <p style={{ fontSize: 10, color: C.muted, margin: '4px 0 0' }}>As a GST-registered business you can claim back the 10% GST included in all eBay AU fees. The ledger shows your true net cost after reclaim.</p>
                         </div>
                     )}

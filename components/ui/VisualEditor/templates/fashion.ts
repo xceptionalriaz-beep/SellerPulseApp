@@ -1,118 +1,105 @@
 // components/ui/VisualEditor/templates/fashion.ts
+// ─────────────────────────────────────────────────────────────────────────────
+// Fashion Template — 16 blocks, 2-column hero + refined policy cards.
+// Category-consistent product theme: rose/pink, premium clothing.
+// ─────────────────────────────────────────────────────────────────────────────
 import { TemplateSection } from './types'
 
 export const fashionTemplate: TemplateSection = {
     id: 'full-fashion',
     name: 'Fashion & Clothing',
-    description: 'Elegant pink theme · 17 blocks · Gallery + features + returns',
+    description: 'Elegant pink theme · 16 blocks · Pro 2-column hero + crisp cards',
     category: 'full',
     blocks: [
 
-        // ── 1. Store hero header — deep rose gradient ─────────────────────────
+        // ── 1. Store Hero Header (compact) ───────────────────────────────────
         {
             type: 'hero_header', props: {
                 storeName: '{{SELLER_NAME}}',
                 tagline: 'Premium Fashion · Free UK Returns · Next Day Available',
+                bgColor: '#be185d',
                 bgGradient: true,
-                gradientFrom: '#be185d',
-                gradientTo: '#831843',
-                textColor: '#ffffff',
+                bgGradientFrom: '#be185d',
+                bgGradientTo: '#831843',
+                bgGradientDir: 135,
+                nameFontSize: 22,
+                nameFontWeight: '800',
+                nameColor: '#ffffff',
+                taglineFontSize: 12,
                 taglineColor: 'rgba(255,255,255,0.7)',
-                height: 100,
+                showLogo: false,
+                height: 80,
                 align: 'center',
                 borderRadius: 0,
                 paddingTop: 0,
                 paddingBottom: 0,
+                paddingLeft: 24,
+                paddingRight: 24,
+                fontFamily: 'Arial, Helvetica, sans-serif',
             }
         },
 
-        // ── 2. Navigation bar ─────────────────────────────────────────────────
+        // ── 2. Navigation Bar ─────────────────────────────────────────────────
         {
             type: 'nav_bar', props: {
                 bgColor: '#500724',
                 textColor: '#fce7f3',
                 hoverColor: '#f9a8d4',
+                activeColor: '#f9a8d4',
                 separator: '·',
                 align: 'center',
                 fontSize: 12,
+                fontWeight: '600',
+                letterSpacing: 1,
                 borderRadius: 0,
                 paddingTop: 10,
                 paddingBottom: 10,
+                paddingLeft: 24,
+                paddingRight: 24,
                 links: [
-                    { label: 'All Items', url: '{{STORE_URL}}' },
-                    { label: 'Dresses', url: '#' },
-                    { label: 'Tops', url: '#' },
-                    { label: 'Accessories', url: '#' },
-                    { label: 'Sale', url: '#' },
+                    { label: 'All Items',     url: '{{STORE_URL}}' },
+                    { label: 'Dresses',       url: '#' },
+                    { label: 'Tops',          url: '#' },
+                    { label: 'Accessories',   url: '#' },
+                    { label: 'Sale',          url: '#' },
                 ],
             }
         },
 
-        // ── 3. Product title + condition ──────────────────────────────────────
+        // ── 3. 2-Column Hero Product ──────────────────────────────────────────
         {
-            type: 'product_title', props: {
-                text: '{{PRODUCT_TITLE}}',
-                conditionText: '{{ITEM_CONDITION}}',
-                showCondition: true,
-                color: '#831843',
-                fontSize: 22,
-                fontWeight: '800',
-                align: 'left',
-                bgColor: '#fff7fb',
-                paddingTop: 20,
-                paddingBottom: 10,
-                paddingLeft: 16,
-                paddingRight: 16,
-            }
-        },
-
-        // ── 4. Product image — portrait fashion shot ──────────────────────────
-        {
-            type: 'product_image', props: {
-                src: '{{MAIN_IMAGE_URL}}',
-                alt: '{{PRODUCT_TITLE}}',
-                maxWidth: 480,
-                align: 'center',
-                borderRadius: 12,
-                showBorder: false,
-                borderColor: '#fbcfe8',
-                bgColor: '#fff7fb',
-                paddingTop: 16,
-                paddingBottom: 16,
-                paddingLeft: 16,
-                paddingRight: 16,
-            }
-        },
-
-        // ── 5. Price block — with sale badge ──────────────────────────────────
-        {
-            type: 'price_block', props: {
-                priceText: '{{ITEM_PRICE}}',
-                priceColor: '#be185d',
-                priceFontSize: 34,
-                priceFontWeight: '900',
-                priceAlign: 'left',
-                showBadge: true,
-                badgeText: 'SALE',
-                badgeBg: '#be185d',
-                badgeColor: '#ffffff',
-                badgeFontSize: 11,
-                badgeBorderRadius: 4,
+            type: 'hero_product', props: {
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                leftImage: '{{MAIN_IMAGE_URL}}',
+                thumb1: '{{IMAGE_2_URL}}',
+                thumb2: '{{IMAGE_3_URL}}',
+                thumb3: '{{IMAGE_4_URL}}',
+                thumb4: '{{IMAGE_5_URL}}',
+                leftBg: '#fff7fb',
+                rightTitle: '{{PRODUCT_TITLE}}',
+                rightCondition: '{{ITEM_CONDITION}}',
+                rightPrice: '{{ITEM_PRICE}}',
+                rightOriginal: '{{ORIGINAL_PRICE}}',
                 showOriginal: true,
-                originalText: '{{ORIGINAL_PRICE}}',
-                originalColor: '#9ca3af',
-                originalSize: 15,
-                borderRadius: 0,
-                bgColor: '#fff7fb',
-                paddingTop: 12,
-                paddingBottom: 12,
-                paddingLeft: 16,
-                paddingRight: 16,
-                fontFamily: 'Arial, Helvetica, sans-serif',
+                rightQuantity: '{{QUANTITY}}',
+                showScarcity: true,
+                rightBadgeText: 'Brand New',
+                rightBullets: [
+                    'Premium quality material — built to last',
+                    'True to size — check size guide before ordering',
+                    'Machine washable at 30 degrees',
+                    'Free UK returns within 30 days',
+                ],
+                accentColor: '#be185d',
+                scarcityBg: '#fdf2f8',
+                scarcityColor: '#831843',
             }
         },
 
-        // ── 6. Urgency bar ────────────────────────────────────────────────────
+        // ── 4. Urgency Bar ────────────────────────────────────────────────────
         {
             type: 'urgency_bar', props: {
                 text: '🩷 Only {{QUANTITY}} Left — Order Before They Sell Out!',
@@ -126,168 +113,153 @@ export const fashionTemplate: TemplateSection = {
                 fontWeight: '700',
                 paddingTop: 10,
                 paddingBottom: 10,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
             }
         },
 
-        // ── 7. Key features bullet list ───────────────────────────────────────
-        {
-            type: 'bullet_list', props: {
-                items: [
-                    'Premium quality material — built to last',
-                    'True to size — check size guide before ordering',
-                    'Machine washable at 30 degrees',
-                    'Available in multiple colours — see our store',
-                    'Free UK returns within 30 days',
-                ],
-                bulletStyle: 'check',
-                bulletColor: '#be185d',
-                color: '#500724',
-                fontSize: 13,
-                bgColor: '#fff7fb',
-                paddingTop: 16,
-                paddingBottom: 16,
-                paddingLeft: 16,
-                paddingRight: 16,
-            }
-        },
-
-        // ── 8. Trust badges ───────────────────────────────────────────────────
+        // ── 5. Trust Badges (white card grid) ────────────────────────────────
         {
             type: 'trust_badges', props: {
                 iconColor: '#be185d',
                 textColor: '#831843',
                 subTextColor: '#9ca3af',
-                badgeBg: '#fdf2f8',
-                borderColor: '#fbcfe8',
-                borderRadius: 8,
+                borderColor: '#e5e7eb',
+                borderRadius: 12,
                 align: 'center',
                 bgColor: '#ffffff',
-                paddingTop: 20,
-                paddingBottom: 20,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                variant: 'grid',
                 badges: [
-                    { icon: 'check', text: 'Genuine Item', subText: '100% Authentic' },
-                    { icon: 'package', text: 'Careful Packaging', subText: 'Arrives Safely' },
-                    { icon: 'refresh-ccw', text: 'Free Returns', subText: '30-Day Policy' },
-                    { icon: 'star', text: 'Top Rated', subText: '5★ Seller' },
+                    { icon: 'shield-check', text: 'Genuine Item',     subText: '100% Authentic' },
+                    { icon: 'truck',         text: 'Careful Packaging', subText: 'Arrives Safely' },
+                    { icon: 'rotate-ccw',    text: 'Free Returns',      subText: '30-Day Policy' },
+                    { icon: 'star',          text: 'Top Rated',         subText: '5★ Seller' },
                 ],
             }
         },
 
-        // ── 9. Product description ────────────────────────────────────────────
+        // ── 6. Product Description ────────────────────────────────────────────
         {
             type: 'product_description', props: {
                 text: '{{ITEM_DESCRIPTION}}',
                 color: '#6b7280',
-                fontSize: 13,
+                fontSize: 14,
                 lineHeight: 1.8,
                 showTitle: true,
                 titleText: 'Product Details',
                 titleColor: '#831843',
-                titleFontSize: 16,
+                titleFontSize: 18,
                 bgColor: '#ffffff',
-                paddingTop: 20,
-                paddingBottom: 20,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
                 fontFamily: 'Arial, Helvetica, sans-serif',
             }
         },
 
-        // ── 10. Divider ───────────────────────────────────────────────────────
-        {
-            type: 'divider', props: {
-                lineStyle: 'solid',
-                color: '#fbcfe8',
-                thickness: 1,
-                widthPercent: 100,
-                paddingTop: 0,
-                paddingBottom: 0,
-            }
-        },
-
-        // ── 11. Specs table — fashion specific ────────────────────────────────
+        // ── 7. Specs Table (crisp 2-column alternating) ──────────────────────
         {
             type: 'specs_table', props: {
                 showTitle: true,
                 titleText: 'Item Specifics',
                 titleColor: '#831843',
                 titleFontSize: 16,
-                headerBg: '#be185d',
+                headerBg: '#1e1535',
                 headerText: '#ffffff',
-                altRowBg: '#fdf2f8',
+                altRowBg: '#f9fafb',
                 rowBg: '#ffffff',
-                borderColor: '#fbcfe8',
+                borderColor: '#f3f4f6',
                 fontSize: 13,
                 bgColor: '#ffffff',
                 paddingTop: 0,
-                paddingBottom: 0,
-                paddingLeft: 0,
-                paddingRight: 0,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                variant: 'full',
                 rows: [
-                    { key: 'Brand', value: '{{BRAND}}' },
-                    { key: 'Size', value: '{{SIZE}}' },
-                    { key: 'Colour', value: '{{COLOUR}}' },
-                    { key: 'Material', value: '{{MATERIAL}}' },
-                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
-                    { key: 'Style', value: '{{STYLE}}' },
+                    { key: 'Brand',      value: '{{BRAND}}' },
+                    { key: 'Size',       value: '{{SIZE}}' },
+                    { key: 'Colour',     value: '{{COLOUR}}' },
+                    { key: 'Material',   value: '{{MATERIAL}}' },
+                    { key: 'Style',      value: '{{STYLE}}' },
                     { key: 'Department', value: '{{DEPARTMENT}}' },
-                    { key: 'SKU', value: '{{ITEM_SKU}}' },
+                    { key: 'Gender',     value: '{{GENDER}}' },
+                    { key: 'Age Group',  value: '{{AGE_GROUP}}' },
+                    { key: 'SKU',        value: '{{ITEM_SKU}}' },
                 ],
             }
         },
 
-        // ── 12. Shipping info — rose green accent ─────────────────────────────
+        // ── 8. Divider ───────────────────────────────────────────────────────
+        {
+            type: 'divider', props: {
+                lineStyle: 'solid',
+                color: '#e5e7eb',
+                thickness: 1,
+                widthPercent: 100,
+                paddingTop: 4,
+                paddingBottom: 4,
+            }
+        },
+
+        // ── 9. Shipping Info (white card with truck SVG) ─────────────────────
         {
             type: 'shipping_info', props: {
-                bgColor: '#fdf2f8',
-                textColor: '#831843',
-                iconColor: '#be185d',
-                borderRadius: 0,
-                shippingText: '🚚 FREE Standard UK Delivery — Royal Mail 48 (2–3 business days)',
-                dispatchText: '⚡ Dispatched within 1 business day — Express next-day available',
-                locationText: '📦 Dispatched from: United Kingdom',
-                paddingTop: 14,
-                paddingBottom: 14,
-                paddingLeft: 16,
-                paddingRight: 16,
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
+                iconColor: '#16a34a',
+                accentColor: '#16a34a',
+                iconBg: '#f0fdf4',
+                borderRadius: 8,
+                shippingText: '{{SHIPPING_TIME}} — FREE Standard UK Delivery',
+                dispatchText: 'Same-day dispatch on orders placed before 3pm Mon–Fri',
+                locationText: 'Dispatched from: United Kingdom',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
             }
         },
 
-        // ── 13. Returns policy ────────────────────────────────────────────────
+        // ── 10. Returns Policy (white card with rotate-ccw SVG) ──────────────
         {
             type: 'returns_policy', props: {
-                bgColor: '#fff7fb',
-                textColor: '#831843',
-                iconColor: '#be185d',
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
                 accentColor: '#be185d',
-                borderRadius: 0,
-                policyText: '↩ FREE 30-day returns. Item must be unworn, in original condition with all tags attached.',
+                iconColor: '#be185d',
+                iconBg: '#fdf2f8',
+                borderRadius: 8,
+                policyText: '{{RETURN_POLICY}}. Items must be unworn with all tags attached.',
                 showPeriod: true,
                 periodText: '30-Day Free Returns — No Questions Asked',
-                paddingTop: 14,
-                paddingBottom: 14,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
             }
         },
 
-        // ── 14. Policy tabs ───────────────────────────────────────────────────
+        // ── 11. Policy Tabs ──────────────────────────────────────────────────
         {
             type: 'policy_tabs', props: {
                 activeBg: '#be185d',
                 activeText: '#ffffff',
                 inactiveBg: '#fdf2f8',
                 inactiveText: '#6b7280',
-                borderColor: '#fbcfe8',
+                borderColor: '#e5e7eb',
                 contentBg: '#ffffff',
-                borderRadius: 0,
+                borderRadius: 8,
                 fontSize: 13,
-                paddingTop: 0,
-                paddingBottom: 0,
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
                 tabs: [
                     {
                         label: 'Shipping',
@@ -309,7 +281,7 @@ export const fashionTemplate: TemplateSection = {
             }
         },
 
-        // ── 15. Cross-sell — complementary fashion items ──────────────────────
+        // ── 12. Cross-Sell ───────────────────────────────────────────────────
         {
             type: 'cross_sell', props: {
                 title: 'Complete the Look',
@@ -317,15 +289,15 @@ export const fashionTemplate: TemplateSection = {
                 titleFontSize: 16,
                 bgColor: '#fdf2f8',
                 cardBg: '#ffffff',
-                cardBorder: '#fbcfe8',
-                borderRadius: 10,
+                cardBorder: '#e5e7eb',
+                borderRadius: 12,
                 columns: 3,
                 showPrice: true,
                 gap: 12,
                 paddingTop: 24,
                 paddingBottom: 24,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
                 items: [
                     { imageUrl: '{{RELATED_IMAGE_1}}', title: '{{RELATED_TITLE_1}}', price: '{{RELATED_PRICE_1}}', url: '{{RELATED_URL_1}}' },
                     { imageUrl: '{{RELATED_IMAGE_2}}', title: '{{RELATED_TITLE_2}}', price: '{{RELATED_PRICE_2}}', url: '{{RELATED_URL_2}}' },
@@ -334,7 +306,7 @@ export const fashionTemplate: TemplateSection = {
             }
         },
 
-        // ── 16. Seller info ───────────────────────────────────────────────────
+        // ── 13. Seller Info ──────────────────────────────────────────────────
         {
             type: 'seller_info', props: {
                 sellerName: '{{SELLER_NAME}}',
@@ -348,17 +320,16 @@ export const fashionTemplate: TemplateSection = {
                 bgColor: '#fff7fb',
                 textColor: '#831843',
                 subTextColor: '#9ca3af',
-                accentColor: '#be185d',
                 borderRadius: 0,
                 paddingTop: 20,
                 paddingBottom: 20,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
                 fontFamily: 'Arial, Helvetica, sans-serif',
             }
         },
 
-        // ── 17. CTA footer banner ─────────────────────────────────────────────
+        // ── 14. CTA Footer Banner ─────────────────────────────────────────────
         {
             type: 'cta_banner', props: {
                 headingText: 'Shop with Confidence — Premium UK Fashion',
@@ -367,14 +338,16 @@ export const fashionTemplate: TemplateSection = {
                 bgGradient: true,
                 gradientFrom: '#be185d',
                 gradientTo: '#831843',
+                headingColor: '#ffffff',
+                subColor: 'rgba(255,255,255,0.7)',
                 textColor: '#ffffff',
                 subTextColor: 'rgba(255,255,255,0.7)',
                 align: 'center',
                 minHeight: 90,
                 paddingTop: 28,
                 paddingBottom: 28,
-                paddingLeft: 16,
-                paddingRight: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
                 fontFamily: 'Arial, Helvetica, sans-serif',
             }
         },

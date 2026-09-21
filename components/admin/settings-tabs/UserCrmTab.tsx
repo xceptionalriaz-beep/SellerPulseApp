@@ -19,7 +19,7 @@ function useOnlineUserIds(): Set<string> {
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<{ userId: string }>()
-        const ids   = new Set<string>()
+        const ids = new Set<string>()
         for (const presences of Object.values(state)) {
           for (const p of presences as any[]) {
             if (p.userId) ids.add(p.userId)
@@ -41,76 +41,76 @@ function getOnlineCount(users: any[]): number {
 }
 // --------------------------------------------------------------
 import {
-    UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
-    Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
-    AlertTriangle, Check, Search, RefreshCw, Users,
-    TimerOff, Headphones, MoreVertical, User, CloudOff,
-    CheckCircle, Plus, Shield, Key, Activity, TrendingDown,
-    Clock, Wifi, WifiOff, Zap, Gift, TrendingUp, XCircle,
-    Award, Globe, AtSign, Camera, PlayCircle, HelpCircle,
-    Link2, Wrench, BarChart2 as BarChart, MessageSquare, Filter, ArrowRight, SlidersHorizontal, FileText, Download,
+  UserPlus, X, Mail, Lock, LogOut, DollarSign, Calendar,
+  Store, Monitor, Smartphone, Copy, Trash2, ChevronDown,
+  AlertTriangle, Check, Search, RefreshCw, Users,
+  TimerOff, Headphones, MoreVertical, User, CloudOff,
+  CheckCircle, Plus, Shield, Key, Activity, TrendingDown,
+  Clock, Wifi, WifiOff, Zap, Gift, TrendingUp, XCircle,
+  Award, Globe, AtSign, Camera, PlayCircle, HelpCircle,
+  Link2, Wrench, BarChart2 as BarChart, MessageSquare, Filter, ArrowRight, SlidersHorizontal, FileText, Download,
 } from 'lucide-react'
 
 import { UserDetailDrawer } from './UserDetailDrawer'
 
 // -- Brand tokens -----------------------------------------------
 const C = {
-  dark:    '#0a0d08', lime:    '#8fff00', limeDeep: '#4a8f00',
-  limeTint:'#f4ffe6', border:  '#e8ede2', bg:       '#f7f9f5',
-  text:    '#1a2410', muted:   '#8a9e78', surface:  '#ffffff',
-  red:     '#b91c1c', amber:   '#d97706', green:    '#16a34a',
+  dark: '#1e1535', lime: '#b8fa33', limeDeep: '#4d7c0f',
+  limeTint: '#f3eeff', border: '#ede9fe', bg: '#f8f7ff',
+  text: '#1f1d2e', muted: '#6b7280', surface: '#ffffff',
+  red: '#dc2626', amber: '#d97706', green: '#16a34a',
 }
 const PAGE_SIZES = [25, 50, 100]
 
 // -- Badge helpers ----------------------------------------------
 function planBadge(plan: string) {
   const p = (plan ?? '').toLowerCase()
-  if (p.includes('growth') || p.includes('custom') || p.includes('starter')) return { bg: C.lime,    text: C.dark  }
-  return                                                { bg: C.bg,      text: C.muted }
+  if (p.includes('growth') || p.includes('custom') || p.includes('starter')) return { bg: C.lime, text: C.dark }
+  return { bg: C.bg, text: C.muted }
 }
 function statusBadge(status: string) {
-  if (status === 'Active')    return { bg: 'rgba(22,163,74,0.10)',  text: C.green   }
-  if (status === 'Past Due')  return { bg: 'rgba(217,119,6,0.10)',  text: C.amber   }
-  if (status === 'Expired')   return { bg: 'rgba(185,28,28,0.10)',  text: C.red     }
+  if (status === 'Active') return { bg: 'rgba(22,163,74,0.10)', text: C.green }
+  if (status === 'Past Due') return { bg: 'rgba(217,119,6,0.10)', text: C.amber }
+  if (status === 'Expired') return { bg: 'rgba(220,38,38,0.10)', text: C.red }
   if (status === 'Suspended') return { bg: 'rgba(249,115,22,0.12)', text: '#c2410c' }
-  if (status === 'Banned')    return { bg: 'rgba(127,29,29,0.15)',  text: '#7f1d1d' }
-  return                             { bg: C.bg,                    text: C.muted   }
+  if (status === 'Banned') return { bg: 'rgba(127,29,29,0.15)', text: '#7f1d1d' }
+  return { bg: C.bg, text: C.muted }
 }
 
 // -- Data helpers -----------------------------------------------
 function getInitials(n: string) {
   const p = (n ?? '').trim().split(/\s+/)
-  return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : (n ?? 'U').slice(0,2).toUpperCase()
+  return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : (n ?? 'U').slice(0, 2).toUpperCase()
 }
 function nameToColor(n: string) {
-  const pal = ['#4a8f00','#1d70f5','#d97706','#8b5cf6','#e11d48','#0891b2']
+  const pal = ['#4d7c0f', '#1d70f5', '#d97706', '#8b5cf6', '#e11d48', '#0891b2']
   let h = 0; for (const c of n ?? '') h = c.charCodeAt(0) + ((h << 5) - h)
   return pal[Math.abs(h) % pal.length]
 }
 function fmtDate(iso: string) {
   if (!iso) return '—'
-  try { return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) }
+  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
   catch { return '—' }
 }
 function fmtDateTime(iso: string) {
   if (!iso) return '—'
-  try { return new Date(iso).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) }
+  try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) }
   catch { return '—' }
 }
 function timeAgo(iso: string) {
   if (!iso) return 'Never'
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
   if (m < 1) return 'Just now'; if (m < 60) return `${m}m ago`
-  if (m < 1440) return `${Math.floor(m/60)}h ago`; return `${Math.floor(m/1440)}d ago`
+  if (m < 1440) return `${Math.floor(m / 60)}h ago`; return `${Math.floor(m / 1440)}d ago`
 }
-function planOf(u: any)   { return u.subscriptions?.[0]?.plan_name ?? u.plan_name ?? 'Free Trial' }
+function planOf(u: any) { return u.subscriptions?.[0]?.plan_name ?? u.plan_name ?? 'Free Trial' }
 function statusOf(u: any): string {
-  const as   = (u.account_status ?? '').trim().toLowerCase()
+  const as = (u.account_status ?? '').trim().toLowerCase()
   // Suspension takes highest priority
   if (as === 'suspended') return 'Suspended'
-  if (as === 'banned')    return 'Banned'
+  if (as === 'banned') return 'Banned'
 
-  const s    = u.subscriptions?.[0]?.status
+  const s = u.subscriptions?.[0]?.status
   const plan = planOf(u).toLowerCase()
   const isFree = plan.includes('free')
 
@@ -120,7 +120,7 @@ function statusOf(u: any): string {
     return days !== null && days <= 0
   }
 
-  if (s === 'active')   return isTrialOver() ? 'Expired' : 'Active'
+  if (s === 'active') return isTrialOver() ? 'Expired' : 'Active'
   if (s === 'past_due') return 'Past Due'
   if (s === 'expired' || s === 'cancelled' || s === 'canceled') return 'Expired'
 
@@ -129,13 +129,13 @@ function statusOf(u: any): string {
   if (as === 'expired') return 'Expired'
   return isTrialOver() ? 'Expired' : 'Active'
 }
-function mrrOf(u: any)    { return Number(u.subscriptions?.find((s:any) => s.status==='active')?.amount ?? 0) }
-function ltvOf(u: any)    {
+function mrrOf(u: any) { return Number(u.subscriptions?.find((s: any) => s.status === 'active')?.amount ?? 0) }
+function ltvOf(u: any) {
   return (u.subscriptions ?? [])
     .filter((s: any) => Number(s.amount ?? 0) > 0)
     .reduce((sum: number, s: any) => sum + Number(s.amount ?? 0), 0)
 }
-function hasDispute(u: any){ return (u.disputes ?? []).some((d:any) => d.status !== 'resolved') }
+function hasDispute(u: any) { return (u.disputes ?? []).some((d: any) => d.status !== 'resolved') }
 
 // -- Health Score (0-100) ---------------------------------------
 function calcHealthScore(u: any): number {
@@ -162,9 +162,9 @@ function calcHealthScore(u: any): number {
 
 // -- Churn Risk from Health Score -------------------------------
 function churnRisk(score: number) {
-  if (score >= 70) return { label: 'Low Risk',    color: C.green, bg: 'rgba(22,163,74,0.10)'  }
-  if (score >= 40) return { label: 'Medium Risk', color: C.amber, bg: 'rgba(217,119,6,0.10)'  }
-  return               { label: 'High Risk',   color: C.red,   bg: 'rgba(185,28,28,0.10)'  }
+  if (score >= 70) return { label: 'Low Risk', color: C.green, bg: 'rgba(22,163,74,0.10)' }
+  if (score >= 40) return { label: 'Medium Risk', color: C.amber, bg: 'rgba(217,119,6,0.10)' }
+  return { label: 'High Risk', color: C.red, bg: 'rgba(220,38,38,0.10)' }
 }
 
 // -- Trial Days Remaining ---------------------------------------
@@ -189,7 +189,7 @@ function ebayStatus(u: any): 'connected' | 'expiring' | 'disconnected' | 'none' 
   if (!conn.is_connected) return 'disconnected'
   if (conn.expires_at) {
     const days = (new Date(conn.expires_at).getTime() - Date.now()) / 86400000
-    if (days <= 0)  return 'disconnected'
+    if (days <= 0) return 'disconnected'
     if (days <= 14) return 'expiring'
   }
   return 'connected'
@@ -203,50 +203,50 @@ function ebayDaysLeft(u: any): number | null {
 
 // -- Riazify Tool Definitions -----------------------------------
 const TOOLS = [
-  { key: 'ebay_orders',        name: 'Orders'        },
-  { key: 'profit_calculator',  name: 'Profit Calc'   },
-  { key: 'title_builder',      name: 'Title Builder' },
-  { key: 'product_research',   name: 'Product Res.'  },
-  { key: 'competitor_research',name: 'Competitor'    },
+  { key: 'ebay_orders', name: 'Orders' },
+  { key: 'profit_calculator', name: 'Profit Calc' },
+  { key: 'title_builder', name: 'Title Builder' },
+  { key: 'product_research', name: 'Product Res.' },
+  { key: 'competitor_research', name: 'Competitor' },
 ]
 
 // -- Tag config -------------------------------------------------
-const TAG_CFG: Record<string, { label:string; color:string; bg:string; Icon:React.ElementType }> = {
-  vip:          { label:'VIP',          color:'#4a8f00', bg:'#f4ffe6', Icon: Award          },
-  power_user:   { label:'Power User',   color:'#8b5cf6', bg:'#F5F3FF', Icon: Zap            },
-  beta_tester:  { label:'Beta Tester',  color:'#1d70f5', bg:'#EFF6FF', Icon: Key            },
-  influencer:   { label:'Influencer',   color:'#d97706', bg:'#FEF3C7', Icon: Users          },
-  hot_lead:     { label:'Hot Lead',     color:'#f97316', bg:'#FFF7ED', Icon: TrendingUp     },
-  at_risk:      { label:'At Risk',      color:'#d97706', bg:'#FFFBEB', Icon: AlertTriangle  },
-  suspended:    { label:'Suspended',    color:'#b91c1c', bg:'#FEF2F2', Icon: XCircle        },
-  partner:      { label:'Partner',      color:'#0d9488', bg:'#F0FDFA', Icon: Link2          },
+const TAG_CFG: Record<string, { label: string; color: string; bg: string; Icon: React.ElementType }> = {
+  vip: { label: 'VIP', color: '#4d7c0f', bg: '#f3eeff', Icon: Award },
+  power_user: { label: 'Power User', color: '#7530fb', bg: '#f3eeff', Icon: Zap },
+  beta_tester: { label: 'Beta Tester', color: '#1d70f5', bg: '#eff6ff', Icon: Key },
+  influencer: { label: 'Influencer', color: '#d97706', bg: '#fef3c7', Icon: Users },
+  hot_lead: { label: 'Hot Lead', color: '#f97316', bg: '#fff7ed', Icon: TrendingUp },
+  at_risk: { label: 'At Risk', color: '#d97706', bg: '#fffbeb', Icon: AlertTriangle },
+  suspended: { label: 'Suspended', color: '#dc2626', bg: '#fef2f2', Icon: XCircle },
+  partner: { label: 'Partner', color: '#0d9488', bg: '#f0fdfa', Icon: Link2 },
 }
-const SEGMENT_CFG: Record<string, { label:string; Icon:React.ElementType; color:string; bg:string }> = {
-  power:          { label:'Power Users',    Icon: Zap,          color:'#4a8f00', bg:'#f4ffe6' },
-  new_user:       { label:'New Users',      Icon: UserPlus,     color:'#1d70f5', bg:'#EFF6FF' },
-  at_risk:        { label:'At Risk',        Icon: AlertTriangle,color:'#d97706', bg:'#FFFBEB' },
-  dormant:        { label:'Dormant',        Icon: TimerOff,     color:'#8a9e78', bg:'#f7f9f5' },
-  high_value:     { label:'High Value',     Icon: DollarSign,   color:'#d97706', bg:'#FEF3C7' },
-  trial_expiring: { label:'Trial Expiring', Icon: Clock,        color:'#b91c1c', bg:'#FEF2F2' },
+const SEGMENT_CFG: Record<string, { label: string; Icon: React.ElementType; color: string; bg: string }> = {
+  power: { label: 'Power Users', Icon: Zap, color: '#4d7c0f', bg: '#f3eeff' },
+  new_user: { label: 'New Users', Icon: UserPlus, color: '#1d70f5', bg: '#eff6ff' },
+  at_risk: { label: 'At Risk', Icon: AlertTriangle, color: '#d97706', bg: '#fffbeb' },
+  dormant: { label: 'Dormant', Icon: TimerOff, color: '#6b7280', bg: '#f8f7ff' },
+  high_value: { label: 'High Value', Icon: DollarSign, color: '#d97706', bg: '#fef3c7' },
+  trial_expiring: { label: 'Trial Expiring', Icon: Clock, color: '#dc2626', bg: '#fef2f2' },
 }
 
 // -- Get user's primary segment ---------------------------------
 function getUserSegment(u: any): string | null {
-  const health    = calcHealthScore(u)
-  const lastSeen  = u.last_seen
+  const health = calcHealthScore(u)
+  const lastSeen = u.last_seen
     ? (Date.now() - new Date(u.last_seen).getTime()) / 86400000 : 999
-  const joinedDays= (Date.now() - new Date(u.created_at).getTime()) / 86400000
+  const joinedDays = (Date.now() - new Date(u.created_at).getTime()) / 86400000
   const toolCount = (u.toolUsage ?? []).length
-  const ltv       = ltvOf(u)
+  const ltv = ltvOf(u)
   const trialDays = trialDaysLeft(u)
 
   // Order matters — most specific first
   if (trialDays !== null && trialDays <= 3 && trialDays >= 0) return 'trial_expiring'
-  if (lastSeen >= 30)                                          return 'dormant'
-  if (joinedDays < 7)                                          return 'new_user'
-  if (health >= 70 && lastSeen < 3 && toolCount >= 2)          return 'power'
-  if (health >= 40 && health < 70 && lastSeen >= 7)            return 'at_risk'
-  if (ltv > 50 || mrrOf(u) > 0)                               return 'high_value'
+  if (lastSeen >= 30) return 'dormant'
+  if (joinedDays < 7) return 'new_user'
+  if (health >= 70 && lastSeen < 3 && toolCount >= 2) return 'power'
+  if (health >= 40 && health < 70 && lastSeen >= 7) return 'at_risk'
+  if (ltv > 50 || mrrOf(u) > 0) return 'high_value'
   return null
 }
 
@@ -265,9 +265,9 @@ function exportToCSV(users: any[], filterLabel: string) {
 
   const rows = users.map(u => {
     const health = calcHealthScore(u)
-    const risk   = churnRisk(health)
+    const risk = churnRisk(health)
     const eStatus = ebayStatus(u)
-    const days   = trialDaysLeft(u)
+    const days = trialDaysLeft(u)
     return [
       escape(u.name ?? u.email?.split('@')[0] ?? 'Unknown'),
       escape(u.email ?? ''),
@@ -280,9 +280,9 @@ function exportToCSV(users: any[], filterLabel: string) {
       escape(mrrOf(u)),
       escape(ltvOf(u)),
       escape(
-        eStatus === 'connected'    ? 'Connected' :
-        eStatus === 'expiring'     ? 'Expiring Soon' :
-        eStatus === 'disconnected' ? 'Disconnected' : 'Not Connected'
+        eStatus === 'connected' ? 'Connected' :
+          eStatus === 'expiring' ? 'Expiring Soon' :
+            eStatus === 'disconnected' ? 'Disconnected' : 'Not Connected'
       ),
       escape(days !== null ? `${days} days` : 'N/A'),
       escape(u.country ?? u.verified_city ?? 'Unknown'),
@@ -297,11 +297,11 @@ function exportToCSV(users: any[], filterLabel: string) {
   ].join('\n')
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url  = URL.createObjectURL(blob)
+  const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   const date = new Date().toISOString().split('T')[0]
-  link.href     = url
-  link.download = `riazify-users-${filterLabel.toLowerCase().replace(/\s/g,'-')}-${date}.csv`
+  link.href = url
+  link.download = `riazify-users-${filterLabel.toLowerCase().replace(/\s/g, '-')}-${date}.csv`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -315,21 +315,25 @@ function Avatar({ name, size = 36, avatarUrl }: {
   const bg = nameToColor(name)
   if (avatarUrl) {
     return (
-      <div style={{ width:size, height:size, borderRadius:'50%',
-        overflow:'hidden', flexShrink:0, backgroundColor: bg }}>
+      <div style={{
+        width: size, height: size, borderRadius: '50%',
+        overflow: 'hidden', flexShrink: 0, backgroundColor: bg
+      }}>
         <img
           src={avatarUrl}
           alt={name}
-          style={{ width:'100%', height:'100%', objectFit:'cover' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
         />
       </div>
     )
   }
   return (
-    <div style={{ width:size, height:size, borderRadius:'50%', backgroundColor:bg,
-      display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-      <span style={{ color:'#fff', fontSize: size * 0.35, fontWeight:800 }}>
+    <div style={{
+      width: size, height: size, borderRadius: '50%', backgroundColor: bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+    }}>
+      <span style={{ color: '#fff', fontSize: size * 0.35, fontWeight: 800 }}>
         {getInitials(name)}
       </span>
     </div>
@@ -337,16 +341,16 @@ function Avatar({ name, size = 36, avatarUrl }: {
 }
 
 // -- Toast ------------------------------------------------------
-function Toast({ msg, type }: { msg:string; type:'success'|'error'|'info' }) {
+function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark, border: C.lime,   text: C.lime,  Icon: CheckCircle  },
-    error:   { bg:'#FEF2F2', border:'#FECACA', text: C.red,  Icon: AlertTriangle },
-    info:    { bg: C.bg,   border: C.border, text: C.text,  Icon: Shield        },
+    success: { bg: C.dark, border: C.lime, text: C.lime, Icon: CheckCircle },
+    error: { bg: '#FEF2F2', border: '#FECACA', text: C.red, Icon: AlertTriangle },
+    info: { bg: C.bg, border: C.border, text: C.text, Icon: Shield },
   }
   const { bg, border, text, Icon } = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: bg, border: `1px solid ${border}`, color: text }}>
+      style={{ backgroundColor: bg, border: `1px solid ${border}`, color: text }}>
       <Icon size={15} /><p className="text-[13px] font-bold">{msg}</p>
     </div>
   )
@@ -356,24 +360,24 @@ function Toast({ msg, type }: { msg:string; type:'success'|'error'|'info' }) {
 // BLOCK 1 — HUD METRIC DECK
 // --------------------------------------------------------------
 function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => true }: {
-    users: any[]
-    onlineIds: Set<string>
-    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-    onGoToMarketing: (users: any[]) => void
-    canDo?: (action: string) => boolean
-  }) {
+  users: any[]
+  onlineIds: Set<string>
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  onGoToMarketing: (users: any[]) => void
+  canDo?: (action: string) => boolean
+}) {
   const supabase = createClient()
-  const total      = users.length
+  const total = users.length
   const activeSubs = users.filter(u => mrrOf(u) > 0).length
-  const activeRatio= total > 0 ? activeSubs / total : 0
+  const activeRatio = total > 0 ? activeSubs / total : 0
 
-  const free      = users.filter(u => planOf(u).toLowerCase() === 'free').length
+  const free = users.filter(u => planOf(u).toLowerCase() === 'free').length
   const freeTrial = users.filter(u => planOf(u).toLowerCase() === 'free trial').length
-  const starter   = users.filter(u => planOf(u).toLowerCase() === 'starter').length
-  const growth    = users.filter(u => planOf(u).toLowerCase() === 'growth').length
-  const custom    = users.filter(u => planOf(u).toLowerCase() === 'custom').length
+  const starter = users.filter(u => planOf(u).toLowerCase() === 'starter').length
+  const growth = users.filter(u => planOf(u).toLowerCase() === 'growth').length
+  const custom = users.filter(u => planOf(u).toLowerCase() === 'custom').length
 
-  const highRisk   = users.filter(u => calcHealthScore(u) < 40).length
+  const highRisk = users.filter(u => calcHealthScore(u) < 40).length
   const mediumRisk = users.filter(u => { const s = calcHealthScore(u); return s >= 40 && s < 70 }).length
 
   const ebayDisconnected = users.filter(u => {
@@ -384,22 +388,22 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
   const firstDisp = users.find(hasDispute)
 
   // New this week
-  const weekAgo        = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  const newThisWeek    = users.filter(u => u.created_at && new Date(u.created_at) >= weekAgo).length
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const newThisWeek = users.filter(u => u.created_at && new Date(u.created_at) >= weekAgo).length
 
   // Trials expiring in 1–3 days — full list for emailing
   const expiringUsers = users.filter(u => {
     const days = trialDaysLeft(u)
     return days !== null && days >= 0 && days <= 3 &&
-           planOf(u).toLowerCase().includes('free') &&
-           statusOf(u) !== 'Expired'
+      planOf(u).toLowerCase().includes('free') &&
+      statusOf(u) !== 'Expired'
   })
   const expiringTrials = expiringUsers.length
 
   // Email all expiring users
-  const [emailingAll,   setEmailingAll]   = useState(false)
+  const [emailingAll, setEmailingAll] = useState(false)
   const [emailProgress, setEmailProgress] = useState(0)
-  const [emailDone,     setEmailDone]     = useState(false)
+  const [emailDone, setEmailDone] = useState(false)
 
   async function emailAllExpiring(opts?: { templateKey: string; subject: string; promoCode: string; customNote: string; excluded: Set<string> }) {
     if (emailingAll) return
@@ -412,15 +416,15 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
       for (const u of toSend) {
         const days = trialDaysLeft(u) ?? 0
         await fetch('/api/admin/send-email', {
-          method:  'POST',
+          method: 'POST',
           headers: {
-            'Content-Type':  'application/json',
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${session?.access_token}`,
           },
           body: JSON.stringify({
-            userId:      u.id,
+            userId: u.id,
             templateKey: opts?.templateKey ?? 'trial_ending',
-            customNote:  [
+            customNote: [
               opts?.promoCode ? `Use code ${opts.promoCode} for a special discount.` : '',
               opts?.customNote || `Your trial expires in ${days} day${days !== 1 ? 's' : ''}. Upgrade now to keep access.`,
             ].filter(Boolean).join(' '),
@@ -451,45 +455,45 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
       return (Date.now() - new Date(u.last_seen).getTime()) < 5 * 60 * 1000
     })
   )
-  const liveFromPresence  = effectiveOnlineIds.size
+  const liveFromPresence = effectiveOnlineIds.size
   const liveFromHeartbeat = getOnlineCount(users)
   const liveCount = liveFromPresence > 0 ? liveFromPresence : liveFromHeartbeat
 
   const r = 18; const sw = 5; const circ = 2 * Math.PI * r
 
-  function CircleProgress({ value, color }: { value:number; color:string }) {
+  function CircleProgress({ value, color }: { value: number; color: string }) {
     const dash = Math.max(value, 0.03) * circ
     return (
-      <div style={{ position:'relative', width:44, height:44, flexShrink:0 }}>
+      <div style={{ position: 'relative', width: 44, height: 44, flexShrink: 0 }}>
         <svg width="44" height="44">
           <circle cx="22" cy="22" r={r} fill="none" stroke={C.bg} strokeWidth={sw} />
           <circle cx="22" cy="22" r={r} fill="none" stroke={color} strokeWidth={sw}
-            strokeDasharray={`${dash} ${circ-dash}`} strokeDashoffset={circ*0.25} strokeLinecap="round" />
+            strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={circ * 0.25} strokeLinecap="round" />
         </svg>
-        <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <span style={{ fontSize:10, fontWeight:800, color:C.text }}>{Math.round(value*100)}%</span>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 10, fontWeight: 800, color: C.text }}>{Math.round(value * 100)}%</span>
         </div>
       </div>
     )
   }
 
-  function MiniBar({ fill, color }: { fill:number; color:string }) {
+  function MiniBar({ fill, color }: { fill: number; color: string }) {
     return (
-      <div style={{ width:10, height:36, backgroundColor:C.bg, borderRadius:3, display:'flex', alignItems:'flex-end', overflow:'hidden' }}>
-        <div style={{ width:'100%', height:`${Math.max(fill,0.05)*100}%`, backgroundColor:color, borderRadius:3 }} />
+      <div style={{ width: 10, height: 36, backgroundColor: C.bg, borderRadius: 3, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: `${Math.max(fill, 0.05) * 100}%`, backgroundColor: color, borderRadius: 3 }} />
       </div>
     )
   }
 
-  function HudCard({ title, value, sub, children }: { title:string; value:string; sub:string; children:React.ReactNode }) {
+  function HudCard({ title, value, sub, children }: { title: string; value: string; sub: string; children: React.ReactNode }) {
     return (
       <div className="flex items-center gap-3 p-4 rounded-2xl border"
-           style={{ backgroundColor:C.surface, borderColor:C.border }}>
+        style={{ backgroundColor: C.surface, borderColor: C.border }}>
         <div className="shrink-0">{children}</div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold truncate mb-1" style={{ color:C.muted }}>{title}</p>
-          <p className="text-[14px] font-black truncate" style={{ color:C.text }}>{value}</p>
-          <p className="text-[10px] font-semibold truncate mt-0.5" style={{ color:C.muted }}>{sub}</p>
+          <p className="text-[10px] font-bold truncate mb-1" style={{ color: C.muted }}>{title}</p>
+          <p className="text-[14px] font-black truncate" style={{ color: C.text }}>{value}</p>
+          <p className="text-[10px] font-semibold truncate mt-0.5" style={{ color: C.muted }}>{sub}</p>
         </div>
       </div>
     )
@@ -497,30 +501,30 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
 
   return (
     <div className="flex flex-col gap-3">
-        {/* -- Expiring Trials Alert Banner -- */}
-        {expiringTrials > 0 && canDo('email_expiring') && (
+      {/* -- Expiring Trials Alert Banner -- */}
+      {expiringTrials > 0 && canDo('email_expiring') && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border"
-             style={{ backgroundColor:'rgba(217,119,6,0.08)', borderColor:'rgba(217,119,6,0.3)' }}>
+          style={{ backgroundColor: 'rgba(217,119,6,0.08)', borderColor: 'rgba(217,119,6,0.3)' }}>
           <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-               style={{ backgroundColor:'rgba(217,119,6,0.15)' }}>
-            <AlertTriangle size={15} style={{ color:C.amber }} />
+            style={{ backgroundColor: 'rgba(217,119,6,0.15)' }}>
+            <AlertTriangle size={15} style={{ color: C.amber }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-black" style={{ color:C.amber }}>
+            <p className="text-[13px] font-black" style={{ color: C.amber }}>
               {expiringTrials} trial{expiringTrials !== 1 ? 's' : ''} expiring in 1–3 days
             </p>
-            <p className="text-[11px]" style={{ color:C.muted }}>
+            <p className="text-[11px]" style={{ color: C.muted }}>
               {emailingAll
                 ? `Sending... ${emailProgress}/${expiringTrials}`
                 : emailDone
-                ? `All ${expiringTrials} emails sent ?`
-                : 'Hot conversion opportunity — email them now before they churn'}
+                  ? `All ${expiringTrials} emails sent ?`
+                  : 'Hot conversion opportunity — email them now before they churn'}
             </p>
           </div>
           <button
             onClick={() => onGoToMarketing(expiringUsers)}
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-bold shrink-0 hover:opacity-80 transition-all"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+            style={{ backgroundColor: '#b8fa33', color: '#1a2410' }}>
             <Mail size={13} /> Email All {expiringTrials} <ArrowRight size={12} />
           </button>
         </div>
@@ -533,10 +537,10 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
         </HudCard>
         <HudCard title="Plan Distribution" value={`Starter: ${starter}`} sub={`Free: ${free} - Trial: ${freeTrial} - Growth: ${growth} - Custom: ${custom}`}>
           <div className="flex items-end gap-1">
-            <MiniBar fill={total>0?free/total:0}     color={C.muted}    />
-            <MiniBar fill={total>0?starter/total:0}  color={C.lime}     />
-            <MiniBar fill={total>0?growth/total:0}   color={C.limeDeep} />
-            <MiniBar fill={total>0?custom/total:0}   color={C.dark}     />
+            <MiniBar fill={total > 0 ? free / total : 0} color={C.muted} />
+            <MiniBar fill={total > 0 ? starter / total : 0} color={C.lime} />
+            <MiniBar fill={total > 0 ? growth / total : 0} color={C.limeDeep} />
+            <MiniBar fill={total > 0 ? custom / total : 0} color={C.dark} />
           </div>
         </HudCard>
         <HudCard
@@ -544,10 +548,10 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
           value={liveCount > 0 ? `${liveCount} Online` : 'Nobody Online'}
           sub={liveCount > 0 ? `Using Riazify right now` : 'Check back soon'}>
           <div className="w-11 h-11 rounded-full flex items-center justify-center relative"
-               style={{ backgroundColor: liveCount > 0 ? 'rgba(22,163,74,0.08)' : C.bg }}>
+            style={{ backgroundColor: liveCount > 0 ? 'rgba(22,163,74,0.08)' : C.bg }}>
             {liveCount > 0 && (
               <div className="absolute inset-0 rounded-full animate-ping opacity-30"
-                   style={{ backgroundColor: '#0a0d08' }} />
+                style={{ backgroundColor: '#0a0d08' }} />
             )}
             <Users size={20} style={{ color: liveCount > 0 ? C.green : C.muted }} />
           </div>
@@ -555,17 +559,17 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
         <HudCard title="New This Week" value={`+${newThisWeek}`}
           sub={newThisWeek > 0 ? `in the last 7 days` : 'No new signups yet'}>
           <div className="w-11 h-11 rounded-full flex items-center justify-center"
-               style={{ backgroundColor: newThisWeek > 0 ? 'rgba(143,255,0,0.12)' : C.bg }}>
+            style={{ backgroundColor: newThisWeek > 0 ? 'rgba(143,255,0,0.12)' : C.bg }}>
             <UserPlus size={20} style={{ color: newThisWeek > 0 ? C.limeDeep : C.muted }} />
           </div>
         </HudCard>
         <HudCard title="Dispute Center" value={`${dispCount} Issues`}
           sub={ebayDisconnected > 0 ? `${ebayDisconnected} eBay disconnected` : dispCount > 0 ? `Queue: ${(firstDisp?.name ?? 'Unknown').split(' ')[0]}` : 'All systems OK'}>
           <div className="w-11 h-11 rounded-full flex items-center justify-center"
-               style={{ backgroundColor: dispCount > 0 || ebayDisconnected > 0 ? 'rgba(185,28,28,0.08)' : 'rgba(22,163,74,0.08)' }}>
+            style={{ backgroundColor: dispCount > 0 || ebayDisconnected > 0 ? 'rgba(185,28,28,0.08)' : 'rgba(22,163,74,0.08)' }}>
             {dispCount > 0 || ebayDisconnected > 0
-              ? <AlertTriangle size={20} style={{ color:C.red }}   />
-              : <CheckCircle  size={20} style={{ color:C.green }} />}
+              ? <AlertTriangle size={20} style={{ color: C.red }} />
+              : <CheckCircle size={20} style={{ color: C.green }} />}
           </div>
         </HudCard>
       </div>
@@ -578,18 +582,18 @@ function HudDeck({ users, onlineIds, showToast, onGoToMarketing, canDo = () => t
 // --------------------------------------------------------------
 // -- Advanced filter types --------------------------------------
 interface AdvancedFilters {
-  plans:      string[]   // [] = all
-  statuses:   string[]   // [] = all
-  health:     string     // 'all'|'high'|'medium'|'low'
-  ebay:       string     // 'all'|'connected'|'expiring'|'disconnected'
-  joined:     string     // 'all'|'7d'|'30d'|'90d'|'custom'
+  plans: string[]   // [] = all
+  statuses: string[]   // [] = all
+  health: string     // 'all'|'high'|'medium'|'low'
+  ebay: string     // 'all'|'connected'|'expiring'|'disconnected'
+  joined: string     // 'all'|'7d'|'30d'|'90d'|'custom'
   joinedFrom: string     // ISO date string e.g. '2026-01-01' (used when joined='custom')
-  joinedTo:   string     // ISO date string e.g. '2026-06-10'
+  joinedTo: string     // ISO date string e.g. '2026-06-10'
   lastActive: string     // 'all'|'today'|'7d'|'30d'|'inactive'
-  ltv:        string     // 'all'|'zero'|'low'|'mid'|'high'
-  dispute:    string     // 'all'|'yes'|'no'
-  country:    string     // 'all' or country name
-  contacted:  string     // 'all'|'never'|'recent'|'safe'
+  ltv: string     // 'all'|'zero'|'low'|'mid'|'high'
+  dispute: string     // 'all'|'yes'|'no'
+  country: string     // 'all' or country name
+  contacted: string     // 'all'|'never'|'recent'|'safe'
 }
 const DEFAULT_FILTERS: AdvancedFilters = {
   plans: [], statuses: [], health: 'all', ebay: 'all',
@@ -613,51 +617,51 @@ function applyAdvFilters(users: any[], f: AdvancedFilters): any[] {
     // Health
     if (f.health !== 'all') {
       const h = calcHealthScore(u)
-      if (f.health === 'high'   && h < 70)         return false
+      if (f.health === 'high' && h < 70) return false
       if (f.health === 'medium' && (h < 40 || h >= 70)) return false
-      if (f.health === 'low'    && h >= 40)         return false
+      if (f.health === 'low' && h >= 40) return false
     }
     // eBay
     if (f.ebay !== 'all') {
       const es = ebayStatus(u)
-      if (f.ebay === 'connected'    && es !== 'connected')    return false
-      if (f.ebay === 'expiring'     && es !== 'expiring')     return false
+      if (f.ebay === 'connected' && es !== 'connected') return false
+      if (f.ebay === 'expiring' && es !== 'expiring') return false
       if (f.ebay === 'disconnected' && es !== 'disconnected') return false
-      if (f.ebay === 'none'         && es !== 'none')         return false
+      if (f.ebay === 'none' && es !== 'none') return false
     }
     // Joined date — preset OR custom range
     if (f.joined === 'custom') {
       if (f.joinedFrom || f.joinedTo) {
         const joined = u.created_at ? new Date(u.created_at) : null
         if (!joined) return false
-        if (f.joinedFrom && joined < new Date(f.joinedFrom))             return false
-        if (f.joinedTo   && joined > new Date(f.joinedTo + 'T23:59:59')) return false
+        if (f.joinedFrom && joined < new Date(f.joinedFrom)) return false
+        if (f.joinedTo && joined > new Date(f.joinedTo + 'T23:59:59')) return false
       }
     } else if (f.joined !== 'all' && u.created_at) {
       const days = (Date.now() - new Date(u.created_at).getTime()) / 86400000
-      if (f.joined === '7d'  && days > 7)  return false
+      if (f.joined === '7d' && days > 7) return false
       if (f.joined === '30d' && days > 30) return false
       if (f.joined === '90d' && days > 90) return false
     }
     // Last active
     if (f.lastActive !== 'all' && u.last_seen) {
       const days = (Date.now() - new Date(u.last_seen).getTime()) / 86400000
-      if (f.lastActive === 'today'    && days > 1)  return false
-      if (f.lastActive === '7d'       && days > 7)  return false
-      if (f.lastActive === '30d'      && days > 30) return false
+      if (f.lastActive === 'today' && days > 1) return false
+      if (f.lastActive === '7d' && days > 7) return false
+      if (f.lastActive === '30d' && days > 30) return false
       if (f.lastActive === 'inactive' && days <= 30) return false
     }
     // LTV
     if (f.ltv !== 'all') {
       const l = ltvOf(u)
-      if (f.ltv === 'zero' && l > 0)          return false
-      if (f.ltv === 'low'  && (l <= 0 || l > 50))   return false
-      if (f.ltv === 'mid'  && (l <= 50 || l > 200))  return false
-      if (f.ltv === 'high' && l <= 200)        return false
+      if (f.ltv === 'zero' && l > 0) return false
+      if (f.ltv === 'low' && (l <= 0 || l > 50)) return false
+      if (f.ltv === 'mid' && (l <= 50 || l > 200)) return false
+      if (f.ltv === 'high' && l <= 200) return false
     }
     // Dispute
     if (f.dispute === 'yes' && !hasDispute(u)) return false
-    if (f.dispute === 'no'  &&  hasDispute(u)) return false
+    if (f.dispute === 'no' && hasDispute(u)) return false
     // Country
     if (f.country !== 'all' && (u.country ?? '') !== f.country) return false
 
@@ -665,9 +669,9 @@ function applyAdvFilters(users: any[], f: AdvancedFilters): any[] {
     if (f.contacted !== 'all') {
       const ci = u.contactInfo as any
       const msAgo = ci?.lastSent ? Date.now() - new Date(ci.lastSent).getTime() : null
-      if (f.contacted === 'never'  && msAgo !== null)                   return false
+      if (f.contacted === 'never' && msAgo !== null) return false
       if (f.contacted === 'recent' && (msAgo === null || msAgo > 3 * 86400000)) return false
-      if (f.contacted === 'safe'   && (msAgo === null || msAgo < 7 * 86400000)) return false
+      if (f.contacted === 'safe' && (msAgo === null || msAgo < 7 * 86400000)) return false
     }
     return true
   })
@@ -675,30 +679,30 @@ function applyAdvFilters(users: any[], f: AdvancedFilters): any[] {
 
 // -- Advanced Filter Panel --------------------------------------
 function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => true }: {
-    users: any[]
-    filters: AdvancedFilters
-    onApply: (f: AdvancedFilters) => void
-    onClose: () => void
-    canDo?: (action: string) => boolean
-  }) {
-    const [draft, setDraft] = useState<AdvancedFilters>({ ...filters })
+  users: any[]
+  filters: AdvancedFilters
+  onApply: (f: AdvancedFilters) => void
+  onClose: () => void
+  canDo?: (action: string) => boolean
+}) {
+  const [draft, setDraft] = useState<AdvancedFilters>({ ...filters })
 
-    // Unique countries from data
-    const countries = Array.from(new Set(
-      users.map(u => u.country).filter(Boolean)
-    )).sort() as string[]
+  // Unique countries from data
+  const countries = Array.from(new Set(
+    users.map(u => u.country).filter(Boolean)
+  )).sort() as string[]
 
-    const previewCount = applyAdvFilters(users, draft).length
+  const previewCount = applyAdvFilters(users, draft).length
 
-    function toggle(field: keyof AdvancedFilters, val: string) {
-      if (!canDo('filter_search')) return
-      if (field === 'plans' || field === 'statuses') {
-        const arr = draft[field] as string[]
-        setDraft(d => ({ ...d, [field]: arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val] }))
-      } else {
-        setDraft(d => ({ ...d, [field]: draft[field] === val ? 'all' : val }))
-      }
+  function toggle(field: keyof AdvancedFilters, val: string) {
+    if (!canDo('filter_search')) return
+    if (field === 'plans' || field === 'statuses') {
+      const arr = draft[field] as string[]
+      setDraft(d => ({ ...d, [field]: arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val] }))
+    } else {
+      setDraft(d => ({ ...d, [field]: draft[field] === val ? 'all' : val }))
     }
+  }
 
   const ChipRow = ({ label, field, options }: {
     label: string
@@ -706,7 +710,7 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
     options: { value: string; label: string }[]
   }) => {
     const isMulti = field === 'plans' || field === 'statuses'
-    const val     = draft[field]
+    const val = draft[field]
     return (
       <div className="mb-4">
         <p className="text-[10px] font-black tracking-widest mb-2" style={{ color: C.muted }}>
@@ -721,9 +725,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
               <button key={opt.value} onClick={() => toggle(field, opt.value)}
                 className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                 style={{
-                  backgroundColor: active ? C.dark    : C.bg,
-                  borderColor:     active ? C.dark    : C.border,
-                  color:           active ? C.lime    : C.muted,
+                  backgroundColor: active ? C.dark : C.bg,
+                  borderColor: active ? C.dark : C.border,
+                  color: active ? C.lime : C.muted,
                 }}>
                 {opt.label}
               </button>
@@ -736,14 +740,14 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
 
   return (
     <div className="fixed inset-0 z-[10050] flex"
-         onClick={e => e.target === e.currentTarget && onClose()}>
+      onClick={e => e.target === e.currentTarget && onClose()}>
       {/* Overlay */}
       <div className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={onClose} />
       {/* Panel */}
       <div className="w-[340px] h-full bg-white flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b shrink-0"
-             style={{ borderColor: C.border }}>
+          style={{ borderColor: C.border }}>
           <div>
             <p className="text-[15px] font-black" style={{ color: C.dark }}>Advanced Filters</p>
             <p className="text-[11px]" style={{ color: C.muted }}>Narrow down your user list</p>
@@ -764,29 +768,29 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
         {/* Filters */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <ChipRow label="PLAN" field="plans" options={[
-            { value:'Free Trial', label:'Free Trial' },
-            { value:'Pro Plan',   label:'Pro'        },
-            { value:'Elite Plan', label:'Elite'      },
+            { value: 'Free Trial', label: 'Free Trial' },
+            { value: 'Pro Plan', label: 'Pro' },
+            { value: 'Elite Plan', label: 'Elite' },
           ]} />
           <ChipRow label="STATUS" field="statuses" options={[
-            { value:'Active',    label:'Active'    },
-            { value:'Expired',   label:'Expired'   },
-            { value:'Past Due',  label:'Past Due'  },
-            { value:'Suspended', label:'Suspended' },
-            { value:'Banned',    label:'Banned'    },
+            { value: 'Active', label: 'Active' },
+            { value: 'Expired', label: 'Expired' },
+            { value: 'Past Due', label: 'Past Due' },
+            { value: 'Suspended', label: 'Suspended' },
+            { value: 'Banned', label: 'Banned' },
           ]} />
           <ChipRow label="HEALTH SCORE" field="health" options={[
-            { value:'all',    label:'Any'           },
-            { value:'high',   label:'High (70+)'    },
-            { value:'medium', label:'Medium (40-70)'},
-            { value:'low',    label:'Low (< 40)'    },
+            { value: 'all', label: 'Any' },
+            { value: 'high', label: 'High (70+)' },
+            { value: 'medium', label: 'Medium (40-70)' },
+            { value: 'low', label: 'Low (< 40)' },
           ]} />
           <ChipRow label="EBAY CONNECTION" field="ebay" options={[
-            { value:'all',          label:'Any'         },
-            { value:'connected',    label:'Connected'   },
-            { value:'expiring',     label:'Expiring'    },
-            { value:'disconnected', label:'Offline'     },
-            { value:'none',         label:'No Account'  },
+            { value: 'all', label: 'Any' },
+            { value: 'connected', label: 'Connected' },
+            { value: 'expiring', label: 'Expiring' },
+            { value: 'disconnected', label: 'Offline' },
+            { value: 'none', label: 'No Account' },
           ]} />
           {/* JOINED DATE — presets + custom range */}
           <div className="mb-4">
@@ -796,26 +800,26 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
             {/* Preset chips */}
             <div className="flex flex-wrap gap-1.5 mb-2.5">
               {[
-                { value:'all',    label:'Any time' },
-                { value:'7d',     label:'Last 7d'  },
-                { value:'30d',    label:'Last 30d' },
-                { value:'90d',    label:'Last 90d' },
-                { value:'custom', label:'Custom'   },
+                { value: 'all', label: 'Any time' },
+                { value: '7d', label: 'Last 7d' },
+                { value: '30d', label: 'Last 30d' },
+                { value: '90d', label: 'Last 90d' },
+                { value: 'custom', label: 'Custom' },
               ].map(opt => {
                 const active = draft.joined === opt.value
                 return (
                   <button key={opt.value}
-                      onClick={() => canDo('filter_search') && setDraft(d => ({
-                        ...d,
-                        joined:     opt.value,
-                        joinedFrom: opt.value !== 'custom' ? '' : d.joinedFrom,
-                        joinedTo:   opt.value !== 'custom' ? '' : d.joinedTo,
-                      }))}
+                    onClick={() => canDo('filter_search') && setDraft(d => ({
+                      ...d,
+                      joined: opt.value,
+                      joinedFrom: opt.value !== 'custom' ? '' : d.joinedFrom,
+                      joinedTo: opt.value !== 'custom' ? '' : d.joinedTo,
+                    }))}
                     className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                     style={{
                       backgroundColor: active ? C.lime : C.bg,
-                      borderColor:     active ? C.lime : C.border,
-                      color:           active ? C.lime : C.muted,
+                      borderColor: active ? C.lime : C.border,
+                      color: active ? C.lime : C.muted,
                     }}>
                     {opt.label}
                   </button>
@@ -825,13 +829,13 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
             {/* Custom date range inputs */}
             {draft.joined === 'custom' && (
               <div className="flex flex-col gap-2 p-3 rounded-xl border"
-                   style={{ borderColor: C.lime, backgroundColor: C.limeTint }}>
+                style={{ borderColor: C.lime, backgroundColor: C.limeTint }}>
                 <div>
                   <p className="text-[9px] font-black tracking-wider mb-1.5" style={{ color: C.limeDeep }}>FROM</p>
                   <input
-                      type="date"
-                      value={draft.joinedFrom}
-                      onChange={e => canDo('filter_search') && setDraft(d => ({ ...d, joinedFrom: e.target.value }))}
+                    type="date"
+                    value={draft.joinedFrom}
+                    onChange={e => canDo('filter_search') && setDraft(d => ({ ...d, joinedFrom: e.target.value }))}
                     className="w-full h-9 px-3 rounded-xl border text-[12px] font-semibold outline-none cursor-pointer"
                     style={{ borderColor: C.border, backgroundColor: '#fff', color: C.dark, colorScheme: 'light' }}
                   />
@@ -839,9 +843,9 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                 <div>
                   <p className="text-[9px] font-black tracking-wider mb-1.5" style={{ color: C.limeDeep }}>TO</p>
                   <input
-                      type="date"
-                      value={draft.joinedTo}
-                      onChange={e => canDo('filter_search') && setDraft(d => ({ ...d, joinedTo: e.target.value }))}
+                    type="date"
+                    value={draft.joinedTo}
+                    onChange={e => canDo('filter_search') && setDraft(d => ({ ...d, joinedTo: e.target.value }))}
                     className="w-full h-9 px-3 rounded-xl border text-[12px] font-semibold outline-none cursor-pointer"
                     style={{ borderColor: C.border, backgroundColor: '#fff', color: C.dark, colorScheme: 'light' }}
                   />
@@ -850,29 +854,29 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
             )}
           </div>
           <ChipRow label="LAST ACTIVE" field="lastActive" options={[
-            { value:'all',      label:'Any time'  },
-            { value:'today',    label:'Today'     },
-            { value:'7d',       label:'Last 7d'   },
-            { value:'30d',      label:'Last 30d'  },
-            { value:'inactive', label:'30d+ ago'  },
+            { value: 'all', label: 'Any time' },
+            { value: 'today', label: 'Today' },
+            { value: '7d', label: 'Last 7d' },
+            { value: '30d', label: 'Last 30d' },
+            { value: 'inactive', label: '30d+ ago' },
           ]} />
           <ChipRow label="LIFETIME VALUE" field="ltv" options={[
-            { value:'all',  label:'Any'       },
-            { value:'zero', label:'$0 (free)' },
-            { value:'low',  label:'$1–$50'    },
-            { value:'mid',  label:'$50–$200'  },
-            { value:'high', label:'$200+'     },
+            { value: 'all', label: 'Any' },
+            { value: 'zero', label: '$0 (free)' },
+            { value: 'low', label: '$1–$50' },
+            { value: 'mid', label: '$50–$200' },
+            { value: 'high', label: '$200+' },
           ]} />
           <ChipRow label="OPEN DISPUTE" field="dispute" options={[
-            { value:'all', label:'Any' },
-            { value:'yes', label:'Yes' },
-            { value:'no',  label:'No'  },
+            { value: 'all', label: 'Any' },
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
           ]} />
           <ChipRow label="EMAIL STATUS" field="contacted" options={[
-            { value:'all',    label:'Any'           },
-            { value:'never',  label:'Never emailed' },
-            { value:'recent', label:'< 3 days ago'  },
-            { value:'safe',   label:'Safe to email' },
+            { value: 'all', label: 'Any' },
+            { value: 'never', label: 'Never emailed' },
+            { value: 'recent', label: '< 3 days ago' },
+            { value: 'safe', label: 'Safe to email' },
           ]} />
           {countries.length > 0 && (
             <div className="mb-4">
@@ -880,14 +884,14 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
                 COUNTRY
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {[{ value:'all', label:'Any' }, ...countries.map(c => ({ value: c, label: c }))].map(opt => (
+                {[{ value: 'all', label: 'Any' }, ...countries.map(c => ({ value: c, label: c }))].map(opt => (
                   <button key={opt.value}
-                      onClick={() => canDo('filter_search') && setDraft(d => ({ ...d, country: d.country === opt.value ? 'all' : opt.value }))}
+                    onClick={() => canDo('filter_search') && setDraft(d => ({ ...d, country: d.country === opt.value ? 'all' : opt.value }))}
                     className="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all"
                     style={{
                       backgroundColor: draft.country === opt.value ? C.lime : C.bg,
-                      borderColor:     draft.country === opt.value ? C.lime : C.border,
-                      color:           draft.country === opt.value ? C.lime : C.muted,
+                      borderColor: draft.country === opt.value ? C.lime : C.border,
+                      color: draft.country === opt.value ? C.lime : C.muted,
                     }}>
                     {opt.label}
                   </button>
@@ -905,8 +909,8 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
             Cancel
           </button>
           <button onClick={() => { canDo('filter_search') && onApply(draft); onClose() }}
-              className="flex-[2] py-2.5 rounded-xl text-[13px] font-bold"
-              style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+            className="flex-[2] py-2.5 rounded-xl text-[13px] font-bold"
+            style={{ backgroundColor: '#b8fa33', color: '#1a2410' }}>
             Show {previewCount} user{previewCount !== 1 ? 's' : ''}
           </button>
         </div>
@@ -918,33 +922,33 @@ function AdvancedFilterPanel({ users, filters, onApply, onClose, canDo = () => t
 // -- Team Detail Modal ------------------------------------------
 function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
   const teamMembers = (user.teamMembers ?? []) as any[]
-  const teamOwners  = (user.teamOwners  ?? []) as any[]
-  const name        = user.name ?? user.email ?? 'User'
-  const isOwner     = teamMembers.length > 0
+  const teamOwners = (user.teamOwners ?? []) as any[]
+  const name = user.name ?? user.email ?? 'User'
+  const isOwner = teamMembers.length > 0
 
-  const ROLE_COLORS: Record<string, { color:string; bg:string; label:string }> = {
-    viewer:        { color:'#1d70f5', bg:'#EFF6FF',  label:'Viewer'        },
-    order_manager: { color:C.limeDeep, bg:C.limeTint, label:'Order Manager' },
-    full_access:   { color:'#8b5cf6', bg:'#F5F3FF',  label:'Full Access'   },
+  const ROLE_COLORS: Record<string, { color: string; bg: string; label: string }> = {
+    viewer: { color: '#1d70f5', bg: '#EFF6FF', label: 'Viewer' },
+    order_manager: { color: C.limeDeep, bg: C.limeTint, label: 'Order Manager' },
+    full_access: { color: '#8b5cf6', bg: '#F5F3FF', label: 'Full Access' },
   }
 
   function getInitials(n: string) {
-    return (n ?? 'U').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase()
+    return (n ?? 'U').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
   }
 
   return (
     <div className="fixed inset-0 z-[10100] flex items-center justify-center p-4"
-         style={{ backgroundColor:'rgba(0,0,0,0.5)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
-           style={{ border:`1px solid ${C.border}` }}>
+        style={{ border: `1px solid ${C.border}` }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b"
-             style={{ borderColor:C.border }}>
+          style={{ borderColor: C.border }}>
           <div>
-            <p className="text-[15px] font-black" style={{ color:C.dark }}>Team</p>
-            <p className="text-[12px]" style={{ color:C.muted }}>
+            <p className="text-[15px] font-black" style={{ color: C.dark }}>Team</p>
+            <p className="text-[12px]" style={{ color: C.muted }}>
               {name} ·{' '}
               {isOwner
                 ? `${teamMembers.length} member${teamMembers.length !== 1 ? 's' : ''}`
@@ -953,9 +957,9 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
           </div>
           <div className="text-right">
             {isOwner && (() => {
-              const plan  = ((user.plan_name ?? 'free trial') as string).toLowerCase()
+              const plan = ((user.plan_name ?? 'free trial') as string).toLowerCase()
               const limit = plan.includes('elite') ? 10 : plan.includes('pro') ? 3 : 0
-              const used  = teamMembers.length
+              const used = teamMembers.length
               return limit > 0 ? (
                 <p className="text-[10px] font-bold" style={{ color: used >= limit ? C.red : C.muted }}>
                   {used}/{limit} slots used
@@ -964,42 +968,42 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
             })()}
             <button onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 mt-1">
-              <X size={15} style={{ color:C.muted }} />
+              <X size={15} style={{ color: C.muted }} />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-5 py-4 flex flex-col gap-2" style={{ maxHeight:360, overflowY:'auto' }}>
+        <div className="px-5 py-4 flex flex-col gap-2" style={{ maxHeight: 360, overflowY: 'auto' }}>
 
           {/* Owner view — show their members */}
           {isOwner && (
             <>
-              <p className="text-[10px] font-black tracking-wider mb-1" style={{ color:C.muted }}>
+              <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>
                 TEAM MEMBERS
               </p>
               {teamMembers.map((m: any) => {
-                const mem  = m.member ?? {}
-                const rc   = ROLE_COLORS[m.role] ?? ROLE_COLORS.viewer
+                const mem = m.member ?? {}
+                const rc = ROLE_COLORS[m.role] ?? ROLE_COLORS.viewer
                 const init = getInitials(mem.name ?? mem.email ?? 'U')
                 return (
                   <div key={m.member_id}
-                       className="flex items-center gap-3 px-3.5 py-3 rounded-xl border"
-                       style={{ borderColor:C.border, backgroundColor:C.bg }}>
+                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl border"
+                    style={{ borderColor: C.border, backgroundColor: C.bg }}>
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[12px] font-bold text-white"
-                         style={{ backgroundColor:'#8b5cf6' }}>
+                      style={{ backgroundColor: '#8b5cf6' }}>
                       {init}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold truncate" style={{ color:C.dark }}>
+                      <p className="text-[13px] font-bold truncate" style={{ color: C.dark }}>
                         {mem.name ?? mem.email?.split('@')[0]}
                       </p>
-                      <p className="text-[10px] truncate" style={{ color:C.muted }}>
+                      <p className="text-[10px] truncate" style={{ color: C.muted }}>
                         {mem.email}
                       </p>
                     </div>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0"
-                          style={{ backgroundColor:rc.bg, color:rc.color }}>
+                      style={{ backgroundColor: rc.bg, color: rc.color }}>
                       {rc.label}
                     </span>
                   </div>
@@ -1011,31 +1015,31 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
           {/* Member view — show teams they belong to */}
           {!isOwner && teamOwners.length > 0 && (
             <>
-              <p className="text-[10px] font-black tracking-wider mb-1" style={{ color:C.muted }}>
+              <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>
                 MEMBER OF
               </p>
               {teamOwners.map((t: any) => {
                 const owner = t.owner ?? {}
-                const rc    = ROLE_COLORS[t.role] ?? ROLE_COLORS.viewer
-                const init  = getInitials(owner.name ?? owner.email ?? 'O')
+                const rc = ROLE_COLORS[t.role] ?? ROLE_COLORS.viewer
+                const init = getInitials(owner.name ?? owner.email ?? 'O')
                 return (
                   <div key={t.owner_id}
-                       className="flex items-center gap-3 px-3.5 py-3 rounded-xl border"
-                       style={{ borderColor:C.border, backgroundColor:C.bg }}>
+                    className="flex items-center gap-3 px-3.5 py-3 rounded-xl border"
+                    style={{ borderColor: C.border, backgroundColor: C.bg }}>
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[12px] font-bold text-white"
-                         style={{ backgroundColor:C.limeDeep }}>
+                      style={{ backgroundColor: C.limeDeep }}>
                       {init}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold truncate" style={{ color:C.dark }}>
+                      <p className="text-[13px] font-bold truncate" style={{ color: C.dark }}>
                         {owner.name ?? owner.email?.split('@')[0]}
                       </p>
-                      <p className="text-[10px] truncate" style={{ color:C.muted }}>
+                      <p className="text-[10px] truncate" style={{ color: C.muted }}>
                         {owner.email}
                       </p>
                     </div>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0"
-                          style={{ backgroundColor:rc.bg, color:rc.color }}>
+                      style={{ backgroundColor: rc.bg, color: rc.color }}>
                       {rc.label}
                     </span>
                   </div>
@@ -1046,10 +1050,10 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t" style={{ borderColor:C.border }}>
+        <div className="px-5 py-3 border-t" style={{ borderColor: C.border }}>
           <button onClick={onClose}
             className="w-full py-2.5 rounded-xl text-[13px] font-semibold"
-            style={{ backgroundColor:C.bg, color:C.muted }}>
+            style={{ backgroundColor: C.bg, color: C.muted }}>
             Close
           </button>
         </div>
@@ -1060,8 +1064,8 @@ function TeamDetailModal({ user, onClose }: { user: any; onClose: () => void }) 
 
 // -- IP Detail Modal --------------------------------------------
 function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
-  const logs    = (user.ipLogs ?? []) as any[]
-  const name    = user.name ?? user.email ?? 'User'
+  const logs = (user.ipLogs ?? []) as any[]
+  const name = user.name ?? user.email ?? 'User'
 
   // Build per-IP summary
   const ipSummary: Record<string, { count: number; lastSeen: string; location?: string }> = {}
@@ -1078,25 +1082,25 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
   const entries = Object.entries(ipSummary)
     .sort((a, b) => new Date(b[1].lastSeen).getTime() - new Date(a[1].lastSeen).getTime())
 
-  const uniqueLocations = new Set(entries.map(([,v]) => v.location).filter(Boolean))
+  const uniqueLocations = new Set(entries.map(([, v]) => v.location).filter(Boolean))
 
   return (
     <div className="fixed inset-0 z-[10100] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-         onClick={e => e.target === e.currentTarget && onClose()}>
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-           style={{ border: `1px solid ${C.border}` }}>
+        style={{ border: `1px solid ${C.border}` }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b"
-             style={{ borderColor: C.border }}>
+          style={{ borderColor: C.border }}>
           <div>
             <p className="text-[15px] font-black" style={{ color: C.dark }}>IP Address Details</p>
             <p className="text-[12px]" style={{ color: C.muted }}>
               {name} · {entries.length} unique IPs
               {uniqueLocations.size > 1 && (
                 <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold"
-                      style={{ backgroundColor:'rgba(185,28,28,0.1)', color:C.red }}>
+                  style={{ backgroundColor: 'rgba(185,28,28,0.1)', color: C.red }}>
                   {uniqueLocations.size} locations
                 </span>
               )}
@@ -1104,20 +1108,20 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
           </div>
           <button onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100">
-            <X size={15} style={{ color:C.muted }} />
+            <X size={15} style={{ color: C.muted }} />
           </button>
         </div>
 
         {/* Risk summary */}
         {entries.length > 5 && (
           <div className="mx-5 mt-4 px-3 py-2.5 rounded-xl flex items-center gap-2"
-               style={{ backgroundColor:'rgba(185,28,28,0.06)', border:`1px solid rgba(185,28,28,0.2)` }}>
-            <AlertTriangle size={14} style={{ color:C.red }} />
+            style={{ backgroundColor: 'rgba(185,28,28,0.06)', border: `1px solid rgba(185,28,28,0.2)` }}>
+            <AlertTriangle size={14} style={{ color: C.red }} />
             <div>
-              <p className="text-[12px] font-bold" style={{ color:C.red }}>
+              <p className="text-[12px] font-bold" style={{ color: C.red }}>
                 {entries.length} unique IPs detected
               </p>
-              <p className="text-[10px]" style={{ color:C.muted }}>
+              <p className="text-[10px]" style={{ color: C.muted }}>
                 {entries.length > 8
                   ? 'Very high — likely account sharing or suspicious activity'
                   : 'Elevated — monitor for account sharing'}
@@ -1129,7 +1133,7 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
         {/* IP list */}
         <div className="overflow-y-auto px-5 py-4" style={{ maxHeight: 380 }}>
           {entries.length === 0 ? (
-            <p className="text-center text-[13px] py-6" style={{ color:C.muted }}>
+            <p className="text-center text-[13px] py-6" style={{ color: C.muted }}>
               No login history found
             </p>
           ) : (
@@ -1139,25 +1143,25 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl border"
                   style={{ borderColor: C.border, backgroundColor: i === 0 ? C.bg : '#fff' }}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                       style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
-                    <Globe size={14} style={{ color:C.limeDeep }} />
+                    style={{ backgroundColor: 'rgba(143,255,0,0.1)' }}>
+                    <Globe size={14} style={{ color: C.limeDeep }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-[12px] font-bold font-mono" style={{ color:C.dark }}>{ip}</p>
+                      <p className="text-[12px] font-bold font-mono" style={{ color: C.dark }}>{ip}</p>
                       {i === 0 && (
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                              style={{ backgroundColor:C.limeTint, color:C.limeDeep }}>Latest</span>
+                          style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>Latest</span>
                       )}
                     </div>
-                    <p className="text-[10px]" style={{ color:C.muted }}>
+                    <p className="text-[10px]" style={{ color: C.muted }}>
                       {info.location || 'Location unknown'}
                       {' · '}{info.count} login{info.count !== 1 ? 's' : ''}
                       {' · '}{info.lastSeen ? timeAgo(info.lastSeen) : '—'}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[11px] font-bold" style={{ color:C.text }}>{info.count}×</p>
+                    <p className="text-[11px] font-bold" style={{ color: C.text }}>{info.count}×</p>
                   </div>
                 </div>
               ))}
@@ -1166,10 +1170,10 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t" style={{ borderColor:C.border }}>
+        <div className="px-5 py-3 border-t" style={{ borderColor: C.border }}>
           <button onClick={onClose}
             className="w-full py-2.5 rounded-xl text-[13px] font-semibold"
-            style={{ backgroundColor:C.bg, color:C.muted }}>
+            style={{ backgroundColor: C.bg, color: C.muted }}>
             Close
           </button>
         </div>
@@ -1181,10 +1185,10 @@ function IpDetailModal({ user, onClose }: { user: any; onClose: () => void }) {
 // -- Export Dropdown --------------------------------------------
 function ExportDropdown({ onExportPage, users }: {
   onExportPage?: () => void
-  users:         any[]
+  users: any[]
 }) {
-  const supabase    = createClient()
-  const [open,      setOpen]      = useState(false)
+  const supabase = createClient()
+  const [open, setOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
 
   async function exportAll() {
@@ -1198,12 +1202,12 @@ function ExportDropdown({ onExportPage, users }: {
       if (!res.ok) throw new Error('Export failed')
 
       // Trigger download
-      const blob     = await res.blob()
-      const url      = URL.createObjectURL(blob)
-      const a        = document.createElement('a')
-      const date     = new Date().toISOString().split('T')[0]
-      a.href         = url
-      a.download     = `riazify-users-${date}.csv`
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const date = new Date().toISOString().split('T')[0]
+      a.href = url
+      a.download = `riazify-users-${date}.csv`
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) {
@@ -1215,30 +1219,30 @@ function ExportDropdown({ onExportPage, users }: {
   return (
     <div className="relative shrink-0">
       <button onClick={() => setOpen(s => !s)}
-          className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold hover:opacity-80 border"
-          style={{ borderColor:C.border, backgroundColor:C.surface, color:C.muted }}>
-          {exporting
-              ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.limeDeep }} />
-              : <Download size={14} />}
-          Export
-          <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition:'0.2s' }} />
+        className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold hover:opacity-80 border"
+        style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+        {exporting
+          ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.limeDeep }} />
+          : <Download size={14} />}
+        Export
+        <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute top-full left-0 mt-1.5 z-50 rounded-2xl border overflow-hidden shadow-xl min-w-[200px]"
-               style={{ backgroundColor:'#fff', borderColor:C.border }}>
+            style={{ backgroundColor: '#fff', borderColor: C.border }}>
             <button onClick={() => { onExportPage?.(); setOpen(false) }}
               className="w-full flex flex-col px-4 py-3 text-left hover:bg-gray-50 border-b transition-colors"
-              style={{ borderColor:C.border }}>
-              <p className="text-[13px] font-bold" style={{ color:C.dark }}>Export Current Page</p>
-              <p className="text-[10px]" style={{ color:C.muted }}>{users.length} visible users</p>
+              style={{ borderColor: C.border }}>
+              <p className="text-[13px] font-bold" style={{ color: C.dark }}>Export Current Page</p>
+              <p className="text-[10px]" style={{ color: C.muted }}>{users.length} visible users</p>
             </button>
             <button onClick={exportAll} disabled={exporting}
               className="w-full flex flex-col px-4 py-3 text-left hover:bg-gray-50 transition-colors disabled:opacity-50">
-              <p className="text-[13px] font-bold" style={{ color:C.dark }}>Export All Users</p>
-              <p className="text-[10px]" style={{ color:C.muted }}>Every user, all pages — full CSV</p>
+              <p className="text-[13px] font-bold" style={{ color: C.dark }}>Export All Users</p>
+              <p className="text-[10px]" style={{ color: C.muted }}>Every user, all pages — full CSV</p>
             </button>
           </div>
         </>
@@ -1247,21 +1251,21 @@ function ExportDropdown({ onExportPage, users }: {
   )
 }
 
-function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, segment, onSegment, activeTag, onTag, onAddUser, onRefresh, onExport, advFilters, onAdvFilters, pageSize, onPageSize, 
-showing, total, canDo = () => true }: {
-    users:any[]; searchInput:string; onSearch:(v:string)=>void; onClear:()=>void
-    filter:string; onFilter:(f:string)=>void
-    segment:string|null; onSegment:(s:string|null)=>void
-    activeTag:string|null; onTag:(t:string|null)=>void
-    onAddUser?:()=>void; onRefresh:()=>void; onExport?:()=>void
-    advFilters: AdvancedFilters; onAdvFilters:(f:AdvancedFilters)=>void
-    pageSize:number; onPageSize:(n:number)=>void
-    showing:number; total:number
+function ControlsBar({ users, searchInput, onSearch, onClear, filter, onFilter, segment, onSegment, activeTag, onTag, onAddUser, onRefresh, onExport, advFilters, onAdvFilters, pageSize, onPageSize,
+  showing, total, canDo = () => true }: {
+    users: any[]; searchInput: string; onSearch: (v: string) => void; onClear: () => void
+    filter: string; onFilter: (f: string) => void
+    segment: string | null; onSegment: (s: string | null) => void
+    activeTag: string | null; onTag: (t: string | null) => void
+    onAddUser?: () => void; onRefresh: () => void; onExport?: () => void
+    advFilters: AdvancedFilters; onAdvFilters: (f: AdvancedFilters) => void
+    pageSize: number; onPageSize: (n: number) => void
+    showing: number; total: number
     canDo?: (action: string) => boolean
   }) {
-  const [focused,        setFocused]        = useState(false)
+  const [focused, setFocused] = useState(false)
   const [showAdvFilters, setShowAdvFilters] = useState(false)
-  const [refreshing,     setRefreshing]     = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const hasActiveFilters = !isDefaultFilters(advFilters)
 
   async function handleRefresh() {
@@ -1270,9 +1274,9 @@ showing, total, canDo = () => true }: {
     setTimeout(() => setRefreshing(false), 600)
   }
 
-  const pastDueCount  = users.filter(u => statusOf(u) === 'Past Due').length
-  const expiredCount  = users.filter(u => statusOf(u) === 'Expired' && planOf(u).toLowerCase().includes('free')).length
-  const supportCount  = users.filter(hasDispute).length
+  const pastDueCount = users.filter(u => statusOf(u) === 'Past Due').length
+  const expiredCount = users.filter(u => statusOf(u) === 'Expired' && planOf(u).toLowerCase().includes('free')).length
+  const supportCount = users.filter(hasDispute).length
 
   // Count per segment
   const segmentCounts = Object.keys(SEGMENT_CFG).reduce((acc, key) => {
@@ -1287,11 +1291,11 @@ showing, total, canDo = () => true }: {
   }, {} as Record<string, number>)
 
   const chips = [
-    { label:'All',             icon:Users,         badge:undefined       },
-    { label:'Paid Plans',      icon:Shield,         badge:undefined       },
-    { label:'Expired Trials',  icon:TimerOff,       badge:expiredCount    },
-    { label:'Past Due',        icon:AlertTriangle,  badge:pastDueCount    },
-    { label:'Support Waiting', icon:Headphones,     badge:supportCount    },
+    { label: 'All', icon: Users, badge: undefined },
+    { label: 'Paid Plans', icon: Shield, badge: undefined },
+    { label: 'Expired Trials', icon: TimerOff, badge: expiredCount },
+    { label: 'Past Due', icon: AlertTriangle, badge: pastDueCount },
+    { label: 'Support Waiting', icon: Headphones, badge: supportCount },
   ]
 
   return (
@@ -1299,43 +1303,43 @@ showing, total, canDo = () => true }: {
       {/* Row 1: search + buttons */}
       <div className="flex items-center gap-3">
         <div className="flex-1 flex items-center gap-2 h-11 px-3.5 rounded-xl border transition-all"
-             style={{
-               backgroundColor: C.surface,
-               borderColor:     focused ? C.lime : C.border,
-               boxShadow:       focused ? `0 0 0 3px rgba(143,255,0,0.15)` : 'none',
-             }}>
-          <Search size={15} style={{ color: focused ? C.limeDeep : C.muted, flexShrink:0 }} />
+          style={{
+            backgroundColor: C.surface,
+            borderColor: focused ? C.lime : C.border,
+            boxShadow: focused ? `0 0 0 3px rgba(143,255,0,0.15)` : 'none',
+          }}>
+          <Search size={15} style={{ color: focused ? C.limeDeep : C.muted, flexShrink: 0 }} />
           <input
-              value={searchInput}
-              onChange={e => canDo('filter_search') && onSearch(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
+            value={searchInput}
+            onChange={e => canDo('filter_search') && onSearch(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder="Search users by name or email..."
             className="flex-1 text-[13px] bg-transparent"
-            style={{ color:C.text, outline:'none', border:'none', boxShadow:'none' }} />
+            style={{ color: C.text, outline: 'none', border: 'none', boxShadow: 'none' }} />
           {searchInput && (
-            <button onClick={onClear}><X size={14} style={{ color:C.muted }} /></button>
+            <button onClick={onClear}><X size={14} style={{ color: C.muted }} /></button>
           )}
         </div>
 
         {/* Advanced filter button */}
-          <button onClick={() => setShowAdvFilters(true)}
+        <button onClick={() => setShowAdvFilters(true)}
           className="relative w-11 h-11 flex items-center justify-center rounded-xl border shrink-0 hover:opacity-80"
           title="Advanced Filters"
           style={{
-            borderColor:     hasActiveFilters ? C.limeDeep : C.border,
-            backgroundColor: hasActiveFilters ? C.limeTint  : C.surface,
+            borderColor: hasActiveFilters ? C.limeDeep : C.border,
+            backgroundColor: hasActiveFilters ? C.limeTint : C.surface,
           }}>
           <Filter size={15} style={{ color: hasActiveFilters ? C.limeDeep : C.muted }} />
           {hasActiveFilters && (
             <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                 style={{ backgroundColor: C.limeDeep }}>
+              style={{ backgroundColor: C.limeDeep }}>
               <span className="text-[7px] font-black text-white">
                 {[advFilters.plans.length > 0, advFilters.statuses.length > 0,
-                  advFilters.health !== 'all', advFilters.ebay !== 'all',
-                  advFilters.joined !== 'all', advFilters.lastActive !== 'all',
-                  advFilters.ltv !== 'all', advFilters.dispute !== 'all',
-                  advFilters.country !== 'all'].filter(Boolean).length}
+                advFilters.health !== 'all', advFilters.ebay !== 'all',
+                advFilters.joined !== 'all', advFilters.lastActive !== 'all',
+                advFilters.ltv !== 'all', advFilters.dispute !== 'all',
+                advFilters.country !== 'all'].filter(Boolean).length}
               </span>
             </div>
           )}
@@ -1343,7 +1347,7 @@ showing, total, canDo = () => true }: {
 
         <button onClick={handleRefresh} disabled={refreshing}
           className="w-11 h-11 flex items-center justify-center rounded-xl border shrink-0 hover:opacity-80 transition-all"
-          style={{ borderColor:C.border, backgroundColor:C.surface }}>
+          style={{ borderColor: C.border, backgroundColor: C.surface }}>
           <RefreshCw size={15}
             className={refreshing ? 'animate-spin' : ''}
             style={{ color: refreshing ? C.limeDeep : C.muted }} />
@@ -1351,18 +1355,18 @@ showing, total, canDo = () => true }: {
         {/* Export dropdown */}
         {onExport && <ExportDropdown onExportPage={onExport} users={users} />}
         {onAddUser && (
-         <button onClick={onAddUser}
-              className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
-              style={{ backgroundColor:C.lime, color:'#1a2410' }}>
-              <Plus size={14} /> Add New User
-            </button>
+          <button onClick={onAddUser}
+            className="flex items-center gap-2 px-4 h-11 rounded-xl text-[13px] font-bold shrink-0 hover:opacity-90"
+            style={{ backgroundColor: C.lime, color: '#1a2410' }}>
+            <Plus size={14} /> Add New User
+          </button>
         )}
       </div>
 
       {/* Active advanced filter chips */}
       {hasActiveFilters && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-black tracking-wider shrink-0" style={{ color:C.limeDeep }}>
+          <span className="text-[10px] font-black tracking-wider shrink-0" style={{ color: C.limeDeep }}>
             FILTERING BY
           </span>
           {advFilters.plans.map(p => (
@@ -1442,13 +1446,13 @@ showing, total, canDo = () => true }: {
 
       {/* Advanced filter panel */}
       {showAdvFilters && (
-          <AdvancedFilterPanel
-            users={users}
-            filters={advFilters}
-            onApply={onAdvFilters}
-            onClose={() => setShowAdvFilters(false)}
-            canDo={canDo}
-          />
+        <AdvancedFilterPanel
+          users={users}
+          filters={advFilters}
+          onApply={onAdvFilters}
+          onClose={() => setShowAdvFilters(false)}
+          canDo={canDo}
+        />
       )}
 
       {/* Row 2: filter chips + count */}
@@ -1459,15 +1463,15 @@ showing, total, canDo = () => true }: {
             <button key={ch.label} onClick={() => canDo('filter_search') && (onFilter(ch.label), onSegment(null))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
-                  backgroundColor: isActive ? C.lime    : C.surface,
-                  borderColor: isActive ? C.lime : C.border,
-                  color:           isActive ? C.dark : C.muted,
+                backgroundColor: isActive ? C.lime : C.surface,
+                borderColor: isActive ? C.lime : C.border,
+                color: isActive ? C.dark : C.muted,
               }}>
               <Icon size={12} style={{ color: isActive ? '#1a2410' : C.muted }} />
-                {ch.label}
-                {ch.badge != null && ch.badge > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                      style={{ backgroundColor: isActive ? '#1a2410' : C.red, color: isActive ? C.lime : '#fff' }}>
+              {ch.label}
+              {ch.badge != null && ch.badge > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
+                  style={{ backgroundColor: isActive ? '#1a2410' : C.red, color: isActive ? C.lime : '#fff' }}>
                   {ch.badge}
                 </span>
               )}
@@ -1475,20 +1479,20 @@ showing, total, canDo = () => true }: {
           )
         })}
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-[11px] font-semibold" style={{ color:C.muted }}>
+          <span className="text-[11px] font-semibold" style={{ color: C.muted }}>
             Showing {showing} of {total} users
           </span>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px]" style={{ color:C.muted }}>Per page:</span>
+            <span className="text-[10px]" style={{ color: C.muted }}>Per page:</span>
             <div className="flex items-center gap-1">
               {PAGE_SIZES.map(n => (
                 <button key={n} onClick={() => onPageSize(n)}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all"
-                    style={{
-                      backgroundColor: pageSize === n ? C.lime    : C.bg,
-                      color:           pageSize === n ? '#1a2410' : C.muted,
-                      border:          `1px solid ${pageSize === n ? C.lime : C.border}`,
-                    }}>
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all"
+                  style={{
+                    backgroundColor: pageSize === n ? C.lime : C.bg,
+                    color: pageSize === n ? '#1a2410' : C.muted,
+                    border: `1px solid ${pageSize === n ? C.lime : C.border}`,
+                  }}>
                   {n}
                 </button>
               ))}
@@ -1499,29 +1503,29 @@ showing, total, canDo = () => true }: {
 
       {/* Row 3: segment chips */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] font-black tracking-wider shrink-0" style={{ color:C.muted }}>
+        <span className="text-[10px] font-black tracking-wider shrink-0" style={{ color: C.muted }}>
           SEGMENTS
         </span>
         {Object.entries(SEGMENT_CFG).map(([key, cfg]) => {
-          const count    = segmentCounts[key] ?? 0
+          const count = segmentCounts[key] ?? 0
           const isActive = segment === key
           return (
             <button key={key}
-                onClick={() => canDo('filter_search') && (onSegment(isActive ? null : key), onFilter('All'))}
+              onClick={() => canDo('filter_search') && (onSegment(isActive ? null : key), onFilter('All'))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
-                backgroundColor: isActive ? cfg.bg      : C.surface,
-                borderColor:     isActive ? cfg.color   : C.border,
-                color:           isActive ? cfg.color   : C.muted,
+                backgroundColor: isActive ? cfg.bg : C.surface,
+                borderColor: isActive ? cfg.color : C.border,
+                color: isActive ? cfg.color : C.muted,
               }}>
               <cfg.Icon size={12} style={{ color: isActive ? cfg.color : C.muted }} />
               {cfg.label}
               {count > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                      style={{
-                        backgroundColor: isActive ? cfg.color : C.bg,
-                        color:           isActive ? '#fff'    : cfg.color,
-                      }}>
+                  style={{
+                    backgroundColor: isActive ? cfg.color : C.bg,
+                    color: isActive ? '#fff' : cfg.color,
+                  }}>
                   {count}
                 </span>
               )}
@@ -1532,36 +1536,36 @@ showing, total, canDo = () => true }: {
 
       {/* Row 4: tag filter chips */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] font-black tracking-wider shrink-0" style={{ color:C.muted }}>
+        <span className="text-[10px] font-black tracking-wider shrink-0" style={{ color: C.muted }}>
           TAGS
         </span>
         {Object.entries(TAG_CFG).map(([key, cfg]) => {
-          const count    = tagCounts[key] ?? 0
+          const count = tagCounts[key] ?? 0
           const isActive = activeTag === key
           if (count === 0) return null
           return (
             <button key={key}
-                onClick={() => canDo('filter_search') && onTag(isActive ? null : key)}
+              onClick={() => canDo('filter_search') && onTag(isActive ? null : key)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all shrink-0"
               style={{
-                backgroundColor: isActive ? cfg.bg    : C.surface,
-                borderColor:     isActive ? cfg.color : C.border,
-                color:           isActive ? cfg.color : C.muted,
+                backgroundColor: isActive ? cfg.bg : C.surface,
+                borderColor: isActive ? cfg.color : C.border,
+                color: isActive ? cfg.color : C.muted,
               }}>
               <cfg.Icon size={11} style={{ color: isActive ? cfg.color : C.muted }} />
               {cfg.label}
               <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                    style={{
-                      backgroundColor: isActive ? cfg.color : C.bg,
-                      color:           isActive ? '#fff'    : cfg.color,
-                    }}>
+                style={{
+                  backgroundColor: isActive ? cfg.color : C.bg,
+                  color: isActive ? '#fff' : cfg.color,
+                }}>
                 {count}
               </span>
             </button>
           )
         })}
         {Object.values(tagCounts).every(c => c === 0) && (
-          <span className="text-[10px]" style={{ color:C.muted }}>No tags applied yet</span>
+          <span className="text-[10px]" style={{ color: C.muted }}>No tags applied yet</span>
         )}
       </div>
     </div>
@@ -1577,11 +1581,11 @@ function Checkbox({ checked, onChange, indeterminate = false }: {
 }) {
   return (
     <div onClick={onChange}
-         className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer shrink-0 transition-all"
-         style={{
-           backgroundColor: checked ? C.lime : 'transparent',
-           borderColor:     checked ? C.lime : C.border,
-         }}>
+      className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center cursor-pointer shrink-0 transition-all"
+      style={{
+        backgroundColor: checked ? C.lime : 'transparent',
+        borderColor: checked ? C.lime : C.border,
+      }}>
       {checked && <Check size={9} style={{ color: C.lime }} />}
       {indeterminate && !checked && (
         <div className="w-2 h-0.5 rounded" style={{ backgroundColor: C.muted }} />
@@ -1591,28 +1595,28 @@ function Checkbox({ checked, onChange, indeterminate = false }: {
 }
 
 function UserTable({ users, isInvestorMode, searchQuery, filter, segment, activeTag, advFilters, onlineIds, onDrawer, onUpdated, showToast, onGoToMarketing, canDo = () => true }: {
-    users:any[]; isInvestorMode:boolean; searchQuery:string; filter:string
-    segment:string|null; activeTag:string|null; advFilters: AdvancedFilters
-    onlineIds: Set<string>
-    onDrawer:(u:any)=>void; onUpdated:(id:string,field:string,val:any)=>void
-    showToast:(msg:string,type:'success'|'error'|'info')=>void
-    onGoToMarketing:(users:any[])=>void
-    canDo?: (action: string) => boolean
-  }) {
+  users: any[]; isInvestorMode: boolean; searchQuery: string; filter: string
+  segment: string | null; activeTag: string | null; advFilters: AdvancedFilters
+  onlineIds: Set<string>
+  onDrawer: (u: any) => void; onUpdated: (id: string, field: string, val: any) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  onGoToMarketing: (users: any[]) => void
+  canDo?: (action: string) => boolean
+}) {
   const supabase = createClient()
-  const [selectedIds,   setSelectedIds]   = useState<Set<string>>(new Set())
-  const [showPlanMenu,  setShowPlanMenu]  = useState(false)
-  const [bulkLoading,   setBulkLoading]   = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showPlanMenu, setShowPlanMenu] = useState(false)
+  const [bulkLoading, setBulkLoading] = useState(false)
   const [showBulkSuspend, setShowBulkSuspend] = useState(false)
-  const [sortField,     setSortField]     = useState<string>('created_at')
-  const [sortDir,       setSortDir]       = useState<'asc'|'desc'>('desc')
-  const [hiddenCols,    setHiddenCols]    = useState<Set<string>>(() => {
+  const [sortField, setSortField] = useState<string>('created_at')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [hiddenCols, setHiddenCols] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('crm_hidden_cols') ?? '[]')) }
     catch { return new Set() }
   })
-  const [showColMenu,   setShowColMenu]   = useState(false)
-    const [colMenuPos, setColMenuPos] = useState({ top: 0, right: 0 })
-    const colMenuBtnRef = useRef<HTMLButtonElement>(null)
+  const [showColMenu, setShowColMenu] = useState(false)
+  const [colMenuPos, setColMenuPos] = useState({ top: 0, right: 0 })
+  const colMenuBtnRef = useRef<HTMLButtonElement>(null)
 
   function toggleCol(col: string) {
     setHiddenCols(prev => {
@@ -1633,19 +1637,19 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
   if (searchQuery) {
     const q = searchQuery.toLowerCase()
     filtered = filtered.filter(u =>
-      (u.name    ?? '').toLowerCase().includes(q) ||
-      (u.email   ?? '').toLowerCase().includes(q) ||
+      (u.name ?? '').toLowerCase().includes(q) ||
+      (u.email ?? '').toLowerCase().includes(q) ||
       (u.country ?? '').toLowerCase().includes(q) ||
-      (u.id      ?? '').toLowerCase().startsWith(q)
+      (u.id ?? '').toLowerCase().startsWith(q)
     )
   }
   if (segment) {
     filtered = filtered.filter(u => getUserSegment(u) === segment)
   } else if (filter !== 'All') {
     filtered = filtered.filter(u => {
-      if (filter === 'Paid Plans')      return mrrOf(u) > 0
-      if (filter === 'Expired Trials')  return statusOf(u) === 'Expired' && planOf(u).toLowerCase().includes('free')
-      if (filter === 'Past Due')        return statusOf(u) === 'Past Due'
+      if (filter === 'Paid Plans') return mrrOf(u) > 0
+      if (filter === 'Expired Trials') return statusOf(u) === 'Expired' && planOf(u).toLowerCase().includes('free')
+      if (filter === 'Past Due') return statusOf(u) === 'Past Due'
       if (filter === 'Support Waiting') return hasDispute(u)
       return true
     })
@@ -1662,22 +1666,22 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
   filtered = [...filtered].sort((a, b) => {
     let aVal: any, bVal: any
     switch (sortField) {
-      case 'name':       aVal = (a.name ?? a.email ?? '').toLowerCase();       bVal = (b.name ?? b.email ?? '').toLowerCase(); break
-      case 'plan':       aVal = planOf(a);                                      bVal = planOf(b); break
-      case 'status':     aVal = statusOf(a);                                    bVal = statusOf(b); break
-      case 'health':     aVal = calcHealthScore(a);                             bVal = calcHealthScore(b); break
-      case 'last_seen':  aVal = a.last_seen ? new Date(a.last_seen).getTime() : 0;  bVal = b.last_seen ? new Date(b.last_seen).getTime() : 0; break
+      case 'name': aVal = (a.name ?? a.email ?? '').toLowerCase(); bVal = (b.name ?? b.email ?? '').toLowerCase(); break
+      case 'plan': aVal = planOf(a); bVal = planOf(b); break
+      case 'status': aVal = statusOf(a); bVal = statusOf(b); break
+      case 'health': aVal = calcHealthScore(a); bVal = calcHealthScore(b); break
+      case 'last_seen': aVal = a.last_seen ? new Date(a.last_seen).getTime() : 0; bVal = b.last_seen ? new Date(b.last_seen).getTime() : 0; break
       case 'created_at': aVal = a.created_at ? new Date(a.created_at).getTime() : 0; bVal = b.created_at ? new Date(b.created_at).getTime() : 0; break
-      default:           aVal = 0; bVal = 0
+      default: aVal = 0; bVal = 0
     }
     if (aVal < bVal) return sortDir === 'asc' ? -1 : 1
-    if (aVal > bVal) return sortDir === 'asc' ?  1 : -1
+    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1
     return 0
   })
 
   // -- Bulk action handlers ----------------------------------
   const selectedCount = selectedIds.size
-  const allSelected   = filtered.length > 0 && filtered.every(u => selectedIds.has(u.id))
+  const allSelected = filtered.length > 0 && filtered.every(u => selectedIds.has(u.id))
 
   function toggleAll() {
     if (allSelected) {
@@ -1717,7 +1721,7 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
 
   function bulkEmail() {
     const selected = filtered.filter(u => selectedIds.has(u.id))
-    const emails   = selected.map(u => u.email).filter(Boolean).join(',')
+    const emails = selected.map(u => u.email).filter(Boolean).join(',')
     if (!emails) { showToast('No email addresses found', 'error'); return }
     window.open(`mailto:${emails}`)
     showToast(`Opened email for ${selected.length} users`, 'info')
@@ -1726,9 +1730,9 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
   const someSelected = selectedCount > 0 && !allSelected
 
   const COL_WIDTHS: Record<string, string> = {
-    PLAN:'1fr', STATUS:'1fr', JOINED:'0.9fr', ACTIVE:'0.9fr',
-    LOCATION:'0.8fr', HEALTH:'1fr', EBAY:'0.8fr',
-    IPS:'0.6fr', DEVICES:'0.6fr', TEAM:'0.6fr',
+    PLAN: '1fr', STATUS: '1fr', JOINED: '0.9fr', ACTIVE: '0.9fr',
+    LOCATION: '0.8fr', HEALTH: '1fr', EBAY: '0.8fr',
+    IPS: '0.6fr', DEVICES: '0.6fr', TEAM: '0.6fr',
   }
   const TOGGLEABLE_COLS = Object.keys(COL_WIDTHS)
   const cols = '40px 2fr ' +
@@ -1743,21 +1747,21 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
   }
 
   const HeaderCell = ({ label }: { label: string }) => {
-    const field  = SORTABLE[label]
+    const field = SORTABLE[label]
     const active = field && sortField === field
     if (!field) return (
-      <span className="text-[10px] font-bold tracking-wider" style={{ color:C.muted }}>{label}</span>
+      <span className="text-[10px] font-bold tracking-wider" style={{ color: C.muted }}>{label}</span>
     )
     return (
       <button onClick={() => toggleSort(field)}
         className="flex items-center gap-1 group"
         title={`Sort by ${label}`}>
         <span className="text-[10px] font-bold tracking-wider transition-colors"
-              style={{ color: active ? C.limeDeep : C.muted }}>
+          style={{ color: active ? C.limeDeep : C.muted }}>
           {label}
         </span>
         <span className="text-[9px] font-bold transition-all"
-              style={{ color: active ? C.limeDeep : 'transparent', transform: active && sortDir === 'asc' ? 'rotate(180deg)' : 'none', display:'inline-block' }}>
+          style={{ color: active ? C.limeDeep : 'transparent', transform: active && sortDir === 'asc' ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>
           ?
         </span>
       </button>
@@ -1765,120 +1769,120 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
   }
 
   if (filtered.length === 0) return (
-    <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor:C.surface, borderColor:C.border }}>
+    <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
       <div className="flex flex-col items-center py-16 gap-3">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor:C.bg }}>
-          <Users size={22} style={{ color:C.muted }} />
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.bg }}>
+          <Users size={22} style={{ color: C.muted }} />
         </div>
-        <p className="text-[14px] font-bold" style={{ color:C.text }}>No users match this filter</p>
-        <p className="text-[12px]" style={{ color:C.muted }}>Try adjusting your search or filter</p>
+        <p className="text-[14px] font-bold" style={{ color: C.text }}>No users match this filter</p>
+        <p className="text-[12px]" style={{ color: C.muted }}>Try adjusting your search or filter</p>
       </div>
     </div>
   )
 
   return (
-    <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor:C.surface, borderColor:C.border }}>
+    <div className="rounded-2xl border overflow-hidden" style={{ backgroundColor: C.surface, borderColor: C.border }}>
       {/* Header */}
-      <div className="grid px-5 py-3 border-b" style={{ gridTemplateColumns:cols, gap:12, borderColor:C.border, backgroundColor:C.bg }}>
+      <div className="grid px-5 py-3 border-b" style={{ gridTemplateColumns: cols, gap: 12, borderColor: C.border, backgroundColor: C.bg }}>
         <Checkbox checked={allSelected} indeterminate={someSelected} onChange={toggleAll} />
         <HeaderCell label="USER" />
-        {!hiddenCols.has('PLAN')     && <HeaderCell label="PLAN" />}
-        {!hiddenCols.has('STATUS')   && <HeaderCell label="STATUS" />}
-        {!hiddenCols.has('JOINED')   && <HeaderCell label="JOINED" />}
-        {!hiddenCols.has('ACTIVE')   && <HeaderCell label="ACTIVE" />}
+        {!hiddenCols.has('PLAN') && <HeaderCell label="PLAN" />}
+        {!hiddenCols.has('STATUS') && <HeaderCell label="STATUS" />}
+        {!hiddenCols.has('JOINED') && <HeaderCell label="JOINED" />}
+        {!hiddenCols.has('ACTIVE') && <HeaderCell label="ACTIVE" />}
         {!hiddenCols.has('LOCATION') && <HeaderCell label="LOCATION" />}
-        {!hiddenCols.has('HEALTH')   && <HeaderCell label="HEALTH" />}
-        {!hiddenCols.has('EBAY')     && <HeaderCell label="EBAY" />}
-        {!hiddenCols.has('IPS')      && <HeaderCell label="IPS" />}
-        {!hiddenCols.has('DEVICES')  && <HeaderCell label="DEVICES" />}
-        {!hiddenCols.has('TEAM')     && <HeaderCell label="TEAM" />}
+        {!hiddenCols.has('HEALTH') && <HeaderCell label="HEALTH" />}
+        {!hiddenCols.has('EBAY') && <HeaderCell label="EBAY" />}
+        {!hiddenCols.has('IPS') && <HeaderCell label="IPS" />}
+        {!hiddenCols.has('DEVICES') && <HeaderCell label="DEVICES" />}
+        {!hiddenCols.has('TEAM') && <HeaderCell label="TEAM" />}
         {/* Column visibility toggle */}
         <div className="flex items-center justify-end gap-1 relative">
           <HeaderCell label="ACTIONS" />
           <button ref={colMenuBtnRef} onClick={() => {
-                if (!showColMenu && colMenuBtnRef.current) {
-                  const rect = colMenuBtnRef.current.getBoundingClientRect()
-                  setColMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
-                }
-                setShowColMenu(s => !s)
-              }}
-              className="p-1 rounded-md hover:bg-gray-100 transition-colors ml-1"
-              title="Show/hide columns">
-              <SlidersHorizontal size={11} style={{ color: hiddenCols.size > 0 ? C.limeDeep : C.muted }} />
-            </button>
-            {showColMenu && createPortal(
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
-                <div className="fixed z-50 rounded-2xl border shadow-xl overflow-hidden min-w-[160px]"
-                     style={{ backgroundColor:'#fff', borderColor:C.border, top: colMenuPos.top, right: colMenuPos.right }}>
+            if (!showColMenu && colMenuBtnRef.current) {
+              const rect = colMenuBtnRef.current.getBoundingClientRect()
+              setColMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+            }
+            setShowColMenu(s => !s)
+          }}
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors ml-1"
+            title="Show/hide columns">
+            <SlidersHorizontal size={11} style={{ color: hiddenCols.size > 0 ? C.limeDeep : C.muted }} />
+          </button>
+          {showColMenu && createPortal(
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
+              <div className="fixed z-50 rounded-2xl border shadow-xl overflow-hidden min-w-[160px]"
+                style={{ backgroundColor: '#fff', borderColor: C.border, top: colMenuPos.top, right: colMenuPos.right }}>
                 <div className="px-3 py-2 border-b flex items-center justify-between"
-                     style={{ borderColor:C.border, backgroundColor:C.bg }}>
-                  <p className="text-[10px] font-black tracking-wider" style={{ color:C.muted }}>COLUMNS</p>
+                  style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                  <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>COLUMNS</p>
                   {hiddenCols.size > 0 && (
                     <button onClick={() => {
                       setHiddenCols(new Set())
                       localStorage.removeItem('crm_hidden_cols')
-                    }} className="text-[9px] font-bold" style={{ color:C.limeDeep }}>
+                    }} className="text-[9px] font-bold" style={{ color: C.limeDeep }}>
                       Reset
                     </button>
                   )}
                 </div>
                 {TOGGLEABLE_COLS.map(col => (
-                      <button key={col} onClick={() => toggleCol(col)}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors"
-                        style={{ borderBottom:`1px solid ${C.border}` }}>
-                        <div className="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0"
-                             style={{
-                               backgroundColor: !hiddenCols.has(col) ? C.lime    : 'transparent',
-                               borderColor:     !hiddenCols.has(col) ? C.lime    : C.border,
-                             }}>
-                          {!hiddenCols.has(col) && <Check size={8} style={{ color: '#1a2410' }} />}
-                        </div>
-                      <span className="text-[11px] font-semibold" style={{ color:C.text }}>{col}</span>
-                    </button>
-                  ))}
-                </div>
-              </>,
-              document.body
-            )}
+                  <button key={col} onClick={() => toggleCol(col)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors"
+                    style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <div className="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0"
+                      style={{
+                        backgroundColor: !hiddenCols.has(col) ? C.lime : 'transparent',
+                        borderColor: !hiddenCols.has(col) ? C.lime : C.border,
+                      }}>
+                      {!hiddenCols.has(col) && <Check size={8} style={{ color: '#1a2410' }} />}
+                    </div>
+                    <span className="text-[11px] font-semibold" style={{ color: C.text }}>{col}</span>
+                  </button>
+                ))}
+              </div>
+            </>,
+            document.body
+          )}
         </div>
       </div>
 
       {/* Rows */}
-      <div className="flex flex-col divide-y" style={{ borderColor:'#f0f4ee' }}>
+      <div className="flex flex-col divide-y" style={{ borderColor: '#f0f4ee' }}>
         {filtered.map((u, i) => (
-            <UserRow
-              key={u.id}
-              u={u}
-              i={i}
-              cols={cols}
-              onlineIds={onlineIds}
-              selectedIds={selectedIds}
-              toggleOne={toggleOne}
-              onDrawer={onDrawer}
-              isInvestorMode={isInvestorMode}
-              onUpdated={onUpdated}
-              showToast={showToast}
-              hiddenCols={hiddenCols}
-              canDo={canDo}
-            />
-          ))}
+          <UserRow
+            key={u.id}
+            u={u}
+            i={i}
+            cols={cols}
+            onlineIds={onlineIds}
+            selectedIds={selectedIds}
+            toggleOne={toggleOne}
+            onDrawer={onDrawer}
+            isInvestorMode={isInvestorMode}
+            onUpdated={onUpdated}
+            showToast={showToast}
+            hiddenCols={hiddenCols}
+            canDo={canDo}
+          />
+        ))}
       </div>
 
       {/* -- Floating Bulk Action Bar ------------------------- */}
       {selectedCount > 0 && (
         <div className="fixed bottom-8 left-1/2 z-[9990] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl"
-             style={{
-               transform: 'translateX(-50%)',
-               backgroundColor: C.dark,
-               border: `1px solid rgba(143,255,0,0.3)`,
-               boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-             }}>
+          style={{
+            transform: 'translateX(-50%)',
+            backgroundColor: C.dark,
+            border: `1px solid rgba(143,255,0,0.3)`,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+          }}>
           {/* Count badge */}
           <div className="flex items-center gap-2 pr-3"
-               style={{ borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+            style={{ borderRight: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="w-6 h-6 rounded-full flex items-center justify-center"
-                 style={{ backgroundColor: C.lime }}>
+              style={{ backgroundColor: C.lime }}>
               <span className="text-[10px] font-black" style={{ color: C.dark }}>{selectedCount}</span>
             </div>
             <span className="text-[12px] font-semibold text-white">
@@ -1887,13 +1891,13 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
           </div>
 
           {/* Change Plan dropdown */}
-            {canDo('bulk_change_plan') && <div className="relative">
-              <button onClick={() => setShowPlanMenu(s => !s)} disabled={bulkLoading}
+          {canDo('bulk_change_plan') && <div className="relative">
+            <button onClick={() => setShowPlanMenu(s => !s)} disabled={bulkLoading}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80 disabled:opacity-50"
               style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
               {bulkLoading
                 ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-                       style={{ borderTopColor: C.lime }} />
+                  style={{ borderTopColor: C.lime }} />
                 : <Shield size={13} style={{ color: C.lime }} />}
               Change Plan
             </button>
@@ -1901,8 +1905,8 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowPlanMenu(false)} />
                 <div className="absolute bottom-full mb-2 left-0 z-50 rounded-xl border overflow-hidden shadow-xl"
-                     style={{ backgroundColor: '#1a2410', borderColor: 'rgba(143,255,0,0.2)', minWidth: 160 }}>
-                  {['Free Trial','Pro Plan','Elite Plan'].map(p => (
+                  style={{ backgroundColor: '#1a2410', borderColor: 'rgba(143,255,0,0.2)', minWidth: 160 }}>
+                  {['Free Trial', 'Pro Plan', 'Elite Plan'].map(p => (
                     <button key={p} onClick={() => bulkChangePlan(p)}
                       className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-white/10"
                       style={{ color: '#fff' }}>
@@ -1910,23 +1914,23 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
                     </button>
                   ))}
                 </div>
-                </>
-              )}
-            </div>}
+              </>
+            )}
+          </div>}
 
-            {/* Export Selected */}
-            {canDo('export_csv') && <button onClick={bulkExport}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-                <Download size={13} /> Export CSV
-              </button>}
+          {/* Export Selected */}
+          {canDo('export_csv') && <button onClick={bulkExport}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
+            style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+            <Download size={13} /> Export CSV
+          </button>}
 
           {/* Suspend Selected */}
-            {canDo('suspend_user') && <button onClick={() => setShowBulkSuspend(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
-              style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
-              <Shield size={13} /> Suspend {selectedCount}
-            </button>}
+          {canDo('suspend_user') && <button onClick={() => setShowBulkSuspend(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold hover:opacity-80"
+            style={{ backgroundColor: 'rgba(185,28,28,0.3)', color: '#fca5a5' }}>
+            <Shield size={13} /> Suspend {selectedCount}
+          </button>}
 
           {/* Email All */}
           <button onClick={bulkEmail}
@@ -1947,10 +1951,10 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
       {/* Bulk Suspend Modal */}
       {showBulkSuspend && (
         <BulkSuspendModal
-          users={filtered.filter((u:any) => selectedIds.has(u.id) && u.role !== 'admin')}
+          users={filtered.filter((u: any) => selectedIds.has(u.id) && u.role !== 'admin')}
           onClose={() => setShowBulkSuspend(false)}
           onDone={(count: number) => {
-            filtered.filter((u:any) => selectedIds.has(u.id)).forEach((u:any) =>
+            filtered.filter((u: any) => selectedIds.has(u.id)).forEach((u: any) =>
               onUpdated(u.id, 'account_status', 'Suspended')
             )
             setSelectedIds(new Set())
@@ -1967,42 +1971,42 @@ function UserTable({ users, isInvestorMode, searchQuery, filter, segment, active
 // BULK SUSPEND MODAL
 // --------------------------------------------------------------
 const SUSPEND_REASONS = [
-  { key: 'suspicious_activity',   label: 'Suspicious Activity'         },
-  { key: 'account_sharing',       label: 'Account Sharing / Multi-login'},
-  { key: 'payment_issue',         label: 'Payment Issue / Chargeback'  },
-  { key: 'tos_violation',         label: 'TOS Violation'               },
-  { key: 'fraud_risk',            label: 'Fraud Risk'                  },
-  { key: 'other',                 label: 'Other'                       },
+  { key: 'suspicious_activity', label: 'Suspicious Activity' },
+  { key: 'account_sharing', label: 'Account Sharing / Multi-login' },
+  { key: 'payment_issue', label: 'Payment Issue / Chargeback' },
+  { key: 'tos_violation', label: 'TOS Violation' },
+  { key: 'fraud_risk', label: 'Fraud Risk' },
+  { key: 'other', label: 'Other' },
 ]
 
 const DURATIONS = [
-  { key: 'permanent', label: 'Permanent'  },
-  { key: '7',         label: '7 days'     },
-  { key: '30',        label: '30 days'    },
-  { key: 'custom',    label: 'Custom'     },
+  { key: 'permanent', label: 'Permanent' },
+  { key: '7', label: '7 days' },
+  { key: '30', label: '30 days' },
+  { key: 'custom', label: 'Custom' },
 ]
 
 function BulkSuspendModal({ users, onClose, onDone }: {
-  users:   any[]
+  users: any[]
   onClose: () => void
-  onDone:  (count: number) => void
+  onDone: (count: number) => void
 }) {
   const supabase = createClient()
-  const [excluded,     setExcluded]     = useState<Set<string>>(new Set())
-  const [reason,       setReason]       = useState('')
+  const [excluded, setExcluded] = useState<Set<string>>(new Set())
+  const [reason, setReason] = useState('')
   const [customReason, setCustomReason] = useState('')
-  const [duration,     setDuration]     = useState('permanent')
-  const [customDays,   setCustomDays]   = useState('')
-  const [notify,       setNotify]       = useState(true)
-  const [suspending,   setSuspending]   = useState(false)
-  const [progress,     setProgress]     = useState(0)
-  const [done,         setDone]         = useState(false)
-  const [undoTimer,    setUndoTimer]    = useState(0)
-  const [suspended,    setSuspended]    = useState<string[]>([])
+  const [duration, setDuration] = useState('permanent')
+  const [customDays, setCustomDays] = useState('')
+  const [notify, setNotify] = useState(true)
+  const [suspending, setSuspending] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [done, setDone] = useState(false)
+  const [undoTimer, setUndoTimer] = useState(0)
+  const [suspended, setSuspended] = useState<string[]>([])
 
-  const toSuspend   = users.filter(u => !excluded.has(u.id))
+  const toSuspend = users.filter(u => !excluded.has(u.id))
   const alreadySusp = users.filter(u => u.account_status === 'Suspended')
-  const canProceed  = toSuspend.length > 0 && (reason !== '' && reason !== 'other' || customReason.trim().length > 2)
+  const canProceed = toSuspend.length > 0 && (reason !== '' && reason !== 'other' || customReason.trim().length > 2)
   const finalReason = reason === 'other' ? customReason.trim() : SUSPEND_REASONS.find(r => r.key === reason)?.label ?? ''
 
   function toggleUser(id: string) {
@@ -2022,20 +2026,20 @@ function BulkSuspendModal({ users, onClose, onDone }: {
     for (const u of toSuspend) {
       try {
         await fetch('/api/admin/suspend-user', {
-          method:  'POST',
+          method: 'POST',
           headers: {
-            'Content-Type':  'application/json',
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${session?.access_token}`,
           },
           body: JSON.stringify({
-            userId:  u.id,
-            action:  'suspend',
-            reason:  finalReason,
+            userId: u.id,
+            action: 'suspend',
+            reason: finalReason,
             notify,
           }),
         })
         ids.push(u.id)
-      } catch {}
+      } catch { }
       setProgress(p => p + 1)
     }
 
@@ -2061,31 +2065,31 @@ function BulkSuspendModal({ users, onClose, onDone }: {
     for (const id of suspended) {
       try {
         await fetch('/api/admin/suspend-user', {
-          method:  'POST',
+          method: 'POST',
           headers: {
-            'Content-Type':  'application/json',
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${session?.access_token}`,
           },
           body: JSON.stringify({ userId: id, action: 'reactivate' }),
         })
-      } catch {}
+      } catch { }
     }
     onClose()
   }
 
   return (
     <div className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
-         style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-         onClick={e => e.target === e.currentTarget && !suspending && !done && onClose()}>
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      onClick={e => e.target === e.currentTarget && !suspending && !done && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-           style={{ border: `1px solid ${C.border}` }}>
+        style={{ border: `1px solid ${C.border}` }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b"
-             style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
+          style={{ borderColor: C.border, backgroundColor: 'rgba(185,28,28,0.04)' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                 style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
+              style={{ backgroundColor: 'rgba(185,28,28,0.1)' }}>
               <Shield size={18} style={{ color: C.red }} />
             </div>
             <div>
@@ -2109,7 +2113,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
           {done ? (
             <div className="flex flex-col items-center py-6 text-center gap-3">
               <div className="w-14 h-14 rounded-full flex items-center justify-center"
-                   style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+                style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
                 <CheckCircle size={28} style={{ color: C.red }} />
               </div>
               <p className="text-[17px] font-black" style={{ color: C.dark }}>
@@ -2117,7 +2121,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
               </p>
               <p className="text-[12px]" style={{ color: C.muted }}>Reason: {finalReason}</p>
               <div className="w-full p-3 rounded-xl border flex items-center justify-between"
-                   style={{ borderColor: C.amber + '40', backgroundColor: 'rgba(217,119,6,0.06)' }}>
+                style={{ borderColor: C.amber + '40', backgroundColor: 'rgba(217,119,6,0.06)' }}>
                 <p className="text-[12px] font-semibold" style={{ color: C.amber }}>
                   Closing in {undoTimer}s...
                 </p>
@@ -2133,7 +2137,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
               {/* Already suspended warning */}
               {alreadySusp.length > 0 && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl border"
-                     style={{ backgroundColor: 'rgba(217,119,6,0.06)', borderColor: C.amber + '40' }}>
+                  style={{ backgroundColor: 'rgba(217,119,6,0.06)', borderColor: C.amber + '40' }}>
                   <AlertTriangle size={13} style={{ color: C.amber }} />
                   <p className="text-[11px]" style={{ color: C.amber }}>
                     {alreadySusp.length} user{alreadySusp.length !== 1 ? 's are' : ' is'} already suspended
@@ -2154,31 +2158,31 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                 </div>
                 <div className="flex flex-col gap-2">
                   {users.map(u => {
-                    const isExcluded  = excluded.has(u.id)
-                    const isAlready   = u.account_status === 'Suspended'
-                    const name        = u.name ?? u.email?.split('@')[0] ?? 'Unknown'
-                    const days        = trialDaysLeft(u)
-                    const plan        = planOf(u)
+                    const isExcluded = excluded.has(u.id)
+                    const isAlready = u.account_status === 'Suspended'
+                    const name = u.name ?? u.email?.split('@')[0] ?? 'Unknown'
+                    const days = trialDaysLeft(u)
+                    const plan = planOf(u)
                     return (
                       <div key={u.id}
                         onClick={() => !isAlready && toggleUser(u.id)}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all"
                         style={{
-                          borderColor:     isExcluded || isAlready ? C.border : 'rgba(185,28,28,0.3)',
-                          backgroundColor: isExcluded || isAlready ? '#fafafa'  : 'rgba(185,28,28,0.04)',
-                          opacity:         isExcluded || isAlready ? 0.5 : 1,
-                          cursor:          isAlready ? 'default' : 'pointer',
+                          borderColor: isExcluded || isAlready ? C.border : 'rgba(185,28,28,0.3)',
+                          backgroundColor: isExcluded || isAlready ? '#fafafa' : 'rgba(185,28,28,0.04)',
+                          opacity: isExcluded || isAlready ? 0.5 : 1,
+                          cursor: isAlready ? 'default' : 'pointer',
                         }}>
                         <div className="w-4 h-4 rounded border-[1.5px] flex items-center justify-center shrink-0"
-                             style={{
-                               backgroundColor: isExcluded || isAlready ? 'transparent' : C.red,
-                               borderColor:     isExcluded || isAlready ? C.border : C.red,
-                             }}>
+                          style={{
+                            backgroundColor: isExcluded || isAlready ? 'transparent' : C.red,
+                            borderColor: isExcluded || isAlready ? C.border : C.red,
+                          }}>
                           {!isExcluded && !isAlready && <Check size={9} style={{ color: '#fff' }} />}
                         </div>
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-                             style={{ backgroundColor: isExcluded ? C.muted : C.red }}>
-                          {name.slice(0,2).toUpperCase()}
+                          style={{ backgroundColor: isExcluded ? C.muted : C.red }}>
+                          {name.slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[12px] font-bold truncate" style={{ color: C.dark }}>{name}</p>
@@ -2191,7 +2195,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                         {/* Progress tick while suspending */}
                         {suspending && !isExcluded && (
                           <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin shrink-0"
-                               style={{ borderTopColor: C.red }} />
+                            style={{ borderTopColor: C.red }} />
                         )}
                       </div>
                     )
@@ -2209,15 +2213,15 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                     <button key={r.key} onClick={() => setReason(r.key)}
                       className="flex items-center gap-2.5 px-3 py-2 rounded-xl border text-left transition-all"
                       style={{
-                        borderColor:     reason === r.key ? C.red      : C.border,
+                        borderColor: reason === r.key ? C.red : C.border,
                         backgroundColor: reason === r.key ? 'rgba(185,28,28,0.06)' : 'transparent',
                       }}>
                       <div className="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0"
-                           style={{ borderColor: reason === r.key ? C.red : C.border }}>
+                        style={{ borderColor: reason === r.key ? C.red : C.border }}>
                         {reason === r.key && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: C.red }} />}
                       </div>
                       <span className="text-[12px] font-semibold"
-                            style={{ color: reason === r.key ? C.red : C.text }}>{r.label}</span>
+                        style={{ color: reason === r.key ? C.red : C.text }}>{r.label}</span>
                     </button>
                   ))}
                   {reason === 'other' && (
@@ -2241,9 +2245,9 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                     <button key={d.key} onClick={() => setDuration(d.key)}
                       className="px-3 py-1.5 rounded-xl border text-[12px] font-bold transition-all"
                       style={{
-                        backgroundColor: duration === d.key ? C.dark   : 'transparent',
-                        borderColor:     duration === d.key ? C.dark   : C.border,
-                        color:           duration === d.key ? C.lime   : C.muted,
+                        backgroundColor: duration === d.key ? C.dark : 'transparent',
+                        borderColor: duration === d.key ? C.dark : C.border,
+                        color: duration === d.key ? C.lime : C.muted,
                       }}>
                       {d.label}
                     </button>
@@ -2265,7 +2269,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
 
               {/* Notify toggle */}
               <div className="flex items-center justify-between px-4 py-3 rounded-xl border"
-                   style={{ borderColor: C.border, backgroundColor: C.bg }}>
+                style={{ borderColor: C.border, backgroundColor: C.bg }}>
                 <div>
                   <p className="text-[13px] font-bold" style={{ color: C.dark }}>Notify Users</p>
                   <p className="text-[10px]" style={{ color: C.muted }}>
@@ -2273,10 +2277,10 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                   </p>
                 </div>
                 <div onClick={() => setNotify(s => !s)}
-                     className="relative w-10 h-5 rounded-full cursor-pointer transition-colors"
-                     style={{ backgroundColor: notify ? C.lime : '#CBD5E1' }}>
+                  className="relative w-10 h-5 rounded-full cursor-pointer transition-colors"
+                  style={{ backgroundColor: notify ? C.lime : '#CBD5E1' }}>
                   <div className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
-                       style={{ backgroundColor: notify ? C.lime : '#fff', left: notify ? '22px' : '2px' }} />
+                    style={{ backgroundColor: notify ? C.lime : '#fff', left: notify ? '22px' : '2px' }} />
                 </div>
               </div>
             </>
@@ -2286,7 +2290,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
         {/* Footer */}
         {!done && (
           <div className="px-6 py-4 border-t flex items-center gap-3"
-               style={{ borderColor: C.border, backgroundColor: C.bg }}>
+            style={{ borderColor: C.border, backgroundColor: C.bg }}>
             {!canProceed && reason && (
               <p className="text-[11px] flex-1" style={{ color: C.muted }}>
                 {reason === 'other' ? 'Enter a reason (min 3 chars)' : ''}
@@ -2306,7 +2310,7 @@ function BulkSuspendModal({ users, onClose, onDone }: {
                 {suspending ? (
                   <>
                     <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin"
-                         style={{ borderTopColor: '#fff' }} />
+                      style={{ borderTopColor: '#fff' }} />
                     Suspending {progress}/{toSuspend.length}...
                   </>
                 ) : (
@@ -2325,39 +2329,39 @@ function BulkSuspendModal({ users, onClose, onDone }: {
 // BLOCK 4 — PROFILE SLIDE-OUT DRAWER
 // --------------------------------------------------------------
 
-function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=>void }) {
+function AddUserDialog({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const supabase = createClient()
-  const [name,        setName]        = useState('')
-  const [email,       setEmail]       = useState('')
-  const [plan,        setPlan]        = useState('Free Trial')
-  const [role,        setRole]        = useState('user')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [plan, setPlan] = useState('Free Trial')
+  const [role, setRole] = useState('user')
   const [sendWelcome, setSendWelcome] = useState(true)
-  const [submitting,  setSubmitting]  = useState(false)
-  const [error,       setError]       = useState('')
-  const [success,     setSuccess]     = useState(false)
-  const [tempPass,    setTempPass]    = useState('')
-  const [copied,      setCopied]      = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [tempPass, setTempPass] = useState('')
+  const [copied, setCopied] = useState(false)
 
   function genPass(n: string) {
-    const safe = (n ?? '').trim().replace(/\s/g,'')
-    const pre  = safe.length >= 3 ? safe.slice(0,3) : 'Usr'
-    return `${pre}#${Math.floor(Math.random()*9000)+1000}`
+    const safe = (n ?? '').trim().replace(/\s/g, '')
+    const pre = safe.length >= 3 ? safe.slice(0, 3) : 'Usr'
+    return `${pre}#${Math.floor(Math.random() * 9000) + 1000}`
   }
 
   useEffect(() => { setTempPass(genPass(name || 'User')) }, [name])
 
   const isValidEmail = (e: string) => /^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/.test(e)
-  const isValid      = name.trim().length >= 2 && isValidEmail(email)
+  const isValid = name.trim().length >= 2 && isValidEmail(email)
 
   async function handleCreate() {
     if (!isValid || submitting) return
     setError(''); setSubmitting(true)
     try {
-      const { data:{ session } } = await supabase.auth.getSession()
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/create-user', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${session?.access_token}` },
-        body: JSON.stringify({ name, email:email.trim(), password:tempPass, plan, role, sendWelcome }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ name, email: email.trim(), password: tempPass, plan, role, sendWelcome }),
       })
       const json = await res.json()
       if (!res.ok) { setError(json.error ?? 'Failed to create user'); return }
@@ -2368,86 +2372,86 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-         style={{ backgroundColor:'rgba(0,0,0,0.45)', backdropFilter:'blur(4px)' }}
-         onClick={e => e.target === e.currentTarget && !submitting && onClose()}>
+      style={{ backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+      onClick={e => e.target === e.currentTarget && !submitting && onClose()}>
       <div className="bg-white rounded-2xl w-full max-w-[440px] border overflow-hidden"
-           style={{ borderColor:C.border, boxShadow:'0 24px 60px rgba(0,0,0,0.18)' }}>
+        style={{ borderColor: C.border, boxShadow: '0 24px 60px rgba(0,0,0,0.18)' }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor:C.border }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: C.border }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor:C.dark }}>
-              <UserPlus size={15} style={{ color:C.lime }} />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: C.dark }}>
+              <UserPlus size={15} style={{ color: C.lime }} />
             </div>
-            <p className="text-[16px] font-bold" style={{ color:C.text }}>Add New User</p>
+            <p className="text-[16px] font-bold" style={{ color: C.text }}>Add New User</p>
           </div>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100">
-            <X size={15} style={{ color:C.muted }} />
+            <X size={15} style={{ color: C.muted }} />
           </button>
         </div>
 
         {success ? (
           <div className="flex flex-col items-center py-10 px-6">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor:C.limeTint }}>
-              <CheckCircle size={32} style={{ color:C.limeDeep }} />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: C.limeTint }}>
+              <CheckCircle size={32} style={{ color: C.limeDeep }} />
             </div>
-            <p className="text-[17px] font-bold mb-1" style={{ color:C.text }}>User Created!</p>
-            <p className="text-[12px] mb-5" style={{ color:C.muted }}>{name} has been added successfully</p>
-            <div className="w-full flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ backgroundColor:C.bg, borderColor:C.border }}>
-              <Key size={13} style={{ color:C.muted }} />
-              <span className="flex-1 text-[13px] font-mono font-bold" style={{ color:C.text }}>{tempPass}</span>
-              <button onClick={() => { navigator.clipboard.writeText(tempPass); setCopied(true); setTimeout(()=>setCopied(false),2000) }}
+            <p className="text-[17px] font-bold mb-1" style={{ color: C.text }}>User Created!</p>
+            <p className="text-[12px] mb-5" style={{ color: C.muted }}>{name} has been added successfully</p>
+            <div className="w-full flex items-center gap-2 px-4 py-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+              <Key size={13} style={{ color: C.muted }} />
+              <span className="flex-1 text-[13px] font-mono font-bold" style={{ color: C.text }}>{tempPass}</span>
+              <button onClick={() => { navigator.clipboard.writeText(tempPass); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold"
                 style={{ backgroundColor: copied ? C.limeTint : C.bg, color: copied ? C.limeDeep : C.muted }}>
                 {copied ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
               </button>
             </div>
-            <p className="text-[10px] mt-2" style={{ color:C.muted }}>Share this temp password with the user</p>
+            <p className="text-[10px] mt-2" style={{ color: C.muted }}>Share this temp password with the user</p>
           </div>
         ) : (
           <div className="p-6 flex flex-col gap-4">
             {error && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border" style={{ backgroundColor:'#FEF2F2', borderColor:'#FECACA' }}>
-                <AlertTriangle size={13} style={{ color:C.red }} />
-                <p className="text-[12px] font-semibold" style={{ color:C.red }}>{error}</p>
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border" style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
+                <AlertTriangle size={13} style={{ color: C.red }} />
+                <p className="text-[12px] font-semibold" style={{ color: C.red }}>{error}</p>
               </div>
             )}
             {[
-              { label:'FULL NAME',      val:name,  set:setName,  type:'text',  placeholder:'Enter full name' },
-              { label:'EMAIL ADDRESS',  val:email, set:setEmail, type:'email', placeholder:'email@example.com' },
+              { label: 'FULL NAME', val: name, set: setName, type: 'text', placeholder: 'Enter full name' },
+              { label: 'EMAIL ADDRESS', val: email, set: setEmail, type: 'email', placeholder: 'email@example.com' },
             ].map(({ label, val, set, type, placeholder }) => (
               <div key={label}>
-                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>{label}</p>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>{label}</p>
                 <input value={val} onChange={e => set(e.target.value)} type={type} placeholder={placeholder}
                   className="w-full h-10 px-3 rounded-xl border text-[13px] outline-none"
-                  style={{ borderColor: val.length > 0 ? C.lime : C.border, backgroundColor:C.bg, color:C.text }} />
+                  style={{ borderColor: val.length > 0 ? C.lime : C.border, backgroundColor: C.bg, color: C.text }} />
               </div>
             ))}
             {/* Plan + Role */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                  <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>INITIAL PLAN</p>
-                  <ProDropdown
-                    prefix=""
-                    currentValue={plan}
-                    options={['Free Trial','Pro Plan','Elite Plan'].map(p => ({ val: p, label: p, enabled: true }))}
-                    onChanged={setPlan}
-                    width="full"
-                    maxItems={3}
-                  />
-                </div>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>INITIAL PLAN</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={plan}
+                  options={['Free Trial', 'Pro Plan', 'Elite Plan'].map(p => ({ val: p, label: p, enabled: true }))}
+                  onChanged={setPlan}
+                  width="full"
+                  maxItems={3}
+                />
+              </div>
               <div>
-                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>ROLE</p>
+                <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>ROLE</p>
                 <div className="flex gap-1.5 h-10">
-                  {['user','admin'].map(r => (
+                  {['user', 'admin'].map(r => (
                     <button key={r} onClick={() => setRole(r)}
                       className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border text-[12px] font-bold transition-all"
                       style={{
-                          backgroundColor: role===r ? C.lime : C.bg,
-                          borderColor:     role===r ? C.lime : C.border,
-                          color:           role===r ? '#1a2410' : C.muted,
-                        }}>
-                        {r === 'admin' ? <><Key size={11} /> Admin</> : <><User size={11} /> User</>}
+                        backgroundColor: role === r ? C.lime : C.bg,
+                        borderColor: role === r ? C.lime : C.border,
+                        color: role === r ? '#1a2410' : C.muted,
+                      }}>
+                      {r === 'admin' ? <><Key size={11} /> Admin</> : <><User size={11} /> User</>}
                     </button>
                   ))}
                 </div>
@@ -2455,44 +2459,44 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
             </div>
             {/* Temp password */}
             <div>
-              <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color:C.muted }}>TEMP PASSWORD</p>
-              <div className="flex items-center gap-2 h-10 px-3 rounded-xl border" style={{ backgroundColor:C.bg, borderColor:C.border }}>
-                <Key size={13} style={{ color:C.muted }} />
-                <span className="flex-1 text-[12px] font-mono font-bold" style={{ color:C.text }}>{tempPass}</span>
+              <p className="text-[10px] font-black tracking-wider mb-1.5" style={{ color: C.muted }}>TEMP PASSWORD</p>
+              <div className="flex items-center gap-2 h-10 px-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                <Key size={13} style={{ color: C.muted }} />
+                <span className="flex-1 text-[12px] font-mono font-bold" style={{ color: C.text }}>{tempPass}</span>
                 <button onClick={() => setTempPass(genPass(name || 'User'))}
                   className="p-1 rounded hover:bg-gray-100" title="Regenerate password">
-                  <RefreshCw size={11} style={{ color:C.muted }} />
+                  <RefreshCw size={11} style={{ color: C.muted }} />
                 </button>
-                <button onClick={() => { navigator.clipboard.writeText(tempPass); setCopied(true); setTimeout(()=>setCopied(false),2000) }}
+                <button onClick={() => { navigator.clipboard.writeText(tempPass); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
                   className="p-1 rounded hover:bg-gray-100">
                   {copied
-                    ? <Check size={11} style={{ color:C.limeDeep }} />
-                    : <Copy  size={11} style={{ color:C.muted    }} />}
+                    ? <Check size={11} style={{ color: C.limeDeep }} />
+                    : <Copy size={11} style={{ color: C.muted }} />}
                 </button>
               </div>
             </div>
             {/* Welcome email toggle */}
-            <div className="flex items-center justify-between px-4 py-3 rounded-xl border" style={{ backgroundColor:C.bg, borderColor:C.border }}>
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl border" style={{ backgroundColor: C.bg, borderColor: C.border }}>
               <div>
-                <p className="text-[13px] font-bold" style={{ color:C.text }}>Send Welcome Email</p>
-                <p className="text-[10px]" style={{ color:C.muted }}>Includes temporary password</p>
+                <p className="text-[13px] font-bold" style={{ color: C.text }}>Send Welcome Email</p>
+                <p className="text-[10px]" style={{ color: C.muted }}>Includes temporary password</p>
               </div>
               <div onClick={() => setSendWelcome(s => !s)}
-                     className="relative w-11 h-6 rounded-full cursor-pointer"
-                     style={{ backgroundColor: sendWelcome ? C.lime : '#CBD5E1' }}>
-                  <div className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
-                       style={{ backgroundColor: sendWelcome ? '#1a2410' : '#fff', left: sendWelcome ? '22px' : '2px' }} />
-                </div>
+                className="relative w-11 h-6 rounded-full cursor-pointer"
+                style={{ backgroundColor: sendWelcome ? C.lime : '#CBD5E1' }}>
+                <div className="absolute top-0.5 w-5 h-5 rounded-full transition-all"
+                  style={{ backgroundColor: sendWelcome ? '#1a2410' : '#fff', left: sendWelcome ? '22px' : '2px' }} />
+              </div>
             </div>
             {/* Actions */}
             <div className="flex gap-2">
               <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border text-[13px] font-semibold"
-                      style={{ borderColor:C.border, color:C.muted }}>Cancel</button>
+                style={{ borderColor: C.border, color: C.muted }}>Cancel</button>
               <button onClick={handleCreate} disabled={!isValid || submitting}
                 className="flex-1 py-2.5 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                 style={{ backgroundColor: isValid ? C.lime : C.bg, color: isValid ? C.dark : C.muted }}>
                 {submitting
-                  ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.dark }} />
+                  ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.dark }} />
                   : <><Check size={13} /> Create User</>}
               </button>
             </div>
@@ -2507,28 +2511,28 @@ function AddUserDialog({ onClose, onCreated }: { onClose:()=>void; onCreated:()=
 // MAIN — UserCrmTab
 // --------------------------------------------------------------
 export default function UserCrmTab({ isInvestorMode = false, isMobile = false, onGoToMarketing, viewOnly = false, canDo = () => true }: {
-  isInvestorMode?:  boolean
-  isMobile?:        boolean
+  isInvestorMode?: boolean
+  isMobile?: boolean
   onGoToMarketing?: (users: any[]) => void
-  viewOnly?:        boolean
-  canDo?:           (action: string) => boolean
+  viewOnly?: boolean
+  canDo?: (action: string) => boolean
 }) {
   const supabase = createClient()
 
-  const [users,       setUsers]       = useState<any[]>([])
-  const [total,       setTotal]       = useState(0)
-  const [loading,     setLoading]     = useState(true)
-  const [page,        setPage]        = useState(0)
-  const [pageSize,    setPageSize]    = useState(25)
+  const [users, setUsers] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(25)
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [filter,      setFilter]      = useState('All')
-  const [segment,     setSegment]     = useState<string|null>(null)
-  const [activeTag,   setActiveTag]   = useState<string|null>(null)
-  const [advFilters,  setAdvFilters]  = useState<AdvancedFilters>(DEFAULT_FILTERS)
-  const [drawerUser,  setDrawerUser]  = useState<any|null>(null)
-  const [showAdd,     setShowAdd]     = useState(false)
-  const [toast,       setToast]       = useState<{ msg:string; type:'success'|'error'|'info' }|null>(null)
+  const [filter, setFilter] = useState('All')
+  const [segment, setSegment] = useState<string | null>(null)
+  const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [advFilters, setAdvFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS)
+  const [drawerUser, setDrawerUser] = useState<any | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
 
   // -- Realtime presence — who's online right now ---------------
   const onlineIds = useOnlineUserIds()
@@ -2539,7 +2543,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
     return () => clearTimeout(t)
   }, [searchInput])
 
-  const showToast = useCallback((msg: string, type: 'success'|'error'|'info' = 'success') => {
+  const showToast = useCallback((msg: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3500)
   }, [])
@@ -2549,7 +2553,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
     if (!silent) setLoading(true)
     try {
       const start = page * pageSize
-      const end   = start + pageSize - 1
+      const end = start + pageSize - 1
 
       // 1. Paginated profiles
       const { data: profiles, count } = await supabase
@@ -2561,7 +2565,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
           { count: 'exact' }
         )
         .range(start, end)
-        .order('created_at', { ascending:false })
+        .order('created_at', { ascending: false })
 
       const rows = (profiles ?? []) as any[]
       setTotal(count ?? 0)
@@ -2594,18 +2598,18 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
       const ipRes = ipResRaw.error ? { data: [] } : ipResRaw
 
       // 3. Build lookup maps
-      const subMap: Record<string, any[]>      = {}
+      const subMap: Record<string, any[]> = {}
       for (const s of (subRes.data ?? []) as any[]) {
         if (!subMap[s.user_id]) subMap[s.user_id] = []
         subMap[s.user_id].push(s)
       }
-      const dispMap: Record<string, any[]>     = {}
+      const dispMap: Record<string, any[]> = {}
       for (const d of (dispRes.data ?? []) as any[]) {
         if (!dispMap[d.user_id]) dispMap[d.user_id] = []
         dispMap[d.user_id].push(d)
       }
       const ipMap: Record<string, Set<string>> = {}
-      const ipLogsMap: Record<string, any[]>   = {}
+      const ipLogsMap: Record<string, any[]> = {}
       for (const r of (ipRes.data ?? []) as any[]) {
         if (!ipMap[r.user_id]) { ipMap[r.user_id] = new Set(); ipLogsMap[r.user_id] = [] }
         if (r.ip_address) {
@@ -2623,9 +2627,9 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
         toolMap[t.user_id].push(t)
       }
 
-      const warningMap:    Record<string, boolean> = {}
-      const notesCountMap: Record<string, number>  = {}
-      const notesMap:      Record<string, any[]>   = {}
+      const warningMap: Record<string, boolean> = {}
+      const notesCountMap: Record<string, number> = {}
+      const notesMap: Record<string, any[]> = {}
       for (const n of (notesRes.data ?? []) as any[]) {
         if (n.category === 'warning') warningMap[n.user_id] = true
         notesCountMap[n.user_id] = (notesCountMap[n.user_id] ?? 0) + 1
@@ -2673,19 +2677,19 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
       // 4. Merge
       const enriched = rows.map(r => ({
         ...r,
-        subscriptions:   subMap[r.id]        ?? [],
-        disputes:        dispMap[r.id]        ?? [],
-        uniqueIps:       ipMap[r.id]?.size    ?? 0,
-        ipLogs:          ipLogsMap[r.id]      ?? [],
-        ebayConnection:  ebayMap[r.id]        ?? null,
-        toolUsage:       toolMap[r.id]        ?? [],
-        hasWarningNote:  warningMap[r.id]      ?? false,
-        noteCount:       notesCountMap[r.id]   ?? 0,
-        recentNotes:     notesMap[r.id]        ?? [],
-        deviceList:      devicesMap[r.id]     ?? [],
-        teamMembers:     teamMembersMap[r.id] ?? [],  // users I own as owner
-        teamOwners:      teamOwnersMap[r.id]  ?? [],  // teams I belong to
-        contactInfo:     contactMap[r.id]     ?? null, // last email sent
+        subscriptions: subMap[r.id] ?? [],
+        disputes: dispMap[r.id] ?? [],
+        uniqueIps: ipMap[r.id]?.size ?? 0,
+        ipLogs: ipLogsMap[r.id] ?? [],
+        ebayConnection: ebayMap[r.id] ?? null,
+        toolUsage: toolMap[r.id] ?? [],
+        hasWarningNote: warningMap[r.id] ?? false,
+        noteCount: notesCountMap[r.id] ?? 0,
+        recentNotes: notesMap[r.id] ?? [],
+        deviceList: devicesMap[r.id] ?? [],
+        teamMembers: teamMembersMap[r.id] ?? [],  // users I own as owner
+        teamOwners: teamOwnersMap[r.id] ?? [],  // teams I belong to
+        contactInfo: contactMap[r.id] ?? null, // last email sent
       }))
 
       setUsers(enriched)
@@ -2719,8 +2723,8 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
     <div className="flex flex-col gap-5 pb-20">
       {/* View only banner */}
       {viewOnly && (
-        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:10 }}>
-          <span style={{ fontSize:12, fontWeight:600, color:'#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes. Contact your admin to request access.</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#1d4ed8' }}>👁 View only — you can see this tab but cannot make changes. Contact your admin to request access.</span>
         </div>
       )}
       {/* Skeleton loader — shows table shape while data loads */}
@@ -2728,7 +2732,7 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
         <div className="flex flex-col gap-5">
           {/* HUD skeleton */}
           <div className="grid grid-cols-4 gap-4">
-            {[1,2,3,4].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-20 rounded-2xl animate-pulse" style={{ backgroundColor: C.border }} />
             ))}
           </div>
@@ -2739,14 +2743,14 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
             {/* Header */}
             <div className="h-10 animate-pulse" style={{ backgroundColor: C.border }} />
             {/* Rows */}
-            {[1,2,3,4,5,6,7].map(i => (
+            {[1, 2, 3, 4, 5, 6, 7].map(i => (
               <div key={i} className="flex items-center gap-4 px-5 py-3.5 border-t"
-                   style={{ borderColor: C.border }}>
+                style={{ borderColor: C.border }}>
                 <div className="w-4 h-4 rounded animate-pulse" style={{ backgroundColor: C.border }} />
                 <div className="w-9 h-9 rounded-xl animate-pulse" style={{ backgroundColor: C.border }} />
                 <div className="flex flex-col gap-1.5 flex-1">
                   <div className="h-3 w-32 rounded-full animate-pulse" style={{ backgroundColor: C.border }} />
-                  <div className="h-2 w-44 rounded-full animate-pulse" style={{ backgroundColor: C.border, opacity:0.6 }} />
+                  <div className="h-2 w-44 rounded-full animate-pulse" style={{ backgroundColor: C.border, opacity: 0.6 }} />
                 </div>
                 <div className="h-5 w-16 rounded-full animate-pulse" style={{ backgroundColor: C.border }} />
                 <div className="h-5 w-14 rounded-full animate-pulse" style={{ backgroundColor: C.border }} />
@@ -2762,57 +2766,57 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
       )}
       {/* Real content — hidden while skeleton loads */}
       {!loading && (<>
-      <HudDeck users={users} onlineIds={onlineIds} showToast={showToast} onGoToMarketing={onGoToMarketing ?? (() => {})} canDo={canDo} />
+        <HudDeck users={users} onlineIds={onlineIds} showToast={showToast} onGoToMarketing={onGoToMarketing ?? (() => { })} canDo={canDo} />
 
-      <ControlsBar
-        users={users}
-        searchInput={searchInput}
-        onSearch={setSearchInput}
-        onClear={() => { setSearchInput(''); setSearchQuery('') }}
-        filter={filter}
-        onFilter={setFilter}
-        segment={segment}
-        onSegment={setSegment}
-        activeTag={activeTag}
-        onTag={setActiveTag}
-        onAddUser={canDo('create_user') ? () => setShowAdd(true) : undefined}
-        onRefresh={loadUsers}
-        advFilters={advFilters}
-        onAdvFilters={setAdvFilters}
-        pageSize={pageSize}
-        onPageSize={(n) => { setPageSize(n); setPage(0) }}
-        onExport={canDo('export_csv') ? () => {
-          let filtered = [...users]
-          if (searchQuery) {
-            const q = searchQuery.toLowerCase()
-            filtered = filtered.filter(u =>
-              (u.name ?? '').toLowerCase().includes(q) ||
-              (u.email ?? '').toLowerCase().includes(q)
-            )
-          }
-          if (segment) {
-            filtered = filtered.filter(u => getUserSegment(u) === segment)
-          } else if (filter !== 'All') {
-            filtered = filtered.filter(u => {
-              if (filter === 'Paid Plans')      return mrrOf(u) > 0
-              if (filter === 'Expired Trials')  return statusOf(u) === 'Expired' && planOf(u).toLowerCase().includes('free')
-              if (filter === 'Past Due')        return statusOf(u) === 'Past Due'
-              if (filter === 'Support Waiting') return hasDispute(u)
-              return true
-            })
-          }
-          if (!isDefaultFilters(advFilters)) {
-            filtered = applyAdvFilters(filtered, advFilters)
-          }
-          exportToCSV(filtered, segment ? (SEGMENT_CFG[segment]?.label ?? segment) : filter)
-          showToast(`Exported ${filtered.length} users to CSV`, 'success')
-        } : undefined}
-        showing={users.length}
+        <ControlsBar
+          users={users}
+          searchInput={searchInput}
+          onSearch={setSearchInput}
+          onClear={() => { setSearchInput(''); setSearchQuery('') }}
+          filter={filter}
+          onFilter={setFilter}
+          segment={segment}
+          onSegment={setSegment}
+          activeTag={activeTag}
+          onTag={setActiveTag}
+          onAddUser={canDo('create_user') ? () => setShowAdd(true) : undefined}
+          onRefresh={loadUsers}
+          advFilters={advFilters}
+          onAdvFilters={setAdvFilters}
+          pageSize={pageSize}
+          onPageSize={(n) => { setPageSize(n); setPage(0) }}
+          onExport={canDo('export_csv') ? () => {
+            let filtered = [...users]
+            if (searchQuery) {
+              const q = searchQuery.toLowerCase()
+              filtered = filtered.filter(u =>
+                (u.name ?? '').toLowerCase().includes(q) ||
+                (u.email ?? '').toLowerCase().includes(q)
+              )
+            }
+            if (segment) {
+              filtered = filtered.filter(u => getUserSegment(u) === segment)
+            } else if (filter !== 'All') {
+              filtered = filtered.filter(u => {
+                if (filter === 'Paid Plans') return mrrOf(u) > 0
+                if (filter === 'Expired Trials') return statusOf(u) === 'Expired' && planOf(u).toLowerCase().includes('free')
+                if (filter === 'Past Due') return statusOf(u) === 'Past Due'
+                if (filter === 'Support Waiting') return hasDispute(u)
+                return true
+              })
+            }
+            if (!isDefaultFilters(advFilters)) {
+              filtered = applyAdvFilters(filtered, advFilters)
+            }
+            exportToCSV(filtered, segment ? (SEGMENT_CFG[segment]?.label ?? segment) : filter)
+            showToast(`Exported ${filtered.length} users to CSV`, 'success')
+          } : undefined}
+          showing={users.length}
           total={total}
           canDo={canDo}
         />
 
-      <UserTable
+        <UserTable
           users={users}
           isInvestorMode={isInvestorMode}
           searchQuery={searchQuery}
@@ -2824,43 +2828,43 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
           onDrawer={setDrawerUser}
           onUpdated={onUpdated}
           showToast={showToast}
-          onGoToMarketing={onGoToMarketing ?? (() => {})}
+          onGoToMarketing={onGoToMarketing ?? (() => { })}
           canDo={canDo}
         />
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3">
-          <button disabled={page === 0} onClick={() => setPage(p => p-1)}
-            className="px-4 py-2 rounded-xl border text-[12px] font-bold disabled:opacity-40 hover:opacity-80"
-            style={{ borderColor:C.border, color:C.muted }}>? Previous</button>
-          <span className="text-[12px]" style={{ color:C.muted }}>Page {page+1} of {totalPages}</span>
-          <button disabled={page >= totalPages-1} onClick={() => setPage(p => p+1)}
-            className="px-4 py-2 rounded-xl border text-[12px] font-bold disabled:opacity-40 hover:opacity-80"
-            style={{ borderColor:C.border, color:C.muted }}>Next ?</button>
-        </div>
-      )}
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3">
+            <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
+              className="px-4 py-2 rounded-xl border text-[12px] font-bold disabled:opacity-40 hover:opacity-80"
+              style={{ borderColor: C.border, color: C.muted }}>? Previous</button>
+            <span className="text-[12px]" style={{ color: C.muted }}>Page {page + 1} of {totalPages}</span>
+            <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
+              className="px-4 py-2 rounded-xl border text-[12px] font-bold disabled:opacity-40 hover:opacity-80"
+              style={{ borderColor: C.border, color: C.muted }}>Next ?</button>
+          </div>
+        )}
 
-      {drawerUser && (
-        <UserDetailDrawer
-          user={drawerUser}
-          onClose={() => setDrawerUser(null)}
-          onUpdated={onUpdated}
-          showToast={showToast}
-          viewOnly={viewOnly}
-        />
-      )}
+        {drawerUser && (
+          <UserDetailDrawer
+            user={drawerUser}
+            onClose={() => setDrawerUser(null)}
+            onUpdated={onUpdated}
+            showToast={showToast}
+            viewOnly={viewOnly}
+          />
+        )}
 
-      {showAdd && (
-        <AddUserDialog
-          onClose={() => setShowAdd(false)}
-          onCreated={() => { loadUsers(); showToast('User created successfully') }}
-        />
-      )}
+        {showAdd && (
+          <AddUserDialog
+            onClose={() => setShowAdd(false)}
+            onCreated={() => { loadUsers(); showToast('User created successfully') }}
+          />
+        )}
 
-      {toast && <Toast msg={toast.msg} type={toast.type} />}
+        {toast && <Toast msg={toast.msg} type={toast.type} />}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </>)}
     </div>
   )
@@ -2868,25 +2872,25 @@ export default function UserCrmTab({ isInvestorMode = false, isMobile = false, o
 
 // -- QuickNotePanel ---------------------------------------------
 const NOTE_CATEGORIES = [
-  { key:'general', label:'General', icon:'??', color:C.muted    },
-  { key:'support', label:'Support', icon:'??', color:'#3b82f6'  },
-  { key:'warning', label:'Warning', icon:'??',  color:C.red      },
-  { key:'sales',   label:'Sales',   icon:'??', color:C.green    },
+  { key: 'general', label: 'General', icon: '??', color: C.muted },
+  { key: 'support', label: 'Support', icon: '??', color: '#3b82f6' },
+  { key: 'warning', label: 'Warning', icon: '??', color: C.red },
+  { key: 'sales', label: 'Sales', icon: '??', color: C.green },
 ]
 
 function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
-  userId:      string
-  userName:    string
+  userId: string
+  userName: string
   recentNotes: any[]
-  onClose:     () => void
-  onSaved:     (newCount: number) => void
+  onClose: () => void
+  onSaved: (newCount: number) => void
 }) {
-  const supabase  = createClient()
-  const [content,  setContent]  = useState('')
+  const supabase = createClient()
+  const [content, setContent] = useState('')
   const [category, setCategory] = useState('general')
-  const [pinned,   setPinned]   = useState(false)
-  const [saving,   setSaving]   = useState(false)
-  const textRef   = useRef<HTMLTextAreaElement>(null)
+  const [pinned, setPinned] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const textRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => { textRef.current?.focus() }, [])
 
@@ -2895,16 +2899,16 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
     setSaving(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      const { data: profile  } = await (supabase.from('profiles') as any)
+      const { data: profile } = await (supabase.from('profiles') as any)
         .select('name').eq('id', user?.id).single()
 
       await (supabase.from('user_notes') as any).insert({
-        user_id:    userId,
-        admin_id:   user?.id,
+        user_id: userId,
+        admin_id: user?.id,
         admin_name: profile?.name ?? user?.email?.split('@')[0] ?? 'Admin',
-        content:    content.trim(),
+        content: content.trim(),
         category,
-        is_pinned:  pinned,
+        is_pinned: pinned,
       })
 
       // Get updated count
@@ -2925,21 +2929,21 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
 
   return (
     <div className="border-t px-4 py-3 flex flex-col gap-3"
-         style={{ backgroundColor:C.limeTint, borderColor:C.lime }}>
+      style={{ backgroundColor: C.limeTint, borderColor: C.lime }}>
 
       {/* Existing notes */}
       {recentNotes.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <p className="text-[9px] font-black tracking-wider" style={{ color:C.muted }}>RECENT NOTES</p>
+          <p className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>RECENT NOTES</p>
           {recentNotes.map((n, i) => {
             const cat = NOTE_CATEGORIES.find(c => c.key === n.category)
             return (
               <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-xl border"
-                   style={{ backgroundColor:'#fff', borderColor:C.border }}>
+                style={{ backgroundColor: '#fff', borderColor: C.border }}>
                 <span className="text-[11px] shrink-0">{cat?.icon ?? '??'}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px]" style={{ color:C.text }}>{n.content}</p>
-                  <p className="text-[9px] mt-0.5" style={{ color:C.muted }}>{timeAgo(n.created_at)}</p>
+                  <p className="text-[11px]" style={{ color: C.text }}>{n.content}</p>
+                  <p className="text-[9px] mt-0.5" style={{ color: C.muted }}>{timeAgo(n.created_at)}</p>
                 </div>
                 {n.is_pinned && <span className="text-[10px] shrink-0">??</span>}
               </div>
@@ -2950,7 +2954,7 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
 
       {/* New note input */}
       <div className="flex flex-col gap-2">
-        <p className="text-[9px] font-black tracking-wider" style={{ color:C.muted }}>
+        <p className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>
           ADD NOTE FOR {userName.toUpperCase()}
         </p>
         <textarea
@@ -2961,7 +2965,7 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
           placeholder="Type a note... (Ctrl+Enter to save, Esc to close)"
           rows={2}
           className="w-full px-3 py-2 rounded-xl border text-[12px] outline-none resize-none"
-          style={{ borderColor: content ? C.lime : C.border, color:C.dark, backgroundColor:'#fff' }}
+          style={{ borderColor: content ? C.lime : C.border, color: C.dark, backgroundColor: '#fff' }}
         />
 
         {/* Category + pin + actions row */}
@@ -2972,9 +2976,9 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
               <button key={c.key} onClick={() => setCategory(c.key)}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-bold transition-all"
                 style={{
-                  backgroundColor: category === c.key ? C.dark      : 'transparent',
-                  borderColor:     category === c.key ? C.dark      : C.border,
-                  color:           category === c.key ? C.lime      : C.muted,
+                  backgroundColor: category === c.key ? C.dark : 'transparent',
+                  borderColor: category === c.key ? C.dark : C.border,
+                  color: category === c.key ? C.lime : C.muted,
                 }}>
                 {c.icon} {c.label}
               </button>
@@ -2986,8 +2990,8 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
             className="flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-bold transition-all ml-auto"
             style={{
               backgroundColor: pinned ? 'rgba(74,143,0,0.1)' : 'transparent',
-              borderColor:     pinned ? C.lime                : C.border,
-              color:           pinned ? C.limeDeep            : C.muted,
+              borderColor: pinned ? C.lime : C.border,
+              color: pinned ? C.limeDeep : C.muted,
             }}>
             ?? {pinned ? 'Pinned' : 'Pin'}
           </button>
@@ -2995,14 +2999,14 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
           {/* Cancel + Save */}
           <button onClick={onClose}
             className="px-3 py-1.5 rounded-xl border text-[11px] font-semibold"
-            style={{ borderColor:C.border, color:C.muted, backgroundColor:'#fff' }}>
+            style={{ borderColor: C.border, color: C.muted, backgroundColor: '#fff' }}>
             Cancel
           </button>
           <button onClick={save} disabled={!content.trim() || saving}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold disabled:opacity-40"
             style={{ backgroundColor: content.trim() ? C.lime : C.border, color: content.trim() ? C.dark : C.lime }}>
             {saving
-              ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.lime }} />
+              ? <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Check size={11} /> Save</>}
           </button>
         </div>
@@ -3013,636 +3017,638 @@ function QuickNotePanel({ userId, userName, recentNotes, onClose, onSaved }: {
 
 // -- ActionMenu -------------------------------------------------
 function ActionMenu({ u, onDrawer, onUpdated, showToast, canDo = () => true }: {
-    u: any
-    onDrawer: (u: any) => void
-    onUpdated: (id: string, field: string, value: any) => void
-    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-    canDo?: (action: string) => boolean
-  }) {
-    const supabase = createClient()
-    const [open, setOpen]           = useState(false)
-    const [menuPos, setMenuPos]     = useState({ top: 0, left: 0, openUp: false })
-    const btnRef = useRef<HTMLButtonElement>(null)
-    const [loading, setLoading]     = useState(false)
-    const [confirmDelete, setConfirmDelete] = useState(false)
-    const [deleting, setDeleting]   = useState(false)
-    const [impersonating, setImpersonating] = useState(false)
-    const plan   = planOf(u)
-    const status = statusOf(u)
+  u: any
+  onDrawer: (u: any) => void
+  onUpdated: (id: string, field: string, value: any) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canDo?: (action: string) => boolean
+}) {
+  const supabase = createClient()
+  const [open, setOpen] = useState(false)
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, openUp: false })
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const [loading, setLoading] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [impersonating, setImpersonating] = useState(false)
+  const plan = planOf(u)
+  const status = statusOf(u)
 
-    async function changePlan(newPlan: string) {
-      if (!canDo('change_plan')) return
-      setLoading(true); setOpen(false)
-      onUpdated(u.id, 'plan_name', newPlan)
-      try {
-        await (supabase.from('profiles') as any).update({ plan_name: newPlan }).eq('id', u.id)
-        await (supabase.from('subscriptions') as any).update({ plan_name: newPlan }).eq('user_id', u.id)
-        showToast(`Plan changed to ${newPlan}`, 'success')
-      } catch { onUpdated(u.id, 'plan_name', plan); showToast('Failed to change plan', 'error') }
-      setLoading(false)
+  async function changePlan(newPlan: string) {
+    if (!canDo('change_plan')) return
+    setLoading(true); setOpen(false)
+    onUpdated(u.id, 'plan_name', newPlan)
+    try {
+      await (supabase.from('profiles') as any).update({ plan_name: newPlan }).eq('id', u.id)
+      await (supabase.from('subscriptions') as any).update({ plan_name: newPlan }).eq('user_id', u.id)
+      showToast(`Plan changed to ${newPlan}`, 'success')
+    } catch { onUpdated(u.id, 'plan_name', plan); showToast('Failed to change plan', 'error') }
+    setLoading(false)
+  }
+
+  async function changeStatus(newStatus: string) {
+    if (!canDo('suspend_user')) return
+    setLoading(true); setOpen(false)
+    onUpdated(u.id, 'account_status', newStatus)
+    try {
+      await (supabase.from('profiles') as any).update({ account_status: newStatus }).eq('id', u.id)
+      showToast(`Status set to ${newStatus}`, 'success')
+    } catch { showToast('Failed to update status', 'error') }
+    setLoading(false)
+  }
+
+  async function handleDelete() {
+    if (!canDo('delete_user')) return
+    setDeleting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ userId: u.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to delete user')
+      onUpdated(u.id, 'deleted', true)
+      showToast('User deleted', 'success')
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to delete user', 'error')
     }
+    setDeleting(false)
+    setConfirmDelete(false)
+    setOpen(false)
+  }
 
-    async function changeStatus(newStatus: string) {
-      if (!canDo('suspend_user')) return
-      setLoading(true); setOpen(false)
-      onUpdated(u.id, 'account_status', newStatus)
-      try {
-        await (supabase.from('profiles') as any).update({ account_status: newStatus }).eq('id', u.id)
-        showToast(`Status set to ${newStatus}`, 'success')
-      } catch { showToast('Failed to update status', 'error') }
-      setLoading(false)
+  async function handleImpersonate() {
+    if (!canDo('impersonate_user')) return
+    setImpersonating(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/impersonate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ userId: u.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to impersonate')
+      window.open(data.magicLink, '_blank')
+      showToast(`Viewing as ${data.userName}`, 'success')
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to impersonate', 'error')
     }
+    setImpersonating(false)
+    setOpen(false)
+  }
 
-    async function handleDelete() {
-      if (!canDo('delete_user')) return
-      setDeleting(true)
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const res = await fetch('/api/admin/delete-user', {
-          method:  'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ userId: u.id }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed to delete user')
-        onUpdated(u.id, 'deleted', true)
-        showToast('User deleted', 'success')
-      } catch (e: any) {
-        showToast(e.message ?? 'Failed to delete user', 'error')
-      }
-      setDeleting(false)
-      setConfirmDelete(false)
-      setOpen(false)
+  async function handleForceLogout() {
+    if (!canDo('force_logout')) return
+    setLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/force-logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ userId: u.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to force logout')
+      showToast('User logged out from all devices', 'success')
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to force logout', 'error')
     }
+    setLoading(false)
+    setOpen(false)
+  }
 
-    async function handleImpersonate() {
-      if (!canDo('impersonate_user')) return
-      setImpersonating(true)
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const res = await fetch('/api/admin/impersonate', {
-          method:  'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ userId: u.id }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed to impersonate')
-        window.open(data.magicLink, '_blank')
-        showToast(`Viewing as ${data.userName}`, 'success')
-      } catch (e: any) {
-        showToast(e.message ?? 'Failed to impersonate', 'error')
-      }
-      setImpersonating(false)
-      setOpen(false)
-    }
-
-    async function handleForceLogout() {
-      if (!canDo('force_logout')) return
-      setLoading(true)
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const res = await fetch('/api/admin/force-logout', {
-          method:  'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ userId: u.id }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed to force logout')
-        showToast('User logged out from all devices', 'success')
-      } catch (e: any) {
-        showToast(e.message ?? 'Failed to force logout', 'error')
-      }
-      setLoading(false)
-      setOpen(false)
-    }
-
-    const plans = ['Free Trial','Pro Plan','Elite Plan'].filter(p => p !== plan)
+  const plans = ['Free Trial', 'Pro Plan', 'Elite Plan'].filter(p => p !== plan)
 
   return (
     <div className="flex items-center justify-end gap-1.5 relative">
       <button onClick={() => onDrawer(u)}
-          title="View Profile"
-          className="w-8 h-8 flex items-center justify-center rounded-lg border hover:opacity-80"
-          style={{ backgroundColor:C.limeTint, borderColor:C.lime }}>
-          <User size={14} style={{ color:C.limeDeep }} />
-        </button>
+        title="View Profile"
+        className="w-8 h-8 flex items-center justify-center rounded-lg border hover:opacity-80"
+        style={{ backgroundColor: C.limeTint, borderColor: C.lime }}>
+        <User size={14} style={{ color: C.limeDeep }} />
+      </button>
       <button ref={btnRef} onClick={() => {
-            if (!open && btnRef.current) {
-              const rect = btnRef.current.getBoundingClientRect()
-              const openUp = window.innerHeight - rect.bottom < 300
-              setMenuPos({
-                top:  openUp ? rect.top - 4 : rect.bottom + 4,
-                left: rect.right - 190,
-                openUp,
-              })
-            }
-            setOpen(s => !s)
-          }}
-          className="w-7 h-7 flex items-center justify-center rounded-lg border hover:bg-gray-50"
-          style={{ borderColor:C.border }}>
-          {loading
-            ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor:C.limeDeep }} />
-            : <MoreVertical size={13} style={{ color:C.muted }} />}
-        </button>
-        {open && createPortal(
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-              <div className="fixed z-50 bg-white rounded-2xl border shadow-xl overflow-hidden"
-                   style={{
-                     borderColor:C.border, minWidth:190,
-                     top:  menuPos.openUp ? 'auto' : menuPos.top,
-                     bottom: menuPos.openUp ? window.innerHeight - menuPos.top : 'auto',
-                     left: menuPos.left,
-                   }}>
-              {canDo('change_plan') && plans.map(p => (
-                <button key={p} onClick={() => changePlan(p)}
-                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-gray-50 transition-colors"
-                  style={{ color:C.text }}>Switch ? {p}</button>
-              ))}
-              {canDo('change_plan') && <div className="h-px" style={{ backgroundColor:C.border }} />}
-              {canDo('suspend_user') && status !== 'Past Due' && (
-                <button onClick={() => changeStatus('Past Due')}
-                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-amber-50 transition-colors"
-                  style={{ color:C.amber }}>Suspend (Past Due)</button>
-              )}
-              {canDo('suspend_user') && status !== 'Active' && (
-                <button onClick={() => changeStatus('Active')}
-                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-green-50 transition-colors"
-                  style={{ color:C.green }}>Reactivate Account</button>
-              )}
-              {canDo('delete_user') && (
-                <>
-                  <div className="h-px" style={{ backgroundColor:C.border }} />
-                  <button onClick={() => setConfirmDelete(true)}
-                    className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-red-50 transition-colors"
-                    style={{ color:'#b91c1c' }}>Delete Account</button>
-                </>
-              )}
+        if (!open && btnRef.current) {
+          const rect = btnRef.current.getBoundingClientRect()
+          const openUp = window.innerHeight - rect.bottom < 300
+          setMenuPos({
+            top: openUp ? rect.top - 4 : rect.bottom + 4,
+            left: rect.right - 190,
+            openUp,
+          })
+        }
+        setOpen(s => !s)
+      }}
+        className="w-7 h-7 flex items-center justify-center rounded-lg border hover:bg-gray-50"
+        style={{ borderColor: C.border }}>
+        {loading
+          ? <div className="w-3.5 h-3.5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.limeDeep }} />
+          : <MoreVertical size={13} style={{ color: C.muted }} />}
+      </button>
+      {open && createPortal(
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="fixed z-50 bg-white rounded-2xl border shadow-xl overflow-hidden"
+            style={{
+              borderColor: C.border, minWidth: 190,
+              top: menuPos.openUp ? 'auto' : menuPos.top,
+              bottom: menuPos.openUp ? window.innerHeight - menuPos.top : 'auto',
+              left: menuPos.left,
+            }}>
+            {canDo('change_plan') && plans.map(p => (
+              <button key={p} onClick={() => changePlan(p)}
+                className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-gray-50 transition-colors"
+                style={{ color: C.text }}>Switch ? {p}</button>
+            ))}
+            {canDo('change_plan') && <div className="h-px" style={{ backgroundColor: C.border }} />}
+            {canDo('suspend_user') && status !== 'Past Due' && (
+              <button onClick={() => changeStatus('Past Due')}
+                className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-amber-50 transition-colors"
+                style={{ color: C.amber }}>Suspend (Past Due)</button>
+            )}
+            {canDo('suspend_user') && status !== 'Active' && (
+              <button onClick={() => changeStatus('Active')}
+                className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-green-50 transition-colors"
+                style={{ color: C.green }}>Reactivate Account</button>
+            )}
+            {canDo('delete_user') && (
+              <>
+                <div className="h-px" style={{ backgroundColor: C.border }} />
+                <button onClick={() => setConfirmDelete(true)}
+                  className="w-full px-4 py-2.5 text-left text-[12px] font-semibold hover:bg-red-50 transition-colors"
+                  style={{ color: '#b91c1c' }}>Delete Account</button>
+              </>
+            )}
+          </div>
+        </>,
+        document.body
+      )}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={e => e.target === e.currentTarget && !deleting && setConfirmDelete(false)}>
+          <div className="bg-white rounded-2xl border p-6 w-full max-w-sm" style={{ borderColor: C.border }}>
+            <p className="text-[15px] font-bold mb-2" style={{ color: C.text }}>Delete this account?</p>
+            <p className="text-[13px] mb-5" style={{ color: C.muted }}>
+              This permanently deletes <strong>{u.name ?? u.email}</strong> and all their data. This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmDelete(false)} disabled={deleting}
+                className="flex-1 py-2 rounded-lg border text-[13px] font-semibold" style={{ borderColor: C.border, color: C.muted }}>
+                Cancel
+              </button>
+              <button onClick={handleDelete} disabled={deleting}
+                className="flex-1 py-2 rounded-lg text-[13px] font-bold text-white disabled:opacity-50" style={{ backgroundColor: '#b91c1c' }}>
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
             </div>
-          </>,
-          document.body
-        )}
-        {confirmDelete && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-               style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-               onClick={e => e.target === e.currentTarget && !deleting && setConfirmDelete(false)}>
-            <div className="bg-white rounded-2xl border p-6 w-full max-w-sm" style={{ borderColor: C.border }}>
-              <p className="text-[15px] font-bold mb-2" style={{ color: C.text }}>Delete this account?</p>
-              <p className="text-[13px] mb-5" style={{ color: C.muted }}>
-                This permanently deletes <strong>{u.name ?? u.email}</strong> and all their data. This cannot be undone.
-              </p>
-              <div className="flex gap-2">
-                <button onClick={() => setConfirmDelete(false)} disabled={deleting}
-                  className="flex-1 py-2 rounded-lg border text-[13px] font-semibold" style={{ borderColor: C.border, color: C.muted }}>
-                  Cancel
-                </button>
-                <button onClick={handleDelete} disabled={deleting}
-                  className="flex-1 py-2 rounded-lg text-[13px] font-bold text-white disabled:opacity-50" style={{ backgroundColor: '#b91c1c' }}>
-                  {deleting ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </div>
-            </div>
-          )}
+          </div>
         </div>
-      )
-    }
+      )}
+    </div>
+  )
+}
 
 // -- UserRow — extracted so useState hooks are legal ------------
 function UserRow({ u, i, cols, onlineIds, selectedIds, toggleOne, onDrawer, isInvestorMode, onUpdated, showToast, hiddenCols = new Set(), canDo = () => true }: {
-    u: any; i: number; cols: string
-    onlineIds: Set<string>
-    selectedIds: Set<string>
-    toggleOne: (id: string) => void
-    onDrawer: (u: any) => void
-    isInvestorMode: boolean
-    onUpdated: (id: string, field: string, value: any) => void
-    showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-    hiddenCols?: Set<string>
-    canDo?: (action: string) => boolean
-  }) {
-  const [showIpModal,    setShowIpModal]    = useState(false)
-  const [showTeamModal,  setShowTeamModal]  = useState(false)
-  const [showQuickNote,  setShowQuickNote]  = useState(false)
-  const [hovered,        setHovered]        = useState(false)
+  u: any; i: number; cols: string
+  onlineIds: Set<string>
+  selectedIds: Set<string>
+  toggleOne: (id: string) => void
+  onDrawer: (u: any) => void
+  isInvestorMode: boolean
+  onUpdated: (id: string, field: string, value: any) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  hiddenCols?: Set<string>
+  canDo?: (action: string) => boolean
+}) {
+  const [showIpModal, setShowIpModal] = useState(false)
+  const [showTeamModal, setShowTeamModal] = useState(false)
+  const [showQuickNote, setShowQuickNote] = useState(false)
+  const [hovered, setHovered] = useState(false)
   const supabase = createClient()
 
-  const noteCount   = u.noteCount   ?? 0
+  const noteCount = u.noteCount ?? 0
   const recentNotes = u.recentNotes ?? []
 
-  const name      = u.name || (u.email ?? '').split('@')[0] || 'Unknown'
-  const email     = u.email ?? '—'
-  const plan      = planOf(u)
-  const status    = statusOf(u)
-  const pb        = planBadge(plan)
-  const sb        = statusBadge(status)
-  const joined    = fmtDate(u.created_at)
-  const lastSeen  = timeAgo(u.last_seen)
-  const platform  = u.device_platform ?? 'Unknown'
-  const shortId   = u.display_id ?? u.id?.slice(0,8) ?? '—'
-  const uniqueIps  = u.uniqueIps  ?? 0
+  const name = u.name || (u.email ?? '').split('@')[0] || 'Unknown'
+  const email = u.email ?? '—'
+  const plan = planOf(u)
+  const status = statusOf(u)
+  const pb = planBadge(plan)
+  const sb = statusBadge(status)
+  const joined = fmtDate(u.created_at)
+  const lastSeen = timeAgo(u.last_seen)
+  const platform = u.device_platform ?? 'Unknown'
+  const shortId = u.display_id ?? u.id?.slice(0, 8) ?? '—'
+  const uniqueIps = u.uniqueIps ?? 0
   const deviceList = (u.deviceList ?? []) as any[]
   const deviceCount = deviceList.length
-  const lastSeenMs  = u.last_seen ? Date.now() - new Date(u.last_seen).getTime() : Infinity
+  const lastSeenMs = u.last_seen ? Date.now() - new Date(u.last_seen).getTime() : Infinity
   const isOnlineNow = onlineIds.has(u.id) || lastSeenMs < 2 * 60 * 1000
-  const isRecent    = !isOnlineNow && lastSeenMs < 5 * 60 * 1000
-  const isToday     = lastSeenMs < 24 * 60 * 60 * 1000
+  const isRecent = !isOnlineNow && lastSeenMs < 5 * 60 * 1000
+  const isToday = lastSeenMs < 24 * 60 * 60 * 1000
   const presenceDot = isOnlineNow ? C.lime : isRecent ? C.limeDeep : 'transparent'
   const presenceLabel = isOnlineNow ? 'Active now' : isRecent ? `Active ${lastSeen}` : `${lastSeen}`
-  const health    = calcHealthScore(u)
-  const risk      = churnRisk(health)
+  const health = calcHealthScore(u)
+  const risk = churnRisk(health)
   const trialDays = trialDaysLeft(u)
-  const eStatus   = ebayStatus(u)
-  const eDays     = ebayDaysLeft(u)
-  const userTags  = Array.isArray(u.tags) ? u.tags : []
-  const dispName  = isInvestorMode ? `${name.split(' ')[0]} ***` : name
+  const eStatus = ebayStatus(u)
+  const eDays = ebayDaysLeft(u)
+  const userTags = Array.isArray(u.tags) ? u.tags : []
+  const dispName = isInvestorMode ? `${name.split(' ')[0]} ***` : name
   const dispEmail = isInvestorMode && email.includes('@')
     ? `${email[0]}***@${email.split('@')[1]}` : email
 
   // Contacted status
-  const contactInfo    = u.contactInfo as { lastSent: string; count: number; lastTemplate: string } | null
+  const contactInfo = u.contactInfo as { lastSent: string; count: number; lastTemplate: string } | null
   const contactedMsAgo = contactInfo ? Date.now() - new Date(contactInfo.lastSent).getTime() : null
-  const contactColor   = contactedMsAgo === null    ? null
-                       : contactedMsAgo < 3 * 86400000 ? C.red    // < 3 days = too soon
-                       : contactedMsAgo < 7 * 86400000 ? C.amber  // 3-7 days = recent
-                       : C.muted                                    // > 7 days = safe
-  const contactLabel   = contactedMsAgo === null ? null : timeAgo(contactInfo!.lastSent)
-  const templateLabel  = contactInfo?.lastTemplate
-    ?.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()) ?? ''
+  const contactColor = contactedMsAgo === null ? null
+    : contactedMsAgo < 3 * 86400000 ? C.red    // < 3 days = too soon
+      : contactedMsAgo < 7 * 86400000 ? C.amber  // 3-7 days = recent
+        : C.muted                                    // > 7 days = safe
+  const contactLabel = contactedMsAgo === null ? null : timeAgo(contactInfo!.lastSent)
+  const templateLabel = contactInfo?.lastTemplate
+    ?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) ?? ''
 
   return (
     <>
-            <div key={u.id}
-                 className="grid px-5 py-3 items-center hover:bg-[#fafcf8] transition-colors"
-                 style={{
-                   gridTemplateColumns: cols, gap: 12,
-                   backgroundColor: selectedIds.has(u.id) ? '#f4ffe6' : undefined,
-                   borderLeft:
-                     u.account_status === 'Banned'    ? `3px solid #7f1d1d` :
-                     u.account_status === 'Suspended' ? `3px solid #f97316` :
-                     u.hasWarningNote                 ? `3px solid ${C.red}` :
-                                                        '3px solid transparent',
-                 }}>
-              {/* Checkbox */}
-              <Checkbox checked={selectedIds.has(u.id)} onChange={() => toggleOne(u.id)} />
-              {/* 1. User */}
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="relative shrink-0">
-                  <Avatar
-                    name={name}
-                    size={34}
-                    avatarUrl={u.avatar_url ?? u.raw_user_meta_data?.avatar_url ?? null}
-                  />
-                  {(isOnlineNow || isRecent) && (<>
-                    {isOnlineNow && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-ping"
-                           style={{ backgroundColor: '#0a0d08', opacity: 0.5 }} />
-                    )}
-                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white"
-                         style={{
-                           backgroundColor: presenceDot,
-                           boxShadow: isOnlineNow ? `0 0 6px 1px rgba(143,255,0,0.5)` : 'none',
-                         }} />
-                  </>)}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-bold truncate" style={{ color:C.text }}>{dispName}</p>
-                  <p className="text-[10px] truncate" style={{ color:C.muted }}>{dispEmail}</p>
-                  {/* Tag pills */}
-                  {userTags.length > 0 && (
-                    <div className="flex items-center gap-1 mt-1 flex-wrap">
-                      {userTags.slice(0, 2).map((tag: string) => {
-                        const tc = TAG_CFG[tag]
-                        if (!tc) return null
-                        return (
-                          <span key={tag}
-                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
-                            style={{ backgroundColor: tc.bg, color: tc.color }}>
-                            <tc.Icon size={8} />
-                            {tc.label}
-                          </span>
-                        )
-                      })}
-                      {userTags.length > 2 && (
-                        <span className="text-[9px] font-bold" style={{ color: C.muted }}>
-                          +{userTags.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Contacted status badge */}
-                  {contactInfo && contactColor && (
-                    <div className="flex items-center gap-1 mt-1" title={`${templateLabel} · ${contactLabel}`}>
-                      <Mail size={9} style={{ color: contactColor }} />
-                      <span className="text-[9px] font-bold" style={{ color: contactColor }}>
-                        {contactInfo.count > 1 ? `${contactInfo.count}×` : ''} {contactLabel}
-                      </span>
-                      {contactedMsAgo !== null && contactedMsAgo < 3 * 86400000 && (
-                        <span className="text-[8px] font-bold px-1 py-0.5 rounded"
-                              style={{ backgroundColor:'rgba(185,28,28,0.08)', color:C.red }}>
-                          wait
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                 {/* Note count badge */}
-                    {noteCount > 0 && canDo('add_notes') && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
-                        className="flex items-center gap-1 mt-1 hover:opacity-70"
-                        title={`${noteCount} note${noteCount !== 1 ? 's' : ''} — click to view`}>
-                      <FileText size={9} style={{ color: C.limeDeep }} />
-                      <span className="text-[9px] font-bold" style={{ color: C.limeDeep }}>
-                        {noteCount} note{noteCount !== 1 ? 's' : ''}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* 2. Plan */}
-              {!hiddenCols.has('PLAN') && (
-              <div>
-                <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-black"
-                      style={{ backgroundColor:pb.bg, color:pb.text }}>{plan}</span>
-              </div>
+      <div key={u.id}
+        className="grid px-5 py-3 items-center hover:bg-[#fafcf8] transition-colors"
+        style={{
+          gridTemplateColumns: cols, gap: 12,
+          backgroundColor: selectedIds.has(u.id) ? '#f4ffe6' : undefined,
+          borderLeft:
+            u.account_status === 'Banned' ? `3px solid #7f1d1d` :
+              u.account_status === 'Suspended' ? `3px solid #f97316` :
+                u.hasWarningNote ? `3px solid ${C.red}` :
+                  '3px solid transparent',
+        }}>
+        {/* Checkbox */}
+        <Checkbox checked={selectedIds.has(u.id)} onChange={() => toggleOne(u.id)} />
+        {/* 1. User */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="relative shrink-0">
+            <Avatar
+              name={name}
+              size={34}
+              avatarUrl={u.avatar_url ?? u.raw_user_meta_data?.avatar_url ?? null}
+            />
+            {(isOnlineNow || isRecent) && (<>
+              {isOnlineNow && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full animate-ping"
+                  style={{ backgroundColor: '#0a0d08', opacity: 0.5 }} />
               )}
-
-              {/* 3. Status */}
-              {!hiddenCols.has('STATUS') && (
-              <div className="flex flex-col gap-1">
-                <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold w-fit"
-                      style={{ backgroundColor:sb.bg, color:sb.text }}>{status}</span>
-                {trialDays !== null && trialDays <= 7 && (
-                  <span className="inline-flex items-center gap-1 text-[9px] font-bold"
-                        style={{ color: trialDays <= 3 ? C.red : C.amber }}>
-                    <Clock size={8} /> {trialDays}d left
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white"
+                style={{
+                  backgroundColor: presenceDot,
+                  boxShadow: isOnlineNow ? `0 0 6px 1px rgba(143,255,0,0.5)` : 'none',
+                }} />
+            </>)}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[12px] font-bold truncate" style={{ color: C.text }}>{dispName}</p>
+            <p className="text-[10px] truncate" style={{ color: C.muted }}>{dispEmail}</p>
+            {/* Tag pills */}
+            {userTags.length > 0 && (
+              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                {userTags.slice(0, 2).map((tag: string) => {
+                  const tc = TAG_CFG[tag]
+                  if (!tc) return null
+                  return (
+                    <span key={tag}
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                      style={{ backgroundColor: tc.bg, color: tc.color }}>
+                      <tc.Icon size={8} />
+                      {tc.label}
+                    </span>
+                  )
+                })}
+                {userTags.length > 2 && (
+                  <span className="text-[9px] font-bold" style={{ color: C.muted }}>
+                    +{userTags.length - 2}
                   </span>
                 )}
               </div>
-              )}
-              {/* 3. Joined — date only */}
-              {!hiddenCols.has('JOINED') && (
-              <div>
-                <p className="text-[11px] font-semibold" style={{ color:C.text }}>{joined}</p>
-              </div>
-              )}
+            )}
 
-              {/* 4. Active — dedicated presence column */}
-              {!hiddenCols.has('ACTIVE') && (
-              <div className="flex items-center gap-1.5">
-                {(isOnlineNow || isRecent) && (
-                  <div className="relative shrink-0 w-2 h-2">
-                    {/* Pulsing ring radiates outward */}
-                    {isOnlineNow && (
-                      <div className="absolute inset-0 rounded-full animate-ping"
-                           style={{ backgroundColor: '#0a0d08', opacity: 0.4 }} />
-                    )}
-                    {/* Solid dot with lime glow shadow */}
-                    <div className="w-2 h-2 rounded-full"
-                         style={{
-                           backgroundColor: presenceDot,
-                           boxShadow: isOnlineNow
-                             ? `0 0 0 2px rgba(0,0,0,0.15), 0 0 8px 2px rgba(143,255,0,0.45)`
-                             : `0 0 0 2px rgba(0,0,0,0.1)`,
-                         }} />
-                  </div>
+            {/* Contacted status badge */}
+            {contactInfo && contactColor && (
+              <div className="flex items-center gap-1 mt-1" title={`${templateLabel} · ${contactLabel}`}>
+                <Mail size={9} style={{ color: contactColor }} />
+                <span className="text-[9px] font-bold" style={{ color: contactColor }}>
+                  {contactInfo.count > 1 ? `${contactInfo.count}×` : ''} {contactLabel}
+                </span>
+                {contactedMsAgo !== null && contactedMsAgo < 3 * 86400000 && (
+                  <span className="text-[8px] font-bold px-1 py-0.5 rounded"
+                    style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+                    wait
+                  </span>
                 )}
-                <p className="text-[11px] font-semibold"
-                   style={{ color: isOnlineNow ? C.limeDeep : isRecent ? C.limeDeep : C.muted }}>
-                  {presenceLabel}
-                </p>
               </div>
-              )}
+            )}
 
-              {/* 5. Location — flag image + city + country */}
-              {!hiddenCols.has('LOCATION') && (() => {
-                const rawCity  = u.verified_city ?? ''
-                const country  = u.country ?? ''
-                const code     = (u.country_code ?? '').trim().toLowerCase()
-                const cityName = rawCity.split(',')[0].trim()
-                const hasData  = !!(cityName || country)
-                return (
-                  <div className="min-w-0">
-                    {hasData ? (
-                      <>
-                        <div className="flex flex-row items-center gap-1.5 flex-nowrap min-w-0">
-                          {code.length === 2 ? (
-                            <img
-                              src={`https://flagcdn.com/16x12/${code}.png`}
-                              srcSet={`https://flagcdn.com/32x24/${code}.png 2x`}
-                              alt={country}
-                              className="shrink-0 rounded-sm"
-                              style={{ width: 16, height: 12, objectFit: 'cover' }}
-                            />
-                          ) : (
-                            <Globe size={11} style={{ color: C.muted, flexShrink: 0 }} />
-                          )}
-                          <span className="text-[11px] font-bold truncate" style={{ color: C.text }}>
-                            {cityName || country}
-                          </span>
-                        </div>
-                        {cityName && country && (
-                          <p className="text-[10px] truncate mt-0.5" style={{ color: C.muted }}>
-                            {country}
-                          </p>
-                        )}
-                      </>
+            {/* Note count badge */}
+            {noteCount > 0 && canDo('add_notes') && (
+              <button
+                onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
+                className="flex items-center gap-1 mt-1 hover:opacity-70"
+                title={`${noteCount} note${noteCount !== 1 ? 's' : ''} — click to view`}>
+                <FileText size={9} style={{ color: C.limeDeep }} />
+                <span className="text-[9px] font-bold" style={{ color: C.limeDeep }}>
+                  {noteCount} note{noteCount !== 1 ? 's' : ''}
+                </span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 2. Plan */}
+        {!hiddenCols.has('PLAN') && (
+          <div>
+            <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-black"
+              style={{ backgroundColor: pb.bg, color: pb.text }}>{plan}</span>
+          </div>
+        )}
+
+        {/* 3. Status */}
+        {!hiddenCols.has('STATUS') && (
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold w-fit"
+              style={{ backgroundColor: sb.bg, color: sb.text }}>{status}</span>
+            {trialDays !== null && trialDays <= 7 && (
+              <span className="inline-flex items-center gap-1 text-[9px] font-bold"
+                style={{ color: trialDays <= 3 ? C.red : C.amber }}>
+                <Clock size={8} /> {trialDays}d left
+              </span>
+            )}
+          </div>
+        )}
+        {/* 3. Joined — date only */}
+        {!hiddenCols.has('JOINED') && (
+          <div>
+            <p className="text-[11px] font-semibold" style={{ color: C.text }}>{joined}</p>
+          </div>
+        )}
+
+        {/* 4. Active — dedicated presence column */}
+        {!hiddenCols.has('ACTIVE') && (
+          <div className="flex items-center gap-1.5">
+            {(isOnlineNow || isRecent) && (
+              <div className="relative shrink-0 w-2 h-2">
+                {/* Pulsing ring radiates outward */}
+                {isOnlineNow && (
+                  <div className="absolute inset-0 rounded-full animate-ping"
+                    style={{ backgroundColor: '#0a0d08', opacity: 0.4 }} />
+                )}
+                {/* Solid dot with lime glow shadow */}
+                <div className="w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor: presenceDot,
+                    boxShadow: isOnlineNow
+                      ? `0 0 0 2px rgba(0,0,0,0.15), 0 0 8px 2px rgba(143,255,0,0.45)`
+                      : `0 0 0 2px rgba(0,0,0,0.1)`,
+                  }} />
+              </div>
+            )}
+            <p className="text-[11px] font-semibold"
+              style={{ color: isOnlineNow ? C.limeDeep : isRecent ? C.limeDeep : C.muted }}>
+              {presenceLabel}
+            </p>
+          </div>
+        )}
+
+        {/* 5. Location — flag image + city + country */}
+        {!hiddenCols.has('LOCATION') && (() => {
+          const rawCity = u.verified_city ?? ''
+          const country = u.country ?? ''
+          const code = (u.country_code ?? '').trim().toLowerCase()
+          const cityName = rawCity.split(',')[0].trim()
+          const hasData = !!(cityName || country)
+          return (
+            <div className="min-w-0">
+              {hasData ? (
+                <>
+                  <div className="flex flex-row items-center gap-1.5 flex-nowrap min-w-0">
+                    {code.length === 2 ? (
+                      <img
+                        src={`https://flagcdn.com/16x12/${code}.png`}
+                        srcSet={`https://flagcdn.com/32x24/${code}.png 2x`}
+                        alt={country}
+                        className="shrink-0 rounded-sm"
+                        style={{ width: 16, height: 12, objectFit: 'cover' }}
+                      />
                     ) : (
-                      <div className="flex flex-row items-center gap-1">
-                        <Globe size={11} style={{ color: C.muted }} />
-                        <span className="text-[10px]" style={{ color: C.muted }}>Unknown</span>
+                      <Globe size={11} style={{ color: C.muted, flexShrink: 0 }} />
+                    )}
+                    <span className="text-[11px] font-bold truncate" style={{ color: C.text }}>
+                      {cityName || country}
+                    </span>
+                  </div>
+                  {cityName && country && (
+                    <p className="text-[10px] truncate mt-0.5" style={{ color: C.muted }}>
+                      {country}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-row items-center gap-1">
+                  <Globe size={11} style={{ color: C.muted }} />
+                  <span className="text-[10px]" style={{ color: C.muted }}>Unknown</span>
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* 5. Health Score — dedicated column */}
+        {!hiddenCols.has('HEALTH') && (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <div className="h-1.5 rounded-full overflow-hidden flex-1" style={{ maxWidth: 40, backgroundColor: C.border }}>
+                <div className="h-full rounded-full"
+                  style={{
+                    width: `${health}%`,
+                    backgroundColor: health >= 70 ? C.lime : health >= 40 ? C.amber : C.red
+                  }} />
+              </div>
+              <span className="text-[10px] font-black"
+                style={{ color: health >= 70 ? C.limeDeep : health >= 40 ? C.amber : C.red }}>
+                {health}
+              </span>
+            </div>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full w-fit"
+              style={{ backgroundColor: risk.bg, color: risk.color }}>
+              {risk.label}
+            </span>
+          </div>
+        )}
+
+        {/* 6. eBay Status — dedicated column */}
+        {!hiddenCols.has('EBAY') && (
+          <div>
+            {eStatus === 'none'
+              ? <span className="text-[10px]" style={{ color: C.muted }}>—</span>
+              : <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{
+                    backgroundColor: eStatus === 'connected' ? C.green : eStatus === 'expiring' ? C.amber : C.red
+                  }} />
+                  <span className="text-[10px] font-bold" style={{
+                    color: eStatus === 'connected' ? C.green : eStatus === 'expiring' ? C.amber : C.red
+                  }}>
+                    {eStatus === 'connected' ? 'Active' : eStatus === 'expiring' ? 'Expiring' : 'Offline'}
+                  </span>
+                </div>
+                {eDays !== null && eStatus !== 'connected' && (
+                  <span className="text-[9px]" style={{ color: C.muted }}>{eDays}d left</span>
+                )}
+              </div>}
+          </div>
+        )}
+
+        {/* 7. IPs — unique login locations, click to see details */}
+        {!hiddenCols.has('IPS') && (
+          <div>
+            {uniqueIps === 0
+              ? <span className="text-[11px]" style={{ color: C.muted }}>—</span>
+              : <>
+                <button onClick={() => canDo('view_security') && setShowIpModal(true)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
+                  style={{
+                    backgroundColor: uniqueIps > 5 ? 'rgba(185,28,28,0.08)' : C.bg,
+                    borderColor: uniqueIps > 5 ? C.red : C.border,
+                  }}>
+                  {uniqueIps > 5
+                    ? <AlertTriangle size={10} style={{ color: C.red }} />
+                    : <Globe size={10} style={{ color: C.muted }} />}
+                  <span className="text-[11px] font-bold"
+                    style={{ color: uniqueIps > 5 ? C.red : C.text }}>
+                    {uniqueIps}
+                  </span>
+                </button>
+                {showIpModal && <IpDetailModal user={u} onClose={() => setShowIpModal(false)} />}
+              </>}
+          </div>
+        )}
+
+        {/* 8. Devices — from user_devices table */}
+        {!hiddenCols.has('DEVICES') && (
+          <div>
+            {deviceCount === 0
+              ? <span className="text-[11px]" style={{ color: C.muted }}>—</span>
+              : (() => {
+                const mobCount = deviceList.filter(d => d.platform?.includes('iOS') || d.platform?.includes('Android')).length
+                const deskCount = deviceCount - mobCount
+                return (
+                  <div className="flex items-center gap-1.5">
+                    {deskCount > 0 && (
+                      <div className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded-md border"
+                        style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                        <Monitor size={10} style={{ color: C.muted }} />
+                        <span className="text-[10px] font-bold" style={{ color: C.text }}>{deskCount}</span>
+                      </div>
+                    )}
+                    {mobCount > 0 && (
+                      <div className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded-md border"
+                        style={{ backgroundColor: C.bg, borderColor: C.border }}>
+                        <Smartphone size={10} style={{ color: C.muted }} />
+                        <span className="text-[10px] font-bold" style={{ color: C.text }}>{mobCount}</span>
                       </div>
                     )}
                   </div>
                 )
               })()}
+          </div>
+        )}
 
-              {/* 5. Health Score — dedicated column */}
-              {!hiddenCols.has('HEALTH') && (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 rounded-full overflow-hidden flex-1" style={{ maxWidth:40, backgroundColor:C.border }}>
-                    <div className="h-full rounded-full"
-                         style={{ width:`${health}%`,
-                                  backgroundColor: health>=70 ? C.lime : health>=40 ? C.amber : C.red }} />
-                  </div>
-                  <span className="text-[10px] font-black"
-                        style={{ color: health>=70 ? C.limeDeep : health>=40 ? C.amber : C.red }}>
-                    {health}
-                  </span>
-                </div>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full w-fit"
-                      style={{ backgroundColor: risk.bg, color: risk.color }}>
-                  {risk.label}
-                </span>
-              </div>
-              )}
+        {/* 9. Team */}
+        {!hiddenCols.has('TEAM') && (
+          <div>
+            {(() => {
+              const teamMembers = (u.teamMembers ?? []) as any[]
+              const teamOwners = (u.teamOwners ?? []) as any[]
+              const hasTeam = teamMembers.length > 0 || teamOwners.length > 0
+              if (!hasTeam) return <span className="text-[11px]" style={{ color: C.muted }}>—</span>
 
-              {/* 6. eBay Status — dedicated column */}
-              {!hiddenCols.has('EBAY') && (
-              <div>
-                {eStatus === 'none'
-                  ? <span className="text-[10px]" style={{ color:C.muted }}>—</span>
-                  : <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{
-                          backgroundColor: eStatus==='connected' ? C.green : eStatus==='expiring' ? C.amber : C.red
-                        }} />
-                        <span className="text-[10px] font-bold" style={{
-                          color: eStatus==='connected' ? C.green : eStatus==='expiring' ? C.amber : C.red
-                        }}>
-                          {eStatus==='connected' ? 'Active' : eStatus==='expiring' ? 'Expiring' : 'Offline'}
-                        </span>
-                      </div>
-                      {eDays !== null && eStatus !== 'connected' && (
-                        <span className="text-[9px]" style={{ color:C.muted }}>{eDays}d left</span>
-                      )}
-                    </div>}
-              </div>
-              )}
+              if (teamMembers.length > 0) {
+                return (
+                  <>
+                    <button onClick={() => setShowTeamModal(true)}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
+                      style={{ backgroundColor: '#F5F3FF', borderColor: '#c4b5fd' }}>
+                      <Users size={10} style={{ color: '#8b5cf6' }} />
+                      <span className="text-[10px] font-bold" style={{ color: '#8b5cf6' }}>
+                        {teamMembers.length}
+                      </span>
+                    </button>
+                    {showTeamModal && <TeamDetailModal user={u} onClose={() => setShowTeamModal(false)} />}
+                  </>
+                )
+              }
+              const ownerName = teamOwners[0].owner?.name?.split(' ')[0]
+                ?? teamOwners[0].owner?.email?.split('@')[0]
+                ?? 'Team'
+              return (
+                <>
+                  <button onClick={() => setShowTeamModal(true)}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
+                    style={{ backgroundColor: '#FEF3C7', borderColor: '#fde68a' }}>
+                    <Users size={10} style={{ color: '#92400e' }} />
+                    <span className="text-[10px] font-bold truncate max-w-[50px]"
+                      style={{ color: '#92400e' }}>
+                      {ownerName}
+                    </span>
+                  </button>
+                  {showTeamModal && <TeamDetailModal user={u} onClose={() => setShowTeamModal(false)} />}
+                </>
+              )
+            })()}
+          </div>
+        )}
 
-              {/* 7. IPs — unique login locations, click to see details */}
-                {!hiddenCols.has('IPS') && (
-                <div>
-                  {uniqueIps === 0
-                    ? <span className="text-[11px]" style={{ color:C.muted }}>—</span>
-                    : <>
-                        <button onClick={() => canDo('view_security') && setShowIpModal(true)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
-                        style={{
-                          backgroundColor: uniqueIps > 5 ? 'rgba(185,28,28,0.08)' : C.bg,
-                          borderColor:     uniqueIps > 5 ? C.red                  : C.border,
-                        }}>
-                        {uniqueIps > 5
-                          ? <AlertTriangle size={10} style={{ color:C.red }} />
-                          : <Globe size={10} style={{ color:C.muted }} />}
-                        <span className="text-[11px] font-bold"
-                              style={{ color: uniqueIps > 5 ? C.red : C.text }}>
-                          {uniqueIps}
-                        </span>
-                      </button>
-                      {showIpModal && <IpDetailModal user={u} onClose={() => setShowIpModal(false)} />}
-                    </>}
-              </div>
-              )}
+        {/* 10. Actions */}
+        <div className="flex items-center justify-end gap-1">
+          {/* Quick note button */}
+          {canDo('add_notes') && <button
+            onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
+            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
+            style={{
+              backgroundColor: showQuickNote ? C.limeTint : 'transparent',
+              border: showQuickNote ? `1px solid ${C.lime}` : '1px solid transparent',
+            }}
+            title="Quick note">
+            <FileText size={13} style={{ color: showQuickNote ? C.limeDeep : C.muted }} />
+          </button>}
+          <ActionMenu u={u} onDrawer={onDrawer} onUpdated={onUpdated} showToast={showToast} canDo={canDo} />
+        </div>
+      </div>
 
-              {/* 8. Devices — from user_devices table */}
-              {!hiddenCols.has('DEVICES') && (
-              <div>
-                {deviceCount === 0
-                  ? <span className="text-[11px]" style={{ color:C.muted }}>—</span>
-                  : (() => {
-                      const mobCount  = deviceList.filter(d => d.platform?.includes('iOS') || d.platform?.includes('Android')).length
-                      const deskCount = deviceCount - mobCount
-                      return (
-                        <div className="flex items-center gap-1.5">
-                          {deskCount > 0 && (
-                            <div className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded-md border"
-                                 style={{ backgroundColor:C.bg, borderColor:C.border }}>
-                              <Monitor size={10} style={{ color:C.muted }} />
-                              <span className="text-[10px] font-bold" style={{ color:C.text }}>{deskCount}</span>
-                            </div>
-                          )}
-                          {mobCount > 0 && (
-                            <div className="inline-flex items-center gap-0.5 px-1.5 py-1 rounded-md border"
-                                 style={{ backgroundColor:C.bg, borderColor:C.border }}>
-                              <Smartphone size={10} style={{ color:C.muted }} />
-                              <span className="text-[10px] font-bold" style={{ color:C.text }}>{mobCount}</span>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })()}
-              </div>
-              )}
-
-              {/* 9. Team */}
-              {!hiddenCols.has('TEAM') && (
-              <div>
-                {(() => {
-                  const teamMembers = (u.teamMembers ?? []) as any[]
-                  const teamOwners  = (u.teamOwners  ?? []) as any[]
-                  const hasTeam     = teamMembers.length > 0 || teamOwners.length > 0
-                  if (!hasTeam) return <span className="text-[11px]" style={{ color:C.muted }}>—</span>
-
-                  if (teamMembers.length > 0) {
-                    return (
-                      <>
-                        <button onClick={() => setShowTeamModal(true)}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
-                          style={{ backgroundColor:'#F5F3FF', borderColor:'#c4b5fd' }}>
-                          <Users size={10} style={{ color:'#8b5cf6' }} />
-                          <span className="text-[10px] font-bold" style={{ color:'#8b5cf6' }}>
-                            {teamMembers.length}
-                          </span>
-                        </button>
-                        {showTeamModal && <TeamDetailModal user={u} onClose={() => setShowTeamModal(false)} />}
-                      </>
-                    )
-                  }
-                  const ownerName = teamOwners[0].owner?.name?.split(' ')[0]
-                    ?? teamOwners[0].owner?.email?.split('@')[0]
-                    ?? 'Team'
-                  return (
-                    <>
-                      <button onClick={() => setShowTeamModal(true)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md border hover:opacity-80 cursor-pointer"
-                        style={{ backgroundColor:'#FEF3C7', borderColor:'#fde68a' }}>
-                        <Users size={10} style={{ color:'#92400e' }} />
-                        <span className="text-[10px] font-bold truncate max-w-[50px]"
-                              style={{ color:'#92400e' }}>
-                          {ownerName}
-                        </span>
-                      </button>
-                      {showTeamModal && <TeamDetailModal user={u} onClose={() => setShowTeamModal(false)} />}
-                    </>
-                  )
-                })()}
-              </div>
-              )}
-
-              {/* 10. Actions */}
-              <div className="flex items-center justify-end gap-1">
-                {/* Quick note button */}
-                  {canDo('add_notes') && <button
-                    onClick={e => { e.stopPropagation(); setShowQuickNote(s => !s) }}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg transition-all hover:opacity-80"
-                  style={{
-                    backgroundColor: showQuickNote ? C.limeTint : 'transparent',
-                    border: showQuickNote ? `1px solid ${C.lime}` : '1px solid transparent',
-                  }}
-                  title="Quick note">
-                  <FileText size={13} style={{ color: showQuickNote ? C.limeDeep : C.muted }} />
-                  </button>}
-                  <ActionMenu u={u} onDrawer={onDrawer} onUpdated={onUpdated} showToast={showToast} canDo={canDo} />
-              </div>
-            </div>
-
-            {/* Quick Note Panel — expands below row */}
-            {showQuickNote && (
-              <QuickNotePanel
-                userId={u.id}
-                userName={name}
-                recentNotes={recentNotes}
-                onClose={() => setShowQuickNote(false)}
-                onSaved={(newCount) => {
-                  onUpdated(u.id, 'noteCount', newCount)
-                  setShowQuickNote(false)
-                }}
-              />
-            )}
+      {/* Quick Note Panel — expands below row */}
+      {showQuickNote && (
+        <QuickNotePanel
+          userId={u.id}
+          userName={name}
+          recentNotes={recentNotes}
+          onClose={() => setShowQuickNote(false)}
+          onSaved={(newCount) => {
+            onUpdated(u.id, 'noteCount', newCount)
+            setShowQuickNote(false)
+          }}
+        />
+      )}
     </>
   )
 }
