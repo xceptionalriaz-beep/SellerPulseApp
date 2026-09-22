@@ -180,6 +180,73 @@ function runAudit(html: string, blockCount: number): AuditIssue[] {
         })
     }
 
+    // ── IMAGE HOST CHECKS ─────────────────────────────────────────────────────
+
+    // Extract all <img> src values for detailed checks
+    const allImgSrcs = [...html.matchAll(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/gi)]
+        .map(m => m[1].trim())
+        .filter(src => src.length > 0 && !src.startsWith('{{')) // skip placeholders
+
+    // 1. localhost / 127.0.0.1 — developer URLs that break on live listings
+    const localhostImgs = allImgSrcs.filter(src =>
+        /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?/i.test(src)
+    )
+    if (localhostImgs.length > 0) {
+        issues.push({
+            id: 'localhost-images',
+            severity: 'error',
+            title: `${localhostImgs.length} localhost image${localhostImgs.length > 1 ? 's' : ''} — will break on eBay`,
+            detail: `Found ${localhostImgs.length} image${localhostImgs.length > 1 ? 's' : ''} pointing to localhost or 127.0.0.1. These are local development URLs — they work on your machine but are completely inaccessible to eBay's servers and buyers.`,
+            fixHint: 'Upload these images to your Supabase My Assets or an eBay-hosted image service and use the public HTTPS URL.',
+            count: localhostImgs.length,
+        })
+    }
+
+    // 2. Relative paths — work in a browser context but break in eBay listing HTML
+    const relativeImgs = allImgSrcs.filter(src =>
+        (src.startsWith('/') || src.startsWith('./') || src.startsWith('../')) &&
+        !src.startsWith('//')
+    )
+    if (relativeImgs.length > 0) {
+        issues.push({
+            id: 'relative-images',
+            severity: 'error',
+            title: `${relativeImgs.length} relative image path${relativeImgs.length > 1 ? 's' : ''} — will break on eBay`,
+            detail: `Found ${relativeImgs.length} image${relativeImgs.length > 1 ? 's' : ''} using relative paths (e.g. /images/photo.jpg). eBay renders listing HTML in its own domain context — relative paths resolve to eBay's servers, not yours, and will show broken image icons.`,
+            fixHint: 'Replace all relative image paths with full absolute HTTPS URLs (e.g. https://your-cdn.com/images/photo.jpg).',
+            count: relativeImgs.length,
+        })
+    }
+
+    // 3. Base64 / data: URI images — massive file size, eBay may strip or truncate
+    const dataUriImgs = allImgSrcs.filter(src => src.startsWith('data:image/'))
+    if (dataUriImgs.length > 0) {
+        const totalKb = Math.round(
+            dataUriImgs.reduce((sum, src) => sum + src.length, 0) / 1024
+        )
+        issues.push({
+            id: 'data-uri-images',
+            severity: 'warning',
+            title: `${dataUriImgs.length} embedded (base64) image${dataUriImgs.length > 1 ? 's' : ''} — ~${totalKb}KB`,
+            detail: `Found ${dataUriImgs.length} base64-encoded image${dataUriImgs.length > 1 ? 's' : ''} embedded directly in the HTML (~${totalKb}KB total). These bloat the template size significantly and may be stripped by eBay's HTML sanitiser.`,
+            fixHint: 'Upload images to My Assets and use the Supabase public URL instead of embedding them as base64.',
+            count: dataUriImgs.length,
+        })
+    }
+
+    // 4. Empty src — renders as broken image icon on live listing
+    const emptySrcImgs = (html.match(/<img\b[^>]*\bsrc\s*=\s*["']\s*["'][^>]*>/gi) || [])
+    if (emptySrcImgs.length > 0) {
+        issues.push({
+            id: 'empty-src-images',
+            severity: 'warning',
+            title: `${emptySrcImgs.length} image${emptySrcImgs.length > 1 ? 's' : ''} with empty src`,
+            detail: `Found ${emptySrcImgs.length} <img> tag${emptySrcImgs.length > 1 ? 's' : ''} with an empty src attribute. These will render as broken image icons on the live listing.`,
+            fixHint: 'Add an image URL or remove the empty <img> tag.',
+            count: emptySrcImgs.length,
+        })
+    }
+
     // HTTP (non-HTTPS) image URLs
     const httpImgMatches = html.match(/src\s*=\s*["']http:\/\//gi)
     if (httpImgMatches) {
