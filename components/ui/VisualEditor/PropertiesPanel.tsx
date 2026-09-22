@@ -18,7 +18,8 @@
 //   onDeselect      — called when user clicks × to deselect
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
+import { createClient } from '@/lib/supabase'
 import { getVariants, hasVariants } from './variants/index'
 import type { BlockVariant } from './variants/hero_header.variants'
 import {
@@ -1434,9 +1435,11 @@ function CrossSellItemsEditor({
                         <button onClick={() => onChange(items.filter((_, j) => j !== i))}
                             style={{ ...smallBtnStyle, color: C.danger }}>×</button>
                     </div>
-                    <input value={item.imageUrl} placeholder="Image URL"
-                        onChange={e => { const n = [...items]; n[i] = { ...n[i], imageUrl: e.target.value }; onChange(n) }}
-                        style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
+                    <ImageUploadInput
+                        label=""
+                        value={item.imageUrl}
+                        onChange={v => { const n = [...items]; n[i] = { ...n[i], imageUrl: v }; onChange(n) }}
+                    />
                     <input value={item.title} placeholder="Product title / placeholder"
                         onChange={e => { const n = [...items]; n[i] = { ...n[i], title: e.target.value }; onChange(n) }}
                         style={{ ...inputStyle, marginBottom: 4, fontSize: 11 }} />
@@ -2025,7 +2028,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                     {props.variant === 'split-image-text' && (
                         <>
                             <Section title="Image">
-                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
+                                <ImageUploadInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
                                 <SelectInput label="Image position" value={props.imagePosition ?? 'left'}
                                     options={[{ v: 'left', l: 'Image left, text right' }, { v: 'right', l: 'Image right, text left' }]} onChange={v => updateProps({ imagePosition: v })} />
                                 <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
@@ -2719,7 +2722,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Main image">
-                        <TextInput label="Image URL" value={props.src ?? ''} onChange={v => updateProps({ src: v })} />
+                        <ImageUploadInput label="Image URL" value={props.src ?? ''} onChange={v => updateProps({ src: v })} />
                         {phButton('src', 'main image URL')}
                         <TextInput label="Alt text" value={props.alt ?? ''} onChange={v => updateProps({ alt: v })} />
                         {phButton('alt', 'alt text')}
@@ -2736,9 +2739,9 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     {av === 'gallery' && (
                         <Section title="Gallery images">
                             <InfoBox>Add extra images for the thumbnail strip.</InfoBox>
-                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            <ImageUploadInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
                             {phButton('image2Url', 'image 2 URL')}
-                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            <ImageUploadInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
                             {phButton('image3Url', 'image 3 URL')}
                             {(props.imageCount ?? 4) >= 4 && <>
                                 <TextInput label="Image 4 URL" value={props.image4Url ?? ''} onChange={v => updateProps({ image4Url: v })} />
@@ -2766,7 +2769,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     )}
                     {av === 'comparison' && (
                         <Section title="Second image">
-                            <TextInput label="Second image URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            <ImageUploadInput label="Second image URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
                             {phButton('image2Url', 'second image URL')}
                             <TextInput label="Left label" value={props.label1 ?? 'Front'} onChange={v => updateProps({ label1: v })} />
                             <TextInput label="Right label" value={props.label2 ?? 'Back'} onChange={v => updateProps({ label2: v })} />
@@ -2788,23 +2791,23 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <Section title="Before / After images">
                             <TextInput label="Before label" value={props.beforeLabel ?? 'Before'} onChange={v => updateProps({ beforeLabel: v })} />
                             <TextInput label="After label" value={props.afterLabel ?? 'After'} onChange={v => updateProps({ afterLabel: v })} />
-                            <TextInput label="After image URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            <ImageUploadInput label="After image URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
                             {phButton('image2Url', 'after image URL')}
                         </Section>
                     )}
                     {av === 'magazine' && (
                         <Section title="Additional images">
-                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            <ImageUploadInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
                             {phButton('image2Url', 'image 2 URL')}
-                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            <ImageUploadInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
                             {phButton('image3Url', 'image 3 URL')}
                         </Section>
                     )}
                     {av === 'inverted-magazine-grid' && (
                         <Section title="Additional images">
-                            <TextInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
+                            <ImageUploadInput label="Image 2 URL" value={props.image2Url ?? ''} onChange={v => updateProps({ image2Url: v })} />
                             {phButton('image2Url', 'image 2 URL')}
-                            <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
+                            <ImageUploadInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
                             {phButton('image3Url', 'image 3 URL')}
                         </Section>
                     )}
@@ -2824,7 +2827,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     {props.variant === 'full-width-hero' && (
                         <>
                             <Section title="Background Image">
-                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
+                                <ImageUploadInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
                                 {phButton('imageUrl', 'background image')}
                             </Section>
                             <Section title="Size">
@@ -2858,7 +2861,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Main image">
-                        <TextInput label="Main image URL" value={props.mainImageSrc ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ mainImageSrc: v })} />
+                        <ImageUploadInput label="Main image URL" value={props.mainImageSrc ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ mainImageSrc: v })} />
                         {phButton('mainImageSrc', 'main image')}
                     </Section>
                     <Section title="Thumbnail images">
@@ -3193,7 +3196,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         />
                         {props.showLogo && (
                             <>
-                                <TextInput
+                                <ImageUploadInput
                                     label="Logo URL"
                                     value={props.logoUrl ?? ''}
                                     onChange={v => updateProps({ logoUrl: v })}
@@ -3405,9 +3408,9 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Images">
-                        <TextInput label="Before image URL" value={props.beforeSrc ?? '{{IMAGE_BEFORE}}'} onChange={v => updateProps({ beforeSrc: v })} />
+                        <ImageUploadInput label="Before image URL" value={props.beforeSrc ?? '{{IMAGE_BEFORE}}'} onChange={v => updateProps({ beforeSrc: v })} />
                         {phButton('beforeSrc', 'before image URL')}
-                        <TextInput label="After image URL" value={props.afterSrc ?? '{{IMAGE_AFTER}}'} onChange={v => updateProps({ afterSrc: v })} />
+                        <ImageUploadInput label="After image URL" value={props.afterSrc ?? '{{IMAGE_AFTER}}'} onChange={v => updateProps({ afterSrc: v })} />
                         {phButton('afterSrc', 'after image URL')}
                     </Section>
                     <Section title="Labels">
@@ -3527,7 +3530,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Image">
-                        <TextInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
+                        <ImageUploadInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
                         {phButton('src', 'image URL')}
                         <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
                         {phButton('alt', 'alt text')}
@@ -4126,15 +4129,14 @@ function GalleryImagesEditor({ images, onChange }: { images: Array<{ src: string
                         <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, fontWeight: 600 }}>Image {i + 1}</span>
                         <button onClick={() => onChange(images.filter((_, j) => j !== i))} style={{ ...smallBtnStyle, color: C.danger }}>×</button>
                     </div>
-                    <input
+                    <ImageUploadInput
+                        label=""
                         value={img.src}
-                        placeholder="Image URL"
-                        onChange={e => {
+                        onChange={v => {
                             const next = [...images]
-                            next[i] = { ...next[i], src: e.target.value }
+                            next[i] = { ...next[i], src: v }
                             onChange(next)
                         }}
-                        style={{ ...inputStyle, marginBottom: 4 }}
                     />
                     <input
                         value={img.alt}
@@ -4489,6 +4491,169 @@ function TextInput({ label, value, onChange }: { label: string; value: string; o
                 onChange={e => onChange(e.target.value)}
                 style={inputStyle}
             />
+        </div>
+    )
+}
+
+// ── Image Upload Input ─────────────────────────────────────────────────────────
+// Wraps a URL text field with a file-picker upload button.
+// Uploads to Supabase Storage bucket "listing-images" and writes back the public URL.
+function ImageUploadInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+    const [uploading, setUploading] = useState(false)
+    const [uploadError, setUploadError] = useState<string | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // Basic validation
+        if (!file.type.startsWith('image/')) {
+            setUploadError('Please select an image file (JPG, PNG, GIF, WebP)')
+            return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setUploadError('Image must be under 5 MB')
+            return
+        }
+
+        setUploading(true)
+        setUploadError(null)
+
+        try {
+            const supabase = createClient()
+            const ext = file.name.split('.').pop() ?? 'jpg'
+            const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+            const filePath = `uploads/${fileName}`
+
+            const { error: uploadErr } = await supabase.storage
+                .from('listing-images')
+                .upload(filePath, file, { contentType: file.type, upsert: false })
+
+            if (uploadErr) {
+                // If bucket doesn't exist, give a helpful message
+                if (uploadErr.message?.includes('Bucket not found') || uploadErr.message?.includes('bucket')) {
+                    setUploadError('Storage bucket "listing-images" not found. Please create it in Supabase Storage.')
+                } else {
+                    setUploadError(uploadErr.message ?? 'Upload failed')
+                }
+                return
+            }
+
+            const { data: urlData } = supabase.storage
+                .from('listing-images')
+                .getPublicUrl(filePath)
+
+            if (urlData?.publicUrl) {
+                onChange(urlData.publicUrl)
+            } else {
+                setUploadError('Could not get public URL after upload')
+            }
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Upload failed'
+            setUploadError(msg)
+        } finally {
+            setUploading(false)
+            // Reset the file input so the same file can be re-selected
+            if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+    }, [onChange])
+
+    const isValidUrl = value.startsWith('http://') || value.startsWith('https://')
+
+    return (
+        <div style={{ marginBottom: 8 }}>
+            {label && (
+                <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>
+                    {label}
+                </p>
+            )}
+
+            {/* URL field + upload button row */}
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                <input
+                    type="text"
+                    value={value}
+                    onChange={e => { setUploadError(null); onChange(e.target.value) }}
+                    placeholder="Paste URL or upload ↑"
+                    style={{ ...inputStyle, flex: 1, marginBottom: 0 }}
+                />
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    title="Upload image"
+                    style={{
+                        flexShrink: 0,
+                        width: 30,
+                        height: 28,
+                        border: `1px solid ${C.inputBorder}`,
+                        borderRadius: 6,
+                        backgroundColor: uploading ? C.bg : C.primaryLight,
+                        color: C.primary,
+                        cursor: uploading ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 14,
+                        padding: 0,
+                        transition: 'background 0.15s',
+                    }}
+                >
+                    {uploading ? (
+                        <span style={{
+                            display: 'inline-block',
+                            width: 12,
+                            height: 12,
+                            border: `2px solid ${C.primary}`,
+                            borderTopColor: 'transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 0.7s linear infinite',
+                        }} />
+                    ) : '📁'}
+                </button>
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                />
+            </div>
+
+            {/* Upload status */}
+            {uploading && (
+                <p style={{ margin: '3px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.primary }}>
+                    Uploading…
+                </p>
+            )}
+            {uploadError && (
+                <p style={{ margin: '3px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.danger }}>
+                    ⚠ {uploadError}
+                </p>
+            )}
+
+            {/* Preview thumbnail — shown when value is a valid URL */}
+            {isValidUrl && !uploading && (
+                <div style={{ marginTop: 4, position: 'relative', display: 'inline-block' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={value}
+                        alt="Preview"
+                        style={{
+                            height: 48,
+                            maxWidth: '100%',
+                            objectFit: 'contain',
+                            borderRadius: 4,
+                            border: `1px solid ${C.border}`,
+                            backgroundColor: C.bg,
+                            display: 'block',
+                        }}
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        onLoad={e => { (e.target as HTMLImageElement).style.display = 'block' }}
+                    />
+                </div>
+            )}
         </div>
     )
 }
