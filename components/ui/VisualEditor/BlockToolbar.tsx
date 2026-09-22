@@ -69,6 +69,7 @@ interface BlockToolbarProps {
     slotEdit?: { blockId: string; propKey: string; currentHtml: string } | null
     onClearSlot?: (blockId: string, propKey: string) => void
     onReplaceSlot?: () => void
+    onFormatSlot?: (blockId: string, propKey: string, format: string, value: string) => void
 }
 
 export default function BlockToolbar({
@@ -79,6 +80,7 @@ export default function BlockToolbar({
     slotEdit = null,
     onClearSlot,
     onReplaceSlot,
+    onFormatSlot,
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
     const [showLinkModal, setShowLinkModal] = useState(false)
@@ -149,11 +151,26 @@ export default function BlockToolbar({
     }
 
     const handleAlign = (align: string) => {
-        if (slotEdit) return
+        if (slotEdit) {
+            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'align', align)
+            return
+        }
         onChange({ ...blockProps, align })
     }
 
+    const handleFormatSlotProp = (format: string, value: string) => {
+        if (slotEdit) {
+            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, format, value)
+        }
+    }
+
     const handleToggleBold = () => {
+        if (slotEdit) {
+            const current = (slotDerivedProps as any).fontWeight ?? '400'
+            const next = current === 'bold' ? '400' : 'bold'
+            handleFormatSlotProp('fontWeight', next)
+            return
+        }
         const current = blockProps.fontWeight ?? '400'
         const next = current === 'bold' || current === '700' || current === '800' || current === '900'
             ? '400' : '700'
