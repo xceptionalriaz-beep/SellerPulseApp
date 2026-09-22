@@ -206,7 +206,7 @@ export default function VisualEditor({
 
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
-    const [activeSlotEdit, setActiveSlotEdit] = useState<{ blockId: string; propKey: string } | null>(null)
+    const [activeSlotEdit, setActiveSlotEdit] = useState<{ blockId: string; propKey: string; currentHtml: string } | null>(null)
     const [inlineToolbar, setInlineToolbar] = useState<{
         visible: boolean;
         x: number;
@@ -868,11 +868,11 @@ export default function VisualEditor({
                     setPanelOpen(true);
                 }
             } else if (event.data?.type === 'RIAZIFY_EDIT_SLOT_CONTENT') {
-                const { blockId, propKey } = event.data;
+                const { blockId, propKey, currentHtml } = event.data;
                 if (blockId && propKey) {
                     setSelectedId(blockId);
                     setSelectedSubSlot(propKey);
-                    setActiveSlotEdit({ blockId, propKey });
+                    setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '' });
                     const targetBlock = blocks.find(b => b.id === blockId);
                     if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
                         setActiveTab('images');
