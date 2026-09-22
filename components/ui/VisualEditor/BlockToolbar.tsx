@@ -14,7 +14,7 @@ import {
     Palette, Grid, Minus,
     Link, Quote, Eraser,
     ExternalLink, AlertCircle, CheckCircle2,
-    RefreshCw, Trash2, Pencil,
+    RefreshCw, Trash2,
 } from 'lucide-react'
 
 const C = {
@@ -86,6 +86,7 @@ export default function BlockToolbar({
     const [showLinkModal, setShowLinkModal] = useState(false)
     const [linkInput, setLinkInput] = useState('')
     const [linkError, setLinkError] = useState<string | null>(null)
+    const [replaceActive, setReplaceActive] = useState(false)
     const safeProps = blockProps ?? {}
 
     // When a slot is active, derive formatting state from its HTML
@@ -108,6 +109,9 @@ export default function BlockToolbar({
     }, [slotEdit?.currentHtml])
 
     const activeProps = slotEdit ? { ...safeProps, ...slotDerivedProps } : safeProps
+
+    // Reset replace mode when slot changes
+    useEffect(() => { setReplaceActive(false) }, [slotEdit?.propKey])
 
     // ── ALL HOOKS MUST COME BEFORE ANY EARLY RETURN ──────────────────────────
 
@@ -268,22 +272,24 @@ export default function BlockToolbar({
             {slotEdit && (
                 <>
                     <span style={{
-                        fontSize: 11, fontWeight: 600, color: '#ffffff',
-                        padding: '2px 10px', backgroundColor: '#7530fb',
+                        fontSize: 11, fontWeight: 600, color: '#1e1535',
+                        padding: '2px 8px', backgroundColor: '#f1f5f9',
                         borderRadius: 4, fontFamily: 'DM Sans, sans-serif',
-                        whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
+                        whiteSpace: 'nowrap',
                     }}>
-                        <Pencil size={10} />
                         {slotEdit.propKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim()}
                     </span>
                     <button
-                        onClick={onReplaceSlot}
+                        onClick={() => { setReplaceActive(true); onReplaceSlot?.() }}
                         title="Replace slot content"
                         style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: 28, height: 28, border: '1px solid #7530fb',
-                            borderRadius: 6, backgroundColor: '#f3eeff',
-                            color: '#7530fb', cursor: 'pointer', flexShrink: 0,
+                            width: 28, height: 28,
+                            border: replaceActive ? '1px solid #7530fb' : '1px solid #e2e8f0',
+                            borderRadius: 6,
+                            backgroundColor: replaceActive ? '#f3eeff' : '#fff',
+                            color: replaceActive ? '#7530fb' : '#1e1535',
+                            cursor: 'pointer', flexShrink: 0,
                         }}
                     >
                         <RefreshCw size={13} />
