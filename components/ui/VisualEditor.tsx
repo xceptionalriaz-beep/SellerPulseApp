@@ -1310,6 +1310,10 @@ export default function VisualEditor({
                                 onAddBlock={handleInsertOrAssignBlock}
                                 onAddBlockBelow={handleAddBlockBelow}
                                 hasActiveSlot={activeDropSlot !== null}
+                                onDeselect={() => {
+                                    setSelectedId(null)
+                                    setActiveSlotEdit(null)
+                                }}
                             />
                         </div>
                     )}\

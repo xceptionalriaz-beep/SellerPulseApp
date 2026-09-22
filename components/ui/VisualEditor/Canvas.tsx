@@ -143,6 +143,7 @@ interface CanvasProps {
     onAddBlock?: (type: BlockType) => void
     onAddBlockBelow?: (blockId: string, type: BlockType) => void
     hasActiveSlot?: boolean
+    onDeselect?: () => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -174,6 +175,7 @@ export default function Canvas({
     onAddBlock,
     onAddBlockBelow,
     hasActiveSlot = false,
+    onDeselect,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -256,6 +258,11 @@ export default function Canvas({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onClick={(e) => {
+                // Only deselect when clicking the canvas background itself,
+                // not a child block or toolbar button
+                if (e.target === e.currentTarget) onDeselect?.()
+            }}
         >
             {/* ── Drop overlay — shown when dragging from library ── */}
             {draggedType && isDropTarget && (
