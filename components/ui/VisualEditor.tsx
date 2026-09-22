@@ -533,6 +533,11 @@ export default function VisualEditor({
 
         // Update activeSlotEdit so toolbar reflects new state
         setActiveSlotEdit({ blockId, propKey, currentHtml: newHtml })
+        // Re-send highlight so purple outline stays after formatting
+        setTimeout(() => {
+            const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement
+            iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*')
+        }, 50)
     }
 
     const handleClearSlot = (blockId: string, propKey: string) => {
