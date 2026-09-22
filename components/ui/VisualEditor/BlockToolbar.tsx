@@ -418,35 +418,6 @@ export default function BlockToolbar({
 
             <div style={sepStyle} />
 
-            {/* Alignment */}
-            <button onClick={() => handleAlign('left')} title="Align Left" style={{
-                ...miniBtn,
-                backgroundColor: safeProps.align === 'left' ? C.primary : 'transparent',
-                color: safeProps.align === 'left' ? '#ffffff' : '#1f1d2e',
-            }}><AlignLeft size={14} /></button>
-            <button onClick={() => handleAlign('center')} title="Align Center" style={{
-                ...miniBtn,
-                backgroundColor: safeProps.align === 'center' ? C.primary : 'transparent',
-                color: safeProps.align === 'center' ? '#ffffff' : '#1f1d2e',
-            }}><AlignCenter size={14} /></button>
-            <button onClick={() => handleAlign('right')} title="Align Right" style={{
-                ...miniBtn,
-                backgroundColor: safeProps.align === 'right' ? C.primary : 'transparent',
-                color: safeProps.align === 'right' ? '#ffffff' : '#1f1d2e',
-            }}><AlignRight size={14} /></button>
-
-            <div style={sepStyle} />
-
-            {/* Style */}
-            <button onClick={() => handleTextColor('#7530fb')} title="Text Color" style={miniBtn}>
-                <Palette size={14} />
-            </button>
-            <button onClick={() => handleBgColor('#7530fb')} title="Background Color" style={miniBtn}>
-                <Palette size={14} />
-            </button>
-
-            <div style={sepStyle} />
-
             {/* Structure */}
             <button title="Table" style={miniBtn}><Grid size={14} /></button>
             <button title="Divider" style={miniBtn}><Minus size={14} /></button>
