@@ -1309,12 +1309,19 @@ export default function VisualEditor({
                             block={activeSlotEdit.slotBlock}
                             placeholders={placeholders}
                             onChange={(updatedSlotBlock) => {
-                                // Apply prop changes back to slot HTML
+                                // Apply prop changes back to slot HTML and keep
+                                // activeSlotEdit.slotBlock in sync so the panel
+                                // re-renders with the latest props (#3)
                                 const def = getDefinition(activeSlotEdit.slotBlock!.type)
                                 if (!def) return
                                 const newHtml = def.toHtml(updatedSlotBlock.props, activeSlotEdit.slotBlock!.id)
                                 handleFormatSlot(activeSlotEdit.blockId, activeSlotEdit.propKey, '__html__', newHtml)
                                 slotBlockMapRef.current[`${activeSlotEdit.blockId}__${activeSlotEdit.propKey}`] = updatedSlotBlock
+                                // ← FIX #3: update slotBlock in activeSlotEdit so
+                                // PropertiesPanel receives fresh props on next render
+                                setActiveSlotEdit(prev =>
+                                    prev ? { ...prev, slotBlock: updatedSlotBlock, currentHtml: newHtml } : null
+                                )
                             }}
                             onDeselect={() => setActiveSlotEdit(null)}
                         />
