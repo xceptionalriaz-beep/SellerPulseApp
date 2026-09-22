@@ -1028,8 +1028,82 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
   var BLOCK_TYPE = "${block.type}";
   document.addEventListener('DOMContentLoaded', function() {
 
-    // In-place text editing on double click for p, h1, h2, h3, h4, span
-    // [REMOVED: Interactive content editing feature]
+    // In-place text editing on double click
+    var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, td, li, blockquote';
+    var activeEditable = null;
+    var originalText = '';
+
+    function commitEdit(el) {
+      if (!el || !el._riazifyEditing) return;
+      el._riazifyEditing = false;
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.style.cursor = '';
+      el.style.borderRadius = '';
+      var newText = el.innerText || el.textContent || '';
+      if (newText !== originalText) {
+        window.parent.postMessage({
+          type: 'RIAZIFY_COMMIT_TEXT_EDIT',
+          blockId: BLOCK_ID,
+          text: newText
+        }, '*');
+      }
+      activeEditable = null;
+    }
+
+    function cancelEdit(el) {
+      if (!el || !el._riazifyEditing) return;
+      el._riazifyEditing = false;
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.style.cursor = '';
+      el.style.borderRadius = '';
+      el.innerText = originalText;
+      activeEditable = null;
+    }
+
+    document.addEventListener('dblclick', function(e) {
+      var target = e.target;
+      if (!target) return;
+      // Don't activate inside dropzones or overlays
+      if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
+      var el = target.closest(editableSelectors);
+      if (!el) return;
+      e.preventDefault();
+      e.stopPropagation();
+      // Commit any previous edit first
+      if (activeEditable && activeEditable !== el) commitEdit(activeEditable);
+      activeEditable = el;
+      originalText = el.innerText || el.textContent || '';
+      el._riazifyEditing = true;
+      el.contentEditable = 'true';
+      el.style.outline = '2px solid #7530fb';
+      el.style.borderRadius = '3px';
+      el.style.cursor = 'text';
+      el.focus();
+      // Select all text
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (!activeEditable) return;
+      if (e.key === 'Escape') { e.preventDefault(); cancelEdit(activeEditable); }
+      // Commit on Enter for single-line elements (not p or blockquote)
+      if (e.key === 'Enter' && activeEditable.tagName !== 'P' && activeEditable.tagName !== 'BLOCKQUOTE') {
+        e.preventDefault();
+        commitEdit(activeEditable);
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!activeEditable) return;
+      if (!activeEditable.contains(e.target)) commitEdit(activeEditable);
+    });
+
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
       img.addEventListener('click', function(e) {
         e.preventDefault();
