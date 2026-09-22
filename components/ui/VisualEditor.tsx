@@ -24,6 +24,7 @@ import { createClient } from '@/lib/supabase'
 import {
     Undo2, Redo2, Trash2, Eye, EyeOff,
     AlertTriangle, CheckCircle2, X,
+    Monitor, Tablet, Smartphone,
     type LucideIcon,
 } from 'lucide-react'
 
@@ -1145,6 +1146,8 @@ export default function VisualEditor({
                 onToggleLivePreview={() => setLivePreview(p => !p)}
                 onToggleFocusMode={() => setFocusMode(p => !p)}
                 onZoomChange={setCanvasZoom}
+                deviceWidth={deviceWidth}
+                onDeviceChange={setDeviceWidth}
                 onTemplateNameChange={setTemplateName}
                 onSave={handleSave}
                 saveStatus={saveStatus}
@@ -1471,6 +1474,8 @@ interface EditorToolbarProps {
     livePreview: boolean
     focusMode: boolean
     canvasZoom: number
+    deviceWidth: 'desktop' | 'tablet' | 'mobile'
+    onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void
     templateName: string
     isDirty: boolean
     currentTemplateId: string | null
@@ -1489,7 +1494,7 @@ interface EditorToolbarProps {
 function EditorToolbar({
     blockCount, selectedBlock, canUndo, canRedo, undoDepth,
     livePreview, focusMode, canvasZoom, templateName,
-    isDirty, currentTemplateId,
+    isDirty, currentTemplateId, deviceWidth, onDeviceChange,
     onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
     onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll
 }: EditorToolbarProps) {
@@ -1633,6 +1638,34 @@ function EditorToolbar({
 
             {/* Right — zoom + focus + clear */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* Device width toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '2px', backgroundColor: '#f1f5f9', borderRadius: 6 }}>
+                    {([
+                        { id: 'desktop', Icon: Monitor, label: 'Desktop (700px)' },
+                        { id: 'tablet', Icon: Tablet, label: 'Tablet (480px)' },
+                        { id: 'mobile', Icon: Smartphone, label: 'Mobile (375px)' },
+                    ] as const).map(({ id, Icon, label }) => (
+                        <button
+                            key={id}
+                            title={label}
+                            onClick={() => onDeviceChange(id)}
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: 26, height: 26, border: 'none', borderRadius: 4,
+                                backgroundColor: deviceWidth === id ? '#ffffff' : 'transparent',
+                                color: deviceWidth === id ? '#7530fb' : '#94a3b8',
+                                cursor: 'pointer',
+                                boxShadow: deviceWidth === id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                transition: 'all 0.15s',
+                            }}
+                        >
+                            <Icon size={13} />
+                        </button>
+                    ))}
+                </div>
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
                 {/* Zoom */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <ToolbarButton onClick={() => onZoomChange(Math.max(50, canvasZoom - 10))} title="Zoom out" disabled={canvasZoom <= 50}>
