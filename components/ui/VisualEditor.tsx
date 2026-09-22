@@ -206,7 +206,8 @@ export default function VisualEditor({
 
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
-    const [activeSlotEdit, setActiveSlotEdit] = useState<{ blockId: string; propKey: string; currentHtml: string } | null>(null)
+    const [activeSlotEdit, setActiveSlotEdit] = useState<{ blockId: string; propKey: string; currentHtml: string; slotBlock?: Block } | null>(null)
+    const slotBlockMapRef = useRef<Record<string, Block>>({})
     const [inlineToolbar, setInlineToolbar] = useState<{
         visible: boolean;
         x: number;
@@ -479,7 +480,10 @@ export default function VisualEditor({
 
         let newHtml = currentHtml
 
-        if (format === 'fontWeight') {
+        // Direct HTML replacement from PropertiesPanel onChange
+        if (format === '__html__') {
+            newHtml = value
+        } else if (format === 'fontWeight') {
             if (value === 'bold') {
                 if (!/font-weight:\s*bold/i.test(newHtml)) {
                     newHtml = `<strong>${newHtml}</strong>`
@@ -532,7 +536,7 @@ export default function VisualEditor({
         commitBlocks(newBlocks, blocks)
 
         // Update activeSlotEdit so toolbar reflects new state
-        setActiveSlotEdit({ blockId, propKey, currentHtml: newHtml })
+        setActiveSlotEdit(prev => prev ? { ...prev, currentHtml: newHtml } : null)
         // Re-send highlight so purple outline stays after formatting
         setTimeout(() => {
             const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement
@@ -941,7 +945,8 @@ export default function VisualEditor({
                 if (blockId && propKey) {
                     setSelectedId(blockId);
                     setSelectedSubSlot(propKey);
-                    setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '' });
+                    const slotBlock = slotBlockMapRef.current[`${blockId}__${propKey}`]
+                    setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '', slotBlock });
                     // Send highlight message back to iframe so slot gets purple outline
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
                     iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*');
@@ -1003,6 +1008,8 @@ export default function VisualEditor({
                         setActiveDropSlot(null);
                         setSelectedId(target.id);
                         setDraggedType(null);
+                        // Store slot block so PropertiesPanel can show it when slot is clicked
+                        slotBlockMapRef.current[`${target.id}__${propKey}`] = newBlock;
                     }
                 }
             }
@@ -1273,7 +1280,21 @@ export default function VisualEditor({
 
                 {/* RIGHT — Properties Panel */}
                 {!focusMode && (
-                    activeSlotEdit ? (
+                    activeSlotEdit?.slotBlock ? (
+                        <PropertiesPanel
+                            block={activeSlotEdit.slotBlock}
+                            placeholders={placeholders}
+                            onChange={(updatedSlotBlock) => {
+                                // Apply prop changes back to slot HTML
+                                const def = getDefinition(activeSlotEdit.slotBlock!.type)
+                                if (!def) return
+                                const newHtml = def.toHtml(updatedSlotBlock.props, activeSlotEdit.slotBlock!.id)
+                                handleFormatSlot(activeSlotEdit.blockId, activeSlotEdit.propKey, '__html__', newHtml)
+                                slotBlockMapRef.current[`${activeSlotEdit.blockId}__${activeSlotEdit.propKey}`] = updatedSlotBlock
+                            }}
+                            onDeselect={() => setActiveSlotEdit(null)}
+                        />
+                    ) : activeSlotEdit ? (
                         <div style={{
                             width: 280, borderLeft: '1px solid #e2e8f0',
                             backgroundColor: '#fff', padding: '20px 16px',
