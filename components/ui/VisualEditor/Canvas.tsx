@@ -533,11 +533,12 @@ function EmptyState({
                                     const all = mod.FULL_TEMPLATES
                                     const found = all.find((s: { id: string }) => s.id === t.id)
                                     if (found?.blocks) {
-                                        const hydrated: Block[] = (found.blocks as Array<{ type: BlockType; props?: Record<string, unknown> }>).map(b => ({
+                                        const raw = found.blocks as Array<{ type: BlockType; props?: Record<string, unknown> }>
+                                        const hydrated = raw.map(b => ({
                                             id: generateId(),
                                             type: b.type,
                                             props: b.props ?? {},
-                                        }))
+                                        })) as unknown as Block[]
                                         onLoadTemplate(hydrated, t.id)
                                     }
                                 })
