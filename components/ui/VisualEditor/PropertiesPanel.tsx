@@ -71,6 +71,8 @@ import {
     RectangleProps,
     HeroHeaderProps,
     RawHtmlProps,
+    ConditionBadgeProps,
+    ItemSpecificsProps,
 } from './blocks'
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from './audit'
@@ -2495,6 +2497,34 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </Section>
             )
 
+        case 'condition_badge':
+            return (
+                <>
+                    <Section title="Badge">
+                        <SliderInput label="Border radius" value={props.badgeRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ badgeRadius: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'item_specifics':
+            return (
+                <>
+                    <Section title="Header">
+                        <ColorRow label="Header background" value={props.headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                        <ToggleRow label="Show title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
+                    </Section>
+                    <Section title="Rows">
+                        <ColorRow label="Even row" value={props.evenRowBg ?? '#ffffff'} onChange={v => updateProps({ evenRowBg: v })} />
+                        <ColorRow label="Odd row" value={props.oddRowBg ?? '#f8f7ff'} onChange={v => updateProps({ oddRowBg: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Key colour" value={props.keyColor ?? '#1e1535'} onChange={v => updateProps({ keyColor: v })} />
+                        <ColorRow label="Value colour" value={props.valueColor ?? '#374151'} onChange={v => updateProps({ valueColor: v })} />
+                        <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
         default:
             return null
     }
@@ -3740,6 +3770,94 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     </Section>
                 </>
             )
+
+        case 'condition_badge':
+            return (
+                <>
+                    <Section title="Condition">
+                        <SelectInput
+                            label="Condition"
+                            value={props.condition ?? 'new'}
+                            options={[
+                                { v: 'new', l: '✦ New' },
+                                { v: 'used', l: '↺ Used' },
+                                { v: 'refurbished', l: '⟳ Refurbished' },
+                                { v: 'open_box', l: '📦 Open Box' },
+                                { v: 'for_parts', l: '⚙ For Parts / Not Working' },
+                            ]}
+                            onChange={v => updateProps({ condition: v })}
+                        />
+                        <ToggleRow label="Show icon" value={props.showIcon ?? true} onChange={v => updateProps({ showIcon: v })} />
+                    </Section>
+                    <Section title="Sub-text">
+                        <TextareaInput
+                            label="Condition description"
+                            value={props.subText ?? ''}
+                            rows={3}
+                            onChange={v => updateProps({ subText: v })}
+                        />
+                        <InfoBox>Describe the item's exact condition — scratches, testing status, accessories included, etc.</InfoBox>
+                    </Section>
+                </>
+            )
+
+        case 'item_specifics': {
+            const rows: Array<{ key: string; value: string }> = props.rows ?? []
+            return (
+                <>
+                    <Section title="Title">
+                        <ToggleRow label="Show section title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
+                        {(props.showTitle ?? true) && (
+                            <TextInput label="Title text" value={props.titleText ?? 'Item Specifics'} onChange={v => updateProps({ titleText: v })} />
+                        )}
+                    </Section>
+                    <Section title="Rows">
+                        {rows.map((row, i) => (
+                            <div key={i} style={{ marginBottom: 8 }}>
+                                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                    <TextInput
+                                        label={`Key ${i + 1}`}
+                                        value={row.key}
+                                        onChange={v => {
+                                            const next = rows.map((r, j) => j === i ? { ...r, key: v } : r)
+                                            updateProps({ rows: next })
+                                        }}
+                                    />
+                                    <TextInput
+                                        label="Value"
+                                        value={row.value}
+                                        onChange={v => {
+                                            const next = rows.map((r, j) => j === i ? { ...r, value: v } : r)
+                                            updateProps({ rows: next })
+                                        }}
+                                    />
+                                    <button
+                                        onClick={() => updateProps({ rows: rows.filter((_, j) => j !== i) })}
+                                        style={{
+                                            marginTop: 18, padding: '4px 8px', borderRadius: 4,
+                                            border: '1px solid #fca5a5', background: '#fff',
+                                            color: '#dc2626', fontSize: 12, cursor: 'pointer', flexShrink: 0,
+                                        }}
+                                        title="Remove row"
+                                    >✕</button>
+                                </div>
+                            </div>
+                        ))}
+                        <button
+                            onClick={() => updateProps({ rows: [...rows, { key: 'New Field', value: '' }] })}
+                            style={{
+                                marginTop: 4, padding: '6px 14px', borderRadius: 6,
+                                border: '1.5px dashed #7530fb', background: '#fff',
+                                color: '#7530fb', fontSize: 12, fontWeight: 600, cursor: 'pointer', width: '100%',
+                            }}
+                        >
+                            + Add row
+                        </button>
+                        <InfoBox>Use eBay placeholders like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — they get replaced at listing time.</InfoBox>
+                    </Section>
+                </>
+            )
+        }
 
         default:
             return (

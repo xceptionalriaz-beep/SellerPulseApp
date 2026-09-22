@@ -98,6 +98,8 @@ export type BlockType =
     | 'vat_notice'
     | 'international_shipping'
     | 'authenticity_guarantee'
+    | 'condition_badge'
+    | 'item_specifics'
     // Conversion
     | 'policy_tabs'
     | 'nav_bar'
@@ -183,6 +185,8 @@ export type BlockProps =
     | PaymentMethodsBlockProps
     | UrgencyTimerBlockProps
     | TrustBadgeBlockProps
+    | ConditionBadgeProps
+    | ItemSpecificsProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -537,6 +541,29 @@ export interface SpecsTableProps extends CommonProps {
     showTitle: boolean
     titleText: string
     variant: string
+}
+
+// ── Condition Badge ──────────────────────────────────────────────────────────
+export interface ConditionBadgeProps extends CommonProps {
+    condition: 'new' | 'used' | 'refurbished' | 'for_parts' | 'open_box'
+    subText: string
+    showIcon: boolean
+    badgeRadius: number
+}
+
+// ── Item Specifics ───────────────────────────────────────────────────────────
+export interface ItemSpecificsProps extends CommonProps {
+    rows: Array<{ key: string; value: string }>
+    headerBg: string
+    headerText: string
+    evenRowBg: string
+    oddRowBg: string
+    borderColor: string
+    keyColor: string
+    valueColor: string
+    fontSize: number
+    showTitle: boolean
+    titleText: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2755,6 +2782,83 @@ ${thumbCells}
                 const p = props as CommonProps
                 return wrapBlock('authenticity_guarantee' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:32px;">&#128737;</p><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#b8fa33;">100% Authenticity Guaranteed</p><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.7);">Every item verified genuine. Sourced directly from authorised distributors.</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Official Supplier</td><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Anti-counterfeit Checked</td><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Money Back</td></tr></table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'condition_badge' as BlockType,
+            label: 'Condition Badge',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'tag',
+            description: 'New / Used / Refurbished condition badge with sub-text',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#f0fdf4',
+                condition: 'new',
+                subText: 'Opened for testing only — all functions verified.',
+                showIcon: true,
+                badgeRadius: 8,
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as unknown as ConditionBadgeProps
+                const CONDITION_MAP: Record<string, { label: string; icon: string; bg: string; text: string; border: string; badgeBg: string; badgeText: string }> = {
+                    new: { label: 'New', icon: '✦', bg: '#f0fdf4', text: '#166534', border: '#bbf7d0', badgeBg: '#16a34a', badgeText: '#fff' },
+                    used: { label: 'Used', icon: '↺', bg: '#fff7ed', text: '#9a3412', border: '#fed7aa', badgeBg: '#ea580c', badgeText: '#fff' },
+                    refurbished: { label: 'Refurbished', icon: '⟳', bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', badgeBg: '#2563eb', badgeText: '#fff' },
+                    for_parts: { label: 'For Parts', icon: '⚙', bg: '#f9fafb', text: '#374151', border: '#e5e7eb', badgeBg: '#6b7280', badgeText: '#fff' },
+                    open_box: { label: 'Open Box', icon: '📦', bg: '#fdf4ff', text: '#7e22ce', border: '#e9d5ff', badgeBg: '#9333ea', badgeText: '#fff' },
+                }
+                const c = CONDITION_MAP[p.condition ?? 'new'] ?? CONDITION_MAP.new
+                const icon = p.showIcon !== false ? `<span style="margin-right:8px;font-size:16px;">${c.icon}</span>` : ''
+                const subText = p.subText ? `<p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${c.text};opacity:0.8;line-height:1.5;">${p.subText}</p>` : ''
+                return wrapBlock('condition_badge' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? c.bg};padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;border:1px solid ${c.border};border-radius:${p.badgeRadius ?? 8}px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="vertical-align:middle;">${icon}<span style="display:inline-block;background-color:${c.badgeBg};color:${c.badgeText};font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;padding:4px 14px;border-radius:100px;letter-spacing:0.03em;">&#10003; ${c.label}</span><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${c.text};margin-left:10px;">Condition: ${c.label}</span></td></tr>${subText ? `<tr><td>${subText}</td></tr>` : ''}</table></td></tr></table>`)
+            },
+        },
+
+        {
+            type: 'item_specifics' as BlockType,
+            label: 'Item Specifics',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'list',
+            description: 'eBay item specifics table — Brand, MPN, EAN, Condition, etc.',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                rows: [
+                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
+                    { key: 'Brand', value: '{{BRAND}}' },
+                    { key: 'Model', value: '{{MODEL}}' },
+                    { key: 'MPN', value: '{{MPN}}' },
+                    { key: 'EAN / UPC', value: '{{EAN}}' },
+                    { key: 'Colour', value: '{{COLOUR}}' },
+                    { key: 'Size', value: '{{SIZE}}' },
+                    { key: 'Material', value: '{{MATERIAL}}' },
+                ],
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                evenRowBg: '#ffffff',
+                oddRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                keyColor: '#1e1535',
+                valueColor: '#374151',
+                fontSize: 13,
+                showTitle: true,
+                titleText: 'Item Specifics',
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as unknown as ItemSpecificsProps
+                const rows: Array<{ key: string; value: string }> = p.rows ?? []
+                const fs = p.fontSize ?? 13
+                const rowsHtml = rows.map((r, i) => {
+                    const bg = i % 2 === 0 ? (p.evenRowBg ?? '#ffffff') : (p.oddRowBg ?? '#f8f7ff')
+                    return `<tr style="background-color:${bg};"><td style="padding:9px 14px;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:700;color:${p.keyColor ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:35%;">${r.key}</td><td style="padding:9px 14px;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;color:${p.valueColor ?? '#374151'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r.value}</td></tr>`
+                }).join('')
+                const title = p.showTitle !== false
+                    ? `<tr style="background-color:${p.headerBg ?? '#7530fb'};"><td colspan="2" style="padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:700;color:${p.headerText ?? '#ffffff'};letter-spacing:0.04em;text-transform:uppercase;">&#9776; ${p.titleText ?? 'Item Specifics'}</td></tr>`
+                    : ''
+                return wrapBlock('item_specifics' as BlockType, id,
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;"><table width="100%" cellpadding="0" cellspacing="0" border="0">${title}${rowsHtml}</table></td></tr></table>`)
             },
         },
 
