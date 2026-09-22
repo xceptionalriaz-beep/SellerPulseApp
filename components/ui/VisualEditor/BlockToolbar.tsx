@@ -7,7 +7,7 @@
 // Provides formatting, typography, list, alignment, and style tools.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
     List, ListOrdered,
     AlignLeft, AlignCenter, AlignRight,
@@ -86,6 +86,27 @@ export default function BlockToolbar({
     const [linkError, setLinkError] = useState<string | null>(null)
     const safeProps = blockProps ?? {}
 
+    // When a slot is active, derive formatting state from its HTML
+    const slotDerivedProps = useMemo(() => {
+        if (!slotEdit?.currentHtml) return {}
+        const html = slotEdit.currentHtml
+        const hasTag = (tag: string) => new RegExp(`<${tag}[\\s>]`, 'i').test(html)
+        const getAttr = (attr: string) => {
+            const m = html.match(new RegExp(`${attr}:\\s*([^;'"]+)`, 'i'))
+            return m ? m[1].trim() : undefined
+        }
+        return {
+            fontWeight: hasTag('strong') || hasTag('b') || /font-weight:\s*(bold|700|800|900)/i.test(html) ? 'bold' : '400',
+            fontStyle: hasTag('em') || hasTag('i') || /font-style:\s*italic/i.test(html) ? 'italic' : 'normal',
+            textDecoration: hasTag('u') || /text-decoration:\s*underline/i.test(html) ? 'underline' : 'none',
+            fontSize: getAttr('font-size') ?? '16px',
+            align: getAttr('text-align') ?? 'left',
+            color: getAttr('color'),
+        }
+    }, [slotEdit?.currentHtml])
+
+    const activeProps = slotEdit ? { ...slotDerivedProps, ...safeProps } : safeProps
+
     // ── ALL HOOKS MUST COME BEFORE ANY EARLY RETURN ──────────────────────────
 
     // Close on outside click — disabled in persistent mode
@@ -128,6 +149,7 @@ export default function BlockToolbar({
     }
 
     const handleAlign = (align: string) => {
+        if (slotEdit) return
         onChange({ ...blockProps, align })
     }
 
