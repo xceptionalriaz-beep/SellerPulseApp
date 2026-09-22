@@ -930,6 +930,24 @@ export default function VisualEditor({
             if (e.key === '?' && !meta && !['input', 'textarea', 'select'].includes((e.target as HTMLElement).tagName.toLowerCase())) {
                 e.preventDefault(); setShowShortcuts(p => !p)
             }
+            // Ctrl+S — save
+            if (meta && e.key === 's') {
+                e.preventDefault(); handleSave()
+            }
+            // Panel shortcuts — only when not typing in an input
+            const tag = (e.target as HTMLElement).tagName.toLowerCase()
+            if (!meta && !e.altKey && !['input', 'textarea', 'select'].includes(tag)) {
+                switch (e.key.toLowerCase()) {
+                    case 'b': e.preventDefault(); setActiveTab('blocks'); setPanelOpen(true); break
+                    case 'c': e.preventDefault(); setActiveTab('content'); setPanelOpen(true); break
+                    case 't': e.preventDefault(); setActiveTab('templates'); setPanelOpen(true); break
+                    case 'o': e.preventDefault(); setActiveTab('body'); setPanelOpen(true); break
+                    case 'i': e.preventDefault(); setActiveTab('images'); setPanelOpen(true); break
+                    case 'a': e.preventDefault(); setActiveTab('audit'); setPanelOpen(true); break
+                    case 'k': e.preventDefault(); setActiveTab('tokens'); setPanelOpen(true); break
+                    case 's': e.preventDefault(); setActiveTab('saved'); setPanelOpen(true); break
+                }
+            }
         }
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
@@ -1458,20 +1476,31 @@ export default function VisualEditor({
                         {/* Two-column grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 24px' }}>
                             {[
-                                { keys: ['Ctrl', 'Z'], label: 'Undo' },
+                                // ── Editing ──
+                                { keys: ['Ctrl', 'Z'], label: 'Undo', group: true },
                                 { keys: ['Ctrl', 'Shift', 'Z'], label: 'Redo' },
+                                { keys: ['Ctrl', 'S'], label: 'Save template' },
                                 { keys: ['Ctrl', 'D'], label: 'Duplicate block' },
-                                { keys: ['Ctrl', 'L'], label: 'Lock / unlock block' },
-                                { keys: ['Ctrl', 'H'], label: 'Hide / show block' },
-                                { keys: ['Ctrl', 'F'], label: 'Toggle focus mode' },
+                                { keys: ['Del'], label: 'Delete block' },
+                                { keys: ['Esc'], label: 'Deselect block' },
+                                // ── Block movement ──
                                 { keys: ['Alt', '↑'], label: 'Move block up' },
                                 { keys: ['Alt', '↓'], label: 'Move block down' },
-                                { keys: ['Del'], label: 'Delete selected block' },
-                                { keys: ['Esc'], label: 'Deselect block' },
-                                { keys: ['B'], label: 'Open Blocks panel' },
-                                { keys: ['I'], label: 'Open Images panel' },
-                                { keys: ['T'], label: 'Open Templates panel' },
-                                { keys: ['S'], label: 'Open Saved panel' },
+                                // ── Block state ──
+                                { keys: ['Ctrl', 'L'], label: 'Lock / unlock block' },
+                                { keys: ['Ctrl', 'H'], label: 'Hide / show block' },
+                                // ── View ──
+                                { keys: ['Ctrl', 'F'], label: 'Focus mode' },
+                                { keys: ['?'], label: 'This shortcut list' },
+                                // ── Panels ──
+                                { keys: ['B'], label: 'Blocks panel' },
+                                { keys: ['C'], label: 'Content panel' },
+                                { keys: ['T'], label: 'Templates panel' },
+                                { keys: ['O'], label: 'Body settings' },
+                                { keys: ['I'], label: 'Images panel' },
+                                { keys: ['A'], label: 'Audit panel' },
+                                { keys: ['K'], label: 'Tokens panel' },
+                                { keys: ['S'], label: 'Saved panel' },
                             ].map(({ keys, label }) => (
                                 <div key={label} style={{
                                     display: 'flex', alignItems: 'center',
