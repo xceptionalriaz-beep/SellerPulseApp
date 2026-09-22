@@ -107,7 +107,7 @@ export default function BlockToolbar({
         }
     }, [slotEdit?.currentHtml])
 
-    const activeProps = slotEdit ? { ...slotDerivedProps, ...safeProps } : safeProps
+    const activeProps = slotEdit ? { ...safeProps, ...slotDerivedProps } : safeProps
 
     // ── ALL HOOKS MUST COME BEFORE ANY EARLY RETURN ──────────────────────────
 
@@ -304,7 +304,7 @@ export default function BlockToolbar({
             )}
             {/* Font Family */}
             <select
-                value={safeProps.fontFamily || 'Arial, Helvetica, sans-serif'}
+                value={activeProps.fontFamily || 'Arial, Helvetica, sans-serif'}
                 onChange={(e) => handleFontFamily(e.target.value)}
                 style={{
                     backgroundColor: '#ffffff',
@@ -327,26 +327,26 @@ export default function BlockToolbar({
             <button onClick={handleToggleBold} title="Bold (B)" style={{
                 ...miniBtn,
                 fontWeight: 'bold',
-                backgroundColor: safeProps.fontWeight === '700' || safeProps.fontWeight === '800' || safeProps.fontWeight === '900' ? C.primary : 'transparent',
-                color: safeProps.fontWeight === '700' || safeProps.fontWeight === '800' || safeProps.fontWeight === '900' ? '#ffffff' : '#1f1d2e',
+                backgroundColor: activeProps.fontWeight === 'bold' || activeProps.fontWeight === '700' || activeProps.fontWeight === '800' || activeProps.fontWeight === '900' ? C.primary : 'transparent',
+                color: activeProps.fontWeight === 'bold' || activeProps.fontWeight === '700' || activeProps.fontWeight === '800' || activeProps.fontWeight === '900' ? '#ffffff' : '#1f1d2e',
             }}>B</button>
             <button onClick={handleToggleItalic} title="Italic (I)" style={{
                 ...miniBtn,
                 fontStyle: 'italic',
-                backgroundColor: safeProps.fontStyle === 'italic' ? C.primary : 'transparent',
-                color: safeProps.fontStyle === 'italic' ? '#ffffff' : '#1f1d2e',
+                backgroundColor: activeProps.fontStyle === 'italic' ? C.primary : 'transparent',
+                color: activeProps.fontStyle === 'italic' ? '#ffffff' : '#1f1d2e',
             }}>I</button>
             <button onClick={handleToggleUnderline} title="Underline (U)" style={{
                 ...miniBtn,
                 textDecoration: 'underline',
-                backgroundColor: safeProps.textDecoration === 'underline' ? C.primary : 'transparent',
-                color: safeProps.textDecoration === 'underline' ? '#ffffff' : '#1f1d2e',
+                backgroundColor: activeProps.textDecoration === 'underline' ? C.primary : 'transparent',
+                color: activeProps.textDecoration === 'underline' ? '#ffffff' : '#1f1d2e',
             }}>U</button>
             <button onClick={handleToggleStrikethrough} title="Strikethrough" style={{
                 ...miniBtn,
                 textDecoration: 'line-through',
-                backgroundColor: safeProps.textDecoration === 'line-through' ? C.primary : 'transparent',
-                color: safeProps.textDecoration === 'line-through' ? '#ffffff' : '#1f1d2e',
+                backgroundColor: activeProps.textDecoration === 'line-through' ? C.primary : 'transparent',
+                color: activeProps.textDecoration === 'line-through' ? '#ffffff' : '#1f1d2e',
             }}>S</button>
             <button onClick={handleToggleBlockquote} title="Blockquote" style={{
                 ...miniBtn,
