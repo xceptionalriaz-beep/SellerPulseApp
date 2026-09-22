@@ -442,7 +442,7 @@ export default function VisualEditor({
                 const def = getDefinition(type);
                 const rawHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
                 // Wrap in dropzone div so clicking filled content fires RIAZIFY_EDIT_SLOT_CONTENT
-                const newHtml = `<div data-canvas-dropzone="${slot}">${rawHtml}</div>`;
+                const newHtml = `<div data-canvas-dropzone="${slot}" data-slot-block-type="${type}" data-slot-block-props='${JSON.stringify(newBlock.props)}'>${rawHtml}</div>`;
                 const updatedProps = { ...(target.props as any), [slot]: newHtml };
                 const updatedBlock = { ...target, props: updatedProps } as any;
                 const newBlocks = [...blocks];
@@ -945,7 +945,19 @@ export default function VisualEditor({
                 if (blockId && propKey) {
                     setSelectedId(blockId);
                     setSelectedSubSlot(propKey);
-                    const slotBlock = slotBlockMapRef.current[`${blockId}__${propKey}`]
+                    // Try ref map first, then parse from stored HTML attributes
+                    let slotBlock = slotBlockMapRef.current[`${blockId}__${propKey}`]
+                    if (!slotBlock) {
+                        const targetBlock = blocks.find(b => b.id === blockId)
+                        const slotHtml = (targetBlock?.props as any)?.[propKey] ?? ''
+                        const typeMatch = slotHtml.match(/data-slot-block-type="([^"]+)"/)
+                        const propsMatch = slotHtml.match(/data-slot-block-props='([^']+)'/)
+                        if (typeMatch) {
+                            const parsedProps = propsMatch ? JSON.parse(propsMatch[1]) : {}
+                            slotBlock = { id: `slot-${blockId}-${propKey}`, type: typeMatch[1] as BlockType, props: parsedProps }
+                            slotBlockMapRef.current[`${blockId}__${propKey}`] = slotBlock
+                        }
+                    }
                     setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '', slotBlock });
                     // Send highlight message back to iframe so slot gets purple outline
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
@@ -999,7 +1011,8 @@ export default function VisualEditor({
                         const target = blocks[idx];
                         const newBlock = createBlock(blockType as BlockType, canvasSettings);
                         const def = getDefinition(blockType as BlockType);
-                        const newHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
+                        const rawHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
+                        const newHtml = `<div data-canvas-dropzone="${propKey}" data-slot-block-type="${blockType}" data-slot-block-props='${JSON.stringify(newBlock.props)}'>${rawHtml}</div>`;
                         const updatedProps = { ...(target.props as any), [propKey]: newHtml };
                         const updatedBlock = { ...target, props: updatedProps } as any;
                         const newBlocks = [...blocks];
@@ -1008,7 +1021,6 @@ export default function VisualEditor({
                         setActiveDropSlot(null);
                         setSelectedId(target.id);
                         setDraggedType(null);
-                        // Store slot block so PropertiesPanel can show it when slot is clicked
                         slotBlockMapRef.current[`${target.id}__${propKey}`] = newBlock;
                     }
                 }
