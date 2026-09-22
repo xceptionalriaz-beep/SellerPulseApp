@@ -150,25 +150,21 @@ export default function BlockToolbar({
         )
     }
 
-    const handleAlign = (align: string) => {
-        if (slotEdit) {
-            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'align', align)
-            return
-        }
-        onChange({ ...blockProps, align })
-    }
-
     const handleFormatSlotProp = (format: string, value: string) => {
         if (slotEdit) {
             onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, format, value)
         }
     }
 
+    const handleAlign = (align: string) => {
+        if (slotEdit) { handleFormatSlotProp('align', align); return }
+        onChange({ ...blockProps, align })
+    }
+
     const handleToggleBold = () => {
         if (slotEdit) {
-            const current = (slotDerivedProps as any).fontWeight ?? '400'
-            const next = current === 'bold' ? '400' : 'bold'
-            handleFormatSlotProp('fontWeight', next)
+            const current = slotDerivedProps.fontWeight ?? '400'
+            handleFormatSlotProp('fontWeight', current === 'bold' ? '400' : 'bold')
             return
         }
         const current = blockProps.fontWeight ?? '400'
@@ -178,26 +174,43 @@ export default function BlockToolbar({
     }
 
     const handleToggleItalic = () => {
+        if (slotEdit) {
+            const current = slotDerivedProps.fontStyle ?? 'normal'
+            handleFormatSlotProp('fontStyle', current === 'italic' ? 'normal' : 'italic')
+            return
+        }
         const current = blockProps.fontStyle ?? 'normal'
         onChange({ ...blockProps, fontStyle: current === 'italic' ? 'normal' : 'italic' })
     }
 
     const handleToggleUnderline = () => {
+        if (slotEdit) {
+            const current = slotDerivedProps.textDecoration ?? 'none'
+            handleFormatSlotProp('textDecoration', current === 'underline' ? 'none' : 'underline')
+            return
+        }
         const current = blockProps.textDecoration ?? 'none'
         onChange({ ...blockProps, textDecoration: current === 'underline' ? 'none' : 'underline' })
     }
 
     const handleToggleStrikethrough = () => {
+        if (slotEdit) {
+            const current = slotDerivedProps.textDecoration ?? 'none'
+            handleFormatSlotProp('textDecoration', current === 'line-through' ? 'none' : 'line-through')
+            return
+        }
         const current = blockProps.textDecoration ?? 'none'
         onChange({ ...blockProps, textDecoration: current === 'line-through' ? 'none' : 'line-through' })
     }
 
     const handleToggleBlockquote = () => {
+        if (slotEdit) return
         const current = blockProps.isBlockquote ?? false
         onChange({ ...blockProps, isBlockquote: !current })
     }
 
     const handleClearFormatting = () => {
+        if (slotEdit) return
         onChange({
             ...blockProps,
             fontWeight: '400',
@@ -210,22 +223,27 @@ export default function BlockToolbar({
     }
 
     const handleHeading = (level: string) => {
+        if (slotEdit) return
         onChange({ ...blockProps, level })
     }
 
     const handleList = (type: string) => {
+        if (slotEdit) return
         onChange({ ...blockProps, listStyle: type })
     }
 
     const handleTextColor = (color: string) => {
+        if (slotEdit) { handleFormatSlotProp('color', color); return }
         onChange({ ...blockProps, color })
     }
 
     const handleBgColor = (color: string) => {
+        if (slotEdit) return
         onChange({ ...blockProps, bgColor: color })
     }
 
     const handleFontFamily = (fontFamily: string) => {
+        if (slotEdit) { handleFormatSlotProp('fontFamily', fontFamily); return }
         onChange({ ...blockProps, fontFamily })
     }
 
