@@ -547,7 +547,7 @@ export default function VisualEditor({
         commitBlocks(newBlocks, blocks)
         setActiveSlotEdit(null)
         setSelectedSubSlot(null)
-    }, [blocks, commitBlocks])
+    }
 
     const handleDelete = useCallback((id: string) => {
         const next = blocks.filter(b => b.id !== id)
