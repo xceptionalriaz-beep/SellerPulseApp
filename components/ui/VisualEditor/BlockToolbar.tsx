@@ -112,57 +112,7 @@ export default function BlockToolbar({
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    if (blockProps === null && slotEdit) {
-        const slotLabel = slotEdit.propKey
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, s => s.toUpperCase())
-            .trim()
-        return (
-            <div style={{
-                height: 40, display: 'flex', alignItems: 'center',
-                padding: '0 12px', backgroundColor: '#ffffff',
-                borderBottom: '1px solid #e2e8f0',
-                fontFamily: 'DM Sans, sans-serif', fontSize: 12,
-                gap: 8,
-            }}>
-                <span style={{
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    padding: '2px 8px', borderRadius: 4,
-                    backgroundColor: '#f3eeff', color: '#7530fb',
-                    fontWeight: 700, fontSize: 11,
-                }}>
-                    <Grid size={11} />
-                    {slotLabel}
-                </span>
-                <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0' }} />
-                <button
-                    onClick={onReplaceSlot}
-                    title="Replace slot content"
-                    style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        width: 28, height: 28, border: '1px solid #e2e8f0',
-                        borderRadius: 6, backgroundColor: '#fff',
-                        color: '#1e1535', cursor: 'pointer',
-                    }}
-                >
-                    <RefreshCw size={13} />
-                </button>
-                <button
-                    onClick={() => onClearSlot?.(slotEdit.blockId, slotEdit.propKey)}
-                    title="Clear slot"
-                    style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        width: 28, height: 28, border: '1px solid #fecaca',
-                        borderRadius: 6, backgroundColor: '#fff8f8',
-                        color: '#ef4444', cursor: 'pointer',
-                    }}
-                >
-                    <Trash2 size={13} />
-                </button>
-            </div>
-        )
-    }
-    if (blockProps === null) {
+    if (blockProps === null && !slotEdit) {
         return (
             <div style={{
                 height: 40, display: 'flex', alignItems: 'center',
