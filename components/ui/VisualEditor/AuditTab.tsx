@@ -283,16 +283,15 @@ function runAudit(html: string, blockCount: number): AuditIssue[] {
         })
     }
 
-    // Unfilled placeholders
+    // Unfilled placeholders — info only, this is expected and normal for templates
     const placeholderMatches = html.match(/\{\{[A-Z_]+\}\}/g)
     if (placeholderMatches) {
         const unique = [...new Set(placeholderMatches)]
         issues.push({
             id: 'unfilled-placeholders',
-            severity: 'warning',
-            title: `${unique.length} unfilled placeholder${unique.length > 1 ? 's' : ''}`,
-            detail: `Found: ${unique.slice(0, 5).join(', ')}${unique.length > 5 ? ` and ${unique.length - 5} more` : ''}. These will show as literal text in the listing unless replaced by your listing tool.`,
-            fixHint: 'Placeholders are filled automatically by your eBay listing tool — this is expected if using dynamic templates.',
+            severity: 'info',
+            title: `${unique.length} placeholder token${unique.length > 1 ? 's' : ''} in use`,
+            detail: `Found: ${unique.slice(0, 5).join(', ')}${unique.length > 5 ? ` and ${unique.length - 5} more` : ''}. These are filled automatically by your eBay listing tool at publish time — this is expected and correct.`,
             count: unique.length,
         })
     }
@@ -332,40 +331,43 @@ function runAudit(html: string, blockCount: number): AuditIssue[] {
         })
     }
 
-    // No product title block
-    if (!html.includes('{{PRODUCT_TITLE}}') && !html.includes('PRODUCT_TITLE')) {
-        issues.push({
-            id: 'no-product-title',
-            severity: 'info',
-            title: 'No product title placeholder',
-            detail: 'Your template does not include a {{PRODUCT_TITLE}} placeholder. Adding one helps buyers immediately identify the item.',
-            fixHint: 'Add a Product Title block from the block library.',
-        })
-    }
+    // Only show content suggestions when template has enough blocks to be meaningful
+    if (blockCount >= 5) {
+        // No product title block
+        if (!html.includes('{{PRODUCT_TITLE}}') && !html.includes('PRODUCT_TITLE')) {
+            issues.push({
+                id: 'no-product-title',
+                severity: 'info',
+                title: 'No product title placeholder',
+                detail: 'Your template does not include a {{PRODUCT_TITLE}} placeholder. Adding one helps buyers immediately identify the item.',
+                fixHint: 'Add a Product Title block from the block library.',
+            })
+        }
 
-    // No price
-    if (!html.includes('{{ITEM_PRICE}}') && !html.includes('ITEM_PRICE')) {
-        issues.push({
-            id: 'no-price',
-            severity: 'info',
-            title: 'No price placeholder',
-            detail: 'Your template does not include a {{ITEM_PRICE}} placeholder. Showing price in the description reinforces value.',
-            fixHint: 'Add a Price Block from the block library.',
-        })
-    }
+        // No price
+        if (!html.includes('{{ITEM_PRICE}}') && !html.includes('ITEM_PRICE')) {
+            issues.push({
+                id: 'no-price',
+                severity: 'info',
+                title: 'No price placeholder',
+                detail: 'Your template does not include a {{ITEM_PRICE}} placeholder. Showing price in the description reinforces value.',
+                fixHint: 'Add a Price Block from the block library.',
+            })
+        }
 
-    // No shipping info
-    const hasShipping = html.toLowerCase().includes('shipping') ||
-        html.includes('{{SHIPPING') ||
-        html.includes('{{RETURN')
-    if (!hasShipping && blockCount > 3) {
-        issues.push({
-            id: 'no-shipping',
-            severity: 'info',
-            title: 'No shipping information',
-            detail: 'Buyers consistently cite shipping info as a key purchase factor. Consider adding a Shipping Info or Policy Tabs block.',
-            fixHint: 'Add a Shipping Info Bar or Policy Tabs block.',
-        })
+        // No shipping info
+        const hasShipping = html.toLowerCase().includes('shipping') ||
+            html.includes('{{SHIPPING') ||
+            html.includes('{{RETURN')
+        if (!hasShipping) {
+            issues.push({
+                id: 'no-shipping',
+                severity: 'info',
+                title: 'No shipping information',
+                detail: 'Buyers consistently cite shipping info as a key purchase factor. Consider adding a Shipping Info or Policy Tabs block.',
+                fixHint: 'Add a Shipping Info Bar or Policy Tabs block.',
+            })
+        }
     }
 
     return issues

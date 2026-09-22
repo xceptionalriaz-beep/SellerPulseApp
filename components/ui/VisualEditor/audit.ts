@@ -29,22 +29,24 @@ export interface AuditResult {
     issues: string[]
 }
 
+// ── Hard errors — will cause eBay listing rejection ───────────────────────────
+// NOTE: <style> and target= are intentionally excluded here:
+//   • <style> is flagged as a WARNING in AuditTab (eBay may strip it, not reject)
+//   • target= is standard on template links and not an eBay violation
 const RULES: Array<{ name: string; pattern: RegExp }> = [
-    { name: '<script> tag',         pattern: /<script\b/i },
-    { name: '<iframe> tag',         pattern: /<iframe\b/i },
-    { name: '<form> tag',           pattern: /<form\b/i },
-    { name: '<object> tag',         pattern: /<object\b/i },
-    { name: '<embed> tag',          pattern: /<embed\b/i },
-    { name: '<applet> tag',         pattern: /<applet\b/i },
-    { name: '<style> tag',          pattern: /<style\b/i },
+    { name: '<script> tag', pattern: /<script\b/i },
+    { name: '<iframe> tag', pattern: /<iframe\b/i },
+    { name: '<form> tag', pattern: /<form\b/i },
+    { name: '<object> tag', pattern: /<object\b/i },
+    { name: '<embed> tag', pattern: /<embed\b/i },
+    { name: '<applet> tag', pattern: /<applet\b/i },
     { name: '<link rel=stylesheet>', pattern: /<link\b[^>]*rel\s*=\s*["']stylesheet/i },
-    { name: '<base> tag',           pattern: /<base\b/i },
-    { name: '<meta refresh>',       pattern: /<meta\b[^>]*http-equiv\s*=\s*["']refresh/i },
+    { name: '<base> tag', pattern: /<base\b/i },
+    { name: '<meta refresh>', pattern: /<meta\b[^>]*http-equiv\s*=\s*["']refresh/i },
     { name: 'inline event handler', pattern: /\bon[a-z]+\s*=/i },
-    { name: 'javascript: URI',      pattern: /(href|src)\s*=\s*["']javascript:/i },
-    { name: 'data:text/html URI',   pattern: /(href|src)\s*=\s*["']data:text\/html/i },
-    { name: 'http:// (must be https)', pattern: /(href|src)\s*=\s*["']http:\/\//i },
-    { name: 'target attribute',     pattern: /\btarget\s*=/i },
+    { name: 'javascript: URI', pattern: /(href|src)\s*=\s*["']javascript:/i },
+    { name: 'data:text/html URI', pattern: /(href|src)\s*=\s*["']data:text\/html/i },
+    { name: 'HTTP image (must be HTTPS)', pattern: /src\s*=\s*["']http:\/\//i },
 ]
 
 /**
