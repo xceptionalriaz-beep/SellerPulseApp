@@ -2744,11 +2744,11 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             <ImageUploadInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
                             {phButton('image3Url', 'image 3 URL')}
                             {(props.imageCount ?? 4) >= 4 && <>
-                                <TextInput label="Image 4 URL" value={props.image4Url ?? ''} onChange={v => updateProps({ image4Url: v })} />
+                                <ImageUploadInput label="Image 4 URL" value={props.image4Url ?? ''} onChange={v => updateProps({ image4Url: v })} />
                                 {phButton('image4Url', 'image 4 URL')}
                             </>}
                             {(props.imageCount ?? 4) >= 5 && <>
-                                <TextInput label="Image 5 URL" value={props.image5Url ?? ''} onChange={v => updateProps({ image5Url: v })} />
+                                <ImageUploadInput label="Image 5 URL" value={props.image5Url ?? ''} onChange={v => updateProps({ image5Url: v })} />
                                 {phButton('image5Url', 'image 5 URL')}
                             </>}
                         </Section>
