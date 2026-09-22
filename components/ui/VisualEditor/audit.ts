@@ -47,6 +47,7 @@ const RULES: Array<{ name: string; pattern: RegExp }> = [
     { name: 'javascript: URI', pattern: /(href|src)\s*=\s*["']javascript:/i },
     { name: 'data:text/html URI', pattern: /(href|src)\s*=\s*["']data:text\/html/i },
     { name: 'HTTP image (must be HTTPS)', pattern: /src\s*=\s*["']http:\/\//i },
+    { name: 'non-eBay link (will be stripped)', pattern: /href\s*=\s*["']https?:\/\/(?!(?:[a-z0-9-]+\.)*ebay\.(?:com|co\.uk|com\.au|de|fr|it|es|ca|com\.sg|com\.hk|at|be|nl|pl|ch|ie))[^"'#]/i },
 ]
 
 /**

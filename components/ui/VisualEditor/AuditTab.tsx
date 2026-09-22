@@ -317,6 +317,65 @@ function runAudit(html: string, blockCount: number): AuditIssue[] {
         })
     }
 
+    // ── LINK CHECKER ──────────────────────────────────────────────────────────
+    // eBay silently strips any href that doesn't point to an eBay domain.
+    // Safe values: # | relative paths | {{PLACEHOLDERS}} | eBay domains
+    // Everything else (Amazon, Google, brand sites etc.) gets stripped.
+
+    // Extract all href values from the HTML
+    const hrefMatches = [...html.matchAll(/href\s*=\s*["']([^"']+)["']/gi)]
+    const allHrefs = hrefMatches.map(m => m[1].trim())
+
+    // Known-safe eBay domains
+    const EBAY_DOMAIN_RE = /^https?:\/\/([a-z0-9-]+\.)*ebay\.(com|co\.uk|com\.au|de|fr|it|es|ca|com\.sg|com\.hk|at|be|nl|pl|ch|ie)(\/|$)/i
+
+    const isSafeHref = (href: string): boolean => {
+        if (!href) return true
+        if (href.startsWith('#')) return true          // anchor
+        if (href.startsWith('/')) return true          // relative
+        if (href.startsWith('{{')) return true         // placeholder token
+        if (href === 'javascript:void(0)') return false // js link — caught elsewhere
+        if (EBAY_DOMAIN_RE.test(href)) return true     // eBay domain
+        if (href.startsWith('mailto:')) return true    // email links OK
+        if (href.startsWith('tel:')) return true       // tel links OK
+        return false
+    }
+
+    const unsafeHrefs = allHrefs.filter(h => !isSafeHref(h))
+
+    // Deduplicate for display
+    const uniqueUnsafe = [...new Set(unsafeHrefs)]
+
+    if (uniqueUnsafe.length > 0) {
+        // Extract just the domain from each for a readable summary
+        const domains = uniqueUnsafe
+            .map(h => { try { return new URL(h).hostname } catch { return h } })
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .slice(0, 4)
+
+        issues.push({
+            id: 'non-ebay-links',
+            severity: 'error',
+            title: `${uniqueUnsafe.length} non-eBay link${uniqueUnsafe.length > 1 ? 's' : ''} — will be stripped`,
+            detail: `eBay silently removes links that don't point to eBay domains. Found ${uniqueUnsafe.length} affected link${uniqueUnsafe.length > 1 ? 's' : ''}: ${domains.join(', ')}${domains.length < uniqueUnsafe.length ? '…' : ''}. Buyers will see the link text but clicking will do nothing.`,
+            fixHint: 'Change all links to point to your eBay store (ebay.com/...) or use # as a placeholder. External links must be removed.',
+            count: uniqueUnsafe.length,
+        })
+    }
+
+    // Also warn about placeholder # links if there are many — user may have forgotten to fill them
+    const hashHrefs = allHrefs.filter(h => h === '#')
+    if (hashHrefs.length > 3 && blockCount >= 3) {
+        issues.push({
+            id: 'placeholder-links',
+            severity: 'info',
+            title: `${hashHrefs.length} unfilled # links`,
+            detail: `Found ${hashHrefs.length} links pointing to # (placeholder). These won't navigate anywhere. Replace them with your actual eBay store or listing URLs before publishing.`,
+            fixHint: 'Update link URLs to point to your eBay store pages (e.g. https://www.ebay.com/str/yourstore).',
+            count: hashHrefs.length,
+        })
+    }
+
     // ── INFO ──────────────────────────────────────────────────────────────────
 
     // Block count
