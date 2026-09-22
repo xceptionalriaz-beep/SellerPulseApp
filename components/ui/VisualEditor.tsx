@@ -1273,12 +1273,52 @@ export default function VisualEditor({
 
                 {/* RIGHT — Properties Panel */}
                 {!focusMode && (
-                    <PropertiesPanel
-                        block={selectedBlock}
-                        placeholders={placeholders}
-                        onChange={handleBlockChange}
-                        onDeselect={() => setSelectedId(null)}
-                    />
+                    activeSlotEdit ? (
+                        <div style={{
+                            width: 280, borderLeft: '1px solid #e2e8f0',
+                            backgroundColor: '#fff', padding: '20px 16px',
+                            fontFamily: 'DM Sans, sans-serif',
+                            display: 'flex', flexDirection: 'column', gap: 12,
+                        }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', letterSpacing: 1, textTransform: 'uppercase' }}>
+                                Slot Content
+                            </div>
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                padding: '10px 12px', backgroundColor: '#f3eeff',
+                                borderRadius: 8, border: '1px solid #c4b5fd',
+                            }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#7530fb', flexShrink: 0 }} />
+                                <span style={{ fontSize: 12, fontWeight: 600, color: '#1e1535' }}>
+                                    {activeSlotEdit.propKey
+                                        .replace(/([A-Z])/g, ' $1')
+                                        .replace(/^./, s => s.toUpperCase())
+                                        .trim()}
+                                </span>
+                            </div>
+                            <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+                                Use the toolbar above to format this slot's content — bold, italic, alignment, colour and more.
+                            </p>
+                            <button
+                                onClick={() => setActiveSlotEdit(null)}
+                                style={{
+                                    marginTop: 4, padding: '8px 12px', borderRadius: 6,
+                                    border: '1px solid #e2e8f0', backgroundColor: '#f8fafc',
+                                    fontSize: 12, fontWeight: 600, color: '#64748b',
+                                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                }}
+                            >
+                                ← Back to Layout
+                            </button>
+                        </div>
+                    ) : (
+                        <PropertiesPanel
+                            block={selectedBlock}
+                            placeholders={placeholders}
+                            onChange={handleBlockChange}
+                            onDeselect={() => setSelectedId(null)}
+                        />
+                    )
                 )}
             </div>
 
