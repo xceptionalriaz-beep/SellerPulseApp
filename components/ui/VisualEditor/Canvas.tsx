@@ -46,6 +46,7 @@ import {
     BlockType,
     BlockDefinition,
     getDefinition,
+    generateId,
     BLOCK_DEFINITIONS,
 } from './blocks'
 import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
@@ -144,6 +145,7 @@ interface CanvasProps {
     onAddBlockBelow?: (blockId: string, type: BlockType) => void
     hasActiveSlot?: boolean
     onDeselect?: () => void
+    onLoadTemplate?: (blocks: Block[], templateId: string) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -176,6 +178,7 @@ export default function Canvas({
     onAddBlockBelow,
     hasActiveSlot = false,
     onDeselect,
+    onLoadTemplate,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -293,6 +296,7 @@ export default function Canvas({
                         isDropTarget={isDropTarget}
                         draggedType={draggedType}
                         onAddBlock={onAddBlock}
+                        onLoadTemplate={onLoadTemplate}
                     />
                 )}
 
@@ -373,102 +377,269 @@ export default function Canvas({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EMPTY STATE
+// EMPTY STATE — Onboarding for new users
 // ─────────────────────────────────────────────────────────────────────────────
+const STARTER_TEMPLATES: Array<{
+    id: string
+    label: string
+    icon: string
+    desc: string
+    color: string
+    blockTypes: BlockType[]
+}> = [
+        { id: 'full-minimal', label: 'Clean Minimal', icon: '✦', desc: '16 blocks · works for any category', color: '#7530fb', blockTypes: [] },
+        { id: 'full-electronics', label: 'Electronics', icon: '⚡', desc: 'Dark tech theme · 16 blocks', color: '#0ea5e9', blockTypes: [] },
+        { id: 'full-pet', label: 'Pet Supplies', icon: '🐾', desc: 'Warm lifestyle · 12 blocks', color: '#16a34a', blockTypes: [] },
+        { id: 'full-fashion', label: 'Fashion', icon: '👗', desc: 'Elegant pink theme · 16 blocks', color: '#ec4899', blockTypes: [] },
+        { id: 'full-auto', label: 'Auto Parts', icon: '🔧', desc: 'Industrial dark · 16 blocks', color: '#64748b', blockTypes: [] },
+    ]
+
 function EmptyState({
     isDropTarget,
     draggedType,
     onAddBlock,
+    onLoadTemplate,
 }: {
     isDropTarget: boolean
     draggedType: BlockType | null
     onAddBlock?: (type: BlockType) => void
-    onAddBlockBelow?: (blockId: string, type: BlockType) => void
+    onLoadTemplate?: (blocks: Block[], templateId: string) => void
 }) {
+    const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null)
     const def = draggedType ? getDefinition(draggedType) : null
+
+    // Drop target overlay — shown when dragging a block over the empty canvas
+    if (isDropTarget && def) {
+        return (
+            <div style={{
+                flex: 1, display: 'flex', flexDirection: 'column' as const,
+                alignItems: 'center', justifyContent: 'center', minHeight: 400,
+                border: `2px dashed ${C.primary}`, borderRadius: 16,
+                backgroundColor: C.primaryLight, transition: 'all 0.2s ease', padding: 40,
+            }}>
+                <div style={{
+                    width: 64, height: 64, borderRadius: 16, backgroundColor: C.primary,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 28, marginBottom: 16, boxShadow: `0 8px 24px ${C.primary}44`,
+                }}>
+                    {def.icon}
+                </div>
+                <p style={{ margin: '0 0 4px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: C.primary }}>
+                    Drop to add {def.label}
+                </p>
+                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: C.secondary }}>
+                    {def.description}
+                </p>
+            </div>
+        )
+    }
 
     return (
         <div style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column' as const,
+            flex: 1, overflowY: 'auto' as const,
+            display: 'flex', flexDirection: 'column' as const,
             alignItems: 'center',
-            justifyContent: 'center',
+            padding: '40px 24px 60px',
             minHeight: 400,
-            border: `2px dashed ${isDropTarget ? C.primary : C.border}`,
-            borderRadius: 16,
-            backgroundColor: isDropTarget ? C.primaryLight : C.surface,
-            transition: 'all 0.2s ease',
-            padding: 40,
         }}>
-            {isDropTarget && def ? (
-                <>
-                    <div style={{
-                        width: 64, height: 64, borderRadius: 16,
-                        backgroundColor: C.primary,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 28, marginBottom: 16,
-                        boxShadow: `0 8px 24px ${C.primary}44`,
+
+            {/* ── Header ── */}
+            <div style={{ textAlign: 'center', marginBottom: 32, maxWidth: 480 }}>
+                {/* Animated icon */}
+                <div style={{
+                    width: 56, height: 56, borderRadius: 16,
+                    background: `linear-gradient(135deg, ${C.primary}, #b667ff)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 26, margin: '0 auto 16px',
+                    boxShadow: `0 8px 24px ${C.primary}33`,
+                }}>
+                    🛒
+                </div>
+                <p style={{
+                    margin: '0 0 8px',
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                    fontSize: 20, color: C.dark,
+                }}>
+                    Build your eBay listing template
+                </p>
+                <p style={{
+                    margin: 0,
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+                    color: C.secondary, lineHeight: 1.6,
+                }}>
+                    Start from a ready-made template below, or drag blocks from the left panel to build your own.
+                </p>
+            </div>
+
+            {/* ── How it works — 3 steps ── */}
+            <div style={{
+                display: 'flex', gap: 8, marginBottom: 32,
+                width: '100%', maxWidth: 520,
+            }}>
+                {[
+                    { step: '1', label: 'Pick a template', icon: '📋' },
+                    { step: '2', label: 'Customise blocks', icon: '✏️' },
+                    { step: '3', label: 'Publish to eBay', icon: '🚀' },
+                ].map(({ step, label, icon }) => (
+                    <div key={step} style={{
+                        flex: 1, textAlign: 'center',
+                        padding: '10px 6px',
+                        borderRadius: 10,
+                        backgroundColor: C.surface,
+                        border: `1px solid ${C.border}`,
                     }}>
-                        {def.icon}
+                        <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+                        <div style={{
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            width: 16, height: 16, borderRadius: '50%',
+                            backgroundColor: C.primaryLight,
+                            color: C.primary,
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 9, fontWeight: 700,
+                            marginBottom: 4,
+                        }}>
+                            {step}
+                        </div>
+                        <p style={{
+                            margin: 0,
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 10,
+                            fontWeight: 600, color: C.dark,
+                        }}>
+                            {label}
+                        </p>
                     </div>
-                    <p style={{ margin: '0 0 4px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: C.primary }}>
-                        Drop to add {def.label}
-                    </p>
-                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: C.secondary }}>
-                        {def.description}
-                    </p>
-                </>
-            ) : (
-                <>
-                    {/* Visual hint — mini block stack */}
-                    <div style={{ position: 'relative', width: 120, height: 80, marginBottom: 24 }}>
-                        {[
-                            { top: 0, left: 10, opacity: 0.2, height: 18 },
-                            { top: 24, left: 0, opacity: 0.35, height: 22 },
-                            { top: 52, left: 6, opacity: 0.15, height: 14 },
-                        ].map((s, i) => (
-                            <div key={i} style={{
-                                position: 'absolute', width: 100, borderRadius: 6,
-                                backgroundColor: C.primary, ...s,
-                            }} />
-                        ))}
-                    </div>
+                ))}
+            </div>
 
-                    <p style={{ margin: '0 0 8px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: C.dark, textAlign: 'center' }}>
-                        Drag blocks here to start building
-                    </p>
-                    <p style={{ margin: '0 0 20px', fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: C.secondary, textAlign: 'center', maxWidth: 280, lineHeight: 1.6 }}>
-                        Select blocks from the library on the left, or click any block to add it instantly.
-                    </p>
+            {/* ── Starter templates ── */}
+            <div style={{ width: '100%', maxWidth: 520, marginBottom: 28 }}>
+                <p style={{
+                    margin: '0 0 10px',
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                    fontWeight: 700, color: C.muted,
+                    textTransform: 'uppercase', letterSpacing: '0.07em',
+                }}>
+                    Start from a template
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 6 }}>
+                    {STARTER_TEMPLATES.map(t => (
+                        <div
+                            key={t.id}
+                            onMouseEnter={() => setHoveredTemplate(t.id)}
+                            onMouseLeave={() => setHoveredTemplate(null)}
+                            onClick={() => {
+                                if (!onLoadTemplate) return
+                                // Dynamically import the template blocks
+                                import('./templates').then(mod => {
+                                    const all = mod.FULL_TEMPLATES
+                                    const found = all.find((s: { id: string }) => s.id === t.id)
+                                    if (found?.blocks) {
+                                        const hydrated: Block[] = (found.blocks as Array<{ type: BlockType; props?: Record<string, unknown> }>).map(b => ({
+                                            id: generateId(),
+                                            type: b.type,
+                                            props: b.props ?? {},
+                                        }))
+                                        onLoadTemplate(hydrated, t.id)
+                                    }
+                                })
+                            }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 12,
+                                padding: '10px 14px',
+                                borderRadius: 10,
+                                border: `1.5px solid ${hoveredTemplate === t.id ? t.color : C.border}`,
+                                backgroundColor: hoveredTemplate === t.id ? `${t.color}08` : C.surface,
+                                cursor: onLoadTemplate ? 'pointer' : 'default',
+                                transition: 'all 0.15s',
+                            }}
+                        >
+                            {/* Colour dot + icon */}
+                            <div style={{
+                                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                                backgroundColor: `${t.color}18`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 18,
+                                border: `1px solid ${t.color}30`,
+                            }}>
+                                {t.icon}
+                            </div>
 
-                    {/* Quick-start suggestions — clickable */}
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center' }}>
-                        {(['product_title', 'product_image', 'price_block', 'trust_badges'] as BlockType[]).map(type => {
-                            const d = getDefinition(type)
-                            if (!d) return null
-                            return (
-                                <div
-                                    key={type}
-                                    onClick={() => onAddBlock?.(type)}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: 5,
-                                        padding: '5px 10px', borderRadius: 20,
-                                        border: `1px solid ${C.border}`,
-                                        backgroundColor: C.surface,
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 11,
-                                        color: C.secondary,
-                                        cursor: onAddBlock ? 'pointer' : 'default',
-                                    }}
-                                >
-                                    <span style={{ fontSize: 12 }}>{d.icon}</span>
-                                    {d.label}
-                                </div>
-                            )
-                        })}
-                    </div>
-                </>
-            )}
+                            {/* Label + desc */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{
+                                    margin: 0,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+                                    fontWeight: 700, color: hoveredTemplate === t.id ? t.color : C.dark,
+                                    transition: 'color 0.15s',
+                                }}>
+                                    {t.label}
+                                </p>
+                                <p style={{
+                                    margin: '1px 0 0',
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 10,
+                                    color: C.muted,
+                                }}>
+                                    {t.desc}
+                                </p>
+                            </div>
+
+                            {/* Arrow */}
+                            <div style={{
+                                fontSize: 14, color: hoveredTemplate === t.id ? t.color : C.border,
+                                transition: 'color 0.15s, transform 0.15s',
+                                transform: hoveredTemplate === t.id ? 'translateX(2px)' : 'none',
+                            }}>
+                                →
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* ── Or build block by block ── */}
+            <div style={{ width: '100%', maxWidth: 520 }}>
+                <p style={{
+                    margin: '0 0 10px',
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                    fontWeight: 700, color: C.muted,
+                    textTransform: 'uppercase', letterSpacing: '0.07em',
+                }}>
+                    Or add a single block
+                </p>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' as const }}>
+                    {(['hero_header', 'product_image', 'trust_badges', 'policy_tabs', 'nav_bar'] as BlockType[]).map(type => {
+                        const d = getDefinition(type)
+                        if (!d) return null
+                        return (
+                            <button
+                                key={type}
+                                onClick={() => onAddBlock?.(type)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 5,
+                                    padding: '6px 12px', borderRadius: 20,
+                                    border: `1px solid ${C.border}`,
+                                    backgroundColor: C.surface,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                                    color: C.secondary,
+                                    cursor: onAddBlock ? 'pointer' : 'default',
+                                    transition: 'border-color 0.15s',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.borderColor = C.primary)}
+                                onMouseLeave={e => (e.currentTarget.style.borderColor = C.border)}
+                            >
+                                <span>{d.icon}</span>
+                                {d.label}
+                            </button>
+                        )
+                    })}
+                </div>
+                <p style={{
+                    margin: '12px 0 0',
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                    color: C.muted, textAlign: 'center',
+                }}>
+                    Or drag any block from the <strong style={{ color: C.secondary }}>Blocks panel</strong> on the left
+                </p>
+            </div>
         </div>
     )
 }
