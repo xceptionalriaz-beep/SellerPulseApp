@@ -66,7 +66,7 @@ interface BlockToolbarProps {
     onChange: (props: any) => void
     onClose?: () => void
     persistent?: boolean
-    slotEdit?: { blockId: string; propKey: string } | null
+    slotEdit?: { blockId: string; propKey: string; currentHtml: string } | null
     onClearSlot?: (blockId: string, propKey: string) => void
     onReplaceSlot?: () => void
 }
