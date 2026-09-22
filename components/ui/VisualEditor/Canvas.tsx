@@ -1055,7 +1055,8 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
         var hasContent = zone.querySelector('.add-btn') === null;
         if (slot && window.parent) {
           if (hasContent) {
-            window.parent.postMessage({ type: 'RIAZIFY_EDIT_SLOT_CONTENT', propKey: slot, blockId: blockId }, '*');
+            var slotHtml = zone.innerHTML || '';
+            window.parent.postMessage({ type: 'RIAZIFY_EDIT_SLOT_CONTENT', propKey: slot, blockId: blockId, currentHtml: slotHtml }, '*');
           } else {
             window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: blockId }, '*');
           }
