@@ -8,7 +8,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState, useCallback } from 'react'
-import { Folder, Trash2, Download, RefreshCw, Clock } from 'lucide-react'
+import { Folder, Trash2, Download, RefreshCw, Clock, Copy } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { Block, CanvasSettings, assembleDocument } from './blocks'
 
@@ -36,6 +36,18 @@ interface SavedTemplate {
     blocks_json: Block[]
     canvas_settings_json: CanvasSettings
     updated_at: string
+    category: string
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+    general: 'General',
+    electronics: 'Electronics',
+    fashion: 'Fashion & Beauty',
+    home: 'Home & Garden',
+    auto: 'Auto Parts',
+    pet: 'Pet Supplies',
+    sports: 'Sports & Outdoors',
+    toys: 'Toys & Games',
 }
 
 interface SavedTabProps {
@@ -49,7 +61,9 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
     const [templates, setTemplates] = useState<SavedTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
     const fetchTemplates = useCallback(async () => {
         setLoading(true)
@@ -58,7 +72,7 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
             const supabase = createClient()
             const { data, error: err } = await supabase
                 .from('visual_templates')
-                .select('id, name, blocks_json, canvas_settings_json, updated_at')
+                .select('id, name, blocks_json, canvas_settings_json, updated_at, category')
                 .order('updated_at', { ascending: false })
 
             if (err) throw err
@@ -93,6 +107,30 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
             setDeletingId(null)
         }
     }, [])
+
+    const handleDuplicate = useCallback(async (t: SavedTemplate) => {
+        setDuplicatingId(t.id)
+        try {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+            const { error: err } = await (supabase.from('visual_templates') as any)
+                .insert({
+                    user_id: user.id,
+                    name: `${t.name} (copy)`,
+                    blocks_json: t.blocks_json,
+                    canvas_settings_json: t.canvas_settings_json,
+                    category: t.category ?? 'general',
+                    updated_at: new Date().toISOString(),
+                })
+            if (err) throw err
+            await fetchTemplates()
+        } catch (e: unknown) {
+            console.error('[SavedTab] duplicate error:', e)
+        } finally {
+            setDuplicatingId(null)
+        }
+    }, [fetchTemplates])
 
     // ── Relative time helper ──────────────────────────────────────────────────
     function relativeTime(iso: string): string {
@@ -181,6 +219,11 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
     }
 
     // ── Template list ─────────────────────────────────────────────────────────
+    const categories = ['all', ...Array.from(new Set(templates.map(t => t.category ?? 'general')))]
+    const filtered = categoryFilter === 'all'
+        ? templates
+        : templates.filter(t => (t.category ?? 'general') === categoryFilter)
+
     return (
         <div style={{
             height: '100%', overflowY: 'auto',
@@ -193,7 +236,7 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
                 flexShrink: 0,
             }}>
                 <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted }}>
-                    {templates.length} saved template{templates.length !== 1 ? 's' : ''}
+                    {filtered.length} of {templates.length} template{templates.length !== 1 ? 's' : ''}
                 </span>
                 <button
                     onClick={fetchTemplates}
@@ -208,15 +251,50 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
                 </button>
             </div>
 
+            {/* Category filter pills */}
+            {categories.length > 2 && (
+                <div style={{
+                    padding: '0 10px 8px',
+                    display: 'flex', gap: 4, flexWrap: 'wrap',
+                    flexShrink: 0,
+                }}>
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setCategoryFilter(cat)}
+                            style={{
+                                padding: '3px 8px',
+                                borderRadius: 20,
+                                border: `1px solid ${categoryFilter === cat ? C.primary : C.border}`,
+                                backgroundColor: categoryFilter === cat ? C.primary : C.surface,
+                                color: categoryFilter === cat ? '#fff' : C.muted,
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 10, fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.15s',
+                            }}
+                        >
+                            {cat === 'all' ? 'All' : (CATEGORY_LABELS[cat] ?? cat)}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {/* List */}
             <div style={{ padding: '0 10px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {templates.map(t => (
+                {filtered.length === 0 ? (
+                    <p style={{ margin: '24px auto', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted, textAlign: 'center' }}>
+                        No templates in this category
+                    </p>
+                ) : filtered.map(t => (
                     <SavedTemplateCard
                         key={t.id}
                         template={t}
                         deleting={deletingId === t.id}
+                        duplicating={duplicatingId === t.id}
                         onLoad={() => onLoad(t.name, t.blocks_json, t.canvas_settings_json, t.id)}
                         onDelete={() => handleDelete(t.id)}
+                        onDuplicate={() => handleDuplicate(t)}
                         relativeTime={relativeTime}
                     />
                 ))}
@@ -231,14 +309,18 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
 function SavedTemplateCard({
     template,
     deleting,
+    duplicating,
     onLoad,
     onDelete,
+    onDuplicate,
     relativeTime,
 }: {
     template: SavedTemplate
     deleting: boolean
+    duplicating: boolean
     onLoad: () => void
     onDelete: () => void
+    onDuplicate: () => void
     relativeTime: (iso: string) => string
 }) {
     const [hovered, setHovered] = useState(false)
@@ -372,6 +454,25 @@ function SavedTemplateCard({
                     </div>
                 </div>
 
+                {/* Category badge */}
+                {template.category && template.category !== 'general' && (
+                    <div style={{ marginBottom: 6 }}>
+                        <span style={{
+                            display: 'inline-block',
+                            padding: '2px 7px',
+                            borderRadius: 10,
+                            backgroundColor: C.primaryLight,
+                            color: C.primary,
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 9, fontWeight: 700,
+                            letterSpacing: '0.04em',
+                            textTransform: 'uppercase',
+                        }}>
+                            {CATEGORY_LABELS[template.category] ?? template.category}
+                        </span>
+                    </div>
+                )}
+
                 {/* Action buttons */}
                 <div style={{ display: 'flex', gap: 6 }}>
                     <button
@@ -391,6 +492,27 @@ function SavedTemplateCard({
                     >
                         <Download size={11} />
                         Load
+                    </button>
+                    <button
+                        onClick={onDuplicate}
+                        disabled={duplicating}
+                        title="Duplicate template"
+                        style={{
+                            width: 30, height: 30,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: `1px solid ${C.border}`,
+                            borderRadius: 7,
+                            backgroundColor: 'transparent',
+                            color: C.muted,
+                            cursor: duplicating ? 'default' : 'pointer',
+                            opacity: duplicating ? 0.5 : 1,
+                            flexShrink: 0,
+                        }}
+                    >
+                        {duplicating
+                            ? <RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                            : <Copy size={11} />
+                        }
                     </button>
                     <button
                         onClick={onDelete}

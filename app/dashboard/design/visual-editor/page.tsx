@@ -92,14 +92,14 @@ const PLACEHOLDER_GROUPS = [
 
 // ── Category options ──────────────────────────────────────────────────────────
 const CATEGORIES: DropdownOption[] = [
-    { val: 'general',     label: 'General',           enabled: true },
-    { val: 'electronics', label: 'Electronics',       enabled: true },
-    { val: 'fashion',     label: 'Fashion & Beauty',  enabled: true },
-    { val: 'home',        label: 'Home & Garden',     enabled: true },
-    { val: 'auto',        label: 'Auto Parts',        enabled: true },
-    { val: 'pet',         label: 'Pet Supplies',      enabled: true },
-    { val: 'sports',      label: 'Sports & Outdoors', enabled: true },
-    { val: 'toys',        label: 'Toys & Games',      enabled: true },
+    { val: 'general', label: 'General', enabled: true },
+    { val: 'electronics', label: 'Electronics', enabled: true },
+    { val: 'fashion', label: 'Fashion & Beauty', enabled: true },
+    { val: 'home', label: 'Home & Garden', enabled: true },
+    { val: 'auto', label: 'Auto Parts', enabled: true },
+    { val: 'pet', label: 'Pet Supplies', enabled: true },
+    { val: 'sports', label: 'Sports & Outdoors', enabled: true },
+    { val: 'toys', label: 'Toys & Games', enabled: true },
 ]
 
 // ── Supabase raw client (listing_templates not yet typed) ─────────────────────
@@ -745,11 +745,12 @@ function VisualEditorInner() {
                     // (e.g. electronics → headphones, fashion → sneakers).
                     // Falls back to 'pet' if category is unknown.
                     initialCategory={
-                        (['pet','electronics','fashion','home','sports','auto','general'] as const)
+                        (['pet', 'electronics', 'fashion', 'home', 'sports', 'auto', 'general'] as const)
                             .includes(category as any)
                             ? (category as any)
                             : 'pet'
                     }
+                    templateCategory={category}
                 />
             </div>
 

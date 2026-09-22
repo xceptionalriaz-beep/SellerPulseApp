@@ -128,6 +128,7 @@ interface VisualEditorProps {
     value: string
     onChange: (html: string) => void
     placeholders: PlaceholderGroup[]
+    templateCategory?: string   // DB category for saving — passed from parent page
     /**
      * Initial canvas category. When a saved template is loaded, the parent
      * (e.g. app/dashboard/design/visual-editor/page.tsx) already knows the
@@ -147,6 +148,7 @@ export default function VisualEditor({
     onChange,
     placeholders,
     initialCategory,
+    templateCategory = 'general',
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -641,6 +643,7 @@ export default function VisualEditor({
                 name: trimmedName,
                 blocks_json: blocks,
                 canvas_settings_json: canvasSettings,
+                category: templateCategory,
                 updated_at: new Date().toISOString(),
             }
 
