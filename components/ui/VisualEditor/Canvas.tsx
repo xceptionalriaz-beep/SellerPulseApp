@@ -406,16 +406,24 @@ function EmptyState({
         }}>
             {isDropTarget && def ? (
                 <>
+                    <style>{`
+                        @keyframes bounceDown {
+                            0%, 100% { transform: translateY(0px); }
+                            50%       { transform: translateY(10px); }
+                        }
+                    `}</style>
                     <div style={{
-                        width: 64, height: 64, borderRadius: 16,
+                        width: 56, height: 56, borderRadius: '50%',
                         backgroundColor: C.primary,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 28, marginBottom: 16,
+                        fontSize: 22, marginBottom: 16,
                         boxShadow: `0 8px 24px ${C.primary}44`,
+                        animation: 'bounceDown 0.8s ease-in-out infinite',
+                        color: '#fff',
                     }}>
-                        {def.icon}
+                        ↓
                     </div>
-                    <p style={{ margin: '0 0 4px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: C.primary }}>
+                    <p style={{ margin: '0 0 4px', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: C.primary }}>
                         Drop to add {def.label}
                     </p>
                     <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: C.secondary }}>
