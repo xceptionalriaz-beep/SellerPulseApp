@@ -331,7 +331,7 @@ export default function VisualEditor({
         isInternalChange.current = true
         const html = assembleDocument(nextBlocks, settings ?? canvasSettings)
         setCurrentHtml(html)
-        onChange(html)
+        onChange(stripInternalAttributes(html))
         setIsDirty(true)
         requestAnimationFrame(() => { isInternalChange.current = false })
     }, [onChange, canvasSettings])
@@ -690,9 +690,18 @@ export default function VisualEditor({
         setHiddenIds(new Set())
     }, [blocks, isDirty, commitBlocks])
 
+    const stripInternalAttributes = (html: string): string => {
+        return html
+            .replace(/\s*data-canvas-dropzone="[^"]*"/g, '')
+            .replace(/\s*data-slot-block-type="[^"]*"/g, '')
+            .replace(/\s*data-slot-block-props='[^']*'/g, '')
+            .replace(/\s*data-block-id="[^"]*"/g, '')
+            .replace(/\s*data-toolbar[^=\s>]*/g, '')
+    }
+
     const handleExport = useCallback(() => {
         if (blocks.length === 0) return
-        const html = assembleDocument(blocks, canvasSettings)
+        const html = stripInternalAttributes(assembleDocument(blocks, canvasSettings))
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -851,7 +860,7 @@ export default function VisualEditor({
         const html = assembleDocument(blocks, settings)
         isInternalChange.current = true
         setCurrentHtml(html)
-        onChange(html)
+        onChange(stripInternalAttributes(html))
         setIsDirty(true)
         requestAnimationFrame(() => { isInternalChange.current = false })
     }, [blocks, onChange])
