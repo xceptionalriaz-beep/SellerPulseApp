@@ -4497,7 +4497,7 @@ function TextInput({ label, value, onChange }: { label: string; value: string; o
 
 // ── Image Upload Input ─────────────────────────────────────────────────────────
 // Wraps a URL text field with a file-picker upload button.
-// Uploads to Supabase Storage bucket "listing-images" and writes back the public URL.
+// Uploads to Supabase Storage bucket "template-assets" and writes back the public URL.
 function ImageUploadInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
     const [uploading, setUploading] = useState(false)
     const [uploadError, setUploadError] = useState<string | null>(null)
@@ -4527,13 +4527,13 @@ function ImageUploadInput({ label, value, onChange }: { label: string; value: st
             const filePath = `uploads/${fileName}`
 
             const { error: uploadErr } = await supabase.storage
-                .from('listing-images')
+                .from('template-assets')
                 .upload(filePath, file, { contentType: file.type, upsert: false })
 
             if (uploadErr) {
                 // If bucket doesn't exist, give a helpful message
                 if (uploadErr.message?.includes('Bucket not found') || uploadErr.message?.includes('bucket')) {
-                    setUploadError('Storage bucket "listing-images" not found. Please create it in Supabase Storage.')
+                    setUploadError('Storage bucket "template-assets" not found. Please create it in Supabase Storage.')
                 } else {
                     setUploadError(uploadErr.message ?? 'Upload failed')
                 }
@@ -4541,7 +4541,7 @@ function ImageUploadInput({ label, value, onChange }: { label: string; value: st
             }
 
             const { data: urlData } = supabase.storage
-                .from('listing-images')
+                .from('template-assets')
                 .getPublicUrl(filePath)
 
             if (urlData?.publicUrl) {
