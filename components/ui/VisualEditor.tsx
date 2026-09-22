@@ -151,6 +151,7 @@ export default function VisualEditor({
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
     const [selectedId, setSelectedId] = useState<string | null>(null)
+    const [showShortcuts, setShowShortcuts] = useState(false)
     const [copiedStyle, setCopiedStyle] = useState<Record<string, unknown> | null>(null)
     const [tokenFeedback, setTokenFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null)
     const [draggedType, setDraggedType] = useState<BlockType | null>(null)
@@ -925,6 +926,10 @@ export default function VisualEditor({
             if (meta && e.key === 'f') {
                 e.preventDefault(); setFocusMode(p => !p)
             }
+            // ? — open shortcuts modal
+            if (e.key === '?' && !meta && !['input', 'textarea', 'select'].includes((e.target as HTMLElement).tagName.toLowerCase())) {
+                e.preventDefault(); setShowShortcuts(p => !p)
+            }
         }
         window.addEventListener('keydown', handler)
         return () => window.removeEventListener('keydown', handler)
@@ -1402,7 +1407,108 @@ export default function VisualEditor({
                 hiddenIds={hiddenIds}
                 canvasZoom={canvasZoom}
                 templateName={templateName}
+                onShowShortcuts={() => setShowShortcuts(true)}
             />
+
+            {/* ── Keyboard shortcuts modal ── */}
+            {showShortcuts && (
+                <div
+                    onClick={() => setShowShortcuts(false)}
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 99999,
+                        backgroundColor: 'rgba(0,0,0,0.45)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            backgroundColor: '#fff',
+                            borderRadius: 14,
+                            padding: '24px 28px',
+                            width: 480,
+                            maxWidth: '92vw',
+                            boxShadow: '0 24px 48px rgba(0,0,0,0.18)',
+                            fontFamily: 'DM Sans, sans-serif',
+                        }}
+                    >
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                            <div>
+                                <p style={{ margin: 0, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: C.dark }}>
+                                    Keyboard Shortcuts
+                                </p>
+                                <p style={{ margin: '2px 0 0', fontSize: 11, color: C.muted }}>
+                                    Ctrl on Windows · ⌘ on Mac
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowShortcuts(false)}
+                                style={{
+                                    width: 28, height: 28, borderRadius: 7,
+                                    border: `1px solid ${C.border}`,
+                                    backgroundColor: C.bg,
+                                    cursor: 'pointer', fontSize: 14,
+                                    color: C.muted, display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center',
+                                }}
+                            >×</button>
+                        </div>
+
+                        {/* Two-column grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 24px' }}>
+                            {[
+                                { keys: ['Ctrl', 'Z'], label: 'Undo' },
+                                { keys: ['Ctrl', 'Shift', 'Z'], label: 'Redo' },
+                                { keys: ['Ctrl', 'D'], label: 'Duplicate block' },
+                                { keys: ['Ctrl', 'L'], label: 'Lock / unlock block' },
+                                { keys: ['Ctrl', 'H'], label: 'Hide / show block' },
+                                { keys: ['Ctrl', 'F'], label: 'Toggle focus mode' },
+                                { keys: ['Alt', '↑'], label: 'Move block up' },
+                                { keys: ['Alt', '↓'], label: 'Move block down' },
+                                { keys: ['Del'], label: 'Delete selected block' },
+                                { keys: ['Esc'], label: 'Deselect block' },
+                                { keys: ['B'], label: 'Open Blocks panel' },
+                                { keys: ['I'], label: 'Open Images panel' },
+                                { keys: ['T'], label: 'Open Templates panel' },
+                                { keys: ['S'], label: 'Open Saved panel' },
+                            ].map(({ keys, label }) => (
+                                <div key={label} style={{
+                                    display: 'flex', alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 0',
+                                    borderBottom: `1px solid ${C.border}`,
+                                }}>
+                                    <span style={{ fontSize: 12, color: C.body }}>{label}</span>
+                                    <div style={{ display: 'flex', gap: 3, flexShrink: 0, marginLeft: 8 }}>
+                                        {keys.map((k, i) => (
+                                            <kbd key={i} style={{
+                                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                                minWidth: 22, height: 20,
+                                                padding: '0 5px',
+                                                backgroundColor: C.bg,
+                                                border: `1px solid ${C.border}`,
+                                                borderBottomWidth: 2,
+                                                borderRadius: 4,
+                                                fontSize: 10, fontWeight: 600,
+                                                color: C.dark,
+                                                fontFamily: 'DM Sans, sans-serif',
+                                            }}>
+                                                {k}
+                                            </kbd>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Footer hint */}
+                        <p style={{ margin: '14px 0 0', fontSize: 10, color: C.muted, textAlign: 'center' }}>
+                            Press <kbd style={{ padding: '1px 4px', borderRadius: 3, border: `1px solid ${C.border}`, fontSize: 10, backgroundColor: C.bg }}>?</kbd> or click the ? button anytime to reopen this
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* ── Inline Toolbar Overlay ── */}
             {inlineToolbar?.visible && (
@@ -1813,6 +1919,7 @@ function WarningBanner({
 function StatusBar({
     blockCount, selectedBlock, parseStrategy, auditErrors,
     livePreview, lockedIds, hiddenIds, canvasZoom, templateName,
+    onShowShortcuts,
 }: {
     blockCount: number
     selectedBlock: Block | null
@@ -1823,6 +1930,7 @@ function StatusBar({
     hiddenIds: Set<string>
     canvasZoom: number
     templateName: string
+    onShowShortcuts?: () => void
 }) {
     return (
         <div style={{
@@ -1859,6 +1967,32 @@ function StatusBar({
                     {lockedIds?.size ? ` · ${lockedIds.size} locked` : ''}
                     {hiddenIds?.size ? ` · ${hiddenIds.size} hidden` : ''}
                 </span>
+                <button
+                    onClick={onShowShortcuts}
+                    title="Keyboard shortcuts (?)"
+                    style={{
+                        width: 18, height: 18, borderRadius: '50%',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backgroundColor: 'rgba(255,255,255,0.08)',
+                        color: 'rgba(255,255,255,0.5)',
+                        fontSize: 10, fontWeight: 700,
+                        cursor: 'pointer', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        fontFamily: 'DM Sans, sans-serif',
+                        padding: 0, lineHeight: 1,
+                        transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => {
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,0.18)'
+                            ; (e.currentTarget as HTMLButtonElement).style.color = '#fff'
+                    }}
+                    onMouseLeave={e => {
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,0.08)'
+                            ; (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.5)'
+                    }}
+                >
+                    ?
+                </button>
             </div>
         </div>
     )
