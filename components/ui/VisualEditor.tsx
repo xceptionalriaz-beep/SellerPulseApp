@@ -471,7 +471,71 @@ export default function VisualEditor({
         commitBlocks(next, blocks)
     }, [commitBlocks, blocks])
 
-    const handleClearSlot = useCallback((blockId: string, propKey: string) => {
+    const handleFormatSlot = (blockId: string, propKey: string, format: string, value: string) => {
+        const idx = blocks.findIndex(b => b.id === blockId)
+        if (idx < 0) return
+        const block = blocks[idx]
+        const currentHtml = (block.props as any)[propKey] ?? ''
+
+        let newHtml = currentHtml
+
+        if (format === 'fontWeight') {
+            if (value === 'bold') {
+                if (!/font-weight:\s*bold/i.test(newHtml)) {
+                    newHtml = `<strong>${newHtml}</strong>`
+                }
+            } else {
+                newHtml = newHtml.replace(/<\/?strong>/gi, '').replace(/<\/?b>/gi, '')
+            }
+        } else if (format === 'fontStyle') {
+            if (value === 'italic') {
+                if (!/<em>|<i>/i.test(newHtml)) {
+                    newHtml = `<em>${newHtml}</em>`
+                }
+            } else {
+                newHtml = newHtml.replace(/<\/?em>/gi, '').replace(/<\/?i>/gi, '')
+            }
+        } else if (format === 'textDecoration') {
+            if (value === 'underline') {
+                if (!/<u>/i.test(newHtml)) {
+                    newHtml = `<u>${newHtml}</u>`
+                }
+            } else {
+                newHtml = newHtml.replace(/<\/?u>/gi, '')
+            }
+        } else if (format === 'fontSize') {
+            newHtml = newHtml.replace(/font-size:\s*[^;'"]+/gi, '')
+            newHtml = newHtml.replace(/<span([^>]*)style="([^"]*)"([^>]*)>/gi, (m: string, a: string, s: string, c: string) =>
+                `<span${a}style="${s}font-size:${value};"${c}>`)
+            if (!/<span/i.test(newHtml)) {
+                newHtml = `<span style="font-size:${value};">${newHtml}</span>`
+            }
+        } else if (format === 'align') {
+            newHtml = newHtml.replace(/text-align:\s*[^;'"]+/gi, '')
+            newHtml = `<div style="text-align:${value};">${newHtml}</div>`
+        } else if (format === 'color') {
+            newHtml = newHtml.replace(/(?<![a-z-])color:\s*[^;'"]+/gi, '')
+            if (!/<span/i.test(newHtml)) {
+                newHtml = `<span style="color:${value};">${newHtml}</span>`
+            } else {
+                newHtml = newHtml.replace(/<span([^>]*)style="([^"]*)"([^>]*)>/gi, (m: string, a: string, s: string, c: string) =>
+                    `<span${a}style="${s}color:${value};"${c}>`)
+            }
+        }
+
+        const updatedBlock = {
+            ...block,
+            props: { ...(block.props as any), [propKey]: newHtml }
+        }
+        const newBlocks = [...blocks]
+        newBlocks[idx] = updatedBlock
+        commitBlocks(newBlocks, blocks)
+
+        // Update activeSlotEdit so toolbar reflects new state
+        setActiveSlotEdit({ blockId, propKey, currentHtml: newHtml })
+    }
+
+    const handleClearSlot = (blockId: string, propKey: string) => {
         const EMPTY_SLOT = (slot: string) =>
             `<div data-canvas-dropzone="${slot}"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>`
         const idx = blocks.findIndex(b => b.id === blockId)
@@ -1146,6 +1210,7 @@ export default function VisualEditor({
                             }}
                             slotEdit={isLayoutBlock ? activeSlotEdit : null}
                             onClearSlot={(blockId, propKey) => handleClearSlot(blockId, propKey)}
+                            onFormatSlot={(blockId, propKey, format, value) => handleFormatSlot(blockId, propKey, format, value)}
                             onReplaceSlot={() => {
                                 if (activeSlotEdit) {
                                     setActiveDropSlot({ blockId: activeSlotEdit.blockId, slot: activeSlotEdit.propKey as any })
