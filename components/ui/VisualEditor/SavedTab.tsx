@@ -10,7 +10,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Folder, Trash2, Download, RefreshCw, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { Block, CanvasSettings } from './blocks'
+import { Block, CanvasSettings, assembleDocument } from './blocks'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -211,91 +211,206 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
             {/* List */}
             <div style={{ padding: '0 10px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {templates.map(t => (
-                    <div
+                    <SavedTemplateCard
                         key={t.id}
-                        style={{
-                            backgroundColor: C.surface,
-                            border: `1px solid ${C.border}`,
-                            borderRadius: 10,
-                            padding: '10px 12px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 8,
-                        }}
-                    >
-                        {/* Name + time */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                            <div style={{
-                                width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                                backgroundColor: C.primaryLight,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                                <Folder size={13} style={{ color: C.primary }} />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{
-                                    margin: 0,
-                                    fontFamily: 'DM Sans, sans-serif',
-                                    fontSize: 12, fontWeight: 700,
-                                    color: C.dark,
-                                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                                }}>
-                                    {t.name}
-                                </p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                                    <Clock size={9} style={{ color: C.muted }} />
-                                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
-                                        {relativeTime(t.updated_at)}
-                                    </span>
-                                    <span style={{ color: C.border }}>·</span>
-                                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
-                                        {Array.isArray(t.blocks_json) ? t.blocks_json.length : 0} blocks
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                        template={t}
+                        deleting={deletingId === t.id}
+                        onLoad={() => onLoad(t.name, t.blocks_json, t.canvas_settings_json, t.id)}
+                        onDelete={() => handleDelete(t.id)}
+                        relativeTime={relativeTime}
+                    />
+                ))}
+            </div>
+        </div>
+    )
+}
 
-                        {/* Actions */}
-                        <div style={{ display: 'flex', gap: 6 }}>
-                            <button
-                                onClick={() => onLoad(t.name, t.blocks_json, t.canvas_settings_json, t.id)}
-                                style={{
-                                    flex: 1,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-                                    padding: '5px 8px',
-                                    border: `1px solid ${C.primary}`,
-                                    borderRadius: 7,
-                                    backgroundColor: C.primary,
-                                    color: '#ffffff',
-                                    fontFamily: 'DM Sans, sans-serif',
-                                    fontSize: 11, fontWeight: 600,
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                <Download size={11} />
-                                Load
-                            </button>
-                            <button
-                                onClick={() => handleDelete(t.id)}
-                                disabled={deletingId === t.id}
-                                title="Delete template"
-                                style={{
-                                    width: 30, height: 30,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    border: `1px solid #fecaca`,
-                                    borderRadius: 7,
-                                    backgroundColor: 'transparent',
-                                    color: C.danger,
-                                    cursor: deletingId === t.id ? 'default' : 'pointer',
-                                    opacity: deletingId === t.id ? 0.5 : 1,
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <Trash2 size={12} />
-                            </button>
+// ─────────────────────────────────────────────────────────────────────────────
+// SAVED TEMPLATE CARD — shows live HTML thumbnail + name + actions
+// ─────────────────────────────────────────────────────────────────────────────
+function SavedTemplateCard({
+    template,
+    deleting,
+    onLoad,
+    onDelete,
+    relativeTime,
+}: {
+    template: SavedTemplate
+    deleting: boolean
+    onLoad: () => void
+    onDelete: () => void
+    relativeTime: (iso: string) => string
+}) {
+    const [hovered, setHovered] = useState(false)
+
+    // Build the scaled HTML thumbnail once — assembleDocument gives us the
+    // full email HTML from the saved blocks, same as the canvas does.
+    const [thumbnailHtml] = useState(() => {
+        try {
+            const blocks = Array.isArray(template.blocks_json) ? template.blocks_json : []
+            if (blocks.length === 0) return ''
+            return assembleDocument(blocks, template.canvas_settings_json)
+        } catch {
+            return ''
+        }
+    })
+
+    const blockCount = Array.isArray(template.blocks_json) ? template.blocks_json.length : 0
+
+    return (
+        <div
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                backgroundColor: C.surface,
+                border: `1.5px solid ${hovered ? C.primary : C.border}`,
+                borderRadius: 10,
+                overflow: 'hidden',
+                transition: 'border-color 0.15s, box-shadow 0.15s',
+                boxShadow: hovered ? `0 2px 12px ${C.primary}18` : 'none',
+            }}
+        >
+            {/* ── Thumbnail ── */}
+            <div style={{
+                position: 'relative',
+                height: 110,
+                overflow: 'hidden',
+                backgroundColor: '#ffffff',
+                cursor: 'pointer',
+            }}
+                onClick={onLoad}
+            >
+                {thumbnailHtml ? (
+                    <div
+                        style={{
+                            transform: 'scale(0.28)',
+                            transformOrigin: 'top left',
+                            width: '357%',           /* 100 / 0.28 */
+                            pointerEvents: 'none',
+                            fontFamily: 'Arial, sans-serif',
+                            fontSize: 14,
+                            lineHeight: 1.4,
+                            color: '#1f1d2e',
+                        }}
+                        dangerouslySetInnerHTML={{ __html: thumbnailHtml }}
+                    />
+                ) : (
+                    /* Fallback when no blocks */
+                    <div style={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        backgroundColor: C.bg,
+                    }}>
+                        <Folder size={24} style={{ color: C.border }} />
+                        <span style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 10,
+                            color: C.muted,
+                        }}>
+                            No preview
+                        </span>
+                    </div>
+                )}
+
+                {/* Hover overlay */}
+                {hovered && (
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        backgroundColor: 'rgba(30,21,53,0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <span style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: '#fff',
+                            backgroundColor: C.primary,
+                            padding: '6px 16px',
+                            borderRadius: 8,
+                            boxShadow: `0 2px 8px ${C.primary}66`,
+                        }}>
+                            Load Template
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {/* ── Footer ── */}
+            <div style={{
+                padding: '8px 10px',
+                borderTop: `1px solid ${C.border}`,
+            }}>
+                {/* Name + meta */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6, marginBottom: 7 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{
+                            margin: 0,
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 12, fontWeight: 700,
+                            color: hovered ? C.primary : C.dark,
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                            transition: 'color 0.15s',
+                        }}>
+                            {template.name}
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                            <Clock size={9} style={{ color: C.muted }} />
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
+                                {relativeTime(template.updated_at)}
+                            </span>
+                            <span style={{ color: C.border }}>·</span>
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
+                                {blockCount} block{blockCount !== 1 ? 's' : ''}
+                            </span>
                         </div>
                     </div>
-                ))}
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                        onClick={onLoad}
+                        style={{
+                            flex: 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            padding: '5px 8px',
+                            border: `1px solid ${C.primary}`,
+                            borderRadius: 7,
+                            backgroundColor: C.primary,
+                            color: '#ffffff',
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 11, fontWeight: 600,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <Download size={11} />
+                        Load
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        disabled={deleting}
+                        title="Delete template"
+                        style={{
+                            width: 30, height: 30,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: `1px solid #fecaca`,
+                            borderRadius: 7,
+                            backgroundColor: 'transparent',
+                            color: C.danger,
+                            cursor: deleting ? 'default' : 'pointer',
+                            opacity: deleting ? 0.5 : 1,
+                            flexShrink: 0,
+                        }}
+                    >
+                        <Trash2 size={12} />
+                    </button>
+                </div>
             </div>
         </div>
     )
