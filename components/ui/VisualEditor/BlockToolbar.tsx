@@ -11,9 +11,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
     List, ListOrdered,
     AlignLeft, AlignCenter, AlignRight,
-    Palette, Grid, Minus,
+    Grid, Minus,
     Link, Quote, Eraser,
-    ExternalLink, AlertCircle, CheckCircle2,
+    AlertCircle,
     RefreshCw, Trash2,
 } from 'lucide-react'
 
@@ -240,7 +240,14 @@ export default function BlockToolbar({
     }
 
     const handleClearFormatting = () => {
-        if (slotEdit) return
+        if (slotEdit) {
+            // Strip all inline HTML tags from slot content, keep plain text
+            const stripped = slotEdit.currentHtml
+                .replace(/<\/?(strong|b|em|i|u|s|span|div)[^>]*>/gi, '')
+                .replace(/\s+/g, ' ').trim()
+            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, '__html__', stripped)
+            return
+        }
         onChange({
             ...blockProps,
             fontWeight: '400',
@@ -444,9 +451,65 @@ export default function BlockToolbar({
 
             <div style={sepStyle} />
 
-            {/* Structure */}
-            <button title="Table" style={miniBtn}><Grid size={14} /></button>
-            <button title="Divider" style={miniBtn}><Minus size={14} /></button>
+            <div style={sepStyle} />
+
+            {/* Align */}
+            <button onClick={() => handleAlign('left')} title="Align Left" style={{
+                ...miniBtn,
+                backgroundColor: (activeProps.align ?? 'left') === 'left' ? C.primary : 'transparent',
+                color: (activeProps.align ?? 'left') === 'left' ? '#ffffff' : '#1f1d2e',
+            }}><AlignLeft size={14} /></button>
+            <button onClick={() => handleAlign('center')} title="Align Centre" style={{
+                ...miniBtn,
+                backgroundColor: activeProps.align === 'center' ? C.primary : 'transparent',
+                color: activeProps.align === 'center' ? '#ffffff' : '#1f1d2e',
+            }}><AlignCenter size={14} /></button>
+            <button onClick={() => handleAlign('right')} title="Align Right" style={{
+                ...miniBtn,
+                backgroundColor: activeProps.align === 'right' ? C.primary : 'transparent',
+                color: activeProps.align === 'right' ? '#ffffff' : '#1f1d2e',
+            }}><AlignRight size={14} /></button>
+
+            <div style={sepStyle} />
+
+            {/* Font size */}
+            <select
+                value={activeProps.fontSize ?? '14px'}
+                onChange={e => {
+                    if (slotEdit) { handleFormatSlotProp('fontSize', e.target.value); return }
+                    onChange({ ...blockProps, fontSize: parseInt(e.target.value) })
+                }}
+                title="Font size"
+                style={{
+                    backgroundColor: '#ffffff', color: '#1f1d2e',
+                    border: '1px solid #cbd5e1', borderRadius: 4,
+                    padding: '3px 4px', fontSize: 11, cursor: 'pointer', width: 52,
+                }}
+            >
+                {['10px', '11px', '12px', '13px', '14px', '15px', '16px', '18px', '20px', '22px', '24px', '28px', '32px', '36px', '48px'].map(s => (
+                    <option key={s} value={s}>{s.replace('px', '')}</option>
+                ))}
+            </select>
+
+            <div style={sepStyle} />
+
+            {/* Text colour */}
+            <label title="Text colour" style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', padding: '0 4px' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#1f1d2e', fontFamily: 'DM Sans, sans-serif' }}>A</span>
+                <div style={{ position: 'relative' }}>
+                    <input
+                        type="color"
+                        value={activeProps.color ?? '#1e1535'}
+                        onChange={e => handleTextColor(e.target.value)}
+                        style={{ width: 18, height: 18, padding: 0, border: 'none', cursor: 'pointer', borderRadius: 3 }}
+                        title="Text colour"
+                    />
+                    <div style={{
+                        position: 'absolute', bottom: -2, left: 0, right: 0, height: 3,
+                        backgroundColor: activeProps.color ?? '#1e1535', borderRadius: 2,
+                    }} />
+                </div>
+            </label>
 
             {/* eBay Link Modal Popup */}
             {showLinkModal && (
