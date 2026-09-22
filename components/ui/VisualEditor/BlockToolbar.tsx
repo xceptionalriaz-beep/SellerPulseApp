@@ -14,7 +14,7 @@ import {
     Palette, Grid, Minus,
     Link, Quote, Eraser,
     ExternalLink, AlertCircle, CheckCircle2,
-    RefreshCw, Trash2,
+    RefreshCw, Trash2, Pencil,
 } from 'lucide-react'
 
 const C = {
@@ -268,11 +268,12 @@ export default function BlockToolbar({
             {slotEdit && (
                 <>
                     <span style={{
-                        fontSize: 11, fontWeight: 600, color: '#1e1535',
-                        padding: '2px 8px', backgroundColor: '#f1f5f9',
+                        fontSize: 11, fontWeight: 600, color: '#ffffff',
+                        padding: '2px 10px', backgroundColor: '#7530fb',
                         borderRadius: 4, fontFamily: 'DM Sans, sans-serif',
-                        whiteSpace: 'nowrap',
+                        whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
                     }}>
+                        <Pencil size={10} />
                         {slotEdit.propKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim()}
                     </span>
                     <button
@@ -280,9 +281,9 @@ export default function BlockToolbar({
                         title="Replace slot content"
                         style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: 28, height: 28, border: '1px solid #e2e8f0',
-                            borderRadius: 6, backgroundColor: '#fff',
-                            color: '#1e1535', cursor: 'pointer', flexShrink: 0,
+                            width: 28, height: 28, border: '1px solid #7530fb',
+                            borderRadius: 6, backgroundColor: '#f3eeff',
+                            color: '#7530fb', cursor: 'pointer', flexShrink: 0,
                         }}
                     >
                         <RefreshCw size={13} />
