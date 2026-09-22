@@ -937,6 +937,9 @@ export default function VisualEditor({
                     setSelectedId(blockId);
                     setSelectedSubSlot(propKey);
                     setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '' });
+                    // Send highlight message back to iframe so slot gets purple outline
+                    const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
+                    iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*');
                     const targetBlock = blocks.find(b => b.id === blockId);
                     if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
                         setActiveTab('images');
