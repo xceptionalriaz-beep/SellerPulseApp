@@ -208,6 +208,43 @@ export default function BlockToolbar({
                 fontFamily: 'DM Sans, sans-serif',
             }}
         >
+            {slotEdit && (
+                <>
+                    <span style={{
+                        fontSize: 11, fontWeight: 600, color: '#1e1535',
+                        padding: '2px 8px', backgroundColor: '#f1f5f9',
+                        borderRadius: 4, fontFamily: 'DM Sans, sans-serif',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {slotEdit.propKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim()}
+                    </span>
+                    <button
+                        onClick={onReplaceSlot}
+                        title="Replace slot content"
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: 28, height: 28, border: '1px solid #e2e8f0',
+                            borderRadius: 6, backgroundColor: '#fff',
+                            color: '#1e1535', cursor: 'pointer', flexShrink: 0,
+                        }}
+                    >
+                        <RefreshCw size={13} />
+                    </button>
+                    <button
+                        onClick={() => onClearSlot?.(slotEdit.blockId, slotEdit.propKey)}
+                        title="Clear slot"
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: 28, height: 28, border: '1px solid #fecaca',
+                            borderRadius: 6, backgroundColor: '#fff8f8',
+                            color: '#ef4444', cursor: 'pointer', flexShrink: 0,
+                        }}
+                    >
+                        <Trash2 size={13} />
+                    </button>
+                    <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0', flexShrink: 0 }} />
+                </>
+            )}
             {/* Font Family */}
             <select
                 value={safeProps.fontFamily || 'Arial, Helvetica, sans-serif'}
