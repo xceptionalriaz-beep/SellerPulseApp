@@ -267,18 +267,7 @@ export default function Canvas({
                 if (e.target === e.currentTarget) onDeselect?.()
             }}
         >
-            {/* ── Drop overlay — shown when dragging from library ── */}
-            {draggedType && isDropTarget && (
-                <div style={{
-                    position: 'fixed',
-                    inset: 0,
-                    pointerEvents: 'none',
-                    border: `3px dashed ${C.primary}`,
-                    borderRadius: 4,
-                    backgroundColor: `${C.primary}08`,
-                    zIndex: 10,
-                }} />
-            )}
+            {/* ── Drop overlay — handled by EmptyState when canvas is empty ── */}
 
             {/* ── Canvas frame ── */}
             <div style={{
