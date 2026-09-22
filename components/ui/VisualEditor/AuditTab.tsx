@@ -90,6 +90,21 @@ interface AuditTabProps {
     blockCount: number
 }
 
+// ── Size meter helpers ────────────────────────────────────────────────────────
+function getSizeColor(bytes: number): string {
+    if (bytes >= 500 * 1024) return '#ef4444'   // red  — over limit
+    if (bytes >= 100 * 1024) return '#d97706'   // amber — danger zone
+    if (bytes >= 50 * 1024) return '#f59e0b'   // yellow — getting large
+    return '#16a34a'                             // green — good
+}
+
+function getSizeLabel(bytes: number): string {
+    if (bytes >= 500 * 1024) return 'Over eBay limit!'
+    if (bytes >= 100 * 1024) return 'Very large'
+    if (bytes >= 50 * 1024) return 'Getting large'
+    return 'Good'
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AUDIT ENGINE
 // Pure function — runs all checks on the HTML string
@@ -235,14 +250,35 @@ function runAudit(html: string, blockCount: number): AuditIssue[] {
         })
     }
 
-    // Template size
+    // Template size — 3 tier check
     const sizeKb = Math.round(html.length / 1024)
-    if (sizeKb > 50) {
+    const sizeBytes = html.length
+
+    if (sizeBytes >= 500 * 1024) {
+        // TIER 3 — Hard eBay limit, listing will be rejected or truncated
         issues.push({
-            id: 'template-size',
+            id: 'template-size-critical',
+            severity: 'error',
+            title: `Template exceeds eBay 500KB limit (${sizeKb}KB)`,
+            detail: `Your template is ${sizeKb}KB — over eBay's ~500KB hard limit for listing descriptions. eBay will silently truncate or reject this listing. This is the most common cause of "listing description too long" errors.`,
+            fixHint: 'Remove image-heavy blocks, reduce gallery sizes, or split content across fewer sections. Aim for under 200KB for safety.',
+        })
+    } else if (sizeBytes >= 100 * 1024) {
+        // TIER 2 — Danger zone, eBay mobile issues + slow load
+        issues.push({
+            id: 'template-size-warning',
+            severity: 'warning',
+            title: `Template is very large (${sizeKb}KB)`,
+            detail: `Your template is ${sizeKb}KB. Above 100KB, eBay mobile listings load slowly and some older eBay apps may truncate the description. The hard limit is ~500KB.`,
+            fixHint: 'Reduce image counts, remove unused blocks, or simplify gallery sections. Target under 100KB.',
+        })
+    } else if (sizeBytes >= 50 * 1024) {
+        // TIER 1 — Performance warning only
+        issues.push({
+            id: 'template-size-info',
             severity: 'warning',
             title: `Template is large (${sizeKb}KB)`,
-            detail: `Templates over 50KB can slow page load on mobile. eBay recommends keeping listing descriptions under 50KB for best performance.`,
+            detail: `Templates over 50KB can slow page load on mobile. eBay recommends keeping listing descriptions lean for best buyer experience.`,
             fixHint: 'Remove unused blocks or reduce image counts to trim the template size.',
         })
     }
@@ -368,15 +404,55 @@ export default function AuditTab({ html, blockCount }: AuditTabProps) {
                 backgroundColor: C.surface,
                 flexShrink: 0,
             }}>
-                <p style={{
-                    margin: '0 0 8px',
-                    fontFamily: 'Syne, sans-serif',
-                    fontWeight: 700, fontSize: 13,
-                    color: C.dark, letterSpacing: '0.02em',
-                    textTransform: 'uppercase',
-                }}>
-                    eBay Compliance Audit
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <p style={{
+                        margin: 0,
+                        fontFamily: 'Syne, sans-serif',
+                        fontWeight: 700,
+                        fontSize: 13,
+                        color: C.dark,
+                        letterSpacing: '0.02em',
+                        textTransform: 'uppercase',
+                    }}>
+                        eBay Compliance Audit
+                    </p>
+
+                    {/* Live size meter */}
+                    {html && html.length > 0 && (() => {
+                        const bytes = html.length
+                        const kb = Math.round(bytes / 1024)
+                        const pct = Math.min(100, Math.round((bytes / (500 * 1024)) * 100))
+                        const color = getSizeColor(bytes)
+                        const label = getSizeLabel(bytes)
+                        return (
+                            <div style={{ textAlign: 'right', minWidth: 90 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginBottom: 3 }}>
+                                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color }}>
+                                        {kb}KB
+                                    </span>
+                                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 9, color: C.muted }}>
+                                        / 500KB
+                                    </span>
+                                </div>
+                                {/* Progress bar */}
+                                <div style={{
+                                    width: 90, height: 5, borderRadius: 3,
+                                    backgroundColor: C.border, overflow: 'hidden',
+                                }}>
+                                    <div style={{
+                                        width: `${pct}%`, height: '100%',
+                                        borderRadius: 3,
+                                        backgroundColor: color,
+                                        transition: 'width 0.3s ease, background-color 0.3s ease',
+                                    }} />
+                                </div>
+                                <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 9, color, marginTop: 2, textAlign: 'right' }}>
+                                    {label}
+                                </div>
+                            </div>
+                        )
+                    })()}
+                </div>
 
                 {/* Overall status badge */}
                 <div style={{
