@@ -538,10 +538,19 @@ export default function VisualEditor({
 
         // Update activeSlotEdit so toolbar reflects new state
         setActiveSlotEdit(prev => prev ? { ...prev, currentHtml: newHtml } : null)
-        // Re-send highlight so purple outline stays after formatting
+        // Bug #3 fix: explicitly push updated slot HTML into iframe so canvas re-renders in real time
         setTimeout(() => {
-            const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement
-            iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*')
+            const iframe = document.querySelector('iframe') as HTMLIFrameElement
+            if (iframe?.contentWindow) {
+                iframe.contentWindow.postMessage({
+                    type: 'RIAZIFY_UPDATE_SLOT_HTML',
+                    blockId,
+                    propKey,
+                    html: newHtml,
+                }, '*')
+                // Re-send highlight so purple outline stays
+                iframe.contentWindow.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*')
+            }
         }, 50)
     }
 
@@ -555,6 +564,8 @@ export default function VisualEditor({
         const newBlocks = [...blocks]
         newBlocks[idx] = { ...target, props: updatedProps } as any
         commitBlocks(newBlocks, blocks)
+        // Bug #4 fix: clear stale slotBlockMapRef entry so empty slot shows no stale props
+        delete slotBlockMapRef.current[`${blockId}__${propKey}`]
         setActiveSlotEdit(null)
         setSelectedSubSlot(null)
     }
@@ -1254,6 +1265,8 @@ export default function VisualEditor({
                                 if (activeSlotEdit) {
                                     setActiveDropSlot({ blockId: activeSlotEdit.blockId, slot: activeSlotEdit.propKey as any })
                                 }
+                                // Bug #5 fix: clear stale slot edit so old props don't linger
+                                setActiveSlotEdit(null)
                                 setActiveTab('content')
                                 setPanelOpen(true)
                             }}

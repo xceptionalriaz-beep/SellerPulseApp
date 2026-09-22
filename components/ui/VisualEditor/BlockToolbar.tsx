@@ -90,21 +90,47 @@ export default function BlockToolbar({
     const safeProps = blockProps ?? {}
 
     // When a slot is active, derive formatting state from its HTML
+    // Uses DOM parser so nested tags (e.g. <strong><em>…</em></strong>) are read correctly
     const slotDerivedProps = useMemo(() => {
         if (!slotEdit?.currentHtml) return {}
         const html = slotEdit.currentHtml
-        const hasTag = (tag: string) => new RegExp(`<${tag}[\\s>]`, 'i').test(html)
-        const getAttr = (attr: string) => {
-            const m = html.match(new RegExp(`${attr}:\\s*([^;'"]+)`, 'i'))
-            return m ? m[1].trim() : undefined
+        let bold = false, italic = false, underline = false
+        let fontSize = '16px', color: string | undefined, align = 'left'
+        try {
+            const tmp = document.createElement('div')
+            tmp.innerHTML = html
+            const allEls = Array.from(tmp.querySelectorAll('*')) as HTMLElement[]
+            bold = !!tmp.querySelector('strong, b') ||
+                allEls.some(el => /^(bold|[789]\d\d)$/i.test(el.style?.fontWeight ?? ''))
+            italic = !!tmp.querySelector('em, i') ||
+                allEls.some(el => /italic/i.test(el.style?.fontStyle ?? ''))
+            underline = !!tmp.querySelector('u') ||
+                allEls.some(el => /underline/i.test(el.style?.textDecoration ?? ''))
+            const spanSize = tmp.querySelector('[style*="font-size"]') as HTMLElement | null
+            if (spanSize?.style.fontSize) fontSize = spanSize.style.fontSize
+            const spanColor = tmp.querySelector('[style*="color"]') as HTMLElement | null
+            if (spanColor?.style.color) color = spanColor.style.color
+            const divAlign = tmp.querySelector('[style*="text-align"]') as HTMLElement | null
+            if (divAlign?.style.textAlign) align = divAlign.style.textAlign
+        } catch {
+            // SSR fallback — plain regex
+            bold = /<(strong|b)[\s>]/i.test(html) || /font-weight:\s*(bold|[789]\d\d)/i.test(html)
+            italic = /<(em|i)[\s>]/i.test(html) || /font-style:\s*italic/i.test(html)
+            underline = /<u[\s>]/i.test(html) || /text-decoration:\s*underline/i.test(html)
+            const fsm = html.match(/font-size:\s*([^;'"]+)/i)
+            if (fsm) fontSize = fsm[1].trim()
+            const cm = html.match(/(?<![a-z-])color:\s*([^;'"]+)/i)
+            if (cm) color = cm[1].trim()
+            const am = html.match(/text-align:\s*([^;'"]+)/i)
+            if (am) align = am[1].trim()
         }
         return {
-            fontWeight: hasTag('strong') || hasTag('b') || /font-weight:\s*(bold|700|800|900)/i.test(html) ? 'bold' : '400',
-            fontStyle: hasTag('em') || hasTag('i') || /font-style:\s*italic/i.test(html) ? 'italic' : 'normal',
-            textDecoration: hasTag('u') || /text-decoration:\s*underline/i.test(html) ? 'underline' : 'none',
-            fontSize: getAttr('font-size') ?? '16px',
-            align: getAttr('text-align') ?? 'left',
-            color: getAttr('color'),
+            fontWeight: bold ? 'bold' : '400',
+            fontStyle: italic ? 'italic' : 'normal',
+            textDecoration: underline ? 'underline' : 'none',
+            fontSize,
+            align,
+            color,
         }
     }, [slotEdit?.currentHtml])
 

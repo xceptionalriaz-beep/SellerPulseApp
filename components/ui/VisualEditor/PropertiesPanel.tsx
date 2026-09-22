@@ -405,7 +405,7 @@ export default function PropertiesPanel({
                     />
                 )}
                 {activeTab === 'ai' && (
-                    <AITab block={block} />
+                    <AITab block={block} onChange={onChange} />
                 )}
             </div>
         </div>
@@ -3751,19 +3751,197 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 // ─────────────────────────────────────────────────────────────────────────────
 // AI TAB
 // ─────────────────────────────────────────────────────────────────────────────
-function AITab({ block }: { block: Block }) {
+function AITab({ block, onChange }: { block: Block; onChange: (updated: Block) => void }) {
+    const [copyLoading, setCopyLoading] = useState(false)
+    const [policyLoading, setPolicyLoading] = useState(false)
+    const [copyResult, setCopyResult] = useState<string | null>(null)
+    const [policyResult, setPolicyResult] = useState<string | null>(null)
+    const [copyError, setCopyError] = useState<string | null>(null)
+    const [policyError, setPolicyError] = useState<string | null>(null)
+
+    // Extract text fields from the block props to send to Claude
+    const extractTextFields = () => {
+        const props = block.props as unknown as Record<string, unknown>
+        const textKeys = ['text', 'heading', 'subheading', 'body', 'label', 'title', 'description', 'subtitle', 'content', 'caption']
+        const found: Record<string, string> = {}
+        for (const key of textKeys) {
+            if (typeof props[key] === 'string' && (props[key] as string).trim()) {
+                found[key] = props[key] as string
+            }
+        }
+        return found
+    }
+
+    const handleCopyOptimizer = async () => {
+        const fields = extractTextFields()
+        if (Object.keys(fields).length === 0) {
+            setCopyError('No text fields found on this block to optimize.')
+            return
+        }
+        setCopyLoading(true)
+        setCopyResult(null)
+        setCopyError(null)
+        try {
+            const fieldList = Object.entries(fields).map(([k, v]) => `${k}: "${v}"`).join('\n')
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-6',
+                    max_tokens: 1000,
+                    messages: [{
+                        role: 'user',
+                        content: `You are an eBay listing copywriter. Rewrite the following block text fields to maximize eBay conversion. Keep each field concise, benefit-focused, and eBay-compliant (no HTML, no all-caps spam). Return ONLY a JSON object with the same keys and improved values, no explanation.\n\nFields:\n${fieldList}`,
+                    }],
+                }),
+            })
+            const data = await res.json()
+            const raw = data?.content?.[0]?.text ?? ''
+            // Strip markdown code fences if present
+            const clean = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim()
+            const parsed: Record<string, string> = JSON.parse(clean)
+            // Show preview, don't auto-apply
+            setCopyResult(JSON.stringify(parsed, null, 2))
+        } catch (err) {
+            setCopyError('AI request failed. Check your connection and try again.')
+        } finally {
+            setCopyLoading(false)
+        }
+    }
+
+    const applyCopyResult = () => {
+        if (!copyResult) return
+        try {
+            const parsed: Record<string, string> = JSON.parse(copyResult)
+            onChange({
+                ...block,
+                props: { ...block.props, ...parsed } as BlockProps,
+            })
+            setCopyResult(null)
+        } catch { /* ignore */ }
+    }
+
+    const handlePolicyWriter = async () => {
+        setPolicyLoading(true)
+        setPolicyResult(null)
+        setPolicyError(null)
+        try {
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-6',
+                    max_tokens: 1000,
+                    messages: [{
+                        role: 'user',
+                        content: `Write an eBay-safe shipping and returns policy section for a product listing. It should be professional, clear, and trust-building. Include: shipping time estimate (3-5 business days), free returns within 30 days, and a brief quality guarantee. Return ONLY the plain text (no HTML, no markdown), around 80-100 words.`,
+                    }],
+                }),
+            })
+            const data = await res.json()
+            const text = data?.content?.[0]?.text ?? ''
+            setPolicyResult(text.trim())
+        } catch (err) {
+            setPolicyError('AI request failed. Check your connection and try again.')
+        } finally {
+            setPolicyLoading(false)
+        }
+    }
+
+    const applyPolicyResult = () => {
+        if (!policyResult) return
+        // Try to apply to a 'body', 'text', or 'content' prop
+        const props = block.props as unknown as Record<string, unknown>
+        const targetKey = ['body', 'text', 'content', 'description'].find(k => typeof props[k] === 'string') ?? 'text'
+        onChange({
+            ...block,
+            props: { ...block.props, [targetKey]: policyResult } as BlockProps,
+        })
+        setPolicyResult(null)
+    }
+
+    const spinnerStyle: React.CSSProperties = {
+        display: 'inline-block',
+        width: 13,
+        height: 13,
+        border: '2px solid currentColor',
+        borderTopColor: 'transparent',
+        borderRadius: '50%',
+        animation: 'spin 0.7s linear infinite',
+        marginRight: 6,
+        verticalAlign: 'middle',
+    }
+
     return (
         <div style={{ padding: '14px 14px 24px' }}>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+            {/* ── AI Copy Optimizer ── */}
             <Section title="AI Tools">
-                <AIToolButton
-                    Icon={Sparkles}
-                    label="AI Copy Optimizer"
-                    description="Rewrite this block's text for higher eBay conversion"
-                    color={C.primary}
-                    bg={C.primaryLight}
-                    border={C.primaryBorder}
-                    comingSoon
-                />
+                <div style={{ marginBottom: 10 }}>
+                    <button
+                        onClick={handleCopyOptimizer}
+                        disabled={copyLoading}
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            padding: '10px 12px',
+                            border: `1px solid ${C.primaryBorder}`,
+                            borderRadius: 10,
+                            backgroundColor: C.primaryLight,
+                            cursor: copyLoading ? 'default' : 'pointer',
+                            textAlign: 'left',
+                            opacity: copyLoading ? 0.7 : 1,
+                        }}
+                    >
+                        <div style={{
+                            width: 34, height: 34, borderRadius: 9,
+                            backgroundColor: C.primaryLight,
+                            border: `1px solid ${C.primaryBorder}`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>
+                            <Sparkles size={18} style={{ color: C.primary }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.primary }}>
+                                {copyLoading && <span style={spinnerStyle} />}
+                                {copyLoading ? 'Optimizing…' : 'AI Copy Optimizer'}
+                            </p>
+                            <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
+                                Rewrite this block's text for higher eBay conversion
+                            </p>
+                        </div>
+                    </button>
+                    {copyError && (
+                        <p style={{ margin: '6px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.danger }}>{copyError}</p>
+                    )}
+                    {copyResult && (
+                        <div style={{ marginTop: 8, padding: '10px 12px', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                AI Suggestion — review before applying
+                            </p>
+                            <pre style={{ margin: 0, fontFamily: 'monospace', fontSize: 10, color: C.body, whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.6 }}>{copyResult}</pre>
+                            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                                <button
+                                    onClick={applyCopyResult}
+                                    style={{ flex: 1, padding: '6px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: '#fff', backgroundColor: C.primary, border: 'none', borderRadius: 6, cursor: 'pointer' }}
+                                >
+                                    ✓ Apply
+                                </button>
+                                <button
+                                    onClick={() => setCopyResult(null)}
+                                    style={{ flex: 1, padding: '6px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: C.secondary, backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, cursor: 'pointer' }}
+                                >
+                                    Discard
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── AI Photo Studio — still coming soon ── */}
                 <AIToolButton
                     Icon={Wand2}
                     label="AI Photo Studio"
@@ -3773,15 +3951,70 @@ function AITab({ block }: { block: Block }) {
                     border="#fde68a"
                     comingSoon
                 />
-                <AIToolButton
-                    Icon={Zap}
-                    label="AI Policy Writer"
-                    description="Auto-generate eBay-safe shipping & returns copy"
-                    color={C.success}
-                    bg={C.successLight}
-                    border="#86efac"
-                    comingSoon
-                />
+
+                {/* ── AI Policy Writer ── */}
+                <div style={{ marginBottom: 8 }}>
+                    <button
+                        onClick={handlePolicyWriter}
+                        disabled={policyLoading}
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            padding: '10px 12px',
+                            border: `1px solid #86efac`,
+                            borderRadius: 10,
+                            backgroundColor: C.successLight,
+                            cursor: policyLoading ? 'default' : 'pointer',
+                            textAlign: 'left',
+                            opacity: policyLoading ? 0.7 : 1,
+                        }}
+                    >
+                        <div style={{
+                            width: 34, height: 34, borderRadius: 9,
+                            backgroundColor: C.successLight,
+                            border: `1px solid #86efac`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>
+                            <Zap size={18} style={{ color: C.success }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.success }}>
+                                {policyLoading && <span style={spinnerStyle} />}
+                                {policyLoading ? 'Writing policy…' : 'AI Policy Writer'}
+                            </p>
+                            <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
+                                Auto-generate eBay-safe shipping &amp; returns copy
+                            </p>
+                        </div>
+                    </button>
+                    {policyError && (
+                        <p style={{ margin: '6px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.danger }}>{policyError}</p>
+                    )}
+                    {policyResult && (
+                        <div style={{ marginTop: 8, padding: '10px 12px', backgroundColor: C.bg, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+                            <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                AI Policy Draft — review before applying
+                            </p>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body, lineHeight: 1.6 }}>{policyResult}</p>
+                            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                                <button
+                                    onClick={applyPolicyResult}
+                                    style={{ flex: 1, padding: '6px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: '#fff', backgroundColor: C.success, border: 'none', borderRadius: 6, cursor: 'pointer' }}
+                                >
+                                    ✓ Apply
+                                </button>
+                                <button
+                                    onClick={() => setPolicyResult(null)}
+                                    style={{ flex: 1, padding: '6px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: C.secondary, backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, cursor: 'pointer' }}
+                                >
+                                    Discard
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </Section>
 
             <Section title="eBay Compliance">

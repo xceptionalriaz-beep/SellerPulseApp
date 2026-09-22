@@ -1185,6 +1185,16 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     // Highlight the active sub-slot image frame (visual indicator)
     // Receives propKey updates via message from parent VisualEditor
     window.addEventListener('message', function(msgEvent) {
+      // Bug #3 fix: handle real-time slot HTML update from PropertiesPanel
+      if (msgEvent.data && msgEvent.data.type === 'RIAZIFY_UPDATE_SLOT_HTML') {
+        var prop = msgEvent.data.propKey;
+        var newHtml = msgEvent.data.html;
+        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
+          if (zone.getAttribute('data-canvas-dropzone') === prop) {
+            zone.innerHTML = newHtml;
+          }
+        });
+      }
       if (msgEvent.data && msgEvent.data.type === 'RIAZIFY_UPDATE_ACTIVE_SLOT') {
         var prop = msgEvent.data.propKey;
         // Highlight the dropzone container (clear visual target for full-width and thumbnails)
