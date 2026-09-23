@@ -65,6 +65,12 @@ const sepStyle: React.CSSProperties = {
 interface BlockToolbarProps {
     blockType?: string
     blockProps: any
+    activeSelection?: {
+        blockId: string
+        propKey: string | null
+        selectedText: string
+        selectedHtml: string
+    } | null
     onChange: (props: any) => void
     onClose?: () => void
     persistent?: boolean
@@ -77,6 +83,7 @@ interface BlockToolbarProps {
 export default function BlockToolbar({
     blockType,
     blockProps = null,
+    activeSelection = null,
     onChange,
     onClose,
     persistent = false,
@@ -373,6 +380,22 @@ export default function BlockToolbar({
                             display: 'flex', alignItems: 'center', gap: 3,
                         }}>
                             <Link size={10} />&nbsp;Linked
+                        </span>
+                    )}
+                    {activeSelection && (
+                        <span style={{
+                            fontSize: 10, fontWeight: 600,
+                            color: '#7530fb',
+                            background: '#f3eeff',
+                            border: '1px solid #ddd6fe',
+                            padding: '2px 8px',
+                            borderRadius: 10,
+                            display: 'flex', alignItems: 'center', gap: 4,
+                        }}>
+                            <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                "{activeSelection.selectedText}"
+                            </span>
+                            selected
                         </span>
                     )}
                     <button

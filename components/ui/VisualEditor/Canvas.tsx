@@ -1160,6 +1160,48 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
       if (!activeEditable.contains(e.target)) commitEdit(activeEditable);
     });
 
+    // ── Selection capture — Phase A ──────────────────────────────────
+    // Fire RIAZIFY_SELECTION_CHANGE whenever the user lifts the mouse
+    // after selecting text inside the iframe. The parent uses this to
+    // know which exact word(s) were highlighted so it can apply
+    // inline formatting (link / highlight) only to that range.
+    document.addEventListener('mouseup', function() {
+      var sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+        window.parent.postMessage({ type: 'RIAZIFY_SELECTION_CHANGE', hasSelection: false, blockId: BLOCK_ID }, '*');
+        return;
+      }
+      var range = sel.getRangeAt(0);
+      var selectedText = sel.toString();
+      if (!selectedText || selectedText.trim() === '') {
+        window.parent.postMessage({ type: 'RIAZIFY_SELECTION_CHANGE', hasSelection: false, blockId: BLOCK_ID }, '*');
+        return;
+      }
+      // Find the nearest data-canvas-dropzone ancestor to identify the slot
+      var container = range.commonAncestorContainer;
+      var el = container.nodeType === 3 ? container.parentElement : container;
+      var zone = el ? el.closest('[data-canvas-dropzone]') : null;
+      var propKey = zone ? zone.getAttribute('data-canvas-dropzone') : null;
+      // Serialise the selected range as HTML
+      var fragment = range.cloneContents();
+      var div = document.createElement('div');
+      div.appendChild(fragment);
+      var selectedHtml = div.innerHTML;
+      window.parent.postMessage({
+        type: 'RIAZIFY_SELECTION_CHANGE',
+        hasSelection: true,
+        blockId: BLOCK_ID,
+        propKey: propKey,
+        selectedText: selectedText,
+        selectedHtml: selectedHtml,
+      }, '*');
+    });
+
+    // Clear selection state when user clicks without selecting
+    document.addEventListener('mousedown', function() {
+      window.parent.postMessage({ type: 'RIAZIFY_SELECTION_CHANGE', hasSelection: false, blockId: BLOCK_ID }, '*');
+    });
+
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
       img.addEventListener('click', function(e) {
         e.preventDefault();

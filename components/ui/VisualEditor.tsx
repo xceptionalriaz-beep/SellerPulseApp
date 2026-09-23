@@ -211,6 +211,12 @@ export default function VisualEditor({
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)
     const [activeSlotEdit, setActiveSlotEdit] = useState<{ blockId: string; propKey: string; currentHtml: string; slotBlock?: Block } | null>(null)
+    const [activeSelection, setActiveSelection] = useState<{
+        blockId: string
+        propKey: string | null
+        selectedText: string
+        selectedHtml: string
+    } | null>(null)
     const slotBlockMapRef = useRef<Record<string, Block>>({})
     const [inlineToolbar, setInlineToolbar] = useState<{
         visible: boolean;
@@ -1027,6 +1033,17 @@ export default function VisualEditor({
                         setActiveTab('content');
                     }
                     setPanelOpen(true);
+                }
+            } else if (event.data?.type === 'RIAZIFY_SELECTION_CHANGE') {
+                if (event.data.hasSelection) {
+                    setActiveSelection({
+                        blockId: event.data.blockId,
+                        propKey: event.data.propKey ?? null,
+                        selectedText: event.data.selectedText ?? '',
+                        selectedHtml: event.data.selectedHtml ?? '',
+                    })
+                } else {
+                    setActiveSelection(null)
                 }
             } else if (event.data?.type === 'RIAZIFY_COMMIT_TEXT_EDIT') {
                 const { blockId, text } = event.data;
