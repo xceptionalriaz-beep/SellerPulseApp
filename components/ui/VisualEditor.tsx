@@ -1346,9 +1346,9 @@ export default function VisualEditor({
                             onChange={(newProps) => {
                                 if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
                             }}
-                            slotEdit={isLayoutBlock ? activeSlotEdit : null}
+                            slotEdit={activeSlotEdit}
                             onClearSlot={(blockId, propKey) => handleClearSlot(blockId, propKey)}
-                            onFormatSlot={(blockId, propKey, format, value) => handleFormatSlot(blockId, propKey, format, value)}
+                            onFormatSlot={(blockId, propKey, format, value, selection) => handleFormatSlot(blockId, propKey, format, value, selection)}
                             onReplaceSlot={() => {
                                 if (activeSlotEdit) {
                                     setActiveDropSlot({ blockId: activeSlotEdit.blockId, slot: activeSlotEdit.propKey as any })
