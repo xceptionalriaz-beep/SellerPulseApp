@@ -522,13 +522,23 @@ export default function VisualEditor({
             newHtml = newHtml.replace(/text-align:\s*[^;'"]+/gi, '')
             newHtml = `<div style="text-align:${value};">${newHtml}</div>`
         } else if (format === 'color') {
-            newHtml = newHtml.replace(/(?<![a-z-])color:\s*[^;'"]+/gi, '')
+            newHtml = newHtml.replace(/(?<![a-z-])color:\\s*[^;'\"]+/gi, '')
             if (!/<span/i.test(newHtml)) {
                 newHtml = `<span style="color:${value};">${newHtml}</span>`
             } else {
                 newHtml = newHtml.replace(/<span([^>]*)style="([^"]*)"([^>]*)>/gi, (m: string, a: string, s: string, c: string) =>
                     `<span${a}style="${s}color:${value};"${c}>`)
             }
+        } else if (format === 'link') {
+            // Strip any existing <a> wrapper first
+            newHtml = newHtml.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, '$1')
+            if (value) {
+                // Wrap with eBay-safe link (no target= as eBay strips it)
+                newHtml = `<a href="${value}" style="color:inherit;text-decoration:underline;">${newHtml}</a>`
+            }
+        } else if (format === 'removeLink') {
+            // Strip <a> wrapper, keep inner content
+            newHtml = newHtml.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, '$1')
         }
 
         const updatedBlock = {

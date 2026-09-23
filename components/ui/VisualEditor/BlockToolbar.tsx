@@ -89,6 +89,20 @@ export default function BlockToolbar({
     const [replaceActive, setReplaceActive] = useState(false)
     const safeProps = blockProps ?? {}
 
+    // Detect existing link in slot HTML
+    const slotLinkMatch = slotEdit?.currentHtml?.match(/href="([^"]+)"/)
+    const slotHasLink = !!slotLinkMatch
+    const slotCurrentLink = slotLinkMatch?.[1] ?? ''
+
+    // For button block — url prop is the link
+    const isButtonBlock = safeProps.url !== undefined && safeProps.label !== undefined
+    const currentLinkUrl = isButtonBlock
+        ? (safeProps.url ?? '')
+        : slotEdit
+            ? slotCurrentLink
+            : (safeProps.linkUrl ?? '')
+    const hasLink = isButtonBlock ? !!safeProps.url : slotEdit ? slotHasLink : !!safeProps.linkUrl
+
     // When a slot is active, derive formatting state from its HTML
     // Uses DOM parser so nested tags (e.g. <strong><em>…</em></strong>) are read correctly
     const slotDerivedProps = useMemo(() => {
@@ -396,13 +410,13 @@ export default function BlockToolbar({
                 <Quote size={14} />
             </button>
             <button onClick={() => {
-                setLinkInput(safeProps.linkUrl ?? '')
+                setLinkInput(currentLinkUrl)
                 setLinkError(null)
                 setShowLinkModal(true)
             }} title="Insert eBay Link" style={{
                 ...miniBtn,
-                backgroundColor: safeProps.linkUrl ? C.primary : 'transparent',
-                color: safeProps.linkUrl ? '#ffffff' : '#1f1d2e',
+                backgroundColor: hasLink ? C.primary : 'transparent',
+                color: hasLink ? '#ffffff' : '#1f1d2e',
             }}>
                 <Link size={14} />
             </button>
@@ -602,16 +616,24 @@ export default function BlockToolbar({
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-                        {safeProps.linkUrl && (
+                        {hasLink && (
                             <button
                                 onClick={() => {
-                                    const nextProps = { ...safeProps }
-                                    delete nextProps.linkUrl
-                                    onChange(nextProps)
+                                    if (slotEdit) {
+                                        onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'removeLink', '')
+                                    } else if (isButtonBlock) {
+                                        onChange({ ...safeProps, url: '' })
+                                    } else {
+                                        const nextProps = { ...safeProps }
+                                        delete nextProps.linkUrl
+                                        onChange(nextProps)
+                                    }
                                     setShowLinkModal(false)
                                 }}
                                 style={{
-                                    padding: '5px 10px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer', marginRight: 'auto'
+                                    padding: '5px 10px', background: '#fee2e2', color: '#ef4444',
+                                    border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                                    cursor: 'pointer', marginRight: 'auto',
                                 }}
                             >
                                 Remove Link
@@ -626,18 +648,25 @@ export default function BlockToolbar({
                         <button
                             onClick={() => {
                                 if (linkError || !linkInput.trim()) return
-                                onChange({ ...safeProps, linkUrl: linkInput.trim() })
+                                const url = linkInput.trim()
+                                if (slotEdit) {
+                                    // Wrap slot HTML in <a> tag
+                                    onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'link', url)
+                                } else if (isButtonBlock) {
+                                    // Button block — write to url prop directly
+                                    onChange({ ...safeProps, url })
+                                } else {
+                                    // Image + other blocks — write to linkUrl prop
+                                    onChange({ ...safeProps, linkUrl: url })
+                                }
                                 setShowLinkModal(false)
                             }}
                             disabled={!!linkError || !linkInput.trim()}
                             style={{
                                 padding: '5px 12px',
                                 background: linkError || !linkInput.trim() ? '#cbd5e1' : C.primary,
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: 6,
-                                fontSize: 11,
-                                fontWeight: 600,
+                                color: '#ffffff', border: 'none', borderRadius: 6,
+                                fontSize: 11, fontWeight: 600,
                                 cursor: linkError || !linkInput.trim() ? 'default' : 'pointer',
                             }}
                         >
