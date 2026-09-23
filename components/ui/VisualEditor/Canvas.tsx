@@ -1211,6 +1211,26 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     // which would wipe activeSelection before highlight/link can use it.
     // Selection is cleared naturally after the next mouseup with no range.
 
+    // Listen for format commands from parent toolbar
+    window.addEventListener('message', function(e) {
+      if (!e.data) return;
+      if (e.data.type === 'RIAZIFY_APPLY_FORMAT') {
+        var cmd = e.data.command;
+        var val = e.data.value || null;
+        if (activeEditable && activeEditable._riazifyEditing) {
+          document.execCommand(cmd, false, val);
+          var newHtml = activeEditable.innerHTML || '';
+          var newText = activeEditable.innerText || activeEditable.textContent || '';
+          window.parent.postMessage({
+            type: 'RIAZIFY_COMMIT_HTML_EDIT',
+            blockId: BLOCK_ID,
+            html: newHtml,
+            text: newText
+          }, '*');
+        }
+      }
+    });
+
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
       img.addEventListener('click', function(e) {
         e.preventDefault();
