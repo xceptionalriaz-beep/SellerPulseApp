@@ -1211,23 +1211,53 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     // which would wipe activeSelection before highlight/link can use it.
     // Selection is cleared naturally after the next mouseup with no range.
 
+    // Store the last selection range so we can restore it after focus loss
+    var savedRange = null;
+    var savedEditable = null;
+
+    document.addEventListener('mouseup', function() {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+        savedRange = sel.getRangeAt(0).cloneRange();
+        savedEditable = activeEditable;
+      }
+    });
+
     // Listen for format commands from parent toolbar
     window.addEventListener('message', function(e) {
       if (!e.data) return;
       if (e.data.type === 'RIAZIFY_APPLY_FORMAT') {
         var cmd = e.data.command;
         var val = e.data.value || null;
-        if (activeEditable && activeEditable._riazifyEditing) {
-          document.execCommand(cmd, false, val);
-          var newHtml = activeEditable.innerHTML || '';
-          var newText = activeEditable.innerText || activeEditable.textContent || '';
-          window.parent.postMessage({
-            type: 'RIAZIFY_COMMIT_HTML_EDIT',
-            blockId: BLOCK_ID,
-            html: newHtml,
-            text: newText
-          }, '*');
+        // Use savedEditable if activeEditable was already committed
+        var target = (activeEditable && activeEditable._riazifyEditing) ? activeEditable : savedEditable;
+        if (!target) return;
+        // Restore focus and selection range
+        target.contentEditable = 'true';
+        target._riazifyEditing = true;
+        target.focus();
+        if (savedRange) {
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(savedRange);
         }
+        document.execCommand(cmd, false, val);
+        var newHtml = target.innerHTML || '';
+        var newText = target.innerText || target.textContent || '';
+        // Commit the result
+        window.parent.postMessage({
+          type: 'RIAZIFY_COMMIT_HTML_EDIT',
+          blockId: BLOCK_ID,
+          html: newHtml,
+          text: newText
+        }, '*');
+        // Clean up
+        target.contentEditable = 'false';
+        target._riazifyEditing = false;
+        target.style.outline = '';
+        savedRange = null;
+        savedEditable = null;
+        activeEditable = null;
       }
     });
 
