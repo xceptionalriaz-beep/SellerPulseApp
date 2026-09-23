@@ -13,7 +13,8 @@ import {
     AlignLeft, AlignCenter, AlignRight,
     Grid, Minus,
     Link, Quote, Eraser,
-    AlertCircle,
+    AlertCircle, AlertTriangle, CheckCircle,
+    Store, Search, Package, Anchor,
     RefreshCw, Trash2,
 } from 'lucide-react'
 
@@ -371,7 +372,7 @@ export default function BlockToolbar({
                             whiteSpace: 'nowrap',
                             display: 'flex', alignItems: 'center', gap: 3,
                         }}>
-                            🔗 Linked
+                            <Link size={10} />&nbsp;Linked
                         </span>
                     )}
                     <button
@@ -492,9 +493,10 @@ export default function BlockToolbar({
                         pointerEvents: 'none',
                         animation: 'fadeInUp 0.18s ease',
                     }}>
-                        {isNavBlock
-                            ? '🔗 Edit link URLs in the Attributes tab →'
-                            : '🔗 Edit the button URL in the Attributes tab →'}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <Link size={11} color="#ffffff" />
+                            {isNavBlock ? 'Edit link URLs in the Attributes tab →' : 'Edit the button URL in the Attributes tab →'}
+                        </span>
                         <div style={{
                             position: 'absolute',
                             top: '100%',
@@ -618,33 +620,33 @@ export default function BlockToolbar({
                 // Context label — what gets linked
                 const blockContextMap: Record<string, string> = {
                     // Media
-                    image: '🖼️ Image — whole image becomes clickable',
-                    single_image: '🖼️ Image — whole image becomes clickable',
-                    banner: '🖼️ Banner — whole banner becomes clickable',
+                    image: 'Image — whole image becomes clickable',
+                    single_image: 'Image — whole image becomes clickable',
+                    banner: 'Banner — whole banner becomes clickable',
                     // eBay specific
-                    cta_banner: '📣 CTA Banner — whole banner becomes clickable',
-                    hero_header: '🏪 Hero Header — whole header becomes clickable',
-                    free_shipping_banner: '🚚 Free Shipping Banner — whole banner becomes clickable',
-                    bundle_deal: '🎁 Bundle Deal — whole block becomes clickable',
-                    limited_time_offer: '⏱️ Limited Time Offer — whole block becomes clickable',
-                    dispatch_timer: '⏰ Dispatch Timer — whole block becomes clickable',
-                    urgency_bar: '🔥 Urgency Bar — whole bar becomes clickable',
+                    cta_banner: 'CTA Banner — whole banner becomes clickable',
+                    hero_header: 'Hero Header — whole header becomes clickable',
+                    free_shipping_banner: 'Free Shipping Banner — whole banner becomes clickable',
+                    bundle_deal: 'Bundle Deal — whole block becomes clickable',
+                    limited_time_offer: 'Limited Time Offer — whole block becomes clickable',
+                    dispatch_timer: 'Dispatch Timer — whole block becomes clickable',
+                    urgency_bar: 'Urgency Bar — whole bar becomes clickable',
                     // Conversion
-                    button_block: '🔘 Button — edit URL in Attributes tab',
-                    nav_bar: '🧭 Nav Bar — edit URLs in Attributes tab',
+                    button_block: 'Button — edit URL in Attributes tab',
+                    nav_bar: 'Nav Bar — edit URLs in Attributes tab',
                     // Content
-                    heading: '📝 Heading — selected text gets linked',
-                    paragraph: '📝 Paragraph — selected text gets linked',
-                    product_title: '📝 Product Title — selected text gets linked',
-                    product_description: '📝 Description — selected text gets linked',
-                    quote_block: '💬 Quote — selected text gets linked',
+                    heading: 'Heading — selected text gets linked',
+                    paragraph: 'Paragraph — selected text gets linked',
+                    product_title: 'Product Title — selected text gets linked',
+                    product_description: 'Description — selected text gets linked',
+                    quote_block: 'Quote — selected text gets linked',
                     // Layout
-                    full_width_section: '📐 Section — whole section becomes clickable',
-                    hero_product: '📦 Hero Product — whole block becomes clickable',
+                    full_width_section: 'Section — whole section becomes clickable',
+                    hero_product: 'Hero Product — whole block becomes clickable',
                 }
                 const contextLabel = slotEdit
-                    ? `✏️ Text slot — "${slotEdit.propKey.replace(/([A-Z])/g, ' $1').toLowerCase()}"`
-                    : blockContextMap[blockType ?? ''] ?? '📦 Block — whole block becomes clickable'
+                    ? `Text slot — "${slotEdit.propKey.replace(/([A-Z])/g, ' $1').toLowerCase()}"`
+                    : blockContextMap[blockType ?? ''] ?? 'Block — whole block becomes clickable'
 
                 // Validation helper — called on every keystroke
                 const validateUrl = (val: string) => {
@@ -741,26 +743,29 @@ export default function BlockToolbar({
                             }}>
                                 Quick pick
                             </p>
-                            <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' as const }}>
+                            <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'nowrap' as const }}>
                                 {[
-                                    { label: '🏪 My Store', url: 'https://www.ebay.com/str/{{SELLER_NAME}}' },
-                                    { label: '🔍 My Items', url: 'https://www.ebay.com/sch/{{SELLER_NAME}}' },
-                                    { label: '📦 This Item', url: 'https://www.ebay.com/itm/{{ITEM_ID}}' },
-                                    { label: '⚓ In-page', url: '#section' },
+                                    { icon: <Store size={10} />, label: 'My Store', url: 'https://www.ebay.com/str/{{SELLER_NAME}}' },
+                                    { icon: <Search size={10} />, label: 'My Items', url: 'https://www.ebay.com/sch/{{SELLER_NAME}}' },
+                                    { icon: <Package size={10} />, label: 'This Item', url: 'https://www.ebay.com/itm/{{ITEM_ID}}' },
+                                    { icon: <Anchor size={10} />, label: 'In-page', url: '#section' },
                                 ].map(q => (
                                     <button
                                         key={q.label}
                                         onClick={() => { setLinkInput(q.url); setLinkError(null) }}
                                         style={{
-                                            fontSize: 10, padding: '4px 8px',
+                                            fontSize: 9.5, padding: '4px 7px',
                                             background: linkInput === q.url ? C.primary : '#f3eeff',
                                             color: linkInput === q.url ? '#fff' : C.primary,
                                             border: `1px solid ${linkInput === q.url ? C.primary : '#ddd6fe'}`,
                                             borderRadius: 20, cursor: 'pointer',
                                             fontWeight: 600, transition: 'all 0.12s',
+                                            whiteSpace: 'nowrap' as const, flex: '1 1 0',
+                                            display: 'flex', alignItems: 'center',
+                                            justifyContent: 'center', gap: 4,
                                         }}
                                     >
-                                        {q.label}
+                                        {q.icon}{q.label}
                                     </button>
                                 ))}
                             </div>
@@ -794,13 +799,14 @@ export default function BlockToolbar({
                                     }}
                                 />
                                 {/* Status icon */}
-                                <div style={{
-                                    position: 'absolute', right: 10, top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    fontSize: 13,
-                                }}>
-                                    {linkError ? '🔴' : isValid && linkInput ? '🟢' : ''}
-                                </div>
+                                {(linkError || (isValid && linkInput)) && (
+                                    <div style={{
+                                        position: 'absolute', right: 10, top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        width: 8, height: 8, borderRadius: '50%',
+                                        backgroundColor: linkError ? '#ef4444' : '#16a34a',
+                                    }} />
+                                )}
                             </div>
 
                             {/* Error / success message */}
@@ -824,21 +830,25 @@ export default function BlockToolbar({
                                     backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0',
                                     marginBottom: 8,
                                 }}>
+                                    <CheckCircle size={11} color="#16a34a" style={{ flexShrink: 0 }} />
                                     <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 600 }}>
-                                        ✓ eBay link — safe to use
+                                        eBay link — safe to use
                                     </span>
                                 </div>
                             )}
 
                             {/* ── eBay compliance note ── */}
                             <div style={{
-                                padding: '6px 8px', borderRadius: 6,
+                                padding: '7px 9px', borderRadius: 6,
                                 backgroundColor: '#fffbeb', border: '1px solid #fde68a',
                                 marginBottom: 12,
                             }}>
-                                <p style={{ margin: 0, fontSize: 10, color: '#92400e', lineHeight: 1.6 }}>
-                                    ⚠️ eBay only allows <strong>ebay.com</strong> links — external URLs are stripped.
-                                    Use <code style={{ fontSize: 9, background: '#fef3c7', padding: '0 2px', borderRadius: 2 }}>{'{{SELLER_NAME}}'}</code> or <code style={{ fontSize: 9, background: '#fef3c7', padding: '0 2px', borderRadius: 2 }}>{'{{ITEM_ID}}'}</code> as placeholders.
+                                <p style={{ margin: 0, fontSize: 10, color: '#92400e', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', gap: 5 }}>
+                                    <AlertTriangle size={10} color="#92400e" style={{ marginTop: 2, flexShrink: 0 }} />
+                                    <span>Only <strong>ebay.com</strong> links are allowed — external URLs are stripped by eBay.</span>
+                                </p>
+                                <p style={{ margin: '3px 0 0', fontSize: 10, color: '#92400e', lineHeight: 1.6 }}>
+                                    Tokens: <code style={{ fontSize: 9, background: '#fef3c7', padding: '1px 3px', borderRadius: 2 }}>{'{{SELLER_NAME}}'}</code> · <code style={{ fontSize: 9, background: '#fef3c7', padding: '1px 3px', borderRadius: 2 }}>{'{{ITEM_ID}}'}</code>
                                 </p>
                             </div>
 
