@@ -85,6 +85,7 @@ export default function BlockToolbar({
     onFormatSlot,
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
+    const modalRef = useRef<HTMLDivElement>(null)
     const [showLinkModal, setShowLinkModal] = useState(false)
     const [linkInput, setLinkInput] = useState('')
     const [linkError, setLinkError] = useState<string | null>(null)
@@ -196,6 +197,18 @@ export default function BlockToolbar({
         document.addEventListener('keydown', handleEscape)
         return () => document.removeEventListener('keydown', handleEscape)
     }, [onClose, persistent])
+
+    // Close link modal on outside click
+    useEffect(() => {
+        if (!showLinkModal) return
+        function handleModalOutside(e: MouseEvent) {
+            if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+                setShowLinkModal(false)
+            }
+        }
+        document.addEventListener('mousedown', handleModalOutside)
+        return () => document.removeEventListener('mousedown', handleModalOutside)
+    }, [showLinkModal])
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -653,7 +666,7 @@ export default function BlockToolbar({
                 const isValid = !linkError && !!linkInput.trim()
 
                 return (
-                    <div style={{
+                    <div ref={modalRef} style={{
                         position: 'absolute',
                         top: 45,
                         left: 0,
@@ -823,11 +836,9 @@ export default function BlockToolbar({
                                 backgroundColor: '#fffbeb', border: '1px solid #fde68a',
                                 marginBottom: 12,
                             }}>
-                                <p style={{ margin: 0, fontSize: 10, color: '#92400e', lineHeight: 1.5 }}>
-                                    ⚠️ eBay only allows links to <strong>ebay.com</strong> pages.
-                                    External links are automatically removed by eBay.
-                                    Use <code style={{ fontSize: 9 }}>{'{{SELLER_NAME}}'}</code> and{' '}
-                                    <code style={{ fontSize: 9 }}>{'{{ITEM_ID}}'}</code> as placeholders.
+                                <p style={{ margin: 0, fontSize: 10, color: '#92400e', lineHeight: 1.6 }}>
+                                    ⚠️ eBay only allows <strong>ebay.com</strong> links — external URLs are stripped.
+                                    Use <code style={{ fontSize: 9, background: '#fef3c7', padding: '0 2px', borderRadius: 2 }}>{'{{SELLER_NAME}}'}</code> or <code style={{ fontSize: 9, background: '#fef3c7', padding: '0 2px', borderRadius: 2 }}>{'{{ITEM_ID}}'}</code> as placeholders.
                                 </p>
                             </div>
 
