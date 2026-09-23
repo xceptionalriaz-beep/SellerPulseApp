@@ -1308,7 +1308,9 @@ export default function VisualEditor({
                     {/* ── Toolbar — hidden in live preview and for layout container blocks ── */}
                     {!livePreview && (
                         <BlockToolbar
+                            blockType={isLayoutBlock ? undefined : (selectedBlock?.type ?? undefined)}
                             blockProps={isLayoutBlock ? (activeSlotEdit ? {} : null) : (selectedBlock?.props ?? null)}
+                            activeSelection={activeSelection}
                             onChange={(newProps) => {
                                 if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
                             }}
