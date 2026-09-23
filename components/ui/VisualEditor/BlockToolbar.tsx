@@ -77,7 +77,7 @@ interface BlockToolbarProps {
     slotEdit?: { blockId: string; propKey: string; currentHtml: string } | null
     onClearSlot?: (blockId: string, propKey: string) => void
     onReplaceSlot?: () => void
-    onFormatSlot?: (blockId: string, propKey: string, format: string, value: string) => void
+    onFormatSlot?: (blockId: string, propKey: string, format: string, value: string, selection?: { selectedHtml: string; selectedText: string } | null) => void
 }
 
 export default function BlockToolbar({
@@ -746,16 +746,25 @@ export default function BlockToolbar({
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: 6,
                                 padding: '6px 10px', borderRadius: 7,
-                                backgroundColor: '#f8f7ff',
-                                border: '1px solid #ede9fe',
+                                backgroundColor: activeSelection ? '#ede9fe' : '#f8f7ff',
+                                border: `1px solid ${activeSelection ? '#c4b5fd' : '#ede9fe'}`,
                                 marginBottom: 12,
                             }}>
-                                <span style={{ fontSize: 11, color: '#7530fb', fontWeight: 600 }}>
+                                <span style={{ fontSize: 11, color: '#7530fb', fontWeight: 600, flexShrink: 0 }}>
                                     Applying to:
                                 </span>
-                                <span style={{ fontSize: 11, color: '#4c3d7a' }}>
-                                    {contextLabel}
-                                </span>
+                                {activeSelection ? (
+                                    <span style={{
+                                        fontSize: 11, color: '#4c3d7a', fontWeight: 600,
+                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    }}>
+                                        "{activeSelection.selectedText}"
+                                    </span>
+                                ) : (
+                                    <span style={{ fontSize: 11, color: '#4c3d7a' }}>
+                                        {contextLabel}
+                                    </span>
+                                )}
                             </div>
 
                             {/* ── Quick picks ── */}
@@ -879,7 +888,7 @@ export default function BlockToolbar({
                                     <button
                                         onClick={() => {
                                             if (slotEdit) {
-                                                onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'removeLink', '')
+                                                onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'removeLink', '', activeSelection)
                                             } else if (isButtonBlock) {
                                                 onChange({ ...safeProps, url: '' })
                                             } else {
@@ -919,7 +928,7 @@ export default function BlockToolbar({
                                         if (!isValid) return
                                         const url = linkInput.trim()
                                         if (slotEdit) {
-                                            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'link', url)
+                                            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'link', url, activeSelection)
                                         } else if (isButtonBlock) {
                                             onChange({ ...safeProps, url })
                                         } else {

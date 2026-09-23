@@ -482,7 +482,7 @@ export default function VisualEditor({
         commitBlocks(next, blocks)
     }, [commitBlocks, blocks])
 
-    const handleFormatSlot = (blockId: string, propKey: string, format: string, value: string) => {
+    const handleFormatSlot = (blockId: string, propKey: string, format: string, value: string, selection?: { selectedHtml: string; selectedText: string } | null) => {
         const idx = blocks.findIndex(b => b.id === blockId)
         if (idx < 0) return
         const block = blocks[idx]
@@ -536,16 +536,30 @@ export default function VisualEditor({
                     `<span${a}style="${s}color:${value};"${c}>`)
             }
         } else if (format === 'link') {
-            // Strip only the outermost <a> wrapper if present, keep inner content intact
-            const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
-            if (outerAMatch) newHtml = outerAMatch[1]
-            if (value) {
-                newHtml = `<a href="${value}" style="color:inherit;text-decoration:underline;">${newHtml}</a>`
+            if (selection?.selectedHtml && currentHtml.includes(selection.selectedHtml)) {
+                // Selection-scoped: only wrap the selected portion
+                const linked = `<a href="${value}" style="color:inherit;text-decoration:underline;">${selection.selectedHtml}</a>`
+                newHtml = currentHtml.replace(selection.selectedHtml, linked)
+            } else {
+                // No selection — wrap the whole slot (existing behaviour)
+                const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
+                if (outerAMatch) newHtml = outerAMatch[1]
+                if (value) {
+                    newHtml = `<a href="${value}" style="color:inherit;text-decoration:underline;">${newHtml}</a>`
+                }
             }
         } else if (format === 'removeLink') {
-            // Strip only outermost <a> wrapper, keep inner HTML
-            const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
-            if (outerAMatch) newHtml = outerAMatch[1]
+            if (selection?.selectedHtml) {
+                // Remove link only around the selected portion
+                newHtml = currentHtml.replace(
+                    /<a\s[^>]*>([\s\S]*?)<\/a>/gi,
+                    (match: string, inner: string) => inner
+                )
+            } else {
+                // No selection — strip outermost <a> wrapper (existing behaviour)
+                const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
+                if (outerAMatch) newHtml = outerAMatch[1]
+            }
         }
 
         const updatedBlock = {
@@ -558,6 +572,8 @@ export default function VisualEditor({
 
         // Update activeSlotEdit so toolbar reflects new state
         setActiveSlotEdit(prev => prev ? { ...prev, currentHtml: newHtml } : null)
+        // Clear selection after formatting is applied
+        setActiveSelection(null)
         // Bug #3 fix: explicitly push updated slot HTML into iframe so canvas re-renders in real time
         setTimeout(() => {
             const iframe = document.querySelector('iframe') as HTMLIFrameElement
