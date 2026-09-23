@@ -588,8 +588,8 @@ export default function VisualEditor({
 
         // Update activeSlotEdit so toolbar reflects new state
         setActiveSlotEdit(prev => prev ? { ...prev, currentHtml: newHtml } : null)
-        // Clear selection after formatting is applied
-        setActiveSelection(null)
+        // Clear selection after a short delay so state has time to be used
+        setTimeout(() => setActiveSelection(null), 100)
         // Bug #3 fix: explicitly push updated slot HTML into iframe so canvas re-renders in real time
         setTimeout(() => {
             const iframe = document.querySelector('iframe') as HTMLIFrameElement
@@ -1075,7 +1075,8 @@ export default function VisualEditor({
                         selectedHtml: event.data.selectedHtml ?? '',
                     })
                 } else {
-                    setActiveSelection(null)
+                    // Delay clearing so toolbar button clicks can still read the selection
+                    setTimeout(() => setActiveSelection(null), 300)
                 }
             } else if (event.data?.type === 'RIAZIFY_COMMIT_TEXT_EDIT') {
                 const { blockId, text } = event.data;

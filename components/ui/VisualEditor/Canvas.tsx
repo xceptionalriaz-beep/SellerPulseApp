@@ -1197,8 +1197,10 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
       }, '*');
     });
 
-    // Selection is cleared only after a mouseup with no active selection
-    // Do NOT clear on mousedown — that fires before toolbar clicks resolve
+    // NOTE: do NOT clear selection on mousedown — the toolbar button click
+    // triggers mousedown in the iframe before the React handler fires,
+    // which would wipe activeSelection before highlight/link can use it.
+    // Selection is cleared naturally after the next mouseup with no range.
 
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
       img.addEventListener('click', function(e) {
