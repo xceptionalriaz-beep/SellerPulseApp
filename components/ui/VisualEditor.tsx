@@ -548,6 +548,22 @@ export default function VisualEditor({
                     newHtml = `<a href="${value}" style="color:inherit;text-decoration:underline;">${newHtml}</a>`
                 }
             }
+        } else if (format === 'highlight') {
+            if (value === 'none') {
+                // Remove all highlight spans
+                newHtml = newHtml.replace(/<span([^>]*)style="([^"]*background-color:[^"]*)"([^>]*)>([\s\S]*?)<\/span>/gi,
+                    (m: string, a: string, s: string, c: string, inner: string) => {
+                        const cleaned = s.replace(/background-color:\s*[^;]+;?/gi, '').trim()
+                        return cleaned ? `<span${a}style="${cleaned}"${c}>${inner}</span>` : inner
+                    })
+            } else if (selection?.selectedHtml && currentHtml.includes(selection.selectedHtml)) {
+                // Wrap only selected text
+                const highlighted = `<span style="background-color:${value};border-radius:2px;padding:0 2px;">${selection.selectedHtml}</span>`
+                newHtml = currentHtml.replace(selection.selectedHtml, highlighted)
+            } else {
+                // No selection — wrap whole slot
+                newHtml = `<span style="background-color:${value};border-radius:2px;padding:0 2px;">${newHtml}</span>`
+            }
         } else if (format === 'removeLink') {
             if (selection?.selectedHtml) {
                 // Remove link only around the selected portion

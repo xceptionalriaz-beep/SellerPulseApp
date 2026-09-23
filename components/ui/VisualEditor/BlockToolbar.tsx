@@ -12,7 +12,7 @@ import {
     List, ListOrdered,
     AlignLeft, AlignCenter, AlignRight,
     Grid, Minus,
-    Link, Quote, Eraser,
+    Link, Quote, Eraser, Highlighter,
     AlertCircle, AlertTriangle, CheckCircle,
     Store, Search, Package, Anchor,
     RefreshCw, Trash2,
@@ -99,6 +99,8 @@ export default function BlockToolbar({
     const [linkError, setLinkError] = useState<string | null>(null)
     const [replaceActive, setReplaceActive] = useState(false)
     const [showRedirectTooltip, setShowRedirectTooltip] = useState(false)
+    const [showHighlightPicker, setShowHighlightPicker] = useState(false)
+    const highlightRef = useRef<HTMLDivElement>(null)
     const safeProps = blockProps ?? {}
 
     // Detect existing link in slot HTML
@@ -218,6 +220,18 @@ export default function BlockToolbar({
         return () => document.removeEventListener('mousedown', handleModalOutside)
     }, [showLinkModal])
 
+    // Close highlight picker on outside click
+    useEffect(() => {
+        if (!showHighlightPicker) return
+        function handleHighlightOutside(e: MouseEvent) {
+            if (highlightRef.current && !highlightRef.current.contains(e.target as Node)) {
+                setShowHighlightPicker(false)
+            }
+        }
+        document.addEventListener('mousedown', handleHighlightOutside)
+        return () => document.removeEventListener('mousedown', handleHighlightOutside)
+    }, [showHighlightPicker])
+
     // ─────────────────────────────────────────────────────────────────────────
 
     if (blockProps === null && !slotEdit) {
@@ -233,6 +247,12 @@ export default function BlockToolbar({
                 Layout block — click a content slot to see actions
             </div>
         )
+    }
+
+    const handleHighlight = (color: string) => {
+        if (!slotEdit) return
+        setShowHighlightPicker(false)
+        onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'highlight', color, activeSelection)
     }
 
     const handleFormatSlotProp = (format: string, value: string) => {
@@ -536,6 +556,82 @@ export default function BlockToolbar({
             <button onClick={handleClearFormatting} title="Clear Formatting" style={miniBtn}>
                 <Eraser size={14} />
             </button>
+
+            {/* Highlight picker */}
+            {slotEdit && (
+                <div ref={highlightRef} style={{ position: 'relative', display: 'inline-flex' }}>
+                    <button
+                        onClick={() => setShowHighlightPicker(p => !p)}
+                        title="Highlight text"
+                        style={{
+                            ...miniBtn,
+                            backgroundColor: showHighlightPicker ? C.primary : 'transparent',
+                            color: showHighlightPicker ? '#ffffff' : '#1f1d2e',
+                        }}
+                    >
+                        <Highlighter size={14} />
+                    </button>
+                    {showHighlightPicker && (
+                        <div style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 8px)',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 10,
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                            padding: '8px 10px',
+                            zIndex: 9999,
+                            display: 'flex',
+                            flexDirection: 'column' as const,
+                            gap: 6,
+                            minWidth: 140,
+                        }}>
+                            <p style={{ margin: 0, fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                Highlight colour
+                            </p>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                                {[
+                                    { color: '#fef08a', label: 'Yellow' },
+                                    { color: '#bbf7d0', label: 'Green' },
+                                    { color: '#fbcfe8', label: 'Pink' },
+                                    { color: '#bfdbfe', label: 'Blue' },
+                                ].map(s => (
+                                    <button
+                                        key={s.color}
+                                        title={s.label}
+                                        onClick={() => handleHighlight(s.color)}
+                                        style={{
+                                            width: 22, height: 22,
+                                            borderRadius: 5,
+                                            backgroundColor: s.color,
+                                            border: '1.5px solid rgba(0,0,0,0.1)',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => handleHighlight('none')}
+                                style={{
+                                    fontSize: 10, fontWeight: 600,
+                                    color: '#ef4444',
+                                    background: '#fff5f5',
+                                    border: '1px solid #fecaca',
+                                    borderRadius: 6,
+                                    padding: '3px 8px',
+                                    cursor: 'pointer',
+                                    textAlign: 'left' as const,
+                                }}
+                            >
+                                Clear highlight
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div style={sepStyle} />
 
