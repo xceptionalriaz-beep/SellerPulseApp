@@ -526,155 +526,289 @@ export default function BlockToolbar({
             </label>
 
             {/* eBay Link Modal Popup */}
-            {showLinkModal && (
-                <div style={{
-                    position: 'absolute',
-                    top: 45,
-                    left: 0,
-                    zIndex: 1000,
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: 8,
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                    padding: 14,
-                    width: 320,
-                    fontFamily: 'DM Sans, sans-serif',
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#1f1d2e', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Link size={14} style={{ color: C.primary }} /> eBay Safe Link Tool
-                        </span>
-                        <button onClick={() => setShowLinkModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#64748b' }}>×</button>
-                    </div>
+            {showLinkModal && (() => {
+                // Context label — what gets linked
+                const contextLabel = isButtonBlock
+                    ? '🔘 Button'
+                    : slotEdit
+                        ? `✏️ Text slot — ${slotEdit.propKey.replace(/([A-Z])/g, ' $1').toLowerCase()}`
+                        : safeProps.src !== undefined
+                            ? '🖼️ Image block'
+                            : safeProps.headingText !== undefined
+                                ? '📣 CTA Banner'
+                                : '📦 Block'
 
-                    <div style={{ marginBottom: 10 }}>
-                        <input
-                            type="text"
-                            value={linkInput}
-                            onChange={(e) => {
-                                const val = e.target.value
-                                setLinkInput(val)
-                                if (!val.trim()) {
-                                    setLinkError(null)
-                                    return
-                                }
-                                const lower = val.toLowerCase().trim()
-                                if (lower.startsWith('#') || lower.startsWith('/')) {
-                                    setLinkError(null)
-                                    return
-                                }
-                                try {
-                                    const parsed = new URL(lower.startsWith('http') ? lower : `https://${lower}`)
-                                    const host = parsed.hostname
-                                    if (!host.includes('ebay.')) {
-                                        setLinkError('⚠️ eBay Compliance Error: Only eBay store/item links are permitted.')
-                                    } else {
-                                        setLinkError(null)
-                                    }
-                                } catch {
-                                    setLinkError('Invalid URL format')
-                                }
-                            }}
-                            placeholder="https://www.ebay.com/str/yourstore"
-                            style={{
-                                width: '100%',
-                                boxSizing: 'border-box',
-                                padding: '6px 10px',
-                                border: `1px solid ${linkError ? '#ef4444' : '#cbd5e1'}`,
-                                borderRadius: 6,
-                                fontSize: 12,
-                                outline: 'none',
-                                color: '#1f1d2e',
-                            }}
-                        />
-                        {linkError && (
-                            <div style={{ fontSize: 10, color: '#ef4444', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <AlertCircle size={11} /> {linkError}
+                // Validation helper — called on every keystroke
+                const validateUrl = (val: string) => {
+                    if (!val.trim()) { setLinkError(null); return }
+                    const lower = val.toLowerCase().trim()
+                    if (lower.startsWith('#') || lower.startsWith('/')) { setLinkError(null); return }
+                    try {
+                        const parsed = new URL(lower.startsWith('http') ? lower : `https://${lower}`)
+                        if (!parsed.hostname.includes('ebay.')) {
+                            setLinkError('Only eBay links are allowed on listings.')
+                        } else {
+                            setLinkError(null)
+                        }
+                    } catch {
+                        setLinkError('Invalid URL format')
+                    }
+                }
+
+                const isValid = !linkError && !!linkInput.trim()
+
+                return (
+                    <div style={{
+                        position: 'absolute',
+                        top: 45,
+                        left: 0,
+                        zIndex: 1000,
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        boxShadow: '0 16px 40px rgba(0,0,0,0.14)',
+                        width: 340,
+                        fontFamily: 'DM Sans, sans-serif',
+                        overflow: 'hidden',
+                    }}>
+
+                        {/* ── Header ── */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px 14px 10px',
+                            borderBottom: '1px solid #f1f5f9',
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                                <div style={{
+                                    width: 26, height: 26, borderRadius: 7,
+                                    backgroundColor: C.primary,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <Link size={13} color="#fff" />
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#1f1d2e' }}>
+                                        eBay Link Tool
+                                    </p>
+                                    <p style={{ margin: 0, fontSize: 10, color: '#94a3b8' }}>
+                                        Only eBay URLs allowed
+                                    </p>
+                                </div>
                             </div>
-                        )}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' as const }}>
-                        <button
-                            onClick={() => {
-                                setLinkInput('https://www.ebay.com/str/')
-                                setLinkError(null)
-                            }}
-                            style={{ fontSize: 10, padding: '3px 6px', background: '#f3eeff', color: C.primary, border: `1px solid #ddd6fe`, borderRadius: 4, cursor: 'pointer' }}
-                        >
-                            + My eBay Store
-                        </button>
-                        <button
-                            onClick={() => {
-                                setLinkInput('https://www.ebay.com/sch/')
-                                setLinkError(null)
-                            }}
-                            style={{ fontSize: 10, padding: '3px 6px', background: '#f3eeff', color: C.primary, border: `1px solid #ddd6fe`, borderRadius: 4, cursor: 'pointer' }}
-                        >
-                            + Other Items
-                        </button>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-                        {hasLink && (
                             <button
-                                onClick={() => {
-                                    if (slotEdit) {
-                                        onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'removeLink', '')
-                                    } else if (isButtonBlock) {
-                                        onChange({ ...safeProps, url: '' })
-                                    } else {
-                                        const nextProps = { ...safeProps }
-                                        delete nextProps.linkUrl
-                                        onChange(nextProps)
-                                    }
-                                    setShowLinkModal(false)
-                                }}
+                                onClick={() => setShowLinkModal(false)}
                                 style={{
-                                    padding: '5px 10px', background: '#fee2e2', color: '#ef4444',
-                                    border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600,
-                                    cursor: 'pointer', marginRight: 'auto',
+                                    background: '#f8fafc', border: '1px solid #e2e8f0',
+                                    borderRadius: 6, width: 24, height: 24,
+                                    cursor: 'pointer', fontSize: 14, color: '#64748b',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 }}
-                            >
-                                Remove Link
-                            </button>
-                        )}
-                        <button
-                            onClick={() => setShowLinkModal(false)}
-                            style={{ padding: '5px 10px', background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (linkError || !linkInput.trim()) return
-                                const url = linkInput.trim()
-                                if (slotEdit) {
-                                    // Wrap slot HTML in <a> tag
-                                    onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'link', url)
-                                } else if (isButtonBlock) {
-                                    // Button block — write to url prop directly
-                                    onChange({ ...safeProps, url })
-                                } else {
-                                    // Image + other blocks — write to linkUrl prop
-                                    onChange({ ...safeProps, linkUrl: url })
-                                }
-                                setShowLinkModal(false)
-                            }}
-                            disabled={!!linkError || !linkInput.trim()}
-                            style={{
-                                padding: '5px 12px',
-                                background: linkError || !linkInput.trim() ? '#cbd5e1' : C.primary,
-                                color: '#ffffff', border: 'none', borderRadius: 6,
-                                fontSize: 11, fontWeight: 600,
-                                cursor: linkError || !linkInput.trim() ? 'default' : 'pointer',
-                            }}
-                        >
-                            Apply Link
-                        </button>
+                            >×</button>
+                        </div>
+
+                        <div style={{ padding: '12px 14px' }}>
+
+                            {/* ── Applying to ── */}
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '6px 10px', borderRadius: 7,
+                                backgroundColor: '#f8f7ff',
+                                border: '1px solid #ede9fe',
+                                marginBottom: 12,
+                            }}>
+                                <span style={{ fontSize: 11, color: '#7530fb', fontWeight: 600 }}>
+                                    Applying to:
+                                </span>
+                                <span style={{ fontSize: 11, color: '#4c3d7a' }}>
+                                    {contextLabel}
+                                </span>
+                            </div>
+
+                            {/* ── Quick picks ── */}
+                            <p style={{
+                                margin: '0 0 7px',
+                                fontSize: 10, fontWeight: 700,
+                                color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em',
+                            }}>
+                                Quick pick
+                            </p>
+                            <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' as const }}>
+                                {[
+                                    { label: '🏪 My Store', url: 'https://www.ebay.com/str/{{SELLER_NAME}}' },
+                                    { label: '🔍 My Items', url: 'https://www.ebay.com/sch/{{SELLER_NAME}}' },
+                                    { label: '📦 This Item', url: 'https://www.ebay.com/itm/{{ITEM_ID}}' },
+                                    { label: '⚓ In-page', url: '#section' },
+                                ].map(q => (
+                                    <button
+                                        key={q.label}
+                                        onClick={() => { setLinkInput(q.url); setLinkError(null) }}
+                                        style={{
+                                            fontSize: 10, padding: '4px 8px',
+                                            background: linkInput === q.url ? C.primary : '#f3eeff',
+                                            color: linkInput === q.url ? '#fff' : C.primary,
+                                            border: `1px solid ${linkInput === q.url ? C.primary : '#ddd6fe'}`,
+                                            borderRadius: 20, cursor: 'pointer',
+                                            fontWeight: 600, transition: 'all 0.12s',
+                                        }}
+                                    >
+                                        {q.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* ── URL input ── */}
+                            <p style={{
+                                margin: '0 0 5px',
+                                fontSize: 10, fontWeight: 700,
+                                color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em',
+                            }}>
+                                Or enter URL
+                            </p>
+                            <div style={{ position: 'relative', marginBottom: 8 }}>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={linkInput}
+                                    onChange={e => {
+                                        setLinkInput(e.target.value)
+                                        validateUrl(e.target.value)
+                                    }}
+                                    placeholder="https://www.ebay.com/str/yourstore"
+                                    style={{
+                                        width: '100%',
+                                        boxSizing: 'border-box' as const,
+                                        padding: '8px 36px 8px 10px',
+                                        border: `1.5px solid ${linkError ? '#ef4444' : isValid && linkInput ? '#16a34a' : '#e2e8f0'}`,
+                                        borderRadius: 8,
+                                        fontSize: 12, outline: 'none', color: '#1f1d2e',
+                                        transition: 'border-color 0.15s',
+                                    }}
+                                />
+                                {/* Status icon */}
+                                <div style={{
+                                    position: 'absolute', right: 10, top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    fontSize: 13,
+                                }}>
+                                    {linkError ? '🔴' : isValid && linkInput ? '🟢' : ''}
+                                </div>
+                            </div>
+
+                            {/* Error / success message */}
+                            {linkError && (
+                                <div style={{
+                                    display: 'flex', alignItems: 'flex-start', gap: 5,
+                                    padding: '6px 8px', borderRadius: 6,
+                                    backgroundColor: '#fef2f2', border: '1px solid #fecaca',
+                                    marginBottom: 8,
+                                }}>
+                                    <AlertCircle size={11} color="#ef4444" style={{ marginTop: 1, flexShrink: 0 }} />
+                                    <span style={{ fontSize: 10, color: '#ef4444', lineHeight: 1.4 }}>
+                                        {linkError}
+                                    </span>
+                                </div>
+                            )}
+                            {isValid && linkInput && !linkError && (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: 5,
+                                    padding: '5px 8px', borderRadius: 6,
+                                    backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0',
+                                    marginBottom: 8,
+                                }}>
+                                    <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 600 }}>
+                                        ✓ eBay link — safe to use
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* ── eBay compliance note ── */}
+                            <div style={{
+                                padding: '6px 8px', borderRadius: 6,
+                                backgroundColor: '#fffbeb', border: '1px solid #fde68a',
+                                marginBottom: 12,
+                            }}>
+                                <p style={{ margin: 0, fontSize: 10, color: '#92400e', lineHeight: 1.5 }}>
+                                    ⚠️ eBay only allows links to <strong>ebay.com</strong> pages.
+                                    External links are automatically removed by eBay.
+                                    Use <code style={{ fontSize: 9 }}>{'{{SELLER_NAME}}'}</code> and{' '}
+                                    <code style={{ fontSize: 9 }}>{'{{ITEM_ID}}'}</code> as placeholders.
+                                </p>
+                            </div>
+
+                            {/* ── Actions ── */}
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                {hasLink && (
+                                    <button
+                                        onClick={() => {
+                                            if (slotEdit) {
+                                                onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'removeLink', '')
+                                            } else if (isButtonBlock) {
+                                                onChange({ ...safeProps, url: '' })
+                                            } else {
+                                                const nextProps = { ...safeProps }
+                                                delete nextProps.linkUrl
+                                                onChange(nextProps)
+                                            }
+                                            setShowLinkModal(false)
+                                        }}
+                                        style={{
+                                            padding: '7px 10px',
+                                            background: '#fff',
+                                            color: '#ef4444',
+                                            border: '1.5px solid #fca5a5',
+                                            borderRadius: 8, fontSize: 11,
+                                            fontWeight: 600, cursor: 'pointer',
+                                            marginRight: 'auto',
+                                        }}
+                                    >
+                                        🗑 Remove
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setShowLinkModal(false)}
+                                    style={{
+                                        padding: '7px 12px',
+                                        background: '#f8fafc', color: '#64748b',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: 8, fontSize: 11,
+                                        fontWeight: 600, cursor: 'pointer',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!isValid) return
+                                        const url = linkInput.trim()
+                                        if (slotEdit) {
+                                            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'link', url)
+                                        } else if (isButtonBlock) {
+                                            onChange({ ...safeProps, url })
+                                        } else {
+                                            onChange({ ...safeProps, linkUrl: url })
+                                        }
+                                        setShowLinkModal(false)
+                                    }}
+                                    disabled={!isValid}
+                                    style={{
+                                        padding: '7px 16px',
+                                        background: isValid ? C.primary : '#cbd5e1',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: 8, fontSize: 11,
+                                        fontWeight: 700,
+                                        cursor: isValid ? 'pointer' : 'default',
+                                        transition: 'background 0.15s',
+                                    }}
+                                >
+                                    Apply Link →
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            })()}
         </div>
     )
 }
