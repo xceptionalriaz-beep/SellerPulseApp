@@ -1197,10 +1197,8 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
       }, '*');
     });
 
-    // Clear selection state when user clicks without selecting
-    document.addEventListener('mousedown', function() {
-      window.parent.postMessage({ type: 'RIAZIFY_SELECTION_CHANGE', hasSelection: false, blockId: BLOCK_ID }, '*');
-    });
+    // Selection is cleared only after a mouseup with no active selection
+    // Do NOT clear on mousedown — that fires before toolbar clicks resolve
 
     document.querySelectorAll('img[data-slot]').forEach(function(img) {
       img.addEventListener('click', function(e) {

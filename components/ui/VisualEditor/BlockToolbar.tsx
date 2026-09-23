@@ -250,9 +250,14 @@ export default function BlockToolbar({
     }
 
     const handleHighlight = (color: string) => {
-        if (!slotEdit) return
         setShowHighlightPicker(false)
-        onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'highlight', color, activeSelection)
+        if (slotEdit) {
+            // slot edit mode — apply to selection or whole slot
+            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'highlight', color, activeSelection)
+        } else if (activeSelection?.propKey && activeSelection?.blockId) {
+            // no slotEdit but we have a captured selection — use it directly
+            onFormatSlot?.(activeSelection.blockId, activeSelection.propKey, 'highlight', color, activeSelection)
+        }
     }
 
     const handleFormatSlotProp = (format: string, value: string) => {
