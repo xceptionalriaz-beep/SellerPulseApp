@@ -839,17 +839,15 @@ export default function BlockToolbar({
 
                             {/* ── eBay compliance note ── */}
                             <div style={{
-                                padding: '7px 9px', borderRadius: 6,
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '6px 8px', borderRadius: 6,
                                 backgroundColor: '#fffbeb', border: '1px solid #fde68a',
                                 marginBottom: 12,
                             }}>
-                                <p style={{ margin: 0, fontSize: 10, color: '#92400e', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', gap: 5 }}>
-                                    <AlertTriangle size={10} color="#92400e" style={{ marginTop: 2, flexShrink: 0 }} />
-                                    <span>Only <strong>ebay.com</strong> links are allowed — external URLs are stripped by eBay.</span>
-                                </p>
-                                <p style={{ margin: '3px 0 0', fontSize: 10, color: '#92400e', lineHeight: 1.6 }}>
-                                    Tokens: <code style={{ fontSize: 9, background: '#fef3c7', padding: '1px 3px', borderRadius: 2 }}>{'{{SELLER_NAME}}'}</code> · <code style={{ fontSize: 9, background: '#fef3c7', padding: '1px 3px', borderRadius: 2 }}>{'{{ITEM_ID}}'}</code>
-                                </p>
+                                <AlertTriangle size={10} color="#92400e" style={{ flexShrink: 0 }} />
+                                <span style={{ fontSize: 10, color: '#92400e', lineHeight: 1.4 }}>
+                                    eBay only — use <code style={{ fontSize: 9, background: '#fef3c7', padding: '0 2px', borderRadius: 2 }}>{'{{SELLER_NAME}}'}</code> or <code style={{ fontSize: 9, background: '#fef3c7', padding: '0 2px', borderRadius: 2 }}>{'{{ITEM_ID}}'}</code>
+                                </span>
                             </div>
 
                             {/* ── Actions ── */}
