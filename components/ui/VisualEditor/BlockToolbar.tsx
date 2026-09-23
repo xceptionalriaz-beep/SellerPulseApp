@@ -995,6 +995,15 @@ export default function BlockToolbar({
                                                 onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'removeLink', '', activeSelection)
                                             } else if (isButtonBlock) {
                                                 onChange({ ...safeProps, url: '' })
+                                            } else if (activeSelection?.selectedText) {
+                                                const iframe = document.querySelector('iframe') as HTMLIFrameElement
+                                                if (iframe?.contentWindow) {
+                                                    iframe.contentWindow.postMessage({
+                                                        type: 'RIAZIFY_APPLY_FORMAT',
+                                                        command: 'unlink',
+                                                        value: null,
+                                                    }, '*')
+                                                }
                                             } else {
                                                 const nextProps = { ...safeProps }
                                                 delete nextProps.linkUrl
@@ -1035,6 +1044,16 @@ export default function BlockToolbar({
                                             onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'link', url, activeSelection)
                                         } else if (isButtonBlock) {
                                             onChange({ ...safeProps, url })
+                                        } else if (activeSelection?.selectedText) {
+                                            // inline text selection — apply via execCommand in iframe
+                                            const iframe = document.querySelector('iframe') as HTMLIFrameElement
+                                            if (iframe?.contentWindow) {
+                                                iframe.contentWindow.postMessage({
+                                                    type: 'RIAZIFY_APPLY_FORMAT',
+                                                    command: 'createLink',
+                                                    value: url,
+                                                }, '*')
+                                            }
                                         } else {
                                             onChange({ ...safeProps, linkUrl: url })
                                         }
