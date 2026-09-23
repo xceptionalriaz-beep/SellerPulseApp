@@ -693,6 +693,7 @@ export interface CtaBannerProps extends CommonProps {
     subTextColor: string
     align: 'left' | 'center' | 'right'
     minHeight: number
+    linkUrl?: string
 }
 
 // ── Features / Trust Badges Bar ──────────────────────────────────────────────
@@ -819,6 +820,7 @@ export interface HeroHeaderProps extends CommonProps {
     variant: string           // layout variant id
     categoryBadge: string     // category variant badge text
     saleBadgeText: string     // seasonal variant badge text
+    linkUrl?: string
 }
 
 // ── FAQ Block ─────────────────────────────────────────────────────────
@@ -937,8 +939,12 @@ export interface BlockDefinition {
 // HTML WRAPPER HELPER
 // Wraps block HTML in a table row with data attributes for parsing
 // ─────────────────────────────────────────────────────────────────────────────
-function wrapBlock(type: BlockType, id: string, innerHtml: string): string {
-    return `<!-- BLOCK:${type}:${id} -->\n${innerHtml}\n<!-- /BLOCK:${type}:${id} -->`
+function wrapBlock(type: BlockType, id: string, innerHtml: string, props?: BlockProps): string {
+    const linkUrl = (props as any)?.linkUrl
+    const wrapped = linkUrl
+        ? `<a href="${linkUrl}" style="display:block;text-decoration:none;color:inherit;">${innerHtml}</a>`
+        : innerHtml
+    return `<!-- BLOCK:${type}:${id} -->\n${wrapped}\n<!-- /BLOCK:${type}:${id} -->`
 }
 
 // Padding shorthand helper
@@ -2005,8 +2011,7 @@ ${thumbCells}
       </p>
     </td>
   </tr>
-</table>`
-            )
+</table>`, props)
         },
     },
 

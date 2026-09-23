@@ -529,14 +529,16 @@ export default function BlockToolbar({
             {showLinkModal && (() => {
                 // Context label — what gets linked
                 const contextLabel = isButtonBlock
-                    ? '🔘 Button'
+                    ? '🔘 Button — edit URL in Attributes tab'
                     : slotEdit
                         ? `✏️ Text slot — ${slotEdit.propKey.replace(/([A-Z])/g, ' $1').toLowerCase()}`
                         : safeProps.src !== undefined
-                            ? '🖼️ Image block'
+                            ? '🖼️ Image — whole image becomes clickable'
                             : safeProps.headingText !== undefined
-                                ? '📣 CTA Banner'
-                                : '📦 Block'
+                                ? '📣 CTA Banner — whole banner becomes clickable'
+                                : safeProps.storeName !== undefined
+                                    ? '🏪 Hero Header — whole header becomes clickable'
+                                    : '📦 Block — whole block becomes clickable'
 
                 // Validation helper — called on every keystroke
                 const validateUrl = (val: string) => {
