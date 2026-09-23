@@ -884,6 +884,12 @@ export default function BlockToolbar({
                     </div>
                 )
             })()}
+            <style>{`
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+                to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+        `}</style>
         </div>
     )
 }
