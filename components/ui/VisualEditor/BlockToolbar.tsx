@@ -62,6 +62,7 @@ const sepStyle: React.CSSProperties = {
 }
 
 interface BlockToolbarProps {
+    blockType?: string
     blockProps: any
     onChange: (props: any) => void
     onClose?: () => void
@@ -73,6 +74,7 @@ interface BlockToolbarProps {
 }
 
 export default function BlockToolbar({
+    blockType,
     blockProps = null,
     onChange,
     onClose,
@@ -601,17 +603,35 @@ export default function BlockToolbar({
             {/* eBay Link Modal Popup */}
             {showLinkModal && (() => {
                 // Context label — what gets linked
-                const contextLabel = isButtonBlock
-                    ? '🔘 Button — edit URL in Attributes tab'
-                    : slotEdit
-                        ? `✏️ Text slot — ${slotEdit.propKey.replace(/([A-Z])/g, ' $1').toLowerCase()}`
-                        : safeProps.src !== undefined
-                            ? '🖼️ Image — whole image becomes clickable'
-                            : safeProps.headingText !== undefined
-                                ? '📣 CTA Banner — whole banner becomes clickable'
-                                : safeProps.storeName !== undefined
-                                    ? '🏪 Hero Header — whole header becomes clickable'
-                                    : '📦 Block — whole block becomes clickable'
+                const blockContextMap: Record<string, string> = {
+                    // Media
+                    image: '🖼️ Image — whole image becomes clickable',
+                    single_image: '🖼️ Image — whole image becomes clickable',
+                    banner: '🖼️ Banner — whole banner becomes clickable',
+                    // eBay specific
+                    cta_banner: '📣 CTA Banner — whole banner becomes clickable',
+                    hero_header: '🏪 Hero Header — whole header becomes clickable',
+                    free_shipping_banner: '🚚 Free Shipping Banner — whole banner becomes clickable',
+                    bundle_deal: '🎁 Bundle Deal — whole block becomes clickable',
+                    limited_time_offer: '⏱️ Limited Time Offer — whole block becomes clickable',
+                    dispatch_timer: '⏰ Dispatch Timer — whole block becomes clickable',
+                    urgency_bar: '🔥 Urgency Bar — whole bar becomes clickable',
+                    // Conversion
+                    button_block: '🔘 Button — edit URL in Attributes tab',
+                    nav_bar: '🧭 Nav Bar — edit URLs in Attributes tab',
+                    // Content
+                    heading: '📝 Heading — selected text gets linked',
+                    paragraph: '📝 Paragraph — selected text gets linked',
+                    product_title: '📝 Product Title — selected text gets linked',
+                    product_description: '📝 Description — selected text gets linked',
+                    quote_block: '💬 Quote — selected text gets linked',
+                    // Layout
+                    full_width_section: '📐 Section — whole section becomes clickable',
+                    hero_product: '📦 Hero Product — whole block becomes clickable',
+                }
+                const contextLabel = slotEdit
+                    ? `✏️ Text slot — "${slotEdit.propKey.replace(/([A-Z])/g, ' $1').toLowerCase()}"`
+                    : blockContextMap[blockType ?? ''] ?? '📦 Block — whole block becomes clickable'
 
                 // Validation helper — called on every keystroke
                 const validateUrl = (val: string) => {
