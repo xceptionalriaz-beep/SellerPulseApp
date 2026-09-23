@@ -776,13 +776,28 @@ export default function BlockToolbar({
                     : blockContextMap[blockType ?? ''] ?? 'Block — whole block becomes clickable'
 
                 // Validation helper — called on every keystroke
+                const VALID_EBAY_DOMAINS = new Set([
+                    'ebay.com', 'ebay.co.uk', 'ebay.com.au', 'ebay.ca', 'ebay.de',
+                    'ebay.fr', 'ebay.it', 'ebay.es', 'ebay.at', 'ebay.be',
+                    'ebay.ch', 'ebay.ie', 'ebay.nl', 'ebay.pl', 'ebay.com.hk',
+                    'ebay.com.sg', 'ebay.com.my', 'ebay.ph', 'ebay.in',
+                    'ebay.co.jp', 'ebay.cn',
+                ])
+
                 const validateUrl = (val: string) => {
                     if (!val.trim()) { setLinkError(null); return }
                     const lower = val.toLowerCase().trim()
+                    // Allow in-page anchors and relative paths
                     if (lower.startsWith('#') || lower.startsWith('/')) { setLinkError(null); return }
+                    // Allow token placeholders
+                    if (lower.includes('{{')) { setLinkError(null); return }
                     try {
                         const parsed = new URL(lower.startsWith('http') ? lower : `https://${lower}`)
-                        if (!parsed.hostname.includes('ebay.')) {
+                        const host = parsed.hostname.replace(/^www\./, '')
+                        // Must be exactly a known eBay domain or a subdomain of one
+                        const isEbay = VALID_EBAY_DOMAINS.has(host) ||
+                            [...VALID_EBAY_DOMAINS].some(d => host.endsWith('.' + d))
+                        if (!isEbay) {
                             setLinkError('Only eBay links are allowed on listings.')
                         } else {
                             setLinkError(null)
