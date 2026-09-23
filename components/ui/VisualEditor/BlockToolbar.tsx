@@ -251,12 +251,17 @@ export default function BlockToolbar({
 
     const handleHighlight = (color: string) => {
         setShowHighlightPicker(false)
-        if (slotEdit) {
-            // slot edit mode — apply to selection or whole slot
+        // Send execCommand directly into the iframe where selection is live
+        const iframe = document.querySelector('iframe') as HTMLIFrameElement
+        if (iframe?.contentWindow) {
+            if (color === 'none') {
+                iframe.contentWindow.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'removeFormat' }, '*')
+            } else {
+                iframe.contentWindow.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'backColor', value: color }, '*')
+            }
+        } else if (slotEdit) {
+            // fallback for slot-based blocks
             onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'highlight', color, activeSelection)
-        } else if (activeSelection?.propKey && activeSelection?.blockId) {
-            // no slotEdit but we have a captured selection — use it directly
-            onFormatSlot?.(activeSelection.blockId, activeSelection.propKey, 'highlight', color, activeSelection)
         }
     }
 

@@ -1078,6 +1078,35 @@ export default function VisualEditor({
                     // Delay clearing so toolbar button clicks can still read the selection
                     setTimeout(() => setActiveSelection(null), 300)
                 }
+            } else if (event.data?.type === 'RIAZIFY_COMMIT_HTML_EDIT') {
+                const { blockId, html } = event.data;
+                if (blockId && typeof html === 'string') {
+                    setSelectedId(blockId);
+                    const idx = blocks.findIndex(b => b.id === blockId);
+                    if (idx >= 0) {
+                        const target = blocks[idx];
+                        const p = target.props as any;
+                        // Find which prop holds the text and update with HTML
+                        let targetKey = 'text';
+                        for (const k of TEXT_PROP_KEYS) {
+                            if (p[k] !== undefined && typeof p[k] === 'string') {
+                                targetKey = k;
+                                break;
+                            }
+                        }
+                        // For items array (bullet_list, numbered_list) find which item changed
+                        if (Array.isArray(p.items)) {
+                            // We can't know which item — store as-is for now
+                            // Future: pass itemIndex from iframe
+                        } else {
+                            const updatedProps = { ...p, [targetKey]: html };
+                            const updatedBlock = { ...target, props: updatedProps };
+                            const newBlocks = [...blocks];
+                            newBlocks[idx] = updatedBlock;
+                            commitBlocks(newBlocks, blocks);
+                        }
+                    }
+                }
             } else if (event.data?.type === 'RIAZIFY_COMMIT_TEXT_EDIT') {
                 const { blockId, text } = event.data;
                 if (blockId && typeof text === 'string') {

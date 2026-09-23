@@ -1096,8 +1096,17 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
       el.style.outline = '';
       el.style.cursor = '';
       el.style.borderRadius = '';
+      var newHtml = el.innerHTML || '';
       var newText = el.innerText || el.textContent || '';
-      if (newText !== originalText) {
+      // If innerHTML has span/a tags (formatted), commit as HTML
+      if (/<[a-z][\s\S]*>/i.test(newHtml)) {
+        window.parent.postMessage({
+          type: 'RIAZIFY_COMMIT_HTML_EDIT',
+          blockId: BLOCK_ID,
+          html: newHtml,
+          text: newText
+        }, '*');
+      } else if (newText !== originalText) {
         window.parent.postMessage({
           type: 'RIAZIFY_COMMIT_TEXT_EDIT',
           blockId: BLOCK_ID,
