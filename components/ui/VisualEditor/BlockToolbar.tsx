@@ -382,20 +382,20 @@ export default function BlockToolbar({
                             <Link size={10} />&nbsp;Linked
                         </span>
                     )}
-                    {activeSelection && (
+                    {activeSelection && activeSelection.propKey === slotEdit?.propKey && (
                         <span style={{
                             fontSize: 10, fontWeight: 600,
                             color: '#7530fb',
-                            background: '#f3eeff',
-                            border: '1px solid #ddd6fe',
                             padding: '2px 8px',
+                            backgroundColor: '#ede9fe',
+                            border: '1px solid #c4b5fd',
                             borderRadius: 10,
                             display: 'flex', alignItems: 'center', gap: 4,
+                            maxWidth: 140, overflow: 'hidden',
                         }}>
-                            <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 "{activeSelection.selectedText}"
                             </span>
-                            selected
                         </span>
                     )}
                     <button
