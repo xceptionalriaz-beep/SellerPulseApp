@@ -87,15 +87,20 @@ export default function BlockToolbar({
     const [linkInput, setLinkInput] = useState('')
     const [linkError, setLinkError] = useState<string | null>(null)
     const [replaceActive, setReplaceActive] = useState(false)
+    const [showRedirectTooltip, setShowRedirectTooltip] = useState(false)
     const safeProps = blockProps ?? {}
 
     // Detect existing link in slot HTML
-    const slotLinkMatch = slotEdit?.currentHtml?.match(/href="([^"]+)"/)
+    const slotLinkMatch = slotEdit?.currentHtml?.match(/href=\"([^\"]+)\"/)
     const slotHasLink = !!slotLinkMatch
     const slotCurrentLink = slotLinkMatch?.[1] ?? ''
 
     // For button block — url prop is the link
     const isButtonBlock = safeProps.url !== undefined && safeProps.label !== undefined
+    // For nav bar — links array is the link source
+    const isNavBlock = Array.isArray((safeProps as any).links)
+    // Either block owns its own URLs — redirect user to Attributes tab instead of modal
+    const isOwnUrlBlock = isButtonBlock || isNavBlock
     const currentLinkUrl = isButtonBlock
         ? (safeProps.url ?? '')
         : slotEdit
@@ -437,17 +442,57 @@ export default function BlockToolbar({
             }}>
                 <Quote size={14} />
             </button>
-            <button onClick={() => {
-                setLinkInput(currentLinkUrl)
-                setLinkError(null)
-                setShowLinkModal(true)
-            }} title="Insert eBay Link" style={{
-                ...miniBtn,
-                backgroundColor: hasLink ? C.primary : 'transparent',
-                color: hasLink ? '#ffffff' : '#1f1d2e',
-            }}>
-                <Link size={14} />
-            </button>
+            <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <button onClick={() => {
+                    if (isOwnUrlBlock) {
+                        setShowRedirectTooltip(true)
+                        setTimeout(() => setShowRedirectTooltip(false), 2800)
+                    } else {
+                        setLinkInput(currentLinkUrl)
+                        setLinkError(null)
+                        setShowLinkModal(true)
+                    }
+                }} title={isOwnUrlBlock ? 'Edit URL in Attributes tab' : 'Insert eBay Link'} style={{
+                    ...miniBtn,
+                    backgroundColor: hasLink ? C.primary : 'transparent',
+                    color: hasLink ? '#ffffff' : '#1f1d2e',
+                }}>
+                    <Link size={14} />
+                </button>
+                {showRedirectTooltip && (
+                    <div style={{
+                        position: 'absolute',
+                        bottom: 'calc(100% + 8px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: '#1f1d2e',
+                        color: '#ffffff',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        padding: '6px 12px',
+                        borderRadius: 20,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                        zIndex: 9999,
+                        pointerEvents: 'none',
+                        animation: 'fadeInUp 0.18s ease',
+                    }}>
+                        {isNavBlock
+                            ? '🔗 Edit link URLs in the Attributes tab →'
+                            : '🔗 Edit the button URL in the Attributes tab →'}
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: 0, height: 0,
+                            borderLeft: '6px solid transparent',
+                            borderRight: '6px solid transparent',
+                            borderTop: '6px solid #1f1d2e',
+                        }} />
+                    </div>
+                )}
+            </div>
             <button onClick={handleClearFormatting} title="Clear Formatting" style={miniBtn}>
                 <Eraser size={14} />
             </button>
