@@ -530,15 +530,16 @@ export default function VisualEditor({
                     `<span${a}style="${s}color:${value};"${c}>`)
             }
         } else if (format === 'link') {
-            // Strip any existing <a> wrapper first
-            newHtml = newHtml.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, '$1')
+            // Strip only the outermost <a> wrapper if present, keep inner content intact
+            const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
+            if (outerAMatch) newHtml = outerAMatch[1]
             if (value) {
-                // Wrap with eBay-safe link (no target= as eBay strips it)
                 newHtml = `<a href="${value}" style="color:inherit;text-decoration:underline;">${newHtml}</a>`
             }
         } else if (format === 'removeLink') {
-            // Strip <a> wrapper, keep inner content
-            newHtml = newHtml.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, '$1')
+            // Strip only outermost <a> wrapper, keep inner HTML
+            const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
+            if (outerAMatch) newHtml = outerAMatch[1]
         }
 
         const updatedBlock = {

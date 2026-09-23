@@ -138,6 +138,18 @@ export default function BlockToolbar({
             const am = html.match(/text-align:\s*([^;'"]+)/i)
             if (am) align = am[1].trim()
         }
+        // Extract link from slot HTML
+        let linkUrl: string | undefined
+        try {
+            const tmp2 = document.createElement('div')
+            tmp2.innerHTML = html
+            const anchor = tmp2.querySelector('a[href]') as HTMLAnchorElement | null
+            if (anchor) linkUrl = anchor.getAttribute('href') ?? undefined
+        } catch {
+            const lm = html.match(/href="([^"]+)"/)
+            if (lm) linkUrl = lm[1]
+        }
+
         return {
             fontWeight: bold ? 'bold' : '400',
             fontStyle: italic ? 'italic' : 'normal',
@@ -145,6 +157,7 @@ export default function BlockToolbar({
             fontSize,
             align,
             color,
+            linkUrl,
         }
     }, [slotEdit?.currentHtml])
 
@@ -326,6 +339,21 @@ export default function BlockToolbar({
                     }}>
                         {slotEdit.propKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim()}
                     </span>
+                    {slotHasLink && (
+                        <span style={{
+                            fontSize: 10, fontWeight: 600,
+                            color: '#7530fb',
+                            padding: '2px 7px',
+                            backgroundColor: '#f3eeff',
+                            border: '1px solid #ddd6fe',
+                            borderRadius: 10,
+                            fontFamily: 'DM Sans, sans-serif',
+                            whiteSpace: 'nowrap',
+                            display: 'flex', alignItems: 'center', gap: 3,
+                        }}>
+                            🔗 Linked
+                        </span>
+                    )}
                     <button
                         onClick={() => { setReplaceActive(true); onReplaceSlot?.() }}
                         title="Replace slot content"
