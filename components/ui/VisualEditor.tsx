@@ -980,9 +980,9 @@ export default function VisualEditor({
                     patch[key] = val
                 }
             }
-            return { ...block, props: { ...currentProps, ...patch } }
+            return { ...block, props: { ...currentProps, ...patch } as typeof block.props }
         })
-        commitBlocks(updatedBlocks)
+        commitBlocks(updatedBlocks, blocks)
     }, [blocks, canvasSettings, commitBlocks])
 
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
