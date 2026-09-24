@@ -1217,11 +1217,24 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     var savedEditable = null;
 
     document.addEventListener('mouseup', function() {
-      var sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        // Save range for both selections and cursor positions
-        savedRange = sel.getRangeAt(0).cloneRange();
+      // Save editable and cursor/selection on every mouseup inside iframe
+      if (activeEditable && activeEditable._riazifyEditing) {
         savedEditable = activeEditable;
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          savedRange = sel.getRangeAt(0).cloneRange();
+        }
+      }
+    });
+
+    document.addEventListener('keyup', function() {
+      // Also save after keyboard navigation changes cursor position
+      if (activeEditable && activeEditable._riazifyEditing) {
+        savedEditable = activeEditable;
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          savedRange = sel.getRangeAt(0).cloneRange();
+        }
       }
     });
 
@@ -1242,12 +1255,11 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
           var sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(savedRange);
-        } else if (cmd === 'insertHTML') {
-          // No saved range — place cursor at end of element
-          var sel = window.getSelection();
+        } else {
           var range = document.createRange();
           range.selectNodeContents(target);
           range.collapse(false);
+          var sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(range);
         }
