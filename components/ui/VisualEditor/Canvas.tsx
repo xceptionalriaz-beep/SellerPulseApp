@@ -1045,6 +1045,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
   table { border-collapse: collapse; width: 100%; }
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }
+  a[href] { text-decoration: underline; color: #7530fb; }
   /* Dropzone visual feedback */
   div[data-canvas-dropzone]
   div[data-canvas-dropzone][data-canvas-dropzone-active="true"] {
@@ -1242,6 +1243,17 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
           sel.addRange(savedRange);
         }
         document.execCommand(cmd, false, val);
+        // After createLink, add inline styles so link is visible in canvas and eBay-safe
+        if (cmd === 'createLink') {
+          var anchors = target.querySelectorAll('a[href]');
+          anchors.forEach(function(a) {
+            if (!a.style.textDecoration) {
+              a.style.textDecoration = 'underline';
+              a.style.color = 'inherit';
+              a.style.fontWeight = '600';
+            }
+          });
+        }
         var newHtml = target.innerHTML || '';
         var newText = target.innerText || target.textContent || '';
         // Commit the result
