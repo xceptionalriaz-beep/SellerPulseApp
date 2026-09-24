@@ -693,6 +693,134 @@ export default function BlockToolbar({
                 )}
             </div>
 
+            {/* Insert — Special Characters + Emoji */}
+            <div ref={insertPickerRef} style={{ position: 'relative', display: 'inline-flex' }}>
+                <button
+                    onClick={() => setShowInsertPicker(p => !p)}
+                    title="Insert character or emoji"
+                    style={{
+                        ...miniBtn,
+                        backgroundColor: showInsertPicker ? C.primary : 'transparent',
+                        color: showInsertPicker ? '#ffffff' : '#1f1d2e',
+                    }}
+                >
+                    <SmilePlus size={14} />
+                </button>
+                {showInsertPicker && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        zIndex: 9999,
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.13)',
+                        width: 280,
+                        fontFamily: 'DM Sans, sans-serif',
+                        overflow: 'hidden',
+                    }}>
+                        <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
+                            {(['special', 'emoji'] as const).map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setInsertTab(tab)}
+                                    style={{
+                                        flex: 1, padding: '8px 0',
+                                        fontSize: 11, fontWeight: 700,
+                                        background: 'transparent', border: 'none',
+                                        borderBottom: insertTab === tab ? `2px solid ${C.primary}` : '2px solid transparent',
+                                        color: insertTab === tab ? C.primary : '#94a3b8',
+                                        cursor: 'pointer',
+                                        textTransform: 'capitalize' as const,
+                                    }}
+                                >
+                                    {tab === 'special' ? 'Special Chars' : 'Emoji'}
+                                </button>
+                            ))}
+                        </div>
+                        {insertTab === 'special' && (
+                            <div style={{ padding: '10px 12px' }}>
+                                {[
+                                    { label: 'Symbols', chars: ['©', '®', '™', '°', '±', '×', '÷', '∞', '≈', '≠', '≤', '≥'] },
+                                    { label: 'Arrows', chars: ['→', '←', '↑', '↓', '↔', '⇒', '⇐', '⇔', '▶', '◀', '▲', '▼'] },
+                                    { label: 'Marks', chars: ['✓', '✗', '✕', '★', '☆', '•', '·', '–', '—', '"', '"', '…'] },
+                                    { label: 'Currency', chars: ['£', '€', '¥', '¢', '₹', '₩', '₪', '₿', '$', '¤', '฿', '₫'] },
+                                ].map(group => (
+                                    <div key={group.label} style={{ marginBottom: 8 }}>
+                                        <p style={{ margin: '0 0 4px', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+                                            {group.label}
+                                        </p>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 2 }}>
+                                            {group.chars.map(ch => (
+                                                <button
+                                                    key={ch}
+                                                    onClick={() => handleInsertChar(ch)}
+                                                    title={ch}
+                                                    style={{
+                                                        width: 28, height: 28,
+                                                        fontSize: 14, lineHeight: '1',
+                                                        background: '#f8f7ff',
+                                                        border: '1px solid #ede9fe',
+                                                        borderRadius: 6,
+                                                        cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        transition: 'background 0.1s',
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.background = '#ede9fe')}
+                                                    onMouseLeave={e => (e.currentTarget.style.background = '#f8f7ff')}
+                                                >
+                                                    {ch}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {insertTab === 'emoji' && (
+                            <div style={{ padding: '10px 12px' }}>
+                                {[
+                                    { label: 'Hands & People', chars: ['👍', '👌', '🙌', '🤝', '💪', '👏', '🫶', '✌️', '🤞', '👉', '👈', '☝️'] },
+                                    { label: 'Objects', chars: ['📦', '🚚', '🏷️', '💳', '🔒', '⭐', '🔥', '💯', '✅', '❌', '⚡', '🎁'] },
+                                    { label: 'Shopping', chars: ['🛒', '🛍️', '💰', '💸', '🏆', '🥇', '🎖️', '🏅', '💎', '🆕', '🔝', '📈'] },
+                                    { label: 'Faces', chars: ['😊', '😍', '🤩', '😎', '🥳', '😃', '🙏', '💖', '🌟', '✨', '🎉', '🎊'] },
+                                ].map(group => (
+                                    <div key={group.label} style={{ marginBottom: 8 }}>
+                                        <p style={{ margin: '0 0 4px', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+                                            {group.label}
+                                        </p>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 2 }}>
+                                            {group.chars.map(em => (
+                                                <button
+                                                    key={em}
+                                                    onClick={() => handleInsertChar(em)}
+                                                    title={em}
+                                                    style={{
+                                                        width: 32, height: 32,
+                                                        fontSize: 18, lineHeight: '1',
+                                                        background: 'transparent',
+                                                        border: '1px solid transparent',
+                                                        borderRadius: 6,
+                                                        cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        transition: 'background 0.1s',
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.background = '#f8f7ff')}
+                                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                                >
+                                                    {em}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
             <div style={sepStyle} />
 
             {/* Headings */}
