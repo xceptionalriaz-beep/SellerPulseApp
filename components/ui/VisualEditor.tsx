@@ -242,7 +242,7 @@ export default function VisualEditor({
         text: string;
     } | null>(null);
     const [focusMode, setFocusMode] = useState(false)        // hides sidebar + panel
-    const [templateName, setTemplateName] = useState('My Template')
+    const [templateName, setTemplateName] = useState('')
     /**
      * Active template category — drives the category-matched sample data that
      * the canvas previews (product photos, brand, spec values, cross-sell).
@@ -1884,7 +1884,7 @@ function EditorToolbar({
                             style={{
                                 fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700,
                                 color: C.dark, background: 'transparent', border: 'none',
-                                outline: 'none', width: 160,
+                                outline: 'none', width: 200,
                                 borderBottom: `1px solid transparent`,
                                 padding: '2px 4px', borderRadius: 4,
                                 cursor: 'text',
