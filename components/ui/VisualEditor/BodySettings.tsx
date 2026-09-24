@@ -62,16 +62,53 @@ const WIDTH_PRESETS = [
     { label: '800px', value: 800 },
 ]
 
+// ── Apply to All button ───────────────────────────────────────────────────────
+function ApplyToAllButton({ onApply }: { onApply: () => void }) {
+    const [state, setState] = useState<'idle' | 'confirm' | 'done'>('idle')
+
+    const handleClick = () => {
+        if (state === 'idle') {
+            setState('confirm')
+            setTimeout(() => setState('idle'), 3000)
+        } else if (state === 'confirm') {
+            onApply()
+            setState('done')
+            setTimeout(() => setState('idle'), 2000)
+        }
+    }
+
+    const label = state === 'confirm' ? '⚠ Click again to confirm' : state === 'done' ? '✓ Applied!' : '↓ Push to all blocks'
+    const bg = state === 'confirm' ? '#fef3c7' : state === 'done' ? C.successLight : C.primaryLight
+    const border = state === 'confirm' ? '#f59e0b' : state === 'done' ? C.success : C.primary
+    const color = state === 'confirm' ? '#b45309' : state === 'done' ? C.success : C.primary
+
+    return (
+        <button
+            onClick={handleClick}
+            style={{
+                width: '100%', marginBottom: 10, padding: '8px 12px',
+                borderRadius: 8, border: `1.5px solid ${border}`,
+                backgroundColor: bg, color, cursor: 'pointer',
+                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                transition: 'all 0.15s', textAlign: 'center' as const,
+            }}
+        >
+            {label}
+        </button>
+    )
+}
+
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface BodySettingsProps {
     settings: CanvasSettings
     onUpdate: (settings: CanvasSettings) => void
+    onApplyToAll?: () => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function BodySettings({ settings, onUpdate }: BodySettingsProps) {
+export default function BodySettings({ settings, onUpdate, onApplyToAll }: BodySettingsProps) {
     const [customWidth, setCustomWidth] = useState(String(settings.maxWidth))
     const [customWidthFocused, setCustomWidthFocused] = useState(false)
     const [resetConfirm, setResetConfirm] = useState(false)
@@ -396,8 +433,11 @@ export default function BodySettings({ settings, onUpdate }: BodySettingsProps) 
                 {/* ── Global Design Tokens ── */}
                 <Section title="Brand Tokens" Icon={Palette}>
                     <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
-                        Set once — propagates to all blocks automatically
+                        Set your brand colours once — then push to all existing blocks.
                     </p>
+                    {onApplyToAll && (
+                        <ApplyToAllButton onApply={onApplyToAll} />
+                    )}
                     <ColorRow
                         label="Primary colour"
                         value={settings.primaryColor ?? '#7530fb'}

@@ -952,6 +952,39 @@ export default function VisualEditor({
         requestAnimationFrame(() => { isInternalChange.current = false })
     }, [blocks, onChange])
 
+    // Push global tokens from canvasSettings into every existing block's props
+    const handleApplyGlobalToAll = useCallback(() => {
+        const tokenMap: Record<string, any> = {
+            // Color tokens — only push to blocks that have these props
+            accentColor: canvasSettings.primaryColor,
+            headerBg: canvasSettings.primaryColor,
+            bgColor: canvasSettings.canvasBg,
+            borderColor: canvasSettings.primaryColor + '44',
+            // Typography
+            fontFamily: canvasSettings.fontStack,
+            // Spacing
+            paddingTop: canvasSettings.spacingBase,
+            paddingBottom: canvasSettings.spacingBase,
+            // Border radius
+            borderRadius: canvasSettings.borderRadiusBase,
+        }
+        const updatedBlocks = blocks.map(block => {
+            const def = getDefinition(block.type)
+            if (!def) return block
+            const defaultProps = def.defaultProps as Record<string, any>
+            const currentProps = block.props as Record<string, any>
+            // Only update props that exist in this block's default schema
+            const patch: Record<string, any> = {}
+            for (const [key, val] of Object.entries(tokenMap)) {
+                if (key in defaultProps) {
+                    patch[key] = val
+                }
+            }
+            return { ...block, props: { ...currentProps, ...patch } }
+        })
+        commitBlocks(updatedBlocks)
+    }, [blocks, canvasSettings, commitBlocks])
+
     // ── Keyboard shortcuts ────────────────────────────────────────────────────
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -1375,6 +1408,7 @@ export default function VisualEditor({
                     // BodySettings
                     canvasSettings={canvasSettings}
                     onUpdateSettings={handleUpdateSettings}
+                    onApplyGlobalToAll={handleApplyGlobalToAll}
                     // ImagesTab — direct asset focus (no slot cards)
                     onInsertImage={handleInsertImage}
                     selectedId={selectedId}

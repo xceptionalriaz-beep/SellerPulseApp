@@ -74,6 +74,7 @@ interface SidebarPanelProps {
     // BodySettings props
     canvasSettings: CanvasSettings
     onUpdateSettings: (settings: CanvasSettings) => void
+    onApplyGlobalToAll?: () => void
 
     // ImagesTab props
     onInsertImage: (url: string, alt: string, propKey?: string, propIndex?: number) => void
@@ -108,6 +109,7 @@ export default function SidebarPanel({
     onInsertTemplate,
     canvasSettings,
     onUpdateSettings,
+    onApplyGlobalToAll,
     onInsertImage,
     selectedId,
     selectedSubSlot,
@@ -177,6 +179,7 @@ export default function SidebarPanel({
                         <BodySettings
                             settings={canvasSettings}
                             onUpdate={onUpdateSettings}
+                            onApplyToAll={onApplyGlobalToAll}
                         />
                     )}
 
