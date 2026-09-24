@@ -638,7 +638,13 @@ function VisualEditorInner() {
                             zIndex: 1000, overflow: 'hidden',
                         }}>
                             {/* Category section */}
-                            <div style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${C.border}` }}>
+                            {/* onMouseDown stopPropagation prevents the portal-rendered
+                                ProDropdown menu clicks from reaching the document mousedown
+                                outside-click handler and closing this panel (#bug) */}
+                            <div
+                                onMouseDown={e => e.stopPropagation()}
+                                style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${C.border}` }}
+                            >
                                 <p style={{
                                     margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
                                     fontSize: 10, fontWeight: 700, color: C.muted,
