@@ -286,7 +286,6 @@ export default function BlockToolbar({
     }
 
     const handleInsertChar = (char: string) => {
-        setShowInsertPicker(false)
         const iframe = document.querySelector('iframe') as HTMLIFrameElement
         if (iframe?.contentWindow) {
             iframe.contentWindow.postMessage({
@@ -295,6 +294,8 @@ export default function BlockToolbar({
                 value: char,
             }, '*')
         }
+        // Close picker AFTER postMessage so commitEdit doesn't fire first
+        setTimeout(() => setShowInsertPicker(false), 50)
     }
 
     const handleFormatSlotProp = (format: string, value: string) => {
