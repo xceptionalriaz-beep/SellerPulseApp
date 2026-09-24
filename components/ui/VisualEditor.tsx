@@ -1876,23 +1876,54 @@ function EditorToolbar({
 
                 {/* Template name */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <input
-                        value={templateName}
-                        onChange={e => onTemplateNameChange(e.target.value)}
-                        maxLength={50}
-                        style={{
-                            fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700,
-                            color: C.dark, background: 'transparent', border: 'none',
-                            outline: 'none', width: 140,
-                            borderBottom: `1px solid transparent`,
-                            padding: '2px 4px', borderRadius: 4,
-                            cursor: 'text',
-                            transition: 'border-color 0.15s',
-                        }}
-                        onFocus={e => e.currentTarget.style.borderBottomColor = C.border}
-                        onBlur={e => e.currentTarget.style.borderBottomColor = 'transparent'}
-                        placeholder="Template name..."
-                    />
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <input
+                            value={templateName}
+                            onChange={e => onTemplateNameChange(e.target.value)}
+                            maxLength={50}
+                            style={{
+                                fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700,
+                                color: C.dark, background: 'transparent', border: 'none',
+                                outline: 'none', width: 160,
+                                borderBottom: `1px solid transparent`,
+                                padding: '2px 4px', borderRadius: 4,
+                                cursor: 'text',
+                                transition: 'border-color 0.15s',
+                            }}
+                            onFocus={e => e.currentTarget.style.borderBottomColor = C.border}
+                            onBlur={e => e.currentTarget.style.borderBottomColor = 'transparent'}
+                            placeholder=""
+                        />
+                        {/* Animated placeholder — only shows when input is empty */}
+                        {!templateName && (
+                            <span
+                                style={{
+                                    position: 'absolute',
+                                    left: 4,
+                                    fontFamily: 'Syne, sans-serif',
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    color: C.muted,
+                                    pointerEvents: 'none',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    width: 160,
+                                    animation: 'typingPlaceholder 2.4s steps(14, end) infinite',
+                                }}
+                            >
+                                Name your design…
+                            </span>
+                        )}
+                        <style>{`
+                            @keyframes typingPlaceholder {
+                                0%   { width: 0ch; opacity: 1; }
+                                60%  { width: 14ch; opacity: 1; }
+                                80%  { width: 14ch; opacity: 1; }
+                                90%  { width: 14ch; opacity: 0; }
+                                100% { width: 0ch; opacity: 0; }
+                            }
+                        `}</style>
+                    </div>
                     {/* Dirty indicator — appears whenever there are unsaved changes */}
                     {isDirty && (
                         <span
