@@ -3387,27 +3387,85 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 
         // ── LOWER PRIORITY BLOCKS ────────────────────────────────────────────
 
-        case 'data_table':
+        case 'specs_table': {
+            const rows: Array<{ key: string; value: string }> = props.rows ?? []
+            const rowPhButton = (indexStr: string, _label: string) => (
+                <button
+                    onClick={() => {
+                        const i = parseInt(indexStr)
+                        // cycle through common eBay placeholders
+                        const phs = ['{{BRAND}}', '{{MPN}}', '{{EAN}}', '{{ITEM_CONDITION}}', '{{MODEL}}', '{{WEIGHT}}', '{{COLOUR}}', '{{SIZE}}', '{{MATERIAL}}']
+                        const cur = rows[i]?.value ?? ''
+                        const next = phs.find(p => !cur.includes(p)) ?? phs[0]
+                        const updated = rows.map((r, j) => j === i ? { ...r, value: cur ? cur + ', ' + next : next } : r)
+                        updateProps({ rows: updated })
+                    }}
+                    style={{
+                        marginTop: 3, padding: '2px 8px', border: `1px solid ${C.primaryBorder}`,
+                        borderRadius: 5, background: C.primaryLight, color: C.primary,
+                        fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                >+ Placeholder</button>
+            )
             return (
-                <Section title="Table rows">
-                    <InfoBox>One row per line in format: Label | Value</InfoBox>
-                    <TextareaInput
-                        label="Rows (Label | Value)"
-                        value={Array.isArray(props.rows)
-                            ? props.rows.map((r: string[]) => r.join(' | ')).join('\n')
-                            : 'Brand | {{BRAND}}\nModel | {{MPN}}\nCondition | {{ITEM_CONDITION}}'
-                        }
-                        rows={6}
-                        onChange={v => updateProps({
-                            rows: v.split('\n')
-                                .filter((s: string) => s.includes('|'))
-                                .map((s: string) => s.split('|').map((p: string) => p.trim()))
-                        })}
+                <>
+                    <Section title="Title">
+                        <ToggleRow label="Show section title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
+                        {(props.showTitle ?? true) && (
+                            <TextInput label="Title text" value={props.titleText ?? 'Item Specifics'} onChange={v => updateProps({ titleText: v })} />
+                        )}
+                    </Section>
+                    <Section title={`Rows (${rows.length})`}>
+                        <TableRowEditor
+                            rows={rows}
+                            onChange={r => updateProps({ rows: r })}
+                            keyLabel="Specification"
+                            valueLabel="Value"
+                            phButton={rowPhButton}
+                        />
+                        <InfoBox>Use eBay tokens like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — replaced at listing time.</InfoBox>
+                    </Section>
+                </>
+            )
+        }
+
+        case 'data_table': {
+            const rows: Array<{ key: string; value: string }> = Array.isArray(props.rows)
+                ? props.rows.map((r: any) => Array.isArray(r) ? { key: r[0] ?? '', value: r[1] ?? '' } : r)
+                : [
+                    { key: 'Brand', value: '{{BRAND}}' },
+                    { key: 'Model', value: '{{MPN}}' },
+                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
+                ]
+            const rowPhButton = (indexStr: string, _label: string) => (
+                <button
+                    onClick={() => {
+                        const i = parseInt(indexStr)
+                        const phs = ['{{BRAND}}', '{{MPN}}', '{{EAN}}', '{{ITEM_CONDITION}}', '{{MODEL}}', '{{SELLER_NAME}}']
+                        const cur = rows[i]?.value ?? ''
+                        const next = phs.find(p => !cur.includes(p)) ?? phs[0]
+                        const updated = rows.map((r, j) => j === i ? { ...r, value: cur ? cur + ', ' + next : next } : r)
+                        updateProps({ rows: updated.map(r => [r.key, r.value]) })
+                    }}
+                    style={{
+                        marginTop: 3, padding: '2px 8px', border: `1px solid ${C.primaryBorder}`,
+                        borderRadius: 5, background: C.primaryLight, color: C.primary,
+                        fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                >+ Placeholder</button>
+            )
+            return (
+                <Section title={`Table rows (${rows.length})`}>
+                    <TableRowEditor
+                        rows={rows}
+                        onChange={r => updateProps({ rows: r.map(row => [row.key, row.value]) })}
+                        keyLabel="Label"
+                        valueLabel="Value"
+                        phButton={rowPhButton}
                     />
-                    <ColorRow label="Alt row colour" value={props.altBg ?? '#f8f7ff'} onChange={v => updateProps({ altBg: v })} />
-                    <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
                 </Section>
             )
+        }
 
         case 'compatibility_table':
             return (
@@ -3817,6 +3875,23 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 
         case 'item_specifics': {
             const rows: Array<{ key: string; value: string }> = props.rows ?? []
+            const rowPhButton = (indexStr: string, _label: string) => (
+                <button
+                    onClick={() => {
+                        const i = parseInt(indexStr)
+                        const phs = ['{{BRAND}}', '{{MPN}}', '{{EAN}}', '{{ITEM_CONDITION}}', '{{MODEL}}', '{{COLOUR}}', '{{SIZE}}', '{{MATERIAL}}', '{{WEIGHT}}']
+                        const cur = rows[i]?.value ?? ''
+                        const next = phs.find(p => !cur.includes(p)) ?? phs[0]
+                        const updated = rows.map((r, j) => j === i ? { ...r, value: cur ? cur + ', ' + next : next } : r)
+                        updateProps({ rows: updated })
+                    }}
+                    style={{
+                        marginTop: 3, padding: '2px 8px', border: `1px solid ${C.primaryBorder}`,
+                        borderRadius: 5, background: C.primaryLight, color: C.primary,
+                        fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                >+ Placeholder</button>
+            )
             return (
                 <>
                     <Section title="Title">
@@ -3825,49 +3900,15 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             <TextInput label="Title text" value={props.titleText ?? 'Item Specifics'} onChange={v => updateProps({ titleText: v })} />
                         )}
                     </Section>
-                    <Section title="Rows">
-                        {rows.map((row, i) => (
-                            <div key={i} style={{ marginBottom: 8 }}>
-                                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                                    <TextInput
-                                        label={`Key ${i + 1}`}
-                                        value={row.key}
-                                        onChange={v => {
-                                            const next = rows.map((r, j) => j === i ? { ...r, key: v } : r)
-                                            updateProps({ rows: next })
-                                        }}
-                                    />
-                                    <TextInput
-                                        label="Value"
-                                        value={row.value}
-                                        onChange={v => {
-                                            const next = rows.map((r, j) => j === i ? { ...r, value: v } : r)
-                                            updateProps({ rows: next })
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => updateProps({ rows: rows.filter((_, j) => j !== i) })}
-                                        style={{
-                                            marginTop: 18, padding: '4px 8px', borderRadius: 4,
-                                            border: '1px solid #fca5a5', background: '#fff',
-                                            color: '#dc2626', fontSize: 12, cursor: 'pointer', flexShrink: 0,
-                                        }}
-                                        title="Remove row"
-                                    >✕</button>
-                                </div>
-                            </div>
-                        ))}
-                        <button
-                            onClick={() => updateProps({ rows: [...rows, { key: 'New Field', value: '' }] })}
-                            style={{
-                                marginTop: 4, padding: '6px 14px', borderRadius: 6,
-                                border: '1.5px dashed #7530fb', background: '#fff',
-                                color: '#7530fb', fontSize: 12, fontWeight: 600, cursor: 'pointer', width: '100%',
-                            }}
-                        >
-                            + Add row
-                        </button>
-                        <InfoBox>Use eBay placeholders like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — they get replaced at listing time.</InfoBox>
+                    <Section title={`Rows (${rows.length})`}>
+                        <TableRowEditor
+                            rows={rows}
+                            onChange={r => updateProps({ rows: r })}
+                            keyLabel="Field name"
+                            valueLabel="Value"
+                            phButton={rowPhButton}
+                        />
+                        <InfoBox>Use eBay tokens like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — replaced at listing time.</InfoBox>
                     </Section>
                 </>
             )
@@ -4608,6 +4649,134 @@ function SelectInput({
                 onChanged={onChange}
                 width="full"
             />
+        </div>
+    )
+}
+
+// ─── Shared Table Row Editor ───────────────────────────────────────────────
+function TableRowEditor({
+    rows,
+    onChange,
+    keyLabel = 'Label',
+    valueLabel = 'Value',
+    phButton,
+    addLabel = '+ Add row',
+    maxRows = 30,
+}: {
+    rows: Array<{ key: string; value: string }>
+    onChange: (rows: Array<{ key: string; value: string }>) => void
+    keyLabel?: string
+    valueLabel?: string
+    phButton?: (fieldKey: string, label: string) => React.ReactNode
+    addLabel?: string
+    maxRows?: number
+}) {
+    const [dragIndex, setDragIndex] = useState<number | null>(null)
+    const [overIndex, setOverIndex] = useState<number | null>(null)
+
+    const update = (i: number, field: 'key' | 'value', v: string) => {
+        const next = rows.map((r, j) => j === i ? { ...r, [field]: v } : r)
+        onChange(next)
+    }
+    const remove = (i: number) => onChange(rows.filter((_, j) => j !== i))
+    const add = () => onChange([...rows, { key: '', value: '' }])
+
+    const onDragStart = (i: number) => setDragIndex(i)
+    const onDragOver = (e: React.DragEvent, i: number) => { e.preventDefault(); setOverIndex(i) }
+    const onDrop = (i: number) => {
+        if (dragIndex === null || dragIndex === i) { setDragIndex(null); setOverIndex(null); return }
+        const next = [...rows]
+        const [moved] = next.splice(dragIndex, 1)
+        next.splice(i, 0, moved)
+        onChange(next)
+        setDragIndex(null)
+        setOverIndex(null)
+    }
+
+    return (
+        <div>
+            {rows.map((row, i) => (
+                <div
+                    key={i}
+                    draggable
+                    onDragStart={() => onDragStart(i)}
+                    onDragOver={e => onDragOver(e, i)}
+                    onDrop={() => onDrop(i)}
+                    onDragEnd={() => { setDragIndex(null); setOverIndex(null) }}
+                    style={{
+                        marginBottom: 6,
+                        borderRadius: 8,
+                        border: overIndex === i ? `2px solid ${C.primary}` : '1.5px solid #e5e7eb',
+                        background: dragIndex === i ? '#f3eeff' : '#fafafa',
+                        padding: '8px 8px 6px',
+                        opacity: dragIndex === i ? 0.5 : 1,
+                        transition: 'border-color 0.15s, background 0.15s',
+                    }}
+                >
+                    {/* Row header: number + drag handle + delete */}
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 6 }}>
+                        <span style={{
+                            width: 18, height: 18, borderRadius: '50%',
+                            background: C.primaryLight, color: C.primary,
+                            fontSize: 10, fontWeight: 700, fontFamily: 'DM Sans, sans-serif',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>{i + 1}</span>
+                        <span
+                            title="Drag to reorder"
+                            style={{ cursor: 'grab', color: '#9ca3af', fontSize: 14, lineHeight: 1, userSelect: 'none', flexShrink: 0 }}
+                        >⠿</span>
+                        <span style={{ flex: 1 }} />
+                        <button
+                            onClick={() => remove(i)}
+                            title="Remove row"
+                            style={{
+                                padding: '2px 7px', borderRadius: 4, border: '1px solid #fca5a5',
+                                background: '#fff1f1', color: '#dc2626', fontSize: 11,
+                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', lineHeight: 1.4,
+                            }}
+                        >✕</button>
+                    </div>
+                    {/* Key field */}
+                    <div style={{ marginBottom: 4 }}>
+                        <p style={{ margin: '0 0 3px', fontSize: 10, color: C.body, fontFamily: 'DM Sans, sans-serif' }}>{keyLabel}</p>
+                        <input
+                            type="text"
+                            value={row.key}
+                            placeholder={keyLabel}
+                            onChange={e => update(i, 'key', e.target.value)}
+                            style={{ ...inputStyle, fontWeight: 600 }}
+                        />
+                    </div>
+                    {/* Value field */}
+                    <div>
+                        <p style={{ margin: '0 0 3px', fontSize: 10, color: C.body, fontFamily: 'DM Sans, sans-serif' }}>{valueLabel}</p>
+                        <input
+                            type="text"
+                            value={row.value}
+                            placeholder={`{{PLACEHOLDER}} or text`}
+                            onChange={e => update(i, 'value', e.target.value)}
+                            style={inputStyle}
+                        />
+                        {phButton?.(String(i), valueLabel)}
+                    </div>
+                </div>
+            ))}
+            {rows.length < maxRows && (
+                <button
+                    onClick={add}
+                    style={{
+                        marginTop: 6, padding: '7px 0', borderRadius: 7, width: '100%',
+                        border: `1.5px dashed ${C.primary}`, background: C.primaryLight,
+                        color: C.primary, fontSize: 12, fontWeight: 600,
+                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                >{addLabel}</button>
+            )}
+            {rows.length === 0 && (
+                <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans, sans-serif', textAlign: 'center', margin: '8px 0' }}>
+                    No rows yet — click "{addLabel}" to start
+                </p>
+            )}
         </div>
     )
 }
