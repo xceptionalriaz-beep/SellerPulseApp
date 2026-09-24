@@ -1410,7 +1410,7 @@ export default function VisualEditor({
                                 setActiveTab('content')
                                 setPanelOpen(true)
                             }}
-                            onToggleLivePreview={onToggleLivePreview}
+                            onToggleLivePreview={() => setLivePreview(p => !p)}
                             livePreview={livePreview}
                             persistent
                         />
