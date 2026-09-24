@@ -1900,33 +1900,28 @@ function EditorToolbar({
                                 style={{
                                     position: 'absolute',
                                     left: 4,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
                                     fontFamily: 'Syne, sans-serif',
                                     fontSize: 13,
                                     fontWeight: 700,
                                     color: C.muted,
                                     pointerEvents: 'none',
                                     whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    width: 160,
-                                    display: 'inline-block',
-                                    maxWidth: 240,
                                 }}
                             >
-                                Name your design…
+                                Name your design<span className="dot-anim">.</span><span className="dot-anim" style={{ animationDelay: '0.3s' }}>.</span><span className="dot-anim" style={{ animationDelay: '0.6s' }}>.</span>
                             </span>
                         )}
                         <style>{`
-                            .typing-placeholder {
-                                animation: typingIn 8s steps(20, end) infinite;
-                                border-right: 2px solid transparent;
+                            .dot-anim {
+                                animation: dotFade 1.5s ease-in-out infinite;
+                                opacity: 0;
                             }
-                            @keyframes typingIn {
-                                0%   { max-width: 0;     opacity: 0; border-right-color: transparent; }
-                                8%   { max-width: 0;     opacity: 1; border-right-color: currentColor; }
-                                40%  { max-width: 240px; opacity: 1; border-right-color: currentColor; }
-                                52%  { max-width: 240px; opacity: 1; border-right-color: transparent; }
-                                62%  { max-width: 240px; opacity: 0; border-right-color: transparent; }
-                                100% { max-width: 0;     opacity: 0; border-right-color: transparent; }
+                            @keyframes dotFade {
+                                0%   { opacity: 0; }
+                                50%  { opacity: 1; }
+                                100% { opacity: 0; }
                             }
                         `}</style>
                     </div>
