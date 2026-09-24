@@ -465,19 +465,8 @@ function VisualEditorInner() {
             backgroundColor: C.bg,
         }}>
 
-            {/* ── TOP BAR ─────────────────────────────────────────────────── */}
-            <div style={{
-                height: 52,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 16px',
-                backgroundColor: C.surface,
-                borderBottom: `1px solid ${C.border}`,
-                flexShrink: 0,
-                gap: 12,
-                zIndex: 10,
-            }}>
+            {/* ── TOP BAR REMOVED — back + name now live in EditorToolbar ── */}
+            <div style={{ display: 'none' }}>
                 {/* Left — back + name */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
                     {/* Back button */}
@@ -796,6 +785,7 @@ function VisualEditorInner() {
                     onExportReady={(fn) => { exportFnRef.current = fn }}
                     onPublish={handlePublish}
                     publishStatus={publishStatus}
+                    onBack={() => router.push('/dashboard/design')}
                     toolbarSlot={
                         <div style={{ position: 'relative' }} ref={actionMenuRef}>
                             {/* Trigger button */}
