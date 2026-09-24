@@ -25,7 +25,7 @@ import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
-    Globe, LayoutTemplate, Code2,
+    Globe, LayoutTemplate, Code2, Download,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
@@ -175,6 +175,8 @@ function VisualEditorInner() {
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const [actionMenuOpen, setActionMenuOpen] = useState(false)
     const actionMenuRef = useRef<HTMLDivElement>(null)
+    const exportFnRef = useRef<(() => void) | null>(null)
+    const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published'>('idle')
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -344,6 +346,7 @@ function VisualEditorInner() {
 
     // ── Publish ───────────────────────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
+        setPublishStatus('publishing')
         setPublishing(true)
         setPublished(false)
         try {
@@ -368,8 +371,9 @@ function VisualEditorInner() {
                     })
                     .eq('id', savedId)
                 setPublished(true)
+                setPublishStatus('published')
+                setTimeout(() => { setPublished(false); setPublishStatus('idle') }, 3000)
                 router.refresh()
-                setTimeout(() => setPublished(false), 3000)
             } else {
                 // Save first, then publish
                 const { data, error } = await (supabase as any)
@@ -386,8 +390,9 @@ function VisualEditorInner() {
                     setSavedId(data.id)
                     window.history.replaceState(null, '', `?id=${data.id}`)
                     setPublished(true)
+                    setPublishStatus('published')
+                    setTimeout(() => { setPublished(false); setPublishStatus('idle') }, 3000)
                     router.push('/dashboard/design?tab=templates')
-                    setTimeout(() => setPublished(false), 3000)
                 }
             }
         } catch (err) {

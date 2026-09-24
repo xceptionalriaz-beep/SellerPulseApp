@@ -24,7 +24,7 @@ import { createClient } from '@/lib/supabase'
 import {
     Undo2, Redo2, Trash2, Eye, EyeOff,
     AlertTriangle, CheckCircle2, X,
-    Monitor, Tablet, Smartphone,
+    Monitor, Tablet, Smartphone, Download, Globe,
     type LucideIcon,
 } from 'lucide-react'
 
@@ -129,6 +129,12 @@ interface VisualEditorProps {
     onChange: (html: string) => void
     placeholders: PlaceholderGroup[]
     templateCategory?: string   // DB category for saving — passed from parent page
+    /** Called once with a stable trigger fn so parent can fire Export HTML from outside */
+    onExportReady?: (fn: () => void) => void
+    /** Called when user clicks Publish in the bottom toolbar */
+    onPublish?: () => void
+    /** True while publish is in progress — shows spinner on the Publish button */
+    publishStatus?: 'idle' | 'publishing' | 'published'
     /**
      * Initial canvas category. When a saved template is loaded, the parent
      * (e.g. app/dashboard/design/visual-editor/page.tsx) already knows the
@@ -149,6 +155,9 @@ export default function VisualEditor({
     placeholders,
     initialCategory,
     templateCategory = 'general',
+    onExportReady,
+    onPublish,
+    publishStatus = 'idle',
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -779,6 +788,13 @@ export default function VisualEditor({
         URL.revokeObjectURL(url)
     }, [blocks, canvasSettings, templateName])
 
+    // Expose export fn to parent (page.tsx calls it from the dropdown)
+    const onExportReadyRef = useRef(onExportReady)
+    useEffect(() => { onExportReadyRef.current = onExportReady }, [onExportReady])
+    useEffect(() => {
+        onExportReadyRef.current?.(handleExport)
+    }, [handleExport])
+
     const handleUndo = useCallback(() => {
         if (undoStack.length === 0) return
         const last = undoStack[undoStack.length - 1]
@@ -1279,6 +1295,8 @@ export default function VisualEditor({
                 onSave={handleSave}
                 saveStatus={saveStatus}
                 onExport={handleExport}
+                onPublish={onPublish}
+                publishStatus={publishStatus}
                 onClearAll={() => {
                     if (blocks.length === 0) return
                     setShowClearConfirm(true)
@@ -1744,6 +1762,8 @@ interface EditorToolbarProps {
     saveStatus: 'idle' | 'saving' | 'saved' | 'error'
     onExport: () => void
     onClearAll: () => void
+    onPublish?: () => void
+    publishStatus?: 'idle' | 'publishing' | 'published'
 }
 
 function EditorToolbar({
@@ -1751,7 +1771,8 @@ function EditorToolbar({
     livePreview, focusMode, canvasZoom, templateName,
     isDirty, currentTemplateId, deviceWidth, onDeviceChange,
     onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
-    onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll
+    onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll,
+    onPublish, publishStatus = 'idle',
 }: EditorToolbarProps) {
     return (
         <div style={{
