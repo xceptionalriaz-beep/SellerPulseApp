@@ -137,6 +137,8 @@ interface VisualEditorProps {
     publishStatus?: 'idle' | 'publishing' | 'published'
     /** Slot rendered at the far right of the second toolbar row (Row 2) */
     toolbarSlot?: React.ReactNode
+    /** Called when user clicks the back button in the toolbar */
+    onBack?: () => void
     /**
      * Initial canvas category. When a saved template is loaded, the parent
      * (e.g. app/dashboard/design/visual-editor/page.tsx) already knows the
@@ -161,6 +163,7 @@ export default function VisualEditor({
     onPublish,
     publishStatus = 'idle',
     toolbarSlot,
+    onBack,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -1301,6 +1304,7 @@ export default function VisualEditor({
                 onPublish={onPublish}
                 publishStatus={publishStatus}
                 toolbarSlot={toolbarSlot}
+                onBack={onBack}
                 onClearAll={() => {
                     if (blocks.length === 0) return
                     setShowClearConfirm(true)
@@ -1811,6 +1815,7 @@ interface EditorToolbarProps {
     onPublish?: () => void
     publishStatus?: 'idle' | 'publishing' | 'published'
     toolbarSlot?: React.ReactNode
+    onBack?: () => void
 }
 
 function EditorToolbar({
@@ -1819,7 +1824,7 @@ function EditorToolbar({
     isDirty, currentTemplateId, deviceWidth, onDeviceChange,
     onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
     onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll,
-    onPublish, publishStatus = 'idle', toolbarSlot,
+    onPublish, publishStatus = 'idle', toolbarSlot, onBack,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -1833,8 +1838,42 @@ function EditorToolbar({
             flexShrink: 0,
             gap: 12,
         }}>
-            {/* Left — template name + undo/redo */}
+            {/* Left — back + title + template name + undo/redo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
+                {/* Back button */}
+                {onBack && (
+                    <>
+                        <button
+                            onClick={onBack}
+                            title="Back to Design Studio"
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 5,
+                                padding: '4px 10px',
+                                border: `1px solid ${C.border}`, borderRadius: 7,
+                                backgroundColor: 'transparent', cursor: 'pointer',
+                                fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                                color: C.secondary, whiteSpace: 'nowrap', flexShrink: 0,
+                                transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg; e.currentTarget.style.color = C.dark }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = C.secondary }}
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                            Design Studio
+                        </button>
+                        <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+                        <span style={{
+                            fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                            fontSize: 13, color: C.primary,
+                            flexShrink: 0, whiteSpace: 'nowrap',
+                        }}>
+                            Visual Template Builder
+                        </span>
+                        <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+                    </>
+                )}
+
                 {/* Template name */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <input
