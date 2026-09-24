@@ -16,7 +16,6 @@ import {
     AlertCircle, AlertTriangle, CheckCircle,
     Store, Search, Package, Anchor,
     RefreshCw, Trash2,
-    Superscript, Subscript, SmilePlus,
 } from 'lucide-react'
 
 const C = {
@@ -106,9 +105,6 @@ export default function BlockToolbar({
     const [showRedirectTooltip, setShowRedirectTooltip] = useState(false)
     const [showHighlightPicker, setShowHighlightPicker] = useState(false)
     const highlightRef = useRef<HTMLDivElement>(null)
-    const [showInsertPicker, setShowInsertPicker] = useState(false)
-    const [insertTab, setInsertTab] = useState<'special' | 'emoji'>('special')
-    const insertPickerRef = useRef<HTMLDivElement>(null)
     const safeProps = blockProps ?? {}
 
     // Detect existing link in slot HTML
@@ -240,18 +236,6 @@ export default function BlockToolbar({
         return () => document.removeEventListener('mousedown', handleHighlightOutside)
     }, [showHighlightPicker])
 
-    // Close insert picker on outside click
-    useEffect(() => {
-        if (!showInsertPicker) return
-        function handleInsertOutside(e: MouseEvent) {
-            if (insertPickerRef.current && !insertPickerRef.current.contains(e.target as Node)) {
-                setShowInsertPicker(false)
-            }
-        }
-        document.addEventListener('mousedown', handleInsertOutside)
-        return () => document.removeEventListener('mousedown', handleInsertOutside)
-    }, [showInsertPicker])
-
     // ─────────────────────────────────────────────────────────────────────────
 
     if (blockProps === null && !slotEdit) {
@@ -269,20 +253,10 @@ export default function BlockToolbar({
         )
     }
 
-    // Always target the iframe for the currently-active block, not just the first iframe on the page
-    const getBlockIframe = (): HTMLIFrameElement | null => {
-        const blockId = slotEdit?.blockId ?? activeSelection?.blockId
-        if (blockId) {
-            return document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement | null
-        }
-        // fallback: first iframe (single-block pages)
-        return document.querySelector('iframe') as HTMLIFrameElement | null
-    }
-
     const handleHighlight = (color: string) => {
         setShowHighlightPicker(false)
         // Send execCommand directly into the iframe where selection is live
-        const iframe = getBlockIframe()
+        const iframe = document.querySelector('iframe') as HTMLIFrameElement
         if (iframe?.contentWindow) {
             if (color === 'none') {
                 iframe.contentWindow.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'removeFormat' }, '*')
@@ -293,19 +267,6 @@ export default function BlockToolbar({
             // fallback for slot-based blocks
             onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'highlight', color, activeSelection)
         }
-    }
-
-    const handleInsertChar = (char: string) => {
-        const iframe = getBlockIframe()
-        if (iframe?.contentWindow) {
-            iframe.contentWindow.postMessage({
-                type: 'RIAZIFY_APPLY_FORMAT',
-                command: 'insertHTML',
-                value: char,
-            }, '*')
-        }
-        // Close picker AFTER postMessage so commitEdit doesn't fire first
-        setTimeout(() => setShowInsertPicker(false), 50)
     }
 
     const handleFormatSlotProp = (format: string, value: string) => {
@@ -547,24 +508,6 @@ export default function BlockToolbar({
                 backgroundColor: activeProps.textDecoration === 'line-through' ? C.primary : 'transparent',
                 color: activeProps.textDecoration === 'line-through' ? '#ffffff' : '#1f1d2e',
             }}>S</button>
-            <button
-                onClick={() => {
-                    getBlockIframe()?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'superscript', value: null }, '*')
-                }}
-                title="Superscript"
-                style={{ ...miniBtn }}
-            >
-                <Superscript size={14} />
-            </button>
-            <button
-                onClick={() => {
-                    getBlockIframe()?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'subscript', value: null }, '*')
-                }}
-                title="Subscript"
-                style={{ ...miniBtn }}
-            >
-                <Subscript size={14} />
-            </button>
             <button onClick={handleToggleBlockquote} title="Blockquote" style={{
                 ...miniBtn,
                 backgroundColor: safeProps.isBlockquote ? C.primary : 'transparent',
@@ -698,134 +641,6 @@ export default function BlockToolbar({
                         >
                             Clear highlight
                         </button>
-                    </div>
-                )}
-            </div>
-
-            {/* Insert — Special Characters + Emoji */}
-            <div ref={insertPickerRef} style={{ position: 'relative', display: 'inline-flex' }}>
-                <button
-                    onClick={() => setShowInsertPicker(p => !p)}
-                    title="Insert character or emoji"
-                    style={{
-                        ...miniBtn,
-                        backgroundColor: showInsertPicker ? C.primary : 'transparent',
-                        color: showInsertPicker ? '#ffffff' : '#1f1d2e',
-                    }}
-                >
-                    <SmilePlus size={14} />
-                </button>
-                {showInsertPicker && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 'calc(100% + 8px)',
-                        left: 0,
-                        zIndex: 9999,
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 12,
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.13)',
-                        width: 280,
-                        fontFamily: 'DM Sans, sans-serif',
-                        overflow: 'hidden',
-                    }}>
-                        <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
-                            {(['special', 'emoji'] as const).map(tab => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setInsertTab(tab)}
-                                    style={{
-                                        flex: 1, padding: '8px 0',
-                                        fontSize: 11, fontWeight: 700,
-                                        background: 'transparent', border: 'none',
-                                        borderBottom: insertTab === tab ? `2px solid ${C.primary}` : '2px solid transparent',
-                                        color: insertTab === tab ? C.primary : '#94a3b8',
-                                        cursor: 'pointer',
-                                        textTransform: 'capitalize' as const,
-                                    }}
-                                >
-                                    {tab === 'special' ? 'Special Chars' : 'Emoji'}
-                                </button>
-                            ))}
-                        </div>
-                        {insertTab === 'special' && (
-                            <div style={{ padding: '10px 12px' }}>
-                                {[
-                                    { label: 'Symbols', chars: ['©', '®', '™', '°', '±', '×', '÷', '∞', '≈', '≠', '≤', '≥'] },
-                                    { label: 'Arrows', chars: ['→', '←', '↑', '↓', '↔', '⇒', '⇐', '⇔', '▶', '◀', '▲', '▼'] },
-                                    { label: 'Marks', chars: ['✓', '✗', '✕', '★', '☆', '•', '·', '–', '—', '"', '"', '…'] },
-                                    { label: 'Currency', chars: ['£', '€', '¥', '¢', '₹', '₩', '₪', '₿', '$', '¤', '฿', '₫'] },
-                                ].map(group => (
-                                    <div key={group.label} style={{ marginBottom: 8 }}>
-                                        <p style={{ margin: '0 0 4px', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
-                                            {group.label}
-                                        </p>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 2 }}>
-                                            {group.chars.map(ch => (
-                                                <button
-                                                    key={ch}
-                                                    onClick={() => handleInsertChar(ch)}
-                                                    title={ch}
-                                                    style={{
-                                                        width: 28, height: 28,
-                                                        fontSize: 14, lineHeight: '1',
-                                                        background: '#f8f7ff',
-                                                        border: '1px solid #ede9fe',
-                                                        borderRadius: 6,
-                                                        cursor: 'pointer',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        transition: 'background 0.1s',
-                                                    }}
-                                                    onMouseEnter={e => (e.currentTarget.style.background = '#ede9fe')}
-                                                    onMouseLeave={e => (e.currentTarget.style.background = '#f8f7ff')}
-                                                >
-                                                    {ch}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {insertTab === 'emoji' && (
-                            <div style={{ padding: '10px 12px' }}>
-                                {[
-                                    { label: 'Hands & People', chars: ['👍', '👌', '🙌', '🤝', '💪', '👏', '🫶', '✌️', '🤞', '👉', '👈', '☝️'] },
-                                    { label: 'Objects', chars: ['📦', '🚚', '🏷️', '💳', '🔒', '⭐', '🔥', '💯', '✅', '❌', '⚡', '🎁'] },
-                                    { label: 'Shopping', chars: ['🛒', '🛍️', '💰', '💸', '🏆', '🥇', '🎖️', '🏅', '💎', '🆕', '🔝', '📈'] },
-                                    { label: 'Faces', chars: ['😊', '😍', '🤩', '😎', '🥳', '😃', '🙏', '💖', '🌟', '✨', '🎉', '🎊'] },
-                                ].map(group => (
-                                    <div key={group.label} style={{ marginBottom: 8 }}>
-                                        <p style={{ margin: '0 0 4px', fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
-                                            {group.label}
-                                        </p>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 2 }}>
-                                            {group.chars.map(em => (
-                                                <button
-                                                    key={em}
-                                                    onClick={() => handleInsertChar(em)}
-                                                    title={em}
-                                                    style={{
-                                                        width: 32, height: 32,
-                                                        fontSize: 18, lineHeight: '1',
-                                                        background: 'transparent',
-                                                        border: '1px solid transparent',
-                                                        borderRadius: 6,
-                                                        cursor: 'pointer',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        transition: 'background 0.1s',
-                                                    }}
-                                                    onMouseEnter={e => (e.currentTarget.style.background = '#f8f7ff')}
-                                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                                >
-                                                    {em}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
@@ -1225,11 +1040,14 @@ export default function BlockToolbar({
                                             } else if (isButtonBlock) {
                                                 onChange({ ...safeProps, url: '' })
                                             } else if (activeSelection?.selectedText) {
-                                                getBlockIframe()?.contentWindow?.postMessage({
-                                                    type: 'RIAZIFY_APPLY_FORMAT',
-                                                    command: 'unlink',
-                                                    value: null,
-                                                }, '*')
+                                                const iframe = document.querySelector('iframe') as HTMLIFrameElement
+                                                if (iframe?.contentWindow) {
+                                                    iframe.contentWindow.postMessage({
+                                                        type: 'RIAZIFY_APPLY_FORMAT',
+                                                        command: 'unlink',
+                                                        value: null,
+                                                    }, '*')
+                                                }
                                             } else {
                                                 const nextProps = { ...safeProps }
                                                 delete nextProps.linkUrl
@@ -1272,11 +1090,14 @@ export default function BlockToolbar({
                                             onChange({ ...safeProps, url })
                                         } else if (activeSelection?.selectedText) {
                                             // inline text selection — apply via execCommand in iframe
-                                            getBlockIframe()?.contentWindow?.postMessage({
-                                                type: 'RIAZIFY_APPLY_FORMAT',
-                                                command: 'createLink',
-                                                value: url,
-                                            }, '*')
+                                            const iframe = document.querySelector('iframe') as HTMLIFrameElement
+                                            if (iframe?.contentWindow) {
+                                                iframe.contentWindow.postMessage({
+                                                    type: 'RIAZIFY_APPLY_FORMAT',
+                                                    command: 'createLink',
+                                                    value: url,
+                                                }, '*')
+                                            }
                                         } else {
                                             onChange({ ...safeProps, linkUrl: url })
                                         }

@@ -1217,24 +1217,10 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     var savedEditable = null;
 
     document.addEventListener('mouseup', function() {
-      // Save editable and cursor/selection on every mouseup inside iframe
-      if (activeEditable && activeEditable._riazifyEditing) {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+        savedRange = sel.getRangeAt(0).cloneRange();
         savedEditable = activeEditable;
-        var sel = window.getSelection();
-        if (sel && sel.rangeCount > 0) {
-          savedRange = sel.getRangeAt(0).cloneRange();
-        }
-      }
-    });
-
-    document.addEventListener('keyup', function() {
-      // Also save after keyboard navigation changes cursor position
-      if (activeEditable && activeEditable._riazifyEditing) {
-        savedEditable = activeEditable;
-        var sel = window.getSelection();
-        if (sel && sel.rangeCount > 0) {
-          savedRange = sel.getRangeAt(0).cloneRange();
-        }
       }
     });
 
@@ -1255,13 +1241,6 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
           var sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(savedRange);
-        } else {
-          var range = document.createRange();
-          range.selectNodeContents(target);
-          range.collapse(false);
-          var sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
         }
         document.execCommand(cmd, false, val);
         // After createLink, add inline styles so link is visible in canvas and eBay-safe

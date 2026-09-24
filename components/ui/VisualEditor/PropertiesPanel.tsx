@@ -1816,12 +1816,15 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     {(pv === 'single' || pv === 'zoom') && (
                         <Section title="Image">
-                            <SliderInput label="Max width" value={props.maxWidth ?? 500} min={100} max={800} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
-                            <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={60} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                            <SliderInput label="Max width" value={props.maxWidth ?? 600} min={100} max={700} suffix="px" onChange={v => updateProps({ maxWidth: v })} />
+                            <SliderInput label="Border radius" value={props.borderRadius ?? 12} min={0} max={60} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                             <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
                                 options={[{ v: 'contain', l: 'Contain' }, { v: 'cover', l: 'Cover' }, { v: 'fill', l: 'Fill' }]}
                                 onChange={v => updateProps({ objectFit: v })} />
-                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                            {pv === 'single' && <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />}
+                            <SelectInput label="Shadow" value={props.shadowPreset ?? 'none'}
+                                options={[{ v: 'none', l: 'None' }, { v: 'soft', l: 'Soft' }, { v: 'medium', l: 'Medium' }, { v: 'hard', l: 'Hard' }, { v: 'card', l: 'Card' }]}
+                                onChange={v => updateProps({ shadowPreset: v })} />
                             <ToggleRow label="Show border" value={props.showBorder ?? false} onChange={v => updateProps({ showBorder: v })} />
                             {props.showBorder && (
                                 <>
@@ -1829,6 +1832,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                                     <SliderInput label="Border width" value={props.borderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
                                 </>
                             )}
+                            <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
                         </Section>
                     )}
                     {pv === 'zoom' && (
@@ -1849,7 +1853,8 @@ function BlockStyleProps({ block, props, updateProps }: {
                     {pv === 'lifestyle' && (
                         <Section title="Lifestyle Shot">
                             <SliderInput label="Min height" value={props.minHeight ?? 320} min={200} max={600} suffix="px" onChange={v => updateProps({ minHeight: v })} />
-                            <SliderInput label="Name size" value={props.nameFontSize ?? 20} min={14} max={36} suffix="px" onChange={v => updateProps({ nameFontSize: v })} />
+                            <SliderInput label="Name font size" value={props.nameFontSize ?? 14} min={10} max={36} suffix="px" onChange={v => updateProps({ nameFontSize: v })} />
+                            <ColorRow label="Name colour" value={props.lifestyleNameColor ?? '#ffffff'} onChange={v => updateProps({ lifestyleNameColor: v })} />
                             <ColorRow label="Overlay tint" value={props.overlayColor ?? 'rgba(0,0,0,0.45)'} onChange={v => updateProps({ overlayColor: v })} />
                             <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                         </Section>
@@ -1860,6 +1865,10 @@ function BlockStyleProps({ block, props, updateProps }: {
                             <SelectInput label="Image fit" value={props.objectFit ?? 'cover'}
                                 options={[{ v: 'cover', l: 'Cover' }, { v: 'contain', l: 'Contain' }]}
                                 onChange={v => updateProps({ objectFit: v })} />
+                            <ColorRow label="Caption colour" value={props.captionColor ?? '#4b5563'} onChange={v => updateProps({ captionColor: v })} />
+                            <SliderInput label="Caption size" value={props.captionFontSize ?? 13} min={10} max={20} suffix="px" onChange={v => updateProps({ captionFontSize: v })} />
+                            <TextInput label="Suffix (blank to hide)" value={props.polaroidSuffix ?? 'Premium Edition'} onChange={v => updateProps({ polaroidSuffix: v })} />
+                            <ColorRow label="Background" value={props.bgColor ?? '#f5f0e8'} onChange={v => updateProps({ bgColor: v })} />
                         </Section>
                     )}
                     {pv === 'before-after' && (
@@ -1906,12 +1915,15 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <Section title="Gallery">
                             <InfoBox>Thumbnails render as uniform 1:1 squares — first thumb is highlighted as the active image.</InfoBox>
                             <SliderInput label="Thumbnail count" value={props.imageCount ?? 4} min={2} max={5} onChange={v => updateProps({ imageCount: v })} />
+                            <SliderInput label="Main image max height" value={props.mainImageMaxHeight ?? 420} min={200} max={700} suffix="px" onChange={v => updateProps({ mainImageMaxHeight: v })} />
                             <SliderInput label="Thumb radius" value={props.thumbBorderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v })} />
                             <ToggleRow label="Thumb border" value={props.showThumbBorder ?? true} onChange={v => updateProps({ showThumbBorder: v })} />
                             {props.showThumbBorder && <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />}
                             <SelectInput label="Image fit" value={props.objectFit ?? 'contain'}
                                 options={[{ v: 'contain', l: 'Contain' }, { v: 'cover', l: 'Cover' }]}
                                 onChange={v => updateProps({ objectFit: v })} />
+                            <ToggleRow label="Show scroll hint" value={props.showScrollHint ?? true} onChange={v => updateProps({ showScrollHint: v })} />
+                            <ColorRow label="Background" value={props.bgColor ?? '#f8fafc'} onChange={v => updateProps({ bgColor: v })} />
                         </Section>
                     )}
                     {pv === 'fullwidth' && (
@@ -2806,6 +2818,8 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     )}
                     {av === 'lifestyle' && (
                         <Section title="Overlay text">
+                            <TextInput label="Product name" value={props.lifestyleName ?? ''} onChange={v => updateProps({ lifestyleName: v })} />
+                            {phButton('lifestyleName', 'product name')}
                             <TextInput label="Subtext (optional)" value={props.lifestyleSubtext ?? ''} onChange={v => updateProps({ lifestyleSubtext: v })} />
                             {phButton('lifestyleSubtext', 'subtext')}
                         </Section>

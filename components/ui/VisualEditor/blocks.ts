@@ -477,6 +477,15 @@ export interface ProductImageProps extends CommonProps {
     // borderRadius + bgColor frame alone; the canvas preview shows the
     // full treatment. Preserved across Layout Style preset switches.
     shadow?: string
+    shadowPreset?: 'none' | 'soft' | 'medium' | 'hard' | 'card'
+    // Gallery
+    mainImageMaxHeight?: number   // max-height on gallery main image (default 420)
+    showScrollHint?: boolean      // show "Scroll to view all images" hint
+    // Lifestyle
+    lifestyleName?: string        // override product name in overlay (falls back to alt)
+    lifestyleNameColor?: string   // colour of the product name text
+    // Polaroid
+    polaroidSuffix?: string       // text after " — " in caption (empty string = hide)
 }
 
 // ── Hero Product (2-column) ───────────────────────────────────────────────────
@@ -1433,6 +1442,12 @@ ${rows}
             // Canvas-only depth treatment — preserved across Layout Style
             // preset switches because it's a top-level prop on the schema.
             shadow: '',
+            shadowPreset: 'none',
+            mainImageMaxHeight: 420,
+            showScrollHint: true,
+            lifestyleName: '',
+            lifestyleNameColor: '#ffffff',
+            polaroidSuffix: 'Premium Edition',
         } as ProductImageProps,
         toHtml(props, id) {
             const p = props as ProductImageProps
