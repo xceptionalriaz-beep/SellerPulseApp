@@ -269,10 +269,20 @@ export default function BlockToolbar({
         )
     }
 
+    // Always target the iframe for the currently-active block, not just the first iframe on the page
+    const getBlockIframe = (): HTMLIFrameElement | null => {
+        const blockId = slotEdit?.blockId ?? activeSelection?.blockId
+        if (blockId) {
+            return document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement | null
+        }
+        // fallback: first iframe (single-block pages)
+        return document.querySelector('iframe') as HTMLIFrameElement | null
+    }
+
     const handleHighlight = (color: string) => {
         setShowHighlightPicker(false)
         // Send execCommand directly into the iframe where selection is live
-        const iframe = document.querySelector('iframe') as HTMLIFrameElement
+        const iframe = getBlockIframe()
         if (iframe?.contentWindow) {
             if (color === 'none') {
                 iframe.contentWindow.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'removeFormat' }, '*')
@@ -286,7 +296,7 @@ export default function BlockToolbar({
     }
 
     const handleInsertChar = (char: string) => {
-        const iframe = document.querySelector('iframe') as HTMLIFrameElement
+        const iframe = getBlockIframe()
         if (iframe?.contentWindow) {
             iframe.contentWindow.postMessage({
                 type: 'RIAZIFY_APPLY_FORMAT',
@@ -539,8 +549,7 @@ export default function BlockToolbar({
             }}>S</button>
             <button
                 onClick={() => {
-                    const iframe = document.querySelector('iframe') as HTMLIFrameElement
-                    iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'superscript', value: null }, '*')
+                    getBlockIframe()?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'superscript', value: null }, '*')
                 }}
                 title="Superscript"
                 style={{ ...miniBtn }}
@@ -549,8 +558,7 @@ export default function BlockToolbar({
             </button>
             <button
                 onClick={() => {
-                    const iframe = document.querySelector('iframe') as HTMLIFrameElement
-                    iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'subscript', value: null }, '*')
+                    getBlockIframe()?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'subscript', value: null }, '*')
                 }}
                 title="Subscript"
                 style={{ ...miniBtn }}
@@ -1217,14 +1225,11 @@ export default function BlockToolbar({
                                             } else if (isButtonBlock) {
                                                 onChange({ ...safeProps, url: '' })
                                             } else if (activeSelection?.selectedText) {
-                                                const iframe = document.querySelector('iframe') as HTMLIFrameElement
-                                                if (iframe?.contentWindow) {
-                                                    iframe.contentWindow.postMessage({
-                                                        type: 'RIAZIFY_APPLY_FORMAT',
-                                                        command: 'unlink',
-                                                        value: null,
-                                                    }, '*')
-                                                }
+                                                getBlockIframe()?.contentWindow?.postMessage({
+                                                    type: 'RIAZIFY_APPLY_FORMAT',
+                                                    command: 'unlink',
+                                                    value: null,
+                                                }, '*')
                                             } else {
                                                 const nextProps = { ...safeProps }
                                                 delete nextProps.linkUrl
@@ -1267,14 +1272,11 @@ export default function BlockToolbar({
                                             onChange({ ...safeProps, url })
                                         } else if (activeSelection?.selectedText) {
                                             // inline text selection — apply via execCommand in iframe
-                                            const iframe = document.querySelector('iframe') as HTMLIFrameElement
-                                            if (iframe?.contentWindow) {
-                                                iframe.contentWindow.postMessage({
-                                                    type: 'RIAZIFY_APPLY_FORMAT',
-                                                    command: 'createLink',
-                                                    value: url,
-                                                }, '*')
-                                            }
+                                            getBlockIframe()?.contentWindow?.postMessage({
+                                                type: 'RIAZIFY_APPLY_FORMAT',
+                                                command: 'createLink',
+                                                value: url,
+                                            }, '*')
                                         } else {
                                             onChange({ ...safeProps, linkUrl: url })
                                         }
