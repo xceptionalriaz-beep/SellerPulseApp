@@ -1884,7 +1884,7 @@ function EditorToolbar({
                             style={{
                                 fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700,
                                 color: C.dark, background: 'transparent', border: 'none',
-                                outline: 'none', width: 200,
+                                outline: 'none', width: 240,
                                 borderBottom: `1px solid transparent`,
                                 padding: '2px 4px', borderRadius: 4,
                                 cursor: 'text',
@@ -1908,19 +1908,25 @@ function EditorToolbar({
                                     whiteSpace: 'nowrap',
                                     overflow: 'hidden',
                                     width: 160,
-                                    animation: 'typingPlaceholder 2.4s steps(14, end) infinite',
+                                    display: 'inline-block',
+                                    maxWidth: 240,
                                 }}
                             >
                                 Name your design…
                             </span>
                         )}
                         <style>{`
-                            @keyframes typingPlaceholder {
-                                0%   { width: 0ch; opacity: 1; }
-                                60%  { width: 14ch; opacity: 1; }
-                                80%  { width: 14ch; opacity: 1; }
-                                90%  { width: 14ch; opacity: 0; }
-                                100% { width: 0ch; opacity: 0; }
+                            .typing-placeholder {
+                                animation: typingIn 2.8s steps(18, end) infinite;
+                                border-right: 2px solid transparent;
+                            }
+                            @keyframes typingIn {
+                                0%   { max-width: 0;     opacity: 1; border-right-color: transparent; }
+                                5%   { max-width: 0;     opacity: 1; border-right-color: currentColor; }
+                                55%  { max-width: 240px; opacity: 1; border-right-color: currentColor; }
+                                75%  { max-width: 240px; opacity: 1; border-right-color: transparent; }
+                                90%  { max-width: 240px; opacity: 0; border-right-color: transparent; }
+                                100% { max-width: 0;     opacity: 0; border-right-color: transparent; }
                             }
                         `}</style>
                     </div>
