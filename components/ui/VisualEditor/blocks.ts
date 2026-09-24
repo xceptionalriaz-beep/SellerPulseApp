@@ -321,6 +321,8 @@ export interface HeadingProps extends CommonProps {
     fontSize: number          // px
     align: 'left' | 'center' | 'right'
     fontWeight: '400' | '600' | '700' | '800' | '900'
+    lineHeight: number        // e.g. 1.2
+    letterSpacing: number     // px — converted to em in toHtml
     borderBottom: boolean     // decorative left-border accent
     accentColor: string       // left-border color when borderBottom = true
 }
@@ -339,6 +341,8 @@ export interface BulletListProps extends CommonProps {
     items: string[]           // each item is a string (may contain placeholders)
     color: string
     fontSize: number
+    lineHeight: number        // e.g. 1.6
+    letterSpacing: number     // px — converted to em in toHtml
     bulletColor: string
     bulletStyle: 'disc' | 'check' | 'arrow' | 'star'
 }
@@ -362,6 +366,8 @@ export interface ProductTitleProps extends CommonProps {
     fontSize: number
     align: 'left' | 'center' | 'right'
     fontWeight: '600' | '700' | '800' | '900'
+    lineHeight: number        // e.g. 1.3
+    letterSpacing: number     // px — converted to em in toHtml
     showCondition: boolean
     conditionText: string     // default: {{ITEM_CONDITION}}
     conditionColor: string    // condition text colour
@@ -1151,6 +1157,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             fontSize: 22,
             align: 'left',
             fontWeight: '700',
+            lineHeight: 1.2,
+            letterSpacing: 0,
             borderBottom: true,
             accentColor: '#7530fb',
         } as HeadingProps,
@@ -1159,11 +1167,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const border = p.borderBottom
                 ? `border-left:4px solid ${p.accentColor};padding-left:12px;`
                 : ''
+            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 22)).toFixed(4)
             return wrapBlock('heading', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <${p.level} style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};color:${p.color};${textAlign(p.align)}${border}">
+      <${p.level} style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};line-height:${p.lineHeight ?? 1.2};letter-spacing:${lsEm}em;color:${p.color};${textAlign(p.align)}${border}">
         ${p.text}
       </${p.level}>
     </td>
@@ -1214,6 +1223,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             items: ['Feature one — describe your product benefit', 'Feature two — another key selling point', 'Feature three — quality guarantee'],
             color: '#1f1d2e',
             fontSize: 14,
+            lineHeight: 1.6,
+            letterSpacing: 0,
             bulletColor: '#7530fb',
             bulletStyle: 'check',
         } as BulletListProps,
@@ -1226,10 +1237,11 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 star: '&#9733;',
             }
             const bullet = bulletMap[p.bulletStyle] || '•'
+            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 14)).toFixed(4)
             const rows = p.items.map(item =>
                 `        <tr>
           <td width="20" valign="top" style="padding-right:8px;padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.bulletColor};font-weight:700;">${bullet}</td>
-          <td valign="top" style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.color};line-height:1.6;">${item}</td>
+          <td valign="top" style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.color};line-height:${p.lineHeight ?? 1.6};letter-spacing:${lsEm}em;">${item}</td>
         </tr>`
             ).join('\n')
             return wrapBlock('bullet_list', id,
@@ -1298,6 +1310,8 @@ ${rows}
             fontSize: 24,
             align: 'left',
             fontWeight: '800',
+            lineHeight: 1.3,
+            letterSpacing: 0,
             showCondition: true,
             conditionText: '{{ITEM_CONDITION}}',
             conditionColor: '#6b7280',
@@ -1305,6 +1319,7 @@ ${rows}
         } as ProductTitleProps,
         toHtml(props, id) {
             const p = props as ProductTitleProps
+            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 24)).toFixed(4)
             const conditionHtml = p.showCondition
                 ? `<p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:${p.conditionFontSize ?? 13}px;color:${p.conditionColor ?? '#6b7280'};">Condition: <strong style="color:${p.conditionColor ?? '#6b7280'};">${p.conditionText}</strong></p>`
                 : ''
@@ -1312,7 +1327,7 @@ ${rows}
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <h1 style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};color:${p.color};${textAlign(p.align)}line-height:1.3;">
+      <h1 style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};line-height:${p.lineHeight ?? 1.3};letter-spacing:${lsEm}em;color:${p.color};${textAlign(p.align)}">
         ${p.text}
       </h1>
       ${conditionHtml}
