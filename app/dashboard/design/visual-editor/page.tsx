@@ -588,59 +588,45 @@ function VisualEditorInner() {
 
                 </div>
 
-                {/* Auto-save pill — sits in top bar right, no button needed here now */}
-                {autoSaveLabel !== 'idle' && (
-                    <div style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '3px 9px', borderRadius: 20,
-                        backgroundColor: autoSaveLabel === 'saved' ? C.successBg : C.bg,
-                        border: `1px solid ${autoSaveLabel === 'saved' ? '#86efac50' : C.border}`,
-                        flexShrink: 0,
-                    }}>
-                        {autoSaveLabel === 'saving'
-                            ? <Loader2 size={10} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
-                            : <Check size={10} style={{ color: C.success }} />}
+                {/* Right — single action menu button */}
+                <div style={{ position: 'relative', flexShrink: 0 }} ref={actionMenuRef}>
+
+                    {/* Auto-save pill — only shows when active */}
+                    {autoSaveLabel !== 'idle' && (
                         <span style={{
+                            position: 'absolute', top: -8, left: -100,
+                            display: 'flex', alignItems: 'center', gap: 4,
+                            padding: '2px 8px', borderRadius: 20,
+                            backgroundColor: autoSaveLabel === 'saved' ? C.successBg : C.bg,
+                            border: `1px solid ${autoSaveLabel === 'saved' ? '#86efac50' : C.border}`,
                             fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
                             color: autoSaveLabel === 'saved' ? C.success : C.muted,
+                            whiteSpace: 'nowrap', pointerEvents: 'none',
                         }}>
-                            {autoSaveLabel === 'saving' ? 'Saving...' : 'Draft Saved'}
+                            {autoSaveLabel === 'saving'
+                                ? <Loader2 size={9} style={{ animation: 'spin 1s linear infinite' }} />
+                                : <Check size={9} />}
+                            {autoSaveLabel === 'saving' ? 'Auto-saving…' : 'Draft saved'}
                         </span>
-                    </div>
-                )}
+                    )}
 
-            </div>
-        </div>
-
-    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        <VisualEditor
-            value={html}
-            onChange={(next) => {
-                dirtyRef.current = true
-                setHtml(next)
-            }}
-            onExportReady={(fn) => { exportFnRef.current = fn }}
-            onPublish={handlePublish}
-            publishStatus={publishStatus}
-            toolbarSlot={
-                <div style={{ position: 'relative' }} ref={actionMenuRef}>
                     {/* Trigger button */}
                     <button
                         onClick={() => setActionMenuOpen(o => !o)}
                         style={{
                             display: 'flex', alignItems: 'center', gap: 6,
-                            padding: '4px 12px',
-                            border: 'none', borderRadius: 7,
-                            backgroundColor: published ? '#16a34a' : '#7530fb',
+                            padding: '6px 14px',
+                            border: 'none', borderRadius: 8,
+                            backgroundColor: published ? C.success : C.primary,
                             color: '#ffffff',
-                            fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
                             cursor: 'pointer', transition: 'all 0.15s',
-                            boxShadow: '0 2px 6px #7530fb44',
+                            boxShadow: `0 2px 8px ${C.primary}44`,
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? '#16a34a' : '#6020e0' }}
-                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? '#16a34a' : '#7530fb' }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
+                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
                     >
-                        {published ? <Check size={12} /> : <Globe size={12} />}
+                        {published ? <Check size={13} /> : <Globe size={13} />}
                         {published ? 'Published!' : 'Publish'}
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
                             <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -650,20 +636,23 @@ function VisualEditorInner() {
                     {/* Dropdown panel */}
                     {actionMenuOpen && (
                         <div style={{
-                            position: 'absolute', bottom: 'calc(100% + 8px)', right: 0,
-                            width: 260, backgroundColor: '#ffffff',
-                            border: '1px solid #ede9fe', borderRadius: 12,
+                            position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                            width: 260, backgroundColor: C.surface,
+                            border: `1px solid ${C.border}`, borderRadius: 12,
                             boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
                             zIndex: 1000, overflow: 'hidden',
                         }}>
-                            {/* Category */}
+                            {/* Category section */}
+                            {/* onMouseDown stopPropagation prevents the portal-rendered
+                                ProDropdown menu clicks from reaching the document mousedown
+                                outside-click handler and closing this panel (#bug) */}
                             <div
                                 onMouseDown={e => e.stopPropagation()}
-                                style={{ padding: '12px 14px 10px', borderBottom: '1px solid #ede9fe' }}
+                                style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${C.border}` }}
                             >
                                 <p style={{
                                     margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
-                                    fontSize: 10, fontWeight: 700, color: '#9ca3af',
+                                    fontSize: 10, fontWeight: 700, color: C.muted,
                                     textTransform: 'uppercase', letterSpacing: 0.8,
                                 }}>
                                     Category
@@ -672,13 +661,16 @@ function VisualEditorInner() {
                                     prefix=""
                                     currentValue={category}
                                     options={CATEGORIES}
-                                    onChanged={(v) => { dirtyRef.current = true; setCategory(v) }}
+                                    onChanged={(v) => {
+                                        dirtyRef.current = true
+                                        setCategory(v)
+                                    }}
                                     width={232}
                                 />
                             </div>
 
-                            {/* Actions */}
-                            <div style={{ padding: '8px' }}>
+                            {/* Action buttons */}
+                            <div style={{ padding: '8px 8px' }}>
                                 {/* Save Draft */}
                                 <button
                                     onClick={() => { handleSaveDraft(); setActionMenuOpen(false) }}
@@ -686,94 +678,74 @@ function VisualEditorInner() {
                                     style={{
                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                         padding: '9px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: saved ? '#dcfce7' : 'transparent',
-                                        color: saved ? '#16a34a' : '#1f1d2e',
+                                        backgroundColor: saved ? C.successBg : 'transparent',
+                                        color: saved ? C.success : C.body,
                                         fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
                                         cursor: saving ? 'default' : 'pointer', textAlign: 'left',
                                         transition: 'background 0.12s',
                                     }}
-                                    onMouseEnter={e => { if (!saving && !saved) e.currentTarget.style.backgroundColor = '#f8f7ff' }}
+                                    onMouseEnter={e => { if (!saving && !saved) e.currentTarget.style.backgroundColor = C.bg }}
                                     onMouseLeave={e => { if (!saved) e.currentTarget.style.backgroundColor = 'transparent' }}
                                 >
                                     <span style={{
-                                        width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                                        backgroundColor: saved ? '#dcfce7' : '#f8f7ff',
-                                        border: `1px solid ${saved ? '#86efac' : '#ede9fe'}`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        width: 28, height: 28, borderRadius: 7,
+                                        backgroundColor: saved ? '#dcfce7' : C.bg,
+                                        border: `1px solid ${saved ? '#86efac' : C.border}`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                     }}>
-                                        {saving ? <Loader2 size={13} style={{ color: '#9ca3af', animation: 'spin 1s linear infinite' }} />
-                                            : saved ? <Check size={13} style={{ color: '#16a34a' }} />
-                                                : <Save size={13} style={{ color: '#6b7280' }} />}
+                                        {saving
+                                            ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
+                                            : saved
+                                                ? <Check size={13} style={{ color: C.success }} />
+                                                : <Save size={13} style={{ color: C.secondary }} />}
                                     </span>
                                     <div>
-                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>{saved ? 'Draft Saved!' : 'Save Draft'}</p>
-                                        <p style={{ margin: 0, fontSize: 10, color: '#9ca3af' }}>Save without publishing</p>
+                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
+                                            {saved ? 'Draft Saved!' : 'Save Draft'}
+                                        </p>
+                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
+                                            Save without publishing
+                                        </p>
                                     </div>
                                 </button>
 
-                                {/* Code Editor */}
+                                {/* Open in Code Editor */}
                                 <button
                                     onClick={() => { handleOpenInCodeEditor(); setActionMenuOpen(false) }}
                                     style={{
                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                         padding: '9px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: 'transparent', color: '#1f1d2e',
+                                        backgroundColor: 'transparent', color: C.body,
                                         fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
                                         cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
                                     }}
-                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8f7ff' }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
                                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
                                 >
                                     <span style={{
-                                        width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                                        backgroundColor: '#f8f7ff', border: '1px solid #ede9fe',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        width: 28, height: 28, borderRadius: 7,
+                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                     }}>
-                                        <Code2 size={13} style={{ color: '#6b7280' }} />
+                                        <Code2 size={13} style={{ color: C.secondary }} />
                                     </span>
                                     <div>
                                         <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Code Editor</p>
-                                        <p style={{ margin: 0, fontSize: 10, color: '#9ca3af' }}>Fine-tune the raw HTML</p>
-                                    </div>
-                                </button>
-
-                                {/* Export HTML */}
-                                <button
-                                    onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
-                                    style={{
-                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                        padding: '9px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: 'transparent', color: '#1f1d2e',
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
-                                    }}
-                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8f7ff' }}
-                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
-                                >
-                                    <span style={{
-                                        width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                                        backgroundColor: '#f8f7ff', border: '1px solid #ede9fe',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    }}>
-                                        <Download size={13} style={{ color: '#6b7280' }} />
-                                    </span>
-                                    <div>
-                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
-                                        <p style={{ margin: 0, fontSize: 10, color: '#9ca3af' }}>Download ready-to-use eBay HTML</p>
+                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
                                     </div>
                                 </button>
                             </div>
 
-                            {/* Publish — bottom highlighted */}
-                            <div style={{ padding: '8px', borderTop: '1px solid #ede9fe' }}>
+                            {/* Publish — bottom section, highlighted */}
+                            <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
                                 <button
                                     onClick={() => { handlePublish(); setActionMenuOpen(false) }}
                                     disabled={publishing}
                                     style={{
                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                         padding: '10px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: published ? '#dcfce7' : '#f3eeff',
-                                        color: published ? '#16a34a' : '#7530fb',
+                                        backgroundColor: published ? '#dcfce7' : C.primaryLight,
+                                        color: published ? C.success : C.primary,
                                         fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
                                         cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
                                         transition: 'background 0.12s',
@@ -782,43 +754,64 @@ function VisualEditorInner() {
                                     onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                                 >
                                     <span style={{
-                                        width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                                        backgroundColor: published ? '#16a34a' : '#7530fb',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        width: 28, height: 28, borderRadius: 7,
+                                        backgroundColor: published ? C.success : C.primary,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                     }}>
-                                        {publishing ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
-                                            : published ? <Check size={13} style={{ color: '#fff' }} />
+                                        {publishing
+                                            ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
+                                            : published
+                                                ? <Check size={13} style={{ color: '#fff' }} />
                                                 : <Globe size={13} style={{ color: '#fff' }} />}
                                     </span>
                                     <div>
-                                        <p style={{ margin: 0, fontSize: 12 }}>{published ? 'Published!' : 'Publish Template'}</p>
-                                        <p style={{ margin: 0, fontSize: 10, opacity: 0.7, fontWeight: 400 }}>Make visible to all users</p>
+                                        <p style={{ margin: 0, fontSize: 12 }}>
+                                            {published ? 'Published!' : 'Publish Template'}
+                                        </p>
+                                        <p style={{ margin: 0, fontSize: 10, opacity: 0.7, fontWeight: 400 }}>
+                                            Make visible to all users
+                                        </p>
                                     </div>
                                 </button>
                             </div>
                         </div>
                     )}
                 </div>
-            }
-            placeholders={PLACEHOLDER_GROUPS}
-            initialCategory={
-                (['pet', 'electronics', 'fashion', 'home', 'sports', 'auto', 'general'] as const)
-                    .includes(category as any)
-                    ? (category as any)
-                    : 'pet'
-            }
-            templateCategory={category}
-        />
-    </div>
+            </div>
 
-    {/* Spin keyframe */ }
-    <style>{`
+            {/* ── VISUAL EDITOR — fills remaining height ────────────────── */}
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <VisualEditor
+                    value={html}
+                    onChange={(next) => {
+                        // VisualEditor only emits onChange from real user
+                        // actions (add/move/edit/delete/undo/redo), so this
+                        // is a safe signal that the user actually edited.
+                        dirtyRef.current = true
+                        setHtml(next)
+                    }}
+                    placeholders={PLACEHOLDER_GROUPS}
+                    // Seed the canvas with the saved template's DB category so
+                    // its previews use category-matched sample data
+                    // (e.g. electronics → headphones, fashion → sneakers).
+                    // Falls back to 'pet' if category is unknown.
+                    initialCategory={
+                        (['pet', 'electronics', 'fashion', 'home', 'sports', 'auto', 'general'] as const)
+                            .includes(category as any)
+                            ? (category as any)
+                            : 'pet'
+                    }
+                    templateCategory={category}
+                />
+            </div>
+
+            {/* Spin keyframe */}
+            <style>{`
                 @keyframes spin {
                     from { transform: rotate(0deg); }
                     to   { transform: rotate(360deg); }
                 }
             `}</style>
-    </div >
-    </div >
+        </div>
     )
 }
