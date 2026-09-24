@@ -1674,6 +1674,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <Section title="Typography">
                     <ColorRow label="Text colour" value={props.color ?? '#6b7280'} onChange={v => updateProps({ color: v })} />
                     <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={28} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    <SelectInput label="Weight" value={props.fontWeight ?? '400'}
+                        options={[{ v: '400', l: 'Regular' }, { v: '500', l: 'Medium' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }]}
+                        onChange={v => updateProps({ fontWeight: v })} />
                     <SliderInput label="Line height" value={props.lineHeight ?? 1.7} min={1} max={3} step={0.05} onChange={v => updateProps({ lineHeight: v })} />
                     <SliderInput label="Letter spacing" value={props.letterSpacing ?? 0} min={0} max={5} step={0.5} suffix="px" onChange={v => updateProps({ letterSpacing: v })} />
                     <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
@@ -1686,6 +1689,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
                     <ColorRow label="Bullet colour" value={props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ bulletColor: v })} />
                     <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    <SelectInput label="Weight" value={props.fontWeight ?? '400'}
+                        options={[{ v: '400', l: 'Regular' }, { v: '500', l: 'Medium' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }]}
+                        onChange={v => updateProps({ fontWeight: v })} />
                     <SliderInput label="Line height" value={props.lineHeight ?? 1.6} min={1} max={3} step={0.05} onChange={v => updateProps({ lineHeight: v })} />
                     <SliderInput label="Letter spacing" value={props.letterSpacing ?? 0} min={0} max={5} step={0.5} suffix="px" onChange={v => updateProps({ letterSpacing: v })} />
                     <SelectInput label="Bullet style" value={props.bulletStyle ?? 'check'}
@@ -2027,6 +2033,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                     </Section>
                     <Section title="Typography">
                         <SliderInput label="Heading size" value={props.headingSize ?? 24} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
+                        <SelectInput label="Heading weight" value={props.fontWeight ?? '700'}
+                            options={[{ v: '400', l: 'Regular' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }, { v: '900', l: 'Black' }]}
+                            onChange={v => updateProps({ fontWeight: v })} />
                     </Section>
                     <Section title="Layout">
                         <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
@@ -2068,6 +2077,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Heading colour" value={props.textColor ?? (block.type === 'cta_banner' ? '#b8fa33' : '#ffffff')} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Subtext colour" value={props.subColor ?? props.subTextColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps({ subColor: v })} />
                         <SliderInput label="Heading size" value={props.headingSize ?? 26} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
+                        <SelectInput label="Heading weight" value={props.fontWeight ?? '700'}
+                            options={[{ v: '400', l: 'Regular' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }, { v: '900', l: 'Black' }]}
+                            onChange={v => updateProps({ fontWeight: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
                 </>
@@ -2301,7 +2313,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Text colour" value={props.textColor ?? '#94a3b8'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Hover colour" value={props.hoverColor ?? '#7530fb'} onChange={v => updateProps({ hoverColor: v })} />
                         <SliderInput label="Font size" value={props.fontSize ?? 12} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
-                        <SliderInput label="Font weight" value={parseInt(props.fontWeight ?? '600')} min={400} max={900} step={100} onChange={v => updateProps({ fontWeight: String(v) })} />
+                        <SelectInput label="Weight" value={props.fontWeight ?? '600'}
+                            options={[{ v: '400', l: 'Regular' }, { v: '500', l: 'Medium' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }]}
+                            onChange={v => updateProps({ fontWeight: v })} />
                         <SliderInput label="Letter spacing" value={props.letterSpacing ?? 3} min={0} max={10} step={0.5} suffix="px" onChange={v => updateProps({ letterSpacing: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
@@ -2334,6 +2348,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                     </Section>
                     <Section title="Layout">
                         <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SelectInput label="Font weight" value={props.fontWeight ?? '700'}
+                            options={[{ v: '400', l: 'Regular' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }]}
+                            onChange={v => updateProps({ fontWeight: v })} />
                         <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={20} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                         <ToggleRow label="Show pulse dot" value={props.showIcon ?? true} onChange={v => updateProps({ showIcon: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />

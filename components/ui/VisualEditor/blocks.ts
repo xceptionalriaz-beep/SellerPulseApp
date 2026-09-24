@@ -332,7 +332,9 @@ export interface ParagraphProps extends CommonProps {
     text: string
     color: string
     fontSize: number
+    fontWeight: '400' | '500' | '600' | '700'
     lineHeight: number        // e.g. 1.7
+    letterSpacing: number
     align: 'left' | 'center' | 'right'
 }
 
@@ -341,6 +343,7 @@ export interface BulletListProps extends CommonProps {
     items: string[]           // each item is a string (may contain placeholders)
     color: string
     fontSize: number
+    fontWeight: '400' | '500' | '600' | '700'
     lineHeight: number        // e.g. 1.6
     letterSpacing: number     // px — converted to em in toHtml
     bulletColor: string
@@ -1193,16 +1196,19 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             text: 'Enter your paragraph text here. You can include {{PRODUCT_TITLE}} and other placeholders.',
             color: '#6b7280',
             fontSize: 14,
+            fontWeight: '400',
             lineHeight: 1.7,
+            letterSpacing: 0,
             align: 'left',
         } as ParagraphProps,
         toHtml(props, id) {
             const p = props as ParagraphProps
+            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 14)).toFixed(4)
             return wrapBlock('paragraph', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;line-height:${p.lineHeight};color:${p.color};${textAlign(p.align)}">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '400'};line-height:${p.lineHeight};letter-spacing:${lsEm}em;color:${p.color};${textAlign(p.align)}">
         ${p.text}
       </p>
     </td>
@@ -1223,6 +1229,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             items: ['Feature one — describe your product benefit', 'Feature two — another key selling point', 'Feature three — quality guarantee'],
             color: '#1f1d2e',
             fontSize: 14,
+            fontWeight: '400',
             lineHeight: 1.6,
             letterSpacing: 0,
             bulletColor: '#7530fb',
@@ -1241,7 +1248,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const rows = p.items.map(item =>
                 `        <tr>
           <td width="20" valign="top" style="padding-right:8px;padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.bulletColor};font-weight:700;">${bullet}</td>
-          <td valign="top" style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.color};line-height:${p.lineHeight ?? 1.6};letter-spacing:${lsEm}em;">${item}</td>
+          <td valign="top" style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '400'};color:${p.color};line-height:${p.lineHeight ?? 1.6};letter-spacing:${lsEm}em;">${item}</td>
         </tr>`
             ).join('\n')
             return wrapBlock('bullet_list', id,
