@@ -610,29 +610,6 @@ function VisualEditorInner() {
                         </span>
                     )}
 
-                    {/* Trigger button */}
-                    <button
-                        onClick={() => setActionMenuOpen(o => !o)}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 6,
-                            padding: '6px 14px',
-                            border: 'none', borderRadius: 8,
-                            backgroundColor: published ? C.success : C.primary,
-                            color: '#ffffff',
-                            fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
-                            cursor: 'pointer', transition: 'all 0.15s',
-                            boxShadow: `0 2px 8px ${C.primary}44`,
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
-                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
-                    >
-                        {published ? <Check size={13} /> : <Globe size={13} />}
-                        {published ? 'Published!' : 'Publish'}
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
-                            <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </button>
-
                     {/* Dropdown panel */}
                     {actionMenuOpen && (
                         <div style={{
