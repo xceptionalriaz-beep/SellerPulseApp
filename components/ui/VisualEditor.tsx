@@ -1917,15 +1917,15 @@ function EditorToolbar({
                         )}
                         <style>{`
                             .typing-placeholder {
-                                animation: typingIn 6s steps(18, end) infinite;
+                                animation: typingIn 8s steps(20, end) infinite;
                                 border-right: 2px solid transparent;
                             }
                             @keyframes typingIn {
                                 0%   { max-width: 0;     opacity: 0; border-right-color: transparent; }
-                                10%  { max-width: 0;     opacity: 1; border-right-color: currentColor; }
-                                45%  { max-width: 240px; opacity: 1; border-right-color: currentColor; }
-                                55%  { max-width: 240px; opacity: 1; border-right-color: transparent; }
-                                65%  { max-width: 240px; opacity: 0; border-right-color: transparent; }
+                                8%   { max-width: 0;     opacity: 1; border-right-color: currentColor; }
+                                40%  { max-width: 240px; opacity: 1; border-right-color: currentColor; }
+                                52%  { max-width: 240px; opacity: 1; border-right-color: transparent; }
+                                62%  { max-width: 240px; opacity: 0; border-right-color: transparent; }
                                 100% { max-width: 0;     opacity: 0; border-right-color: transparent; }
                             }
                         `}</style>
