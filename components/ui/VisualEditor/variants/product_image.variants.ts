@@ -349,7 +349,7 @@ ${captionRow}
   <tr>
     <td align="center" style="${pad(p)}padding-top:32px;text-align:center;">
       <div align="center" class="riazify-zoom-frame" style="display:block;margin:0 auto;text-align:center;position:relative;overflow:hidden;border-radius:12px;background-color:#ffffff;padding:4px;${border}max-width:600px;width:100%;">
-        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
+        <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
           class="riazify-zoom-img"
           width="600"
           style="max-width:100%;width:100%;height:auto;display:block;margin:0 auto;margin-left:auto;margin-right:auto;object-fit:${p.objectFit ?? 'contain'};border-radius:${p.borderRadius ?? 8}px;transition:transform 0.3s ease;transform-origin:center center;" />
@@ -580,7 +580,7 @@ ${captionRow}
           <td width="60%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-right:${gap}px;height:380px;">
             <div align="center" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
               <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
-                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
+                style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;bforder-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
           </td>
           <!-- Two stacked images right (40%) — exact split: (380-8)/2 -->
