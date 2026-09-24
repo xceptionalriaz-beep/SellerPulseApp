@@ -1859,16 +1859,16 @@ function EditorToolbar({
                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg; e.currentTarget.style.color = C.dark }}
                             onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = C.secondary }}
                         >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-                            Design Studio
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
                         </button>
                         <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
                         <span style={{
-                            fontFamily: 'Syne, sans-serif', fontWeight: 700,
-                            fontSize: 13, color: C.primary,
+                            fontFamily: 'Syne, sans-serif', fontWeight: 800,
+                            fontSize: 15, color: C.primary,
                             flexShrink: 0, whiteSpace: 'nowrap',
+                            letterSpacing: '-0.2px',
                         }}>
-                            Visual Template Builder
+                            Template Studio
                         </span>
                         <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
                     </>
