@@ -734,6 +734,32 @@ function VisualEditorInner() {
                                         <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
                                     </div>
                                 </button>
+
+                                {/* Export HTML */}
+                                <button
+                                    onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
+                                    style={{
+                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                        padding: '9px 10px', border: 'none', borderRadius: 8,
+                                        backgroundColor: 'transparent', color: C.body,
+                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                >
+                                    <span style={{
+                                        width: 28, height: 28, borderRadius: 7,
+                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                    }}>
+                                        <Download size={13} style={{ color: C.secondary }} />
+                                    </span>
+                                    <div>
+                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
+                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Download ready-to-use eBay HTML</p>
+                                    </div>
+                                </button>
                             </div>
 
                             {/* Publish — bottom section, highlighted */}
@@ -790,6 +816,35 @@ function VisualEditorInner() {
                         dirtyRef.current = true
                         setHtml(next)
                     }}
+                    onExportReady={(fn) => { exportFnRef.current = fn }}
+                    onPublish={handlePublish}
+                    publishStatus={publishStatus}
+                    toolbarSlot={
+                        <div style={{ position: 'relative' }} ref={actionMenuRef}>
+                            {/* Trigger button */}
+                            <button
+                                onClick={() => setActionMenuOpen(o => !o)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    padding: '6px 14px',
+                                    border: 'none', borderRadius: 8,
+                                    backgroundColor: published ? C.success : C.primary,
+                                    color: '#ffffff',
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
+                                    cursor: 'pointer', transition: 'all 0.15s',
+                                    boxShadow: `0 2px 8px ${C.primary}44`,
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
+                            >
+                                {published ? <Check size={13} /> : <Globe size={13} />}
+                                {published ? 'Published!' : 'Publish'}
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
+                                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+                    }
                     placeholders={PLACEHOLDER_GROUPS}
                     // Seed the canvas with the saved template's DB category so
                     // its previews use category-matched sample data
