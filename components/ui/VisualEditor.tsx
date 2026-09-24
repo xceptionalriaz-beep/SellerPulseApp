@@ -1969,29 +1969,34 @@ function EditorToolbar({
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
-                {/* Export HTML */}
-                <button
-                    onClick={onExport}
-                    disabled={blockCount === 0}
-                    title="Download assembled HTML file — ready to paste into eBay"
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: 5,
-                        padding: '4px 12px',
-                        border: `1px solid ${blockCount === 0 ? C.border : C.primary}`,
-                        borderRadius: 7,
-                        backgroundColor: blockCount === 0 ? 'transparent' : C.primary,
-                        color: blockCount === 0 ? C.muted : '#ffffff',
-                        fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                        cursor: blockCount === 0 ? 'default' : 'pointer',
-                        opacity: blockCount === 0 ? 0.5 : 1,
-                        transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={e => { if (blockCount > 0) e.currentTarget.style.backgroundColor = '#6020e0' }}
-                    onMouseLeave={e => { if (blockCount > 0) e.currentTarget.style.backgroundColor = '#7530fb' }}
-                >
-                    <CheckCircle2 size={12} />
-                    Export HTML
-                </button>
+                {/* Publish — moved from top bar */}
+                {onPublish && (
+                    <button
+                        onClick={onPublish}
+                        disabled={publishStatus === 'publishing' || blockCount === 0}
+                        title="Publish this template"
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '4px 12px',
+                            border: 'none', borderRadius: 7,
+                            backgroundColor: publishStatus === 'published' ? '#16a34a' : blockCount === 0 ? '#e5e0f5' : '#7530fb',
+                            color: '#ffffff',
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                            cursor: publishStatus === 'publishing' || blockCount === 0 ? 'default' : 'pointer',
+                            opacity: blockCount === 0 ? 0.5 : 1,
+                            transition: 'all 0.15s',
+                            boxShadow: blockCount > 0 && publishStatus === 'idle' ? '0 2px 6px #7530fb44' : 'none',
+                        }}
+                        onMouseEnter={e => { if (blockCount > 0 && publishStatus === 'idle') e.currentTarget.style.backgroundColor = '#6020e0' }}
+                        onMouseLeave={e => { if (publishStatus !== 'published') e.currentTarget.style.backgroundColor = blockCount === 0 ? '#e5e0f5' : '#7530fb' }}
+                    >
+                        {publishStatus === 'publishing'
+                            ? <><CheckCircle2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Publishing…</>
+                            : publishStatus === 'published'
+                                ? <><CheckCircle2 size={12} /> Published!</>
+                                : <><Globe size={12} /> Publish</>}
+                    </button>
+                )}
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
