@@ -1389,32 +1389,56 @@ export default function VisualEditor({
 
                 {/* CENTRE — Canvas or Live Preview */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-                    {/* ── Toolbar — hidden in live preview and for layout container blocks ── */}
-                    {!livePreview && (
-                        <BlockToolbar
-                            blockType={isLayoutBlock ? undefined : (selectedBlock?.type ?? undefined)}
-                            blockProps={isLayoutBlock ? (activeSlotEdit ? {} : null) : (selectedBlock?.props ?? null)}
-                            activeSelection={activeSelection}
-                            onChange={(newProps) => {
-                                if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
+                    {/* ── Toolbar row — BlockToolbar + always-visible eye icon ── */}
+                    <div style={{ display: 'flex', alignItems: 'stretch', borderBottom: '1px solid #e2e8f0', backgroundColor: '#ffffff', flexShrink: 0 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            {!livePreview && (
+                                <BlockToolbar
+                                    blockType={isLayoutBlock ? undefined : (selectedBlock?.type ?? undefined)}
+                                    blockProps={isLayoutBlock ? (activeSlotEdit ? {} : null) : (selectedBlock?.props ?? null)}
+                                    activeSelection={activeSelection}
+                                    onChange={(newProps) => {
+                                        if (selectedId && !isLayoutBlock) handleBlockChange({ ...selectedBlock!, props: newProps });
+                                    }}
+                                    slotEdit={activeSlotEdit}
+                                    onClearSlot={(blockId, propKey) => handleClearSlot(blockId, propKey)}
+                                    onFormatSlot={(blockId, propKey, format, value, selection) => handleFormatSlot(blockId, propKey, format, value, selection)}
+                                    onReplaceSlot={() => {
+                                        if (activeSlotEdit) {
+                                            setActiveDropSlot({ blockId: activeSlotEdit.blockId, slot: activeSlotEdit.propKey as any })
+                                        }
+                                        // Bug #5 fix: clear stale slot edit so old props don't linger
+                                        setActiveSlotEdit(null)
+                                        setActiveTab('content')
+                                        setPanelOpen(true)
+                                    }}
+                                    onToggleLivePreview={() => setLivePreview(p => !p)}
+                                    livePreview={livePreview}
+                                    persistent
+                                />
+                            )}
+                        </div>
+                        {/* Always-visible Live Preview eye icon */}
+                        <button
+                            onClick={() => setLivePreview(p => !p)}
+                            title={livePreview ? 'Exit Live Preview' : 'Live Preview'}
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: 40, flexShrink: 0,
+                                border: 'none',
+                                borderLeft: '1px solid #e2e8f0',
+                                backgroundColor: livePreview ? '#f3eeff' : '#ffffff',
+                                color: livePreview ? '#7530fb' : '#94a3b8',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s',
                             }}
-                            slotEdit={activeSlotEdit}
-                            onClearSlot={(blockId, propKey) => handleClearSlot(blockId, propKey)}
-                            onFormatSlot={(blockId, propKey, format, value, selection) => handleFormatSlot(blockId, propKey, format, value, selection)}
-                            onReplaceSlot={() => {
-                                if (activeSlotEdit) {
-                                    setActiveDropSlot({ blockId: activeSlotEdit.blockId, slot: activeSlotEdit.propKey as any })
-                                }
-                                // Bug #5 fix: clear stale slot edit so old props don't linger
-                                setActiveSlotEdit(null)
-                                setActiveTab('content')
-                                setPanelOpen(true)
-                            }}
-                            onToggleLivePreview={() => setLivePreview(p => !p)}
-                            livePreview={livePreview}
-                            persistent
-                        />
-                    )}
+                        >
+                            {livePreview
+                                ? <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                                : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            }
+                        </button>
+                    </div>
                     {/* ── Canvas or Live Preview ── */}
                     {livePreview ? (
                         <LivePreview
