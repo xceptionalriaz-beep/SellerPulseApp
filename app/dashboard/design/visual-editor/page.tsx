@@ -346,9 +346,9 @@ function VisualEditorInner() {
 
     // ── Publish ───────────────────────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
-        setPublishStatus('publishing')
         setPublishing(true)
         setPublished(false)
+        setPublishStatus('publishing')
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('Not logged in')
@@ -375,7 +375,6 @@ function VisualEditorInner() {
                 setTimeout(() => { setPublished(false); setPublishStatus('idle') }, 3000)
                 router.refresh()
             } else {
-                // Save first, then publish
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
@@ -397,6 +396,7 @@ function VisualEditorInner() {
             }
         } catch (err) {
             console.error('[visual-editor] publish error:', err)
+            setPublishStatus('idle')
         } finally {
             setPublishing(false)
         }
@@ -734,43 +734,30 @@ function VisualEditorInner() {
                                         <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
                                     </div>
                                 </button>
-                            </div>
 
-                            {/* Publish — bottom section, highlighted */}
-                            <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
+                                {/* Export HTML */}
                                 <button
-                                    onClick={() => { handlePublish(); setActionMenuOpen(false) }}
-                                    disabled={publishing}
+                                    onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
                                     style={{
                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                        padding: '10px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: published ? '#dcfce7' : C.primaryLight,
-                                        color: published ? C.success : C.primary,
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
-                                        cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
-                                        transition: 'background 0.12s',
+                                        padding: '9px 10px', border: 'none', borderRadius: 8,
+                                        backgroundColor: 'transparent', color: C.body,
+                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
                                     }}
-                                    onMouseEnter={e => { if (!publishing) e.currentTarget.style.opacity = '0.85' }}
-                                    onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
                                 >
                                     <span style={{
                                         width: 28, height: 28, borderRadius: 7,
-                                        backgroundColor: published ? C.success : C.primary,
+                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                     }}>
-                                        {publishing
-                                            ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
-                                            : published
-                                                ? <Check size={13} style={{ color: '#fff' }} />
-                                                : <Globe size={13} style={{ color: '#fff' }} />}
+                                        <Download size={13} style={{ color: C.secondary }} />
                                     </span>
                                     <div>
-                                        <p style={{ margin: 0, fontSize: 12 }}>
-                                            {published ? 'Published!' : 'Publish Template'}
-                                        </p>
-                                        <p style={{ margin: 0, fontSize: 10, opacity: 0.7, fontWeight: 400 }}>
-                                            Make visible to all users
-                                        </p>
+                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
+                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Download ready-to-use eBay HTML</p>
                                     </div>
                                 </button>
                             </div>
@@ -784,12 +771,12 @@ function VisualEditorInner() {
                 <VisualEditor
                     value={html}
                     onChange={(next) => {
-                        // VisualEditor only emits onChange from real user
-                        // actions (add/move/edit/delete/undo/redo), so this
-                        // is a safe signal that the user actually edited.
                         dirtyRef.current = true
                         setHtml(next)
                     }}
+                    onExportReady={(fn) => { exportFnRef.current = fn }}
+                    onPublish={handlePublish}
+                    publishStatus={publishStatus}
                     placeholders={PLACEHOLDER_GROUPS}
                     // Seed the canvas with the saved template's DB category so
                     // its previews use category-matched sample data
