@@ -135,6 +135,8 @@ interface VisualEditorProps {
     onPublish?: () => void
     /** True while publish is in progress — shows spinner on the Publish button */
     publishStatus?: 'idle' | 'publishing' | 'published'
+    /** Slot rendered at the far right of the second toolbar row (Row 2) */
+    toolbarSlot?: React.ReactNode
     /**
      * Initial canvas category. When a saved template is loaded, the parent
      * (e.g. app/dashboard/design/visual-editor/page.tsx) already knows the
@@ -158,6 +160,7 @@ export default function VisualEditor({
     onExportReady,
     onPublish,
     publishStatus = 'idle',
+    toolbarSlot,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -1297,6 +1300,7 @@ export default function VisualEditor({
                 onExport={handleExport}
                 onPublish={onPublish}
                 publishStatus={publishStatus}
+                toolbarSlot={toolbarSlot}
                 onClearAll={() => {
                     if (blocks.length === 0) return
                     setShowClearConfirm(true)
@@ -1764,6 +1768,7 @@ interface EditorToolbarProps {
     onClearAll: () => void
     onPublish?: () => void
     publishStatus?: 'idle' | 'publishing' | 'published'
+    toolbarSlot?: React.ReactNode
 }
 
 function EditorToolbar({
@@ -1772,7 +1777,7 @@ function EditorToolbar({
     isDirty, currentTemplateId, deviceWidth, onDeviceChange,
     onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
     onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll,
-    onPublish, publishStatus = 'idle',
+    onPublish, publishStatus = 'idle', toolbarSlot,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -1969,37 +1974,6 @@ function EditorToolbar({
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
-                {/* Publish — moved from top bar */}
-                {onPublish && (
-                    <button
-                        onClick={onPublish}
-                        disabled={publishStatus === 'publishing' || blockCount === 0}
-                        title="Publish this template"
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 5,
-                            padding: '4px 12px',
-                            border: 'none', borderRadius: 7,
-                            backgroundColor: publishStatus === 'published' ? '#16a34a' : blockCount === 0 ? '#e5e0f5' : '#7530fb',
-                            color: '#ffffff',
-                            fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
-                            cursor: publishStatus === 'publishing' || blockCount === 0 ? 'default' : 'pointer',
-                            opacity: blockCount === 0 ? 0.5 : 1,
-                            transition: 'all 0.15s',
-                            boxShadow: blockCount > 0 && publishStatus === 'idle' ? '0 2px 6px #7530fb44' : 'none',
-                        }}
-                        onMouseEnter={e => { if (blockCount > 0 && publishStatus === 'idle') e.currentTarget.style.backgroundColor = '#6020e0' }}
-                        onMouseLeave={e => { if (publishStatus !== 'published') e.currentTarget.style.backgroundColor = blockCount === 0 ? '#e5e0f5' : '#7530fb' }}
-                    >
-                        {publishStatus === 'publishing'
-                            ? <><CheckCircle2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Publishing…</>
-                            : publishStatus === 'published'
-                                ? <><CheckCircle2 size={12} /> Published!</>
-                                : <><Globe size={12} /> Publish</>}
-                    </button>
-                )}
-
-                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
-
                 {/* Clear all */}
                 <button
                     onClick={onClearAll}
@@ -2018,6 +1992,14 @@ function EditorToolbar({
                     <Trash2 size={12} />
                     Clear all
                 </button>
+
+                {/* Slot — parent injects the Publish ▾ dropdown here */}
+                {toolbarSlot && (
+                    <>
+                        <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+                        {toolbarSlot}
+                    </>
+                )}
             </div>
         </div>
     )
