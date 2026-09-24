@@ -1410,6 +1410,8 @@ export default function VisualEditor({
                                 setActiveTab('content')
                                 setPanelOpen(true)
                             }}
+                            onToggleLivePreview={onToggleLivePreview}
+                            livePreview={livePreview}
                             persistent
                         />
                     )}
@@ -1860,63 +1862,6 @@ function EditorToolbar({
                 </div>
             </div>
 
-            {/* Save button — UPDATE if editing a saved template, INSERT if new */}
-            <button
-                onClick={onSave}
-                disabled={blockCount === 0 || saveStatus === 'saving' || (saveStatus === 'idle' && !isDirty && currentTemplateId !== null)}
-                title={currentTemplateId
-                    ? 'Save changes to this template'
-                    : 'Save as a new template'}
-                style={{
-                    display: 'flex', alignItems: 'center', gap: 5,
-                    padding: '5px 14px',
-                    border: `1px solid ${saveStatus === 'saved' ? '#86efac' :
-                        saveStatus === 'error' ? '#fecaca' :
-                            (isDirty || !currentTemplateId) && blockCount > 0 ? C.primary : C.border
-                        }`,
-                    borderRadius: 8,
-                    backgroundColor:
-                        saveStatus === 'saved' ? '#dcfce7' :
-                            saveStatus === 'error' ? '#fee2e2' :
-                                (isDirty || !currentTemplateId) && blockCount > 0 ? C.primary : 'transparent',
-                    color:
-                        saveStatus === 'saved' ? '#16a34a' :
-                            saveStatus === 'error' ? '#ef4444' :
-                                (isDirty || !currentTemplateId) && blockCount > 0 ? '#ffffff' : C.muted,
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 12, fontWeight: saveStatus !== 'idle' ? 700 : 600,
-                    cursor: blockCount === 0 || saveStatus === 'saving' ? 'default' : 'pointer',
-                    opacity: blockCount === 0 ? 0.5 : 1,
-                    transition: 'all 0.2s',
-                    flexShrink: 0,
-                }}
-            >
-                <CheckCircle2 size={13} />
-                {saveStatus === 'saving' ? 'Saving…' :
-                    saveStatus === 'saved' ? 'Saved ✓' :
-                        saveStatus === 'error' ? 'Error — retry' :
-                            currentTemplateId ? 'Save changes' : 'Save'}
-            </button>
-
-            {/* Centre — Live Preview toggle */}
-            <button
-                onClick={onToggleLivePreview}
-                style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '5px 14px',
-                    border: `1px solid ${livePreview ? C.primary : C.border}`,
-                    borderRadius: 8,
-                    backgroundColor: livePreview ? C.primaryLight : 'transparent',
-                    color: livePreview ? C.primary : C.secondary,
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 12, fontWeight: livePreview ? 700 : 400,
-                    cursor: 'pointer', transition: 'all 0.15s',
-                }}
-            >
-                {livePreview ? <EyeOff size={13} /> : <Eye size={13} />}
-                {livePreview ? 'Card View' : 'Live Preview'}
-            </button>
-
             {/* Right — zoom + focus + clear */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 {/* Device width toggle */}
@@ -1991,6 +1936,46 @@ function EditorToolbar({
                 >
                     <Trash2 size={12} />
                     Clear all
+                </button>
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
+                {/* Save button — moved to right side, between Clear all and Publish */}
+                <button
+                    onClick={onSave}
+                    disabled={blockCount === 0 || saveStatus === 'saving' || (saveStatus === 'idle' && !isDirty && currentTemplateId !== null)}
+                    title={currentTemplateId
+                        ? 'Save changes to this template'
+                        : 'Save as a new template'}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: '5px 14px',
+                        border: `1px solid ${saveStatus === 'saved' ? '#86efac' :
+                            saveStatus === 'error' ? '#fecaca' :
+                                (isDirty || !currentTemplateId) && blockCount > 0 ? C.primary : C.border
+                            }`,
+                        borderRadius: 8,
+                        backgroundColor:
+                            saveStatus === 'saved' ? '#dcfce7' :
+                                saveStatus === 'error' ? '#fee2e2' :
+                                    (isDirty || !currentTemplateId) && blockCount > 0 ? C.primary : 'transparent',
+                        color:
+                            saveStatus === 'saved' ? '#16a34a' :
+                                saveStatus === 'error' ? '#ef4444' :
+                                    (isDirty || !currentTemplateId) && blockCount > 0 ? '#ffffff' : C.muted,
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: 12, fontWeight: saveStatus !== 'idle' ? 700 : 600,
+                        cursor: blockCount === 0 || saveStatus === 'saving' ? 'default' : 'pointer',
+                        opacity: blockCount === 0 ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                        flexShrink: 0,
+                    }}
+                >
+                    <CheckCircle2 size={13} />
+                    {saveStatus === 'saving' ? 'Saving…' :
+                        saveStatus === 'saved' ? 'Saved ✓' :
+                            saveStatus === 'error' ? 'Error — retry' :
+                                currentTemplateId ? 'Save changes' : 'Save'}
                 </button>
 
                 {/* Slot — parent injects the Publish ▾ dropdown here */}
