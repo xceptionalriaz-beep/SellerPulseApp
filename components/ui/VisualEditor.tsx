@@ -954,11 +954,18 @@ export default function VisualEditor({
 
     // Push global tokens from canvasSettings into every existing block's props
     const handleApplyGlobalToAll = useCallback(() => {
+        // Default token map — applied to all blocks that have the matching prop key
         const tokenMap: Record<string, any> = {
-            // Color tokens — only push to blocks that have these props
-            accentColor: canvasSettings.primaryColor,
+            // Accent stripe / left-border colour → brand accent (lime, badges, highlights)
+            accentColor: canvasSettings.accentColor,
+            // Header backgrounds → brand primary
             headerBg: canvasSettings.primaryColor,
+            // Section backgrounds → canvas background (white, not primary)
             bgColor: canvasSettings.canvasBg,
+            // Heading text colour → global heading colour token
+            headingColor: canvasSettings.headingColor,
+            titleColor: canvasSettings.headingColor,
+            // Borders → semi-transparent primary (subtle tint)
             borderColor: canvasSettings.primaryColor + '44',
             // Typography
             fontFamily: canvasSettings.fontStack,
@@ -968,14 +975,27 @@ export default function VisualEditor({
             // Border radius
             borderRadius: canvasSettings.borderRadiusBase,
         }
+
+        // Per-type overrides — for blocks where a prop means something different
+        const typeOverrides: Record<string, Record<string, any>> = {
+            // button_block: bgColor = button face colour → push primaryColor, not canvasBg
+            //               borderColor = button border → push solid primaryColor, not semi-transparent
+            button_block: {
+                bgColor: canvasSettings.primaryColor,
+                borderColor: canvasSettings.primaryColor,
+            },
+        }
+
         const updatedBlocks = blocks.map(block => {
             const def = getDefinition(block.type)
             if (!def) return block
             const defaultProps = def.defaultProps as Record<string, any>
             const currentProps = block.props as Record<string, any>
+            // Merge base tokenMap with any per-type overrides for this block
+            const effectiveTokens = { ...tokenMap, ...(typeOverrides[block.type] ?? {}) }
             // Only update props that exist in this block's default schema
             const patch: Record<string, any> = {}
-            for (const [key, val] of Object.entries(tokenMap)) {
+            for (const [key, val] of Object.entries(effectiveTokens)) {
                 if (key in defaultProps) {
                     patch[key] = val
                 }
