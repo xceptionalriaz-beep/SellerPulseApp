@@ -4781,6 +4781,67 @@ function TableRowEditor({
     )
 }
 
+function TableRowEditor({
+    rows, onChange, keyLabel = 'Label', valueLabel = 'Value', phButton, addLabel = '+ Add row', maxRows = 30,
+}: {
+    rows: Array<{ key: string; value: string }>
+    onChange: (rows: Array<{ key: string; value: string }>) => void
+    keyLabel?: string
+    valueLabel?: string
+    phButton?: (indexStr: string, label: string) => React.ReactNode
+    addLabel?: string
+    maxRows?: number
+}) {
+    const [dragIdx, setDragIdx] = useState<number | null>(null)
+    const [overIdx, setOverIdx] = useState<number | null>(null)
+    const upd = (i: number, f: 'key' | 'value', v: string) =>
+        onChange(rows.map((r, j) => j === i ? { ...r, [f]: v } : r))
+    const drop = (i: number) => {
+        if (dragIdx === null || dragIdx === i) { setDragIdx(null); setOverIdx(null); return }
+        const next = [...rows]
+        const [moved] = next.splice(dragIdx, 1)
+        next.splice(i, 0, moved)
+        onChange(next)
+        setDragIdx(null); setOverIdx(null)
+    }
+    return (
+        <div>
+            {rows.map((row, i) => (
+                <div key={i} draggable
+                    onDragStart={() => setDragIdx(i)}
+                    onDragOver={e => { e.preventDefault(); setOverIdx(i) }}
+                    onDrop={() => drop(i)}
+                    onDragEnd={() => { setDragIdx(null); setOverIdx(null) }}
+                    style={{
+                        marginBottom: 6, borderRadius: 8, padding: '8px 8px 6px',
+                        border: overIdx === i ? `2px solid ${C.primary}` : '1.5px solid #e5e7eb',
+                        background: dragIdx === i ? '#f3eeff' : '#fafafa',
+                        opacity: dragIdx === i ? 0.5 : 1,
+                    }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 6 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: '50%', background: C.primaryLight, color: C.primary, fontSize: 10, fontWeight: 700, fontFamily: 'DM Sans,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
+                        <span title="Drag to reorder" style={{ cursor: 'grab', color: '#9ca3af', fontSize: 14, userSelect: 'none' }}>⠿</span>
+                        <span style={{ flex: 1 }} />
+                        <button onClick={() => onChange(rows.filter((_, j) => j !== i))}
+                            style={{ padding: '2px 7px', borderRadius: 4, border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 11, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>✕</button>
+                    </div>
+                    <p style={{ margin: '0 0 3px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>{keyLabel}</p>
+                    <input type="text" value={row.key} placeholder={keyLabel} onChange={e => upd(i, 'key', e.target.value)} style={{ ...inputStyle, fontWeight: 600, marginBottom: 4 }} />
+                    <p style={{ margin: '0 0 3px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>{valueLabel}</p>
+                    <input type="text" value={row.value} placeholder="{{PLACEHOLDER}} or text" onChange={e => upd(i, 'value', e.target.value)} style={inputStyle} />
+                    {phButton?.(String(i), valueLabel)}
+                </div>
+            ))}
+            {rows.length < maxRows && (
+                <button onClick={() => onChange([...rows, { key: '', value: '' }])}
+                    style={{ marginTop: 6, padding: '7px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+                >{addLabel}</button>
+            )}
+            {rows.length === 0 && <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows yet</p>}
+        </div>
+    )
+}
+
 function TextInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
     return (
         <div style={{ marginBottom: 8 }}>
