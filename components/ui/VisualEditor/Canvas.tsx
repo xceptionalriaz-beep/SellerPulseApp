@@ -1218,7 +1218,8 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
 
     document.addEventListener('mouseup', function() {
       var sel = window.getSelection();
-      if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      if (sel && sel.rangeCount > 0) {
+        // Save range for both selections and cursor positions
         savedRange = sel.getRangeAt(0).cloneRange();
         savedEditable = activeEditable;
       }
@@ -1241,6 +1242,14 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
           var sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(savedRange);
+        } else if (cmd === 'insertHTML') {
+          // No saved range — place cursor at end of element
+          var sel = window.getSelection();
+          var range = document.createRange();
+          range.selectNodeContents(target);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
         }
         document.execCommand(cmd, false, val);
         // After createLink, add inline styles so link is visible in canvas and eBay-safe
