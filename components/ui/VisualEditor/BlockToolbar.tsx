@@ -16,6 +16,7 @@ import {
     AlertCircle, AlertTriangle, CheckCircle,
     Store, Search, Package, Anchor,
     RefreshCw, Trash2,
+    Superscript, Subscript, SmilePlus,
 } from 'lucide-react'
 
 const C = {
@@ -105,6 +106,9 @@ export default function BlockToolbar({
     const [showRedirectTooltip, setShowRedirectTooltip] = useState(false)
     const [showHighlightPicker, setShowHighlightPicker] = useState(false)
     const highlightRef = useRef<HTMLDivElement>(null)
+    const [showInsertPicker, setShowInsertPicker] = useState(false)
+    const [insertTab, setInsertTab] = useState<'special' | 'emoji'>('special')
+    const insertPickerRef = useRef<HTMLDivElement>(null)
     const safeProps = blockProps ?? {}
 
     // Detect existing link in slot HTML
@@ -236,6 +240,18 @@ export default function BlockToolbar({
         return () => document.removeEventListener('mousedown', handleHighlightOutside)
     }, [showHighlightPicker])
 
+    // Close insert picker on outside click
+    useEffect(() => {
+        if (!showInsertPicker) return
+        function handleInsertOutside(e: MouseEvent) {
+            if (insertPickerRef.current && !insertPickerRef.current.contains(e.target as Node)) {
+                setShowInsertPicker(false)
+            }
+        }
+        document.addEventListener('mousedown', handleInsertOutside)
+        return () => document.removeEventListener('mousedown', handleInsertOutside)
+    }, [showInsertPicker])
+
     // ─────────────────────────────────────────────────────────────────────────
 
     if (blockProps === null && !slotEdit) {
@@ -266,6 +282,18 @@ export default function BlockToolbar({
         } else if (slotEdit) {
             // fallback for slot-based blocks
             onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, 'highlight', color, activeSelection)
+        }
+    }
+
+    const handleInsertChar = (char: string) => {
+        setShowInsertPicker(false)
+        const iframe = document.querySelector('iframe') as HTMLIFrameElement
+        if (iframe?.contentWindow) {
+            iframe.contentWindow.postMessage({
+                type: 'RIAZIFY_APPLY_FORMAT',
+                command: 'insertHTML',
+                value: char,
+            }, '*')
         }
     }
 
@@ -508,6 +536,26 @@ export default function BlockToolbar({
                 backgroundColor: activeProps.textDecoration === 'line-through' ? C.primary : 'transparent',
                 color: activeProps.textDecoration === 'line-through' ? '#ffffff' : '#1f1d2e',
             }}>S</button>
+            <button
+                onClick={() => {
+                    const iframe = document.querySelector('iframe') as HTMLIFrameElement
+                    iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'superscript', value: null }, '*')
+                }}
+                title="Superscript"
+                style={{ ...miniBtn }}
+            >
+                <Superscript size={14} />
+            </button>
+            <button
+                onClick={() => {
+                    const iframe = document.querySelector('iframe') as HTMLIFrameElement
+                    iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_APPLY_FORMAT', command: 'subscript', value: null }, '*')
+                }}
+                title="Subscript"
+                style={{ ...miniBtn }}
+            >
+                <Subscript size={14} />
+            </button>
             <button onClick={handleToggleBlockquote} title="Blockquote" style={{
                 ...miniBtn,
                 backgroundColor: safeProps.isBlockquote ? C.primary : 'transparent',
