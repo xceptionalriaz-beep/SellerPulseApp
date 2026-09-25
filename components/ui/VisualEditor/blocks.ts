@@ -3500,6 +3500,9 @@ export interface CanvasSettings {
     spacingBase: number          // global base spacing multiplier (px)
     mobileFontScale: number      // % scale for mobile font sizes (default 90)
     mobilePaddingScale: number   // % scale for mobile padding (default 80)
+
+    // ── Color Palette ─────────────────────────────────────────────────────────
+    palette: string[]            // saved brand swatches (max 10)
 }
 
 export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
@@ -3520,6 +3523,9 @@ export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
     spacingBase: 16,
     mobileFontScale: 90,
     mobilePaddingScale: 80,
+
+    // Color palette — pre-seeded with brand colors
+    palette: ['#7530fb', '#b8fa33', '#1e1535', '#ffffff', '#6b7280'],
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

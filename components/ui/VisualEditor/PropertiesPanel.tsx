@@ -152,6 +152,8 @@ interface PropertiesPanelProps {
     onChange: (updated: Block) => void
     onDeselect: () => void
     selectedSubSlot?: string | null
+    palette?: string[]
+    onPaletteChange?: (palette: string[]) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -163,6 +165,8 @@ export default function PropertiesPanel({
     onChange,
     onDeselect,
     selectedSubSlot,
+    palette = [],
+    onPaletteChange,
 }: PropertiesPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>('styles')
 
@@ -246,171 +250,173 @@ export default function PropertiesPanel({
     // PANEL WITH SELECTED BLOCK
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div style={{
-            width: 280,
-            minWidth: 280,
-            height: '100%',
-            backgroundColor: C.surface,
-            borderLeft: `1px solid ${C.border}`,
-            display: 'flex',
-            flexDirection: 'column',
-            flexShrink: 0,
-            overflow: 'hidden',
-        }}>
-            {/* ── Header ── */}
+        <PaletteContext.Provider value={{ palette, onPaletteChange }}>
             <div style={{
-                padding: '12px 14px 0',
-                borderBottom: `1px solid ${C.border}`,
+                width: 280,
+                minWidth: 280,
+                height: '100%',
                 backgroundColor: C.surface,
+                borderLeft: `1px solid ${C.border}`,
+                display: 'flex',
+                flexDirection: 'column',
                 flexShrink: 0,
+                overflow: 'hidden',
             }}>
-                {/* Block identity */}
+                {/* ── Header ── */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: 10,
+                    padding: '12px 14px 0',
+                    borderBottom: `1px solid ${C.border}`,
+                    backgroundColor: C.surface,
+                    flexShrink: 0,
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: 8,
-                            backgroundColor: C.primaryLight,
-                            border: `1px solid ${C.primaryBorder}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 15,
-                            flexShrink: 0,
-                        }}>
-                            {(() => {
-                                const I = def?.icon ? BLOCK_ICONS[def.icon] : null
-                                return I ? <I size={16} style={{ color: C.primary }} /> : null
-                            })()}
-                        </div>
-                        <div>
-                            <p style={{
-                                margin: 0,
-                                fontFamily: 'Syne, sans-serif',
-                                fontWeight: 700,
-                                fontSize: 12,
-                                color: C.dark,
-                            }}>
-                                {def?.label}
-                            </p>
-                            <p style={{
-                                margin: 0,
-                                fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 10,
-                                color: C.muted,
-                            }}>
-                                {def?.category}
-                            </p>
-                        </div>
-                    </div>
-                    {/* Deselect */}
-                    <button
-                        onClick={onDeselect}
-                        title="Deselect block"
-                        style={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: 6,
-                            border: `1px solid ${C.border}`,
-                            backgroundColor: 'transparent',
-                            cursor: 'pointer',
-                            color: C.muted,
-                            fontSize: 14,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: 0,
-                            fontFamily: 'DM Sans, sans-serif',
-                        }}
-                    >
-                        ×
-                    </button>
-                </div>
-
-                {/* eBay compliant badge — reflects THIS block's actual HTML */}
-                <div
-                    title={blockAudit.count === 0
-                        ? 'This block passes every eBay compliance check'
-                        : `Issues: ${blockAudit.issues.join(', ')}`}
-                    style={{
-                        display: 'inline-flex',
+                    {/* Block identity */}
+                    <div style={{
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: 5,
-                        backgroundColor: blockAudit.count === 0 ? C.successLight : C.warningLight,
-                        border: `1px solid ${blockAudit.count === 0 ? '#86efac50' : '#fcd34d80'}`,
-                        borderRadius: 20,
-                        padding: '3px 10px',
+                        justifyContent: 'space-between',
                         marginBottom: 10,
                     }}>
-                    {blockAudit.count === 0 ? (
-                        <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
-                    ) : (
-                        <AlertTriangle size={11} style={{ color: C.warning, flexShrink: 0 }} />
-                    )}
-                    <span style={{
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        color: blockAudit.count === 0 ? C.success : C.warning,
-                    }}>
-                        {blockAudit.count === 0
-                            ? '100% eBay Compliant'
-                            : `${blockAudit.count} issue${blockAudit.count > 1 ? 's' : ''}`}
-                    </span>
-                </div>
-
-                {/* Tabs */}
-                <div style={{ display: 'flex', gap: 2 }}>
-                    {(['styles', 'attributes', 'ai'] as PanelTab[]).map(tab => (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{
+                                width: 30,
+                                height: 30,
+                                borderRadius: 8,
+                                backgroundColor: C.primaryLight,
+                                border: `1px solid ${C.primaryBorder}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 15,
+                                flexShrink: 0,
+                            }}>
+                                {(() => {
+                                    const I = def?.icon ? BLOCK_ICONS[def.icon] : null
+                                    return I ? <I size={16} style={{ color: C.primary }} /> : null
+                                })()}
+                            </div>
+                            <div>
+                                <p style={{
+                                    margin: 0,
+                                    fontFamily: 'Syne, sans-serif',
+                                    fontWeight: 700,
+                                    fontSize: 12,
+                                    color: C.dark,
+                                }}>
+                                    {def?.label}
+                                </p>
+                                <p style={{
+                                    margin: 0,
+                                    fontFamily: 'DM Sans, sans-serif',
+                                    fontSize: 10,
+                                    color: C.muted,
+                                }}>
+                                    {def?.category}
+                                </p>
+                            </div>
+                        </div>
+                        {/* Deselect */}
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
+                            onClick={onDeselect}
+                            title="Deselect block"
                             style={{
-                                flex: 1,
-                                padding: '6px 4px',
-                                border: 'none',
-                                borderBottom: `2px solid ${activeTab === tab ? C.primary : 'transparent'}`,
+                                width: 24,
+                                height: 24,
+                                borderRadius: 6,
+                                border: `1px solid ${C.border}`,
                                 backgroundColor: 'transparent',
                                 cursor: 'pointer',
+                                color: C.muted,
+                                fontSize: 14,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: 0,
                                 fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 11,
-                                fontWeight: activeTab === tab ? 700 : 500,
-                                color: activeTab === tab ? C.primary : C.secondary,
-                                transition: 'color 0.15s, border-color 0.15s',
-                                textTransform: 'capitalize',
                             }}
                         >
-                            {tab === 'ai' ? 'AI' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            ×
                         </button>
-                    ))}
+                    </div>
+
+                    {/* eBay compliant badge — reflects THIS block's actual HTML */}
+                    <div
+                        title={blockAudit.count === 0
+                            ? 'This block passes every eBay compliance check'
+                            : `Issues: ${blockAudit.issues.join(', ')}`}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            backgroundColor: blockAudit.count === 0 ? C.successLight : C.warningLight,
+                            border: `1px solid ${blockAudit.count === 0 ? '#86efac50' : '#fcd34d80'}`,
+                            borderRadius: 20,
+                            padding: '3px 10px',
+                            marginBottom: 10,
+                        }}>
+                        {blockAudit.count === 0 ? (
+                            <CheckCircle2 size={11} style={{ color: C.success, flexShrink: 0 }} />
+                        ) : (
+                            <AlertTriangle size={11} style={{ color: C.warning, flexShrink: 0 }} />
+                        )}
+                        <span style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: blockAudit.count === 0 ? C.success : C.warning,
+                        }}>
+                            {blockAudit.count === 0
+                                ? '100% eBay Compliant'
+                                : `${blockAudit.count} issue${blockAudit.count > 1 ? 's' : ''}`}
+                        </span>
+                    </div>
+
+                    {/* Tabs */}
+                    <div style={{ display: 'flex', gap: 2 }}>
+                        {(['styles', 'attributes', 'ai'] as PanelTab[]).map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                style={{
+                                    flex: 1,
+                                    padding: '6px 4px',
+                                    border: 'none',
+                                    borderBottom: `2px solid ${activeTab === tab ? C.primary : 'transparent'}`,
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    fontFamily: 'DM Sans, sans-serif',
+                                    fontSize: 11,
+                                    fontWeight: activeTab === tab ? 700 : 500,
+                                    color: activeTab === tab ? C.primary : C.secondary,
+                                    transition: 'color 0.15s, border-color 0.15s',
+                                    textTransform: 'capitalize',
+                                }}
+                            >
+                                {tab === 'ai' ? 'AI' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Tab content ── */}
+                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+                    {activeTab === 'styles' && (
+                        <StylesTab block={block} props={props} updateProps={updateProps} />
+                    )}
+                    {activeTab === 'attributes' && (
+                        <AttributesTab
+                            block={block}
+                            props={props}
+                            placeholders={placeholders}
+                            updateProps={updateProps}
+                            selectedSubSlot={selectedSubSlot}
+                        />
+                    )}
+                    {activeTab === 'ai' && (
+                        <AITab block={block} onChange={onChange} />
+                    )}
                 </div>
             </div>
-
-            {/* ── Tab content ── */}
-            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-                {activeTab === 'styles' && (
-                    <StylesTab block={block} props={props} updateProps={updateProps} />
-                )}
-                {activeTab === 'attributes' && (
-                    <AttributesTab
-                        block={block}
-                        props={props}
-                        placeholders={placeholders}
-                        updateProps={updateProps}
-                        selectedSubSlot={selectedSubSlot}
-                    />
-                )}
-                {activeTab === 'ai' && (
-                    <AITab block={block} onChange={onChange} />
-                )}
-            </div>
-        </div>
+        </PaletteContext.Provider>
     )
 }
 
@@ -3458,9 +3464,9 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             const rows: Array<{ key: string; value: string }> = Array.isArray(props.rows)
                 ? props.rows.map((r: any) => Array.isArray(r) ? { key: r[0] ?? '', value: r[1] ?? '' } : r)
                 : [
-                    { key: 'Brand', value: '{{BRAND}}' },
-                    { key: 'Model', value: '{{MPN}}' },
-                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
+                    { key: 'Brand', value: '{{ BRAND }}' },
+                    { key: 'Model', value: '{{ MPN }}' },
+                    { key: 'Condition', value: '{{ ITEM_CONDITION }}' },
                 ]
             const rowPhButton = (indexStr: string, _label: string) => (
                 <button
@@ -4539,42 +4545,133 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     )
 }
 
+// ── Color palette context — set once at panel level, read by every ColorRow ──
+const PaletteContext = React.createContext<{
+    palette: string[]
+    onPaletteChange?: (p: string[]) => void
+}>({ palette: [] })
+
 function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+    const { palette, onPaletteChange } = React.useContext(PaletteContext)
+    const [open, setOpen] = React.useState(false)
+    const safeHex = value.startsWith('#') && value.length >= 4 ? value : '#ffffff'
+
+    const addToPalette = () => {
+        if (!onPaletteChange) return
+        if (palette.includes(value)) return
+        if (palette.length >= 10) {
+            onPaletteChange([...palette.slice(1), value])
+        } else {
+            onPaletteChange([...palette, value])
+        }
+    }
+
+    const removeFromPalette = (color: string, e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (!onPaletteChange) return
+        onPaletteChange(palette.filter(c => c !== color))
+    }
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>{label}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                    type="text"
-                    value={value}
-                    onChange={e => onChange(e.target.value)}
-                    style={{
-                        width: 70,
-                        padding: '3px 6px',
-                        border: `1px solid ${C.inputBorder}`,
-                        borderRadius: 5,
-                        fontFamily: 'monospace',
-                        fontSize: 10,
-                        color: C.body,
-                        backgroundColor: C.surface,
-                        outline: 'none',
-                    }}
-                />
-                <input
-                    type="color"
-                    value={value.startsWith('#') && value.length >= 4 ? value : '#ffffff'}
-                    onChange={e => onChange(e.target.value)}
-                    style={{
-                        width: 26,
-                        height: 26,
-                        padding: 2,
-                        border: `1px solid ${C.inputBorder}`,
-                        borderRadius: 6,
-                        cursor: 'pointer',
-                        backgroundColor: 'transparent',
-                    }}
-                />
+        <div style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>{label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                        type="text"
+                        value={value}
+                        onChange={e => onChange(e.target.value)}
+                        style={{
+                            width: 70,
+                            padding: '3px 6px',
+                            border: `1px solid ${C.inputBorder}`,
+                            borderRadius: 5,
+                            fontFamily: 'monospace',
+                            fontSize: 10,
+                            color: C.body,
+                            backgroundColor: C.surface,
+                            outline: 'none',
+                        }}
+                    />
+                    <input
+                        type="color"
+                        value={safeHex}
+                        onChange={e => { onChange(e.target.value); setOpen(false) }}
+                        style={{
+                            width: 26,
+                            height: 26,
+                            padding: 2,
+                            border: `1px solid ${C.inputBorder}`,
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                            backgroundColor: 'transparent',
+                        }}
+                    />
+                </div>
             </div>
+            {/* ── Palette swatches ── */}
+            {palette.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 5, flexWrap: 'wrap' }}>
+                    {palette.map(color => (
+                        <div
+                            key={color}
+                            title={color}
+                            onClick={() => onChange(color)}
+                            style={{
+                                position: 'relative',
+                                width: 18,
+                                height: 18,
+                                borderRadius: 4,
+                                backgroundColor: color,
+                                border: value === color ? `2px solid ${C.primary}` : `1px solid ${C.border}`,
+                                cursor: 'pointer',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <span
+                                onClick={e => removeFromPalette(color, e)}
+                                title="Remove"
+                                style={{
+                                    position: 'absolute',
+                                    top: -5,
+                                    right: -5,
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '50%',
+                                    backgroundColor: C.muted,
+                                    color: '#fff',
+                                    fontSize: 7,
+                                    lineHeight: '10px',
+                                    textAlign: 'center',
+                                    cursor: 'pointer',
+                                    display: 'none',
+                                }}
+                                className="palette-remove"
+                            >✕</span>
+                        </div>
+                    ))}
+                    {/* + Add current colour button */}
+                    {onPaletteChange && !palette.includes(value) && value.startsWith('#') && (
+                        <div
+                            onClick={addToPalette}
+                            title={`Save ${value} to palette`}
+                            style={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: 4,
+                                border: `1.5px dashed ${C.border}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                fontSize: 12,
+                                color: C.muted,
+                                flexShrink: 0,
+                            }}
+                        >+</div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
@@ -4648,7 +4745,7 @@ function SelectInput({
     options: Array<{ v: string; l: string }>
     onChange: (v: string) => void
 }) {
-    // Convert { v, l } → DropdownOption { val, label, enabled }
+    // Convert {v, l} → DropdownOption {val, label, enabled}
     const ddOptions: DropdownOption[] = options.map(o => ({
         val: o.v,
         label: o.l,

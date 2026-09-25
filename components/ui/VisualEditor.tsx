@@ -1627,6 +1627,8 @@ export default function VisualEditor({
                             placeholders={placeholders}
                             onChange={handleBlockChange}
                             onDeselect={() => setSelectedId(null)}
+                            palette={canvasSettings.palette ?? []}
+                            onPaletteChange={p => handleUpdateSettings({ ...canvasSettings, palette: p })}
                         />
                     )
                 )}
