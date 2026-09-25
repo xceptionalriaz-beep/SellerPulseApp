@@ -545,6 +545,12 @@ export interface ProductDescriptionProps extends CommonProps {
     titleText: string
     titleColor: string
     titleFontSize: number     // title font size (default 16)
+    variant: string
+    accentColor: string
+    feature1: string
+    feature2: string
+    feature3: string
+    darkBg: string
 }
 
 // ── Specs Table ───────────────────────────────────────────────────────────────
@@ -937,6 +943,7 @@ import { getPolicyTabsVariant as _getPolicyTabsVariant } from './variants/policy
 import { getBannerVariant as _getBannerVariant } from './variants/banner.variants'
 import { getButtonVariant as _getButtonVariant } from './variants/button_block.variants'
 import { getFeatureVariant as _getFeatureVariant } from './variants/features.variants'
+import { getProductDescriptionVariant as _getProductDescriptionVariant } from './variants/product_description.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
