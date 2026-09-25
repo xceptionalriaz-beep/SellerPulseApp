@@ -650,6 +650,113 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="36" y="26" width="32" height="5" rx="2.5" fillOpacity="0.12" fill={col} stroke={col} strokeWidth="1" strokeOpacity="0.3" />
         </svg>
     ),
+    // ── What's In The Box variants ────────────────────────────────────────────
+    'simple-list': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="8" width="36" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <rect x="8" y="15" width="6" height="5" rx="1" fill="#16a34a" opacity="0.8" />
+            <rect x="18" y="16.5" width="44" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="8" y="22" width="6" height="5" rx="1" fill="#16a34a" opacity="0.8" />
+            <rect x="18" y="23.5" width="38" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="8" y="29" width="6" height="5" rx="1" fill="#16a34a" opacity="0.8" />
+            <rect x="18" y="30.5" width="42" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+        </svg>
+    ),
+    'tick-cards': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="7" width="68" height="7" rx="3" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="0.75" />
+            <circle cx="13" cy="10.5" r="3" fill="#16a34a" opacity="0.8" />
+            <rect x="20" y="9" width="40" height="2.5" rx="1.25" fill="#374151" opacity="0.6" />
+            <rect x="6" y="16" width="68" height="7" rx="3" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="0.75" />
+            <circle cx="13" cy="19.5" r="3" fill="#16a34a" opacity="0.8" />
+            <rect x="20" y="18" width="34" height="2.5" rx="1.25" fill="#374151" opacity="0.6" />
+            <rect x="6" y="25" width="68" height="7" rx="3" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="0.75" />
+            <circle cx="13" cy="28.5" r="3" fill="#16a34a" opacity="0.8" />
+            <rect x="20" y="27" width="38" height="2.5" rx="1.25" fill="#374151" opacity="0.6" />
+        </svg>
+    ),
+    'two-column': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="6" width="30" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <rect x="8" y="13" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="16" y="14" width="20" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="8" y="20" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="16" y="21" width="16" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="8" y="27" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="16" y="28" width="18" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="42" y="13" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="50" y="14" width="20" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="42" y="20" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="50" y="21" width="16" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+        </svg>
+    ),
+    'numbered': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="6" width="32" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <circle cx="13" cy="15" r="4" fill={col} opacity="0.85" />
+            <rect x="21" y="13.5" width="42" height="2.5" rx="1.25" fill="#6b7280" opacity="0.6" />
+            <circle cx="13" cy="23" r="4" fill={col} opacity="0.6" />
+            <rect x="21" y="21.5" width="36" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" />
+            <circle cx="13" cy="31" r="4" fill={col} opacity="0.4" />
+            <rect x="21" y="29.5" width="38" height="2.5" rx="1.25" fill="#6b7280" opacity="0.4" />
+        </svg>
+    ),
+    'dark-panel': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e1535" />
+            <rect x="8" y="6" width="36" height="3" rx="1.5" fill="#b8fa33" opacity="0.9" />
+            <rect x="8" y="13" width="6" height="5" rx="1" fill="#b8fa33" opacity="0.7" />
+            <rect x="18" y="14.5" width="42" height="2" rx="1" fill="white" opacity="0.5" />
+            <rect x="8" y="21" width="6" height="5" rx="1" fill="#b8fa33" opacity="0.7" />
+            <rect x="18" y="22.5" width="36" height="2" rx="1" fill="white" opacity="0.4" />
+            <rect x="8" y="29" width="6" height="5" rx="1" fill="#b8fa33" opacity="0.7" />
+            <rect x="18" y="30.5" width="40" height="2" rx="1" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    'icon-row': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="5" width="40" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <rect x="6" y="11" width="14" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="8" y="13" width="10" height="4" rx="1" fill={col} opacity="0.5" />
+            <rect x="6" y="22" width="14" height="3" rx="1.5" fill="#9ca3af" opacity="0.5" />
+            <rect x="23" y="11" width="14" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="25" y="13" width="10" height="4" rx="1" fill={col} opacity="0.5" />
+            <rect x="23" y="22" width="14" height="3" rx="1.5" fill="#9ca3af" opacity="0.5" />
+            <rect x="40" y="11" width="14" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="42" y="13" width="10" height="4" rx="1" fill={col} opacity="0.5" />
+            <rect x="40" y="22" width="14" height="3" rx="1.5" fill="#9ca3af" opacity="0.5" />
+            <rect x="57" y="11" width="14" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="59" y="13" width="10" height="4" rx="1" fill={col} opacity="0.5" />
+            <rect x="57" y="22" width="14" height="3" rx="1.5" fill="#9ca3af" opacity="0.5" />
+        </svg>
+    ),
+    'table-qty': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="6" y="6" width="68" height="6" rx="2" fill={col} opacity="0.85" />
+            <rect x="6" y="12" width="68" height="6" fill="#f9fafb" />
+            <rect x="9" y="14" width="36" height="2" rx="1" fill="#374151" opacity="0.6" />
+            <rect x="57" y="14" width="14" height="2" rx="1" fill={col} opacity="0.7" />
+            <rect x="6" y="18" width="68" height="6" fill="white" />
+            <rect x="9" y="20" width="28" height="2" rx="1" fill="#374151" opacity="0.5" />
+            <rect x="57" y="20" width="14" height="2" rx="1" fill={col} opacity="0.6" />
+            <rect x="6" y="24" width="68" height="6" fill="#f9fafb" />
+            <rect x="9" y="26" width="32" height="2" rx="1" fill="#374151" opacity="0.5" />
+            <rect x="57" y="26" width="14" height="2" rx="1" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    'badge-count': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="6" width="32" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <rect x="8" y="13" width="34" height="2.5" rx="1.25" fill="#374151" opacity="0.6" />
+            <rect x="57" y="11" width="15" height="6" rx="3" fill={col} opacity="0.85" />
+            <rect x="8" y="20" width="28" height="2.5" rx="1.25" fill="#374151" opacity="0.5" />
+            <rect x="57" y="18" width="15" height="6" rx="3" fill={col} opacity="0.7" />
+            <rect x="8" y="27" width="32" height="2.5" rx="1.25" fill="#374151" opacity="0.4" />
+            <rect x="57" y="25" width="15" height="6" rx="3" fill={col} opacity="0.5" />
+        </svg>
+    ),
     'plain': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
@@ -1792,7 +1899,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -3766,22 +3873,46 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
         }
 
-        case 'whats_in_the_box':
+        case 'whats_in_the_box': {
+            const witbVariant = props.variant ?? 'simple-list'
+            const isDark = witbVariant === 'dark-panel'
+            const showAccent = ['numbered', 'table-qty', 'badge-count'].includes(witbVariant)
             return (
-                <Section title="Box contents">
-                    <InfoBox>One item per line.</InfoBox>
-                    <TextareaInput
-                        label="Items (one per line)"
-                        value={Array.isArray(props.items) ? props.items.join('\n') : '1x Main Unit\n1x Power Cable\n1x User Manual'}
-                        rows={5}
-                        onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
-                    />
-                    <TextInput label="Heading" value={props.heading ?? "📦 What's In The Box"} onChange={v => updateProps({ heading: v })} />
-                    <ColorRow label="Heading colour" value={props.headingColor ?? '#1e1535'} onChange={v => updateProps({ headingColor: v })} />
-                    <ColorRow label="Bullet colour" value={props.bulletColor ?? '#16a34a'} onChange={v => updateProps({ bulletColor: v })} />
-                    <ColorRow label="Text colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
-                </Section>
+                <>
+                    <Section title="Box contents">
+                        <TextareaInput
+                            label="Items (one per line)"
+                            value={Array.isArray(props.items) ? props.items.join('\n') : '1x Main Unit\n1x Power Cable\n1x User Manual\n1x Warranty Card\n2x AAA Batteries'}
+                            rows={6}
+                            onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
+                        />
+                        <InfoBox>Start each item with quantity e.g. "2x AAA Batteries" — used by Badge Count and Quantity Table variants.</InfoBox>
+                        <TextInput label="Heading" value={props.heading ?? "📦 What's In The Box"} onChange={v => updateProps({ heading: v })} />
+                    </Section>
+
+                    <Section title="Colours">
+                        {isDark ? (
+                            <>
+                                <ColorRow label="Panel background" value={props.darkBg ?? '#1e1535'} onChange={v => updateProps({ darkBg: v })} />
+                                <ColorRow label="Text colour" value={props.darkText ?? '#ffffff'} onChange={v => updateProps({ darkText: v })} />
+                                <ColorRow label="Accent / bullet" value={props.darkAccent ?? '#b8fa33'} onChange={v => updateProps({ darkAccent: v })} />
+                            </>
+                        ) : (
+                            <>
+                                <ColorRow label="Heading colour" value={props.headingColor ?? '#1e1535'} onChange={v => updateProps({ headingColor: v })} />
+                                {!showAccent && (
+                                    <ColorRow label="Bullet colour" value={props.bulletColor ?? '#16a34a'} onChange={v => updateProps({ bulletColor: v })} />
+                                )}
+                                <ColorRow label="Text colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
+                                {showAccent && (
+                                    <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                                )}
+                            </>
+                        )}
+                    </Section>
+                </>
             )
+        }
 
         case 'key_features_grid':
             return (

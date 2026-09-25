@@ -991,6 +991,7 @@ import { getButtonVariant as _getButtonVariant } from './variants/button_block.v
 import { getFeatureVariant as _getFeatureVariant } from './variants/features.variants'
 import { getProductDescriptionVariant as _getProductDescriptionVariant } from './variants/product_description.variants'
 import { getProductVariantsVariant as _getProductVariantsVariant } from './variants/product_variants.variants'
+import { getWhatsInTheBoxVariant as _getWhatsInTheBoxVariant } from './variants/whats_in_the_box.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
@@ -2694,13 +2695,23 @@ ${thumbCells}
             category: 'Product' as BlockCategory,
             icon: 'package',
             description: 'Checklist of included items',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'simple-list',
+                heading: "📦 What's In The Box",
+                items: ['1x Main Unit', '1x Power Cable', '1x User Manual', '1x Warranty Card', '2x AAA Batteries'],
+                headingColor: '#1e1535',
+                bulletColor: '#16a34a',
+                textColor: '#1f1d2e',
+                accentColor: '#7530fb',
+                darkBg: '#1e1535',
+                darkText: '#ffffff',
+                darkAccent: '#b8fa33',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                const items = ['1x Main Unit', '1x Power Cable', '1x User Manual', '1x Warranty Card', '2x AAA Batteries']
-                const rows = items.map(item => `<tr><td width="24" valign="top" style="padding-right:8px;padding-bottom:6px;font-size:14px;color:#16a34a;">&#9632;</td><td valign="top" style="padding-bottom:6px;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;line-height:1.5;">${item}</td></tr>`).join('')
-                return wrapBlock('whats_in_the_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1e1535;">&#128230; What's In The Box</p><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+                const p = props as unknown as import('./variants/whats_in_the_box.variants').WhatsInTheBoxProps
+                const variant = _getWhatsInTheBoxVariant(p.variant ?? 'simple-list')
+                return variant.toHtml(p, id)
             },
         },
 

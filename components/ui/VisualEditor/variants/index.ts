@@ -15,6 +15,7 @@ export { bannerVariants, getBannerVariant } from './banner.variants'
 export { buttonBlockVariants, getButtonVariant } from './button_block.variants'
 export { productDescriptionVariants, getProductDescriptionVariant } from './product_description.variants'
 export { productVariantsVariants, getProductVariantsVariant } from './product_variants.variants'
+export { whatsInTheBoxVariants, getWhatsInTheBoxVariant } from './whats_in_the_box.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -28,6 +29,7 @@ import { bannerVariants } from './banner.variants'
 import { buttonBlockVariants } from './button_block.variants'
 import { productDescriptionVariants } from './product_description.variants'
 import { productVariantsVariants } from './product_variants.variants'
+import { whatsInTheBoxVariants } from './whats_in_the_box.variants'
 import type { BlockVariant } from './hero_header.variants'
 
 // Registry — maps block type to its variant array
@@ -43,6 +45,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'button_block': buttonBlockVariants,
     'product_description': productDescriptionVariants,
     'product_variants': productVariantsVariants,
+    'whats_in_the_box': whatsInTheBoxVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
