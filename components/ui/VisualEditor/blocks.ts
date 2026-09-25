@@ -2653,7 +2653,7 @@ ${thumbCells}
                 badge4Icon: '📦', badge4Text: 'Fast Dispatch',
             } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as ProductVariantsProps
+                const p = props as unknown as ProductVariantsProps
                 return _getProductVariantsVariant(p.variant ?? 'swatches-sizes').toHtml(p, id)
             },
         },
