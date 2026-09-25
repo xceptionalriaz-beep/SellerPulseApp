@@ -1500,6 +1500,7 @@ ${rows}
             titleText: 'Product Description',
             titleColor: '#1e1535',
             fontWeight: '400',
+            titleFontSize: 16,
             variant: 'plain',
             accentColor: '#7530fb',
             feature1: '✓ Premium Quality',
@@ -1509,21 +1510,7 @@ ${rows}
         } as ProductDescriptionProps,
         toHtml(props, id) {
             const p = props as ProductDescriptionProps
-            const titleHtml = p.showTitle
-                ? `<p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:${p.titleFontSize ?? 16}px;font-weight:700;color:${p.titleColor};border-left:4px solid #7530fb;padding-left:12px;">${p.titleText}</p>`
-                : ''
-            return wrapBlock('product_description', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      ${titleHtml}
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '400'};line-height:${p.lineHeight};color:${p.color};">
-        ${p.text}
-      </p>
-    </td>
-  </tr>
-</table>`
-            )
+            return _getProductDescriptionVariant(p.variant ?? 'plain').toHtml(p, id)
         },
     },
 

@@ -526,6 +526,63 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="10" y="10" width="60" height="16" rx="2" fill="none" stroke="#c9a84c" strokeWidth="1" />
         </svg>
     ),
+    // ── Product Description variants ──────────────────────────────────────────
+    'plain': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="8" y="8" width="40" height="4" rx="2" fill={col} opacity="0.9" />
+            <rect x="8" y="15" width="64" height="2" rx="1" fill="#e5e7eb" />
+            <rect x="8" y="20" width="64" height="2" rx="1" fill="#d1d5db" />
+            <rect x="8" y="25" width="48" height="2" rx="1" fill="#d1d5db" />
+        </svg>
+    ),
+    'accent-bar': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="0" y="0" width="4" height="36" rx="2" fill={col} />
+            <rect x="10" y="8" width="36" height="4" rx="2" fill={col} opacity="0.9" />
+            <rect x="10" y="17" width="58" height="2" rx="1" fill="#d1d5db" />
+            <rect x="10" y="22" width="58" height="2" rx="1" fill="#d1d5db" />
+            <rect x="10" y="27" width="40" height="2" rx="1" fill="#d1d5db" />
+        </svg>
+    ),
+    'feature-box': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="5" width="20" height="7" rx="3" fill={col} opacity="0.15" stroke={col} strokeWidth="0.5" />
+            <rect x="28" y="5" width="20" height="7" rx="3" fill={col} opacity="0.15" stroke={col} strokeWidth="0.5" />
+            <rect x="52" y="5" width="20" height="7" rx="3" fill={col} opacity="0.15" stroke={col} strokeWidth="0.5" />
+            <rect x="4" y="16" width="38" height="3" rx="1.5" fill={col} opacity="0.8" />
+            <rect x="4" y="22" width="72" height="2" rx="1" fill="#d1d5db" />
+            <rect x="4" y="27" width="60" height="2" rx="1" fill="#d1d5db" />
+        </svg>
+    ),
+    'split-story': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="8" width="34" height="2" rx="1" fill="#d1d5db" />
+            <rect x="4" y="13" width="30" height="2" rx="1" fill="#d1d5db" />
+            <rect x="4" y="18" width="32" height="2" rx="1" fill="#d1d5db" />
+            <rect x="4" y="23" width="28" height="2" rx="1" fill="#d1d5db" />
+            <rect x="40" y="8" width="1" height="22" fill="#e5e7eb" />
+            <rect x="44" y="8" width="30" height="2" rx="1" fill="#d1d5db" />
+            <rect x="44" y="13" width="28" height="2" rx="1" fill="#d1d5db" />
+            <rect x="44" y="18" width="30" height="2" rx="1" fill="#d1d5db" />
+            <rect x="44" y="23" width="22" height="2" rx="1" fill="#d1d5db" />
+            <rect x="4" y="4" width="72" height="2" rx="1" fill={col} opacity="0.8" />
+        </svg>
+    ),
+    'card-elevated': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f3f4f6" />
+            <rect x="4" y="4" width="72" height="28" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="10" y="9" width="36" height="4" rx="2" fill={col} opacity="0.85" />
+            <rect x="10" y="15" width="2" height="12" rx="1" fill={col} />
+            <rect x="10" y="17" width="56" height="2" rx="1" fill="#d1d5db" />
+            <rect x="10" y="22" width="50" height="2" rx="1" fill="#d1d5db" />
+            <rect x="10" y="27" width="40" height="2" rx="1" fill="#d1d5db" />
+        </svg>
+    ),
     // ── Banner: Split Image & Text ─────────────────────────────────────────────
     'split-image-text': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
@@ -1956,35 +2013,165 @@ function BlockStyleProps({ block, props, updateProps }: {
             )
         }
 
-        case 'product_description':
+        case 'product_description': {
+            const pdv = props.variant ?? 'plain'
+            const showAccent = ['accent-bar', 'feature-box', 'split-story', 'card-elevated'].includes(pdv)
+            const isFeatureBox = pdv === 'feature-box'
+            const isDarkLuxury = pdv === 'dark-luxury'
+            const isSplitStory = pdv === 'split-story'
             return (
                 <>
+                    {/* ── Title section ── */}
                     <Section title="Title">
-                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
-                        <SliderInput
-                            label="Title font size"
-                            value={props.titleFontSize ?? 16}
-                            min={12} max={32} suffix="px"
-                            onChange={v => updateProps({ titleFontSize: v })}
+                        <ToggleRow
+                            label="Show title"
+                            value={props.showTitle ?? true}
+                            onChange={v => updateProps({ showTitle: v })}
                         />
+                        {(props.showTitle ?? true) && (
+                            <>
+                                <TextInput
+                                    label="Title text"
+                                    value={props.titleText ?? 'Product Description'}
+                                    onChange={v => updateProps({ titleText: v })}
+                                />
+                                <ColorRow
+                                    label="Title colour"
+                                    value={props.titleColor ?? '#1e1535'}
+                                    onChange={v => updateProps({ titleColor: v })}
+                                />
+                                <SliderInput
+                                    label="Title font size"
+                                    value={props.titleFontSize ?? 16}
+                                    min={12} max={32} suffix="px"
+                                    onChange={v => updateProps({ titleFontSize: v })}
+                                />
+                            </>
+                        )}
                     </Section>
-                    <Section title="Body text">
-                        <ColorRow label="Text colour" value={props.color ?? '#6b7280'} onChange={v => updateProps({ color: v })} />
-                        <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+
+                    {/* ── Body text ── */}
+                    <Section title="Body Text">
+                        <ColorRow
+                            label="Text colour"
+                            value={props.color ?? '#6b7280'}
+                            onChange={v => updateProps({ color: v })}
+                        />
+                        <SliderInput
+                            label="Font size"
+                            value={props.fontSize ?? 14}
+                            min={10} max={22} suffix="px"
+                            onChange={v => updateProps({ fontSize: v })}
+                        />
                         <SelectInput
                             label="Font weight"
                             value={props.fontWeight ?? '400'}
                             options={[
+                                { v: '300', l: 'Light' },
                                 { v: '400', l: 'Regular' },
                                 { v: '500', l: 'Medium' },
                                 { v: '600', l: 'Semibold' },
+                                { v: '700', l: 'Bold' },
                             ]}
                             onChange={v => updateProps({ fontWeight: v })}
                         />
-                        <SliderInput label="Line height" value={props.lineHeight ?? 1.8} min={1} max={3} step={0.1} onChange={v => updateProps({ lineHeight: v })} />
+                        <SliderInput
+                            label="Line height"
+                            value={props.lineHeight ?? 1.8}
+                            min={1} max={3} step={0.1}
+                            onChange={v => updateProps({ lineHeight: v })}
+                        />
+                    </Section>
+
+                    {/* ── Accent colour — shown for accent-bar, feature-box, split-story, card-elevated ── */}
+                    {showAccent && (
+                        <Section title="Accent Colour">
+                            <ColorRow
+                                label="Accent colour"
+                                value={props.accentColor ?? '#7530fb'}
+                                onChange={v => updateProps({ accentColor: v })}
+                            />
+                            <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af' }}>
+                                Pulls from your brand colour automatically
+                            </p>
+                        </Section>
+                    )}
+
+                    {/* ── Feature pills — feature-box only ── */}
+                    {isFeatureBox && (
+                        <Section title="Feature Pills">
+                            <TextInput
+                                label="Pill 1"
+                                value={props.feature1 ?? '✓ Premium Quality'}
+                                onChange={v => updateProps({ feature1: v })}
+                            />
+                            <TextInput
+                                label="Pill 2"
+                                value={props.feature2 ?? '✓ Fast Dispatch'}
+                                onChange={v => updateProps({ feature2: v })}
+                            />
+                            <TextInput
+                                label="Pill 3"
+                                value={props.feature3 ?? '✓ 30-Day Returns'}
+                                onChange={v => updateProps({ feature3: v })}
+                            />
+                        </Section>
+                    )}
+
+                    {/* ── Dark luxury controls ── */}
+                    {isDarkLuxury && (
+                        <Section title="Dark Background">
+                            <ColorRow
+                                label="Background colour"
+                                value={props.darkBg ?? '#1e1535'}
+                                onChange={v => updateProps({ darkBg: v })}
+                            />
+                            <SliderInput
+                                label="Border radius"
+                                value={props.borderRadius ?? 0}
+                                min={0} max={24} suffix="px"
+                                onChange={v => updateProps({ borderRadius: v })}
+                            />
+                        </Section>
+                    )}
+
+                    {/* ── Background — all except dark-luxury (which uses darkBg above) ── */}
+                    {!isDarkLuxury && (
+                        <Section title="Background">
+                            <ColorRow
+                                label="Background colour"
+                                value={props.bgColor ?? '#ffffff'}
+                                onChange={v => updateProps({ bgColor: v })}
+                            />
+                            {pdv === 'card-elevated' && (
+                                <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af' }}>
+                                    Card is always white — outer background shows behind it
+                                </p>
+                            )}
+                        </Section>
+                    )}
+
+                    {/* ── Split story hint ── */}
+                    {isSplitStory && (
+                        <Section title="Split Story">
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280', lineHeight: 1.6 }}>
+                                Your description text is automatically split at the midpoint sentence boundary — story on the left, detail on the right.
+                            </p>
+                        </Section>
+                    )}
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <SliderInput label="Top" value={props.paddingTop ?? 20} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <SliderInput label="Bottom" value={props.paddingBottom ?? 20} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <SliderInput label="Left" value={props.paddingLeft ?? 24} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <SliderInput label="Right" value={props.paddingRight ?? 24} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
                     </Section>
                 </>
             )
+        }
 
         case 'specs_table': {
             const pv = props.variant ?? 'full'
