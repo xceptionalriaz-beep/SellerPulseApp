@@ -644,10 +644,10 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'spec-badges': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="4" y="10" width="32" height="12" rx="6" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.4" />
-            <rect x="40" y="10" width="36" height="12" rx="6" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.4" />
-            <rect x="4" y="26" width="28" height="5" rx="2.5" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.3" />
-            <rect x="36" y="26" width="32" height="5" rx="2.5" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.3" />
+            <rect x="4" y="10" width="32" height="12" rx="6" fillOpacity="0.12" fill={col} stroke={col} strokeWidth="1" strokeOpacity="0.4" />
+            <rect x="40" y="10" width="36" height="12" rx="6" fillOpacity="0.12" fill={col} stroke={col} strokeWidth="1" strokeOpacity="0.4" />
+            <rect x="4" y="26" width="28" height="5" rx="2.5" fillOpacity="0.12" fill={col} stroke={col} strokeWidth="1" strokeOpacity="0.3" />
+            <rect x="36" y="26" width="32" height="5" rx="2.5" fillOpacity="0.12" fill={col} stroke={col} strokeWidth="1" strokeOpacity="0.3" />
         </svg>
     ),
     'plain': (col, _) => (
