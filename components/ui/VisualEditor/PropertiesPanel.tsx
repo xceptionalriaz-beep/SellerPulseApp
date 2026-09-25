@@ -2046,11 +2046,33 @@ function BlockStyleProps({ block, props, updateProps }: {
                                     min={12} max={32} suffix="px"
                                     onChange={v => updateProps({ titleFontSize: v })}
                                 />
+                                <SelectInput
+                                    label="Title font weight"
+                                    value={props.titleFontWeight ?? '700'}
+                                    options={[
+                                        { v: '400', l: 'Regular' },
+                                        { v: '500', l: 'Medium' },
+                                        { v: '600', l: 'Semibold' },
+                                        { v: '700', l: 'Bold' },
+                                        { v: '800', l: 'Extrabold' },
+                                    ]}
+                                    onChange={v => updateProps({ titleFontWeight: v })}
+                                />
+                                <SliderInput
+                                    label="Title letter spacing"
+                                    value={props.titleLetterSpacing ?? 0}
+                                    min={0} max={8} step={0.5} suffix="px"
+                                    onChange={v => updateProps({ titleLetterSpacing: v })}
+                                />
+                                <AlignButtons
+                                    value={props.titleAlign ?? 'left'}
+                                    onChange={v => updateProps({ titleAlign: v })}
+                                />
                             </>
                         )}
                     </Section>
 
-                    {/* ── Body text ── */}
+                    {/* ── Body Text ── */}
                     <Section title="Body Text">
                         <ColorRow
                             label="Text colour"
@@ -2080,6 +2102,16 @@ function BlockStyleProps({ block, props, updateProps }: {
                             value={props.lineHeight ?? 1.8}
                             min={1} max={3} step={0.1}
                             onChange={v => updateProps({ lineHeight: v })}
+                        />
+                        <SliderInput
+                            label="Letter spacing"
+                            value={props.letterSpacing ?? 0}
+                            min={0} max={6} step={0.5} suffix="px"
+                            onChange={v => updateProps({ letterSpacing: v })}
+                        />
+                        <AlignButtons
+                            value={props.textAlign ?? 'left'}
+                            onChange={v => updateProps({ textAlign: v })}
                         />
                     </Section>
 
@@ -2135,11 +2167,16 @@ function BlockStyleProps({ block, props, updateProps }: {
                         </Section>
                     )}
 
-                    {/* ── Split story hint ── */}
+                    {/* ── Split story controls ── */}
                     {isSplitStory && (
                         <Section title="Split Story">
-                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280', lineHeight: 1.6 }}>
-                                Your description text is automatically split at the midpoint sentence boundary — story on the left, detail on the right.
+                            <ToggleRow
+                                label="Left column italic"
+                                value={props.splitItalic ?? true}
+                                onChange={v => updateProps({ splitItalic: v })}
+                            />
+                            <p style={{ margin: '6px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af', lineHeight: 1.6 }}>
+                                Text splits at the midpoint sentence — story left, detail right.
                             </p>
                         </Section>
                     )}
