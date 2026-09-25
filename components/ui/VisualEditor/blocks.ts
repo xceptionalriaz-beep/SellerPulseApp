@@ -535,6 +535,46 @@ export interface HeroProductProps extends CommonProps {
 }
 
 // ── Product Description ───────────────────────────────────────────────────────
+export interface ProductVariantsProps extends CommonProps {
+    variant: string
+    // Colours
+    colorCount: number
+    color1: string; colorName1: string
+    color2: string; colorName2: string
+    color3: string; colorName3: string
+    color4: string; colorName4: string
+    color5: string; colorName5: string
+    color6: string; colorName6: string
+    // Sizes
+    sizesText: string           // comma-separated: 'XS,S,M,L,XL,XXL'
+    // Labels
+    showColourLabel: boolean
+    showSizeLabel: boolean
+    colourLabel: string
+    sizeLabel: string
+    labelColor: string
+    textColor: string
+    // Swatch style
+    swatchSize: number
+    swatchShape: string         // 'circle' | 'square'
+    swatchBorderColor: string
+    // Pill style
+    pillStyle: string           // 'outlined' | 'filled'
+    accentColor: string
+    // Accent selected
+    selectedColorIndex: number
+    selectedSizeIndex: number
+    // Dark selector
+    darkPanelBg: string
+    // Availability grid
+    unavailableSizes: string    // comma-separated out-of-stock sizes
+    // Spec badges
+    badge1Icon: string; badge1Text: string
+    badge2Icon: string; badge2Text: string
+    badge3Icon: string; badge3Text: string
+    badge4Icon: string; badge4Text: string
+}
+
 export interface ProductDescriptionProps extends CommonProps {
     text: string              // default: {{ITEM_DESCRIPTION}}
     color: string
@@ -950,6 +990,7 @@ import { getBannerVariant as _getBannerVariant } from './variants/banner.variant
 import { getButtonVariant as _getButtonVariant } from './variants/button_block.variants'
 import { getFeatureVariant as _getFeatureVariant } from './variants/features.variants'
 import { getProductDescriptionVariant as _getProductDescriptionVariant } from './variants/product_description.variants'
+import { getProductVariantsVariant as _getProductVariantsVariant } from './variants/product_variants.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
@@ -2579,16 +2620,41 @@ ${thumbCells}
             label: 'Product Variants',
             category: 'Product' as BlockCategory,
             icon: 'layers',
-            description: 'Colour and size options display',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Colour swatches and size options — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'swatches-sizes',
+                colorCount: 6,
+                color1: '#ef4444', colorName1: 'Red',
+                color2: '#3b82f6', colorName2: 'Blue',
+                color3: '#22c55e', colorName3: 'Green',
+                color4: '#f59e0b', colorName4: 'Amber',
+                color5: '#000000', colorName5: 'Black',
+                color6: '#ffffff', colorName6: 'White',
+                sizesText: 'XS,S,M,L,XL,XXL',
+                showColourLabel: true,
+                showSizeLabel: true,
+                colourLabel: 'Colours:',
+                sizeLabel: 'Sizes:',
+                labelColor: '#1e1535',
+                textColor: '#1f1d2e',
+                swatchSize: 24,
+                swatchShape: 'circle',
+                swatchBorderColor: '#e5e7eb',
+                pillStyle: 'outlined',
+                accentColor: '#7530fb',
+                selectedColorIndex: 0,
+                selectedSizeIndex: 2,
+                darkPanelBg: '#1e1535',
+                unavailableSizes: 'L',
+                badge1Icon: '🎨', badge1Text: '6 Colours',
+                badge2Icon: '📏', badge2Text: '6 Sizes',
+                badge3Icon: '🔄', badge3Text: 'Easy Returns',
+                badge4Icon: '📦', badge4Text: 'Fast Dispatch',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                const colours = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#000', '#fff']
-                const swatches = colours.map(c => `<td style="padding:3px;"><span style="display:inline-block;width:24px;height:24px;background-color:${c};border-radius:50%;border:2px solid #e5e7eb;"></span></td>`).join('')
-                const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-                const sizeCells = sizes.map(s => `<td style="padding:3px;"><span style="display:inline-block;padding:4px 10px;border:1px solid #ede9fe;border-radius:4px;font-family:Arial,sans-serif;font-size:12px;color:#1f1d2e;">${s}</span></td>`).join('')
-                return wrapBlock('product_variants' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">Colours:</p><table cellpadding="0" cellspacing="0" border="0"><tr>${swatches}</tr></table><p style="margin:12px 0 8px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">Sizes:</p><table cellpadding="0" cellspacing="0" border="0"><tr>${sizeCells}</tr></table></td></tr></table>`)
+                const p = props as ProductVariantsProps
+                return _getProductVariantsVariant(p.variant ?? 'swatches-sizes').toHtml(p, id)
             },
         },
 
