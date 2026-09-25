@@ -527,6 +527,129 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
     // ── Product Description variants ──────────────────────────────────────────
+    // ── Product Variants ──────────────────────────────────────────────────────
+    'swatches-sizes': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="12" cy="14" r="5" fill="#ef4444" />
+            <circle cx="24" cy="14" r="5" fill="#3b82f6" />
+            <circle cx="36" cy="14" r="5" fill="#22c55e" />
+            <circle cx="48" cy="14" r="5" fill="#f59e0b" />
+            <rect x="8" y="24" width="12" height="7" rx="2" fill="none" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="23" y="24" width="12" height="7" rx="2" fill="none" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="38" y="24" width="12" height="7" rx="2" fill="none" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="53" y="24" width="12" height="7" rx="2" fill="none" stroke="#ede9fe" strokeWidth="1" />
+        </svg>
+    ),
+    'inline-compact': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="10" cy="18" r="4" fill="#ef4444" />
+            <circle cx="20" cy="18" r="4" fill="#3b82f6" />
+            <circle cx="30" cy="18" r="4" fill="#22c55e" />
+            <rect x="37" y="12" width="1" height="12" fill="#e5e7eb" />
+            <rect x="42" y="13" width="10" height="10" rx="2" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="55" y="13" width="10" height="10" rx="2" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="68" y="13" width="10" height="10" rx="2" fill="none" stroke={col} strokeWidth="1" />
+        </svg>
+    ),
+    'labelled-swatches': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="14" cy="14" r="6" fill="#ef4444" />
+            <rect x="9" y="22" width="10" height="2" rx="1" fill="#d1d5db" />
+            <circle cx="34" cy="14" r="6" fill="#3b82f6" />
+            <rect x="29" y="22" width="10" height="2" rx="1" fill="#d1d5db" />
+            <circle cx="54" cy="14" r="6" fill="#22c55e" />
+            <rect x="49" y="22" width="10" height="2" rx="1" fill="#d1d5db" />
+            <circle cx="72" cy="14" r="6" fill="#f59e0b" />
+            <rect x="67" y="22" width="10" height="2" rx="1" fill="#d1d5db" />
+        </svg>
+    ),
+    'pill-only': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="6" width="16" height="9" rx="4" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="23" y="6" width="16" height="9" rx="4" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="42" y="6" width="16" height="9" rx="4" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="4" y="21" width="14" height="9" rx="4" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="21" y="21" width="10" height="9" rx="4" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="34" y="21" width="12" height="9" rx="4" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="49" y="21" width="10" height="9" rx="4" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+        </svg>
+    ),
+    'card-grid': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="10" cy="10" r="4" fill="#ef4444" />
+            <circle cx="20" cy="10" r="4" fill="#3b82f6" />
+            <circle cx="30" cy="10" r="4" fill="#22c55e" />
+            <rect x="4" y="19" width="16" height="12" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1.5" />
+            <rect x="23" y="19" width="16" height="12" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1.5" />
+            <rect x="42" y="19" width="16" height="12" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1.5" />
+            <rect x="61" y="19" width="16" height="12" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1.5" />
+        </svg>
+    ),
+    'accent-selected': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="12" cy="13" r="5" fill="#ef4444" stroke={col} strokeWidth="2" />
+            <circle cx="24" cy="13" r="5" fill="#3b82f6" />
+            <circle cx="36" cy="13" r="5" fill="#22c55e" />
+            <circle cx="48" cy="13" r="5" fill="#f59e0b" />
+            <rect x="4" y="23" width="12" height="8" rx="2" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="19" y="23" width="12" height="8" rx="2" fill={col} opacity="0.15" stroke={col} strokeWidth="1.5" />
+            <rect x="34" y="23" width="12" height="8" rx="2" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="49" y="23" width="12" height="8" rx="2" fill="none" stroke="#e5e7eb" strokeWidth="1" />
+        </svg>
+    ),
+    'dark-selector': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#1e1535" />
+            <circle cx="12" cy="13" r="5" fill="#ef4444" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <circle cx="24" cy="13" r="5" fill="#3b82f6" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <circle cx="36" cy="13" r="5" fill="#22c55e" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+            <rect x="4" y="23" width="12" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+            <rect x="19" y="23" width="12" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+            <rect x="34" y="23" width="12" height="8" rx="2" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+            <rect x="0" y="33" width="50" height="2" rx="1" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    'side-by-side': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="12" cy="20" r="5" fill="#ef4444" />
+            <circle cx="22" cy="20" r="5" fill="#3b82f6" />
+            <circle cx="32" cy="20" r="5" fill="#22c55e" />
+            <rect x="39" y="8" width="1" height="20" fill="#e5e7eb" />
+            <rect x="44" y="14" width="10" height="9" rx="2" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="57" y="14" width="10" height="9" rx="2" fill="none" stroke={col} strokeWidth="1" />
+            <rect x="69" y="14" width="9" height="9" rx="2" fill="none" stroke={col} strokeWidth="1" />
+        </svg>
+    ),
+    'availability-grid': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="6" width="14" height="12" rx="3" fill="white" stroke={col} strokeWidth="1.5" />
+            <circle cx="11" cy="9" r="2" fill="#22c55e" />
+            <rect x="21" y="6" width="14" height="12" rx="3" fill="white" stroke={col} strokeWidth="1.5" />
+            <circle cx="28" cy="9" r="2" fill="#22c55e" />
+            <rect x="38" y="6" width="14" height="12" rx="3" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="1" />
+            <circle cx="45" cy="9" r="2" fill="#ef4444" />
+            <rect x="55" y="6" width="14" height="12" rx="3" fill="white" stroke={col} strokeWidth="1.5" />
+            <circle cx="62" cy="9" r="2" fill="#22c55e" />
+            <rect x="4" y="26" width="30" height="3" rx="1.5" fill="#d1d5db" />
+        </svg>
+    ),
+    'spec-badges': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="10" width="32" height="12" rx="6" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.4" />
+            <rect x="40" y="10" width="36" height="12" rx="6" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.4" />
+            <rect x="4" y="26" width="28" height="5" rx="2.5" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.3" />
+            <rect x="36" y="26" width="32" height="5" rx="2.5" fill={col} opacity="0.12" stroke={col} strokeWidth="1" opacity="0.3" />
+        </svg>
+    ),
     'plain': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
@@ -1669,7 +1792,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -3525,15 +3648,123 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 
         // ── MEDIUM PRIORITY BLOCKS ───────────────────────────────────────────
 
-        case 'product_variants':
+        case 'product_variants': {
+            const pvVariant = props.variant ?? 'swatches-sizes'
+            const isDark = pvVariant === 'dark-selector'
+            const showSwatches = !['pill-only', 'spec-badges'].includes(pvVariant)
+            const showSizes = !['spec-badges'].includes(pvVariant)
+            const showAccentSelected = pvVariant === 'accent-selected'
+            const showAvailability = pvVariant === 'availability-grid'
+            const showSpecBadges = pvVariant === 'spec-badges'
+            const showLabelledNames = pvVariant === 'labelled-swatches'
             return (
-                <Section title="Variants">
-                    <InfoBox>Colour swatches and size options are rendered from fixed defaults. Styles tab controls background and spacing.</InfoBox>
-                    <ColorRow label="Swatch border colour" value={props.borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v })} />
-                    <ColorRow label="Size label colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
-                    <ColorRow label="Size border colour" value={props.sizeBorderColor ?? '#ede9fe'} onChange={v => updateProps({ sizeBorderColor: v })} />
-                </Section>
+                <>
+                    {/* ── Labels ── */}
+                    <Section title="Labels">
+                        <ToggleRow label="Show colour label" value={props.showColourLabel ?? true} onChange={v => updateProps({ showColourLabel: v })} />
+                        {(props.showColourLabel ?? true) && (
+                            <TextInput label="Colour label text" value={props.colourLabel ?? 'Colours:'} onChange={v => updateProps({ colourLabel: v })} />
+                        )}
+                        <ToggleRow label="Show size label" value={props.showSizeLabel ?? true} onChange={v => updateProps({ showSizeLabel: v })} />
+                        {(props.showSizeLabel ?? true) && (
+                            <TextInput label="Size label text" value={props.sizeLabel ?? 'Sizes:'} onChange={v => updateProps({ sizeLabel: v })} />
+                        )}
+                        <ColorRow label="Label colour" value={props.labelColor ?? '#1e1535'} onChange={v => updateProps({ labelColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1f1d2e'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+
+                    {/* ── Colours ── */}
+                    {showSwatches && (
+                        <Section title="Colours">
+                            <SliderInput label="Number of colours" value={props.colorCount ?? 6} min={1} max={6} step={1} onChange={v => updateProps({ colorCount: v })} />
+                            {Array.from({ length: props.colorCount ?? 6 }, (_, i) => {
+                                const key = `color${i + 1}` as keyof typeof props
+                                const nameKey = `colorName${i + 1}` as keyof typeof props
+                                const defaults = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#000000', '#ffffff']
+                                const nameDefaults = ['Red', 'Blue', 'Green', 'Amber', 'Black', 'White']
+                                return (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                                        <ColorRow
+                                            label={`Colour ${i + 1}`}
+                                            value={(props[key] as string) ?? defaults[i]}
+                                            onChange={v => updateProps({ [key]: v })}
+                                        />
+                                        {showLabelledNames && (
+                                            <TextInput
+                                                label="Name"
+                                                value={(props[nameKey] as string) ?? nameDefaults[i]}
+                                                onChange={v => updateProps({ [nameKey]: v })}
+                                            />
+                                        )}
+                                    </div>
+                                )
+                            })}
+                            <SelectInput
+                                label="Swatch shape"
+                                value={props.swatchShape ?? 'circle'}
+                                options={[{ v: 'circle', l: 'Circle' }, { v: 'square', l: 'Square' }]}
+                                onChange={v => updateProps({ swatchShape: v })}
+                            />
+                            <SliderInput label="Swatch size" value={props.swatchSize ?? 24} min={16} max={36} suffix="px" onChange={v => updateProps({ swatchSize: v })} />
+                            {!isDark && (
+                                <ColorRow label="Swatch border" value={props.swatchBorderColor ?? '#e5e7eb'} onChange={v => updateProps({ swatchBorderColor: v })} />
+                            )}
+                        </Section>
+                    )}
+
+                    {/* ── Sizes ── */}
+                    {showSizes && (
+                        <Section title="Sizes">
+                            <TextInput label="Sizes (comma-separated)" value={props.sizesText ?? 'XS,S,M,L,XL,XXL'} onChange={v => updateProps({ sizesText: v })} />
+                            <SelectInput
+                                label="Pill style"
+                                value={props.pillStyle ?? 'outlined'}
+                                options={[{ v: 'outlined', l: 'Outlined' }, { v: 'filled', l: 'Filled' }]}
+                                onChange={v => updateProps({ pillStyle: v })}
+                            />
+                            <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        </Section>
+                    )}
+
+                    {/* ── Accent Selected ── */}
+                    {showAccentSelected && (
+                        <Section title="Selected State">
+                            <SliderInput label="Selected colour index" value={props.selectedColorIndex ?? 0} min={0} max={5} step={1} onChange={v => updateProps({ selectedColorIndex: v })} />
+                            <SliderInput label="Selected size index" value={props.selectedSizeIndex ?? 2} min={0} max={9} step={1} onChange={v => updateProps({ selectedSizeIndex: v })} />
+                        </Section>
+                    )}
+
+                    {/* ── Availability Grid ── */}
+                    {showAvailability && (
+                        <Section title="Availability">
+                            <TextInput label="Out-of-stock sizes (comma-separated)" value={props.unavailableSizes ?? 'L'} onChange={v => updateProps({ unavailableSizes: v })} />
+                            <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af' }}>e.g. L,XL</p>
+                        </Section>
+                    )}
+
+                    {/* ── Dark Selector ── */}
+                    {isDark && (
+                        <Section title="Dark Panel">
+                            <ColorRow label="Panel background" value={props.darkPanelBg ?? '#1e1535'} onChange={v => updateProps({ darkPanelBg: v })} />
+                            <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        </Section>
+                    )}
+
+                    {/* ── Spec Badges ── */}
+                    {showSpecBadges && (
+                        <Section title="Spec Badges">
+                            <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                            {[1, 2, 3, 4].map(n => (
+                                <div key={n} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
+                                    <TextInput label={`Badge ${n} icon`} value={props[`badge${n}Icon`] ?? ['🎨', '📏', '🔄', '📦'][n - 1]} onChange={v => updateProps({ [`badge${n}Icon`]: v })} />
+                                    <TextInput label={`Badge ${n} text`} value={props[`badge${n}Text`] ?? ['6 Colours', '6 Sizes', 'Easy Returns', 'Fast Dispatch'][n - 1]} onChange={v => updateProps({ [`badge${n}Text`]: v })} />
+                                </div>
+                            ))}
+                        </Section>
+                    )}
+                </>
             )
+        }
 
         case 'whats_in_the_box':
             return (
