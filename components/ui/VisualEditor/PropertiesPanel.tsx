@@ -1669,7 +1669,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? 'gradient'}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -2135,22 +2135,6 @@ function BlockStyleProps({ block, props, updateProps }: {
                         </Section>
                     )}
 
-                    {/* ── Background — all except dark-luxury (which uses darkBg above) ── */}
-                    {!isDarkLuxury && (
-                        <Section title="Background">
-                            <ColorRow
-                                label="Background colour"
-                                value={props.bgColor ?? '#ffffff'}
-                                onChange={v => updateProps({ bgColor: v })}
-                            />
-                            {pdv === 'card-elevated' && (
-                                <p style={{ margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af' }}>
-                                    Card is always white — outer background shows behind it
-                                </p>
-                            )}
-                        </Section>
-                    )}
-
                     {/* ── Split story hint ── */}
                     {isSplitStory && (
                         <Section title="Split Story">
@@ -2160,15 +2144,23 @@ function BlockStyleProps({ block, props, updateProps }: {
                         </Section>
                     )}
 
-                    {/* ── Spacing ── */}
-                    <Section title="Spacing">
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                            <SliderInput label="Top" value={props.paddingTop ?? 20} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
-                            <SliderInput label="Bottom" value={props.paddingBottom ?? 20} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
-                            <SliderInput label="Left" value={props.paddingLeft ?? 24} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
-                            <SliderInput label="Right" value={props.paddingRight ?? 24} min={0} max={80} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
-                        </div>
-                    </Section>
+                    {/* ── Dark luxury background note ── */}
+                    {isDarkLuxury && (
+                        <Section title="Background">
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af' }}>
+                                Dark Luxury uses its own background colour above — the universal background is ignored for this variant.
+                            </p>
+                        </Section>
+                    )}
+
+                    {/* ── Card note ── */}
+                    {pdv === 'card-elevated' && (
+                        <Section title="Background Note">
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#9ca3af' }}>
+                                The card itself is always white. The background colour (above) shows as the outer area behind the card.
+                            </p>
+                        </Section>
+                    )}
                 </>
             )
         }
