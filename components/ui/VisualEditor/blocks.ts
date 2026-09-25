@@ -1500,7 +1500,12 @@ ${rows}
             titleText: 'Product Description',
             titleColor: '#1e1535',
             fontWeight: '400',
-            titleFontSize: 16,
+            variant: 'plain',
+            accentColor: '#7530fb',
+            feature1: '✓ Premium Quality',
+            feature2: '✓ Fast Dispatch',
+            feature3: '✓ 30-Day Returns',
+            darkBg: '#1e1535',
         } as ProductDescriptionProps,
         toHtml(props, id) {
             const p = props as ProductDescriptionProps
