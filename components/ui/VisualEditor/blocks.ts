@@ -541,10 +541,16 @@ export interface ProductDescriptionProps extends CommonProps {
     fontSize: number
     fontWeight: string        // body text weight (default '400')
     lineHeight: number
+    textAlign: string         // body text alignment (default 'left')
+    letterSpacing: number     // body letter spacing px (default 0)
     showTitle: boolean
     titleText: string
     titleColor: string
     titleFontSize: number     // title font size (default 16)
+    titleFontWeight: string   // title font weight (default '700')
+    titleAlign: string        // title alignment (default 'left')
+    titleLetterSpacing: number // title letter spacing px (default 0)
+    splitItalic: boolean      // split-story: left column italic (default true)
     variant: string
     accentColor: string
     feature1: string
@@ -1500,7 +1506,13 @@ ${rows}
             titleText: 'Product Description',
             titleColor: '#1e1535',
             fontWeight: '400',
+            textAlign: 'left',
+            letterSpacing: 0,
             titleFontSize: 16,
+            titleFontWeight: '700',
+            titleAlign: 'left',
+            titleLetterSpacing: 0,
+            splitItalic: true,
             variant: 'plain',
             accentColor: '#7530fb',
             feature1: '✓ Premium Quality',
