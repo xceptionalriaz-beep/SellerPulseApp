@@ -2619,7 +2619,7 @@ ${thumbCells}
             type: 'product_variants' as BlockType,
             label: 'Product Variants',
             category: 'Product' as BlockCategory,
-            icon: 'layers',
+            icon: 'layout-grid',
             description: 'Colour swatches and size options — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,

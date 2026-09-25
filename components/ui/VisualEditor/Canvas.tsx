@@ -33,7 +33,7 @@ import {
     Layout, Columns2, Columns3, Square,
     Heading, Pilcrow, List, Minus,
     Tag, BadgeDollarSign, Image, FileText, Table2,
-    Camera, Megaphone, LayoutGrid,
+    Camera, Megaphone, LayoutGrid, Layers,
     ShieldCheck, Truck, RotateCcw, User, Bell,
     Check, ArrowRight, Star, Package,
     ChevronUp, ChevronDown, Copy, Clipboard,
@@ -82,6 +82,7 @@ const DEVICE_WIDTHS = {
 const BLOCK_ICONS: Record<string, LucideIcon> = {
     'layout': Layout,
     'columns-2': Columns2,
+    'layers': Layers,
     'columns-3': Columns3,
     'square': Square,
     'heading': Heading,
