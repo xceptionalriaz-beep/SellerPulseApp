@@ -140,7 +140,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
 
     // ── 3. Two Column ─────────────────────────────────────────────────────────
     {
-        id: 'two-column',
+        id: 'witb-two-column',
         label: 'Two Column',
         description: 'Items split into two equal columns — ideal for 6+ items',
         toHtml(props, id) {

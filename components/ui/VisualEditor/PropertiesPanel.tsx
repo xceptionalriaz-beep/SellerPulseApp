@@ -677,7 +677,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="20" y="27" width="38" height="2.5" rx="1.25" fill="#374151" opacity="0.6" />
         </svg>
     ),
-    'two-column': (col, _) => (
+    'witb-two-column': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
             <rect x="8" y="6" width="30" height="3" rx="1.5" fill={col} opacity="0.85" />
