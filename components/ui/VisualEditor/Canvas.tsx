@@ -273,7 +273,6 @@ export default function Canvas({
             <div style={{
                 width: '100%',
                 maxWidth: canvasWidth,
-                transition: 'max-width 0.3s ease',
                 minHeight: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -732,13 +731,21 @@ function BlockCard({
             {/* ── Block preview content ── */}
             <div
                 ref={el => {
-                    if (el) {
-                        // Compute scale so 700px iframe fits the card width minus padding (16px left + 16px right = 32px)
+                    if (!el) return
+                    // Recompute scale whenever this element's width changes —
+                    // covers initial mount, device-width switches, sidebar toggles,
+                    // window resize, and zoom changes. No stale reads.
+                    const recalcScale = () => {
                         const w = el.getBoundingClientRect().width
                         const scale = w > 32 ? ((w - 32) / 700) : 1
                         el.style.setProperty('--canvas-scale', String(scale))
-                        el.style.height = 'auto'
                     }
+                    recalcScale()
+                    const ro = new ResizeObserver(recalcScale)
+                    ro.observe(el)
+                        // Cleanup stored on element so it runs on unmount
+                        ; (el as any).__ro?.disconnect()
+                        ; (el as any).__ro = ro
                 }}
                 style={{ padding: '14px 16px 12px', pointerEvents: 'auto', overflow: 'hidden' }}
             >
