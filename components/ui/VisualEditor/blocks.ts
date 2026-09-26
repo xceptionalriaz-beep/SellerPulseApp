@@ -752,6 +752,7 @@ export interface SellerInfoProps extends CommonProps {
     bgColor: string
     textColor: string
     accentColor: string
+    variant: string
 }
 
 // ── CTA Banner ────────────────────────────────────────────────────────────────
@@ -998,6 +999,7 @@ import { getProductVariantsVariant as _getProductVariantsVariant } from './varia
 import { getWhatsInTheBoxVariant as _getWhatsInTheBoxVariant } from './variants/whats_in_the_box.variants'
 import { getHeroProductVariant as _getHeroProductVariant } from './variants/hero_product.variants'
 import { getCtaBannerVariant as _getCtaBannerVariant } from './variants/cta_banner.variants'
+import { getSellerInfoVariant as _getSellerInfoVariant } from './variants/seller_info.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1978,26 +1980,11 @@ ${thumbCells}
             badgeText: 'Top Rated Seller',
             textColor: '#1e1535',
             accentColor: '#7530fb',
+            variant: 'authority-split',
         } as SellerInfoProps,
         toHtml(props, id) {
             const p = props as SellerInfoProps
-            const badge = p.showBadge
-                ? `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;margin-left:10px;vertical-align:middle;">${p.badgeText}</span>`
-                : ''
-            return wrapBlock('seller_info', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.textColor};">
-        ${p.sellerName}${badge}
-      </p>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;line-height:1.6;">
-        ${p.tagline} &bull; <span style="color:${p.accentColor};font-weight:600;">${p.feedbackText}</span>
-      </p>
-    </td>
-  </tr>
-</table>`
-            )
+            return _getSellerInfoVariant(p.variant ?? 'authority-split')?.toHtml(props, id) ?? ''
         },
     },
 

@@ -1865,9 +1865,165 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="57" y="45" width="14" height="2" rx="1" fill={col} opacity="0.18" />
         </svg>
     ),
+
+    // ── seller_info: authority-split ──────────────────────────────────────────
+    'authority-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            <rect width="80" height="48" rx="3" stroke={col} strokeWidth="0.6" fill="none" />
+            <circle cx="14" cy="20" r="9" fill={light} stroke={col} strokeWidth="0.8" />
+            <rect x="6" y="31" width="16" height="3.5" rx="1.75" fill={col} opacity="0.7" />
+            <rect x="28" y="11" width="30" height="3" rx="1" fill={col} opacity="0.85" />
+            <rect x="28" y="17" width="22" height="2" rx="1" fill={col} opacity="0.25" />
+            <rect x="28" y="23" width="26" height="2" rx="1" fill={col} opacity="0.4" />
+            <rect x="28" y="29" width="18" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+
+    // ── seller_info: inline-ribbon ────────────────────────────────────────────
+    'inline-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            <rect x="0" y="17" width="3" height="14" rx="1.5" fill={col} />
+            <rect x="7" y="21" width="10" height="2.5" rx="1" fill={col} opacity="0.85" />
+            <rect x="21" y="21" width="2" height="2.5" rx="1" fill={col} opacity="0.3" />
+            <rect x="27" y="21" width="16" height="2.5" rx="1" fill={col} opacity="0.3" />
+            <rect x="47" y="21" width="2" height="2.5" rx="1" fill={col} opacity="0.3" />
+            <rect x="53" y="21" width="20" height="2.5" rx="1" fill={col} opacity="0.6" />
+        </svg>
+    ),
+
+    // ── seller_info: metrics-grid ─────────────────────────────────────────────
+    'metrics-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            <rect x="3" y="4" width="36" height="3" rx="1" fill={col} opacity="0.8" />
+            <rect x="3" y="9" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="3" y="16" width="22" height="28" rx="2" fill={light} stroke={col} strokeWidth="0.5" />
+            <rect x="3" y="16" width="22" height="3" rx="2" fill={col} opacity="0.6" />
+            <rect x="29" y="16" width="22" height="28" rx="2" fill={light} stroke={col} strokeWidth="0.5" />
+            <rect x="29" y="16" width="22" height="3" rx="2" fill="#b8fa33" opacity="0.8" />
+            <rect x="55" y="16" width="22" height="28" rx="2" fill={light} stroke={col} strokeWidth="0.5" />
+            <rect x="55" y="16" width="22" height="3" rx="2" fill="#10b981" opacity="0.7" />
+        </svg>
+    ),
+
+    // ── seller_info: dark-executive ───────────────────────────────────────────
+    'dark-executive': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect width="80" height="48" rx="3" stroke={col} strokeWidth="0.8" fill="none" />
+            <circle cx="14" cy="24" r="8" fill={col} opacity="0.3" stroke={col} strokeWidth="0.8" />
+            <rect x="27" y="17" width="24" height="3" rx="1" fill="#ffffff" opacity="0.9" />
+            <rect x="27" y="23" width="18" height="2" rx="1" fill="#ffffff" opacity="0.3" />
+            <rect x="27" y="28" width="22" height="3" rx="1.5" fill="none" stroke="#b8fa33" strokeWidth="0.6" />
+            <rect x="58" y="20" width="18" height="8" rx="2" fill="none" stroke={col} strokeWidth="0.8" />
+        </svg>
+    ),
+
+    // ── seller_info: storefront-split ─────────────────────────────────────────
+    'storefront-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            <rect width="80" height="48" rx="3" stroke={col} strokeWidth="0.5" fill="none" />
+            <rect x="3" y="6" width="10" height="10" rx="2" fill={col} opacity="0.25" />
+            <rect x="3" y="19" width="30" height="2.5" rx="1" fill={col} opacity="0.8" />
+            <rect x="3" y="24" width="22" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="3" y="29" width="26" height="2" rx="1" fill={col} opacity="0.4" />
+            <line x1="40" y1="6" x2="40" y2="42" stroke={col} strokeWidth="0.5" opacity="0.25" />
+            <rect x="44" y="8" width="14" height="2" rx="1" fill={col} opacity="0.3" />
+            <rect x="44" y="14" width="32" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="44" y="20" width="30" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="44" y="26" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="44" y="32" width="26" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+
+    // ── seller_info: glass-card ───────────────────────────────────────────────
+    'glass-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="gc-bg" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} stopOpacity="0.12" />
+                    <stop offset="1" stopColor={col} stopOpacity="0.03" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="6" fill="url(#gc-bg)" stroke={col} strokeWidth="0.5" opacity="0.4" />
+            <circle cx="15" cy="22" r="9" fill={col} opacity="0.2" stroke="#ffffff" strokeWidth="1" />
+            <rect x="29" y="14" width="26" height="3" rx="1" fill={col} opacity="0.8" />
+            <rect x="29" y="20" width="18" height="2" rx="1" fill={col} opacity="0.25" />
+            <rect x="29" y="27" width="36" height="5" rx="2.5" fill={col} opacity="0.12" stroke={col} strokeWidth="0.5" />
+        </svg>
+    ),
+
+    // ── seller_info: vertical-profile ─────────────────────────────────────────
+    'vertical-profile': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <circle cx="40" cy="13" r="8" fill={light} stroke={col} strokeWidth="0.8" />
+            <rect x="28" y="24" width="24" height="3" rx="1" fill={col} opacity="0.8" />
+            <rect x="32" y="29" width="16" height="2" rx="1" fill={col} opacity="0.25" />
+            <rect x="36" y="33" width="8" height="1.5" rx="0.75" fill={col} opacity="0.6" />
+            <rect x="26" y="37" width="28" height="5" rx="2.5" fill={col} opacity="0.15" stroke={col} strokeWidth="0.5" />
+        </svg>
+    ),
+
+    // ── seller_info: trust-ribbon-duo ─────────────────────────────────────────
+    'trust-ribbon-duo': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            <rect width="80" height="20" rx="3" fill={col} opacity="0.85" />
+            <rect x="4" y="7" width="28" height="3" rx="1" fill="#ffffff" opacity="0.9" />
+            <rect x="60" y="6.5" width="16" height="4" rx="2" fill="#b8fa33" opacity="0.9" />
+            <rect x="4" y="26" width="16" height="5" rx="2.5" fill={light} stroke={col} strokeWidth="0.4" />
+            <rect x="23" y="26" width="14" height="5" rx="2.5" fill={light} stroke={col} strokeWidth="0.4" />
+            <rect x="40" y="26" width="16" height="5" rx="2.5" fill={light} stroke={col} strokeWidth="0.4" />
+            <rect x="59" y="26" width="17" height="5" rx="2.5" fill={light} stroke={col} strokeWidth="0.4" />
+        </svg>
+    ),
+
+    // ── seller_info: spotlight-banner ─────────────────────────────────────────
+    'spotlight-banner': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="sb-bg" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} />
+                    <stop offset="1" stopColor="#1e1535" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="3" fill="url(#sb-bg)" />
+            <rect x="4" y="13" width="32" height="4" rx="1" fill="#ffffff" opacity="0.9" />
+            <rect x="4" y="21" width="22" height="2.5" rx="1" fill="#ffffff" opacity="0.35" />
+            <rect x="4" y="27" width="20" height="2.5" rx="1" fill="#b8fa33" opacity="0.8" />
+            <rect x="56" y="16" width="20" height="10" rx="3" fill="#ffffff" opacity="0.9" />
+        </svg>
+    ),
+
+    // ── seller_info: compact-card-row ─────────────────────────────────────────
+    'compact-card-row': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            <rect x="2" y="6" width="23" height="36" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="2" y="39" width="23" height="3" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="5" y="12" width="8" height="8" rx="4" fill={light} />
+            <rect x="5" y="23" width="16" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="5" y="28" width="12" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="29" y="6" width="23" height="36" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="29" y="39" width="23" height="3" rx="1.5" fill="#b8fa33" opacity="0.8" />
+            <rect x="32" y="12" width="8" height="8" rx="4" fill={light} />
+            <rect x="32" y="23" width="16" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="32" y="28" width="12" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="56" y="6" width="23" height="36" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="56" y="39" width="23" height="3" rx="1.5" fill="#10b981" opacity="0.7" />
+            <rect x="59" y="12" width="8" height="8" rx="4" fill={light} />
+            <rect x="59" y="23" width="16" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="59" y="28" width="12" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
+
     const col = isSelected ? C.primary : C.secondary
     const light = isSelected ? C.primaryLight : '#f3f4f6'
     const render = VARIANT_THUMBNAILS[variantId]
@@ -2294,7 +2450,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
