@@ -1000,6 +1000,7 @@ import { getWhatsInTheBoxVariant as _getWhatsInTheBoxVariant } from './variants/
 import { getHeroProductVariant as _getHeroProductVariant } from './variants/hero_product.variants'
 import { getCtaBannerVariant as _getCtaBannerVariant } from './variants/cta_banner.variants'
 import { getSellerInfoVariant as _getSellerInfoVariant } from './variants/seller_info.variants'
+import { getSingleImageVariant as _getSingleImageVariant } from './variants/single_image.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2671,9 +2672,8 @@ ${thumbCells}
             description: 'Centred image with optional caption',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('single_image' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><img src="{{MAIN_IMAGE_URL}}" alt="{{PRODUCT_TITLE}}" style="max-width:100%;height:auto;display:inline-block;border-radius:8px;"><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#9ca3af;font-style:italic;">{{PRODUCT_TITLE}}</p></td></tr></table>`)
+                const p = props as CommonProps & { variant?: string }
+                return _getSingleImageVariant(p.variant ?? 'classic-frame').toHtml(p, id)
             },
         },
 
