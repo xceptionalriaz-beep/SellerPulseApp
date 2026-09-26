@@ -344,6 +344,84 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
         },
     },
 
+    // ── 9. Split — Image Left, List Right ────────────────────────────────────
+    {
+        id: 'split-image-list',
+        label: 'Image + List',
+        description: 'Photo of box contents on the left, checklist on the right',
+        toHtml(props, id) {
+            const p = props as WhatsInTheBoxProps
+            const items = getItems(p)
+            const headingColor = p.headingColor ?? '#1e1535'
+            const bulletColor = p.bulletColor ?? '#16a34a'
+            const textColor = p.textColor ?? '#1f1d2e'
+            const imageUrl = (p as any).splitImageUrl ?? ''
+            const imageHtml = imageUrl
+                ? `<img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:6px;" />`
+                : `<div style="width:100%;min-height:160px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:6px;display:table;text-align:center;"><div style="display:table-cell;vertical-align:middle;padding:20px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7530fb;font-weight:600;">📷 Click to add image</p></div></div>`
+            const rows = items.map(item =>
+                `<tr>
+                    <td width="20" valign="top" style="padding-right:6px;padding-bottom:8px;font-size:14px;color:${bulletColor};">&#10003;</td>
+                    <td valign="top" style="padding-bottom:8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${textColor};line-height:1.4;">${item}</td>
+                </tr>`
+            ).join('')
+            return `<!-- BLOCK:whats_in_the_box:${id} -->
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+    <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
+        <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td width="45%" valign="top" style="padding-right:16px;">${imageHtml}</td>
+                <td width="55%" valign="top">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
+                </td>
+            </tr>
+        </table>
+    </td></tr>
+</table>
+<!-- /BLOCK:whats_in_the_box:${id} -->`
+        },
+    },
+
+    // ── 10. Split — List Left, Image Right ───────────────────────────────────
+    {
+        id: 'split-list-image',
+        label: 'List + Image',
+        description: 'Checklist on the left, photo of box contents on the right',
+        toHtml(props, id) {
+            const p = props as WhatsInTheBoxProps
+            const items = getItems(p)
+            const headingColor = p.headingColor ?? '#1e1535'
+            const bulletColor = p.bulletColor ?? '#16a34a'
+            const textColor = p.textColor ?? '#1f1d2e'
+            const imageUrl = (p as any).splitImageUrl ?? ''
+            const imageHtml = imageUrl
+                ? `<img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:6px;" />`
+                : `<div style="width:100%;min-height:160px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:6px;display:table;text-align:center;"><div style="display:table-cell;vertical-align:middle;padding:20px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7530fb;font-weight:600;">📷 Click to add image</p></div></div>`
+            const rows = items.map(item =>
+                `<tr>
+                    <td width="20" valign="top" style="padding-right:6px;padding-bottom:8px;font-size:14px;color:${bulletColor};">&#10003;</td>
+                    <td valign="top" style="padding-bottom:8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${textColor};line-height:1.4;">${item}</td>
+                </tr>`
+            ).join('')
+            return `<!-- BLOCK:whats_in_the_box:${id} -->
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+    <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
+        <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td width="55%" valign="top" style="padding-right:16px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
+                </td>
+                <td width="45%" valign="top">${imageHtml}</td>
+            </tr>
+        </table>
+    </td></tr>
+</table>
+<!-- /BLOCK:whats_in_the_box:${id} -->`
+        },
+    },
+
 ]
 
 export function getWhatsInTheBoxVariant(variantId: string) {

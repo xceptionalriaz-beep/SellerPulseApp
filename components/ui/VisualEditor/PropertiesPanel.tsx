@@ -757,6 +757,32 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="57" y="25" width="15" height="6" rx="3" fill={col} opacity="0.5" />
         </svg>
     ),
+    'split-image-list': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="4" width="33" height="28" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" />
+            <circle cx="20" cy="13" r="5" fill="#c4b5fd" opacity="0.6" />
+            <path d="M4 26 Q14 20 37 24" stroke="#c4b5fd" strokeWidth="1.5" fill="none" />
+            <rect x="8" y="7" width="24" height="2" rx="1" fill={col} opacity="0.3" />
+            <rect x="42" y="6" width="30" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <rect x="42" y="13" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="50" y="14.5" width="24" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="42" y="20" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="50" y="21.5" width="20" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="42" y="27" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="50" y="28.5" width="22" height="2" rx="1" fill="#6b7280" opacity="0.4" />
+        </svg>
+    ),
+    'split-list-image': (col, _) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="6" width="30" height="3" rx="1.5" fill={col} opacity="0.85" />
+            <rect x="4" y="13" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="12" y="14.5" width="24" height="2" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect x="4" y="20" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="12" y="21.5" width="20" height="2" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="4" y="27" width="5" height="4" rx="1" fill="#16a34a" opacity="0.8" /><rect x="12" y="28.5" width="22" height="2" rx="1" fill="#6b7280" opacity="0.4" />
+            <rect x="43" y="4" width="33" height="28" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" />
+            <circle cx="59" cy="13" r="5" fill="#c4b5fd" opacity="0.6" />
+            <path d="M43 26 Q53 20 76 24" stroke="#c4b5fd" strokeWidth="1.5" fill="none" />
+            <rect x="48" y="7" width="24" height="2" rx="1" fill={col} opacity="0.3" />
+        </svg>
+    ),
     'plain': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
@@ -3877,6 +3903,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             const witbVariant = props.variant ?? 'simple-list'
             const isDark = witbVariant === 'dark-panel'
             const showAccent = ['numbered', 'table-qty', 'badge-count'].includes(witbVariant)
+            const isSplit = ['split-image-list', 'split-list-image'].includes(witbVariant)
             return (
                 <>
                     <Section title="Box contents">
