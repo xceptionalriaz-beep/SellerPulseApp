@@ -1620,6 +1620,124 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="20" y="47" width="40" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
+
+    // ── Minimal Clean: main image top-left, 2×2 grid bottom-left, cream panel right
+    'hp-minimal-clean': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Warm cream background */}
+            <rect width="80" height="44" rx="3" fill="#f5f4f0" />
+            {/* Left col: main image top */}
+            <rect x="3" y="3" width="32" height="22" rx="2" fill={light} stroke={col} strokeWidth="0.7" strokeDasharray="2 1" />
+            <circle cx="19" cy="12" r="4" fill={col} opacity="0.25" />
+            <path d="M4 24 l5-5 4 3 4-5 5 6H4z" fill={col} opacity="0.2" />
+            {/* 2×2 thumb grid bottom-left */}
+            <rect x="3" y="27" width="15" height="7" rx="1.5" fill={col} opacity="0.18" />
+            <rect x="20" y="27" width="15" height="7" rx="1.5" fill={col} opacity="0.18" />
+            <rect x="3" y="36" width="15" height="7" rx="1.5" fill={col} opacity="0.12" />
+            <rect x="20" y="36" width="15" height="7" rx="1.5" fill={col} opacity="0.12" />
+            {/* Right: cream panel */}
+            <rect x="38" y="3" width="39" height="38" rx="3" fill="#faf9f6" />
+            {/* Category label — tiny */}
+            <rect x="42" y="7" width="14" height="2" rx="1" fill={col} opacity="0.3" />
+            {/* Serif title lines */}
+            <rect x="42" y="12" width="31" height="3.5" rx="1" fill={col} opacity="0.75" />
+            <rect x="42" y="17" width="22" height="3.5" rx="1" fill={col} opacity="0.55" />
+            {/* Thin accent rule */}
+            <rect x="42" y="22" width="10" height="1.5" rx="1" fill={col} opacity="1" />
+            {/* Price */}
+            <rect x="42" y="26" width="20" height="3.5" rx="1" fill={col} opacity="0.9" />
+            {/* Em-dash bullets */}
+            <rect x="42" y="32" width="30" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="42" y="36" width="26" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+
+    // ── Flash Sale: red urgency banner top, image+SAVE badge left, giant price right
+    'hp-flash-sale': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#fff7ed" />
+            {/* Red urgency banner */}
+            <rect x="3" y="3" width="74" height="7" rx="2" fill="#dc2626" />
+            <rect x="18" y="5" width="44" height="2.5" rx="1" fill="white" opacity="0.85" />
+            {/* Left: image with red SAVE badge corner */}
+            <rect x="3" y="13" width="32" height="26" rx="2" fill="#fee2e2" stroke="#dc2626" strokeWidth="0.7" />
+            <circle cx="19" cy="22" r="5" fill="#dc2626" opacity="0.2" />
+            <path d="M4 37 l5-5 5 3 4-5 5 7H4z" fill="#dc2626" opacity="0.2" />
+            {/* SAVE badge top-right of image */}
+            <rect x="26" y="14" width="8" height="8" rx="1.5" fill="#dc2626" />
+            <rect x="27" y="15.5" width="6" height="1.5" rx="0.5" fill="white" opacity="0.9" />
+            <rect x="27" y="18.5" width="6" height="1.5" rx="0.5" fill="white" opacity="0.9" />
+            {/* Right: badge + giant price + strikethrough + progress bar */}
+            <rect x="39" y="13" width="14" height="3" rx="1.5" fill="#dc2626" opacity="0.25" />
+            <rect x="39" y="19" width="36" height="5" rx="1.5" fill="#dc2626" opacity="0.9" />
+            <rect x="39" y="26" width="20" height="2.5" rx="1" fill={col} opacity="0.25" style={{ textDecoration: 'line-through' }} />
+            {/* Progress bar */}
+            <rect x="39" y="31" width="36" height="3" rx="1.5" fill="#fee2e2" />
+            <rect x="39" y="31" width="12" height="3" rx="1.5" fill="#dc2626" opacity="0.8" />
+            {/* Bullets */}
+            <rect x="39" y="37" width="32" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="39" y="41" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="39" y="45" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+
+    // ── Dark Premium: near-black bg, text left, image right with glow halo
+    'hp-dark-premium': (col, _light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Near-black background */}
+            <rect width="80" height="44" rx="3" fill="#0f0f13" />
+            {/* Left: badge + white title + accent price + pill bullets */}
+            <rect x="4" y="5" width="12" height="3" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="4" y="11" width="32" height="3.5" rx="1" fill="white" opacity="0.85" />
+            <rect x="4" y="16" width="24" height="3.5" rx="1" fill="white" opacity="0.6" />
+            <rect x="4" y="22" width="18" height="4" rx="1.5" fill={col} opacity="1" />
+            {/* Pill bullets */}
+            <rect x="4" y="29" width="28" height="4" rx="2" fill={col} opacity="0.2" stroke={col} strokeWidth="0.5" />
+            <rect x="4" y="35" width="24" height="4" rx="2" fill={col} opacity="0.15" stroke={col} strokeWidth="0.5" />
+            {/* Right: image with purple glow halo */}
+            <ellipse cx="60" cy="22" rx="16" ry="16" fill={col} opacity="0.18" />
+            <ellipse cx="60" cy="22" rx="11" ry="11" fill={col} opacity="0.15" />
+            <rect x="48" y="9" width="24" height="26" rx="3" fill="#1a1025" stroke={col} strokeWidth="0.8" />
+            <circle cx="60" cy="19" r="5" fill={col} opacity="0.3" />
+            <path d="M49 34 l5-5 4 3 4-5 5 7H49z" fill={col} opacity="0.25" />
+            {/* Thumb strip under image — dark */}
+            <rect x="48" y="37" width="5" height="4" rx="1" fill={col} opacity="0.3" stroke={col} strokeWidth="0.4" />
+            <rect x="55" y="37" width="5" height="4" rx="1" fill={col} opacity="0.2" stroke={col} strokeWidth="0.4" />
+            <rect x="62" y="37" width="5" height="4" rx="1" fill={col} opacity="0.2" stroke={col} strokeWidth="0.4" />
+            <rect x="69" y="37" width="5" height="4" rx="1" fill={col} opacity="0.2" stroke={col} strokeWidth="0.4" />
+        </svg>
+    ),
+
+    // ── Wide Showcase: cinematic image full-width top, 3-col details row below
+    'hp-wide-showcase': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" />
+            {/* Badge centred at top */}
+            <rect x="28" y="3" width="24" height="3.5" rx="1.75" fill={col} opacity="0.7" />
+            {/* Cinematic wide image — 16:7 ratio */}
+            <rect x="3" y="9" width="74" height="18" rx="2.5" fill={light} stroke={col} strokeWidth="0.7" strokeDasharray="2 1" />
+            <circle cx="40" cy="17" r="5" fill={col} opacity="0.2" />
+            <path d="M5 26 l8-6 6 4 7-5 7 7H5z" fill={col} opacity="0.18" />
+            {/* Thumb row under wide image */}
+            {[0, 1, 2, 3].map(i => (
+                <rect key={i} x={3 + i * 19} y="29" width="16" height="5" rx="1" fill={col} opacity="0.15" />
+            ))}
+            {/* 3-col divider lines */}
+            <line x1="28" y1="37" x2="28" y2="47" stroke={col} strokeWidth="0.5" opacity="0.25" />
+            <line x1="54" y1="37" x2="54" y2="47" stroke={col} strokeWidth="0.5" opacity="0.25" />
+            {/* Col 1: price */}
+            <rect x="3" y="37" width="8" height="5" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="3" y="44" width="14" height="2" rx="1" fill={col} opacity="0.2" />
+            {/* Col 2: title + bullets */}
+            <rect x="31" y="37" width="20" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="31" y="41" width="18" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="31" y="45" width="16" height="2" rx="1" fill={col} opacity="0.2" />
+            {/* Col 3: trust icons */}
+            <rect x="57" y="37" width="18" height="2" rx="1" fill={col} opacity="0.25" />
+            <rect x="57" y="41" width="16" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="57" y="45" width="14" height="2" rx="1" fill={col} opacity="0.18" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
