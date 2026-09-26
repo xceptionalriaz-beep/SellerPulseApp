@@ -904,27 +904,31 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'single': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="16" y="4" width="48" height="28" rx="4" fill={col} opacity="0.3" />
-            <circle cx="30" cy="14" r="5" fill={col} opacity="0.4" />
-            <path d="M16 28 Q32 20 48 24 Q60 20 64 28" stroke={col} strokeWidth="1.5" fill="none" opacity="0.5" />
+            <rect x="20" y="3" width="40" height="30" rx="4" fill={col} opacity="0.18" stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.5" />
+            <circle cx="34" cy="13" r="4" fill={col} opacity="0.35" />
+            <path d="M20 28 L30 20 L38 25 L46 18 L60 28Z" fill={col} opacity="0.25" />
+            <text x="40" y="36" textAnchor="middle" fontFamily="Arial" fontSize="5" fill={col} opacity="0.5">Single</text>
         </svg>
     ),
     'gallery': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="4" y="4" width="72" height="18" rx="3" fill={col} opacity="0.3" />
-            <circle cx="16" cy="11" r="4" fill={col} opacity="0.4" />
-            <rect x="4" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
-            <rect x="22" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
-            <rect x="40" y="25" width="16" height="8" rx="2" fill={col} opacity="0.4" />
-            <rect x="58" y="25" width="16" height="8" rx="2" fill={col} opacity="0.3" />
+            {/* Large main image left */}
+            <rect x="2" y="2" width="44" height="32" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="16" cy="12" r="5" fill={col} opacity="0.3" />
+            <path d="M2 28 L12 20 L22 24 L32 18 L46 28Z" fill={col} opacity="0.2" />
+            {/* 4 thumbs right stacked 2x2 */}
+            <rect x="48" y="2" width="14" height="14" rx="2" fill={col} opacity="0.28" stroke={col} strokeWidth="0.5" />
+            <rect x="64" y="2" width="14" height="14" rx="2" fill={col} opacity="0.18" stroke={col} strokeWidth="0.5" />
+            <rect x="48" y="18" width="14" height="16" rx="2" fill={col} opacity="0.18" stroke={col} strokeWidth="0.5" />
+            <rect x="64" y="18" width="14" height="16" rx="2" fill={col} opacity="0.28" stroke={col} strokeWidth="0.5" />
         </svg>
     ),
     'fullwidth': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.25" />
-            <circle cx="20" cy="16" r="7" fill={col} opacity="0.3" />
-            <path d="M0 28 Q20 18 40 22 Q60 16 80 24" stroke={col} strokeWidth="2" fill="none" opacity="0.4" />
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.12" stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.5" />
+            <circle cx="28" cy="14" r="6" fill={col} opacity="0.3" />
+            <path d="M0 28 L14 18 L28 24 L44 16 L60 22 L80 14 L80 36 L0 36Z" fill={col} opacity="0.2" />
         </svg>
     ),
     'full-width-hero': (col, _) => (
@@ -936,25 +940,25 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'zoom': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="8" y="4" width="64" height="28" rx="4" stroke={col} strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
-            <circle cx="40" cy="16" r="8" fill={col} opacity="0.2" />
-            <circle cx="40" cy="16" r="4" fill={col} opacity="0.3" />
-            <rect x="54" y="24" width="14" height="6" rx="3" fill={col} opacity="0.5" />
+            <rect x="8" y="3" width="64" height="30" rx="4" fill={col} opacity="0.15" stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.5" />
+            <circle cx="30" cy="13" r="5" fill={col} opacity="0.3" />
+            <path d="M8 28 L22 19 L32 24 L44 17 L72 28Z" fill={col} opacity="0.2" />
+            {/* Zoom magnifier icon */}
+            <circle cx="62" cy="11" r="5" stroke={col} strokeWidth="1.2" fill="none" opacity="0.6" />
+            <line x1="66" y1="15" x2="70" y2="19" stroke={col} strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
         </svg>
     ),
     // ── Product Image: Comparison / Front & Back ──────────────────────────────
     'comparison': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="3" y="4" width="34" height="28" rx="3" fill={col} opacity="0.25" />
-            <circle cx="16" cy="14" r="5" fill={col} opacity="0.35" />
-            <path d="M3 28 Q16 22 37 26" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
-            <rect x="39" y="17" width="1" height="16" fill="#e2e8f0" />
-            <rect x="43" y="4" width="34" height="28" rx="3" fill={col} opacity="0.15" />
-            <circle cx="56" cy="14" r="5" fill={col} opacity="0.25" />
-            <path d="M43 28 Q56 20 77 24" stroke={col} strokeWidth="1.5" fill="none" opacity="0.3" />
-            <rect x="8" y="30" width="24" height="2" rx="1" fill={col} opacity="0.3" />
-            <rect x="48" y="30" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="2" y="2" width="36" height="32" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="14" cy="12" r="5" fill={col} opacity="0.3" />
+            <path d="M2 28 L12 20 L22 25 L38 18 L38 32 L2 32Z" fill={col} opacity="0.2" />
+            <rect x="39" y="2" width="1.5" height="32" fill={col} opacity="0.3" />
+            <rect x="42" y="2" width="36" height="32" rx="3" fill={col} opacity="0.12" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="54" cy="12" r="5" fill={col} opacity="0.22" />
+            <path d="M42 28 L52 21 L62 26 L78 19 L78 32 L42 32Z" fill={col} opacity="0.15" />
         </svg>
     ),
     // ── Hero Header: Credibility Banner ──────────────────────────────────────
@@ -973,52 +977,66 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     // ── Product Image: Lifestyle Shot ─────────────────────────────────────────
     'lifestyle': (col, _) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.3" />
-            <rect x="0" y="22" width="80" height="14" rx="0" fill={col} opacity="0.55" />
-            <circle cx="22" cy="13" r="7" fill={col} opacity="0.3" />
-            <rect x="6" y="25" width="40" height="4" rx="2" fill="white" opacity="0.9" />
-            <rect x="6" y="31" width="28" height="2.5" rx="1.25" fill="white" opacity="0.6" />
+            <rect width="80" height="36" rx="3" fill={col} opacity="0.12" stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.5" />
+            <circle cx="28" cy="13" r="7" fill={col} opacity="0.28" />
+            <path d="M0 26 L16 17 L28 22 L44 14 L60 20 L80 12 L80 36 L0 36Z" fill={col} opacity="0.22" />
+            <rect x="0" y="26" width="80" height="10" rx="0" fill={col} opacity="0.3" />
+            <rect x="6" y="28" width="32" height="3" rx="1.5" fill="white" opacity="0.7" />
         </svg>
     ),
     // ── Product Image: Polaroid ───────────────────────────────────────────────
     'polaroid': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect x="8" y="2" width="64" height="32" rx="2" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="11" y="5" width="58" height="22" rx="1" fill={col} opacity="0.25" />
-            <circle cx="26" cy="14" r="5" fill={col} opacity="0.35" />
-            <path d="M11 24 Q25 17 40 20 Q55 16 69 22" stroke={col} strokeWidth="1.5" fill="none" opacity="0.4" />
-            <rect x="20" y="29" width="40" height="2.5" rx="1.25" fill="#9ca3af" />
+            <rect x="10" y="1" width="60" height="34" rx="2" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="13" y="4" width="54" height="22" rx="2" fill={col} opacity="0.18" stroke={col} strokeWidth="0.6" strokeDasharray="2 1.5" />
+            <circle cx="26" cy="13" r="5" fill={col} opacity="0.3" />
+            <path d="M13 22 L24 15 L34 19 L46 13 L67 22Z" fill={col} opacity="0.2" />
+            <rect x="22" y="29" width="36" height="3" rx="1.5" fill="#9ca3af" opacity="0.7" />
         </svg>
     ),
     // ── Product Image: Before/After ───────────────────────────────────────────
     'before-after': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="3" width="36" height="24" rx="3" fill={col} opacity="0.2" />
-            <rect x="42" y="3" width="36" height="24" rx="3" fill={col} opacity="0.35" />
-            <rect x="38" y="3" width="4" height="24" fill={col} opacity="0.6" />
-            <rect x="6" y="29" width="28" height="4" rx="2" fill={col} opacity="0.5" />
-            <rect x="46" y="29" width="28" height="4" rx="2" fill={col} opacity="0.7" />
+            <rect x="2" y="2" width="35" height="28" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="13" cy="11" r="5" fill={col} opacity="0.28" />
+            <path d="M2 24 L12 17 L22 21 L37 15 L37 28 L2 28Z" fill={col} opacity="0.18" />
+            <rect x="3" y="31" width="20" height="3" rx="1.5" fill={col} opacity="0.4" />
+            <rect x="38" y="2" width="1.5" height="28" fill={col} opacity="0.4" />
+            <rect x="41" y="2" width="37" height="28" rx="3" fill={col} opacity="0.28" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="52" cy="11" r="5" fill={col} opacity="0.38" />
+            <path d="M41 24 L52 16 L62 21 L78 14 L78 28 L41 28Z" fill={col} opacity="0.25" />
+            <rect x="47" y="31" width="20" height="3" rx="1.5" fill={col} opacity="0.55" />
         </svg>
     ),
     // ── Product Image: Magazine Grid ──────────────────────────────────────────
     'magazine': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
-            <circle cx="18" cy="14" r="7" fill={col} opacity="0.35" />
-            <rect x="52" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
-            <rect x="52" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
+            {/* Large left hero */}
+            <rect x="2" y="2" width="46" height="32" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="16" cy="13" r="6" fill={col} opacity="0.3" />
+            <path d="M2 28 L14 20 L26 25 L38 17 L48 26 L48 32 L2 32Z" fill={col} opacity="0.2" />
+            {/* Two stacked right thumbs */}
+            <rect x="51" y="2" width="27" height="14" rx="3" fill={col} opacity="0.28" stroke={col} strokeWidth="0.6" strokeDasharray="2 1.5" />
+            <circle cx="60" cy="8" r="3" fill={col} opacity="0.35" />
+            <rect x="51" y="18" width="27" height="16" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.6" strokeDasharray="2 1.5" />
+            <circle cx="60" cy="25" r="3" fill={col} opacity="0.25" />
         </svg>
     ),
-    // ── Product Image: Inverted Magazine Grid ─────────────────────────────
+    // ── Product Image: Inverted Magazine Grid ─────────────────────────────────
     'inverted-magazine-grid': (col, light) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="2" width="26" height="15" rx="3" fill={col} opacity="0.4" />
-            <rect x="2" y="19" width="26" height="15" rx="3" fill={col} opacity="0.25" />
-            <rect x="32" y="2" width="46" height="32" rx="3" fill={col} opacity="0.3" />
-            <circle cx="55" cy="14" r="7" fill={col} opacity="0.35" />
+            {/* Two stacked left thumbs */}
+            <rect x="2" y="2" width="27" height="14" rx="3" fill={col} opacity="0.28" stroke={col} strokeWidth="0.6" strokeDasharray="2 1.5" />
+            <circle cx="11" cy="8" r="3" fill={col} opacity="0.35" />
+            <rect x="2" y="18" width="27" height="16" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.6" strokeDasharray="2 1.5" />
+            <circle cx="11" cy="25" r="3" fill={col} opacity="0.25" />
+            {/* Large right hero */}
+            <rect x="32" y="2" width="46" height="32" rx="3" fill={col} opacity="0.18" stroke={col} strokeWidth="0.7" strokeDasharray="2 1.5" />
+            <circle cx="54" cy="13" r="6" fill={col} opacity="0.3" />
+            <path d="M32 28 L44 20 L56 25 L68 17 L78 24 L78 32 L32 32Z" fill={col} opacity="0.2" />
         </svg>
     ),
     // ── Hero Header: Announcement Strip ──────────────────────────────────────
