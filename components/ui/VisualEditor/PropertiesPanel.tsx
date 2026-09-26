@@ -1584,21 +1584,25 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'hp-with-gallery': (col, light) => (
         <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="44" rx="3" fill="#f9fafb" />
-            {/* Left: image slot 45% */}
-            <rect x="4" y="4" width="30" height="28" rx="3" fill={light} stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.2" />
-            <circle cx="19" cy="16" r="4" fill={col} opacity="0.3" />
-            <path d="M5 31 l5-5 4 3 4-5 5 7H5z" fill={col} opacity="0.25" />
-            {/* Left: 4 mini thumbs below */}
-            {[0, 1, 2, 3].map(i => (
-                <rect key={i} x={4 + i * 8} y="34" width="6" height="6" rx="1" fill={light} stroke={col} strokeWidth="0.6" />
-            ))}
-            {/* Right: text lines 55% */}
-            <rect x="38" y="6" width="16" height="3" rx="1.5" fill={col} opacity="0.3" />
-            <rect x="38" y="12" width="38" height="4" rx="1.5" fill={col} opacity="0.7" />
-            <rect x="38" y="18" width="24" height="4" rx="1.5" fill={col} opacity="0.9" />
-            <rect x="38" y="24" width="36" height="2" rx="1" fill={col} opacity="0.2" />
-            <rect x="38" y="28" width="32" height="2" rx="1" fill={col} opacity="0.2" />
-            <rect x="38" y="32" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+            {/* Vertical thumb strip ~10% — 4 stacked squares, first has active border */}
+            <rect x="2" y="3" width="7" height="7" rx="1" fill={col} opacity="0.9" stroke={col} strokeWidth="0.8" />
+            <rect x="2" y="12" width="7" height="7" rx="1" fill={light} stroke={col} strokeWidth="0.5" opacity="0.6" />
+            <rect x="2" y="21" width="7" height="7" rx="1" fill={light} stroke={col} strokeWidth="0.5" opacity="0.6" />
+            <rect x="2" y="30" width="7" height="7" rx="1" fill={light} stroke={col} strokeWidth="0.5" opacity="0.6" />
+            {/* Main image ~50% — large, clean, no card border */}
+            <rect x="12" y="3" width="30" height="38" rx="3" fill={light} stroke={col} strokeWidth="0.7" strokeDasharray="2.5 1.2" />
+            <circle cx="27" cy="17" r="5" fill={col} opacity="0.25" />
+            <path d="M13 38 l6-7 5 4 6-6 6 9H13z" fill={col} opacity="0.2" />
+            {/* Subtle divider */}
+            <line x1="45" y1="3" x2="45" y2="41" stroke={col} strokeWidth="0.6" opacity="0.2" />
+            {/* Details ~40% — badge + title + price + bullets */}
+            <rect x="47" y="4" width="10" height="3" rx="1.5" fill={col} opacity="0.35" />
+            <rect x="47" y="10" width="30" height="3.5" rx="1.5" fill={col} opacity="0.75" />
+            <rect x="47" y="15" width="20" height="4" rx="1.5" fill={col} opacity="1" />
+            <rect x="47" y="22" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="47" y="26" width="26" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="47" y="30" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="47" y="34" width="22" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
     'hp-centered-hero': (col, light) => (

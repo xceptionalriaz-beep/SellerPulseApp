@@ -253,38 +253,49 @@ function darkHeroVariant(): BlockVariant {
   }
 }
 
-// ── Variant: with-gallery ─────────────────────────────────────────────────────
+// ── Variant: with-gallery (Gallery Strip) ─────────────────────────────────────
+// 3-column layout: vertical thumb strip left | large main image center | details right
+// Matches real eBay/Amazon product gallery pattern
 function withGalleryVariant(): BlockVariant {
   return {
     id: 'hp-with-gallery',
-    label: 'With Thumbnails',
-    description: 'Image left with thumbnail strip below, details right',
+    label: 'Gallery Strip',
+    description: 'Vertical thumbnail strip left, large image center, details right',
     toHtml(props: any, id: string): string {
       const p = props as HeroProductProps
-      const imgNoThumbs = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
-              <tr>
-                <td style="padding:8px;">
-                  <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
-                    style="width:100%;height:auto;display:block;border-radius:8px;aspect-ratio:1/1;object-fit:cover;" />
-                </td>
-              </tr>
+      const ac = accent(p)
+
+      // Vertical thumb strip — thumb1 gets active (purple) border
+      const thumbCells = [p.thumb1, p.thumb2, p.thumb3, p.thumb4].map((t, i) =>
+        `<tr>
+                  <td style="padding:0 0 6px 0;">
+                    <img src="${t}" alt="" border="0" width="100%"
+                      style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:2px solid ${i === 0 ? ac : '#e5e7eb'};background-color:#f3f4f6;" />
+                  </td>
+                </tr>`
+      ).join('')
+
+      const thumbColHtml = `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+              ${thumbCells}
             </table>`
-      const thumbStrip = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
-              <tr>${[p.thumb1, p.thumb2, p.thumb3, p.thumb4].map(t =>
-        `<td width="25%" style="padding:0 3px;">
-                   <img src="${t}" alt="" border="0" width="100%"
-                     style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:2px solid transparent;background-color:#f3f4f6;" />
-                 </td>`
-      ).join('')}</tr>
-            </table>`
+
+      // Main image — clean, no card border, just white bg + subtle shadow
+      const mainImgHtml = `<img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+              style="width:100%;height:auto;display:block;border-radius:10px;aspect-ratio:1/1;object-fit:cover;background-color:${p.leftBg ?? '#f9fafb'};" />`
+
       return wrapOuter(id, '#ffffff', p,
         `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td width="45%" valign="top" style="padding-right:12px;">
-      ${imgNoThumbs}
-      ${thumbStrip}
+    <!-- THUMB STRIP: 10% -->
+    <td width="10%" valign="top" style="padding-right:8px;">
+      ${thumbColHtml}
     </td>
-    <td width="55%" valign="top" style="padding-left:12px;">
+    <!-- MAIN IMAGE: 50% -->
+    <td width="50%" valign="top" style="padding-right:16px;">
+      ${mainImgHtml}
+    </td>
+    <!-- DETAILS: 40% -->
+    <td width="40%" valign="top" style="padding-left:8px;border-left:2px solid #f3f4f6;">
       ${detailsRight(p)}
     </td>
   </tr>
