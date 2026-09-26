@@ -756,6 +756,7 @@ export interface SellerInfoProps extends CommonProps {
 
 // ── CTA Banner ────────────────────────────────────────────────────────────────
 export interface CtaBannerProps extends CommonProps {
+    variant: string
     headingText: string
     subText: string
     bgColor: string
@@ -996,6 +997,7 @@ import { getProductDescriptionVariant as _getProductDescriptionVariant } from '.
 import { getProductVariantsVariant as _getProductVariantsVariant } from './variants/product_variants.variants'
 import { getWhatsInTheBoxVariant as _getWhatsInTheBoxVariant } from './variants/whats_in_the_box.variants'
 import { getHeroProductVariant as _getHeroProductVariant } from './variants/hero_product.variants'
+import { getCtaBannerVariant as _getCtaBannerVariant } from './variants/cta_banner.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2022,22 +2024,7 @@ ${thumbCells}
         } as CtaBannerProps,
         toHtml(props, id) {
             const p = props as CtaBannerProps
-            const bg = p.bgGradient
-                ? `background:linear-gradient(135deg,${p.gradientFrom},${p.gradientTo});`
-                : `background-color:${p.bgColor};`
-            return wrapBlock('cta_banner', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="${bg}${pad(p)}min-height:${p.minHeight}px;${textAlign(p.align)}">
-      <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:800;color:${p.textColor};">
-        ${p.headingText}
-      </p>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${p.subTextColor};">
-        ${p.subText}
-      </p>
-    </td>
-  </tr>
-</table>`, props)
+            return _getCtaBannerVariant(p.variant ?? 'ctab-trust-bar')?.toHtml(props, id) ?? ''
         },
     },
 
