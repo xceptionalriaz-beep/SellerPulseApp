@@ -9,71 +9,71 @@ import type { HeroProductProps } from '../blocks'
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
 function pad(p: HeroProductProps): string {
-    return `padding-top:${p.paddingTop ?? 24}px;padding-bottom:${p.paddingBottom ?? 24}px;padding-left:${p.paddingLeft ?? 20}px;padding-right:${p.paddingRight ?? 20}px;`
+  return `padding-top:${p.paddingTop ?? 24}px;padding-bottom:${p.paddingBottom ?? 24}px;padding-left:${p.paddingLeft ?? 20}px;padding-right:${p.paddingRight ?? 20}px;`
 }
 
 function accent(p: HeroProductProps): string {
-    return p.accentColor ?? '#7530fb'
+  return p.accentColor ?? '#7530fb'
 }
 
 function badge(p: HeroProductProps, bgColor = '#f0fdf4', textColor = '#166534'): string {
-    return `<span style="display:inline-block;background-color:${bgColor};color:${textColor};font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>`
+  return `<span style="display:inline-block;background-color:${bgColor};color:${textColor};font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>`
 }
 
 function bullets(p: HeroProductProps, textColor = '#1f2937'): string {
-    const a = accent(p)
-    return p.rightBullets.map(b =>
-        `<tr>
+  const a = accent(p)
+  return p.rightBullets.map(b =>
+    `<tr>
           <td width="18" valign="top" style="padding:3px 8px 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${a};font-weight:700;line-height:1.5;">&#10003;</td>
           <td valign="top" style="padding:3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${textColor};line-height:1.5;">${b}</td>
         </tr>`
-    ).join('')
+  ).join('')
 }
 
 function priceRow(p: HeroProductProps, priceColor = '', originalColor = '#9ca3af'): string {
-    const ac = priceColor || accent(p)
-    const originalHtml = p.showOriginal
-        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:${originalColor};text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
-        : ''
-    const showStockBadge = p.showStockBadge !== false && !!p.stockBadgeText
-    const stockBadgeHtml = showStockBadge
-        ? `<span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-left:10px;letter-spacing:0.02em;vertical-align:middle;white-space:nowrap;">${p.stockBadgeText}</span>`
-        : ''
-    const showGuaranteeTag = p.showGuaranteeTag !== false && !!p.guaranteeTagText
-    const guaranteeBg = p.guaranteeTagBg ?? '#f0fdf4'
-    const guaranteeColor = p.guaranteeTagColor ?? '#166534'
-    const guaranteeTagHtml = showGuaranteeTag
-        ? `<div style="margin:4px 0 0;"><span style="display:inline-block;background-color:${guaranteeBg};color:${guaranteeColor};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;letter-spacing:0.02em;">${p.guaranteeTagText}</span></div>`
-        : ''
-    return `<div style="margin:0 0 6px;">
+  const ac = priceColor || accent(p)
+  const originalHtml = p.showOriginal
+    ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:${originalColor};text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
+    : ''
+  const showStockBadge = p.showStockBadge !== false && !!p.stockBadgeText
+  const stockBadgeHtml = showStockBadge
+    ? `<span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-left:10px;letter-spacing:0.02em;vertical-align:middle;white-space:nowrap;">${p.stockBadgeText}</span>`
+    : ''
+  const showGuaranteeTag = p.showGuaranteeTag !== false && !!p.guaranteeTagText
+  const guaranteeBg = p.guaranteeTagBg ?? '#f0fdf4'
+  const guaranteeColor = p.guaranteeTagColor ?? '#166534'
+  const guaranteeTagHtml = showGuaranteeTag
+    ? `<div style="margin:4px 0 0;"><span style="display:inline-block;background-color:${guaranteeBg};color:${guaranteeColor};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;letter-spacing:0.02em;">${p.guaranteeTagText}</span></div>`
+    : ''
+  return `<div style="margin:0 0 6px;">
       <span style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:900;color:${ac};letter-spacing:-0.01em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${originalHtml}${stockBadgeHtml}
     </div>${guaranteeTagHtml}`
 }
 
 function scarcity(p: HeroProductProps): string {
-    return p.showScarcity
-        ? `<span style="display:inline-block;background-color:${p.scarcityBg ?? '#fef2f2'};color:${p.scarcityColor ?? '#991b1b'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
-        : ''
+  return p.showScarcity
+    ? `<span style="display:inline-block;background-color:${p.scarcityBg ?? '#fef2f2'};color:${p.scarcityColor ?? '#991b1b'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
+    : ''
 }
 
 function thumbRow(p: HeroProductProps): string {
-    const thumbs = [p.thumb1, p.thumb2, p.thumb3, p.thumb4]
-    const cells = thumbs.map(t =>
-        `<td width="25%" style="padding:0 3px;">
+  const thumbs = [p.thumb1, p.thumb2, p.thumb3, p.thumb4]
+  const cells = thumbs.map(t =>
+    `<td width="25%" style="padding:0 3px;">
            <img src="${t}" alt="" border="0" width="100%"
              style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:1px solid #e5e7eb;background-color:#f3f4f6;" />
          </td>`
-    ).join('')
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  ).join('')
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>${cells}</tr>
     </table>`
 }
 
 function mainImgCard(p: HeroProductProps, showThumbs = true): string {
-    const thumbsHtml = showThumbs
-        ? `<tr><td style="padding:4px 8px 8px;">${thumbRow(p)}</td></tr>`
-        : ''
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
+  const thumbsHtml = showThumbs
+    ? `<tr><td style="padding:4px 8px 8px;">${thumbRow(p)}</td></tr>`
+    : ''
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
       <tr>
         <td style="padding:8px;">
           <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
@@ -85,7 +85,7 @@ function mainImgCard(p: HeroProductProps, showThumbs = true): string {
 }
 
 function detailsRight(p: HeroProductProps, titleColor = '#1e1535', textColor = '#1f2937'): string {
-    return `${badge(p)}
+  return `${badge(p)}
     <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:${titleColor};line-height:1.3;">${p.rightTitle}</h1>
     ${priceRow(p, '', textColor === '#1f2937' ? '#9ca3af' : '#a5b4fc')}
     ${scarcity(p)}
@@ -95,7 +95,7 @@ function detailsRight(p: HeroProductProps, titleColor = '#1e1535', textColor = '
 }
 
 function wrapOuter(id: string, bg: string, p: HeroProductProps, inner: string): string {
-    return `<!--[hero_product:${id}]--><div class="vb-block" data-block-id="${id}" data-block-type="hero_product">
+  return `<!--[hero_product:${id}]--><div class="vb-block" data-block-id="${id}" data-block-type="hero_product">
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${bg};${pad(p)}">
@@ -108,14 +108,14 @@ function wrapOuter(id: string, bg: string, p: HeroProductProps, inner: string): 
 
 // ── Variant: default ──────────────────────────────────────────────────────────
 function defaultVariant(): BlockVariant {
-    return {
-        id: 'default',
-        label: 'Classic Split',
-        description: 'Image + thumbnails left, product details right',
-        toHtml(props: any, id: string): string {
-            const p = props as HeroProductProps
-            return wrapOuter(id, '#ffffff', p,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  return {
+    id: 'hp-default',
+    label: 'Classic Split',
+    description: 'Image + thumbnails left, product details right',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      return wrapOuter(id, '#ffffff', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="48%" valign="top" style="padding-right:12px;">
       ${mainImgCard(p, true)}
@@ -125,21 +125,21 @@ function defaultVariant(): BlockVariant {
     </td>
   </tr>
 </table>`
-            )
-        },
-    }
+      )
+    },
+  }
 }
 
 // ── Variant: image-right ──────────────────────────────────────────────────────
 function imageRightVariant(): BlockVariant {
-    return {
-        id: 'image-right',
-        label: 'Image Right',
-        description: 'Product details left, image + thumbnails right',
-        toHtml(props: any, id: string): string {
-            const p = props as HeroProductProps
-            return wrapOuter(id, '#ffffff', p,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  return {
+    id: 'hp-image-right',
+    label: 'Image Right',
+    description: 'Product details left, image + thumbnails right',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      return wrapOuter(id, '#ffffff', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="52%" valign="top" style="padding-right:12px;">
       ${detailsRight(p)}
@@ -149,21 +149,21 @@ function imageRightVariant(): BlockVariant {
     </td>
   </tr>
 </table>`
-            )
-        },
-    }
+      )
+    },
+  }
 }
 
 // ── Variant: stacked ─────────────────────────────────────────────────────────
 function stackedVariant(): BlockVariant {
-    return {
-        id: 'stacked',
-        label: 'Stacked',
-        description: 'Full-width image top, all details centered below',
-        toHtml(props: any, id: string): string {
-            const p = props as HeroProductProps
-            return wrapOuter(id, '#ffffff', p,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  return {
+    id: 'hp-stacked',
+    label: 'Stacked',
+    description: 'Full-width image top, all details centered below',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      return wrapOuter(id, '#ffffff', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td style="padding-bottom:16px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
@@ -191,34 +191,34 @@ function stackedVariant(): BlockVariant {
     </td>
   </tr>
 </table>`
-            )
-        },
-    }
+      )
+    },
+  }
 }
 
 // ── Variant: dark-hero ────────────────────────────────────────────────────────
 function darkHeroVariant(): BlockVariant {
-    return {
-        id: 'dark-hero',
-        label: 'Dark Hero',
-        description: 'Dark background with white text and purple accents',
-        toHtml(props: any, id: string): string {
-            const p = props as HeroProductProps
-            const ac = accent(p)
-            const badgeHtml = `<span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>`
-            const origHtml = p.showOriginal
-                ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
-                : ''
-            const scarcityDarkHtml = p.showScarcity
-                ? `<span style="display:inline-block;background-color:#3b0764;color:#e9d5ff;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
-                : ''
-            const bulletsHtml = p.rightBullets.map(b =>
-                `<tr>
+  return {
+    id: 'hp-dark-hero',
+    label: 'Dark Hero',
+    description: 'Dark background with white text and purple accents',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const ac = accent(p)
+      const badgeHtml = `<span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>`
+      const origHtml = p.showOriginal
+        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
+        : ''
+      const scarcityDarkHtml = p.showScarcity
+        ? `<span style="display:inline-block;background-color:#3b0764;color:#e9d5ff;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
+        : ''
+      const bulletsHtml = p.rightBullets.map(b =>
+        `<tr>
                   <td width="18" valign="top" style="padding:3px 8px 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${ac};font-weight:700;line-height:1.5;">&#10003;</td>
                   <td valign="top" style="padding:3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#e5e7eb;line-height:1.5;">${b}</td>
                 </tr>`
-            ).join('')
-            const darkImgCard = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2d1f5e;border:1px solid #4c3a8a;border-radius:12px;">
+      ).join('')
+      const darkImgCard = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#2d1f5e;border:1px solid #4c3a8a;border-radius:12px;">
               <tr>
                 <td style="padding:8px;">
                   <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
@@ -229,8 +229,8 @@ function darkHeroVariant(): BlockVariant {
                 <td style="padding:4px 8px 8px;">${thumbRow(p)}</td>
               </tr>
             </table>`
-            return wrapOuter(id, '#1e1535', p,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+      return wrapOuter(id, '#1e1535', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="48%" valign="top" style="padding-right:12px;">
       ${darkImgCard}
@@ -248,20 +248,20 @@ function darkHeroVariant(): BlockVariant {
     </td>
   </tr>
 </table>`
-            )
-        },
-    }
+      )
+    },
+  }
 }
 
 // ── Variant: with-gallery ─────────────────────────────────────────────────────
 function withGalleryVariant(): BlockVariant {
-    return {
-        id: 'with-gallery',
-        label: 'With Thumbnails',
-        description: 'Image left with thumbnail strip below, details right',
-        toHtml(props: any, id: string): string {
-            const p = props as HeroProductProps
-            const imgNoThumbs = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
+  return {
+    id: 'hp-with-gallery',
+    label: 'With Thumbnails',
+    description: 'Image left with thumbnail strip below, details right',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const imgNoThumbs = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
               <tr>
                 <td style="padding:8px;">
                   <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
@@ -269,16 +269,16 @@ function withGalleryVariant(): BlockVariant {
                 </td>
               </tr>
             </table>`
-            const thumbStrip = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+      const thumbStrip = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
               <tr>${[p.thumb1, p.thumb2, p.thumb3, p.thumb4].map(t =>
-                `<td width="25%" style="padding:0 3px;">
+        `<td width="25%" style="padding:0 3px;">
                    <img src="${t}" alt="" border="0" width="100%"
                      style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:2px solid transparent;background-color:#f3f4f6;" />
                  </td>`
-            ).join('')}</tr>
+      ).join('')}</tr>
             </table>`
-            return wrapOuter(id, '#ffffff', p,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+      return wrapOuter(id, '#ffffff', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td width="45%" valign="top" style="padding-right:12px;">
       ${imgNoThumbs}
@@ -289,25 +289,25 @@ function withGalleryVariant(): BlockVariant {
     </td>
   </tr>
 </table>`
-            )
-        },
-    }
+      )
+    },
+  }
 }
 
 // ── Variant: centered-hero ────────────────────────────────────────────────────
 function centeredHeroVariant(): BlockVariant {
-    return {
-        id: 'centered-hero',
-        label: 'Centered',
-        description: 'Centered image top, all details centered below',
-        toHtml(props: any, id: string): string {
-            const p = props as HeroProductProps
-            const ac = accent(p)
-            const origHtml = p.showOriginal
-                ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
-                : ''
-            return wrapOuter(id, '#ffffff', p,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  return {
+    id: 'centered-hero',
+    label: 'Centered',
+    description: 'Centered image top, all details centered below',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const ac = accent(p)
+      const origHtml = p.showOriginal
+        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
+        : ''
+      return wrapOuter(id, '#ffffff', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
     <td style="text-align:center;padding-bottom:20px;">
       <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;max-width:400px;width:100%;">
@@ -334,22 +334,22 @@ function centeredHeroVariant(): BlockVariant {
     </td>
   </tr>
 </table>`
-            )
-        },
-    }
+      )
+    },
+  }
 }
 
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const heroProductVariants: BlockVariant[] = [
-    defaultVariant(),
-    imageRightVariant(),
-    stackedVariant(),
-    darkHeroVariant(),
-    withGalleryVariant(),
-    centeredHeroVariant(),
+  defaultVariant(),
+  imageRightVariant(),
+  stackedVariant(),
+  darkHeroVariant(),
+  withGalleryVariant(),
+  centeredHeroVariant(),
 ]
 
 export function getHeroProductVariant(variantId: string): BlockVariant {
-    return heroProductVariants.find(v => v.id === variantId) ?? heroProductVariants[0]
+  return heroProductVariants.find(v => v.id === variantId) ?? heroProductVariants[0]
 }

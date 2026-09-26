@@ -1662,11 +1662,11 @@ ${rows}
             scarcityBg: '#fef2f2',
             scarcityColor: '#991b1b',
             // Variant
-            variant: 'default',
+            variant: 'hp-default',
         } as HeroProductProps,
         toHtml(props, id) {
             const p = props as HeroProductProps
-            return _getHeroProductVariant(p.variant ?? 'default').toHtml(props, id)
+            return _getHeroProductVariant(p.variant ?? 'hp-default').toHtml(props, id)
         },
     },
 

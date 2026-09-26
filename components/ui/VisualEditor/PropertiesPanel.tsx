@@ -1515,7 +1515,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
     // ── Hero Product ──────────────────────────────────────────────────────────
-    'default': (col, light) => (
+    'hp-default': (col, light) => (
         <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="44" rx="3" fill="#f9fafb" />
             {/* Left: image slot 48% */}
@@ -1534,7 +1534,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="42" y="32" width="28" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
-    'image-right': (col, light) => (
+    'hp-image-right': (col, light) => (
         <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="44" rx="3" fill="#f9fafb" />
             {/* Left: text lines 52% */}
@@ -1551,7 +1551,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <path d="M50 26 l5-5 4 3 4-5 4 7H50z" fill={col} opacity="0.25" />
         </svg>
     ),
-    'stacked': (col, light) => (
+    'hp-stacked': (col, light) => (
         <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="44" rx="3" fill="#f9fafb" />
             {/* Top: full-width image slot */}
@@ -1565,7 +1565,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="22" y="37" width="36" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
-    'dark-hero': (col, _light) => (
+    'hp-dark-hero': (col, _light) => (
         <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="44" rx="3" fill="#1e1535" />
             {/* Left: dark image slot */}
@@ -1581,7 +1581,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="42" y="32" width="30" height="2" rx="1" fill="white" opacity="0.4" />
         </svg>
     ),
-    'with-gallery': (col, light) => (
+    'hp-with-gallery': (col, light) => (
         <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="44" rx="3" fill="#f9fafb" />
             {/* Left: image slot 45% */}
@@ -1601,7 +1601,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="38" y="32" width="28" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
-    'centered-hero': (col, light) => (
+    'hp-centered-hero': (col, light) => (
         <svg viewBox="0 0 80 50" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="50" rx="3" fill="#f9fafb" />
             {/* Top: centered image */}
@@ -2045,7 +2045,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'default' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
