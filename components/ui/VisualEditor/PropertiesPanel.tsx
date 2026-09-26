@@ -1514,6 +1514,108 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="20" y="15" width="40" height="6" rx="3" fill="white" opacity="0.9" />
         </svg>
     ),
+    // ── Hero Product ──────────────────────────────────────────────────────────
+    'default': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="44" rx="3" fill="#f9fafb" />
+            {/* Left: image slot 48% */}
+            <rect x="4" y="4" width="34" height="36" rx="3" fill={light} stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.2" />
+            <rect x="12" y="14" width="18" height="14" rx="2" fill={col} opacity="0.18" />
+            <circle cx="21" cy="18" r="4" fill={col} opacity="0.3" />
+            <path d="M13 26 l5-5 4 3 4-5 5 7H13z" fill={col} opacity="0.25" />
+            {/* Thumbs strip */}
+            {[0, 1, 2, 3].map(i => <rect key={i} x={4 + i * 9} y="41" width="7" height="4" rx="1" fill={col} opacity="0.2" />)}
+            {/* Right: text lines 52% */}
+            <rect x="42" y="6" width="20" height="3" rx="1.5" fill={col} opacity="0.3" />
+            <rect x="42" y="12" width="34" height="4" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="42" y="18" width="22" height="4" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="42" y="24" width="34" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="42" y="28" width="32" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="42" y="32" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    'image-right': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="44" rx="3" fill="#f9fafb" />
+            {/* Left: text lines 52% */}
+            <rect x="4" y="6" width="20" height="3" rx="1.5" fill={col} opacity="0.3" />
+            <rect x="4" y="12" width="34" height="4" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="4" y="18" width="22" height="4" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="4" y="24" width="34" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="4" y="28" width="32" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="4" y="32" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+            {/* Right: image slot 48% */}
+            <rect x="42" y="4" width="34" height="36" rx="3" fill={light} stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.2" />
+            <rect x="49" y="14" width="18" height="14" rx="2" fill={col} opacity="0.18" />
+            <circle cx="58" cy="18" r="4" fill={col} opacity="0.3" />
+            <path d="M50 26 l5-5 4 3 4-5 4 7H50z" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    'stacked': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="44" rx="3" fill="#f9fafb" />
+            {/* Top: full-width image slot */}
+            <rect x="4" y="4" width="72" height="20" rx="3" fill={light} stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.2" />
+            <rect x="25" y="9" width="30" height="10" rx="2" fill={col} opacity="0.18" />
+            <circle cx="40" cy="12" r="3.5" fill={col} opacity="0.3" />
+            <path d="M26 19 l6-5 5 3 5-5 6 7H26z" fill={col} opacity="0.25" />
+            {/* Bottom: centered text */}
+            <rect x="20" y="27" width="40" height="3" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="26" y="32" width="28" height="3" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="22" y="37" width="36" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    'dark-hero': (col, _light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="44" rx="3" fill="#1e1535" />
+            {/* Left: dark image slot */}
+            <rect x="4" y="4" width="34" height="36" rx="3" fill="#2d1f5e" stroke="#4c3a8a" strokeWidth="0.8" />
+            <circle cx="21" cy="18" r="5" fill="#7530fb" opacity="0.4" />
+            <path d="M8 36 l6-7 5 4 5-6 6 9H8z" fill="#7530fb" opacity="0.3" />
+            {/* Right: white text on dark */}
+            <rect x="42" y="6" width="14" height="3" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="42" y="12" width="34" height="4" rx="1.5" fill="white" opacity="0.85" />
+            <rect x="42" y="18" width="22" height="4" rx="1.5" fill={col} opacity="1" />
+            <rect x="42" y="24" width="32" height="2" rx="1" fill="white" opacity="0.4" />
+            <rect x="42" y="28" width="28" height="2" rx="1" fill="white" opacity="0.4" />
+            <rect x="42" y="32" width="30" height="2" rx="1" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    'with-gallery': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="44" rx="3" fill="#f9fafb" />
+            {/* Left: image slot 45% */}
+            <rect x="4" y="4" width="30" height="28" rx="3" fill={light} stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.2" />
+            <circle cx="19" cy="16" r="4" fill={col} opacity="0.3" />
+            <path d="M5 31 l5-5 4 3 4-5 5 7H5z" fill={col} opacity="0.25" />
+            {/* Left: 4 mini thumbs below */}
+            {[0, 1, 2, 3].map(i => (
+                <rect key={i} x={4 + i * 8} y="34" width="6" height="6" rx="1" fill={light} stroke={col} strokeWidth="0.6" />
+            ))}
+            {/* Right: text lines 55% */}
+            <rect x="38" y="6" width="16" height="3" rx="1.5" fill={col} opacity="0.3" />
+            <rect x="38" y="12" width="38" height="4" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="38" y="18" width="24" height="4" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="38" y="24" width="36" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="38" y="28" width="32" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="38" y="32" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    'centered-hero': (col, light) => (
+        <svg viewBox="0 0 80 50" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="50" rx="3" fill="#f9fafb" />
+            {/* Top: centered image */}
+            <rect x="20" y="3" width="40" height="22" rx="3" fill={light} stroke={col} strokeWidth="0.8" strokeDasharray="2.5 1.2" />
+            <circle cx="40" cy="13" r="5" fill={col} opacity="0.3" />
+            <path d="M22 24 l6-6 5 4 6-5 5 7H22z" fill={col} opacity="0.2" />
+            {/* Bottom: centered text */}
+            <rect x="26" y="28" width="28" height="3" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="22" y="33" width="36" height="3" rx="1.5" fill={col} opacity="0.5" />
+            <rect x="16" y="39" width="48" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="18" y="43" width="44" height="2" rx="1" fill={col} opacity="0.2" />
+            <rect x="20" y="47" width="40" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -1943,7 +2045,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'default' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}

@@ -520,6 +520,9 @@ export interface HeroProductProps extends CommonProps {
     // Bullets (4 hard-coded for high-converting eBay listings)
     rightBullets: string[]
 
+    // Variant
+    variant?: string          // 'default' | 'image-right' | 'stacked' | 'dark-hero' | 'with-gallery' | 'centered-hero'
+
     // Accent
     accentColor: string       // title underline, price, bullets
     scarcityBg: string
@@ -992,6 +995,7 @@ import { getFeatureVariant as _getFeatureVariant } from './variants/features.var
 import { getProductDescriptionVariant as _getProductDescriptionVariant } from './variants/product_description.variants'
 import { getProductVariantsVariant as _getProductVariantsVariant } from './variants/product_variants.variants'
 import { getWhatsInTheBoxVariant as _getWhatsInTheBoxVariant } from './variants/whats_in_the_box.variants'
+import { getHeroProductVariant as _getHeroProductVariant } from './variants/hero_product.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1657,97 +1661,12 @@ ${rows}
             accentColor: '#7530fb',
             scarcityBg: '#fef2f2',
             scarcityColor: '#991b1b',
+            // Variant
+            variant: 'default',
         } as HeroProductProps,
         toHtml(props, id) {
             const p = props as HeroProductProps
-            const accent = p.accentColor ?? '#7530fb'
-
-            // Build the 4-bullet list with purple ✓ glyphs
-            const bullets = p.rightBullets.map(b =>
-                `<tr>
-                  <td width="18" valign="top" style="padding:3px 8px 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${accent};font-weight:700;line-height:1.5;">&#10003;</td>
-                  <td valign="top" style="padding:3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1f2937;line-height:1.5;">${b}</td>
-                </tr>`
-            ).join('')
-
-            // Original price (strikethrough) cell
-            const originalHtml = p.showOriginal
-                ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
-                : ''
-
-            // Scarcity pill
-            const scarcityHtml = p.showScarcity
-                ? `<span style="display:inline-block;background-color:${p.scarcityBg ?? '#fef2f2'};color:${p.scarcityColor ?? '#991b1b'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-top:8px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span>`
-                : ''
-
-            // Optional inline "In Stock • Fast Shipping" badge rendered next to the price
-            // (opt-in: present only when stockBadgeText is set AND not explicitly hidden)
-            const showStockBadge = p.showStockBadge !== false && !!p.stockBadgeText
-            const stockBadgeHtml = showStockBadge
-                ? `<span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-left:10px;letter-spacing:0.02em;vertical-align:middle;white-space:nowrap;">${p.stockBadgeText}</span>`
-                : ''
-
-            // Optional "100% Satisfaction Guarantee" reassurance tag rendered
-            // directly under the price row
-            const showGuaranteeTag = p.showGuaranteeTag !== false && !!p.guaranteeTagText
-            const guaranteeBg = p.guaranteeTagBg ?? '#f0fdf4'
-            const guaranteeColor = p.guaranteeTagColor ?? '#166534'
-            const guaranteeTagHtml = showGuaranteeTag
-                ? `<div style="margin:4px 0 0;"><span style="display:inline-block;background-color:${guaranteeBg};color:${guaranteeColor};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;letter-spacing:0.02em;">${p.guaranteeTagText}</span></div>`
-                : ''
-
-            // 4 thumbnails
-            const thumbs = [p.thumb1, p.thumb2, p.thumb3, p.thumb4]
-            const thumbCells = thumbs.map(t =>
-                `<td width="25%" style="padding:0 3px;">
-                   <img src="${t}" alt="" border="0" width="100%"
-                     style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:1px solid #e5e7eb;background-color:#f3f4f6;" />
-                 </td>`
-            ).join('')
-
-            return wrapBlock('hero_product', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:#ffffff;${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <!-- LEFT COLUMN: image + thumbnails -->
-          <td width="48%" valign="top" style="padding-right:12px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
-              <tr>
-                <td style="padding:8px;">
-                  <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
-                    style="width:100%;height:auto;display:block;border-radius:8px;aspect-ratio:1/1;object-fit:cover;" />
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:4px 8px 8px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                    <tr>${thumbCells}</tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-          <!-- RIGHT COLUMN: title + price + scarcity + bullets -->
-          <td width="52%" valign="top" style="padding-left:12px;">
-            <span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>
-            <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:#1e1535;line-height:1.3;">${p.rightTitle}</h1>
-            <div style="margin:0 0 6px;">
-              <span style="font-family:Arial,Helvetica,sans-serif;font-size:30px;font-weight:900;color:${accent};letter-spacing:-0.01em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${originalHtml}${stockBadgeHtml}
-            </div>
-            ${guaranteeTagHtml}
-            ${scarcityHtml}
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;border-top:1px solid #f3f4f6;padding-top:10px;">
-              ${bullets}
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
+            return _getHeroProductVariant(p.variant ?? 'default').toHtml(props, id)
         },
     },
 
