@@ -520,6 +520,313 @@ function centeredHeroVariant(): BlockVariant {
     },
   }
 }
+// ── Variant: hp-minimal-clean (Minimal Clean) ─────────────────────────────────
+// Desktop: bare image left 46% (no card/shadow) | right 54% editorial details
+// Mobile:  image full width → details below
+function minimalCleanVariant(): BlockVariant {
+  return {
+    id: 'hp-minimal-clean',
+    label: 'Minimal Clean',
+    description: 'Borderless image left, editorial typography right — clean editorial feel',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const ac = accent(p)
+      const mobileStyle = `<style>
+@media (max-width:460px) {
+  .hp-mc-col-${id} { display:block !important; width:100% !important; padding-left:0 !important; padding-right:0 !important; }
+  .hp-mc-img-col-${id} { padding-bottom:20px !important; }
+}
+</style>`
+      const numberedBullets = p.rightBullets.map((b, i) =>
+        `<tr>
+          <td width="22" valign="top" style="padding:4px 10px 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${ac};font-weight:900;line-height:1.5;">${i + 1}.</td>
+          <td valign="top" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;line-height:1.6;">${b}</td>
+        </tr>`
+      ).join('')
+      const origHtml = p.showOriginal
+        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#9ca3af;text-decoration:line-through;margin-left:10px;font-weight:400;vertical-align:middle;">${p.rightOriginal}</span>`
+        : ''
+      const scarcityHtml = p.showScarcity
+        ? `<p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;letter-spacing:0.05em;text-transform:uppercase;">Only ${p.rightQuantity} remaining</p>`
+        : ''
+      return wrapOuter(id, '#ffffff', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="hp-mc-col-${id} hp-mc-img-col-${id}" width="46%" valign="top" style="padding-right:24px;">
+      <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+        style="width:100%;height:auto;display:block;border-radius:6px;aspect-ratio:1/1;object-fit:cover;background-color:#f9fafb;" />
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+        <tr>${[p.thumb1, p.thumb2, p.thumb3, p.thumb4].map(t =>
+          `<td width="25%" style="padding:0 2px;"><img src="${t}" alt="" border="0" width="100%" style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:4px;background-color:#f3f4f6;" /></td>`
+        ).join('')}</tr>
+      </table>
+    </td>
+    <td class="hp-mc-col-${id}" width="54%" valign="top" style="padding-left:24px;border-left:1px solid #f3f4f6;">
+      <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${ac};letter-spacing:0.1em;text-transform:uppercase;">${p.rightBadgeText}</p>
+      <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#111827;line-height:1.3;">${p.rightTitle}</h1>
+      <div style="margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;">
+        <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:900;color:#111827;letter-spacing:-0.02em;vertical-align:middle;">${p.rightPrice}</span>${origHtml}
+      </div>
+      ${scarcityHtml}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;">
+        ${numberedBullets}
+      </table>
+    </td>
+  </tr>
+</table>`,
+        mobileStyle
+      )
+    },
+  }
+}
+
+// ── Variant: hp-flash-sale (Urgency / Flash Sale) ─────────────────────────────
+// Top urgency banner → image left with SAVE badge overlay → giant price right
+// Mobile: stack, urgency banner stays, price stays giant
+function flashSaleVariant(): BlockVariant {
+  return {
+    id: 'hp-flash-sale',
+    label: 'Flash Sale',
+    description: 'Urgency banner + SAVE overlay on image, giant price with progress bar',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const ac = accent(p)
+      const mobileStyle = `<style>
+@media (max-width:460px) {
+  .hp-fs-col-${id} { display:block !important; width:100% !important; padding-left:0 !important; padding-right:0 !important; }
+  .hp-fs-img-col-${id} { padding-bottom:16px !important; }
+  .hp-fs-price-${id} { font-size:38px !important; }
+}
+</style>`
+      // Calculate save % if original exists
+      const savePercent = (() => {
+        if (!p.showOriginal || !p.rightOriginal || !p.rightPrice) return null
+        const orig = parseFloat(String(p.rightOriginal).replace(/[^0-9.]/g, ''))
+        const curr = parseFloat(String(p.rightPrice).replace(/[^0-9.]/g, ''))
+        if (!orig || !curr || orig <= curr) return null
+        return Math.round(((orig - curr) / orig) * 100)
+      })()
+      const saveBadgeHtml = savePercent
+        ? `<div style="position:absolute;top:12px;right:12px;background-color:#dc2626;color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:900;padding:6px 10px;border-radius:8px;letter-spacing:0.02em;line-height:1;">SAVE<br/>${savePercent}%</div>`
+        : ''
+      const origHtml = p.showOriginal
+        ? `<div style="margin:4px 0 0;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:18px;color:#9ca3af;text-decoration:line-through;font-weight:500;">${p.rightOriginal}</span>${savePercent ? `<span style="display:inline-block;background-color:#fef2f2;color:#dc2626;font-family:Arial,sans-serif;font-size:12px;font-weight:800;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;">-${savePercent}% OFF</span>` : ''}</div>`
+        : ''
+      // Progress bar (uses rightQuantity as % remaining, capped 5–40)
+      const qty = parseInt(String(p.rightQuantity ?? '10'), 10) || 10
+      const pct = Math.max(5, Math.min(40, qty))
+      const progressHtml = p.showScarcity
+        ? `<div style="margin-top:14px;">
+            <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#dc2626;">⚠ Only ${p.rightQuantity} left — selling fast!</p>
+            <div style="width:100%;height:10px;background-color:#fee2e2;border-radius:5px;overflow:hidden;">
+              <div style="width:${pct}%;height:100%;background-color:#dc2626;border-radius:5px;"></div>
+            </div>
+          </div>`
+        : ''
+      const stockHtml = p.showStockBadge !== false && p.stockBadgeText
+        ? `<span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;margin-left:8px;vertical-align:middle;white-space:nowrap;">${p.stockBadgeText}</span>`
+        : ''
+      const guaranteeHtml = p.showGuaranteeTag !== false && p.guaranteeTagText
+        ? `<div style="margin-top:8px;"><span style="display:inline-block;background-color:${p.guaranteeTagBg ?? '#f0fdf4'};color:${p.guaranteeTagColor ?? '#166534'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;">${p.guaranteeTagText}</span></div>`
+        : ''
+      return wrapOuter(id, '#fff7ed', p,
+        `<!-- Urgency banner -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+  <tr>
+    <td style="background-color:#dc2626;border-radius:8px;padding:8px 16px;text-align:center;">
+      <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:900;color:#ffffff;letter-spacing:0.06em;">⚡ LIMITED TIME DEAL — TODAY ONLY ⚡</span>
+    </td>
+  </tr>
+</table>
+<!-- Main row -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="hp-fs-col-${id} hp-fs-img-col-${id}" width="46%" valign="top" style="padding-right:16px;">
+      <!-- Image with SAVE badge overlay using a table hack -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:2px solid #fca5a5;border-radius:12px;position:relative;">
+        <tr>
+          <td style="padding:8px;position:relative;">
+            <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+              style="width:100%;height:auto;display:block;border-radius:8px;aspect-ratio:1/1;object-fit:cover;" />
+            ${savePercent ? `<div style="position:absolute;top:16px;right:16px;background-color:#dc2626;color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:900;padding:6px 10px;border-radius:8px;text-align:center;line-height:1.2;">SAVE<br>${savePercent}%</div>` : ''}
+          </td>
+        </tr>
+        <tr><td style="padding:0 8px 8px;">${thumbRowHtml(p)}</td></tr>
+      </table>
+    </td>
+    <td class="hp-fs-col-${id}" width="54%" valign="top" style="padding-left:16px;">
+      <span style="display:inline-block;background-color:#fef2f2;color:#dc2626;font-family:Arial,sans-serif;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>
+      <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:800;color:#111827;line-height:1.3;">${p.rightTitle}</h1>
+      <div style="margin:0 0 4px;">
+        <span class="hp-fs-price-${id}" style="font-family:Arial,Helvetica,sans-serif;font-size:44px;font-weight:900;color:#dc2626;letter-spacing:-0.02em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${stockHtml}
+      </div>
+      ${origHtml}
+      ${progressHtml}
+      ${guaranteeHtml}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;border-top:1px solid #fee2e2;padding-top:10px;">
+        ${bullets(p, '#374151')}
+      </table>
+    </td>
+  </tr>
+</table>`,
+        mobileStyle
+      )
+    },
+  }
+}
+
+// ── Variant: hp-dark-premium (Dark Premium) ───────────────────────────────────
+// Near-black bg, image RIGHT with purple glow halo, title+price LEFT in white
+// Bullets as glowing accent pills — for electronics/gaming/tech
+// Mobile: stack (image first), dark bg carries through
+function darkPremiumVariant(): BlockVariant {
+  return {
+    id: 'hp-dark-premium',
+    label: 'Dark Premium',
+    description: 'Near-black bg, image right with glow halo, bullets as accent pills',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const ac = accent(p)
+      const mobileStyle = `<style>
+@media (max-width:460px) {
+  .hp-dp-wrap-${id} { display:flex !important; flex-direction:column !important; }
+  .hp-dp-img-${id}  { display:block !important; width:100% !important; padding:0 0 20px 0 !important; order:1 !important; }
+  .hp-dp-txt-${id}  { display:block !important; width:100% !important; padding:0 !important; order:2 !important; }
+}
+</style>`
+      const pillBullets = p.rightBullets.map(b =>
+        `<tr>
+          <td style="padding:3px 0;">
+            <span style="display:inline-block;background-color:${ac}22;color:${ac};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;border:1px solid ${ac}55;letter-spacing:0.02em;">&#10003; ${b}</span>
+          </td>
+        </tr>`
+      ).join('')
+      const origHtml = p.showOriginal
+        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#6b7280;text-decoration:line-through;margin-left:10px;font-weight:400;vertical-align:middle;">${p.rightOriginal}</span>`
+        : ''
+      const scarcityHtml = p.showScarcity
+        ? `<div style="margin-top:10px;"><span style="display:inline-block;background-color:#3b0764;color:#e9d5ff;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left in Stock</span></div>`
+        : ''
+      return wrapOuter(id, '#0f0f13', p,
+        `<div class="hp-dp-wrap-${id}" style="display:table;width:100%;table-layout:fixed;">
+  <div class="hp-dp-txt-${id}" style="display:table-cell;width:52%;vertical-align:middle;padding-right:20px;">
+    <span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;">${p.rightBadgeText}</span>
+    <h1 style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:900;color:#ffffff;line-height:1.2;letter-spacing:-0.01em;">${p.rightTitle}</h1>
+    <div style="margin:0 0 6px;">
+      <span style="font-family:Arial,Helvetica,sans-serif;font-size:32px;font-weight:900;color:${ac};letter-spacing:-0.02em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${origHtml}
+    </div>
+    ${scarcityHtml}
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;">
+      ${pillBullets}
+    </table>
+  </div>
+  <div class="hp-dp-img-${id}" style="display:table-cell;width:48%;vertical-align:middle;padding-left:20px;">
+    <!-- Glow halo wrapper -->
+    <div style="border-radius:16px;box-shadow:0 0 40px ${ac}66,0 0 80px ${ac}33;background-color:#1a1025;padding:10px;border:1px solid ${ac}44;">
+      <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+        style="width:100%;height:auto;display:block;border-radius:10px;aspect-ratio:1/1;object-fit:cover;" />
+    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+      <tr>${[p.thumb1, p.thumb2, p.thumb3, p.thumb4].map(t =>
+          `<td width="25%" style="padding:0 3px;"><img src="${t}" alt="" border="0" width="100%" style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:1px solid ${ac}44;background-color:#1a1025;" /></td>`
+        ).join('')}</tr>
+    </table>
+  </div>
+</div>`,
+        mobileStyle
+      )
+    },
+  }
+}
+
+// ── Variant: hp-wide-showcase (Wide Showcase) ─────────────────────────────────
+// Cinematic image spans full width top → 3-col content row below:
+//   price left | title+bullets centre | stock+trust right
+// Mobile: stacked — image → price → title → bullets
+function wideShowcaseVariant(): BlockVariant {
+  return {
+    id: 'hp-wide-showcase',
+    label: 'Wide Showcase',
+    description: 'Full-width cinematic image, 3-column details row below — landing page feel',
+    toHtml(props: any, id: string): string {
+      const p = props as HeroProductProps
+      const ac = accent(p)
+      const mobileStyle = `<style>
+@media (max-width:460px) {
+  .hp-ws-col-${id} { display:block !important; width:100% !important; border:none !important; padding-left:0 !important; padding-right:0 !important; margin-bottom:12px !important; }
+}
+</style>`
+      const origHtml = p.showOriginal
+        ? `<div style="margin-top:4px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#9ca3af;text-decoration:line-through;font-weight:400;">${p.rightOriginal}</span></div>`
+        : ''
+      const scarcityHtml = p.showScarcity
+        ? `<div style="margin-top:10px;"><span style="display:inline-block;background-color:${p.scarcityBg ?? '#fef2f2'};color:${p.scarcityColor ?? '#991b1b'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:0.02em;">Only ${p.rightQuantity} Left</span></div>`
+        : ''
+      const stockHtml = p.showStockBadge !== false && p.stockBadgeText
+        ? `<div style="margin-bottom:8px;"><span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:0.02em;">${p.stockBadgeText}</span></div>`
+        : ''
+      const guaranteeHtml = p.showGuaranteeTag !== false && p.guaranteeTagText
+        ? `<div style="margin-top:6px;"><span style="display:inline-block;background-color:${p.guaranteeTagBg ?? '#f0fdf4'};color:${p.guaranteeTagColor ?? '#166534'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:5px 12px;border-radius:4px;">${p.guaranteeTagText}</span></div>`
+        : ''
+      return wrapOuter(id, '#ffffff', p,
+        `<!-- Badge strip -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
+  <tr>
+    <td style="text-align:center;">
+      <span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:800;padding:3px 14px;border-radius:20px;letter-spacing:0.06em;text-transform:uppercase;">${p.rightBadgeText}</span>
+    </td>
+  </tr>
+</table>
+<!-- Cinematic image -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
+  <tr>
+    <td style="border-radius:12px;overflow:hidden;background-color:${p.leftBg ?? '#f9fafb'};line-height:0;">
+      <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+        style="width:100%;height:auto;display:block;border-radius:12px;max-height:320px;object-fit:cover;aspect-ratio:16/7;" />
+    </td>
+  </tr>
+</table>
+<!-- Thumbnail row -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
+  <tr>${[p.thumb1, p.thumb2, p.thumb3, p.thumb4].map(t =>
+          `<td width="25%" style="padding:0 3px;"><img src="${t}" alt="" border="0" width="100%" style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:6px;border:1px solid #e5e7eb;background-color:#f3f4f6;" /></td>`
+        ).join('')}</tr>
+</table>
+<!-- 3-col content row -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <!-- LEFT: Price -->
+    <td class="hp-ws-col-${id}" width="28%" valign="top" style="padding-right:16px;border-right:1px solid #f3f4f6;">
+      <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;">Price</p>
+      <span style="font-family:Arial,Helvetica,sans-serif;font-size:34px;font-weight:900;color:${ac};letter-spacing:-0.02em;line-height:1;">${p.rightPrice}</span>
+      ${origHtml}
+      ${scarcityHtml}
+    </td>
+    <!-- CENTRE: Title + Bullets -->
+    <td class="hp-ws-col-${id}" width="44%" valign="top" style="padding:0 16px;border-right:1px solid #f3f4f6;">
+      <h1 style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:800;color:#111827;line-height:1.3;">${p.rightTitle}</h1>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        ${bullets(p, '#374151')}
+      </table>
+    </td>
+    <!-- RIGHT: Stock + Trust -->
+    <td class="hp-ws-col-${id}" width="28%" valign="top" style="padding-left:16px;">
+      ${stockHtml}
+      ${guaranteeHtml}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+        <tr><td style="padding:5px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#374151;font-weight:600;">🚚 Free Shipping</td></tr>
+        <tr><td style="padding:5px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#374151;font-weight:600;">🔁 30-Day Returns</td></tr>
+        <tr><td style="padding:5px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#374151;font-weight:600;">✅ Secure Checkout</td></tr>
+      </table>
+    </td>
+  </tr>
+</table>`,
+        mobileStyle
+      )
+    },
+  }
+}
+
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const heroProductVariants: BlockVariant[] = [
@@ -529,6 +836,10 @@ export const heroProductVariants: BlockVariant[] = [
   darkHeroVariant(),
   withGalleryVariant(),
   centeredHeroVariant(),
+  minimalCleanVariant(),
+  flashSaleVariant(),
+  darkPremiumVariant(),
+  wideShowcaseVariant(),
 ]
 
 export function getHeroProductVariant(variantId: string): BlockVariant {
