@@ -2700,7 +2700,7 @@ ${thumbCells}
             description: 'Brand and certification logos row',
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { variant?: string; caption?: string; captionColor?: string; accentColor?: string }
                 return _getLogoBarVariant(p.variant ?? 'flat-row').toHtml(p, id)
             },
         },

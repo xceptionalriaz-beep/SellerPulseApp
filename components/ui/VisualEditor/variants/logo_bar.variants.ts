@@ -430,7 +430,7 @@ export const logoBarVariants: BlockVariant[] = [
         toHtml(props, id) { return dividerStrip(props, id) },
     },
     {
-        id: 'card-grid',
+        id: 'lb-card-grid',
         label: 'Card Grid',
         description: 'Individual bordered cards per logo with icon and name',
         toHtml(props, id) { return cardGrid(props, id) },

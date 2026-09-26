@@ -1979,7 +1979,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
     // ── logo_bar: card-grid ───────────────────────────────────────────────────
-    'card-grid': (col, light) => (
+    'lb-card-grid': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="5" fill={light} />
             <rect x="4" y="4" width="72" height="3" rx="1.5" fill={col} opacity="0.2" />
