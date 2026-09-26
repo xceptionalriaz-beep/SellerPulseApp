@@ -994,6 +994,23 @@ import { getProductVariantsVariant as _getProductVariantsVariant } from './varia
 import { getWhatsInTheBoxVariant as _getWhatsInTheBoxVariant } from './variants/whats_in_the_box.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SHARED SLOT PLACEHOLDERS
+// Used wherever a block has an image or content dropzone.
+// SVG scales to any width via viewBox — no fixed pixel size.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const IMAGE_PLACEHOLDER_SVG = `<svg viewBox="0 0 4 3" preserveAspectRatio="xMidYMid meet" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:6px;">
+  <rect width="4" height="3" fill="#f3eeff" rx="0.12"/>
+  <rect width="4" height="3" fill="none" stroke="#c4b5fd" stroke-width="0.06" stroke-dasharray="0.18 0.1" rx="0.12"/>
+  <rect x="0.85" y="0.55" width="2.3" height="1.6" rx="0.1" fill="#ede9fe"/>
+  <circle cx="1.35" cy="1.05" r="0.22" fill="#c4b5fd"/>
+  <path d="M0.85 1.8 L1.6 1.1 L2.2 1.7 L2.6 1.35 L3.15 1.9 L3.15 2.15 L0.85 2.15Z" fill="#c4b5fd" opacity="0.7"/>
+  <text x="2" y="2.65" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="0.22" fill="#7530fb" font-weight="600">Click to add image</text>
+</svg>`
+
+export const CONTENT_PLACEHOLDER = `<div data-canvas-dropzone="content" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`
+
+// ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
 // Meta information for each block type — used by BlockLibrary sidebar
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1093,8 +1110,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Side-by-side two column layout',
         defaultProps: {
             ...DEFAULT_COMMON,
-            leftContent: '<div data-canvas-dropzone="leftContent"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
-            rightContent: '<div data-canvas-dropzone="rightContent"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            leftContent: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="leftContent"'),
+            rightContent: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="rightContent"'),
             leftWidth: 50,
             gap: 16,
             leftBg: '#ffffff',
@@ -1136,9 +1153,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Three equal column layout',
         defaultProps: {
             ...DEFAULT_COMMON,
-            col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
-            col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
-            col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            col1Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col1Content"'),
+            col2Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col2Content"'),
+            col3Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col3Content"'),
             gap: 12,
             col1Bg: '#ffffff',
             col2Bg: '#ffffff',
@@ -2412,7 +2429,7 @@ ${thumbCells}
                 col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
                 col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
                 col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
-                col4Content: '<div data-canvas-dropzone="col4Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                col4Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col4Content"'),
                 gap: 8,
                 col1Bg: '#ffffff',
                 col2Bg: '#ffffff',
@@ -2488,8 +2505,8 @@ ${thumbCells}
             description: '70/30 split — image left, text right with dropzones. Supports multi-row (add more rows for stacked sections).',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                leftImage: '<div data-canvas-dropzone="leftImage" style="width:100%;min-height:200px;background:#f3f4f6;border:2px solid #c4b5fd;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7530fb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#7530fb;font-weight:600;">Click to add image</span></div>',
-                rightContent: '<div data-canvas-dropzone="rightContent" style="width:100%;min-height:200px;background:#f9fafb;border:2px dashed #ddd6fe;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;font-weight:600;">Add content here</span></div>',
+                leftImage: `<div data-canvas-dropzone="leftImage" style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`,
+                rightContent: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="rightContent"'),
                 gap: 16,
             } as unknown as BlockProps,
             toHtml(props, id) {

@@ -1,4 +1,5 @@
 // components/ui/VisualEditor/variants/whats_in_the_box.variants.ts
+import { IMAGE_PLACEHOLDER_SVG } from '../blocks'
 // ─────────────────────────────────────────────────────────────────────────────
 // What's In The Box — 8 layout variants
 //
@@ -358,7 +359,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
             const imageUrl = (p as any).splitImageUrl ?? ''
             const imageHtml = imageUrl
                 ? `<img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:6px;" />`
-                : `<div style="width:100%;min-height:160px;background:#f3f4f6;border:2px dashed #c4b5fd;border-radius:6px;display:table;text-align:center;"><div style="display:table-cell;vertical-align:middle;padding:20px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7530fb;font-weight:600;">📷 Click to add image</p></div></div>`
+                : `<div style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`
             const rows = items.map(item =>
                 `<tr>
                     <td width="20" valign="top" style="padding-right:6px;padding-bottom:8px;font-size:14px;color:${bulletColor};">&#10003;</td>
