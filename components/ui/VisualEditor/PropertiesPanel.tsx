@@ -1940,19 +1940,27 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── seller_info: glass-card ───────────────────────────────────────────────
-    'glass-card': (col, light) => (
+    'glass-card': (col, _light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <defs>
-                <linearGradient id="gc-bg" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
-                    <stop stopColor={col} stopOpacity="0.12" />
-                    <stop offset="1" stopColor={col} stopOpacity="0.03" />
+                <linearGradient id="gc-grad" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} /><stop offset="1" stopColor="#1e1535" />
                 </linearGradient>
             </defs>
-            <rect width="80" height="48" rx="6" fill="url(#gc-bg)" stroke={col} strokeWidth="0.5" opacity="0.4" />
-            <circle cx="15" cy="22" r="9" fill={col} opacity="0.2" stroke="#ffffff" strokeWidth="1" />
-            <rect x="29" y="14" width="26" height="3" rx="1" fill={col} opacity="0.8" />
-            <rect x="29" y="20" width="18" height="2" rx="1" fill={col} opacity="0.25" />
-            <rect x="29" y="27" width="36" height="5" rx="2.5" fill={col} opacity="0.12" stroke={col} strokeWidth="0.5" />
+            {/* Gradient border wrapper */}
+            <rect width="80" height="48" rx="6" fill="url(#gc-grad)" />
+            {/* Frosted inner card */}
+            <rect x="2" y="2" width="76" height="44" rx="5" fill="rgba(255,255,255,0.88)" />
+            {/* Centered avatar circle */}
+            <circle cx="40" cy="14" r="7" fill={col} opacity="0.85" stroke="#ffffff" strokeWidth="1.5" />
+            {/* Store name bar */}
+            <rect x="22" y="24" width="36" height="3" rx="1" fill={col} opacity="0.8" />
+            {/* Tagline bar */}
+            <rect x="26" y="29" width="28" height="2" rx="1" fill={col} opacity="0.2" />
+            {/* Feedback pill */}
+            <rect x="14" y="33" width="52" height="5" rx="2.5" fill={col} opacity="0.75" />
+            {/* Trust footer strip */}
+            <rect x="6" y="40" width="68" height="4" rx="2" fill={col} opacity="0.08" stroke={col} strokeWidth="0.4" />
         </svg>
     ),
 

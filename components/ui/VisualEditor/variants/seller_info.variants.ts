@@ -331,33 +331,57 @@ function glassCard(p: SellerInfoProps, id: string): string {
     return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background:linear-gradient(135deg,${accent}22 0%,${accent}08 100%);border-radius:12px;border:1px solid ${accent}33;">
+  style="width:100%;max-width:700px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:12px;padding:3px;">
   <tr>
-    <td style="padding:28px 24px 20px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="background-color:rgba(255,255,255,0.88);border-radius:10px;border:1px solid rgba(255,255,255,0.7);">
         <tr>
-          <td class="si-col si-avatar" valign="top" style="width:80px;text-align:center;">
+          <!-- Top: centered avatar with glow ring -->
+          <td style="text-align:center;padding:22px 24px 0;">
             <table cellpadding="0" cellspacing="0" border="0" align="center">
               <tr>
-                <td style="width:64px;height:64px;background:linear-gradient(135deg,${accent},#1e1535);border-radius:50%;text-align:center;vertical-align:middle;border:3px solid #ffffff;">
-                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:700;color:#ffffff;line-height:58px;">
+                <td style="width:68px;height:68px;background:linear-gradient(135deg,${accent},#1e1535);border-radius:34px;text-align:center;vertical-align:middle;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;line-height:62px;display:block;">
                     ${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}
                   </span>
                 </td>
               </tr>
             </table>
           </td>
-          <td class="si-col si-right" valign="middle" style="padding-left:16px;">
-            <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:${text};">
-              ${p.sellerName ?? '{{SELLER_NAME}}'}
-            </p>
-            <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">
-              ${p.tagline ?? 'Trusted eBay Seller Since 2010'}
-            </p>
-            <span style="display:inline-block;background-color:#ffffff;border:1px solid ${accent}44;color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">
-              &#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}
-            </span>
-            ${p.showBadge ? `&nbsp;<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;">${p.badgeText ?? 'Top Rated Seller'}</span>` : ''}
+        </tr>
+        <tr>
+          <!-- Middle: store name + feedback pill -->
+          <td style="text-align:center;padding:14px 24px 0;">
+            <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:${text};">${p.sellerName ?? '{{SELLER_NAME}}'}</p>
+            <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
+            <table cellpadding="0" cellspacing="0" border="0" align="center">
+              <tr>
+                <td style="background-color:${accent};border-radius:20px;padding:5px 16px;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">&#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}</span>
+                </td>
+                ${p.showBadge ? `<td style="padding-left:8px;"><span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;">${p.badgeText ?? 'Top Rated'}</span></td>` : ''}
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <!-- Bottom: frosted trust footer bar -->
+          <td style="padding:14px 24px 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+              style="background-color:rgba(117,48,251,0.07);border-radius:8px;border:1px solid ${accent}22;">
+              <tr>
+                <td style="padding:8px 16px;text-align:center;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${text};opacity:0.75;">
+                    &#10003;&nbsp;Authorized Retailer
+                    &nbsp;<span style="color:${accent};opacity:0.4;">&bull;</span>&nbsp;
+                    &#9889;&nbsp;Fast Dispatch
+                    &nbsp;<span style="color:${accent};opacity:0.4;">&bull;</span>&nbsp;
+                    &#128260;&nbsp;Easy Returns
+                  </span>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
@@ -381,27 +405,52 @@ function verticalProfile(p: SellerInfoProps, id: string): string {
   style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
   <tr>
     <td style="${pad(p)};text-align:center;">
+      <!-- Avatar: fixed 72x72 table cell forces true circle -->
       <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
         <tr>
-          <td style="width:72px;height:72px;background-color:${accent};border-radius:50%;text-align:center;vertical-align:middle;">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#ffffff;line-height:72px;">
+          <td width="72" height="72"
+            style="width:72px;height:72px;min-width:72px;background-color:${accent};border-radius:36px;text-align:center;vertical-align:middle;overflow:hidden;">
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;display:block;line-height:72px;width:72px;height:72px;">
               ${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}
             </span>
           </td>
         </tr>
       </table>
+      <!-- Store name -->
       <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:${text};">${p.sellerName ?? '{{SELLER_NAME}}'}</p>
-      <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
-      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
-        <tr><td style="width:40px;height:2px;background-color:${accent};border-radius:2px;"></td></tr>
+      <!-- Tagline -->
+      <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
+      <!-- Accent divider line -->
+      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 14px;">
+        <tr>
+          <td width="40" height="2" style="width:40px;height:2px;background-color:${accent};border-radius:1px;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
       </table>
-      <div style="margin-bottom:14px;">
-        <span style="display:inline-block;background-color:${accent};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;padding:5px 16px;border-radius:20px;">
-          &#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}
-        </span>
-        ${p.showBadge ? `<br><span style="display:inline-block;margin-top:6px;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">${p.badgeText ?? 'Top Rated Seller'}</span>` : ''}
-      </div>
-      <a href="https://www.ebay.com/str/{{SELLER_NAME}}" style="display:inline-block;border:1px solid ${accent};color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;padding:6px 18px;border-radius:4px;text-decoration:none;">View My eBay Store</a>
+      <!-- Feedback pill -->
+      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 8px;">
+        <tr>
+          <td style="background-color:${accent};border-radius:20px;padding:5px 18px;">
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;">&#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}</span>
+          </td>
+        </tr>
+      </table>
+      ${p.showBadge ? `
+      <!-- Badge pill -->
+      <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 14px;">
+        <tr>
+          <td style="background-color:#b8fa33;border-radius:20px;padding:3px 12px;">
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#1e1535;">${p.badgeText ?? 'Top Rated Seller'}</span>
+          </td>
+        </tr>
+      </table>` : '<div style="height:14px;"></div>'}
+      <!-- Store CTA link -->
+      <table cellpadding="0" cellspacing="0" border="0" align="center">
+        <tr>
+          <td style="border:1px solid ${accent};border-radius:4px;padding:6px 18px;">
+            <a href="https://www.ebay.com/str/{{SELLER_NAME}}" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};text-decoration:none;">View My eBay Store</a>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>
