@@ -116,7 +116,7 @@ function defaultVariant(): BlockVariant {
     toHtml(props: any, id: string): string {
       const p = props as HeroProductProps
       const mobileStyle = `<style>
-@media (max-width:600px) {
+@media (max-width:460px) {
   .hp-col-${id} { display:block !important; width:100% !important; padding-left:0 !important; padding-right:0 !important; box-sizing:border-box; }
   .hp-img-col-${id} { padding-bottom:12px !important; }
 }
@@ -150,7 +150,7 @@ function imageRightVariant(): BlockVariant {
     toHtml(props: any, id: string): string {
       const p = props as HeroProductProps
       const mobileStyle = `<style>
-@media (max-width:600px) {
+@media (max-width:460px) {
   .hp-ir-wrap-${id} { display:flex !important; flex-direction:column !important; }
   .hp-ir-img-${id}  { display:block !important; width:100% !important; padding:0 0 12px 0 !important; order:1 !important; }
   .hp-ir-txt-${id}  { display:block !important; width:100% !important; padding:0 !important; order:2 !important; }
@@ -182,7 +182,7 @@ function stackedVariant(): BlockVariant {
     toHtml(props: any, id: string): string {
       const p = props as HeroProductProps
       const mobileStyle = `<style>
-@media (max-width:600px) {
+@media (max-width:460px) {
   .hp-stk-img-${id} { max-height:260px !important; }
   .hp-stk-title-${id} { font-size:18px !important; }
   .hp-stk-price-${id} { font-size:26px !important; }
@@ -236,7 +236,7 @@ function darkHeroVariant(): BlockVariant {
       const p = props as HeroProductProps
       const ac = accent(p)
       const mobileStyle = `<style>
-@media (max-width:600px) {
+@media (max-width:460px) {
   .hp-dk-col-${id} { display:block !important; width:100% !important; padding-left:0 !important; padding-right:0 !important; }
   .hp-dk-img-${id} { padding-bottom:16px !important; }
 }
@@ -302,13 +302,13 @@ function withGalleryVariant(): BlockVariant {
       const p = props as HeroProductProps
       const ac = accent(p)
       const mobileStyle = `<style>
-@media (max-width:600px) {
+@media (max-width:460px) {
   /* Hide desktop 3-col table */
   .hp-gs-desktop-${id} { display:none !important; }
   /* Show mobile single-col version */
   .hp-gs-mobile-${id}  { display:block !important; }
 }
-@media (min-width:601px) {
+@media (min-width:461px) {
   .hp-gs-mobile-${id}  { display:none !important; }
 }
 </style>`
@@ -374,52 +374,152 @@ function centeredHeroVariant(): BlockVariant {
       const p = props as HeroProductProps
       const ac = accent(p)
       const mobileStyle = `<style>
-@media (max-width:600px) {
+@media (max-width:460px) {
   .hp-ct-img-${id}   { max-width:100% !important; }
-  .hp-ct-title-${id} { font-size:18px !important; }
-  .hp-ct-price-${id} { font-size:26px !important; }
+  .hp-ct-title-${id} { font-size:20px !important; }
+  .hp-ct-price-${id} { font-size:28px !important; }
+  .hp-ct-trust-${id} { display:block !important; width:100% !important; text-align:center !important; padding:4px 0 !important; }
 }
 </style>`
       const origHtml = p.showOriginal
-        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:8px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
+        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#9ca3af;text-decoration:line-through;margin-left:10px;font-weight:500;vertical-align:middle;">${p.rightOriginal}</span>`
         : ''
-      return wrapOuter(id, '#ffffff', p,
+
+      const savingsHtml = p.showOriginal
+        ? `<div style="margin:6px auto 0;display:inline-block;background-color:#fef9c3;color:#854d0e;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:0.03em;">YOU SAVE ${p.rightOriginal} TODAY</div>`
+        : ''
+
+      const showStockBadge = p.showStockBadge !== false && !!p.stockBadgeText
+      const stockHtml = showStockBadge
+        ? `<span style="display:inline-block;background-color:#f0fdf4;color:#166534;font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-left:10px;letter-spacing:0.02em;vertical-align:middle;">${p.stockBadgeText}</span>`
+        : ''
+
+      return wrapOuter(id, '#f8f7ff', p,
         `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+
+  <!-- ── TOP BADGE STRIP ── -->
+  <tr>
+    <td style="text-align:center;padding-bottom:16px;">
+      <span style="display:inline-block;background:linear-gradient(90deg,${ac},${ac}cc);color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:800;padding:4px 18px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;box-shadow:0 2px 8px ${ac}44;">${p.rightBadgeText}</span>
+    </td>
+  </tr>
+
+  <!-- ── HERO IMAGE with shadow frame ── -->
   <tr>
     <td style="text-align:center;padding-bottom:20px;">
       <table cellpadding="0" cellspacing="0" border="0" align="center"
-        style="margin:0 auto;background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;max-width:400px;width:100%;">
+        style="margin:0 auto;background-color:#ffffff;border-radius:16px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(117,48,251,0.13),0 2px 8px rgba(0,0,0,0.07);">
         <tr>
-          <td style="padding:12px;">
+          <td style="padding:14px;">
             <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
               class="hp-ct-img-${id}"
-              style="width:100%;height:auto;display:block;border-radius:8px;aspect-ratio:1/1;object-fit:cover;max-width:376px;" />
+              style="width:100%;height:auto;display:block;border-radius:10px;aspect-ratio:1/1;object-fit:cover;max-width:392px;" />
+          </td>
+        </tr>
+        <!-- Thumbnail strip inside frame -->
+        <tr>
+          <td style="padding:0 14px 14px;">
+            ${thumbRowHtml(p)}
           </td>
         </tr>
       </table>
     </td>
   </tr>
+
+  <!-- ── TITLE ── -->
   <tr>
-    <td style="text-align:center;">
-      <div style="margin-bottom:8px;">${badge(p)}</div>
-      <h1 class="hp-ct-title-${id}" style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:#1e1535;line-height:1.3;text-align:center;">${p.rightTitle}</h1>
-      <div style="margin:0 0 6px;text-align:center;">
-        <span class="hp-ct-price-${id}" style="font-family:Arial,Helvetica,sans-serif;font-size:32px;font-weight:900;color:${ac};letter-spacing:-0.01em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${origHtml}
+    <td style="text-align:center;padding-bottom:10px;">
+      <h1 class="hp-ct-title-${id}"
+        style="margin:0 auto 6px;font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:900;color:#1e1535;line-height:1.25;text-align:center;max-width:560px;letter-spacing:-0.01em;">${p.rightTitle}</h1>
+      <div style="width:48px;height:3px;background:linear-gradient(90deg,${ac},${ac}88);border-radius:2px;margin:0 auto;"></div>
+    </td>
+  </tr>
+
+  <!-- ── PRICE ROW ── -->
+  <tr>
+    <td style="text-align:center;padding-bottom:4px;">
+      <div style="margin:0 0 4px;">
+        <span class="hp-ct-price-${id}"
+          style="font-family:Arial,Helvetica,sans-serif;font-size:36px;font-weight:900;color:${ac};letter-spacing:-0.02em;line-height:1;vertical-align:middle;">${p.rightPrice}</span>${origHtml}${stockHtml}
       </div>
-      <div style="text-align:center;">${scarcity(p)}</div>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="margin-top:14px;border-top:1px solid #f3f4f6;padding-top:10px;text-align:left;max-width:500px;margin-left:auto;margin-right:auto;">
-        ${bullets(p)}
+      ${savingsHtml}
+    </td>
+  </tr>
+
+  <!-- ── SCARCITY ── -->
+  ${p.showScarcity ? `<tr><td style="text-align:center;padding:8px 0 4px;">${scarcity(p)}</td></tr>` : ''}
+
+  <!-- ── DIVIDER ── -->
+  <tr>
+    <td style="padding:14px 0 10px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="border-top:1px solid #ede9fe;font-size:0;">&nbsp;</td>
+        </tr>
       </table>
     </td>
   </tr>
+
+  <!-- ── FEATURE BULLETS — two columns on desktop ── -->
+  <tr>
+    <td style="padding-bottom:16px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;margin:0 auto;">
+        ${(() => {
+          const bs = p.rightBullets
+          const rows = []
+          for (let i = 0; i < bs.length; i += 2) {
+            const left = `<td width="50%" valign="top" style="padding:4px 8px 4px 0;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="22" valign="top" style="font-family:Arial,sans-serif;font-size:13px;color:${ac};font-weight:800;padding-right:6px;line-height:1.6;">✓</td>
+                  <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1f2937;line-height:1.6;font-weight:500;">${bs[i]}</td>
+                </tr>
+              </table>
+            </td>`
+            const right = bs[i + 1]
+              ? `<td width="50%" valign="top" style="padding:4px 0 4px 8px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="22" valign="top" style="font-family:Arial,sans-serif;font-size:13px;color:${ac};font-weight:800;padding-right:6px;line-height:1.6;">✓</td>
+                  <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#1f2937;line-height:1.6;font-weight:500;">${bs[i + 1]}</td>
+                </tr>
+              </table>
+            </td>`
+              : '<td width="50%"></td>'
+            rows.push(`<tr>${left}${right}</tr>`)
+          }
+          return rows.join('')
+        })()}
+      </table>
+    </td>
+  </tr>
+
+  <!-- ── TRUST STRIP ── -->
+  <tr>
+    <td style="padding:12px 0 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="background-color:#f3eeff;border-radius:10px;max-width:560px;margin:0 auto;">
+        <tr>
+          <td class="hp-ct-trust-${id}" width="33%" style="padding:10px 8px;text-align:center;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#5b21b6;border-right:1px solid #ddd6fe;">
+            🚚 Free UK Shipping
+          </td>
+          <td class="hp-ct-trust-${id}" width="34%" style="padding:10px 8px;text-align:center;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#5b21b6;border-right:1px solid #ddd6fe;">
+            🔁 30-Day Returns
+          </td>
+          <td class="hp-ct-trust-${id}" width="33%" style="padding:10px 8px;text-align:center;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#5b21b6;">
+            ✅ 100% Authentic
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
 </table>`,
         mobileStyle
       )
     },
   }
 }
-
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const heroProductVariants: BlockVariant[] = [
