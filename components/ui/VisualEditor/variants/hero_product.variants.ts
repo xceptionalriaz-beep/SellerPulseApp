@@ -111,7 +111,8 @@ function defaultVariant(): BlockVariant {
     return {
         id: 'default',
         label: 'Classic Split',
-        toHtml(props: Record<string, unknown>, id: string): string {
+        description: 'Image + thumbnails left, product details right',
+        toHtml(props: any, id: string): string {
             const p = props as HeroProductProps
             return wrapOuter(id, '#ffffff', p,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -134,7 +135,8 @@ function imageRightVariant(): BlockVariant {
     return {
         id: 'image-right',
         label: 'Image Right',
-        toHtml(props: Record<string, unknown>, id: string): string {
+        description: 'Product details left, image + thumbnails right',
+        toHtml(props: any, id: string): string {
             const p = props as HeroProductProps
             return wrapOuter(id, '#ffffff', p,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -157,7 +159,8 @@ function stackedVariant(): BlockVariant {
     return {
         id: 'stacked',
         label: 'Stacked',
-        toHtml(props: Record<string, unknown>, id: string): string {
+        description: 'Full-width image top, all details centered below',
+        toHtml(props: any, id: string): string {
             const p = props as HeroProductProps
             return wrapOuter(id, '#ffffff', p,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -198,7 +201,8 @@ function darkHeroVariant(): BlockVariant {
     return {
         id: 'dark-hero',
         label: 'Dark Hero',
-        toHtml(props: Record<string, unknown>, id: string): string {
+        description: 'Dark background with white text and purple accents',
+        toHtml(props: any, id: string): string {
             const p = props as HeroProductProps
             const ac = accent(p)
             const badgeHtml = `<span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:8px;">${p.rightBadgeText}</span>`
@@ -254,7 +258,8 @@ function withGalleryVariant(): BlockVariant {
     return {
         id: 'with-gallery',
         label: 'With Thumbnails',
-        toHtml(props: Record<string, unknown>, id: string): string {
+        description: 'Image left with thumbnail strip below, details right',
+        toHtml(props: any, id: string): string {
             const p = props as HeroProductProps
             const imgNoThumbs = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.leftBg ?? '#f9fafb'};border:1px solid #e5e7eb;border-radius:12px;">
               <tr>
@@ -294,7 +299,8 @@ function centeredHeroVariant(): BlockVariant {
     return {
         id: 'centered-hero',
         label: 'Centered',
-        toHtml(props: Record<string, unknown>, id: string): string {
+        description: 'Centered image top, all details centered below',
+        toHtml(props: any, id: string): string {
             const p = props as HeroProductProps
             const ac = accent(p)
             const origHtml = p.showOriginal
