@@ -36,6 +36,7 @@ import { whatsInTheBoxVariants } from './whats_in_the_box.variants'
 import { heroProductVariants } from './hero_product.variants'
 import { ctaBannerVariants } from './cta_banner.variants'
 import { sellerInfoVariants } from './seller_info.variants'
+import { singleImageVariants } from './single_image.variants'
 import type { BlockVariant } from './hero_header.variants'
 
 // Registry — maps block type to its variant array
@@ -54,6 +55,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'whats_in_the_box': whatsInTheBoxVariants,
     'hero_product': heroProductVariants,
     'cta_banner': ctaBannerVariants,
+    'single_image': singleImageVariants,
     'seller_info': sellerInfoVariants,
 }
 
