@@ -17,6 +17,7 @@ export { productDescriptionVariants, getProductDescriptionVariant } from './prod
 export { productVariantsVariants, getProductVariantsVariant } from './product_variants.variants'
 export { whatsInTheBoxVariants, getWhatsInTheBoxVariant } from './whats_in_the_box.variants'
 export { heroProductVariants, getHeroProductVariant } from './hero_product.variants'
+export { ctaBannerVariants, getCtaBannerVariant } from './cta_banner.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -32,6 +33,7 @@ import { productDescriptionVariants } from './product_description.variants'
 import { productVariantsVariants } from './product_variants.variants'
 import { whatsInTheBoxVariants } from './whats_in_the_box.variants'
 import { heroProductVariants } from './hero_product.variants'
+import { ctaBannerVariants } from './cta_banner.variants'
 import type { BlockVariant } from './hero_header.variants'
 
 // Registry — maps block type to its variant array
@@ -49,6 +51,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'product_variants': productVariantsVariants,
     'whats_in_the_box': whatsInTheBoxVariants,
     'hero_product': heroProductVariants,
+    'cta_banner': ctaBannerVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

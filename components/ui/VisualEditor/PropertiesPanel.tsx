@@ -1620,6 +1620,133 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="20" y="47" width="40" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
+    // ── CTA Banner ────────────────────────────────────────────────────────────
+    'ctab-trust-bar': (col, _light) => (
+        <svg viewBox="0 0 80 28" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="28" rx="3" fill="#ffffff" />
+            <rect x="0" y="25" width="80" height="3" fill={col} />
+            <circle cx="10" cy="14" r="5" fill={col} opacity="0.9" />
+            <rect x="18" y="11" width="18" height="3" rx="1.5" fill={col} opacity="0.8" />
+            <rect x="40" y="10" width="12" height="5" rx="2.5" fill={col} opacity="0.15" />
+            <rect x="54" y="10" width="12" height="5" rx="2.5" fill={col} opacity="0.15" />
+            <rect x="68" y="10" width="9" height="5" rx="2.5" fill={col} opacity="0.15" />
+        </svg>
+    ),
+    'ctab-split-action': (col, _light) => (
+        <svg viewBox="0 0 80 32" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="32" rx="3" fill="#1e1535" />
+            <rect x="4" y="9" width="32" height="4" rx="1.5" fill="white" opacity="0.85" />
+            <rect x="4" y="16" width="24" height="2.5" rx="1" fill="white" opacity="0.4" />
+            <line x1="44" y1="4" x2="44" y2="28" stroke="white" strokeWidth="0.6" opacity="0.3" />
+            <rect x="50" y="11" width="24" height="10" rx="4" fill={col} />
+            <rect x="56" y="14.5" width="12" height="3" rx="1.5" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'ctab-flash-deal': (col, _light) => (
+        <svg viewBox="0 0 80 34" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="34" rx="3" fill="#dc2626" />
+            <rect width="80" height="7" rx="0" fill="#b91c1c" />
+            <rect x="22" y="1.5" width="36" height="4" rx="1.5" fill="white" opacity="0.7" />
+            <rect x="4" y="12" width="34" height="4" rx="1.5" fill="white" opacity="0.9" />
+            <rect x="4" y="19" width="26" height="2.5" rx="1" fill="white" opacity="0.5" />
+            <rect x="46" y="11" width="28" height="12" rx="4" fill="#ff6b00" opacity="0.9" />
+            <rect x="50" y="15.5" width="20" height="3" rx="1.5" fill="white" opacity="0.9" />
+        </svg>
+    ),
+    'ctab-dark-premium': (col, _light) => (
+        <svg viewBox="0 0 80 34" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="34" rx="4" fill="#d4af37" />
+            <rect x="1" y="1" width="78" height="32" rx="3.2" fill="#7530fb" />
+            <rect x="2" y="2" width="76" height="30" rx="2.5" fill="#0a0a0f" />
+            <rect x="18" y="8" width="44" height="5" rx="2" fill="white" opacity="0.85" />
+            <rect x="24" y="16" width="32" height="3" rx="1.5" fill="#a0a0b0" opacity="0.7" />
+            <rect x="28" y="22" width="24" height="5" rx="2.5" fill="none" stroke="#d4af37" strokeWidth="0.8" />
+        </svg>
+    ),
+    'ctab-icon-value': (col, _light) => (
+        <svg viewBox="0 0 80 34" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="34" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.6" opacity="0.4" />
+            {/* 3 equal columns */}
+            <line x1="27" y1="4" x2="27" y2="30" stroke={col} strokeWidth="0.6" opacity="0.3" />
+            <line x1="54" y1="4" x2="54" y2="30" stroke={col} strokeWidth="0.6" opacity="0.3" />
+            {/* Col 1 */}
+            <circle cx="13" cy="10" r="4" fill={col} opacity="0.2" />
+            <rect x="7" y="17" width="12" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="9" y="22" width="8" height="2" rx="1" fill={col} opacity="0.3" />
+            {/* Col 2 */}
+            <circle cx="40" cy="10" r="4" fill={col} opacity="0.2" />
+            <rect x="34" y="17" width="12" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="36" y="22" width="8" height="2" rx="1" fill={col} opacity="0.3" />
+            {/* Col 3 */}
+            <circle cx="67" cy="10" r="4" fill={col} opacity="0.2" />
+            <rect x="61" y="17" width="12" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="63" y="22" width="8" height="2" rx="1" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    'ctab-ribbon': (col, _light) => (
+        <svg viewBox="0 0 80 22" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="22" fill="#0a0a0f" />
+            <rect x="0" y="0" width="4" height="22" fill={col} />
+            <rect x="8" y="8" width="30" height="3" rx="1.5" fill="white" opacity="0.85" />
+            <rect x="54" y="6" width="22" height="10" rx="3" fill="none" stroke={col} strokeWidth="0.9" />
+            <rect x="58" y="9.5" width="14" height="3" rx="1.5" fill={col} opacity="0.9" />
+        </svg>
+    ),
+    'ctab-gradient-hero': (col, _light) => (
+        <svg viewBox="0 0 80 38" fill="none" style={{ width: '100%', height: 32 }}>
+            <defs>
+                <linearGradient id="ctabGH" x1="0" y1="0" x2="80" y2="38" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor={col} />
+                    <stop offset="100%" stopColor="#0a0a0f" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="38" rx="4" fill="url(#ctabGH)" />
+            <rect x="16" y="8" width="48" height="5" rx="2" fill="white" opacity="0.9" />
+            <rect x="22" y="16" width="36" height="3" rx="1.5" fill="white" opacity="0.5" />
+            <rect x="26" y="24" width="28" height="9" rx="4" fill="white" />
+            <rect x="30" y="27" width="20" height="3" rx="1.5" fill={col} opacity="0.8" />
+        </svg>
+    ),
+    'ctab-social-proof': (col, _light) => (
+        <svg viewBox="0 0 80 32" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="32" rx="3" fill="#ffffff" />
+            <rect x="0" y="0" width="80" height="1" fill={col} opacity="0.15" />
+            <rect x="0" y="31" width="80" height="1" fill={col} opacity="0.15" />
+            {/* Stars */}
+            {[0, 1, 2, 3, 4].map(i => <rect key={i} x={4 + i * 5} y="6" width="4" height="4" rx="0.8" fill="#f59e0b" opacity="0.9" />)}
+            <rect x="4" y="13" width="22" height="4" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="4" y="20" width="18" height="2.5" rx="1" fill={col} opacity="0.3" />
+            <line x1="38" y1="4" x2="38" y2="28" stroke={col} strokeWidth="0.6" opacity="0.2" />
+            <rect x="42" y="8" width="30" height="3.5" rx="1.5" fill={col} opacity="0.7" />
+            <rect x="42" y="15" width="22" height="2.5" rx="1" fill={col} opacity="0.3" />
+            <rect x="42" y="21" width="18" height="5" rx="2" fill="none" stroke={col} strokeWidth="0.8" />
+        </svg>
+    ),
+    'ctab-announcement': (col, _light) => (
+        <svg viewBox="0 0 80 26" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="26" rx="3" fill={col} opacity="0.08" />
+            <rect x="3" y="8" width="20" height="10" rx="5" fill={col} opacity="0.9" />
+            <rect x="6" y="11" width="14" height="4" rx="1.5" fill="white" opacity="0.9" />
+            <rect x="27" y="10" width="26" height="3.5" rx="1.5" fill={col} opacity="0.75" />
+            <rect x="57" y="8" width="18" height="10" rx="5" fill="#e5e7eb" />
+            <rect x="60" y="11" width="12" height="4" rx="1.5" fill="#6b7280" opacity="0.8" />
+        </svg>
+    ),
+    'ctab-two-tone': (col, _light) => (
+        <svg viewBox="0 0 80 32" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="32" rx="3" fill="white" />
+            {/* Left accent half */}
+            <clipPath id="ctabTTL"><rect width="40" height="32" rx="3" /></clipPath>
+            <rect width="40" height="32" fill={col} clipPath="url(#ctabTTL)" />
+            <rect x="4" y="9" width="24" height="4" rx="1.5" fill="white" opacity="0.9" />
+            <rect x="4" y="16" width="18" height="2.5" rx="1" fill="white" opacity="0.5" />
+            {/* Right white half */}
+            <rect x="44" y="8" width="28" height="4" rx="1.5" fill={col} opacity="0.8" />
+            <rect x="44" y="15" width="20" height="2.5" rx="1" fill="#6b7280" opacity="0.5" />
+            <rect x="44" y="21" width="20" height="7" rx="3" fill={col} opacity="0.9" />
+            <rect x="48" y="23.5" width="12" height="2.5" rx="1" fill="white" opacity="0.9" />
+        </svg>
+    ),
 
     // ── Minimal Clean: main image top-left, 2×2 grid bottom-left, cream panel right
     'hp-minimal-clean': (col, light) => (
@@ -2167,7 +2294,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
