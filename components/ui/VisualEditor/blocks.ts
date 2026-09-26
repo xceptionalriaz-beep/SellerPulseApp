@@ -1001,6 +1001,7 @@ import { getHeroProductVariant as _getHeroProductVariant } from './variants/hero
 import { getCtaBannerVariant as _getCtaBannerVariant } from './variants/cta_banner.variants'
 import { getSellerInfoVariant as _getSellerInfoVariant } from './variants/seller_info.variants'
 import { getSingleImageVariant as _getSingleImageVariant } from './variants/single_image.variants'
+import { getLogoBarVariant as _getLogoBarVariant } from './variants/logo_bar.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2700,10 +2701,7 @@ ${thumbCells}
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps
-                const logos = ['&#127968;', '&#9989;', '&#127881;', '&#127942;', '&#128081;']
-                const cells = logos.map(l => `<td style="padding:8px 16px;text-align:center;font-size:28px;">${l}</td>`).join('')
-                return wrapBlock('logo_bar' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:2px;text-transform:uppercase;">Trusted Brands &amp; Certifications</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                return _getLogoBarVariant(p.variant ?? 'flat-row').toHtml(p, id)
             },
         },
 

@@ -1928,6 +1928,206 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="20" y="41" width="40" height="3" rx="1.5" fill={col} opacity="0.25" />
         </svg>
     ),
+    // ── logo_bar: flat-row ────────────────────────────────────────────────────
+    'flat-row': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="6" width="72" height="4" rx="2" fill={col} opacity="0.2" />
+            <rect x="4" y="14" width="72" height="26" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" opacity="0.6" />
+            <rect x="20" y="14" width="1" height="26" fill={col} opacity="0.15" />
+            <rect x="36" y="14" width="1" height="26" fill={col} opacity="0.15" />
+            <rect x="52" y="14" width="1" height="26" fill={col} opacity="0.15" />
+            <rect x="66" y="14" width="1" height="26" fill={col} opacity="0.15" />
+            <rect x="8" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+            <rect x="24" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+            <rect x="40" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+            <rect x="56" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    // ── logo_bar: pill-labels ─────────────────────────────────────────────────
+    'pill-labels': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="6" width="72" height="3" rx="1.5" fill={col} opacity="0.2" />
+            <rect x="3" y="14" width="18" height="26" rx="10" fill="#ffffff" stroke={col} strokeWidth="0.75" />
+            <rect x="22" y="14" width="18" height="26" rx="10" fill="#ffffff" stroke={col} strokeWidth="0.75" />
+            <rect x="41" y="14" width="18" height="26" rx="10" fill="#ffffff" stroke={col} strokeWidth="0.75" />
+            <rect x="60" y="14" width="18" height="26" rx="10" fill="#ffffff" stroke={col} strokeWidth="0.75" />
+            <rect x="6" y="18" width="12" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="6" y="28" width="12" height="3" rx="1.5" fill={col} opacity="0.4" />
+            <rect x="25" y="18" width="12" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="25" y="28" width="12" height="3" rx="1.5" fill={col} opacity="0.4" />
+            <rect x="44" y="18" width="12" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="44" y="28" width="12" height="3" rx="1.5" fill={col} opacity="0.4" />
+            <rect x="63" y="18" width="12" height="8" rx="2" fill={col} opacity="0.15" />
+            <rect x="63" y="28" width="12" height="3" rx="1.5" fill={col} opacity="0.4" />
+        </svg>
+    ),
+    // ── logo_bar: divider-strip ───────────────────────────────────────────────
+    'divider-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="6" width="30" height="4" rx="2" fill={col} opacity="0.5" />
+            <rect x="4" y="14" width="72" height="24" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" opacity="0.7" />
+            <rect x="22" y="14" width="1" height="24" fill={col} opacity="0.18" />
+            <rect x="40" y="14" width="1" height="24" fill={col} opacity="0.18" />
+            <rect x="58" y="14" width="1" height="24" fill={col} opacity="0.18" />
+            <rect x="9" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+            <rect x="27" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+            <rect x="45" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+            <rect x="63" y="20" width="10" height="10" rx="2" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    // ── logo_bar: card-grid ───────────────────────────────────────────────────
+    'card-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="4" width="72" height="3" rx="1.5" fill={col} opacity="0.2" />
+            <rect x="3" y="11" width="16" height="32" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="22" y="11" width="16" height="32" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="41" y="11" width="16" height="32" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="60" y="11" width="16" height="32" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" />
+            <rect x="6" y="14" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="25" y="14" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="44" y="14" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="63" y="14" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="3" y="27" width="16" height="1" fill={col} opacity="0.12" />
+            <rect x="22" y="27" width="16" height="1" fill={col} opacity="0.12" />
+            <rect x="41" y="27" width="16" height="1" fill={col} opacity="0.12" />
+            <rect x="60" y="27" width="16" height="1" fill={col} opacity="0.12" />
+            <rect x="5" y="31" width="12" height="2.5" rx="1.25" fill={col} opacity="0.4" />
+            <rect x="24" y="31" width="12" height="2.5" rx="1.25" fill={col} opacity="0.4" />
+            <rect x="43" y="31" width="12" height="2.5" rx="1.25" fill={col} opacity="0.4" />
+            <rect x="62" y="31" width="12" height="2.5" rx="1.25" fill={col} opacity="0.4" />
+        </svg>
+    ),
+    // ── logo_bar: icon-label-column ───────────────────────────────────────────
+    'icon-label-column': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="6" width="2" height="36" rx="1" fill={col} opacity="0.7" />
+            <rect x="9" y="10" width="22" height="5" rx="2.5" fill={col} opacity="0.7" />
+            <rect x="9" y="19" width="18" height="3" rx="1.5" fill={col} opacity="0.35" />
+            <rect x="9" y="25" width="20" height="2.5" rx="1.25" fill={col} opacity="0.25" />
+            <rect x="36" y="6" width="1" height="36" fill={col} opacity="0.15" />
+            <rect x="40" y="8" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="54" y="8" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="68" y="8" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="40" y="22" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="54" y="22" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+            <rect x="68" y="22" width="10" height="10" rx="2" fill={col} opacity="0.18" />
+        </svg>
+    ),
+    // ── logo_bar: dark-band ───────────────────────────────────────────────────
+    'dark-band': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill="#1e1535" />
+            <rect x="14" y="6" width="52" height="3" rx="1.5" fill="white" opacity="0.2" />
+            <rect x="3" y="13" width="16" height="28" rx="2" fill="white" opacity="0.06" />
+            <rect x="22" y="13" width="16" height="28" rx="2" fill="white" opacity="0.06" />
+            <rect x="41" y="13" width="16" height="28" rx="2" fill="white" opacity="0.06" />
+            <rect x="60" y="13" width="16" height="28" rx="2" fill="white" opacity="0.06" />
+            <rect x="6" y="17" width="10" height="10" rx="2" fill="white" opacity="0.2" />
+            <rect x="25" y="17" width="10" height="10" rx="2" fill="white" opacity="0.2" />
+            <rect x="44" y="17" width="10" height="10" rx="2" fill="white" opacity="0.2" />
+            <rect x="63" y="17" width="10" height="10" rx="2" fill="white" opacity="0.2" />
+            <rect x="5" y="30" width="12" height="2" rx="1" fill="white" opacity="0.15" />
+            <rect x="24" y="30" width="12" height="2" rx="1" fill="white" opacity="0.15" />
+            <rect x="43" y="30" width="12" height="2" rx="1" fill="white" opacity="0.15" />
+            <rect x="62" y="30" width="12" height="2" rx="1" fill="white" opacity="0.15" />
+        </svg>
+    ),
+    // ── logo_bar: gradient-showcase ───────────────────────────────────────────
+    'gradient-showcase': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="lgb-grad" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} /><stop offset="1" stopColor="#1e1535" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="5" fill="url(#lgb-grad)" />
+            <rect x="12" y="6" width="56" height="3" rx="1.5" fill="#b8fa33" opacity="0.8" />
+            <rect x="3" y="14" width="16" height="26" rx="4" fill="white" opacity="0.12" stroke="white" strokeWidth="0.5" strokeOpacity="0.25" />
+            <rect x="22" y="14" width="16" height="26" rx="4" fill="white" opacity="0.12" stroke="white" strokeWidth="0.5" strokeOpacity="0.25" />
+            <rect x="41" y="14" width="16" height="26" rx="4" fill="white" opacity="0.12" stroke="white" strokeWidth="0.5" strokeOpacity="0.25" />
+            <rect x="60" y="14" width="16" height="26" rx="4" fill="white" opacity="0.12" stroke="white" strokeWidth="0.5" strokeOpacity="0.25" />
+            <rect x="6" y="18" width="10" height="10" rx="2" fill="white" opacity="0.3" />
+            <rect x="25" y="18" width="10" height="10" rx="2" fill="white" opacity="0.3" />
+            <rect x="44" y="18" width="10" height="10" rx="2" fill="white" opacity="0.3" />
+            <rect x="63" y="18" width="10" height="10" rx="2" fill="white" opacity="0.3" />
+        </svg>
+    ),
+    // ── logo_bar: trust-ticker ────────────────────────────────────────────────
+    'trust-ticker': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="17" width="72" height="14" rx="4" fill="#ffffff" stroke={col} strokeWidth="0.5" opacity="0.7" />
+            <rect x="4" y="17" width="16" height="14" rx="4" fill={col} opacity="0.85" />
+            <rect x="6" y="21" width="12" height="6" rx="2" fill="white" opacity="0.85" />
+            <rect x="24" y="21" width="8" height="6" rx="2" fill={col} opacity="0.2" />
+            <rect x="35" y="21" width="8" height="6" rx="2" fill={col} opacity="0.2" />
+            <rect x="46" y="21" width="8" height="6" rx="2" fill={col} opacity="0.2" />
+            <rect x="57" y="21" width="8" height="6" rx="2" fill={col} opacity="0.2" />
+            <rect x="33" y="23" width="1" height="2" rx="0.5" fill={col} opacity="0.3" />
+            <rect x="44" y="23" width="1" height="2" rx="0.5" fill={col} opacity="0.3" />
+            <rect x="55" y="23" width="1" height="2" rx="0.5" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    // ── logo_bar: spotlight-cards ─────────────────────────────────────────────
+    'spotlight-cards': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="lgb-spot" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} /><stop offset="1" stopColor="#1e1535" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="4" y="6" width="72" height="3" rx="1.5" fill={col} opacity="0.3" />
+            <rect x="3" y="13" width="16" height="30" rx="3" fill="url(#lgb-spot)" opacity="0.9" />
+            <rect x="22" y="13" width="16" height="30" rx="3" fill="url(#lgb-spot)" opacity="0.9" />
+            <rect x="41" y="13" width="16" height="30" rx="3" fill="url(#lgb-spot)" opacity="0.9" />
+            <rect x="60" y="13" width="16" height="30" rx="3" fill="url(#lgb-spot)" opacity="0.9" />
+            <rect x="3" y="13" width="16" height="3" rx="1.5" fill={col} />
+            <rect x="22" y="13" width="16" height="3" rx="1.5" fill={col} />
+            <rect x="41" y="13" width="16" height="3" rx="1.5" fill={col} />
+            <rect x="60" y="13" width="16" height="3" rx="1.5" fill={col} />
+            <rect x="4" y="16" width="14" height="14" rx="2" fill="white" opacity="0.15" />
+            <rect x="23" y="16" width="14" height="14" rx="2" fill="white" opacity="0.15" />
+            <rect x="42" y="16" width="14" height="14" rx="2" fill="white" opacity="0.15" />
+            <rect x="61" y="16" width="14" height="14" rx="2" fill="white" opacity="0.15" />
+            <rect x="5" y="33" width="12" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="24" y="33" width="12" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="43" y="33" width="12" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+            <rect x="62" y="33" width="12" height="2.5" rx="1.25" fill="white" opacity="0.4" />
+        </svg>
+    ),
+    // ── logo_bar: glass-mosaic ────────────────────────────────────────────────
+    'glass-mosaic': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="lgb-glass" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} /><stop offset="1" stopColor="#1e1535" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="5" fill="url(#lgb-glass)" />
+            <rect x="0" y="0" width="80" height="48" rx="5" fill="white" opacity="0.06" />
+            <rect x="14" y="5" width="52" height="4" rx="2" fill="white" opacity="0.7" />
+            <rect x="20" y="11" width="40" height="2" rx="1" fill="white" opacity="0.25" />
+            <circle cx="12" cy="32" r="9" fill="none" stroke={col} strokeWidth="1.5" strokeOpacity="0.8" />
+            <circle cx="12" cy="32" r="7" fill="white" opacity="0.12" />
+            <circle cx="30" cy="32" r="9" fill="none" stroke={col} strokeWidth="1.5" strokeOpacity="0.8" />
+            <circle cx="30" cy="32" r="7" fill="white" opacity="0.12" />
+            <circle cx="48" cy="32" r="9" fill="none" stroke={col} strokeWidth="1.5" strokeOpacity="0.8" />
+            <circle cx="48" cy="32" r="7" fill="white" opacity="0.12" />
+            <circle cx="66" cy="32" r="9" fill="none" stroke={col} strokeWidth="1.5" strokeOpacity="0.8" />
+            <circle cx="66" cy="32" r="7" fill="white" opacity="0.12" />
+            <rect x="5" y="22" width="12" height="6" rx="2" fill="white" opacity="0.2" />
+            <rect x="23" y="22" width="12" height="6" rx="2" fill="white" opacity="0.2" />
+            <rect x="41" y="22" width="12" height="6" rx="2" fill="white" opacity="0.2" />
+            <rect x="59" y="22" width="12" height="6" rx="2" fill="white" opacity="0.2" />
+            <rect x="10" y="44" width="60" height="2" rx="1" fill="white" opacity="0.2" />
+        </svg>
+    ),
     // ── seller_info: authority-split ─────────────────────────────────────────
     'authority-split': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
@@ -2520,7 +2720,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -4772,6 +4972,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     </Section>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
                     </Section>
                 </>
             )
