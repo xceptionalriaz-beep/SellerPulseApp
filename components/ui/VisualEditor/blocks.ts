@@ -1081,7 +1081,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Full-width container for any content',
         defaultProps: {
             ...DEFAULT_COMMON,
-            content: '<div data-canvas-dropzone="content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            content: CONTENT_PLACEHOLDER,
             borderColor: '#ede9fe',
             borderWidth: 0,
             borderRadius: 0,
@@ -1194,7 +1194,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         defaultProps: {
             ...DEFAULT_COMMON,
             maxWidth: 600,
-            content: '<div data-canvas-dropzone="content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+            content: CONTENT_PLACEHOLDER,
             borderColor: '#ede9fe',
             borderWidth: 1,
             borderRadius: 8,
@@ -2426,9 +2426,9 @@ ${thumbCells}
             description: '4 equal columns for specs or features',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                col1Content: '<div data-canvas-dropzone="col1Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
-                col2Content: '<div data-canvas-dropzone="col2Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
-                col3Content: '<div data-canvas-dropzone="col3Content"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>',
+                col1Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col1Content"'),
+                col2Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col2Content"'),
+                col3Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col3Content"'),
                 col4Content: CONTENT_PLACEHOLDER.replace('data-canvas-dropzone="content"', 'data-canvas-dropzone="col4Content"'),
                 gap: 8,
                 col1Bg: '#ffffff',
