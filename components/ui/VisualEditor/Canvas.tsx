@@ -750,7 +750,7 @@ function BlockCard({
                 }}
                 style={{ padding: '14px 16px 12px', pointerEvents: 'auto', overflow: 'hidden' }}
             >
-                <BlockPreview block={block} def={def} activeCategory={activeCategory} />
+                <BlockPreview block={block} def={def} activeCategory={activeCategory} deviceWidth={deviceWidth} />
             </div>
 
             {/* ── Action toolbar — horizontal, top of block ── */}
@@ -1002,9 +1002,10 @@ function ActionButton({
 // Renders the exact same HTML that goes to eBay, inside a sandboxed iframe.
 // What you see on canvas = what eBay renders. No more wireframe sketches.
 // ─────────────────────────────────────────────────────────────────────────────
-function BlockPreview({ block, def, activeCategory }: { block: Block; def: BlockDefinition; activeCategory?: CategoryId }) {
+function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: { block: Block; def: BlockDefinition; activeCategory?: CategoryId; deviceWidth?: 'desktop' | 'tablet' | 'mobile' }) {
     const props = block.props as any
     const iframeRef = React.useRef<HTMLIFrameElement>(null)
+    const previewWidth = deviceWidth === 'mobile' ? 375 : deviceWidth === 'tablet' ? 480 : 700
 
     // Build the full HTML for this single block
     const html = React.useMemo(() => {
@@ -1048,7 +1049,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
     font-family: Arial, Helvetica, sans-serif;
     background: transparent;
     overflow: hidden;
-    width: 700px;
+    width: ${previewWidth}px;
   }
   table { border-collapse: collapse; width: 100%; }
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
@@ -1477,7 +1478,7 @@ function BlockPreview({ block, def, activeCategory }: { block: Block; def: Block
                     scrolling="no"
                     data-block-id={block.id}
                     style={{
-                        width: '700px',
+                        width: `${previewWidth}px`,
                         height: height,
                         border: 'none',
                         display: 'block',
