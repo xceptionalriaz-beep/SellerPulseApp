@@ -742,7 +742,8 @@ function BlockCard({
                     // window resize, and zoom changes. No stale reads.
                     const recalcScale = () => {
                         const w = el.getBoundingClientRect().width
-                        const scale = w > 32 ? ((w - 32) / 700) : 1
+                        const contentWidth = deviceWidth === 'mobile' ? 375 : deviceWidth === 'tablet' ? 480 : 700
+                        const scale = w > 32 ? ((w - 32) / contentWidth) : 1
                         el.style.setProperty('--canvas-scale', String(scale))
                     }
                     recalcScale()
@@ -1447,7 +1448,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
             const body = doc.body
             if (!body) return
             const h = body.scrollHeight || body.offsetHeight
-            setHeight(Math.max(40, Math.min(h + 4, 600)))
+            setHeight(Math.max(40, h + 4))
         } catch { /* cross-origin guard */ }
     }, [])
 
