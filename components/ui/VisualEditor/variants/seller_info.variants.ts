@@ -340,11 +340,12 @@ function glassCard(p: SellerInfoProps, id: string): string {
           <td style="text-align:center;padding:24px 24px 0;">
             <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
-                <td width="68" height="68"
-                  style="width:68px;height:68px;min-width:68px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:34px;text-align:center;vertical-align:middle;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;">
-                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;display:block;line-height:62px;width:62px;height:62px;text-align:center;">
-                    ${(p.sellerName ?? 'S').replace('{{SELLER_NAME}}', 'S').charAt(0).toUpperCase()}
-                  </span>
+                <td style="text-align:center;padding:0;">
+                  <div style="width:68px;height:68px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:34px;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;display:inline-flex;align-items:center;justify-content:center;text-align:center;margin:0 auto;">
+                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;line-height:1;">
+                      ${(p.sellerName ?? 'S').replace('{{SELLER_NAME}}', 'S').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
                 </td>
               </tr>
             </table>
@@ -406,11 +407,12 @@ function verticalProfile(p: SellerInfoProps, id: string): string {
       <!-- Avatar: fixed 72x72 table cell forces true circle -->
       <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
         <tr>
-          <td width="72" height="72"
-            style="width:72px;height:72px;min-width:72px;background-color:${accent};border-radius:36px;text-align:center;vertical-align:middle;overflow:hidden;">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;display:block;line-height:72px;width:72px;height:72px;">
-              ${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}
-            </span>
+          <td style="text-align:center;padding:0;">
+            <div style="width:72px;height:72px;background-color:${accent};border-radius:36px;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;display:inline-flex;align-items:center;justify-content:center;text-align:center;margin:0 auto;">
+              <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#ffffff;line-height:1;">
+                ${(p.sellerName ?? 'S').replace('{{SELLER_NAME}}', 'S').charAt(0).toUpperCase()}
+              </span>
+            </div>
           </td>
         </tr>
       </table>
