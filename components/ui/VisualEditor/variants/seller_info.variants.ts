@@ -9,28 +9,28 @@ import type { SellerInfoProps } from '../blocks'
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
 function pad(p: SellerInfoProps): string {
-    return `padding-top:${p.paddingTop ?? 16}px;padding-bottom:${p.paddingBottom ?? 16}px;padding-left:${p.paddingLeft ?? 24}px;padding-right:${p.paddingRight ?? 24}px;`
+  return `padding-top:${p.paddingTop ?? 16}px;padding-bottom:${p.paddingBottom ?? 16}px;padding-left:${p.paddingLeft ?? 24}px;padding-right:${p.paddingRight ?? 24}px;`
 }
 
 function ac(p: SellerInfoProps): string {
-    return p.accentColor ?? '#7530fb'
+  return p.accentColor ?? '#7530fb'
 }
 
 function txt(p: SellerInfoProps): string {
-    return p.textColor ?? '#1e1535'
+  return p.textColor ?? '#1e1535'
 }
 
 function bg(p: SellerInfoProps): string {
-    return p.bgColor ?? '#f8f7ff'
+  return p.bgColor ?? '#f8f7ff'
 }
 
 function badge(p: SellerInfoProps): string {
-    if (!p.showBadge) return ''
-    return `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;margin-left:8px;vertical-align:middle;letter-spacing:0.03em;">${p.badgeText ?? 'Top Rated Seller'}</span>`
+  if (!p.showBadge) return ''
+  return `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;margin-left:8px;vertical-align:middle;letter-spacing:0.03em;">${p.badgeText ?? 'Top Rated Seller'}</span>`
 }
 
 function mobileStyle(): string {
-    return `<style>
+  return `<style>
 @media only screen and (max-width:600px){
   .si-col{display:block!important;width:100%!important;text-align:center!important;}
   .si-avatar{margin:0 auto 12px!important;}
@@ -48,10 +48,10 @@ function mobileStyle(): string {
 // Two-column: avatar/logo left + store identity + metrics right
 // ─────────────────────────────────────────────────────────────────────────────
 function authoritySplit(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
@@ -106,10 +106,10 @@ function authoritySplit(p: SellerInfoProps, id: string): string {
 // Single-row sleek horizontal ribbon, left accent border
 // ─────────────────────────────────────────────────────────────────────────────
 function inlineRibbon(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${background};border-left:4px solid ${accent};">
@@ -148,10 +148,10 @@ function inlineRibbon(p: SellerInfoProps, id: string): string {
 // Header + 3-column stat grid (feedback / shipping / support)
 // ─────────────────────────────────────────────────────────────────────────────
 function metricsGrid(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
@@ -221,8 +221,8 @@ function metricsGrid(p: SellerInfoProps, id: string): string {
 // Dark premium profile — charcoal bg, neon accent border, white type
 // ─────────────────────────────────────────────────────────────────────────────
 function darkExecutive(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:#1e1535;border:1px solid ${accent};border-radius:8px;">
@@ -275,10 +275,10 @@ function darkExecutive(p: SellerInfoProps, id: string): string {
 // Left: store identity. Right: bullet guarantee list
 // ─────────────────────────────────────────────────────────────────────────────
 function storefrontSplit(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
@@ -326,24 +326,24 @@ function storefrontSplit(p: SellerInfoProps, id: string): string {
 // Frosted glassmorphism floating card — soft gradient bg + avatar + pill
 // ─────────────────────────────────────────────────────────────────────────────
 function glassCard(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:12px;padding:3px;">
   <tr>
     <td>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background-color:rgba(255,255,255,0.88);border-radius:10px;border:1px solid rgba(255,255,255,0.7);">
+        style="background-color:rgba(255,255,255,0.92);border-radius:10px;border:1px solid rgba(255,255,255,0.7);">
         <tr>
-          <!-- Top: centered avatar with glow ring -->
-          <td style="text-align:center;padding:22px 24px 0;">
-            <table cellpadding="0" cellspacing="0" border="0" align="center">
+          <td style="text-align:center;padding:24px 24px 0;">
+            <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
-                <td style="width:68px;height:68px;background:linear-gradient(135deg,${accent},#1e1535);border-radius:34px;text-align:center;vertical-align:middle;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;">
-                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;line-height:62px;display:block;">
-                    ${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}
+                <td width="68" height="68"
+                  style="width:68px;height:68px;min-width:68px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:34px;text-align:center;vertical-align:middle;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;display:block;line-height:62px;width:62px;height:62px;text-align:center;">
+                    ${(p.sellerName ?? 'S').replace('{{SELLER_NAME}}', 'S').charAt(0).toUpperCase()}
                   </span>
                 </td>
               </tr>
@@ -351,32 +351,30 @@ function glassCard(p: SellerInfoProps, id: string): string {
           </td>
         </tr>
         <tr>
-          <!-- Middle: store name + feedback pill -->
           <td style="text-align:center;padding:14px 24px 0;">
             <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:${text};">${p.sellerName ?? '{{SELLER_NAME}}'}</p>
-            <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
-            <table cellpadding="0" cellspacing="0" border="0" align="center">
+            <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
+            <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 10px;">
               <tr>
-                <td style="background-color:${accent};border-radius:20px;padding:5px 16px;">
+                <td style="background-color:${accent};border-radius:20px;padding:5px 18px;">
                   <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">&#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}</span>
                 </td>
-                ${p.showBadge ? `<td style="padding-left:8px;"><span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;">${p.badgeText ?? 'Top Rated'}</span></td>` : ''}
+                ${p.showBadge ? `<td style="padding-left:8px;"><span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;">${p.badgeText ?? 'Top Rated Seller'}</span></td>` : ''}
               </tr>
             </table>
           </td>
         </tr>
         <tr>
-          <!-- Bottom: frosted trust footer bar -->
-          <td style="padding:14px 24px 16px;">
+          <td style="padding:10px 16px 16px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0"
-              style="background-color:rgba(117,48,251,0.07);border-radius:8px;border:1px solid ${accent}22;">
+              style="background-color:rgba(117,48,251,0.06);border-radius:8px;border:1px solid ${accent}22;">
               <tr>
-                <td style="padding:8px 16px;text-align:center;">
+                <td style="padding:8px 12px;text-align:center;">
                   <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${text};opacity:0.75;">
                     &#10003;&nbsp;Authorized Retailer
-                    &nbsp;<span style="color:${accent};opacity:0.4;">&bull;</span>&nbsp;
+                    &nbsp;<span style="color:${accent};">&bull;</span>&nbsp;
                     &#9889;&nbsp;Fast Dispatch
-                    &nbsp;<span style="color:${accent};opacity:0.4;">&bull;</span>&nbsp;
+                    &nbsp;<span style="color:${accent};">&bull;</span>&nbsp;
                     &#128260;&nbsp;Easy Returns
                   </span>
                 </td>
@@ -396,10 +394,10 @@ function glassCard(p: SellerInfoProps, id: string): string {
 // Centered vertical stack — avatar → name → divider → pill → CTA link
 // ─────────────────────────────────────────────────────────────────────────────
 function verticalProfile(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
@@ -462,10 +460,10 @@ function verticalProfile(p: SellerInfoProps, id: string): string {
 // Row 1: accent identity bar | Row 2: 4 trust chip pills
 // ─────────────────────────────────────────────────────────────────────────────
 function trustRibbonDuo(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
@@ -513,8 +511,8 @@ function trustRibbonDuo(p: SellerInfoProps, id: string): string {
 // Full-width gradient hero strip — name + feedback left, CTA button right
 // ─────────────────────────────────────────────────────────────────────────────
 function spotlightBanner(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:8px;">
@@ -553,10 +551,10 @@ function spotlightBanner(p: SellerInfoProps, id: string): string {
 // 3 side-by-side micro-cards — Store Name / Feedback / Dispatch
 // ─────────────────────────────────────────────────────────────────────────────
 function compactCardRow(p: SellerInfoProps, id: string): string {
-    const accent = ac(p)
-    const text = txt(p)
-    const background = bg(p)
-    return `${mobileStyle()}
+  const accent = ac(p)
+  const text = txt(p)
+  const background = bg(p)
+  return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${background};">
@@ -612,71 +610,71 @@ function compactCardRow(p: SellerInfoProps, id: string): string {
 // VARIANT ARRAY
 // ─────────────────────────────────────────────────────────────────────────────
 export const sellerInfoVariants: BlockVariant[] = [
-    {
-        id: 'authority-split',
-        label: 'Authority Split',
-        description: 'Two-column card — avatar/logo left with Top Rated badge, store name and metrics right. Corporate-grade trust.',
-        toHtml(props, id) { return authoritySplit(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'inline-ribbon',
-        label: 'Sleek Inline Ribbon',
-        description: 'Single-row horizontal ribbon with left accent border, shield icon, dot-separated store name, tagline and feedback.',
-        toHtml(props, id) { return inlineRibbon(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'metrics-grid',
-        label: 'Stats & Metrics Grid',
-        description: 'Store header plus three stat cards — Feedback, Shipping Speed, and Customer Support — with accent top borders.',
-        toHtml(props, id) { return metricsGrid(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'dark-executive',
-        label: 'Dark Executive',
-        description: 'Dark charcoal card with neon accent border, white type, lime-green feedback badge and Visit Store CTA.',
-        toHtml(props, id) { return darkExecutive(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'storefront-split',
-        label: 'Storefront Showcase',
-        description: 'Left: store identity and logo. Right: four checkmark guarantees answering "Why buy from this seller?".',
-        toHtml(props, id) { return storefrontSplit(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'glass-card',
-        label: 'Glassmorphism Card',
-        description: 'Modern frosted card over a subtle accent gradient — avatar circle, store name, and a rounded feedback pill.',
-        toHtml(props, id) { return glassCard(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'vertical-profile',
-        label: 'Tall Store Card',
-        description: 'Fully centred vertical stack — avatar, name, accent divider, feedback pill, badge and View Store link.',
-        toHtml(props, id) { return verticalProfile(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'trust-ribbon-duo',
-        label: 'Double-Row Ribbon',
-        description: 'Row 1: accent-colour identity bar with store name and badge. Row 2: four trust chip pills on a light background.',
-        toHtml(props, id) { return trustRibbonDuo(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'spotlight-banner',
-        label: 'Spotlight Banner',
-        description: 'Full-width purple-to-dark gradient hero strip — store name and feedback left, white View Store CTA right.',
-        toHtml(props, id) { return spotlightBanner(props as SellerInfoProps, id) },
-    },
-    {
-        id: 'compact-card-row',
-        label: 'Compact Card Row',
-        description: 'Three side-by-side micro-cards: Store Name, Feedback Score, and Dispatch Info. Mobile-first, scannable.',
-        toHtml(props, id) { return compactCardRow(props as SellerInfoProps, id) },
-    },
+  {
+    id: 'authority-split',
+    label: 'Authority Split',
+    description: 'Two-column card — avatar/logo left with Top Rated badge, store name and metrics right. Corporate-grade trust.',
+    toHtml(props, id) { return authoritySplit(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'inline-ribbon',
+    label: 'Sleek Inline Ribbon',
+    description: 'Single-row horizontal ribbon with left accent border, shield icon, dot-separated store name, tagline and feedback.',
+    toHtml(props, id) { return inlineRibbon(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'metrics-grid',
+    label: 'Stats & Metrics Grid',
+    description: 'Store header plus three stat cards — Feedback, Shipping Speed, and Customer Support — with accent top borders.',
+    toHtml(props, id) { return metricsGrid(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'dark-executive',
+    label: 'Dark Executive',
+    description: 'Dark charcoal card with neon accent border, white type, lime-green feedback badge and Visit Store CTA.',
+    toHtml(props, id) { return darkExecutive(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'storefront-split',
+    label: 'Storefront Showcase',
+    description: 'Left: store identity and logo. Right: four checkmark guarantees answering "Why buy from this seller?".',
+    toHtml(props, id) { return storefrontSplit(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'glass-card',
+    label: 'Glassmorphism Card',
+    description: 'Modern frosted card over a subtle accent gradient — avatar circle, store name, and a rounded feedback pill.',
+    toHtml(props, id) { return glassCard(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'vertical-profile',
+    label: 'Tall Store Card',
+    description: 'Fully centred vertical stack — avatar, name, accent divider, feedback pill, badge and View Store link.',
+    toHtml(props, id) { return verticalProfile(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'trust-ribbon-duo',
+    label: 'Double-Row Ribbon',
+    description: 'Row 1: accent-colour identity bar with store name and badge. Row 2: four trust chip pills on a light background.',
+    toHtml(props, id) { return trustRibbonDuo(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'spotlight-banner',
+    label: 'Spotlight Banner',
+    description: 'Full-width purple-to-dark gradient hero strip — store name and feedback left, white View Store CTA right.',
+    toHtml(props, id) { return spotlightBanner(props as SellerInfoProps, id) },
+  },
+  {
+    id: 'compact-card-row',
+    label: 'Compact Card Row',
+    description: 'Three side-by-side micro-cards: Store Name, Feedback Score, and Dispatch Info. Mobile-first, scannable.',
+    toHtml(props, id) { return compactCardRow(props as SellerInfoProps, id) },
+  },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GETTER
 // ─────────────────────────────────────────────────────────────────────────────
 export function getSellerInfoVariant(id: string): BlockVariant | undefined {
-    return sellerInfoVariants.find(v => v.id === id)
+  return sellerInfoVariants.find(v => v.id === id)
 }
