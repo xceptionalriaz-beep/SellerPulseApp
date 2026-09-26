@@ -3917,6 +3917,17 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <TextInput label="Heading" value={props.heading ?? "📦 What's In The Box"} onChange={v => updateProps({ heading: v })} />
                     </Section>
 
+                    {isSplit && (
+                        <Section title="Image">
+                            <TextInput
+                                label="Image URL"
+                                value={props.splitImageUrl ?? ''}
+                                onChange={v => updateProps({ splitImageUrl: v })}
+                            />
+                            <InfoBox>Paste a direct image URL. Leave blank to show a click-to-add placeholder on the canvas.</InfoBox>
+                        </Section>
+                    )}
+
                     <Section title="Colours">
                         {isDark ? (
                             <>
