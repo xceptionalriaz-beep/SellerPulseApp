@@ -330,6 +330,8 @@ export default function Canvas({
                                 onReorderDragEnd={handleReorderDragEnd}
                                 onAddBelow={(type) => onAddBlockBelow?.(block.id, type)}
                                 hasActiveSlot={hasActiveSlot}
+                                activeCategory={activeCategory}
+                                deviceWidth={deviceWidth}
                             />
 
                             {/* Reorder drop indicator — line below this block */}
@@ -571,6 +573,7 @@ interface BlockCardProps {
     onAddBelow: (type: BlockType) => void
     hasActiveSlot?: boolean
     activeCategory?: CategoryId
+    deviceWidth?: 'desktop' | 'tablet' | 'mobile'
 }
 
 function BlockCard({
@@ -600,6 +603,7 @@ function BlockCard({
     onAddBelow,
     hasActiveSlot,
     activeCategory,
+    deviceWidth = 'desktop',
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -744,7 +748,7 @@ function BlockCard({
                     recalcScale()
                     const ro = new ResizeObserver(recalcScale)
                     ro.observe(el)
-                        // Cleanup stored on element so it runs on unmount
+                        // Cleanup stored on element so it runs on unmountf
                         ; (el as any).__ro?.disconnect()
                         ; (el as any).__ro = ro
                 }}
