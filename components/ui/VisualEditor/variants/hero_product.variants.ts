@@ -521,56 +521,93 @@ function centeredHeroVariant(): BlockVariant {
   }
 }
 // ── Variant: hp-minimal-clean (Minimal Clean) ─────────────────────────────────
-// Desktop: bare image left 46% (no card/shadow) | right 54% editorial details
-// Mobile:  image full width → details below
+// Desktop: left col = main image top + 2×2 thumb grid below (fills full height)
+//          right col = cream panel, serif title, em-dash bullets, muted price
+// Mobile:  main image → 2×2 grid → cream panel stacked
 function minimalCleanVariant(): BlockVariant {
   return {
     id: 'hp-minimal-clean',
     label: 'Minimal Clean',
-    description: 'Borderless image left, editorial typography right — clean editorial feel',
+    description: 'Main image + 2×2 thumb grid left, cream editorial panel right',
     toHtml(props: any, id: string): string {
       const p = props as HeroProductProps
       const ac = accent(p)
       const mobileStyle = `<style>
 @media (max-width:460px) {
-  .hp-mc-col-${id} { display:block !important; width:100% !important; padding-left:0 !important; padding-right:0 !important; }
-  .hp-mc-img-col-${id} { padding-bottom:20px !important; }
+  .hp-mc-wrap-${id}   { display:block !important; }
+  .hp-mc-left-${id}   { display:block !important; width:100% !important; padding-right:0 !important; padding-bottom:0 !important; }
+  .hp-mc-panel-${id}  { display:block !important; width:100% !important; padding-left:0 !important; border-left:none !important; margin-top:0 !important; }
+  .hp-mc-grid-${id}   { display:block !important; }
 }
 </style>`
-      const numberedBullets = p.rightBullets.map((b, i) =>
+      // Em-dash bullets — quiet, editorial, no checkmarks
+      const dashBullets = p.rightBullets.map(b =>
         `<tr>
-          <td width="22" valign="top" style="padding:4px 10px 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${ac};font-weight:900;line-height:1.5;">${i + 1}.</td>
-          <td valign="top" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;line-height:1.6;">${b}</td>
+          <td width="14" valign="top" style="padding:4px 8px 4px 0;font-family:Georgia,serif;font-size:14px;color:#9ca3af;line-height:1.6;">—</td>
+          <td valign="top" style="padding:4px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#4b5563;line-height:1.65;font-weight:400;">${b}</td>
         </tr>`
       ).join('')
       const origHtml = p.showOriginal
-        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#9ca3af;text-decoration:line-through;margin-left:10px;font-weight:400;vertical-align:middle;">${p.rightOriginal}</span>`
+        ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#9ca3af;text-decoration:line-through;margin-left:12px;font-weight:400;letter-spacing:0.01em;vertical-align:middle;">${p.rightOriginal}</span>`
         : ''
       const scarcityHtml = p.showScarcity
-        ? `<p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;letter-spacing:0.05em;text-transform:uppercase;">Only ${p.rightQuantity} remaining</p>`
+        ? `<p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:600;color:#9ca3af;letter-spacing:0.1em;text-transform:uppercase;">Only ${p.rightQuantity} remaining</p>`
         : ''
-      return wrapOuter(id, '#ffffff', p,
-        `<table width="100%" cellpadding="0" cellspacing="0" border="0">
+      const guaranteeHtml = p.showGuaranteeTag !== false && p.guaranteeTagText
+        ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #e9e6df;"><span style="display:inline-block;background-color:${p.guaranteeTagBg ?? '#f0fdf4'};color:${p.guaranteeTagColor ?? '#166534'};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 12px;border-radius:4px;">${p.guaranteeTagText}</span></div>`
+        : ''
+      // 2×2 thumb grid — top-left, top-right, bottom-left, bottom-right
+      const thumbs = [p.thumb1, p.thumb2, p.thumb3, p.thumb4]
+      const gridHtml = `<table class="hp-mc-grid-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:5px;">
   <tr>
-    <td class="hp-mc-col-${id} hp-mc-img-col-${id}" width="46%" valign="top" style="padding-right:24px;">
-      <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
-        style="width:100%;height:auto;display:block;border-radius:6px;aspect-ratio:1/1;object-fit:cover;background-color:#f9fafb;" />
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
-        <tr>${[p.thumb1, p.thumb2, p.thumb3, p.thumb4].map(t =>
-          `<td width="25%" style="padding:0 2px;"><img src="${t}" alt="" border="0" width="100%" style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:4px;background-color:#f3f4f6;" /></td>`
-        ).join('')}</tr>
-      </table>
+    <td width="50%" style="padding:0 2px 4px 0;">
+      <img src="${thumbs[0]}" alt="" border="0" width="100%"
+        style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:5px;background-color:#ede9e3;" />
     </td>
-    <td class="hp-mc-col-${id}" width="54%" valign="top" style="padding-left:24px;border-left:1px solid #f3f4f6;">
-      <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${ac};letter-spacing:0.1em;text-transform:uppercase;">${p.rightBadgeText}</p>
-      <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#111827;line-height:1.3;">${p.rightTitle}</h1>
-      <div style="margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;">
-        <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:900;color:#111827;letter-spacing:-0.02em;vertical-align:middle;">${p.rightPrice}</span>${origHtml}
+    <td width="50%" style="padding:0 0 4px 2px;">
+      <img src="${thumbs[1]}" alt="" border="0" width="100%"
+        style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:5px;background-color:#ede9e3;" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" style="padding:0 2px 0 0;">
+      <img src="${thumbs[2]}" alt="" border="0" width="100%"
+        style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:5px;background-color:#ede9e3;" />
+    </td>
+    <td width="50%" style="padding:0 0 0 2px;">
+      <img src="${thumbs[3]}" alt="" border="0" width="100%"
+        style="width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:5px;background-color:#ede9e3;" />
+    </td>
+  </tr>
+</table>`
+      return wrapOuter(id, '#f5f4f0', p,
+        `<table width="100%" cellpadding="0" cellspacing="0" border="0" class="hp-mc-wrap-${id}">
+  <tr>
+    <!-- LEFT: main image + 2×2 grid below -->
+    <td class="hp-mc-left-${id}" width="47%" valign="top" style="padding-right:6px;">
+      <img src="${p.leftImage}" alt="${p.rightTitle}" border="0" width="100%"
+        style="width:100%;height:auto;display:block;border-radius:8px;aspect-ratio:1/1;object-fit:cover;background-color:#ede9e3;" />
+      ${gridHtml}
+    </td>
+    <!-- RIGHT: cream editorial panel -->
+    <td class="hp-mc-panel-${id}" width="53%" valign="middle"
+        style="background-color:#faf9f6;border-radius:10px;padding:28px 24px;vertical-align:middle;">
+      <!-- Category label — tiny tracked caps, no pill -->
+      <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:#9ca3af;letter-spacing:0.18em;text-transform:uppercase;">${p.rightBadgeText}</p>
+      <!-- Serif title -->
+      <h1 style="margin:0 0 6px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#1c1917;line-height:1.25;letter-spacing:-0.01em;">${p.rightTitle}</h1>
+      <!-- Thin accent rule under title -->
+      <div style="width:32px;height:2px;background-color:${ac};margin:0 0 16px;border-radius:1px;"></div>
+      <!-- Price — dark charcoal, understated (not accent colour) -->
+      <div style="margin:0 0 4px;">
+        <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:800;color:#1c1917;letter-spacing:-0.02em;vertical-align:middle;">${p.rightPrice}</span>${origHtml}
       </div>
       ${scarcityHtml}
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px;">
-        ${numberedBullets}
+      <!-- Em-dash bullets -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;padding-top:14px;border-top:1px solid #e9e6df;">
+        ${dashBullets}
       </table>
+      ${guaranteeHtml}
     </td>
   </tr>
 </table>`,
