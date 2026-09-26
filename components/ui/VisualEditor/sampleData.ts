@@ -18,7 +18,7 @@
 // template's theme rather than a generic pet-brush placeholder.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Block } from './blocks'
+import { Block, IMAGE_PLACEHOLDER_SVG } from './blocks'
 import { getBannerVariant } from './variants/banner.variants'
 
 // ── Category identifier ──────────────────────────────────────────────────────
@@ -67,50 +67,50 @@ interface CategorySampleData {
 
 const PET_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'Premium Ergonomic Pet Grooming Brush – Stainless Steel',
-        SELLER_NAME:          'FurShield Direct',
-        ITEM_SKU:             'FS-DBT-78210',
-        BRAND:                'FurShield',
-        MODEL:                'FS-DBT-2024 Pro',
-        MPN:                  'FS-DBT-7821',
-        EAN:                  '5012345678900',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'Premium Ergonomic Pet Grooming Brush – Stainless Steel',
+        SELLER_NAME: 'FurShield Direct',
+        ITEM_SKU: 'FS-DBT-78210',
+        BRAND: 'FurShield',
+        MODEL: 'FS-DBT-2024 Pro',
+        MPN: 'FS-DBT-7821',
+        EAN: '5012345678900',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$29.99',
-        ORIGINAL_PRICE:       '$49.99',
+        ITEM_PRICE: '$29.99',
+        ORIGINAL_PRICE: '$49.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '12',
-        WATCHERS:             '24',
-        FEEDBACK_SCORE:       '12,450',
-        FEEDBACK_PERCENT:     '99.4',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '12',
+        WATCHERS: '24',
+        FEEDBACK_SCORE: '12,450',
+        FEEDBACK_PERCENT: '99.4',
 
-        ITEM_DESCRIPTION:     'Professional-grade tool built for daily use. Premium materials, precision engineered, and rigorously tested to deliver reliable performance. Includes a 1-year manufacturer warranty and full after-sales support.',
-        SHIPPING_TIME:        '1–2 Business Days',
-        RETURN_POLICY:        '30-day free returns. No questions asked.',
-        VAT_NUMBER:           'GB 123 4567 89',
+        ITEM_DESCRIPTION: 'Professional-grade tool built for daily use. Premium materials, precision engineered, and rigorously tested to deliver reliable performance. Includes a 1-year manufacturer warranty and full after-sales support.',
+        SHIPPING_TIME: '1–2 Business Days',
+        RETURN_POLICY: '30-day free returns. No questions asked.',
+        VAT_NUMBER: 'GB 123 4567 89',
 
-        COLOUR:               'Midnight Black',
-        SIZE:                 'Medium',
-        MATERIAL:             'Stainless Steel',
-        STYLE:                'Modern',
-        GENDER:               'Unisex',
-        AGE_GROUP:            'Adult',
-        DEPARTMENT:           'Pet Supplies',
-        DIMENSIONS:           '24 × 18 × 6 cm',
-        WEIGHT:               '180 g',
-        PLACEMENT:            'Front',
-        COMPATIBLE_MODELS:    'Universal — see description for full list',
-        NETWORK:              'Wi-Fi 6 / Bluetooth 5.2',
-        CONNECTIVITY:         'USB-C, Wireless',
-        STORAGE:              '128 GB',
-        ROOM_TYPE:            'Living Room',
-        SPORT:                'Outdoor & Indoor',
+        COLOUR: 'Midnight Black',
+        SIZE: 'Medium',
+        MATERIAL: 'Stainless Steel',
+        STYLE: 'Modern',
+        GENDER: 'Unisex',
+        AGE_GROUP: 'Adult',
+        DEPARTMENT: 'Pet Supplies',
+        DIMENSIONS: '24 × 18 × 6 cm',
+        WEIGHT: '180 g',
+        PLACEMENT: 'Front',
+        COMPATIBLE_MODELS: 'Universal — see description for full list',
+        NETWORK: 'Wi-Fi 6 / Bluetooth 5.2',
+        CONNECTIVITY: 'USB-C, Wireless',
+        STORAGE: '128 GB',
+        ROOM_TYPE: 'Living Room',
+        SPORT: 'Outdoor & Indoor',
 
-        TYPE:                 'Deshedding Tool',
-        FEATURES:             'Self-Cleaning, Ergonomic, Anti-Slip',
-        SUITABLE_FOR:         'Dogs & Cats — All Breeds',
-        WARRANTY:             '12-Month Manufacturer Warranty',
+        TYPE: 'Deshedding Tool',
+        FEATURES: 'Self-Cleaning, Ergonomic, Anti-Slip',
+        SUITABLE_FOR: 'Dogs & Cats — All Breeds',
+        WARRANTY: '12-Month Manufacturer Warranty',
     },
     mainImage: U('photo-1583337130417-3346a1be7dee'),
     thumbnails: [
@@ -125,9 +125,9 @@ const PET_SAMPLE: CategorySampleData = {
     // src attrs (see pet.ts block 6 and block 10).
     galleryImages: {
         LIFESTYLE_IMAGE_URL: U('photo-1548199973-03cce0bbc87b'),   // long-haired dog being brushed
-        GALLERY_IMAGE_1:     U('photo-1450778869180-41d0601e046e'), // dog with loose fur
-        GALLERY_IMAGE_2:     U('photo-1518791841217-8f162f1e1131'), // dog bath time
-        GALLERY_IMAGE_3:     U('photo-1543466835-00a7907e9de1'),   // golden retriever portrait
+        GALLERY_IMAGE_1: U('photo-1450778869180-41d0601e046e'), // dog with loose fur
+        GALLERY_IMAGE_2: U('photo-1518791841217-8f162f1e1131'), // dog bath time
+        GALLERY_IMAGE_3: U('photo-1543466835-00a7907e9de1'),   // golden retriever portrait
     },
     related: {
         tokens: {
@@ -151,50 +151,50 @@ const PET_SAMPLE: CategorySampleData = {
 
 const ELECTRONICS_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'Wireless Bluetooth Headphones – Active Noise Cancelling',
-        SELLER_NAME:          'TechVault Audio',
-        ITEM_SKU:             'TV-WH-2024-001',
-        BRAND:                'TechVault',
-        MODEL:                'AirPro X1',
-        MPN:                  'TV-APX1-2024',
-        EAN:                  '5060123456789',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'Wireless Bluetooth Headphones – Active Noise Cancelling',
+        SELLER_NAME: 'TechVault Audio',
+        ITEM_SKU: 'TV-WH-2024-001',
+        BRAND: 'TechVault',
+        MODEL: 'AirPro X1',
+        MPN: 'TV-APX1-2024',
+        EAN: '5060123456789',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$89.99',
-        ORIGINAL_PRICE:       '$149.99',
+        ITEM_PRICE: '$89.99',
+        ORIGINAL_PRICE: '$149.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '24',
-        WATCHERS:             '58',
-        FEEDBACK_SCORE:       '24,810',
-        FEEDBACK_PERCENT:     '99.6',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '24',
+        WATCHERS: '58',
+        FEEDBACK_SCORE: '24,810',
+        FEEDBACK_PERCENT: '99.6',
 
-        ITEM_DESCRIPTION:     'Premium over-ear wireless headphones with adaptive active noise cancellation, 40-hour battery life and hi-res audio drivers. Bluetooth 5.3 with multipoint pairing. Memory-foam earcups for all-day comfort. Includes hard-shell travel case and USB-C fast-charging cable.',
-        SHIPPING_TIME:        '1–2 Business Days',
-        RETURN_POLICY:        '30-day free returns. No questions asked.',
-        VAT_NUMBER:           'GB 987 6543 21',
+        ITEM_DESCRIPTION: 'Premium over-ear wireless headphones with adaptive active noise cancellation, 40-hour battery life and hi-res audio drivers. Bluetooth 5.3 with multipoint pairing. Memory-foam earcups for all-day comfort. Includes hard-shell travel case and USB-C fast-charging cable.',
+        SHIPPING_TIME: '1–2 Business Days',
+        RETURN_POLICY: '30-day free returns. No questions asked.',
+        VAT_NUMBER: 'GB 987 6543 21',
 
-        COLOUR:               'Midnight Black',
-        SIZE:                 'One Size',
-        MATERIAL:             'Aluminium & Memory Foam',
-        STYLE:                'Over-Ear',
-        GENDER:               'Unisex',
-        AGE_GROUP:            'Adult',
-        DEPARTMENT:           'Electronics',
-        DIMENSIONS:           '19 × 17 × 8 cm',
-        WEIGHT:               '265 g',
-        PLACEMENT:            'On-Ear',
-        COMPATIBLE_MODELS:    'iOS, Android, Windows, macOS',
-        NETWORK:              'Bluetooth 5.3',
-        CONNECTIVITY:         'Bluetooth 5.3, USB-C, 3.5mm',
-        STORAGE:              '—',
-        ROOM_TYPE:            '—',
-        SPORT:                '—',
+        COLOUR: 'Midnight Black',
+        SIZE: 'One Size',
+        MATERIAL: 'Aluminium & Memory Foam',
+        STYLE: 'Over-Ear',
+        GENDER: 'Unisex',
+        AGE_GROUP: 'Adult',
+        DEPARTMENT: 'Electronics',
+        DIMENSIONS: '19 × 17 × 8 cm',
+        WEIGHT: '265 g',
+        PLACEMENT: 'On-Ear',
+        COMPATIBLE_MODELS: 'iOS, Android, Windows, macOS',
+        NETWORK: 'Bluetooth 5.3',
+        CONNECTIVITY: 'Bluetooth 5.3, USB-C, 3.5mm',
+        STORAGE: '—',
+        ROOM_TYPE: '—',
+        SPORT: '—',
 
-        TYPE:                 'Over-Ear Headphones',
-        FEATURES:             'Active Noise Cancellation, 40h Battery, Multipoint Pairing',
-        SUITABLE_FOR:         'Music, Travel, Office, Home',
-        WARRANTY:             '24-Month Manufacturer Warranty',
+        TYPE: 'Over-Ear Headphones',
+        FEATURES: 'Active Noise Cancellation, 40h Battery, Multipoint Pairing',
+        SUITABLE_FOR: 'Music, Travel, Office, Home',
+        WARRANTY: '24-Month Manufacturer Warranty',
     },
     mainImage: U('photo-1505740420928-5e560c06d30e'),
     thumbnails: [
@@ -226,50 +226,50 @@ const ELECTRONICS_SAMPLE: CategorySampleData = {
 
 const FASHION_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'Premium UrbanFit Runner Sneakers – Lightweight Mesh',
-        SELLER_NAME:          'Style Studio',
-        ITEM_SKU:             'SS-RUN-9921',
-        BRAND:                'UrbanFit',
-        MODEL:                'Runner Pro 3',
-        MPN:                  'UF-RUN3-9921',
-        EAN:                  '5098765432101',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'Premium UrbanFit Runner Sneakers – Lightweight Mesh',
+        SELLER_NAME: 'Style Studio',
+        ITEM_SKU: 'SS-RUN-9921',
+        BRAND: 'UrbanFit',
+        MODEL: 'Runner Pro 3',
+        MPN: 'UF-RUN3-9921',
+        EAN: '5098765432101',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$64.99',
-        ORIGINAL_PRICE:       '$99.99',
+        ITEM_PRICE: '$64.99',
+        ORIGINAL_PRICE: '$99.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '8',
-        WATCHERS:             '47',
-        FEEDBACK_SCORE:       '18,720',
-        FEEDBACK_PERCENT:     '99.2',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '8',
+        WATCHERS: '47',
+        FEEDBACK_SCORE: '18,720',
+        FEEDBACK_PERCENT: '99.2',
 
-        ITEM_DESCRIPTION:     'Lightweight breathable mesh runners with responsive EVA midsole, removable cushioned insole and durable rubber outsole. Designed for daily training, walking and casual wear. Lace-up closure with padded collar for ankle support.',
-        SHIPPING_TIME:        '1–2 Business Days',
-        RETURN_POLICY:        '30-day free returns. No questions asked.',
-        VAT_NUMBER:           'GB 456 7890 12',
+        ITEM_DESCRIPTION: 'Lightweight breathable mesh runners with responsive EVA midsole, removable cushioned insole and durable rubber outsole. Designed for daily training, walking and casual wear. Lace-up closure with padded collar for ankle support.',
+        SHIPPING_TIME: '1–2 Business Days',
+        RETURN_POLICY: '30-day free returns. No questions asked.',
+        VAT_NUMBER: 'GB 456 7890 12',
 
-        COLOUR:               'Charcoal / White',
-        SIZE:                 'UK 9',
-        MATERIAL:             'Mesh & Synthetic',
-        STYLE:                'Athletic / Casual',
-        GENDER:               'Unisex',
-        AGE_GROUP:            'Adult',
-        DEPARTMENT:           'Footwear',
-        DIMENSIONS:           '32 × 12 × 11 cm',
-        WEIGHT:               '320 g',
-        PLACEMENT:            '—',
-        COMPATIBLE_MODELS:    '—',
-        NETWORK:              '—',
-        CONNECTIVITY:         '—',
-        STORAGE:              '—',
-        ROOM_TYPE:            '—',
-        SPORT:                'Running, Gym, Casual',
+        COLOUR: 'Charcoal / White',
+        SIZE: 'UK 9',
+        MATERIAL: 'Mesh & Synthetic',
+        STYLE: 'Athletic / Casual',
+        GENDER: 'Unisex',
+        AGE_GROUP: 'Adult',
+        DEPARTMENT: 'Footwear',
+        DIMENSIONS: '32 × 12 × 11 cm',
+        WEIGHT: '320 g',
+        PLACEMENT: '—',
+        COMPATIBLE_MODELS: '—',
+        NETWORK: '—',
+        CONNECTIVITY: '—',
+        STORAGE: '—',
+        ROOM_TYPE: '—',
+        SPORT: 'Running, Gym, Casual',
 
-        TYPE:                 'Running Sneakers',
-        FEATURES:             'Breathable Mesh, EVA Midsole, Removable Insole',
-        SUITABLE_FOR:         'Men & Women — Casual and Active Wear',
-        WARRANTY:             '12-Month Manufacturer Warranty',
+        TYPE: 'Running Sneakers',
+        FEATURES: 'Breathable Mesh, EVA Midsole, Removable Insole',
+        SUITABLE_FOR: 'Men & Women — Casual and Active Wear',
+        WARRANTY: '12-Month Manufacturer Warranty',
     },
     mainImage: U('photo-1542291026-7eec264c27ff'),
     thumbnails: [
@@ -301,50 +301,50 @@ const FASHION_SAMPLE: CategorySampleData = {
 
 const HOME_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'Modern Ceramic Plant Pot Set of 3 with Drainage Saucers',
-        SELLER_NAME:          'Living Space Co.',
-        ITEM_SKU:             'LS-PP-3SET-04',
-        BRAND:                'Living Space',
-        MODEL:                'Terracotta Trio',
-        MPN:                  'LS-PP3-04',
-        EAN:                  '5023456789012',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'Modern Ceramic Plant Pot Set of 3 with Drainage Saucers',
+        SELLER_NAME: 'Living Space Co.',
+        ITEM_SKU: 'LS-PP-3SET-04',
+        BRAND: 'Living Space',
+        MODEL: 'Terracotta Trio',
+        MPN: 'LS-PP3-04',
+        EAN: '5023456789012',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$34.99',
-        ORIGINAL_PRICE:       '$54.99',
+        ITEM_PRICE: '$34.99',
+        ORIGINAL_PRICE: '$54.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '15',
-        WATCHERS:             '21',
-        FEEDBACK_SCORE:       '9,640',
-        FEEDBACK_PERCENT:     '99.1',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '15',
+        WATCHERS: '21',
+        FEEDBACK_SCORE: '9,640',
+        FEEDBACK_PERCENT: '99.1',
 
-        ITEM_DESCRIPTION:     'Hand-finished ceramic planter set in three sizes, perfect for indoor plants, succulents and herbs. Each pot includes a matching drainage saucer to protect surfaces. Neutral matte finish suits modern and traditional interiors.',
-        SHIPPING_TIME:        '2–3 Business Days',
-        RETURN_POLICY:        '30-day free returns. No questions asked.',
-        VAT_NUMBER:           'GB 321 4567 89',
+        ITEM_DESCRIPTION: 'Hand-finished ceramic planter set in three sizes, perfect for indoor plants, succulents and herbs. Each pot includes a matching drainage saucer to protect surfaces. Neutral matte finish suits modern and traditional interiors.',
+        SHIPPING_TIME: '2–3 Business Days',
+        RETURN_POLICY: '30-day free returns. No questions asked.',
+        VAT_NUMBER: 'GB 321 4567 89',
 
-        COLOUR:               'Warm Terracotta',
-        SIZE:                 'Small / Medium / Large',
-        MATERIAL:             'Glazed Ceramic',
-        STYLE:                'Modern Minimalist',
-        GENDER:               '—',
-        AGE_GROUP:            '—',
-        DEPARTMENT:           'Home & Garden',
-        DIMENSIONS:           'S: 12cm · M: 16cm · L: 20cm',
-        WEIGHT:               '2.4 kg (set)',
-        PLACEMENT:            'Indoor / Outdoor',
-        COMPATIBLE_MODELS:    '—',
-        NETWORK:              '—',
-        CONNECTIVITY:         '—',
-        STORAGE:              '—',
-        ROOM_TYPE:            'Living Room, Kitchen, Patio',
-        SPORT:                '—',
+        COLOUR: 'Warm Terracotta',
+        SIZE: 'Small / Medium / Large',
+        MATERIAL: 'Glazed Ceramic',
+        STYLE: 'Modern Minimalist',
+        GENDER: '—',
+        AGE_GROUP: '—',
+        DEPARTMENT: 'Home & Garden',
+        DIMENSIONS: 'S: 12cm · M: 16cm · L: 20cm',
+        WEIGHT: '2.4 kg (set)',
+        PLACEMENT: 'Indoor / Outdoor',
+        COMPATIBLE_MODELS: '—',
+        NETWORK: '—',
+        CONNECTIVITY: '—',
+        STORAGE: '—',
+        ROOM_TYPE: 'Living Room, Kitchen, Patio',
+        SPORT: '—',
 
-        TYPE:                 'Plant Pot Set',
-        FEATURES:             'Drainage Hole, Matching Saucers, Frost-Resistant',
-        SUITABLE_FOR:         'Indoor & Outdoor Plants — Succulents, Herbs, Houseplants',
-        WARRANTY:             '12-Month Manufacturer Warranty',
+        TYPE: 'Plant Pot Set',
+        FEATURES: 'Drainage Hole, Matching Saucers, Frost-Resistant',
+        SUITABLE_FOR: 'Indoor & Outdoor Plants — Succulents, Herbs, Houseplants',
+        WARRANTY: '12-Month Manufacturer Warranty',
     },
     mainImage: U('photo-1556909114-f6e7ad7d3136'),
     thumbnails: [
@@ -376,50 +376,50 @@ const HOME_SAMPLE: CategorySampleData = {
 
 const SPORTS_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'Pro Adjustable Dumbbell Set – 24kg (Pair)',
-        SELLER_NAME:          'SportZone UK',
-        ITEM_SKU:             'SZ-DB-24KG-2',
-        BRAND:                'SportZone',
-        MODEL:                'PowerGrip 24',
-        MPN:                  'SZ-PG24-2024',
-        EAN:                  '5045678901234',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'Pro Adjustable Dumbbell Set – 24kg (Pair)',
+        SELLER_NAME: 'SportZone UK',
+        ITEM_SKU: 'SZ-DB-24KG-2',
+        BRAND: 'SportZone',
+        MODEL: 'PowerGrip 24',
+        MPN: 'SZ-PG24-2024',
+        EAN: '5045678901234',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$179.99',
-        ORIGINAL_PRICE:       '$249.99',
+        ITEM_PRICE: '$179.99',
+        ORIGINAL_PRICE: '$249.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '6',
-        WATCHERS:             '38',
-        FEEDBACK_SCORE:       '15,300',
-        FEEDBACK_PERCENT:     '99.5',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '6',
+        WATCHERS: '38',
+        FEEDBACK_SCORE: '15,300',
+        FEEDBACK_PERCENT: '99.5',
 
-        ITEM_DESCRIPTION:     'Pair of quick-change adjustable dumbbells (2 × 24kg). Selectorised weight system lets you switch from 4kg to 24kg in seconds. Knurled chrome handle, contoured grip, and durable rubber-encased plates to protect floors. Includes storage tray.',
-        SHIPPING_TIME:        '2–3 Business Days',
-        RETURN_POLICY:        '30-day free returns. No questions asked.',
-        VAT_NUMBER:           'GB 654 3210 98',
+        ITEM_DESCRIPTION: 'Pair of quick-change adjustable dumbbells (2 × 24kg). Selectorised weight system lets you switch from 4kg to 24kg in seconds. Knurled chrome handle, contoured grip, and durable rubber-encased plates to protect floors. Includes storage tray.',
+        SHIPPING_TIME: '2–3 Business Days',
+        RETURN_POLICY: '30-day free returns. No questions asked.',
+        VAT_NUMBER: 'GB 654 3210 98',
 
-        COLOUR:               'Black / Chrome',
-        SIZE:                 'Adjustable 4–24 kg (per dumbbell)',
-        MATERIAL:             'Steel & Rubber',
-        STYLE:                'Selectorised',
-        GENDER:               'Unisex',
-        AGE_GROUP:            'Adult',
-        DEPARTMENT:           'Sports & Fitness',
-        DIMENSIONS:           '42 × 22 × 22 cm (each)',
-        WEIGHT:               '48 kg (pair)',
-        PLACEMENT:            'Home / Gym',
-        COMPATIBLE_MODELS:    '—',
-        NETWORK:              '—',
-        CONNECTIVITY:         '—',
-        STORAGE:              '—',
-        ROOM_TYPE:            'Home Gym',
-        SPORT:                'Strength Training, Bodybuilding, CrossFit',
+        COLOUR: 'Black / Chrome',
+        SIZE: 'Adjustable 4–24 kg (per dumbbell)',
+        MATERIAL: 'Steel & Rubber',
+        STYLE: 'Selectorised',
+        GENDER: 'Unisex',
+        AGE_GROUP: 'Adult',
+        DEPARTMENT: 'Sports & Fitness',
+        DIMENSIONS: '42 × 22 × 22 cm (each)',
+        WEIGHT: '48 kg (pair)',
+        PLACEMENT: 'Home / Gym',
+        COMPATIBLE_MODELS: '—',
+        NETWORK: '—',
+        CONNECTIVITY: '—',
+        STORAGE: '—',
+        ROOM_TYPE: 'Home Gym',
+        SPORT: 'Strength Training, Bodybuilding, CrossFit',
 
-        TYPE:                 'Adjustable Dumbbell',
-        FEATURES:             'Quick-Select Dial, Rubber-Coated Plates, Knurled Handle',
-        SUITABLE_FOR:         'Home & Commercial Gyms — Beginner to Advanced',
-        WARRANTY:             '24-Month Manufacturer Warranty',
+        TYPE: 'Adjustable Dumbbell',
+        FEATURES: 'Quick-Select Dial, Rubber-Coated Plates, Knurled Handle',
+        SUITABLE_FOR: 'Home & Commercial Gyms — Beginner to Advanced',
+        WARRANTY: '24-Month Manufacturer Warranty',
     },
     mainImage: U('photo-1517466787929-bc90951d0974'),
     thumbnails: [
@@ -451,50 +451,50 @@ const SPORTS_SAMPLE: CategorySampleData = {
 
 const AUTO_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'OEM Quality Front Brake Disc Pair – Vented 300mm',
-        SELLER_NAME:          'AutoParts Direct',
-        ITEM_SKU:             'AP-BD-300-2',
-        BRAND:                'AutoParts Pro',
-        MODEL:                'BrakeMaster 300',
-        MPN:                  'AP-BM300-V2',
-        EAN:                  '5076543210987',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'OEM Quality Front Brake Disc Pair – Vented 300mm',
+        SELLER_NAME: 'AutoParts Direct',
+        ITEM_SKU: 'AP-BD-300-2',
+        BRAND: 'AutoParts Pro',
+        MODEL: 'BrakeMaster 300',
+        MPN: 'AP-BM300-V2',
+        EAN: '5076543210987',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$74.99',
-        ORIGINAL_PRICE:       '$109.99',
+        ITEM_PRICE: '$74.99',
+        ORIGINAL_PRICE: '$109.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '9',
-        WATCHERS:             '17',
-        FEEDBACK_SCORE:       '21,490',
-        FEEDBACK_PERCENT:     '99.3',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '9',
+        WATCHERS: '17',
+        FEEDBACK_SCORE: '21,490',
+        FEEDBACK_PERCENT: '99.3',
 
-        ITEM_DESCRIPTION:     'Pair of OE-quality vented front brake discs, precision-machined from high-carbon cast iron with anti-corrosion coating. Direct fit replacement for the original equipment. Supplied as a pair — ready to fit. Please verify vehicle compatibility before purchase.',
-        SHIPPING_TIME:        '2–3 Business Days',
-        RETURN_POLICY:        '30-day returns on unused parts. No questions asked.',
-        VAT_NUMBER:           'GB 789 0123 45',
+        ITEM_DESCRIPTION: 'Pair of OE-quality vented front brake discs, precision-machined from high-carbon cast iron with anti-corrosion coating. Direct fit replacement for the original equipment. Supplied as a pair — ready to fit. Please verify vehicle compatibility before purchase.',
+        SHIPPING_TIME: '2–3 Business Days',
+        RETURN_POLICY: '30-day returns on unused parts. No questions asked.',
+        VAT_NUMBER: 'GB 789 0123 45',
 
-        COLOUR:               'Silver / Black',
-        SIZE:                 '300 mm diameter',
-        MATERIAL:             'High-Carbon Cast Iron',
-        STYLE:                'Vented',
-        GENDER:               '—',
-        AGE_GROUP:            '—',
-        DEPARTMENT:           'Automotive',
-        DIMENSIONS:           '300 × 26 × 50 mm',
-        WEIGHT:               '8.4 kg (pair)',
-        PLACEMENT:            'Front Axle',
-        COMPATIBLE_MODELS:    'See full fitment list in description',
-        NETWORK:              '—',
-        CONNECTIVITY:         '—',
-        STORAGE:              '—',
-        ROOM_TYPE:            '—',
-        SPORT:                '—',
+        COLOUR: 'Silver / Black',
+        SIZE: '300 mm diameter',
+        MATERIAL: 'High-Carbon Cast Iron',
+        STYLE: 'Vented',
+        GENDER: '—',
+        AGE_GROUP: '—',
+        DEPARTMENT: 'Automotive',
+        DIMENSIONS: '300 × 26 × 50 mm',
+        WEIGHT: '8.4 kg (pair)',
+        PLACEMENT: 'Front Axle',
+        COMPATIBLE_MODELS: 'See full fitment list in description',
+        NETWORK: '—',
+        CONNECTIVITY: '—',
+        STORAGE: '—',
+        ROOM_TYPE: '—',
+        SPORT: '—',
 
-        TYPE:                 'Brake Disc Pair',
-        FEATURES:             'Vented, Anti-Corrosion Coated, OE-Quality',
-        SUITABLE_FOR:         'Passenger Cars & Light Commercial — Verify Fitment',
-        WARRANTY:             '24-Month Manufacturer Warranty',
+        TYPE: 'Brake Disc Pair',
+        FEATURES: 'Vented, Anti-Corrosion Coated, OE-Quality',
+        SUITABLE_FOR: 'Passenger Cars & Light Commercial — Verify Fitment',
+        WARRANTY: '24-Month Manufacturer Warranty',
     },
     mainImage: U('photo-1486006920555-c77dcf18193c'),
     thumbnails: [
@@ -526,50 +526,50 @@ const AUTO_SAMPLE: CategorySampleData = {
 
 const GENERAL_SAMPLE: CategorySampleData = {
     tokens: {
-        PRODUCT_TITLE:        'Premium Product Sample Listing',
-        SELLER_NAME:          'Trusted Seller',
-        ITEM_SKU:             'GEN-001',
-        BRAND:                'Generic',
-        MODEL:                'Standard',
-        MPN:                  'GEN-MPN-001',
-        EAN:                  '5000000000000',
-        STORE_URL:            '#',
+        PRODUCT_TITLE: 'Premium Product Sample Listing',
+        SELLER_NAME: 'Trusted Seller',
+        ITEM_SKU: 'GEN-001',
+        BRAND: 'Generic',
+        MODEL: 'Standard',
+        MPN: 'GEN-MPN-001',
+        EAN: '5000000000000',
+        STORE_URL: '#',
 
-        ITEM_PRICE:           '$19.99',
-        ORIGINAL_PRICE:       '$29.99',
+        ITEM_PRICE: '$19.99',
+        ORIGINAL_PRICE: '$29.99',
 
-        ITEM_CONDITION:       'Brand New',
-        QUANTITY:             '10',
-        WATCHERS:             '5',
-        FEEDBACK_SCORE:       '1,000',
-        FEEDBACK_PERCENT:     '99.0',
+        ITEM_CONDITION: 'Brand New',
+        QUANTITY: '10',
+        WATCHERS: '5',
+        FEEDBACK_SCORE: '1,000',
+        FEEDBACK_PERCENT: '99.0',
 
-        ITEM_DESCRIPTION:     'A high-quality product sample. Replace this text with the actual item description.',
-        SHIPPING_TIME:        '2–3 Business Days',
-        RETURN_POLICY:        '30-day free returns.',
-        VAT_NUMBER:           'GB 000 0000 00',
+        ITEM_DESCRIPTION: 'A high-quality product sample. Replace this text with the actual item description.',
+        SHIPPING_TIME: '2–3 Business Days',
+        RETURN_POLICY: '30-day free returns.',
+        VAT_NUMBER: 'GB 000 0000 00',
 
-        COLOUR:               'Black',
-        SIZE:                 'Standard',
-        MATERIAL:             'Mixed',
-        STYLE:                'Standard',
-        GENDER:               'Unisex',
-        AGE_GROUP:            'Adult',
-        DEPARTMENT:           'General',
-        DIMENSIONS:           '—',
-        WEIGHT:               '—',
-        PLACEMENT:            '—',
-        COMPATIBLE_MODELS:    '—',
-        NETWORK:              '—',
-        CONNECTIVITY:         '—',
-        STORAGE:              '—',
-        ROOM_TYPE:            '—',
-        SPORT:                '—',
+        COLOUR: 'Black',
+        SIZE: 'Standard',
+        MATERIAL: 'Mixed',
+        STYLE: 'Standard',
+        GENDER: 'Unisex',
+        AGE_GROUP: 'Adult',
+        DEPARTMENT: 'General',
+        DIMENSIONS: '—',
+        WEIGHT: '—',
+        PLACEMENT: '—',
+        COMPATIBLE_MODELS: '—',
+        NETWORK: '—',
+        CONNECTIVITY: '—',
+        STORAGE: '—',
+        ROOM_TYPE: '—',
+        SPORT: '—',
 
-        TYPE:                 'Generic',
-        FEATURES:             'Standard features',
-        SUITABLE_FOR:         'All customers',
-        WARRANTY:             '12-Month Standard Warranty',
+        TYPE: 'Generic',
+        FEATURES: 'Standard features',
+        SUITABLE_FOR: 'All customers',
+        WARRANTY: '12-Month Standard Warranty',
     },
     mainImage: U('photo-1505740420928-5e560c06d30e'),
     thumbnails: [
@@ -601,13 +601,13 @@ const GENERAL_SAMPLE: CategorySampleData = {
 
 // ── Public per-category registry ─────────────────────────────────────────────
 export const CATEGORY_DATA: Record<CategoryId, CategorySampleData> = {
-    pet:         PET_SAMPLE,
+    pet: PET_SAMPLE,
     electronics: ELECTRONICS_SAMPLE,
-    fashion:     FASHION_SAMPLE,
-    home:        HOME_SAMPLE,
-    sports:      SPORTS_SAMPLE,
-    auto:        AUTO_SAMPLE,
-    general:     GENERAL_SAMPLE,
+    fashion: FASHION_SAMPLE,
+    home: HOME_SAMPLE,
+    sports: SPORTS_SAMPLE,
+    auto: AUTO_SAMPLE,
+    general: GENERAL_SAMPLE,
 }
 
 // ── Back-compat exports (still used by code that hasn't been updated yet) ───
@@ -615,12 +615,12 @@ export const CATEGORY_DATA: Record<CategoryId, CategorySampleData> = {
 export const SAMPLE_TOKENS: Record<string, string> = PET_SAMPLE.tokens
 export const CATEGORY_SAMPLE_IMAGES: Record<string, string> = {
     electronics: ELECTRONICS_SAMPLE.mainImage,
-    fashion:     FASHION_SAMPLE.mainImage,
-    home:        HOME_SAMPLE.mainImage,
-    sports:      SPORTS_SAMPLE.mainImage,
-    auto:        AUTO_SAMPLE.mainImage,
-    pet:         PET_SAMPLE.mainImage,
-    general:     GENERAL_SAMPLE.mainImage,
+    fashion: FASHION_SAMPLE.mainImage,
+    home: HOME_SAMPLE.mainImage,
+    sports: SPORTS_SAMPLE.mainImage,
+    auto: AUTO_SAMPLE.mainImage,
+    pet: PET_SAMPLE.mainImage,
+    general: GENERAL_SAMPLE.mainImage,
 }
 export const PET_THUMBNAILS: string[] = PET_SAMPLE.thumbnails
 export const RELATED_TOKENS: Record<string, string> = PET_SAMPLE.related.tokens
@@ -724,64 +724,14 @@ export function renderForCanvas(
         return tokenMap[name] ?? full
     })
 
-    // 2) Replace any <img src="...{{TOKEN}}..."> with a real sample image.
-    if (blockType === 'cross_sell') {
-        let relatedIdx = 1
-        out = out.replace(
-            /<img\b([^>]*?)src="[^"]*\{\{RELATED_IMAGE_(\d+)\}\}[^"]*"([^>]*)>/gi,
-            (_match, before, n, after) => {
-                const key = `RELATED_IMAGE_${n}`
-                return `<img ${before}src="${data.related.images[key] ?? pickSampleImage(blockType, category)}"${after}>`
-            }
-        )
-        out = out.replace(
-            /<img\b([^>]*?)src="[^"]*\{\{(?:RELATED_IMAGE|IMAGE)_[^}]*\}\}[^"]*"([^>]*)>/gi,
-            (_match, before, after) => {
-                const fallback = data.related.images[`RELATED_IMAGE_${((relatedIdx++) % 4) + 1}`]
-                return `<img ${before}src="${fallback ?? pickSampleImage(blockType, category)}"${after}>`
-            }
-        )
-    } else {
-        // For hero_product, the {{IMAGE_2_URL}}..{{IMAGE_5_URL}} tokens map
-        // to the category's 4 thumbnails, so the gallery looks like a real
-        // product with 4 different angles. {{MAIN_IMAGE_URL}} → main image.
-        // Thumbnail counter resets per call (one block at a time).
-        let thumbIdx = 0
-        out = out.replace(
-            /<img\b([^>]*?)src="[^"]*\{\{MAIN_IMAGE_URL\}\}[^"]*"([^>]*)>/gi,
-            (_m, before, after) => `<img ${before}src="${data.mainImage}"${after}>`
-        )
-        out = out.replace(
-            /<img\b([^>]*?)src="[^"]*\{\{IMAGE_(\d+)_URL\}\}[^"]*"([^>]*)>/gi,
-            (_m, before, _n, after) => {
-                const t = data.thumbnails[thumbIdx % data.thumbnails.length]
-                thumbIdx++
-                return `<img ${before}src="${t ?? data.mainImage}"${after}>`
-            }
-        )
-        // Extra gallery tokens used by templates that go beyond the hero+thumbs
-        // pair — e.g. pet.ts block 6 (LIFESTYLE_IMAGE_URL) and block 10
-        // (GALLERY_IMAGE_1..3 for the "See It In Action" 3-up). Each token is
-        // mapped to a distinct category-specific image from data.galleryImages
-        // so the lifestyle banner and the 3-up don't all collapse onto the
-        // same hero photo. Tokens absent from the map fall through to the
-        // catch-all below.
-        out = out.replace(
-            /<img\b([^>]*?)src="[^"]*\{\{(LIFESTYLE_IMAGE_URL|GALLERY_IMAGE_\d+)\}\}[^"]*"([^>]*)>/gi,
-            (_m, before, token, after) => {
-                const url = data.galleryImages[token] ?? data.mainImage
-                return `<img ${before}src="${url}"${after}>`
-            }
-        )
-        // Any remaining {{TOKEN}} in src (e.g. {{IMAGE_URL}} without _N) → main image
-        out = out.replace(
-            /<img\b([^>]*?)src="[^"]*\{\{[^}]*\}\}[^"]*"([^>]*)>/gi,
-            (_match, before, after) => {
-                const sample = pickSampleImage(blockType, category)
-                return `<img ${before}src="${sample}"${after}>`
-            }
-        )
-    }
+    // 2) Replace any <img src="...{{TOKEN}}..."> with the SVG placeholder.
+    //    All tokenised images (product_image, hero_product, image, gallery_row,
+    //    cross_sell, etc.) show the same clean SVG on canvas instead of Unsplash
+    //    photos — so the editor always looks like a blank canvas ready to fill.
+    out = out.replace(
+        /<img\b[^>]*src="[^"]*\{\{[^}]*\}\}[^"]*"[^>]*>/gi,
+        `<div style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`
+    )
 
     // 3) For trust_badges, swap icon-name strings with inline SVGs.
     if (blockType === 'trust_badges') {
@@ -810,8 +760,8 @@ export function renderBannerForCanvas(
     const props = {
         ...bannerProps,
         headingText: bannerProps.headingText ?? data.tokens.PRODUCT_TITLE,
-        subText:     bannerProps.subText     ?? data.tokens.ITEM_DESCRIPTION,
-        imageUrl:    bannerProps.imageUrl    ?? data.mainImage,
+        subText: bannerProps.subText ?? data.tokens.ITEM_DESCRIPTION,
+        imageUrl: bannerProps.imageUrl ?? data.mainImage,
     }
 
     const variant = getBannerVariant(props.variant ?? 'simple')
@@ -826,18 +776,18 @@ export function pickSampleImage(blockType: string, category: CategoryId = DEFAUL
     // Type-specific overrides: these only apply for non-default categories
     // when the block has a strong category semantic (e.g. pet_image, auto_image).
     const typeMap: Record<string, (c: CategoryId) => string> = {
-        product_image:   () => data.mainImage,
+        product_image: () => data.mainImage,
         product_gallery: () => data.mainImage,
-        hero_header:     () => data.mainImage,
-        hero_banner:     () => data.mainImage,
-        hero_product:    () => data.mainImage,
-        image_text_row:  () => data.mainImage,
-        image_grid:      () => data.mainImage,
-        pet_image:       () => CATEGORY_DATA.pet.mainImage,
-        auto_image:      () => CATEGORY_DATA.auto.mainImage,
-        fashion_image:   () => CATEGORY_DATA.fashion.mainImage,
-        home_image:      () => CATEGORY_DATA.home.mainImage,
-        sports_image:    () => CATEGORY_DATA.sports.mainImage,
+        hero_header: () => data.mainImage,
+        hero_banner: () => data.mainImage,
+        hero_product: () => data.mainImage,
+        image_text_row: () => data.mainImage,
+        image_grid: () => data.mainImage,
+        pet_image: () => CATEGORY_DATA.pet.mainImage,
+        auto_image: () => CATEGORY_DATA.auto.mainImage,
+        fashion_image: () => CATEGORY_DATA.fashion.mainImage,
+        home_image: () => CATEGORY_DATA.home.mainImage,
+        sports_image: () => CATEGORY_DATA.sports.mainImage,
     }
     const picker = typeMap[blockType]
     return picker ? picker(category) : data.mainImage
