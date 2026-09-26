@@ -1866,7 +1866,69 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
-    // ── seller_info: authority-split ──────────────────────────────────────────
+    // ── single_image: classic-frame ──────────────────────────────────────────
+    'classic-frame': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} stroke={col} strokeWidth="0.75" />
+            <rect x="6" y="5" width="68" height="32" rx="3" fill="#ffffff" stroke={col} strokeWidth="0.5" opacity="0.6" />
+            <rect x="10" y="8" width="60" height="26" rx="2" fill={col} opacity="0.12" />
+            <rect x="18" y="40" width="44" height="3" rx="1.5" fill={col} opacity="0.3" />
+        </svg>
+    ),
+    // ── single_image: modern-elevated ────────────────────────────────────────
+    'modern-elevated': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="4" width="64" height="34" rx="6" fill={col} opacity="0.15" />
+            <rect x="6" y="2" width="64" height="34" rx="6" fill="#ffffff" />
+            <rect x="6" y="2" width="64" height="34" rx="6" fill={col} opacity="0.1" />
+            <rect x="18" y="40" width="44" height="3" rx="1.5" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    // ── single_image: polaroid-classic ───────────────────────────────────────
+    'polaroid-classic': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="14" y="2" width="52" height="44" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="0.75" />
+            <rect x="18" y="5" width="44" height="28" rx="2" fill={col} opacity="0.15" />
+            <rect x="20" y="36" width="40" height="3" rx="1.5" fill={col} opacity="0.4" />
+            <rect x="28" y="41" width="24" height="2" rx="1" fill={col} opacity="0.2" />
+        </svg>
+    ),
+    // ── single_image: edge-to-edge ───────────────────────────────────────────
+    'edge-to-edge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={col} opacity="0.15" />
+            <rect width="80" height="48" rx="5" fill={col} opacity="0.1" />
+            <rect x="0" y="30" width="80" height="18" rx="0" fill={col} opacity="0.5" />
+            <rect x="16" y="36" width="48" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
+            <rect x="24" y="41" width="32" height="2" rx="1" fill="#ffffff" opacity="0.5" />
+        </svg>
+    ),
+    // ── single_image: neon-accent-frame ──────────────────────────────────────
+    'neon-accent-frame': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill="#1e1535" />
+            <defs>
+                <linearGradient id="neon-border" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor={col} /><stop offset="1" stopColor="#1e1535" />
+                </linearGradient>
+            </defs>
+            <rect x="8" y="4" width="64" height="34" rx="6" stroke="url(#neon-border)" strokeWidth="1.5" fill="#0f0b1e" />
+            <rect x="12" y="7" width="56" height="28" rx="4" fill={col} opacity="0.12" />
+            <rect x="22" y="42" width="36" height="2.5" rx="1.25" fill={col} opacity="0.35" />
+        </svg>
+    ),
+    // ── single_image: soft-minimalist ────────────────────────────────────────
+    'soft-minimalist': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="6" y="3" width="68" height="34" rx="12" fill="#ffffff" stroke={col} strokeWidth="0.75" opacity="0.7" />
+            <rect x="10" y="6" width="60" height="28" rx="10" fill={col} opacity="0.08" />
+            <rect x="20" y="41" width="40" height="3" rx="1.5" fill={col} opacity="0.25" />
+        </svg>
+    ),
+    // ── seller_info: authority-split ─────────────────────────────────────────
     'authority-split': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#ffffff" />
