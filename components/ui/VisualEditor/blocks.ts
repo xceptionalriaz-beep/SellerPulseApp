@@ -2698,9 +2698,27 @@ ${thumbCells}
             category: 'Media' as BlockCategory,
             icon: 'image',
             description: 'Brand and certification logos row',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#f8f7ff',
+                logo1Url: '',
+                logo2Url: '',
+                logo3Url: '',
+                logo4Url: '',
+                logo5Url: '',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & { variant?: string; caption?: string; captionColor?: string; accentColor?: string }
+                const p = props as CommonProps & {
+                    variant?: string
+                    caption?: string
+                    captionColor?: string
+                    accentColor?: string
+                    logo1Url?: string
+                    logo2Url?: string
+                    logo3Url?: string
+                    logo4Url?: string
+                    logo5Url?: string
+                }
                 return _getLogoBarVariant(p.variant ?? 'flat-row').toHtml(p, id)
             },
         },

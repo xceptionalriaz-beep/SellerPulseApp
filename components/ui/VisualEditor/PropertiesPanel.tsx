@@ -2128,6 +2128,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="10" y="44" width="60" height="2" rx="1" fill="white" opacity="0.2" />
         </svg>
     ),
+
     // ── seller_info: authority-split ─────────────────────────────────────────
     'authority-split': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
