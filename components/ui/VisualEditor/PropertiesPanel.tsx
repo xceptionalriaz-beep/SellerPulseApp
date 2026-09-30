@@ -33,6 +33,9 @@ import {
     MousePointer2,
     PanelTop, Navigation, Flame, Grid2x2,
     MousePointerClick, LayoutPanelTop, Code2,
+    Gift, Star, File, Globe, Shield, Store, Menu,
+    Clock, Share2, ChevronRight, Type, Quote,
+    Check, CreditCard, HelpCircle, LayoutTemplate,
     type LucideIcon,
     Layers,
 } from 'lucide-react'
@@ -129,6 +132,22 @@ const BLOCK_ICONS: Record<string, LucideIcon> = {
     'mouse-pointer-click': MousePointerClick,
     'layout-panel-top': LayoutPanelTop,
     'code-2': Code2,
+    'gift': Gift,
+    'star': Star,
+    'file': File,
+    'globe': Globe,
+    'shield': Shield,
+    'store': Store,
+    'menu': Menu,
+    'clock': Clock,
+    'share': Share2,
+    'chevron-right': ChevronRight,
+    'type': Type,
+    'quote': Quote,
+    'check': Check,
+    'credit-card': CreditCard,
+    'help-circle': HelpCircle,
+    'layout-template': LayoutTemplate,
 }
 
 // ── Placeholder group type (mirrors PLACEHOLDER_GROUPS in page.tsx) ───────────
