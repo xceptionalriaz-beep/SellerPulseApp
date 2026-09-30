@@ -2776,7 +2776,20 @@ ${thumbCells}
             category: 'eBay Specific' as BlockCategory,
             icon: 'gift',
             description: 'Buy more save more offer block',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535' } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#1e1535',
+                priceColor: '#ffffff',
+                badgeColor: '#b8fa33',
+                badgeText: '#1e1535',
+                heading: '🎁 Bundle & Save',
+                qty1Label: 'Buy 1',
+                qty2Label: 'Buy 2',
+                qty3Label: 'Buy 3+',
+                save2Label: 'Save 10%',
+                save3Label: 'Save 20%',
+                variant: 'tri-tier-columns',
+            } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & {
                     heading?: string
@@ -2788,20 +2801,10 @@ ${thumbCells}
                     qty3Label?: string
                     save2Label?: string
                     save3Label?: string
+                    variant?: string
                 }
-                const headingText = p.heading ?? '🎁 Bundle &amp; Save'
-                const priceColor = p.priceColor ?? '#ffffff'
-                const badgeColor = p.badgeColor ?? '#b8fa33'
-                const badgeText = p.badgeText ?? '#1e1535'
-                const bgColor = p.bgColor ?? '#1e1535'
-                const deals = [
-                    { qty: p.qty1Label ?? 'Buy 1', price: '{{ITEM_PRICE}}', save: '' },
-                    { qty: p.qty2Label ?? 'Buy 2', price: '{{PRICE_2}}', save: p.save2Label ?? 'Save 10%' },
-                    { qty: p.qty3Label ?? 'Buy 3+', price: '{{PRICE_3}}', save: p.save3Label ?? 'Save 20%' },
-                ]
-                const cells = deals.map((d, i) => `<td width="33%" style="padding:12px;text-align:center;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${i === 0 ? '#9ca3af' : badgeColor};text-transform:uppercase;">${d.qty}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:20px;font-weight:700;color:${priceColor};">${d.price}</p>${d.save ? `<span style="background-color:${badgeColor};color:${badgeText};font-family:Arial,sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;">${d.save}</span>` : `<span style="font-family:Arial,sans-serif;font-size:11px;color:#6b7280;">each</span>`}</td>`).join('<td style="width:1px;background-color:#3d3858;"></td>')
                 return wrapBlock('bundle_deal' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${bgColor};${pad(p)}border-radius:8px;"><p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${priceColor};text-align:center;">${headingText}</p><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                    _getBundleDealVariant(p.variant ?? 'tri-tier-columns').toHtml(p, id))
             },
         },
 
