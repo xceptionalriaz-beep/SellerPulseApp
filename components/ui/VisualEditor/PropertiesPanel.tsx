@@ -4997,6 +4997,20 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     <Section title="Heading">
                         <TextInput label="Heading" value={props.heading ?? '🎁 Bundle & Save'} onChange={v => updateProps({ heading: v })} />
                     </Section>
+                    <Section title="Tier Labels">
+                        <TextInput label="Tier 1 label" value={props.qty1Label ?? 'Buy 1'} onChange={v => updateProps({ qty1Label: v })} />
+                        <TextInput label="Tier 2 label" value={props.qty2Label ?? 'Buy 2'} onChange={v => updateProps({ qty2Label: v })} />
+                        <TextInput label="Tier 3 label" value={props.qty3Label ?? 'Buy 3+'} onChange={v => updateProps({ qty3Label: v })} />
+                    </Section>
+                    <Section title="Discount Badges">
+                        <TextInput label="Tier 2 saving" value={props.save2Label ?? 'Save 10%'} onChange={v => updateProps({ save2Label: v })} />
+                        <TextInput label="Tier 3 saving" value={props.save3Label ?? 'Save 20%'} onChange={v => updateProps({ save3Label: v })} />
+                    </Section>
+                    <Section title="Price Tokens">
+                        <InfoBox>Use these tokens in your eBay listing — they are replaced with real prices at runtime.</InfoBox>
+                        {phButton('price2', '{{PRICE_2}}')}
+                        {phButton('price3', '{{PRICE_3}}')}
+                    </Section>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Price colour" value={props.priceColor ?? '#ffffff'} onChange={v => updateProps({ priceColor: v })} />
