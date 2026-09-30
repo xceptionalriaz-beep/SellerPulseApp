@@ -4593,6 +4593,31 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
         }
 
+        case 'product_description':
+            return (
+                <>
+                    <Section title="Description text">
+                        <TextareaInput
+                            label="Body text"
+                            value={props.text ?? '{{ITEM_DESCRIPTION}}'}
+                            rows={6}
+                            onChange={v => updateProps({ text: v })}
+                        />
+                        {phButton('text', 'description body')}
+                    </Section>
+                    {(props.showTitle ?? true) && (
+                        <Section title="Section title">
+                            <TextInput
+                                label="Title text"
+                                value={props.titleText ?? 'Product Description'}
+                                onChange={v => updateProps({ titleText: v })}
+                            />
+                            {phButton('titleText', 'section title')}
+                        </Section>
+                    )}
+                </>
+            )
+
         case 'banner':
             return (
                 <>
