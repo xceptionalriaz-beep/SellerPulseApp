@@ -2587,6 +2587,146 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <line x1="14" y1="38" x2="66" y2="38" stroke="#e5e7eb" strokeWidth="0.8" />
         </svg>
     ),
+
+    // ── store_footer: classic-dark-band ───────────────────────────────────────
+    'classic-dark-band': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="14" y="15" width="10" height="3" rx="1.5" fill="#ffffff" />
+            <circle cx="28" cy="16.5" r="1" fill="rgba(255,255,255,0.4)" />
+            <rect x="32" y="15" width="10" height="3" rx="1.5" fill="#ffffff" />
+            <circle cx="46" cy="16.5" r="1" fill="rgba(255,255,255,0.4)" />
+            <rect x="50" y="15" width="10" height="3" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="27" width="40" height="2" rx="1" fill="rgba(255,255,255,0.5)" />
+        </svg>
+    ),
+
+    // ── store_footer: footer-minimalist-inline ────────────────────────────────
+    'footer-minimalist-inline': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="12" x2="80" y2="12" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="22" width="22" height="3" rx="1" fill="#94a3b8" />
+            <rect x="42" y="22" width="8" height="3" rx="1" fill="#475569" />
+            <rect x="54" y="22" width="8" height="3" rx="1" fill="#475569" />
+            <rect x="66" y="22" width="8" height="3" rx="1" fill="#475569" />
+        </svg>
+    ),
+
+    // ── store_footer: two-column-brand-split ──────────────────────────────────
+    'two-column-brand-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="8" y="14" width="16" height="5" rx="1.5" fill="#ffffff" />
+            <rect x="26" y="15" width="10" height="3" rx="1.5" fill="#b8fa33" />
+            <rect x="8" y="24" width="22" height="2" rx="1" fill="rgba(255,255,255,0.4)" />
+            <rect x="46" y="15" width="13" height="4" rx="1.5" fill="rgba(255,255,255,0.12)" />
+            <rect x="62" y="15" width="13" height="4" rx="1.5" fill="rgba(255,255,255,0.12)" />
+            <rect x="54" y="23" width="14" height="4" rx="1.5" fill="rgba(255,255,255,0.12)" />
+        </svg>
+    ),
+
+    // ── store_footer: trust-secure-payment-bar ────────────────────────────────
+    'trust-secure-payment-bar': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="18" y="10" width="12" height="3" rx="1" fill="#1e293b" />
+            <rect x="34" y="10" width="12" height="3" rx="1" fill="#1e293b" />
+            <rect x="50" y="10" width="12" height="3" rx="1" fill="#1e293b" />
+            <line x1="0" y1="20" x2="80" y2="20" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="0" y="20.5" width="80" height="27.5" fill="#ffffff" />
+            <rect x="8" y="29" width="14" height="4" rx="1.5" fill="#dcfce7" stroke="#16a34a" strokeWidth="0.5" />
+            <rect x="26" y="29" width="14" height="4" rx="1.5" fill="#e0f2fe" stroke="#0369a1" strokeWidth="0.5" />
+            <rect x="48" y="29" width="24" height="2.5" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    // ── store_footer: multi-row-navigation-hub ────────────────────────────────
+    'multi-row-navigation-hub': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="10" y="8" width="16" height="5" rx="2.5" fill="rgba(255,255,255,0.15)" />
+            <rect x="30" y="8" width="18" height="5" rx="2.5" fill="rgba(255,255,255,0.15)" />
+            <rect x="52" y="8" width="16" height="5" rx="2.5" fill="rgba(255,255,255,0.15)" />
+            <rect x="18" y="19" width="12" height="3" rx="1" fill="#b8fa33" />
+            <rect x="34" y="19" width="12" height="3" rx="1" fill="#b8fa33" />
+            <rect x="50" y="19" width="12" height="3" rx="1" fill="#b8fa33" />
+            <line x1="16" y1="29" x2="64" y2="29" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
+            <rect x="22" y="34" width="36" height="2.5" rx="1" fill="rgba(255,255,255,0.5)" />
+        </svg>
+    ),
+
+    // ── store_footer: executive-dark-accent ───────────────────────────────────
+    'executive-dark-accent': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="20" y="8" width="40" height="12" rx="3" fill="#b8fa33" />
+            <rect x="28" y="12.5" width="24" height="3" rx="1" fill="#1e1535" />
+            <rect x="16" y="26" width="12" height="3" rx="1" fill="#ffffff" />
+            <rect x="34" y="26" width="12" height="3" rx="1" fill="#ffffff" />
+            <rect x="52" y="26" width="12" height="3" rx="1" fill="#ffffff" />
+            <rect x="24" y="36" width="32" height="2" rx="1" fill="rgba(255,255,255,0.4)" />
+        </svg>
+    ),
+
+    // ── store_footer: footer-modern-glass ─────────────────────────────────────
+    'footer-modern-glass': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8" />
+            <circle cx="12" cy="18" r="2" fill="#4ade80" />
+            <rect x="17" y="16" width="16" height="4" rx="1" fill="#ffffff" />
+            <rect x="10" y="26" width="22" height="2" rx="1" fill="rgba(255,255,255,0.5)" />
+            <rect x="42" y="16" width="14" height="6" rx="2" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+            <rect x="60" y="16" width="14" height="6" rx="2" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+        </svg>
+    ),
+
+    // ── store_footer: wholesale-compliance ────────────────────────────────────
+    'wholesale-compliance': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="0" y="0" width="80" height="18" fill="#f1f5f9" />
+            <rect x="8" y="5" width="32" height="3" rx="1" fill="#0f172a" />
+            <rect x="8" y="10" width="64" height="2" rx="1" fill="#94a3b8" />
+            <line x1="0" y1="18" x2="80" y2="18" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="8" y="27" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="24" y="27" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="46" y="27" width="26" height="2.5" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    // ── store_footer: spotlight-policy ────────────────────────────────────────
+    'spotlight-policy': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="10" y="8" width="14" height="8" rx="2" fill="#eff6ff" />
+            <rect x="33" y="8" width="14" height="8" rx="2" fill="#eff6ff" />
+            <rect x="56" y="8" width="14" height="8" rx="2" fill="#eff6ff" />
+            <rect x="9" y="19" width="16" height="2" rx="1" fill="#1e1535" />
+            <rect x="32" y="19" width="16" height="2" rx="1" fill="#1e1535" />
+            <rect x="55" y="19" width="16" height="2" rx="1" fill="#1e1535" />
+            <line x1="0" y1="26" x2="80" y2="26" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="0" y="26.5" width="80" height="21.5" fill="#f8fafc" />
+            <rect x="12" y="34" width="12" height="3" rx="1" fill="#1e1535" />
+            <rect x="28" y="34" width="12" height="3" rx="1" fill="#1e1535" />
+            <rect x="48" y="34" width="22" height="2.5" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    // ── store_footer: footer-elite-luxury ─────────────────────────────────────
+    'footer-elite-luxury': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="0" y="0" width="80" height="2.5" fill="#d97706" />
+            <rect x="26" y="8" width="28" height="2.5" rx="1" fill="#d97706" />
+            <line x1="18" y1="16" x2="62" y2="16" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="22" y="21" width="10" height="3" rx="1" fill="#111827" />
+            <rect x="36" y="21" width="8" height="3" rx="1" fill="#111827" />
+            <rect x="48" y="21" width="10" height="3" rx="1" fill="#111827" />
+            <line x1="18" y1="29" x2="62" y2="29" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="25" y="35" width="30" height="2" rx="1" fill="#9ca3af" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -3017,7 +3157,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}

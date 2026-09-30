@@ -13,38 +13,99 @@ export interface BlockVariant {
     toHtml: (props: any, id: string) => string
 }
 
-// ─── Shared helpers ───────────────────────────────────────────────────────────
+// ─── Shared helpers & Token Sanitization ─────────────────────────────────────
 function pad(p: any): string {
-    return `padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;`
+    const top = p.paddingTop ?? 16
+    const right = p.paddingRight ?? 22
+    const bottom = p.paddingBottom ?? 16
+    const left = p.paddingLeft ?? 22
+    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
+
 function bg(p: any, defaultBg = '#ffffff'): string {
     return p.bgColor ?? defaultBg
 }
+
 function priceCol(p: any, defaultCol = '#1e1535'): string {
     return p.priceColor ?? p.textColor ?? defaultCol
 }
+
 function strikeCol(p: any): string {
     return p.strikeColor ?? p.originalColor ?? '#94a3b8'
 }
+
 function badgeBg(p: any, defaultBg = '#dc2626'): string {
     return p.badgeBg ?? p.badgeColor ?? defaultBg
 }
+
 function badgeTxt(p: any, defaultTxt = '#ffffff'): string {
     return p.badgeText ?? p.badgeTextColor ?? defaultTxt
 }
+
+/**
+ * Token Sanitizer:
+ * In the visual design canvas, raw unparsed tokens or messy formulas
+ * (e.g. {{ITEM_PRICE}}, {{ORIGINAL_PRICE}}, {{ITEM_PRICE - ORIGINAL_PRICE...}})
+ * create extreme visual clutter. We cleanly resolve them to professional,
+ * realistic defaults while preserving any real user-configured values.
+ */
 function itemPrice(p: any): string {
-    return p.itemPrice ?? '{{ITEM_PRICE}}'
+    const val = p.itemPrice ?? p.price
+    if (
+        !val ||
+        typeof val !== 'string' ||
+        val.trim() === '' ||
+        val.includes('{{ITEM_PRICE') ||
+        val.includes('{{PRICE')
+    ) {
+        return p.preserveTokens ? '{{ITEM_PRICE}}' : '$19.99'
+    }
+    return val.trim()
 }
+
 function origPrice(p: any): string {
-    return p.originalPrice ?? '{{ORIGINAL_PRICE}}'
+    const val = p.originalPrice ?? p.wasPrice ?? p.msrp
+    if (
+        !val ||
+        typeof val !== 'string' ||
+        val.trim() === '' ||
+        val.includes('{{ORIGINAL_PRICE') ||
+        val.includes('{{MSRP')
+    ) {
+        return p.preserveTokens ? '{{ORIGINAL_PRICE}}' : '$29.99'
+    }
+    return val.trim()
 }
+
 function discPercent(p: any): string {
-    const val = String(p.discountPercent ?? '{{DISCOUNT_PERCENT}}').trim()
-    return val.endsWith('%') ? val.slice(0, -1) : val
+    const val = p.discountPercent ?? p.savingsPercent
+    if (
+        val == null ||
+        (typeof val !== 'string' && typeof val !== 'number') ||
+        String(val).trim() === '' ||
+        String(val).includes('{{DISCOUNT_PERCENT') ||
+        String(val).includes('ORIGINAL_PRICE')
+    ) {
+        return p.preserveTokens ? '{{DISCOUNT_PERCENT}}' : '33'
+    }
+    const str = String(val).trim()
+    return str.endsWith('%') ? str.slice(0, -1) : str
 }
+
 function discAmount(p: any): string {
-    return p.discountAmount ?? '{{DISCOUNT_AMOUNT}}'
+    const val = p.discountAmount ?? p.savingsAmount
+    if (
+        !val ||
+        typeof val !== 'string' ||
+        val.trim() === '' ||
+        val.includes('{{DISCOUNT_AMOUNT') ||
+        val.includes('ORIGINAL_PRICE')
+    ) {
+        return p.preserveTokens ? '{{DISCOUNT_AMOUNT}}' : '$10.00'
+    }
+    return val.trim()
 }
+
 function font(p: any): string {
     return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : 'Arial, sans-serif'
 }
@@ -53,31 +114,35 @@ function font(p: any): string {
 // VARIANT 1 — classic-strike  [FREE DEFAULT]
 // Clean, traditional eBay layout: Strikethrough Was price on left, large bold
 // current price in center, and high-visibility savings badge on right.
+// Uses responsive flex gap alignment to guarantee zero badge clipping or wrapping.
 // ─────────────────────────────────────────────────────────────────────────────
 function classicStrike(p: any, id: string): string {
     const f = font(p)
     const bColor = p.borderColor ?? '#e2e8f0'
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border:1px solid ${bColor};border-radius:8px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="vertical-align:middle;text-align:left;" width="32%">
-            <span style="font-size:11px;font-weight:700;color:${strikeCol(p)};text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:2px;">Original Price</span>
-            <span style="font-size:17px;font-weight:600;color:${strikeCol(p)};text-decoration:line-through;line-height:1;white-space:nowrap;">Was ${origPrice(p)}</span>
-          </td>
-          <td style="vertical-align:middle;text-align:center;padding:0 8px;" width="36%">
-            <span style="font-size:32px;font-weight:900;color:${priceCol(p)};line-height:1;letter-spacing:-0.5px;white-space:nowrap;">${itemPrice(p)}</span>
-          </td>
-          <td style="vertical-align:middle;text-align:right;" width="32%">
-            <span style="display:inline-block;background-color:${badgeBg(p)};color:${badgeTxt(p)};font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.1);white-space:nowrap;">
-              SAVE ${discPercent(p)}%
-            </span>
-          </td>
-        </tr>
-      </table>
+    <td style="background-color:${bg(p)};${pad(p)}border:1px solid ${bColor};border-radius:10px;box-sizing:border-box;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;width:100%;box-sizing:border-box;">
+        <!-- Left: Original Retail / Strikethrough -->
+        <div style="flex:1 1 140px;min-width:120px;text-align:left;box-sizing:border-box;">
+          <span style="font-size:10.5px;font-weight:700;color:${strikeCol(p)};text-transform:uppercase;letter-spacing:1px;display:block;margin:0 0 3px 0;line-height:1.2;">Original Price</span>
+          <span style="font-size:16px;font-weight:600;color:${strikeCol(p)};text-decoration:line-through;line-height:1.2;white-space:nowrap;">Was ${origPrice(p)}</span>
+        </div>
+
+        <!-- Center: Current Active Price -->
+        <div style="flex-shrink:0;text-align:center;padding:0 6px;box-sizing:border-box;">
+          <span style="font-size:34px;font-weight:900;color:${priceCol(p)};line-height:1.15;letter-spacing:-0.5px;white-space:nowrap;display:inline-block;">${itemPrice(p)}</span>
+        </div>
+
+        <!-- Right: Contained Savings Badge -->
+        <div style="flex:1 1 140px;min-width:120px;text-align:right;box-sizing:border-box;">
+          <span style="display:inline-block;box-sizing:border-box;background-color:${badgeBg(p)};color:${badgeTxt(p)};font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;padding:8px 16px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.12);white-space:nowrap;line-height:1.2;max-width:100%;">
+            SAVE ${discPercent(p)}%
+          </span>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
@@ -92,27 +157,17 @@ function minimalistInline(p: any, id: string): string {
     const f = font(p)
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p, '#f8fafc')};padding:10px 16px;border-radius:6px;border:1px solid #e2e8f0;">
-      <table cellpadding="0" cellspacing="0" border="0" align="left">
-        <tr>
-          <td style="vertical-align:middle;padding-right:8px;">
-            <span style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Price:</span>
-          </td>
-          <td style="vertical-align:middle;padding-right:12px;">
-            <span style="font-size:22px;font-weight:800;color:${priceCol(p)};line-height:1;">${itemPrice(p)}</span>
-          </td>
-          <td style="vertical-align:middle;padding-right:12px;">
-            <span style="font-size:13px;font-weight:500;color:${strikeCol(p)};text-decoration:line-through;">${origPrice(p)}</span>
-          </td>
-          <td style="vertical-align:middle;">
-            <span style="display:inline-block;background-color:${badgeBg(p, '#16a34a')};color:${badgeTxt(p)};font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap;">
-              -${discPercent(p)}%
-            </span>
-          </td>
-        </tr>
-      </table>
+    <td style="background-color:${bg(p, '#f8fafc')};padding:12px 18px;border-radius:8px;border:1px solid #e2e8f0;box-sizing:border-box;">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px 14px;width:100%;box-sizing:border-box;">
+        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;line-height:1.2;">Price:</span>
+        <span style="font-size:26px;font-weight:900;color:${priceCol(p)};line-height:1.15;letter-spacing:-0.4px;">${itemPrice(p)}</span>
+        <span style="font-size:14px;font-weight:500;color:${strikeCol(p)};text-decoration:line-through;line-height:1.2;">${origPrice(p)}</span>
+        <span style="display:inline-block;box-sizing:border-box;background-color:${badgeBg(p, '#16a34a')};color:${badgeTxt(p)};font-size:11px;font-weight:800;padding:4px 10px;border-radius:100px;white-space:nowrap;letter-spacing:0.5px;line-height:1.2;flex-shrink:0;">
+          -${discPercent(p)}%
+        </span>
+      </div>
     </td>
   </tr>
 </table>
@@ -128,33 +183,29 @@ function stackedDealCard(p: any, id: string): string {
     const accent = badgeBg(p, '#1e1535')
     const accentTxt = badgeTxt(p, '#b8fa33')
     const topPad = p.paddingTop ?? 20
-    const sidePad = p.paddingRight ?? 24
+    const sidePad = p.paddingRight ?? 22
     const botPad = p.paddingBottom ?? 16
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p)};border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-      <div style="padding:${topPad}px ${sidePad}px ${botPad}px;text-align:center;">
-        <div style="font-size:11px;font-weight:700;color:${strikeCol(p)};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">
+    <td style="background-color:${bg(p)};border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.04);box-sizing:border-box;">
+      <div style="padding:${topPad}px ${sidePad}px ${botPad}px;text-align:center;box-sizing:border-box;">
+        <div style="font-size:11px;font-weight:700;color:${strikeCol(p)};text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px 0;line-height:1.2;">
           Retail MSRP: <span style="text-decoration:line-through;">${origPrice(p)}</span>
         </div>
-        <div style="font-size:38px;font-weight:900;color:${priceCol(p)};line-height:1;margin-bottom:4px;letter-spacing:-1px;">
+        <div style="font-size:36px;font-weight:900;color:${priceCol(p)};line-height:1.15;margin:0 0 6px 0;letter-spacing:-0.8px;">
           ${itemPrice(p)}
         </div>
-        <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:1px;">
+        <div style="font-size:11.5px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;line-height:1.3;margin:0;">
           Special Buy It Now Price
         </div>
       </div>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${accent};">
-        <tr>
-          <td style="padding:10px 16px;text-align:center;">
-            <span style="font-size:12px;font-weight:800;color:${accentTxt};letter-spacing:1px;text-transform:uppercase;">
-              &#128293; You Save ${discAmount(p)} (${discPercent(p)}% Off Retail)
-            </span>
-          </td>
-        </tr>
-      </table>
+      <div style="background-color:${accent};padding:11px 16px;text-align:center;box-sizing:border-box;">
+        <span style="font-size:12px;font-weight:800;color:${accentTxt};letter-spacing:0.8px;text-transform:uppercase;display:block;line-height:1.3;max-width:100%;word-break:break-word;">
+          &#128293; You Save ${discAmount(p)} (${discPercent(p)}% Off Retail)
+        </span>
+      </div>
     </td>
   </tr>
 </table>
@@ -164,6 +215,7 @@ function stackedDealCard(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 4 — discount-badge-pill  [PRO]
 // Large current price on left with oversized floating curved pill badge.
+// Flex layout ensures the pill badge never wraps awkwardly or spills over.
 // ─────────────────────────────────────────────────────────────────────────────
 function discountBadgePill(p: any, id: string): string {
     const f = font(p)
@@ -171,34 +223,31 @@ function discountBadgePill(p: any, id: string): string {
     const pillTxt = badgeTxt(p, '#0a0d08')
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p, '#f8fafc')};${pad(p)}border:1px solid #e2e8f0;border-radius:12px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="vertical-align:middle;text-align:left;">
-            <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
-              Special Listing Price
-            </div>
-            <div style="font-size:34px;font-weight:900;color:${priceCol(p)};line-height:1;margin-bottom:6px;">
-              ${itemPrice(p)}
-              <span style="font-size:15px;font-weight:500;color:${strikeCol(p)};text-decoration:line-through;margin-left:8px;">${origPrice(p)}</span>
-            </div>
-            <div style="font-size:11px;color:#16a34a;font-weight:700;">
-              &#10003; In Stock &amp; Ready for Fast Dispatch
-            </div>
-          </td>
-          <td style="vertical-align:middle;text-align:right;" width="40%">
-            <table cellpadding="0" cellspacing="0" border="0" align="right">
-              <tr>
-                <td style="background-color:${pillCol};color:${pillTxt};font-size:13px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;padding:10px 20px;border-radius:100px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);white-space:nowrap;">
-                  SAVE ${discPercent(p)}%
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
+    <td style="background-color:${bg(p, '#f8fafc')};${pad(p)}border:1px solid #e2e8f0;border-radius:12px;box-sizing:border-box;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
+        <!-- Left: Pricing Info -->
+        <div style="flex:1 1 200px;min-width:180px;text-align:left;box-sizing:border-box;">
+          <div style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px 0;line-height:1.2;">
+            Special Listing Price
+          </div>
+          <div style="font-size:34px;font-weight:900;color:${priceCol(p)};line-height:1.15;margin:0 0 6px 0;letter-spacing:-0.5px;">
+            ${itemPrice(p)}
+            <span style="font-size:15px;font-weight:500;color:${strikeCol(p)};text-decoration:line-through;margin-left:8px;vertical-align:middle;display:inline-block;">${origPrice(p)}</span>
+          </div>
+          <div style="font-size:11px;color:#16a34a;font-weight:700;line-height:1.3;margin:0;">
+            &#10003; In Stock &amp; Ready for Fast Dispatch
+          </div>
+        </div>
+
+        <!-- Right: Prominent Contained Pill Badge -->
+        <div style="flex-shrink:0;text-align:right;box-sizing:border-box;">
+          <div style="display:inline-block;box-sizing:border-box;background-color:${pillCol};color:${pillTxt};font-size:12.5px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;padding:10px 20px;border-radius:100px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,0.08);white-space:nowrap;line-height:1.2;max-width:100%;">
+            SAVE ${discPercent(p)}%
+          </div>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
@@ -207,8 +256,8 @@ function discountBadgePill(p: any, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 5 — dual-tone-split  [PRO]
-// Split block: 65% clean pricing on left, 35% solid brand accent on right.
-// Explicit corner radii prevent sharp corners bleeding in older WebKit views.
+// Split block: Clean pricing on left, solid contrast accent block on right.
+// Responsive flex wrap ensures graceful column stacking on mobile.
 // ─────────────────────────────────────────────────────────────────────────────
 function dualToneSplit(p: any, id: string): string {
     const f = font(p)
@@ -216,35 +265,36 @@ function dualToneSplit(p: any, id: string): string {
     const rightAccent = p.badgeColor ?? '#b8fa33'
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p)};border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td width="65%" style="padding:18px 24px;vertical-align:middle;text-align:left;border-radius:9px 0 0 9px;">
-            <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
-              Buy It Now Price
-            </div>
-            <div style="font-size:32px;font-weight:800;color:${priceCol(p)};line-height:1;margin-bottom:4px;">
-              ${itemPrice(p)}
-            </div>
-            <div style="font-size:12px;color:${strikeCol(p)};font-weight:500;">
-              MSRP: <span style="text-decoration:line-through;">${origPrice(p)}</span> &nbsp;&#8226;&nbsp; Free Returns
-            </div>
-          </td>
-          <td width="35%" style="background-color:${rightBg};padding:18px 16px;vertical-align:middle;text-align:center;border-radius:0 9px 9px 0;">
-            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">
-              Save Today
-            </div>
-            <div style="font-size:28px;font-weight:900;color:${rightAccent};line-height:1;margin-bottom:2px;">
-              ${discPercent(p)}%
-            </div>
-            <div style="font-size:9px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:1px;">
-              Instant Discount
-            </div>
-          </td>
-        </tr>
-      </table>
+    <td style="background-color:${bg(p)};border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:0;box-sizing:border-box;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+      <div style="display:flex;flex-wrap:wrap;width:100%;align-items:stretch;box-sizing:border-box;">
+        <!-- Left: Price details -->
+        <div style="flex:1 1 260px;min-width:200px;padding:20px 24px;text-align:left;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px 0;line-height:1.2;">
+            Buy It Now Price
+          </div>
+          <div style="font-size:34px;font-weight:900;color:${priceCol(p)};line-height:1.15;margin:0 0 6px 0;letter-spacing:-0.5px;">
+            ${itemPrice(p)}
+          </div>
+          <div style="font-size:12px;color:${strikeCol(p)};font-weight:500;line-height:1.4;margin:0;">
+            MSRP: <span style="text-decoration:line-through;">${origPrice(p)}</span> &nbsp;&#8226;&nbsp; Free Returns
+          </div>
+        </div>
+
+        <!-- Right: High-contrast Accent Zone -->
+        <div style="flex:0 1 170px;min-width:140px;background-color:${rightBg};padding:20px 16px;text-align:center;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;">
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1.5px;line-height:1.2;margin:0;">
+            Save Today
+          </div>
+          <div style="font-size:28px;font-weight:900;color:${rightAccent};line-height:1.1;margin:2px 0;">
+            ${discPercent(p)}%
+          </div>
+          <div style="font-size:9.5px;font-weight:800;color:#ffffff;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0;">
+            Instant Discount
+          </div>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
@@ -261,40 +311,38 @@ function urgencyBanner(p: any, id: string): string {
     const urgencyBg = p.bannerBg ?? '#dc2626'
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="border:1px solid #fecaca;border-radius:8px;overflow:hidden;background-color:${bg(p)};">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${urgencyBg};">
-        <tr>
-          <td style="padding:8px 16px;text-align:center;">
-            <span style="font-size:11px;font-weight:800;color:#ffffff;text-transform:uppercase;letter-spacing:1.5px;">
-              &#9889; Limited Time Promotional Price &nbsp;&#8226;&nbsp; While Stock Lasts
-            </span>
-          </td>
-        </tr>
-      </table>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="padding:16px 20px;vertical-align:middle;text-align:left;">
-            <span style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:2px;">
-              Flash Deal Active
-            </span>
-            <span style="font-size:32px;font-weight:900;color:${priceCol(p)};line-height:1;">
-              ${itemPrice(p)}
-            </span>
-            <span style="font-size:14px;color:${strikeCol(p)};text-decoration:line-through;margin-left:8px;">
+    <td style="border:1px solid #fecaca;border-radius:10px;overflow:hidden;background-color:${bg(p)};padding:0;box-sizing:border-box;">
+      <!-- Top Alert Bar -->
+      <div style="background-color:${urgencyBg};padding:9px 16px;text-align:center;box-sizing:border-box;">
+        <span style="font-size:11px;font-weight:800;color:#ffffff;text-transform:uppercase;letter-spacing:1.2px;line-height:1.3;display:block;">
+          &#9889; Limited Time Promotional Price &nbsp;&#8226;&nbsp; While Stock Lasts
+        </span>
+      </div>
+
+      <!-- Main Price Row -->
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding:18px 22px;box-sizing:border-box;width:100%;">
+        <div style="flex:1 1 180px;min-width:160px;text-align:left;box-sizing:border-box;">
+          <span style="font-size:10.5px;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:0.8px;display:block;margin:0 0 3px 0;line-height:1.2;">
+            Flash Deal Active
+          </span>
+          <div style="font-size:34px;font-weight:900;color:${priceCol(p)};line-height:1.15;letter-spacing:-0.5px;margin:0;">
+            ${itemPrice(p)}
+            <span style="font-size:15px;color:${strikeCol(p)};font-weight:500;text-decoration:line-through;margin-left:8px;vertical-align:middle;display:inline-block;">
               ${origPrice(p)}
             </span>
-          </td>
-          <td style="padding:16px 20px;vertical-align:middle;text-align:right;">
-            <div style="display:inline-block;background-color:#fee2e2;border:1px solid #fca5a5;padding:6px 14px;border-radius:6px;text-align:center;white-space:nowrap;">
-              <span style="font-size:11px;font-weight:800;color:#b91c1c;text-transform:uppercase;display:block;">
-                Save ${discAmount(p)} (${discPercent(p)}%)
-              </span>
-            </div>
-          </td>
-        </tr>
-      </table>
+          </div>
+        </div>
+
+        <div style="flex-shrink:0;text-align:right;box-sizing:border-box;">
+          <div style="display:inline-block;box-sizing:border-box;background-color:#fee2e2;border:1px solid #fca5a5;padding:8px 16px;border-radius:6px;text-align:center;white-space:nowrap;max-width:100%;">
+            <span style="font-size:11.5px;font-weight:800;color:#b91c1c;text-transform:uppercase;display:block;line-height:1.2;letter-spacing:0.5px;">
+              Save ${discAmount(p)} (${discPercent(p)}%)
+            </span>
+          </div>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
@@ -304,47 +352,50 @@ function urgencyBanner(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 7 — wholesale-b2b  [PREMIUM]
 // 4-column structured matrix: MSRP, Our Price, Total Savings & Unit Economics.
+// Overflow wrapper prevents matrix collapsing on narrow mobile viewports.
 // ─────────────────────────────────────────────────────────────────────────────
 function wholesaleB2b(p: any, id: string): string {
     const f = font(p)
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p)};border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr style="background-color:#f1f5f9;">
-          <td width="25%" style="padding:10px 12px;text-align:center;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
-            <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Standard MSRP</span>
-          </td>
-          <td width="28%" style="padding:10px 12px;text-align:center;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;background-color:#e2e8f0;">
-            <span style="font-size:10px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:1px;">eBay Direct Price</span>
-          </td>
-          <td width="24%" style="padding:10px 12px;text-align:center;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
-            <span style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">Your Margin</span>
-          </td>
-          <td width="23%" style="padding:10px 12px;text-align:center;border-bottom:1px solid #e2e8f0;">
-            <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Quantity Tier</span>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:16px 12px;text-align:center;border-right:1px solid #e2e8f0;vertical-align:middle;">
-            <span style="font-size:16px;font-weight:600;color:${strikeCol(p)};text-decoration:line-through;">${origPrice(p)}</span>
-          </td>
-          <td style="padding:16px 12px;text-align:center;border-right:1px solid #e2e8f0;vertical-align:middle;background-color:#fafafa;">
-            <span style="font-size:26px;font-weight:800;color:${priceCol(p)};line-height:1;">${itemPrice(p)}</span>
-          </td>
-          <td style="padding:16px 12px;text-align:center;border-right:1px solid #e2e8f0;vertical-align:middle;">
-            <span style="font-size:14px;font-weight:800;color:#16a34a;display:block;">Save ${discPercent(p)}%</span>
-            <span style="display:block;font-size:10px;color:#64748b;margin-top:2px;">(${discAmount(p)}/unit)</span>
-          </td>
-          <td style="padding:16px 12px;text-align:center;vertical-align:middle;">
-            <span style="display:inline-block;background-color:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;text-transform:uppercase;white-space:nowrap;">
-              Multi-Buy Eligible
-            </span>
-          </td>
-        </tr>
-      </table>
+    <td style="background-color:${bg(p)};border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;padding:0;box-sizing:border-box;">
+      <div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;min-width:440px;table-layout:fixed;">
+          <tr style="background-color:#f1f5f9;">
+            <th width="24%" style="padding:10px 8px;text-align:center;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;font-weight:700;box-sizing:border-box;">
+              <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;display:block;line-height:1.2;">Standard MSRP</span>
+            </th>
+            <th width="28%" style="padding:10px 8px;text-align:center;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;background-color:#e2e8f0;font-weight:800;box-sizing:border-box;">
+              <span style="font-size:10px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.8px;display:block;line-height:1.2;">eBay Direct Price</span>
+            </th>
+            <th width="25%" style="padding:10px 8px;text-align:center;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;font-weight:700;box-sizing:border-box;">
+              <span style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:0.8px;display:block;line-height:1.2;">Your Margin</span>
+            </th>
+            <th width="23%" style="padding:10px 8px;text-align:center;border-bottom:1px solid #e2e8f0;font-weight:700;box-sizing:border-box;">
+              <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;display:block;line-height:1.2;">Quantity Tier</span>
+            </th>
+          </tr>
+          <tr>
+            <td style="padding:14px 8px;text-align:center;border-right:1px solid #e2e8f0;vertical-align:middle;box-sizing:border-box;">
+              <span style="font-size:15px;font-weight:600;color:${strikeCol(p)};text-decoration:line-through;display:block;line-height:1.2;">${origPrice(p)}</span>
+            </td>
+            <td style="padding:14px 8px;text-align:center;border-right:1px solid #e2e8f0;vertical-align:middle;background-color:#fafafa;box-sizing:border-box;">
+              <span style="font-size:26px;font-weight:900;color:${priceCol(p)};line-height:1.15;display:block;letter-spacing:-0.4px;">${itemPrice(p)}</span>
+            </td>
+            <td style="padding:14px 8px;text-align:center;border-right:1px solid #e2e8f0;vertical-align:middle;box-sizing:border-box;">
+              <span style="font-size:13px;font-weight:800;color:#16a34a;display:block;line-height:1.2;">Save ${discPercent(p)}%</span>
+              <span style="display:block;font-size:9.5px;color:#64748b;margin-top:2px;line-height:1.2;">(${discAmount(p)}/unit)</span>
+            </td>
+            <td style="padding:14px 8px;text-align:center;vertical-align:middle;box-sizing:border-box;">
+              <span style="display:inline-block;box-sizing:border-box;background-color:#e0f2fe;color:#0369a1;font-size:9.5px;font-weight:800;padding:4px 8px;border-radius:4px;text-transform:uppercase;white-space:nowrap;line-height:1.2;max-width:100%;">
+                Multi-Buy
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
     </td>
   </tr>
 </table>
@@ -354,41 +405,56 @@ function wholesaleB2b(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 8 — modern-glassmorphism  [PREMIUM]
 // Contemporary SaaS-styled card with subtle double-border, soft shadow simulation
-// and high-end typography hierarchy.
+// and high-end typography hierarchy. Flex container prevents badge overflow.
 // ─────────────────────────────────────────────────────────────────────────────
 function modernGlassmorphism(p: any, id: string): string {
     const f = font(p)
+    const prCol = priceCol(p, '#1e1b4b')
+    const stCol = strikeCol(p)
+    const acCol = p.accentColor ?? '#4338ca'
+    const disc = discPercent(p)
+
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p, '#ffffff')};${pad(p)}border:1px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 14px rgba(79,70,229,0.06);">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="vertical-align:middle;text-align:left;">
-            <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
-              <tr>
-                <td style="background-color:#eef2ff;padding:3px 10px;border-radius:100px;border:1px solid #c7d2fe;">
-                  <span style="font-size:10px;font-weight:700;color:#4338ca;text-transform:uppercase;letter-spacing:1px;">Verified Best Deal</span>
-                </td>
-              </tr>
-            </table>
-            <div style="font-size:34px;font-weight:900;color:${priceCol(p, '#1e1b4b')};line-height:1;margin-bottom:4px;letter-spacing:-0.5px;">
-              ${itemPrice(p)}
-              <span style="font-size:14px;font-weight:500;color:${strikeCol(p)};text-decoration:line-through;margin-left:8px;">${origPrice(p)}</span>
-            </div>
-            <div style="font-size:11px;color:#6366f1;font-weight:600;">
-              Guaranteed Authentic &bull; 100% Buyer Protection
-            </div>
-          </td>
-          <td style="vertical-align:middle;text-align:right;" width="35%">
-            <div style="display:inline-block;background-color:#4338ca;color:#ffffff;padding:8px 16px;border-radius:8px;text-align:center;white-space:nowrap;">
-              <span style="font-size:12px;font-weight:800;letter-spacing:0.8px;display:block;">${discPercent(p)}% DISCOUNT</span>
-              <span style="font-size:9px;color:#c7d2fe;text-transform:uppercase;display:block;margin-top:2px;">Applied at Checkout</span>
-            </div>
-          </td>
-        </tr>
-      </table>
+    <td style="background-color:${bg(p, '#ffffff')};${pad(p)}border:1px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 14px rgba(79,70,229,0.06);box-sizing:border-box;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
+        <!-- Left: Pricing details & reassuring badges -->
+        <div style="flex:1 1 220px;min-width:200px;text-align:left;box-sizing:border-box;">
+          <!-- Top Verified Badge -->
+          <div style="margin:0 0 8px 0;">
+            <span style="display:inline-block;box-sizing:border-box;background-color:#eef2ff;color:${acCol};font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border-radius:100px;border:1px solid #c7d2fe;line-height:1.2;">
+              &#10003; Verified Best Deal
+            </span>
+          </div>
+
+          <!-- Price & Strikethrough Row -->
+          <div style="font-size:34px;font-weight:900;color:${prCol};line-height:1.15;margin:0 0 6px 0;letter-spacing:-0.5px;">
+            ${itemPrice(p)}
+            <span style="font-size:15px;font-weight:500;color:${stCol};text-decoration:line-through;margin-left:8px;vertical-align:middle;display:inline-block;">
+              ${origPrice(p)}
+            </span>
+          </div>
+
+          <!-- Bottom Reassurance Line -->
+          <div style="font-size:11.5px;color:#6366f1;font-weight:600;line-height:1.4;letter-spacing:0.2px;margin:0;">
+            Guaranteed Authentic &bull; 100% Buyer Protection
+          </div>
+        </div>
+
+        <!-- Right: Floating discount badge neatly contained -->
+        <div style="flex-shrink:0;text-align:right;box-sizing:border-box;">
+          <div style="display:inline-block;box-sizing:border-box;background-color:${acCol};color:#ffffff;padding:10px 18px;border-radius:10px;text-align:center;box-shadow:0 3px 10px rgba(67,56,202,0.22);max-width:200px;">
+            <span style="font-size:12px;font-weight:800;letter-spacing:0.8px;display:block;line-height:1.2;text-transform:uppercase;word-break:break-word;">
+              ${disc}% DISCOUNT
+            </span>
+            <span style="font-size:9px;color:#c7d2fe;text-transform:uppercase;letter-spacing:0.8px;display:block;margin-top:3px;opacity:0.95;line-height:1.2;">
+              Applied at Checkout
+            </span>
+          </div>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
@@ -398,6 +464,7 @@ function modernGlassmorphism(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 9 — high-contrast-flash  [PREMIUM]
 // Dark-themed background with neon green/lime pricing and angled ribbon style.
+// Contained layout prevents neon boxes from colliding with parent borders.
 // ─────────────────────────────────────────────────────────────────────────────
 function highContrastFlash(p: any, id: string): string {
     const f = font(p)
@@ -405,37 +472,38 @@ function highContrastFlash(p: any, id: string): string {
     const neonCol = p.badgeColor ?? '#8fff00'
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${darkBg};${pad(p)}border-radius:10px;border-left:5px solid ${neonCol};">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="vertical-align:middle;text-align:left;">
-            <div style="margin-bottom:6px;">
-              <span style="background-color:${neonCol};color:#0a0d08;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;padding:3px 9px;border-radius:3px;display:inline-block;">
-                &#9889; FLASH CLEARANCE
-              </span>
+    <td style="background-color:${darkBg};${pad(p)}border-radius:12px;border-left:5px solid ${neonCol};box-sizing:border-box;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
+        <!-- Left: Flash Deal info -->
+        <div style="flex:1 1 220px;min-width:180px;text-align:left;box-sizing:border-box;">
+          <div style="margin:0 0 8px 0;">
+            <span style="background-color:${neonCol};color:#0a0d08;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;padding:4px 10px;border-radius:4px;display:inline-block;line-height:1.2;box-sizing:border-box;">
+              &#9889; FLASH CLEARANCE
+            </span>
+          </div>
+          <div style="font-size:34px;font-weight:900;color:#ffffff;line-height:1.15;margin:0 0 6px 0;letter-spacing:-0.5px;">
+            ${itemPrice(p)}
+            <span style="font-size:15px;font-weight:500;color:rgba(255,255,255,0.45);text-decoration:line-through;margin-left:8px;vertical-align:middle;display:inline-block;">${origPrice(p)}</span>
+          </div>
+          <div style="font-size:11.5px;color:${neonCol};font-weight:700;letter-spacing:0.5px;line-height:1.4;margin:0;">
+            Save ${discAmount(p)} &bull; Limited Quantities at this price
+          </div>
+        </div>
+
+        <!-- Right: Neon Dashed Stamp -->
+        <div style="flex-shrink:0;text-align:right;box-sizing:border-box;">
+          <div style="display:inline-block;box-sizing:border-box;border:2px dashed ${neonCol};padding:10px 16px;border-radius:8px;text-align:center;white-space:nowrap;max-width:100%;">
+            <div style="font-size:22px;font-weight:900;color:${neonCol};line-height:1.1;">
+              -${discPercent(p)}%
             </div>
-            <div style="font-size:36px;font-weight:900;color:#ffffff;line-height:1;margin-bottom:4px;letter-spacing:-0.5px;">
-              ${itemPrice(p)}
-              <span style="font-size:15px;font-weight:500;color:rgba(255,255,255,0.4);text-decoration:line-through;margin-left:8px;">${origPrice(p)}</span>
+            <div style="font-size:9.5px;font-weight:800;color:#ffffff;text-transform:uppercase;letter-spacing:1px;margin-top:3px;line-height:1.2;">
+              Instant Off
             </div>
-            <div style="font-size:11px;color:${neonCol};font-weight:700;letter-spacing:0.5px;">
-              Save ${discAmount(p)} &bull; Limited Quantities at this price
-            </div>
-          </td>
-          <td style="vertical-align:middle;text-align:right;" width="30%">
-            <div style="display:inline-block;border:2px dashed ${neonCol};padding:8px 14px;border-radius:8px;text-align:center;white-space:nowrap;">
-              <div style="font-size:22px;font-weight:900;color:${neonCol};line-height:1;">
-                -${discPercent(p)}%
-              </div>
-              <div style="font-size:9px;font-weight:700;color:#ffffff;text-transform:uppercase;letter-spacing:1px;margin-top:2px;">
-                Instant Off
-              </div>
-            </div>
-          </td>
-        </tr>
-      </table>
+          </div>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
@@ -452,21 +520,21 @@ function eliteLuxury(p: any, id: string): string {
     const gold = p.accentColor ?? '#d97706'
     return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bg(p, '#ffffff')};${pad(p)}border:1px solid #d1d5db;border-top:3px solid ${gold};border-radius:4px;text-align:center;">
-      <div style="font-size:10px;font-weight:700;color:${gold};text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
+    <td style="background-color:${bg(p, '#ffffff')};${pad(p)}border:1px solid #d1d5db;border-top:3px solid ${gold};border-radius:6px;text-align:center;box-sizing:border-box;">
+      <div style="font-size:10.5px;font-weight:700;color:${gold};text-transform:uppercase;letter-spacing:2.5px;margin:0 0 8px 0;line-height:1.2;">
         &#9733; Exclusive Offering &#9733;
       </div>
-      <div style="font-size:34px;font-weight:400;color:${priceCol(p, '#111827')};line-height:1;margin-bottom:6px;letter-spacing:0.5px;">
+      <div style="font-size:34px;font-weight:700;color:${priceCol(p, '#111827')};line-height:1.15;margin:0 0 8px 0;letter-spacing:0.5px;">
         ${itemPrice(p)}
       </div>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">
+      <div style="font-size:12px;color:#6b7280;margin:0 0 12px 0;line-height:1.4;">
         Original Retail: <span style="text-decoration:line-through;color:${strikeCol(p)};">${origPrice(p)}</span>
         &nbsp;&bull;&nbsp;
         <span style="color:${gold};font-weight:600;">Privilege Savings ${discPercent(p)}%</span>
       </div>
-      <div style="display:inline-block;border-top:1px solid #e5e7eb;padding-top:8px;font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">
+      <div style="display:inline-block;box-sizing:border-box;border-top:1px solid #e5e7eb;padding-top:10px;font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;font-family:Arial,sans-serif;line-height:1.4;max-width:92%;">
         Complimentary Expedited Shipping &amp; White Glove Handling Included
       </div>
     </td>

@@ -1004,6 +1004,7 @@ import { getSingleImageVariant as _getSingleImageVariant } from './variants/sing
 import { getLogoBarVariant as _getLogoBarVariant } from './variants/logo_bar.variants'
 import { getBundleDealVariant as _getBundleDealVariant } from './variants/bundle_deal.variants'
 import { getPriceTagVariant as _getPriceTagVariant } from './variants/price_tag.variants'
+import { getStoreFooterVariant as _getStoreFooterVariant } from './variants/store_footer.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -3067,14 +3068,46 @@ ${thumbCells}
             label: 'Store Footer',
             category: 'Header & Footer' as BlockCategory,
             icon: 'layout',
-            description: 'Footer with links and copyright',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535' } as unknown as BlockProps,
+            description: 'Footer block with links and copyright',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#1e1535',
+                textColor: '#ffffff',
+                variant: 'classic-dark-band',
+                sellerName: '{{SELLER_NAME}}',
+                copyright: '© Trusted Seller · All rights reserved',
+                link1Text: 'All Listings',
+                link1Url: '#',
+                link2Text: 'About Us',
+                link2Url: '#',
+                link3Text: 'Feedback',
+                link3Url: '#',
+                link4Text: 'Returns Policy',
+                link4Url: '#',
+                link5Text: 'Contact Us',
+                link5Url: '#',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                const links = ['All Listings', 'Contact Us', 'Returns Policy', 'Feedback']
-                const cells = links.map(l => `<td style="padding:0 12px;"><a href="#" style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.6);text-decoration:none;">${l}</a></td>`).join('')
-                return wrapBlock('store_footer' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}text-align:center;"><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table><p style="margin:12px 0 0;font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.3);">&copy; {{SELLER_NAME}} &middot; All rights reserved</p></td></tr></table>`)
+                const p = props as CommonProps & {
+                    variant?: string
+                    bgColor?: string
+                    textColor?: string
+                    linkColor?: string
+                    sellerName?: string
+                    copyright?: string
+                    link1Text?: string
+                    link1Url?: string
+                    link2Text?: string
+                    link2Url?: string
+                    link3Text?: string
+                    link3Url?: string
+                    link4Text?: string
+                    link4Url?: string
+                    link5Text?: string
+                    link5Url?: string
+                }
+                const variantId = p.variant ?? 'classic-dark-band'
+                return wrapBlock('store_footer' as BlockType, id, _getStoreFooterVariant(variantId).toHtml(p, id))
             },
         },
 

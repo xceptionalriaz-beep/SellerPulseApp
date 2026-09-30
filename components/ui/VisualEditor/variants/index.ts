@@ -8,6 +8,7 @@ export { heroHeaderVariants, getHeroVariant } from './hero_header.variants'
 export { productImageVariants, getProductImageVariant } from './product_image.variants'
 export { priceBlockVariants, getPriceVariant } from './price_block.variants'
 export { priceTagVariants, getPriceTagVariant } from './price_tag.variants' // <── Added for Price Tag
+export { storeFooterVariants, getStoreFooterVariant } from './store_footer.variants'
 export { trustBadgesVariants, getTrustBadgesVariant } from './trust_badges.variants'
 export { navBarVariants, getNavBarVariant } from './nav_bar.variants'
 export { specsTableVariants, getSpecsTableVariant } from './specs_table.variants'
@@ -28,6 +29,7 @@ import { heroHeaderVariants } from './hero_header.variants'
 import { productImageVariants } from './product_image.variants'
 import { priceBlockVariants } from './price_block.variants'
 import { priceTagVariants } from './price_tag.variants' // <── Added for Price Tag
+import { storeFooterVariants } from './store_footer.variants'
 import { trustBadgesVariants } from './trust_badges.variants'
 import { navBarVariants } from './nav_bar.variants'
 import { specsTableVariants } from './specs_table.variants'
@@ -51,6 +53,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'product_image': productImageVariants,
     'price_block': priceBlockVariants,
     'price_tag': priceTagVariants, // <── Added for Price Tag
+    'store_footer': storeFooterVariants,
     'trust_badges': trustBadgesVariants,
     'nav_bar': navBarVariants,
     'specs_table': specsTableVariants,
