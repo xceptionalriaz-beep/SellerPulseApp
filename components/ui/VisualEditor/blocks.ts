@@ -3039,13 +3039,43 @@ ${thumbCells}
             category: 'Header & Footer' as BlockCategory,
             icon: 'menu',
             description: 'Horizontal store category link bar',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535', paddingTop: 10, paddingBottom: 10 } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#1e1535',
+                paddingTop: 10,
+                paddingBottom: 10,
+                links: [
+                    { label: 'Electronics', url: '#' },
+                    { label: 'Clothing', url: '#' },
+                    { label: 'Home & Garden', url: '#' },
+                    { label: 'Collectibles', url: '#' },
+                    { label: 'Auto Parts', url: '#' },
+                ],
+                separator: '|',
+                linkColor: 'rgba(255,255,255,0.8)',
+                fontSize: 13,
+                fontWeight: '600',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                const cats = ['Electronics', 'Clothing', 'Home & Garden', 'Collectibles', 'Auto Parts']
-                const links = cats.map(c => `<td style="padding:0 12px;"><a href="#" style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);text-decoration:none;font-weight:600;">${c}</a></td>`).join('')
+                const p = props as any
+                const defaultLinks = [
+                    { label: 'Electronics', url: '#' },
+                    { label: 'Clothing', url: '#' },
+                    { label: 'Home & Garden', url: '#' },
+                    { label: 'Collectibles', url: '#' },
+                    { label: 'Auto Parts', url: '#' },
+                ]
+                const navLinks: Array<{ label: string; url: string }> = (p.links && p.links.length > 0) ? p.links : defaultLinks
+                const sep = p.separator ?? '|'
+                const fontSize = p.fontSize ?? 13
+                const fontWeight = p.fontWeight ?? '600'
+                const linkColor = p.linkColor ?? 'rgba(255,255,255,0.8)'
+                const cells = navLinks.map((link: { label: string; url: string }, i: number) => {
+                    const sepCell = (i > 0 && sep) ? `<td style="padding:0 3px;font-family:Arial,sans-serif;font-size:${fontSize}px;color:rgba(255,255,255,0.3);">${sep}</td>` : ''
+                    return `${sepCell}<td style="padding:0 10px;"><a href="${link.url || '#'}" style="font-family:Arial,sans-serif;font-size:${fontSize}px;color:${linkColor};text-decoration:none;font-weight:${fontWeight};">${link.label}</a></td>`
+                }).join('')
                 return wrapBlock('category_nav' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}"><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${links}</tr></table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#1e1535'};${pad(p as CommonProps)}"><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
             },
         },
 

@@ -5548,14 +5548,21 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'category_nav':
             return (
                 <>
-                    <Section title="Categories">
-                        <InfoBox>One category per line.</InfoBox>
-                        <TextareaInput
-                            label="Categories (one per line)"
-                            value={Array.isArray(props.categories) ? props.categories.join('\n') : 'Electronics\nClothing\nHome & Garden\nCollectibles\nAuto Parts'}
-                            rows={5}
-                            onChange={v => updateProps({ categories: v.split('\n').filter((s: string) => s.trim()) })}
+                    <Section title={`Links (${(props.links ?? []).length}/8)`}>
+                        <NavLinksEditor
+                            links={props.links ?? [
+                                { label: 'Electronics', url: '#' },
+                                { label: 'Clothing', url: '#' },
+                                { label: 'Home & Garden', url: '#' },
+                                { label: 'Collectibles', url: '#' },
+                                { label: 'Auto Parts', url: '#' },
+                            ]}
+                            onChange={links => updateProps({ links })}
                         />
+                        <InfoBox>
+                            Paste your eBay Store category URL into each link.
+                            Example: https://www.ebay.com/str/yourstore/Clothing/_i.html
+                        </InfoBox>
                     </Section>
                     <Section title="Separator">
                         <SelectInput
