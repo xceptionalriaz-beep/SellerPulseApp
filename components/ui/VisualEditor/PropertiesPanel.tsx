@@ -2293,7 +2293,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: tri-tier-columns ─────────────────────────────────────────
-    'bundle_deal:tri-tier-columns': (col, light) => (
+    'tri-tier-columns': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="5" y="11" width="20" height="26" rx="2" fill="rgba(255,255,255,0.06)" />
@@ -2308,7 +2308,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: horizontal-ribbon ────────────────────────────────────────
-    'bundle_deal:horizontal-ribbon': (col, light) => (
+    'horizontal-ribbon': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="5" y="16" width="70" height="16" rx="2" fill="rgba(255,255,255,0.07)" />
@@ -2322,7 +2322,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: stacked-rows ─────────────────────────────────────────────
-    'bundle_deal:stacked-rows': (col, light) => (
+    'stacked-rows': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="5" y="9" width="2" height="9" rx="1" fill="#b8fa33" opacity="0.3" />
@@ -2337,7 +2337,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: floating-pill-grid ───────────────────────────────────────
-    'bundle_deal:floating-pill-grid': (col, light) => (
+    'floating-pill-grid': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="4" y="11" width="20" height="28" rx="3" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
@@ -2352,7 +2352,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: split-hero ───────────────────────────────────────────────
-    'bundle_deal:split-hero': (col, light) => (
+    'split-hero': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <line x1="32" y1="6" x2="32" y2="42" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
@@ -2368,7 +2368,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: minimal-monochrome ───────────────────────────────────────
-    'bundle_deal:minimal-monochrome': (col, light) => (
+    'minimal-monochrome': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="0.8" />
             <rect x="6" y="12" width="68" height="26" rx="2" fill="none" stroke="#e5e7eb" strokeWidth="0.8" />
@@ -2383,7 +2383,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: executive-highlight ─────────────────────────────────────
-    'bundle_deal:executive-highlight': (col, light) => (
+    'executive-highlight': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="4" y="12" width="20" height="26" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
@@ -2399,7 +2399,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: dark-escalator ───────────────────────────────────────────
-    'bundle_deal:dark-escalator': (col, light) => (
+    'dark-escalator': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="4" y="11" width="20" height="26" rx="2" fill="rgba(255,255,255,0.04)" />
@@ -2412,7 +2412,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: trophy-podium ────────────────────────────────────────────
-    'bundle_deal:trophy-podium': (col, light) => (
+    'trophy-podium': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="4" y="33" width="20" height="12" rx="2" fill="#6b7280" />
@@ -2425,7 +2425,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     ),
 
     // ── bundle_deal: countdown-strip ──────────────────────────────────────────
-    'bundle_deal:countdown-strip': (col, light) => (
+    'countdown-strip': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
             <rect x="0" y="0" width="80" height="10" rx="3" fill="#dc2626" />
