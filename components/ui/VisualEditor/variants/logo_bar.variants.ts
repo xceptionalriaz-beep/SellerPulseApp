@@ -49,11 +49,11 @@ const SVG_VISA = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 34" wi
   <text x="45" y="23" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">VISA</text>
 </svg>`
 
-// 3 — Mastercard: two overlapping circles (red + yellow) with Mastercard text
-const SVG_MASTERCARD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 34" width="90" height="34" aria-label="Mastercard">
-  <circle cx="32" cy="17" r="13" fill="#eb001b" opacity="0.92"/>
-  <circle cx="50" cy="17" r="13" fill="#f79e1b" opacity="0.92"/>
-  <ellipse cx="41" cy="17" rx="5" ry="13" fill="#ff5f00" opacity="0.85"/>
+// 3 — Mastercard: circles pulled closer for deeper overlap
+const SVG_MASTERCARD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 42" width="90" height="42" aria-label="Mastercard">
+  <circle cx="37" cy="14" r="12" fill="#eb001b"/>
+  <circle cx="53" cy="14" r="12" fill="#f79e1b" opacity="0.9"/>
+  <text x="45" y="35" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="700" fill="#231f20" text-anchor="middle" letter-spacing="0.3">mastercard</text>
 </svg>`
 
 // 4 — eBay Guaranteed: blue-outlined badge with star and "eBay" text
@@ -432,15 +432,17 @@ function spotlightCards(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 function glassMosaic(p: any, id: string): string {
   const ac = accent(p)
-  const circles = LOGO_NAMES.map((_n, i) => `
-      <td style="padding:0 10px;text-align:center;vertical-align:middle;">
+  // Wide frosted cards — logos need horizontal space, circles clip them badly
+  const cards = LOGO_NAMES.map((name, i) => `
+      <td style="padding:0 5px;text-align:center;vertical-align:middle;">
         <div style="background:linear-gradient(135deg,${ac} 0%,#9b6bff 100%);
-          border-radius:50%;padding:2px;display:inline-block;width:66px;height:66px;box-sizing:border-box;">
-          <div style="background-color:rgba(255,255,255,0.12);border-radius:50%;
-            width:62px;height:62px;display:table;text-align:center;">
-            <div style="display:table-cell;vertical-align:middle;">
-              ${renderLogo(p, i, 48)}
-            </div>
+          border-radius:10px;padding:1.5px;display:inline-block;width:100%;box-sizing:border-box;">
+          <div style="background-color:rgba(255,255,255,0.10);border-radius:9px;
+            padding:14px 8px 10px;text-align:center;">
+            ${renderLogo(p, i, 80)}
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;
+              color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.8px;
+              margin-top:8px;">${name}</div>
           </div>
         </div>
       </td>`).join('')
@@ -459,8 +461,8 @@ function glassMosaic(p: any, id: string): string {
               color:rgba(255,255,255,0.45);line-height:1.5;">
               Proudly stocking authentic products from world-class brands
             </p>
-            <table align="center" cellpadding="0" cellspacing="0" border="0">
-              <tr>${circles}</tr>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>${cards}</tr>
             </table>
             <p style="margin:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;
               color:rgba(255,255,255,0.35);letter-spacing:1px;">
