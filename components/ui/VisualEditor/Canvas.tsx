@@ -1099,6 +1099,19 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   var BLOCK_TYPE = "${block.type}";
   document.addEventListener('DOMContentLoaded', function() {
 
+    // Prevent all anchor link navigation inside the canvas editor.
+    // Without this, clicking href="#" (or any href) in a sandbox="allow-same-origin"
+    // iframe causes the iframe to navigate to the app URL, showing the dashboard
+    // inside the block preview. Capture phase ensures this fires before any other handler.
+    document.addEventListener('click', function(e) {
+      var t = e.target;
+      var link = (t && t.closest) ? t.closest('a') : (t && t.tagName === 'A' ? t : null);
+      if (link) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
     // In-place text editing on double click
     var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, td, li, blockquote';
     var activeEditable = null;
