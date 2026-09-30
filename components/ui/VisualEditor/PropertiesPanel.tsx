@@ -2457,6 +2457,136 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="55" y="30" width="14" height="4" rx="2" fill="#b8fa33" />
         </svg>
     ),
+
+    // ── price_tag: classic-strike ─────────────────────────────────────────────
+    'classic-strike': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="7" y="17" width="16" height="3" rx="1.5" fill="#94a3b8" />
+            <line x1="6" y1="18.5" x2="24" y2="18.5" stroke="#64748b" strokeWidth="1" />
+            <rect x="7" y="24" width="12" height="2" rx="1" fill="#cbd5e1" />
+            <rect x="29" y="17" width="22" height="14" rx="2" fill="#1e1535" />
+            <rect x="56" y="18" width="18" height="12" rx="2" fill="#dc2626" />
+            <rect x="59" y="22" width="12" height="4" rx="1" fill="#ffffff" />
+        </svg>
+    ),
+
+    // ── price_tag: minimalist-inline ──────────────────────────────────────────
+    'minimalist-inline': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="6" y="20" width="7" height="8" rx="1" fill="#94a3b8" opacity="0.6" />
+            <rect x="16" y="17" width="20" height="14" rx="2" fill="#1e1535" />
+            <line x1="40" y1="24" x2="52" y2="24" stroke="#94a3b8" strokeWidth="1" />
+            <rect x="40" y="22.5" width="12" height="3" rx="1" fill="#94a3b8" />
+            <rect x="56" y="19" width="18" height="10" rx="5" fill="#16a34a" />
+            <rect x="59" y="22.5" width="12" height="3" rx="1" fill="#ffffff" />
+        </svg>
+    ),
+
+    // ── price_tag: stacked-deal-card ──────────────────────────────────────────
+    'stacked-deal-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="25" y="8" width="30" height="3" rx="1.5" fill="#94a3b8" />
+            <line x1="38" y1="9.5" x2="55" y2="9.5" stroke="#64748b" strokeWidth="0.8" />
+            <rect x="23" y="14" width="34" height="13" rx="2" fill="#1e1535" />
+            <rect x="0" y="34" width="80" height="14" rx="0" fill="#1e1535" />
+            <rect x="18" y="39" width="44" height="4" rx="2" fill="#b8fa33" />
+        </svg>
+    ),
+
+    // ── price_tag: discount-badge-pill ────────────────────────────────────────
+    'discount-badge-pill': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="7" y="12" width="18" height="3" rx="1.5" fill="#94a3b8" />
+            <rect x="7" y="18" width="30" height="13" rx="2" fill="#1e1535" />
+            <rect x="7" y="34" width="22" height="3" rx="1" fill="#16a34a" />
+            <rect x="46" y="15" width="28" height="18" rx="9" fill="#8fff00" />
+            <rect x="51" y="22" width="18" height="4" rx="2" fill="#0a0d08" />
+        </svg>
+    ),
+
+    // ── price_tag: dual-tone-split ────────────────────────────────────────────
+    'dual-tone-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <path d="M50 0H77C78.6569 0 80 1.34315 80 3V45C80 46.6569 78.6569 48 77 48H50V0Z" fill="#1e1535" />
+            <rect x="8" y="12" width="18" height="3" rx="1.5" fill="#94a3b8" />
+            <rect x="8" y="18" width="28" height="12" rx="2" fill="#1e1535" />
+            <rect x="8" y="33" width="24" height="3" rx="1" fill="#cbd5e1" />
+            <rect x="56" y="14" width="18" height="3" rx="1" fill="rgba(255,255,255,0.6)" />
+            <rect x="54" y="21" width="22" height="9" rx="2" fill="#b8fa33" />
+            <rect x="57" y="34" width="16" height="3" rx="1" fill="#ffffff" />
+        </svg>
+    ),
+
+    // ── price_tag: urgency-banner ─────────────────────────────────────────────
+    'urgency-banner': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#fecaca" strokeWidth="0.8" />
+            <rect x="0" y="0" width="80" height="11" rx="0" fill="#dc2626" />
+            <rect x="14" y="4" width="52" height="3" rx="1.5" fill="#ffffff" />
+            <rect x="7" y="18" width="14" height="3" rx="1" fill="#dc2626" />
+            <rect x="7" y="24" width="28" height="12" rx="2" fill="#1e1535" />
+            <rect x="50" y="22" width="24" height="14" rx="3" fill="#fee2e2" stroke="#fca5a5" strokeWidth="0.8" />
+            <rect x="54" y="27" width="16" height="4" rx="1" fill="#b91c1c" />
+        </svg>
+    ),
+
+    // ── price_tag: wholesale-b2b ──────────────────────────────────────────────
+    'wholesale-b2b': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="0" y="0" width="80" height="12" fill="#f1f5f9" />
+            <line x1="20" y1="0" x2="20" y2="48" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="44" y1="0" x2="44" y2="48" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="62" y1="0" x2="62" y2="48" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="12" x2="80" y2="12" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="4" y="24" width="12" height="3" rx="1" fill="#94a3b8" />
+            <rect x="23" y="20" width="18" height="11" rx="2" fill="#0f172a" />
+            <rect x="47" y="22" width="12" height="4" rx="1" fill="#16a34a" />
+            <rect x="65" y="21" width="12" height="8" rx="2" fill="#e0f2fe" />
+        </svg>
+    ),
+
+    // ── price_tag: modern-glassmorphism ───────────────────────────────────────
+    'modern-glassmorphism': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#c7d2fe" strokeWidth="1" />
+            <rect x="6" y="8" width="22" height="4" rx="2" fill="#eef2ff" stroke="#c7d2fe" strokeWidth="0.5" />
+            <rect x="6" y="16" width="32" height="13" rx="2" fill="#1e1b4b" />
+            <rect x="6" y="33" width="24" height="3" rx="1.5" fill="#6366f1" />
+            <rect x="48" y="16" width="26" height="16" rx="3" fill="#4338ca" />
+            <rect x="52" y="22" width="18" height="4" rx="1" fill="#ffffff" />
+        </svg>
+    ),
+
+    // ── price_tag: high-contrast-flash ────────────────────────────────────────
+    'high-contrast-flash': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#0f172a" />
+            <rect x="0" y="0" width="3.5" height="48" rx="1.5" fill="#8fff00" />
+            <rect x="8" y="8" width="24" height="4" rx="1" fill="#8fff00" />
+            <rect x="8" y="16" width="34" height="13" rx="2" fill="#ffffff" />
+            <rect x="8" y="33" width="26" height="3" rx="1" fill="#8fff00" />
+            <rect x="52" y="15" width="22" height="17" rx="3" fill="none" stroke="#8fff00" strokeWidth="0.8" strokeDasharray="2 1" />
+            <rect x="56" y="21" width="14" height="5" rx="1" fill="#8fff00" />
+        </svg>
+    ),
+
+    // ── price_tag: elite-luxury ───────────────────────────────────────────────
+    'elite-luxury': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#d1d5db" strokeWidth="0.8" />
+            <rect x="0" y="0" width="80" height="2.5" fill="#d97706" />
+            <rect x="26" y="8" width="28" height="3" rx="1.5" fill="#d97706" />
+            <rect x="22" y="15" width="36" height="12" rx="2" fill="#111827" />
+            <rect x="18" y="31" width="44" height="2.5" rx="1" fill="#9ca3af" />
+            <line x1="14" y1="38" x2="66" y2="38" stroke="#e5e7eb" strokeWidth="0.8" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -2887,7 +3017,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}

@@ -1003,6 +1003,7 @@ import { getSellerInfoVariant as _getSellerInfoVariant } from './variants/seller
 import { getSingleImageVariant as _getSingleImageVariant } from './variants/single_image.variants'
 import { getLogoBarVariant as _getLogoBarVariant } from './variants/logo_bar.variants'
 import { getBundleDealVariant as _getBundleDealVariant } from './variants/bundle_deal.variants'
+import { getPriceTagVariant as _getPriceTagVariant } from './variants/price_tag.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -3170,12 +3171,36 @@ ${thumbCells}
             label: 'Price Tag',
             category: 'Typography' as BlockCategory,
             icon: 'tag',
-            description: 'Decorative was/now price display',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Decorative was/now price display — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                priceColor: '#1e1535',
+                strikeColor: '#94a3b8',
+                badgeColor: '#dc2626',
+                badgeTextColor: '#ffffff',
+                accentColor: '#1e1535',
+                itemPrice: '{{ITEM_PRICE}}',
+                originalPrice: '{{ORIGINAL_PRICE}}',
+                discountPercent: '{{DISCOUNT_PERCENT}}',
+                discountAmount: '{{DISCOUNT_AMOUNT}}',
+                variant: 'classic-strike',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & {
+                    itemPrice?: string
+                    originalPrice?: string
+                    discountPercent?: string
+                    discountAmount?: string
+                    priceColor?: string
+                    strikeColor?: string
+                    badgeColor?: string
+                    badgeTextColor?: string
+                    accentColor?: string
+                    variant?: string
+                }
                 return wrapBlock('price_tag' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table cellpadding="0" cellspacing="0" border="0"><tr><td style="vertical-align:bottom;padding-right:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:14px;color:#9ca3af;text-decoration:line-through;">Was {{ORIGINAL_PRICE}}</p></td><td style="vertical-align:bottom;"><p style="margin:0;font-family:Arial,sans-serif;font-size:32px;font-weight:700;color:#7530fb;">{{ITEM_PRICE}}</p></td><td style="vertical-align:bottom;padding-left:10px;"><span style="display:inline-block;background-color:#dc2626;color:#fff;font-family:Arial,sans-serif;font-size:12px;font-weight:700;padding:4px 10px;border-radius:4px;">SAVE {{DISCOUNT_PERCENT}}%</span></td></tr></table></td></tr></table>`)
+                    _getPriceTagVariant(p.variant ?? 'classic-strike').toHtml(p, id))
             },
         },
 
