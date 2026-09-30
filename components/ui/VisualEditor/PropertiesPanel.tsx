@@ -2291,6 +2291,153 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="59" y="28" width="12" height="2" rx="1" fill={col} opacity="0.2" />
         </svg>
     ),
+
+    // ── bundle_deal: tri-tier-columns ─────────────────────────────────────────
+    'bundle_deal:tri-tier-columns': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="5" y="11" width="20" height="26" rx="2" fill="rgba(255,255,255,0.06)" />
+            <rect x="30" y="8" width="20" height="32" rx="2" fill="rgba(255,255,255,0.10)" />
+            <rect x="30" y="8" width="20" height="3" rx="1" fill="#b8fa33" />
+            <rect x="55" y="11" width="20" height="26" rx="2" fill="rgba(255,255,255,0.06)" />
+            <rect x="32" y="16" width="16" height="3" rx="1" fill="#b8fa33" opacity="0.7" />
+            <rect x="7" y="22" width="16" height="3" rx="1" fill="rgba(255,255,255,0.25)" />
+            <rect x="32" y="22" width="16" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
+            <rect x="57" y="22" width="16" height="3" rx="1" fill="rgba(255,255,255,0.25)" />
+        </svg>
+    ),
+
+    // ── bundle_deal: horizontal-ribbon ────────────────────────────────────────
+    'bundle_deal:horizontal-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="5" y="16" width="70" height="16" rx="2" fill="rgba(255,255,255,0.07)" />
+            <rect x="8" y="21" width="14" height="3" rx="1" fill="rgba(255,255,255,0.3)" />
+            <rect x="30" y="21" width="12" height="3" rx="1" fill="rgba(255,255,255,0.3)" />
+            <rect x="46" y="20" width="10" height="5" rx="2.5" fill="#b8fa33" />
+            <rect x="62" y="21" width="11" height="3" rx="1" fill="rgba(255,255,255,0.3)" />
+            <text x="25" y="27" fontFamily="Arial" fontSize="7" fill="rgba(255,255,255,0.2)">❯</text>
+            <text x="58" y="27" fontFamily="Arial" fontSize="7" fill="rgba(255,255,255,0.2)">❯</text>
+        </svg>
+    ),
+
+    // ── bundle_deal: stacked-rows ─────────────────────────────────────────────
+    'bundle_deal:stacked-rows': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="5" y="9" width="2" height="9" rx="1" fill="#b8fa33" opacity="0.3" />
+            <rect x="5" y="21" width="4" height="9" rx="1" fill="#b8fa33" opacity="0.6" />
+            <rect x="5" y="33" width="6" height="9" rx="1" fill="#b8fa33" />
+            <rect x="12" y="11" width="42" height="5" rx="1.5" fill="rgba(255,255,255,0.15)" />
+            <rect x="12" y="23" width="42" height="5" rx="1.5" fill="rgba(255,255,255,0.2)" />
+            <rect x="12" y="35" width="42" height="5" rx="1.5" fill="rgba(255,255,255,0.28)" />
+            <rect x="58" y="23" width="17" height="4" rx="2" fill="#b8fa33" />
+            <rect x="58" y="35" width="17" height="4" rx="2" fill="#b8fa33" />
+        </svg>
+    ),
+
+    // ── bundle_deal: floating-pill-grid ───────────────────────────────────────
+    'bundle_deal:floating-pill-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="4" y="11" width="20" height="28" rx="3" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+            <rect x="30" y="11" width="20" height="28" rx="3" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+            <rect x="56" y="11" width="20" height="28" rx="3" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+            <rect x="31" y="15" width="18" height="5" rx="2.5" fill="#b8fa33" />
+            <rect x="57" y="15" width="18" height="5" rx="2.5" fill="#b8fa33" />
+            <rect x="6" y="26" width="16" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="32" y="26" width="16" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="58" y="26" width="16" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+        </svg>
+    ),
+
+    // ── bundle_deal: split-hero ───────────────────────────────────────────────
+    'bundle_deal:split-hero': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <line x1="32" y1="6" x2="32" y2="42" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+            <rect x="5" y="13" width="22" height="5" rx="1.5" fill="rgba(255,255,255,0.4)" />
+            <rect x="5" y="21" width="18" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="5" y="27" width="20" height="3" rx="1" fill="rgba(255,255,255,0.15)" />
+            <rect x="36" y="9" width="39" height="8" rx="2" fill="rgba(255,255,255,0.07)" />
+            <rect x="36" y="20" width="39" height="8" rx="2" fill="rgba(255,255,255,0.07)" />
+            <rect x="36" y="31" width="39" height="8" rx="2" fill="rgba(255,255,255,0.07)" />
+            <rect x="57" y="23" width="14" height="3" rx="1.5" fill="#b8fa33" />
+            <rect x="57" y="34" width="14" height="3" rx="1.5" fill="#b8fa33" />
+        </svg>
+    ),
+
+    // ── bundle_deal: minimal-monochrome ───────────────────────────────────────
+    'bundle_deal:minimal-monochrome': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="6" y="12" width="68" height="26" rx="2" fill="none" stroke="#e5e7eb" strokeWidth="0.8" />
+            <line x1="30" y1="12" x2="30" y2="38" stroke="#e5e7eb" strokeWidth="0.8" />
+            <line x1="54" y1="12" x2="54" y2="38" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="9" y="21" width="16" height="4" rx="1.5" fill="#e5e7eb" />
+            <rect x="33" y="21" width="14" height="4" rx="1.5" fill="#111827" />
+            <rect x="57" y="21" width="14" height="4" rx="1.5" fill="#111827" />
+            <rect x="32" y="29" width="16" height="4" rx="2" fill="#7530fb" />
+            <rect x="56" y="29" width="16" height="4" rx="2" fill="#7530fb" />
+        </svg>
+    ),
+
+    // ── bundle_deal: executive-highlight ─────────────────────────────────────
+    'bundle_deal:executive-highlight': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="4" y="12" width="20" height="26" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+            <rect x="30" y="12" width="20" height="26" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+            <rect x="56" y="8" width="20" height="30" rx="2" fill="rgba(255,255,255,0.08)" stroke="#b8fa33" strokeWidth="0.8" />
+            <rect x="56" y="8" width="20" height="3" rx="1" fill="#b8fa33" />
+            <rect x="58" y="16" width="16" height="4" rx="2" fill="#b8fa33" opacity="0.7" />
+            <rect x="7" y="24" width="14" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="33" y="24" width="14" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="58" y="24" width="16" height="4" rx="1.5" fill="rgba(255,255,255,0.45)" />
+            <rect x="58" y="32" width="14" height="3" rx="1" fill="#b8fa33" />
+        </svg>
+    ),
+
+    // ── bundle_deal: dark-escalator ───────────────────────────────────────────
+    'bundle_deal:dark-escalator': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="4" y="11" width="20" height="26" rx="2" fill="rgba(255,255,255,0.04)" />
+            <rect x="30" y="11" width="20" height="26" rx="2" fill="rgba(255,255,255,0.08)" />
+            <rect x="56" y="11" width="20" height="26" rx="2" fill="#b8fa33" />
+            <rect x="7" y="22" width="14" height="3" rx="1" fill="rgba(255,255,255,0.15)" />
+            <rect x="33" y="22" width="14" height="3" rx="1" fill="rgba(255,255,255,0.3)" />
+            <rect x="59" y="22" width="14" height="3" rx="1" fill="rgba(0,0,0,0.3)" />
+        </svg>
+    ),
+
+    // ── bundle_deal: trophy-podium ────────────────────────────────────────────
+    'bundle_deal:trophy-podium': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="4" y="33" width="20" height="12" rx="2" fill="#6b7280" />
+            <rect x="30" y="18" width="20" height="27" rx="2" fill="#f59e0b" />
+            <rect x="56" y="27" width="20" height="18" rx="2" fill="#94a3b8" />
+            <text x="14" y="30" fontFamily="Arial" fontSize="8" textAnchor="middle" fill="rgba(255,255,255,0.5)">🥉</text>
+            <text x="40" y="15" fontFamily="Arial" fontSize="8" textAnchor="middle" fill="rgba(255,255,255,0.8)">🥇</text>
+            <text x="66" y="24" fontFamily="Arial" fontSize="8" textAnchor="middle" fill="rgba(255,255,255,0.6)">🥈</text>
+        </svg>
+    ),
+
+    // ── bundle_deal: countdown-strip ──────────────────────────────────────────
+    'bundle_deal:countdown-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="0" y="0" width="80" height="10" rx="3" fill="#dc2626" />
+            <rect x="6" y="2" width="68" height="4" rx="2" fill="rgba(255,255,255,0.3)" />
+            <rect x="5" y="15" width="70" height="26" rx="2" fill="rgba(255,255,255,0.05)" />
+            <rect x="9" y="23" width="18" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="31" y="23" width="18" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="53" y="23" width="18" height="3" rx="1" fill="rgba(255,255,255,0.2)" />
+            <rect x="33" y="30" width="14" height="4" rx="2" fill="#b8fa33" />
+            <rect x="55" y="30" width="14" height="4" rx="2" fill="#b8fa33" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
