@@ -1002,6 +1002,7 @@ import { getCtaBannerVariant as _getCtaBannerVariant } from './variants/cta_bann
 import { getSellerInfoVariant as _getSellerInfoVariant } from './variants/seller_info.variants'
 import { getSingleImageVariant as _getSingleImageVariant } from './variants/single_image.variants'
 import { getLogoBarVariant as _getLogoBarVariant } from './variants/logo_bar.variants'
+import { getBundleDealVariant as _getBundleDealVariant } from './variants/bundle_deal.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
