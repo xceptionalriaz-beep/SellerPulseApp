@@ -6,30 +6,30 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  toHtml: (props: any, id: string) => string
 }
 
 function pad(p: any): string {
-    return `padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;`
+  return `padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;`
 }
 
 function bg(p: any): string {
-    return p.bgColor ?? '#f8f7ff'
+  return p.bgColor ?? '#f8f7ff'
 }
 
 function accent(p: any): string {
-    return p.accentColor ?? '#7530fb'
+  return p.accentColor ?? '#7530fb'
 }
 
 function captionText(p: any): string {
-    return p.caption ?? 'Trusted Brands &amp; Certifications'
+  return p.caption ?? 'Trusted Brands &amp; Certifications'
 }
 
 function captionColor(p: any): string {
-    return p.captionColor ?? '#9ca3af'
+  return p.captionColor ?? '#9ca3af'
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,10 +37,10 @@ function captionColor(p: any): string {
 // Each returns a self-contained SVG string at ~64×32 viewBox
 // ─────────────────────────────────────────────────────────────────────────────
 
-// 1 — PayPal: blue "Pay" + dark-blue "Pal" wordmark style
-const SVG_PAYPAL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 34" width="90" height="34" aria-label="PayPal">
-  <text x="4" y="22" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="900" fill="#009cde">Pay</text>
-  <text x="36" y="22" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="900" fill="#003087">Pal</text>
+// 1 — PayPal: blue wordmark, no overlap, wider canvas
+const SVG_PAYPAL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 34" width="96" height="34" aria-label="PayPal">
+  <text x="4" y="24" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="900" fill="#009cde">Pay</text>
+  <text x="46" y="24" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="900" fill="#003087">Pal</text>
 </svg>`
 
 // 2 — Visa: classic blue rectangle with white VISA text
@@ -93,16 +93,16 @@ const LOGO_TOKENS = ['{{LOGO_1_URL}}', '{{LOGO_2_URL}}', '{{LOGO_3_URL}}', '{{LO
 // size: width in px for the img tag when using a custom URL
 // ─────────────────────────────────────────────────────────────────────────────
 function renderLogo(p: any, index: number, imgWidth = 80): string {
-    const urlProp = LOGO_URL_PROPS[index]
-    const token = LOGO_TOKENS[index]
-    const altName = LOGO_NAMES[index]
+  const urlProp = LOGO_URL_PROPS[index]
+  const token = LOGO_TOKENS[index]
+  const altName = LOGO_NAMES[index]
 
-    if (p[urlProp] && String(p[urlProp]).trim() !== '') {
-        // Seller-supplied image: output <img> with their token
-        return `<img src="${token}" alt="${altName}" width="${imgWidth}" height="40" style="display:block;max-width:${imgWidth}px;height:40px;object-fit:contain;border:0;">`
-    }
-    // Default: inline SVG (email-safe, no external request)
-    return INLINE_SVGS[index]
+  if (p[urlProp] && String(p[urlProp]).trim() !== '') {
+    // Seller-supplied image: output <img> with their token
+    return `<img src="${token}" alt="${altName}" width="${imgWidth}" height="40" style="display:block;max-width:${imgWidth}px;height:40px;object-fit:contain;border:0;">`
+  }
+  // Default: inline SVG (email-safe, no external request)
+  return INLINE_SVGS[index]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,15 +110,15 @@ function renderLogo(p: any, index: number, imgWidth = 80): string {
 // Clean flat centred row — thin 1px separators between logos
 // ─────────────────────────────────────────────────────────────────────────────
 function flatRow(p: any, id: string): string {
-    const cells = LOGO_NAMES.map((_n, i) => {
-        const sep = i < LOGO_NAMES.length - 1
-            ? `<td style="width:1px;background-color:#e5e7eb;"></td>` : ''
-        return `<td style="padding:12px 20px;text-align:center;vertical-align:middle;">
+  const cells = LOGO_NAMES.map((_n, i) => {
+    const sep = i < LOGO_NAMES.length - 1
+      ? `<td style="width:1px;background-color:#e5e7eb;"></td>` : ''
+    return `<td style="padding:12px 20px;text-align:center;vertical-align:middle;">
             ${renderLogo(p, i, 80)}
         </td>${sep}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${bg(p)};">
   <tr>
@@ -140,8 +140,8 @@ function flatRow(p: any, id: string): string {
 // Each logo in a rounded pill capsule with name text below
 // ─────────────────────────────────────────────────────────────────────────────
 function pillLabels(p: any, id: string): string {
-    const ac = accent(p)
-    const pills = LOGO_NAMES.map((name, i) => `
+  const ac = accent(p)
+  const pills = LOGO_NAMES.map((name, i) => `
       <td style="padding:0 6px;text-align:center;vertical-align:middle;">
         <div style="display:inline-block;background-color:#ffffff;border:1.5px solid #e5e7eb;
           border-radius:24px;padding:10px 18px;min-width:90px;">
@@ -151,7 +151,7 @@ function pillLabels(p: any, id: string): string {
         </div>
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${bg(p)};">
   <tr>
@@ -172,16 +172,16 @@ function pillLabels(p: any, id: string): string {
 // Full-width coloured strip, logos with 1px vertical dividers, left-aligned label
 // ─────────────────────────────────────────────────────────────────────────────
 function dividerStrip(p: any, id: string): string {
-    const ac = accent(p)
-    const cells = LOGO_NAMES.map((_n, i) => {
-        const sep = i < LOGO_NAMES.length - 1
-            ? `<td style="width:1px;background-color:#e5e7eb;opacity:0.4;"></td>` : ''
-        return `<td style="padding:12px 22px;text-align:center;vertical-align:middle;">
+  const ac = accent(p)
+  const cells = LOGO_NAMES.map((_n, i) => {
+    const sep = i < LOGO_NAMES.length - 1
+      ? `<td style="width:1px;background-color:#e5e7eb;opacity:0.4;"></td>` : ''
+    return `<td style="padding:12px 22px;text-align:center;vertical-align:middle;">
             ${renderLogo(p, i, 78)}
         </td>${sep}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -213,8 +213,8 @@ function dividerStrip(p: any, id: string): string {
 // Each logo in its own bordered card with logo + name — structured grid
 // ─────────────────────────────────────────────────────────────────────────────
 function lbCardGrid(p: any, id: string): string {
-    const ac = accent(p)
-    const cards = LOGO_NAMES.map((name, i) => `
+  const ac = accent(p)
+  const cards = LOGO_NAMES.map((name, i) => `
       <td style="width:20%;padding:0 5px;text-align:center;vertical-align:top;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"
           style="background-color:#ffffff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
@@ -232,7 +232,7 @@ function lbCardGrid(p: any, id: string): string {
         </table>
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${bg(p)};">
   <tr>
@@ -253,17 +253,17 @@ function lbCardGrid(p: any, id: string): string {
 // Two-column: bold heading left, logo grid right — credibility section style
 // ─────────────────────────────────────────────────────────────────────────────
 function iconLabelColumn(p: any, id: string): string {
-    const ac = accent(p)
-    const row1 = [0, 1, 2].map(i => `
+  const ac = accent(p)
+  const row1 = [0, 1, 2].map(i => `
       <td style="padding:4px 10px;text-align:center;">
         ${renderLogo(p, i, 64)}
       </td>`).join('')
-    const row2 = [3, 4].map(i => `
+  const row2 = [3, 4].map(i => `
       <td style="padding:4px 10px;text-align:center;">
         ${renderLogo(p, i, 64)}
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${bg(p)};">
   <tr>
@@ -295,14 +295,14 @@ function iconLabelColumn(p: any, id: string): string {
 // Dark background strip, logos with muted name text below
 // ─────────────────────────────────────────────────────────────────────────────
 function darkBand(p: any, id: string): string {
-    const cells = LOGO_NAMES.map((name, i) => `
+  const cells = LOGO_NAMES.map((name, i) => `
       <td style="padding:16px 18px;text-align:center;vertical-align:middle;">
         ${renderLogo(p, i, 76)}
         <div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:600;
           color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;">${name}</div>
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -323,8 +323,8 @@ function darkBand(p: any, id: string): string {
 // Purple-to-indigo brand gradient, frosted translucent logo cards, lime title
 // ─────────────────────────────────────────────────────────────────────────────
 function gradientShowcase(p: any, id: string): string {
-    const ac = accent(p)
-    const cards = LOGO_NAMES.map((_n, i) => `
+  const ac = accent(p)
+  const cards = LOGO_NAMES.map((_n, i) => `
       <td style="padding:0 6px;text-align:center;vertical-align:middle;">
         <div style="display:inline-block;background-color:rgba(255,255,255,0.12);
           border:1px solid rgba(255,255,255,0.22);border-radius:10px;
@@ -333,7 +333,7 @@ function gradientShowcase(p: any, id: string): string {
         </div>
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -354,16 +354,16 @@ function gradientShowcase(p: any, id: string): string {
 // Narrow ticker bar: purple VERIFIED badge left, logos with dot separators right
 // ─────────────────────────────────────────────────────────────────────────────
 function trustTicker(p: any, id: string): string {
-    const ac = accent(p)
-    const logoRow = LOGO_NAMES.map((_n, i) => {
-        const dot = i < LOGO_NAMES.length - 1
-            ? `<td style="padding:0 4px;font-family:Arial,sans-serif;font-size:12px;color:#d1d5db;">•</td>` : ''
-        return `<td style="padding:0 8px;text-align:center;vertical-align:middle;">
+  const ac = accent(p)
+  const logoRow = LOGO_NAMES.map((_n, i) => {
+    const dot = i < LOGO_NAMES.length - 1
+      ? `<td style="padding:0 4px;font-family:Arial,sans-serif;font-size:12px;color:#d1d5db;">•</td>` : ''
+    return `<td style="padding:0 8px;text-align:center;vertical-align:middle;">
             ${renderLogo(p, i, 68)}
         </td>${dot}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${bg(p)};">
   <tr>
@@ -393,8 +393,8 @@ function trustTicker(p: any, id: string): string {
 // Each card has gradient-border wrapper + white inner, coloured top accent bar
 // ─────────────────────────────────────────────────────────────────────────────
 function spotlightCards(p: any, id: string): string {
-    const ac = accent(p)
-    const cards = LOGO_NAMES.map((name, i) => `
+  const ac = accent(p)
+  const cards = LOGO_NAMES.map((name, i) => `
       <td style="width:20%;padding:0 5px;text-align:center;vertical-align:top;">
         <div style="background:linear-gradient(135deg,${ac} 0%,#1e1535 100%);
           border-radius:10px;padding:2px;display:inline-block;width:100%;box-sizing:border-box;">
@@ -409,7 +409,7 @@ function spotlightCards(p: any, id: string): string {
         </div>
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;background-color:${bg(p)};">
   <tr>
@@ -431,8 +431,8 @@ function spotlightCards(p: any, id: string): string {
 // gradient ring borders, large centred heading. Ultra premium statement.
 // ─────────────────────────────────────────────────────────────────────────────
 function glassMosaic(p: any, id: string): string {
-    const ac = accent(p)
-    const circles = LOGO_NAMES.map((_n, i) => `
+  const ac = accent(p)
+  const circles = LOGO_NAMES.map((_n, i) => `
       <td style="padding:0 10px;text-align:center;vertical-align:middle;">
         <div style="background:linear-gradient(135deg,${ac} 0%,#9b6bff 100%);
           border-radius:50%;padding:2px;display:inline-block;width:66px;height:66px;box-sizing:border-box;">
@@ -445,7 +445,7 @@ function glassMosaic(p: any, id: string): string {
         </div>
       </td>`).join('')
 
-    return `<!--[riazify:logo_bar:${id}]-->
+  return `<!--[riazify:logo_bar:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -479,68 +479,68 @@ function glassMosaic(p: any, id: string): string {
 // REGISTRY
 // ─────────────────────────────────────────────────────────────────────────────
 export const logoBarVariants: BlockVariant[] = [
-    {
-        id: 'flat-row',
-        label: 'Flat Row',
-        description: 'Clean centred row with thin dividers between logos',
-        toHtml(props, id) { return flatRow(props, id) },
-    },
-    {
-        id: 'pill-labels',
-        label: 'Pill Labels',
-        description: 'Each logo in a rounded pill capsule with brand name',
-        toHtml(props, id) { return pillLabels(props, id) },
-    },
-    {
-        id: 'divider-strip',
-        label: 'Divider Strip',
-        description: 'Coloured background strip with vertical logo dividers',
-        toHtml(props, id) { return dividerStrip(props, id) },
-    },
-    {
-        id: 'lb-card-grid',
-        label: 'Card Grid',
-        description: 'Individual bordered cards per logo with icon and name',
-        toHtml(props, id) { return lbCardGrid(props, id) },
-    },
-    {
-        id: 'icon-label-column',
-        label: 'Icon Label Column',
-        description: 'Two-column: bold heading left, logo grid right',
-        toHtml(props, id) { return iconLabelColumn(props, id) },
-    },
-    {
-        id: 'dark-band',
-        label: 'Dark Band',
-        description: 'Dark background with logos and muted name text',
-        toHtml(props, id) { return darkBand(props, id) },
-    },
-    {
-        id: 'gradient-showcase',
-        label: 'Gradient Showcase',
-        description: 'Brand gradient with frosted translucent logo cards',
-        toHtml(props, id) { return gradientShowcase(props, id) },
-    },
-    {
-        id: 'trust-ticker',
-        label: 'Trust Ticker',
-        description: 'Compact ticker bar with VERIFIED badge and dot-separated logos',
-        toHtml(props, id) { return trustTicker(props, id) },
-    },
-    {
-        id: 'spotlight-cards',
-        label: 'Spotlight Cards',
-        description: 'Gradient-border cards with coloured top accent bar',
-        toHtml(props, id) { return spotlightCards(props, id) },
-    },
-    {
-        id: 'glass-mosaic',
-        label: 'Glass Mosaic',
-        description: 'Frosted glass panel with circular logo rings — ultra premium',
-        toHtml(props, id) { return glassMosaic(props, id) },
-    },
+  {
+    id: 'flat-row',
+    label: 'Flat Row',
+    description: 'Clean centred row with thin dividers between logos',
+    toHtml(props, id) { return flatRow(props, id) },
+  },
+  {
+    id: 'pill-labels',
+    label: 'Pill Labels',
+    description: 'Each logo in a rounded pill capsule with brand name',
+    toHtml(props, id) { return pillLabels(props, id) },
+  },
+  {
+    id: 'divider-strip',
+    label: 'Divider Strip',
+    description: 'Coloured background strip with vertical logo dividers',
+    toHtml(props, id) { return dividerStrip(props, id) },
+  },
+  {
+    id: 'lb-card-grid',
+    label: 'Card Grid',
+    description: 'Individual bordered cards per logo with icon and name',
+    toHtml(props, id) { return lbCardGrid(props, id) },
+  },
+  {
+    id: 'icon-label-column',
+    label: 'Icon Label Column',
+    description: 'Two-column: bold heading left, logo grid right',
+    toHtml(props, id) { return iconLabelColumn(props, id) },
+  },
+  {
+    id: 'dark-band',
+    label: 'Dark Band',
+    description: 'Dark background with logos and muted name text',
+    toHtml(props, id) { return darkBand(props, id) },
+  },
+  {
+    id: 'gradient-showcase',
+    label: 'Gradient Showcase',
+    description: 'Brand gradient with frosted translucent logo cards',
+    toHtml(props, id) { return gradientShowcase(props, id) },
+  },
+  {
+    id: 'trust-ticker',
+    label: 'Trust Ticker',
+    description: 'Compact ticker bar with VERIFIED badge and dot-separated logos',
+    toHtml(props, id) { return trustTicker(props, id) },
+  },
+  {
+    id: 'spotlight-cards',
+    label: 'Spotlight Cards',
+    description: 'Gradient-border cards with coloured top accent bar',
+    toHtml(props, id) { return spotlightCards(props, id) },
+  },
+  {
+    id: 'glass-mosaic',
+    label: 'Glass Mosaic',
+    description: 'Frosted glass panel with circular logo rings — ultra premium',
+    toHtml(props, id) { return glassMosaic(props, id) },
+  },
 ]
 
 export function getLogoBarVariant(id: string): BlockVariant {
-    return logoBarVariants.find(v => v.id === id) ?? logoBarVariants[0]
+  return logoBarVariants.find(v => v.id === id) ?? logoBarVariants[0]
 }

@@ -4975,6 +4975,19 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
                     </Section>
+                    <Section title="Custom Logo URLs">
+                        <InfoBox>Leave blank to use built-in payment/trust logos. Paste an HTTPS image URL to replace any slot.</InfoBox>
+                        <TextInput label="Logo 1 URL (PayPal)" value={props.logo1Url ?? ''} onChange={v => updateProps({ logo1Url: v })} />
+                        {phButton('logo1Url', 'Logo 1 URL')}
+                        <TextInput label="Logo 2 URL (Visa)" value={props.logo2Url ?? ''} onChange={v => updateProps({ logo2Url: v })} />
+                        {phButton('logo2Url', 'Logo 2 URL')}
+                        <TextInput label="Logo 3 URL (Mastercard)" value={props.logo3Url ?? ''} onChange={v => updateProps({ logo3Url: v })} />
+                        {phButton('logo3Url', 'Logo 3 URL')}
+                        <TextInput label="Logo 4 URL (eBay)" value={props.logo4Url ?? ''} onChange={v => updateProps({ logo4Url: v })} />
+                        {phButton('logo4Url', 'Logo 4 URL')}
+                        <TextInput label="Logo 5 URL (SSL)" value={props.logo5Url ?? ''} onChange={v => updateProps({ logo5Url: v })} />
+                        {phButton('logo5Url', 'Logo 5 URL')}
+                    </Section>
                 </>
             )
 
