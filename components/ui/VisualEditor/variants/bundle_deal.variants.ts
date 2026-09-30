@@ -7,15 +7,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 function pad(p: any): string {
-    return `padding:${p.paddingTop ?? 20}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 20}px ${p.paddingLeft ?? 24}px;`
+  return `padding:${p.paddingTop ?? 20}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 20}px ${p.paddingLeft ?? 24}px;`
 }
 function bg(p: any): string { return p.bgColor ?? '#1e1535' }
 function priceCol(p: any): string { return p.priceColor ?? '#ffffff' }
@@ -33,31 +33,31 @@ function save3(p: any): string { return p.save3Label ?? 'Save 20%' }
 // Three vertical columns, middle tier gets "Most Popular" crown badge
 // ─────────────────────────────────────────────────────────────────────────────
 function triTierColumns(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', label: '', highlight: false },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), label: 'Most Popular', highlight: true },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), label: 'Best Value', highlight: false },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', label: '', highlight: false },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), label: 'Most Popular', highlight: true },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), label: 'Best Value', highlight: false },
+  ]
 
-    const cells = tiers.map((t, i) => {
-        const border = t.highlight
-            ? `border-top:3px solid ${badgeCol(p)};`
-            : `border-top:3px solid transparent;`
-        const cellBg = t.highlight
-            ? `background-color:rgba(255,255,255,0.07);`
-            : ''
-        const topBadge = t.label
-            ? `<div style="font-family:Arial,sans-serif;font-size:9px;font-weight:700;
+  const cells = tiers.map((t, i) => {
+    const border = t.highlight
+      ? `border-top:3px solid ${badgeCol(p)};`
+      : `border-top:3px solid transparent;`
+    const cellBg = t.highlight
+      ? `background-color:rgba(255,255,255,0.07);`
+      : ''
+    const topBadge = t.label
+      ? `<div style="font-family:Arial,sans-serif;font-size:9px;font-weight:700;
                 color:${t.highlight ? badgeCol(p) : 'rgba(255,255,255,0.4)'};
                 text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">${t.label}</div>`
-            : `<div style="margin-bottom:18px;"></div>`
-        const saveBadge = t.save
-            ? `<div style="margin-top:8px;display:inline-block;background-color:${badgeCol(p)};
+      : `<div style="margin-bottom:18px;"></div>`
+    const saveBadge = t.save
+      ? `<div style="margin-top:8px;display:inline-block;background-color:${badgeCol(p)};
                 color:${badgeTxt(p)};font-family:Arial,sans-serif;font-size:11px;font-weight:700;
                 padding:3px 10px;border-radius:100px;">${t.save}</div>`
-            : `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
+      : `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
                 color:rgba(255,255,255,0.35);">each</div>`
-        return `<td width="33%" style="padding:16px 12px;text-align:center;vertical-align:top;
+    return `<td width="33%" style="padding:16px 12px;text-align:center;vertical-align:top;
             ${border}${cellBg}">
             ${topBadge}
             <div style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;
@@ -67,9 +67,9 @@ function triTierColumns(p: any, id: string): string {
                 color:${priceCol(p)};line-height:1;">${t.price}</div>
             ${saveBadge}
         </td>`
-    }).join(`<td style="width:1px;background-color:rgba(255,255,255,0.08);"></td>`)
+  }).join(`<td style="width:1px;background-color:rgba(255,255,255,0.08);"></td>`)
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -91,32 +91,32 @@ function triTierColumns(p: any, id: string): string {
 // Single compact row, chevron arrows between tiers, saves vertical space
 // ─────────────────────────────────────────────────────────────────────────────
 function horizontalRibbon(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
+  ]
 
-    const cells = tiers.map((t, i) => {
-        const savePill = t.save
-            ? `<span style="margin-left:6px;background-color:${badgeCol(p)};color:${badgeTxt(p)};
+  const cells = tiers.map((t, i) => {
+    const savePill = t.save
+      ? `<span style="margin-left:6px;background-color:${badgeCol(p)};color:${badgeTxt(p)};
                 font-family:Arial,sans-serif;font-size:10px;font-weight:700;
                 padding:2px 8px;border-radius:100px;">${t.save}</span>`
-            : ''
-        const arrow = i < tiers.length - 1
-            ? `<td style="padding:0 6px;color:rgba(255,255,255,0.25);
+      : ''
+    const arrow = i < tiers.length - 1
+      ? `<td style="padding:0 6px;color:rgba(255,255,255,0.25);
                 font-family:Arial,sans-serif;font-size:16px;vertical-align:middle;">&#10095;</td>`
-            : ''
-        return `<td style="padding:14px 16px;text-align:center;vertical-align:middle;white-space:nowrap;">
+      : ''
+    return `<td style="padding:14px 16px;text-align:center;vertical-align:middle;white-space:nowrap;">
             <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;
                 color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.8px;">${t.qty}</span>
             <span style="font-family:Arial,sans-serif;font-size:16px;font-weight:700;
                 color:${priceCol(p)};margin:0 6px;">${t.price}</span>
             ${savePill}
         </td>${arrow}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -148,25 +148,25 @@ function horizontalRibbon(p: any, id: string): string {
 // Full-width rows, accent bar thickens per tier, badge floats right
 // ─────────────────────────────────────────────────────────────────────────────
 function stackedRows(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', barW: 3, barOpacity: '0.25' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), barW: 5, barOpacity: '0.6' },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), barW: 7, barOpacity: '1' },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', barW: 3, barOpacity: '0.25' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), barW: 5, barOpacity: '0.6' },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), barW: 7, barOpacity: '1' },
+  ]
 
-    const rows = tiers.map((t, i) => {
-        const saveBadge = t.save
-            ? `<td style="text-align:right;vertical-align:middle;padding-left:12px;">
+  const rows = tiers.map((t, i) => {
+    const saveBadge = t.save
+      ? `<td style="text-align:right;vertical-align:middle;padding-left:12px;">
                 <span style="background-color:${badgeCol(p)};color:${badgeTxt(p)};
                   font-family:Arial,sans-serif;font-size:11px;font-weight:700;
                   padding:4px 12px;border-radius:100px;white-space:nowrap;">${t.save}</span>
                </td>`
-            : `<td style="text-align:right;vertical-align:middle;padding-left:12px;">
+      : `<td style="text-align:right;vertical-align:middle;padding-left:12px;">
                 <span style="font-family:Arial,sans-serif;font-size:11px;
                   color:rgba(255,255,255,0.3);">Base price</span>
                </td>`
-        const rowBg = i === 2 ? `background-color:rgba(255,255,255,0.06);` : ''
-        return `<tr>
+    const rowBg = i === 2 ? `background-color:rgba(255,255,255,0.06);` : ''
+    return `<tr>
           <td style="${rowBg}padding:0;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
@@ -186,9 +186,9 @@ function stackedRows(p: any, id: string): string {
           </td>
         </tr>
         ${i < tiers.length - 1 ? `<tr><td style="height:1px;background-color:rgba(255,255,255,0.07);padding:0;"></td></tr>` : ''}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -210,21 +210,21 @@ function stackedRows(p: any, id: string): string {
 // Cards with save pill badge overlapping top edge, SaaS-style aesthetic
 // ─────────────────────────────────────────────────────────────────────────────
 function floatingPillGrid(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', sub: 'Base price' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), sub: 'Per bundle' },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), sub: 'Best deal' },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', sub: 'Base price' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), sub: 'Per bundle' },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), sub: 'Best deal' },
+  ]
 
-    const cards = tiers.map((t) => {
-        const pill = t.save
-            ? `<div style="margin-bottom:10px;">
+  const cards = tiers.map((t) => {
+    const pill = t.save
+      ? `<div style="margin-bottom:10px;">
                 <span style="background-color:${badgeCol(p)};color:${badgeTxt(p)};
                   font-family:Arial,sans-serif;font-size:10px;font-weight:700;
                   padding:3px 12px;border-radius:100px;display:inline-block;">${t.save}</span>
                </div>`
-            : `<div style="margin-bottom:10px;height:20px;"></div>`
-        return `<td style="width:33%;padding:0 6px;text-align:center;vertical-align:top;">
+      : `<div style="margin-bottom:10px;height:20px;"></div>`
+    return `<td style="width:33%;padding:0 6px;text-align:center;vertical-align:top;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
             style="background-color:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
               border-radius:10px;overflow:hidden;">
@@ -242,9 +242,9 @@ function floatingPillGrid(p: any, id: string): string {
             </tr>
           </table>
         </td>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -265,19 +265,19 @@ function floatingPillGrid(p: any, id: string): string {
 // Left: bold heading copy. Right: stacked tier pills
 // ─────────────────────────────────────────────────────────────────────────────
 function splitHero(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
+  ]
 
-    const pills = tiers.map(t => {
-        const badge = t.save
-            ? `<span style="margin-left:8px;background-color:${badgeCol(p)};color:${badgeTxt(p)};
+  const pills = tiers.map(t => {
+    const badge = t.save
+      ? `<span style="margin-left:8px;background-color:${badgeCol(p)};color:${badgeTxt(p)};
                 font-family:Arial,sans-serif;font-size:10px;font-weight:700;
                 padding:2px 8px;border-radius:100px;">${t.save}</span>`
-            : ''
-        return `<tr>
+      : ''
+    return `<tr>
           <td style="padding:6px 0;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0"
               style="background-color:rgba(255,255,255,0.07);border-radius:6px;">
@@ -294,9 +294,9 @@ function splitHero(p: any, id: string): string {
             </table>
           </td>
         </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -330,33 +330,33 @@ function splitHero(p: any, id: string): string {
 // White background, black text, thin borders, accent only on save badges
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalMonochrome(p: any, id: string): string {
-    const ac = p.badgeColor ?? '#7530fb'
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
-    ]
+  const ac = p.badgeColor ?? '#7530fb'
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
+  ]
 
-    const cells = tiers.map((t, i) => {
-        const sep = i < tiers.length - 1
-            ? `<td style="width:1px;background-color:#e5e7eb;"></td>` : ''
-        const badge = t.save
-            ? `<div style="margin-top:10px;display:inline-block;
+  const cells = tiers.map((t, i) => {
+    const sep = i < tiers.length - 1
+      ? `<td style="width:1px;background-color:#e5e7eb;"></td>` : ''
+    const badge = t.save
+      ? `<div style="margin-top:10px;display:inline-block;
                 background-color:${ac};color:#ffffff;
                 font-family:Arial,sans-serif;font-size:10px;font-weight:700;
                 padding:3px 12px;border-radius:100px;">${t.save}</div>`
-            : `<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11px;
+      : `<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11px;
                 color:#9ca3af;">Standard price</div>`
-        return `<td style="padding:20px 16px;text-align:center;vertical-align:top;">
+    return `<td style="padding:20px 16px;text-align:center;vertical-align:top;">
           <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;
             color:#9ca3af;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">${t.qty}</div>
           <div style="font-family:Arial,sans-serif;font-size:26px;font-weight:700;
             color:#111827;line-height:1;">${t.price}</div>
           ${badge}
         </td>${sep}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -378,31 +378,31 @@ function minimalMonochrome(p: any, id: string): string {
 // Best-value tier popped out with solid top accent bar + BEST VALUE ribbon
 // ─────────────────────────────────────────────────────────────────────────────
 function executiveHighlight(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', best: false },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), best: false },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), best: true },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', best: false },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), best: false },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), best: true },
+  ]
 
-    const cells = tiers.map((t) => {
-        const topBar = t.best
-            ? `<div style="height:4px;background-color:${badgeCol(p)};margin:-14px -12px 14px -12px;"></div>`
-            : `<div style="height:4px;background-color:rgba(255,255,255,0.06);margin:-14px -12px 14px -12px;"></div>`
-        const ribbon = t.best
-            ? `<div style="margin-bottom:8px;">
+  const cells = tiers.map((t) => {
+    const topBar = t.best
+      ? `<div style="height:4px;background-color:${badgeCol(p)};margin:-14px -12px 14px -12px;"></div>`
+      : `<div style="height:4px;background-color:rgba(255,255,255,0.06);margin:-14px -12px 14px -12px;"></div>`
+    const ribbon = t.best
+      ? `<div style="margin-bottom:8px;">
                 <span style="background-color:${badgeCol(p)};color:${badgeTxt(p)};
                   font-family:Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;
                   text-transform:uppercase;padding:3px 10px;border-radius:100px;">&#9733; Best Value</span>
                </div>`
-            : `<div style="margin-bottom:8px;height:20px;"></div>`
-        const border = t.best
-            ? `border:1px solid ${badgeCol(p)};` : `border:1px solid rgba(255,255,255,0.08);`
-        const save = t.save
-            ? `<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;
+      : `<div style="margin-bottom:8px;height:20px;"></div>`
+    const border = t.best
+      ? `border:1px solid ${badgeCol(p)};` : `border:1px solid rgba(255,255,255,0.08);`
+    const save = t.save
+      ? `<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;
                 color:${badgeCol(p)};">${t.save}</div>`
-            : `<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11px;
+      : `<div style="margin-top:10px;font-family:Arial,sans-serif;font-size:11px;
                 color:rgba(255,255,255,0.3);">Base price</div>`
-        return `<td style="width:33%;padding:0 6px;vertical-align:top;text-align:center;">
+    return `<td style="width:33%;padding:0 6px;vertical-align:top;text-align:center;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
             style="background-color:rgba(255,255,255,0.06);${border}border-radius:8px;overflow:hidden;">
             <tr>
@@ -419,9 +419,9 @@ function executiveHighlight(p: any, id: string): string {
             </tr>
           </table>
         </td>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -442,23 +442,23 @@ function executiveHighlight(p: any, id: string): string {
 // Cards progressively brighter left-to-right — escalates toward best deal
 // ─────────────────────────────────────────────────────────────────────────────
 function darkEscalator(p: any, id: string): string {
-    const ac = p.badgeColor ?? '#b8fa33'
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', cardBg: 'rgba(255,255,255,0.04)', opacity: '0.4' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), cardBg: 'rgba(255,255,255,0.08)', opacity: '0.7' },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), cardBg: ac, opacity: '1' },
-    ]
+  const ac = p.badgeColor ?? '#b8fa33'
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', cardBg: 'rgba(255,255,255,0.04)', opacity: '0.4' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), cardBg: 'rgba(255,255,255,0.08)', opacity: '0.7' },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), cardBg: ac, opacity: '1' },
+  ]
 
-    const cells = tiers.map((t, i) => {
-        const isLast = i === tiers.length - 1
-        const textColor = isLast ? badgeTxt(p) : priceCol(p)
-        const subColor = isLast ? `rgba(0,0,0,0.5)` : `rgba(255,255,255,0.4)`
-        const save = t.save
-            ? `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
+  const cells = tiers.map((t, i) => {
+    const isLast = i === tiers.length - 1
+    const textColor = isLast ? badgeTxt(p) : priceCol(p)
+    const subColor = isLast ? `rgba(0,0,0,0.5)` : `rgba(255,255,255,0.4)`
+    const save = t.save
+      ? `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
                 font-weight:700;color:${isLast ? badgeTxt(p) : ac};">${t.save}</div>`
-            : `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
+      : `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
                 color:${subColor};">Base price</div>`
-        return `<td style="width:33%;padding:0 5px;text-align:center;vertical-align:top;">
+    return `<td style="width:33%;padding:0 5px;text-align:center;vertical-align:top;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
             style="background-color:${t.cardBg};border-radius:8px;overflow:hidden;">
             <tr>
@@ -473,9 +473,9 @@ function darkEscalator(p: any, id: string): string {
             </tr>
           </table>
         </td>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -497,19 +497,19 @@ function darkEscalator(p: any, id: string): string {
 // Pure table height trick — fully email-safe
 // ─────────────────────────────────────────────────────────────────────────────
 function trophyPodium(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', height: 70, color: '#6b7280', rank: '3rd' },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), height: 110, color: '#f59e0b', rank: '1st' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), height: 90, color: '#94a3b8', rank: '2nd' },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '', height: 70, color: '#6b7280', rank: '3rd' },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p), height: 110, color: '#f59e0b', rank: '1st' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p), height: 90, color: '#94a3b8', rank: '2nd' },
+  ]
 
-    const columns = tiers.map((t) => {
-        const badge = t.save
-            ? `<div style="margin-top:6px;display:inline-block;background-color:${badgeCol(p)};
+  const columns = tiers.map((t) => {
+    const badge = t.save
+      ? `<div style="margin-top:6px;display:inline-block;background-color:${badgeCol(p)};
                 color:${badgeTxt(p)};font-family:Arial,sans-serif;font-size:10px;font-weight:700;
                 padding:2px 10px;border-radius:100px;">${t.save}</div>`
-            : ''
-        return `<td style="width:33%;text-align:center;vertical-align:bottom;padding:0 5px;">
+      : ''
+    return `<td style="width:33%;text-align:center;vertical-align:bottom;padding:0 5px;">
           <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;
             color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.8px;
             margin-bottom:6px;">${t.qty}</div>
@@ -520,13 +520,13 @@ function trophyPodium(p: any, id: string): string {
             border-radius:6px 6px 0 0;display:table;width:100%;">
             <div style="display:table-cell;vertical-align:middle;text-align:center;">
               <div style="font-family:Arial,sans-serif;font-size:24px;">${t.rank === '1st' ? '&#127942;' : t.rank === '2nd' ? '&#129352;' : '&#129353;'
-            }</div>
+      }</div>
             </div>
           </div>
         </td>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
@@ -551,22 +551,22 @@ function trophyPodium(p: any, id: string): string {
 // Urgency frame: LIMITED OFFER banner, offer-ends token, then tier columns
 // ─────────────────────────────────────────────────────────────────────────────
 function countdownStrip(p: any, id: string): string {
-    const tiers = [
-        { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
-        { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
-        { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
-    ]
+  const tiers = [
+    { qty: qty1(p), price: '{{ITEM_PRICE}}', save: '' },
+    { qty: qty2(p), price: '{{PRICE_2}}', save: save2(p) },
+    { qty: qty3(p), price: '{{PRICE_3}}', save: save3(p) },
+  ]
 
-    const cells = tiers.map((t, i) => {
-        const sep = i < tiers.length - 1
-            ? `<td style="width:1px;background-color:rgba(255,255,255,0.08);"></td>` : ''
-        const badge = t.save
-            ? `<div style="margin-top:8px;display:inline-block;background-color:${badgeCol(p)};
+  const cells = tiers.map((t, i) => {
+    const sep = i < tiers.length - 1
+      ? `<td style="width:1px;background-color:rgba(255,255,255,0.08);"></td>` : ''
+    const badge = t.save
+      ? `<div style="margin-top:8px;display:inline-block;background-color:${badgeCol(p)};
                 color:${badgeTxt(p)};font-family:Arial,sans-serif;font-size:11px;font-weight:700;
                 padding:3px 10px;border-radius:100px;">${t.save}</div>`
-            : `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
+      : `<div style="margin-top:8px;font-family:Arial,sans-serif;font-size:11px;
                 color:rgba(255,255,255,0.3);">each</div>`
-        return `<td style="padding:16px 12px;text-align:center;vertical-align:top;">
+    return `<td style="padding:16px 12px;text-align:center;vertical-align:top;">
           <div style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;
             color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;
             margin-bottom:6px;">${t.qty}</div>
@@ -574,16 +574,16 @@ function countdownStrip(p: any, id: string): string {
             color:${priceCol(p)};line-height:1;">${t.price}</div>
           ${badge}
         </td>${sep}`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:bundle_deal:${id}]-->
+  return `<!--[riazify:bundle_deal:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:#dc2626;padding:8px 16px;border-radius:6px 6px 0 0;text-align:center;">
       <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;
         color:#ffffff;letter-spacing:2px;text-transform:uppercase;">
-        &#9888; Limited Time Offer &nbsp;&#8226;&nbsp; Ends: {{OFFER_ENDS}}
+        &#9888; Limited Time Offer &nbsp;&#8226;&nbsp; Ends: ${p.offerEnds ?? '{{OFFER_ENDS}}'}
       </span>
     </td>
   </tr>
@@ -605,68 +605,68 @@ function countdownStrip(p: any, id: string): string {
 // REGISTRY
 // ─────────────────────────────────────────────────────────────────────────────
 export const bundleDealVariants: BlockVariant[] = [
-    {
-        id: 'tri-tier-columns',
-        label: 'Tri-Tier Columns',
-        description: 'Three columns with Most Popular badge on middle tier',
-        toHtml(props, id) { return triTierColumns(props, id) },
-    },
-    {
-        id: 'horizontal-ribbon',
-        label: 'Horizontal Ribbon',
-        description: 'Single row with chevron arrows between tiers — space-saving',
-        toHtml(props, id) { return horizontalRibbon(props, id) },
-    },
-    {
-        id: 'stacked-rows',
-        label: 'Stacked Rows',
-        description: 'Full-width rows with growing accent bar — mobile-friendly',
-        toHtml(props, id) { return stackedRows(props, id) },
-    },
-    {
-        id: 'floating-pill-grid',
-        label: 'Floating Pill Grid',
-        description: 'SaaS-style cards with floating discount pill badges',
-        toHtml(props, id) { return floatingPillGrid(props, id) },
-    },
-    {
-        id: 'split-hero',
-        label: 'Split Hero',
-        description: 'Bold heading left, tier pills stacked right',
-        toHtml(props, id) { return splitHero(props, id) },
-    },
-    {
-        id: 'minimal-monochrome',
-        label: 'Minimal Monochrome',
-        description: 'White background, clean borders, accent only on badges',
-        toHtml(props, id) { return minimalMonochrome(props, id) },
-    },
-    {
-        id: 'executive-highlight',
-        label: 'Executive Highlight',
-        description: 'Best value tier popped with accent border and star ribbon',
-        toHtml(props, id) { return executiveHighlight(props, id) },
-    },
-    {
-        id: 'dark-escalator',
-        label: 'Dark Escalator',
-        description: 'Cards escalate from dark to bright — best deal glows',
-        toHtml(props, id) { return darkEscalator(props, id) },
-    },
-    {
-        id: 'trophy-podium',
-        label: 'Trophy Podium',
-        description: 'Podium-height columns with gold/silver/bronze medals',
-        toHtml(props, id) { return trophyPodium(props, id) },
-    },
-    {
-        id: 'countdown-strip',
-        label: 'Countdown Strip',
-        description: 'Red urgency banner with offer-ends token above tier columns',
-        toHtml(props, id) { return countdownStrip(props, id) },
-    },
+  {
+    id: 'tri-tier-columns',
+    label: 'Tri-Tier Columns',
+    description: 'Three columns with Most Popular badge on middle tier',
+    toHtml(props, id) { return triTierColumns(props, id) },
+  },
+  {
+    id: 'horizontal-ribbon',
+    label: 'Horizontal Ribbon',
+    description: 'Single row with chevron arrows between tiers — space-saving',
+    toHtml(props, id) { return horizontalRibbon(props, id) },
+  },
+  {
+    id: 'stacked-rows',
+    label: 'Stacked Rows',
+    description: 'Full-width rows with growing accent bar — mobile-friendly',
+    toHtml(props, id) { return stackedRows(props, id) },
+  },
+  {
+    id: 'floating-pill-grid',
+    label: 'Floating Pill Grid',
+    description: 'SaaS-style cards with floating discount pill badges',
+    toHtml(props, id) { return floatingPillGrid(props, id) },
+  },
+  {
+    id: 'split-hero',
+    label: 'Split Hero',
+    description: 'Bold heading left, tier pills stacked right',
+    toHtml(props, id) { return splitHero(props, id) },
+  },
+  {
+    id: 'minimal-monochrome',
+    label: 'Minimal Monochrome',
+    description: 'White background, clean borders, accent only on badges',
+    toHtml(props, id) { return minimalMonochrome(props, id) },
+  },
+  {
+    id: 'executive-highlight',
+    label: 'Executive Highlight',
+    description: 'Best value tier popped with accent border and star ribbon',
+    toHtml(props, id) { return executiveHighlight(props, id) },
+  },
+  {
+    id: 'dark-escalator',
+    label: 'Dark Escalator',
+    description: 'Cards escalate from dark to bright — best deal glows',
+    toHtml(props, id) { return darkEscalator(props, id) },
+  },
+  {
+    id: 'trophy-podium',
+    label: 'Trophy Podium',
+    description: 'Podium-height columns with gold/silver/bronze medals',
+    toHtml(props, id) { return trophyPodium(props, id) },
+  },
+  {
+    id: 'countdown-strip',
+    label: 'Countdown Strip',
+    description: 'Red urgency banner with offer-ends token above tier columns',
+    toHtml(props, id) { return countdownStrip(props, id) },
+  },
 ]
 
 export function getBundleDealVariant(id: string): BlockVariant {
-    return bundleDealVariants.find(v => v.id === id) ?? bundleDealVariants[0]
+  return bundleDealVariants.find(v => v.id === id) ?? bundleDealVariants[0]
 }

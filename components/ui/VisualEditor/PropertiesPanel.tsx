@@ -5154,10 +5154,14 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <TextInput label="Tier 3 saving" value={props.save3Label ?? 'Save 20%'} onChange={v => updateProps({ save3Label: v })} />
                     </Section>
                     <Section title="Price Tokens">
-                        <InfoBox>Use these tokens in your eBay listing — they are replaced with real prices at runtime.</InfoBox>
-                        {phButton('price2', '{{PRICE_2}}')}
-                        {phButton('price3', '{{PRICE_3}}')}
+                        <InfoBox>{'{{ITEM_PRICE}}'}, {'{{PRICE_2}}'} and {'{{PRICE_3}}'} are already built into the block — replace them with real prices when pasting into eBay.</InfoBox>
                     </Section>
+                    {(props.variant === 'countdown-strip') && (
+                        <Section title="Countdown Strip">
+                            <TextInput label="Offer ends text" value={props.offerEnds ?? 'Midnight Tonight'} onChange={v => updateProps({ offerEnds: v })} />
+                            <InfoBox>Replaces {'{{OFFER_ENDS}}'} in the red urgency bar.</InfoBox>
+                        </Section>
+                    )}
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Price colour" value={props.priceColor ?? '#ffffff'} onChange={v => updateProps({ priceColor: v })} />
