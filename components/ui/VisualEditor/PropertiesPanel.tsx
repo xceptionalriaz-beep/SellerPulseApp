@@ -4307,6 +4307,22 @@ function BlockStyleProps({ block, props, updateProps }: {
                     {cv === 'ctab-gradient-hero' && (
                         <Section title="Gradient">
                             <ColorRow label="Gradient from" value={(props as any).gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v } as any)} />
+                            <ColorRow label="Gradient to" value={(props as any).gradientTo ?? '#0a0a0f'} onChange={v => updateProps({ gradientTo: v } as any)} />
+                            <SliderInput label="Gradient angle" value={(props as any).bgGradientDir ?? 135} min={0} max={360} suffix="°" onChange={v => updateProps({ bgGradientDir: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Split Action ── */}
+                    {cv === 'ctab-split-action' && (
+                        <Section title="Background">
+                            <ToggleRow label="Use gradient" value={props.bgGradient ?? false} onChange={v => updateProps({ bgGradient: v })} />
+                            {props.bgGradient && (
+                                <>
+                                    <ColorRow label="Gradient from" value={(props as any).gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v } as any)} />
+                                    <ColorRow label="Gradient to" value={(props as any).gradientTo ?? '#1e1535'} onChange={v => updateProps({ gradientTo: v } as any)} />
+                                    <SliderInput label="Gradient angle" value={(props as any).bgGradientDir ?? 135} min={0} max={360} suffix="°" onChange={v => updateProps({ bgGradientDir: v } as any)} />
+                                </>
+                            )}
                         </Section>
                     )}
 
