@@ -7735,6 +7735,245 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
 
+        case 'image':
+            return (
+                <>
+                    <Section title="Image">
+                        <TextInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
+                        {phButton('src', 'image URL')}
+                        <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
+                        <TextInput label="Link URL (optional)" value={props.linkUrl ?? ''} onChange={v => updateProps({ linkUrl: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <TextInput label="Width" value={String(props.width ?? 100)} onChange={v => updateProps({ width: Number(v) || 100 })} />
+                        <SelectInput
+                            label="Width unit"
+                            value={props.widthUnit ?? '%'}
+                            options={[{ v: '%', l: '% — Percentage' }, { v: 'px', l: 'px — Fixed pixels' }]}
+                            onChange={v => updateProps({ widthUnit: v })}
+                        />
+                        <SelectInput
+                            label="Alignment"
+                            value={props.align ?? 'center'}
+                            options={[{ v: 'left', l: 'Left' }, { v: 'center', l: 'Center' }, { v: 'right', l: 'Right' }]}
+                            onChange={v => updateProps({ align: v })}
+                        />
+                    </Section>
+                </>
+            )
+
+        case 'container':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextareaInput label="Content" value={props.content ?? 'Your content goes here.'} rows={4} onChange={v => updateProps({ content: v })} />
+                        {phButton('content', 'content')}
+                    </Section>
+                    <Section title="Layout">
+                        <TextInput label="Max width (px)" value={String(props.maxWidth ?? 600)} onChange={v => updateProps({ maxWidth: Number(v) || 600 })} />
+                    </Section>
+                </>
+            )
+
+        case 'features': {
+            const feats: { icon: string; label: string; subText: string }[] = props.features ?? [
+                { icon: '⭐', label: 'Top Quality', subText: 'Premium Materials' },
+                { icon: '🚚', label: 'Fast Shipping', subText: 'Tracked Delivery' },
+                { icon: '↩️', label: 'Easy Returns', subText: '30-Day Policy' },
+            ]
+            return (
+                <>
+                    <Section title={`Features (${feats.length})`}>
+                        {feats.map((f, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>Feature {i + 1}</span>
+                                    <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }} onClick={() => updateProps({ features: feats.filter((_, j) => j !== i) })}>✕</button>
+                                </div>
+                                <input placeholder="Icon (emoji)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={f.icon} onChange={e => { const next = [...feats]; next[i] = { ...next[i], icon: e.target.value }; updateProps({ features: next }) }} />
+                                <input placeholder="Label" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={f.label} onChange={e => { const next = [...feats]; next[i] = { ...next[i], label: e.target.value }; updateProps({ features: next }) }} />
+                                <input placeholder="Sub text" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', boxSizing: 'border-box' }} value={f.subText} onChange={e => { const next = [...feats]; next[i] = { ...next[i], subText: e.target.value }; updateProps({ features: next }) }} />
+                            </div>
+                        ))}
+                        {feats.length < 6 && (
+                            <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ features: [...feats, { icon: '✅', label: 'New Feature', subText: 'Description here' }] })}>+ Add feature</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'faq_block': {
+            const faqs: { question: string; answer: string }[] = props.faqs ?? [
+                { question: 'What is the warranty?', answer: 'All items come with a 30-day money back guarantee.' },
+                { question: 'How long does shipping take?', answer: 'Most orders ship within 24 hours of payment clearance.' },
+            ]
+            return (
+                <>
+                    <Section title={`FAQs (${faqs.length})`}>
+                        {faqs.map((faq, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>FAQ {i + 1}</span>
+                                    <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }} onClick={() => updateProps({ faqs: faqs.filter((_, j) => j !== i) })}>✕</button>
+                                </div>
+                                <input placeholder="Question" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={faq.question} onChange={e => { const next = [...faqs]; next[i] = { ...next[i], question: e.target.value }; updateProps({ faqs: next }) }} />
+                                <textarea placeholder="Answer" rows={2} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', resize: 'vertical', boxSizing: 'border-box' }} value={faq.answer} onChange={e => { const next = [...faqs]; next[i] = { ...next[i], answer: e.target.value }; updateProps({ faqs: next }) }} />
+                            </div>
+                        ))}
+                        {faqs.length < 10 && (
+                            <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ faqs: [...faqs, { question: 'New question?', answer: 'Answer here.' }] })}>+ Add FAQ</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'testimonial_block': {
+            const testimonials: { text: string; author: string; rating: number }[] = props.testimonials ?? [
+                { text: 'Amazing product! Exactly as described.', author: 'John D.', rating: 5 },
+                { text: 'Fast shipping and great quality.', author: 'Sarah M.', rating: 4 },
+            ]
+            return (
+                <>
+                    <Section title={`Testimonials (${testimonials.length})`}>
+                        {testimonials.map((t, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>Review {i + 1}</span>
+                                    <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }} onClick={() => updateProps({ testimonials: testimonials.filter((_, j) => j !== i) })}>✕</button>
+                                </div>
+                                <textarea placeholder="Review text" rows={2} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, resize: 'vertical', boxSizing: 'border-box' }} value={t.text} onChange={e => { const next = [...testimonials]; next[i] = { ...next[i], text: e.target.value }; updateProps({ testimonials: next }) }} />
+                                <input placeholder="Author name" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={t.author} onChange={e => { const next = [...testimonials]; next[i] = { ...next[i], author: e.target.value }; updateProps({ testimonials: next }) }} />
+                                <SelectInput
+                                    label="Rating"
+                                    value={String(t.rating ?? 5)}
+                                    options={[{ v: '5', l: '★★★★★ 5 stars' }, { v: '4', l: '★★★★☆ 4 stars' }, { v: '3', l: '★★★☆☆ 3 stars' }]}
+                                    onChange={v => { const next = [...testimonials]; next[i] = { ...next[i], rating: Number(v) }; updateProps({ testimonials: next }) }}
+                                />
+                            </div>
+                        ))}
+                        {testimonials.length < 6 && (
+                            <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ testimonials: [...testimonials, { text: 'Great product!', author: 'Happy Customer', rating: 5 }] })}>+ Add review</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'compatibility_block': {
+            const compatModels: string[] = props.compatibleModels ?? ['Model A 2020+', 'Model B Pro', 'Model C']
+            const incompatModels: string[] = props.incompatibleModels ?? ['Old Model X', 'Legacy Series']
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={props.title ?? 'Check Compatibility'} onChange={v => updateProps({ title: v })} />
+                    </Section>
+                    <Section title={`Compatible models (${compatModels.length})`}>
+                        {compatModels.map((m, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                                <input style={{ flex: 1, background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '4px 8px' }} value={m} onChange={e => { const next = [...compatModels]; next[i] = e.target.value; updateProps({ compatibleModels: next }) }} />
+                                <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, padding: '0 8px' }} onClick={() => updateProps({ compatibleModels: compatModels.filter((_, j) => j !== i) })}>✕</button>
+                            </div>
+                        ))}
+                        <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ compatibleModels: [...compatModels, 'New Model'] })}>+ Add model</button>
+                    </Section>
+                    <Section title={`Incompatible models (${incompatModels.length})`}>
+                        {incompatModels.map((m, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                                <input style={{ flex: 1, background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '4px 8px' }} value={m} onChange={e => { const next = [...incompatModels]; next[i] = e.target.value; updateProps({ incompatibleModels: next }) }} />
+                                <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, padding: '0 8px' }} onClick={() => updateProps({ incompatibleModels: incompatModels.filter((_, j) => j !== i) })}>✕</button>
+                            </div>
+                        ))}
+                        <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ incompatibleModels: [...incompatModels, 'Incompatible Model'] })}>+ Add model</button>
+                    </Section>
+                </>
+            )
+        }
+
+        case 'store_nav_bar':
+            return (
+                <>
+                    <Section title={`Links (${(props.links ?? []).length}/8)`}>
+                        <NavLinksEditor
+                            links={props.links ?? [
+                                { label: 'Electronics', url: '#' },
+                                { label: 'Home & Garden', url: '#' },
+                                { label: 'Fashion', url: '#' },
+                            ]}
+                            onChange={links => updateProps({ links })}
+                        />
+                        <InfoBox>Paste your eBay Store category URL into each link. Example: https://www.ebay.com/str/yourstore/Clothing/_i.html</InfoBox>
+                    </Section>
+                </>
+            )
+
+        case 'money_back':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? '30-Day Money Back Guarantee'} onChange={v => updateProps({ heading: v })} />
+                        <TextInput label="Sub text" value={props.subText ?? 'Not satisfied? Return it — no questions asked.'} onChange={v => updateProps({ subText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'trust_badge_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Badge text" value={props.badgeText ?? '100% Satisfaction Guaranteed or Your Money Back'} onChange={v => updateProps({ badgeText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'urgency_timer_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Banner text" value={props.text ?? 'Limited Time Promotional Price — Order Soon!'} onChange={v => updateProps({ text: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'payment_methods_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={props.title ?? 'Secure Checkout via eBay Managed Payments'} onChange={v => updateProps({ title: v })} />
+                    </Section>
+                    <Section title="Options">
+                        <ToggleRow label="Show PayPal" value={props.showPayPal ?? true} onChange={v => updateProps({ showPayPal: v })} />
+                        <ToggleRow label="Show credit cards" value={props.showCreditCards ?? true} onChange={v => updateProps({ showCreditCards: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'shipping_policy_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={props.title ?? 'Fast & Reliable Shipping'} onChange={v => updateProps({ title: v })} />
+                        <TextareaInput label="Policy text" value={props.policyText ?? 'We ship all orders within 24 hours of payment clearance via tracked carrier services.'} rows={3} onChange={v => updateProps({ policyText: v })} />
+                        <TextInput label="Delivery time" value={props.deliveryTime ?? 'Estimated delivery: 2-5 business days'} onChange={v => updateProps({ deliveryTime: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'bundle_discount_banner':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Banner text" value={props.bannerText ?? 'Buy {{QUANTITY}} or more and save!'} onChange={v => updateProps({ bannerText: v })} />
+                        {phButton('bannerText', 'banner text')}
+                    </Section>
+                    <Section title="Discount">
+                        <TextInput label="Discount %" value={String(props.discountPercentage ?? 15)} onChange={v => updateProps({ discountPercentage: Number(v) || 15 })} />
+                        <TextInput label="Minimum quantity" value={String(props.minimumQty ?? 2)} onChange={v => updateProps({ minimumQty: Number(v) || 2 })} />
+                    </Section>
+                </>
+            )
+
         default:
             return (
                 <div style={{ padding: '8px 0' }}>
