@@ -2539,7 +2539,7 @@ ${thumbCells}
             description: 'Amber warning notice — read before buying',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('warning_box' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#fef9c3'};${pad(p)}border:1px solid ${p.borderColor ?? '#fbbf24'};border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;color:${p.accentColor ?? '#f59e0b'};">&#9888;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#92400e'};">Please Read Before Buying</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#78350f'};line-height:1.6;">Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.</p></td></tr></table></td></tr></table>`)
             },
@@ -2553,7 +2553,7 @@ ${thumbCells}
             description: 'Blue informational notice with icon',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('info_box' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#eff6ff'};${pad(p)}border:1px solid ${p.borderColor ?? '#bfdbfe'};border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;color:${p.accentColor ?? '#3b82f6'};">&#8505;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#1e40af'};">Important Information</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#1d4ed8'};line-height:1.6;">This item ships from a UK warehouse. All items are genuine. VAT invoice available on request.</p></td></tr></table></td></tr></table>`)
             },
@@ -2567,7 +2567,7 @@ ${thumbCells}
             description: 'Two-column alternating row data table',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 const rows = [['Brand', '{{BRAND}}'], ['Model', '{{MPN}}'], ['Condition', '{{ITEM_CONDITION}}'], ['Weight', '{{WEIGHT}}'], ['Country', '{{ORIGIN}}']]
                 const rowHtml = rows.map((r, i) =>
                     `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : (p.headerBg ? '#fff' : '#fff')};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.headerText ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:40%;">${r[0]}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#6b7280'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r[1]}</td></tr>`
@@ -2585,7 +2585,7 @@ ${thumbCells}
             description: 'Inline badges — Genuine · New · UK Stock',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 const badges = ['&#10003; Genuine', '&#128230; UK Stock', '&#9733; Top Rated', '&#128260; Easy Returns']
                 const cells = badges.map(b => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:4px 12px;background-color:${p.badgeBg ?? '#f3eeff'};color:${p.badgeText ?? '#7530fb'};font-family:Arial,sans-serif;font-size:12px;font-weight:700;border-radius:100px;border:1px solid ${p.badgeBorder ?? '#ede9fe'};">${b}</span></td>`).join('')
                 return wrapBlock('badge_row' as BlockType, id,
@@ -2646,7 +2646,7 @@ ${thumbCells}
             description: 'Compatible models list',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 const models = ['Model A 2019-2023', 'Model B 2020-2024', 'Model C Pro All years', 'Model D Mini 2021+']
                 const rows = models.map((m, i) => `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f0fdf4') : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.headerText ?? '#166534'};border:1px solid ${p.borderColor ?? '#bbf7d0'};">&#10003;</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#1f1d2e'};border:1px solid ${p.borderColor ?? '#bbf7d0'};">${m}</td></tr>`).join('')
                 return wrapBlock('compatibility_table' as BlockType, id,
@@ -2702,7 +2702,7 @@ ${thumbCells}
             description: '3-column feature highlights with icons',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 const features = [
                     { icon: '&#9889;', title: 'High Performance', text: 'Engineered for maximum efficiency' },
                     { icon: '&#128272;', title: 'Secure & Reliable', text: 'Built to last with premium materials' },
@@ -2722,7 +2722,7 @@ ${thumbCells}
             description: 'This vs competitors comparison table',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 const rows = [['Feature', 'Our Product', 'Competitor'], ['Quality', '&#9733;&#9733;&#9733;&#9733;&#9733;', '&#9733;&#9733;&#9733;'], ['Warranty', '2 Years', '6 Months'], ['UK Stock', '&#10003; Yes', '&#10007; No'], ['Returns', '30 Days', '14 Days']]
                 const rowHtml = rows.map((r, i) => `<tr style="background-color:${i === 0 ? (p.headerBg ?? '#7530fb') : i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : '#fff'};"><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '400'};color:${i === 0 ? (p.headerText ?? '#fff') : '#1f1d2e'};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};">${r[0]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '600'};color:${i === 0 ? (p.headerText ?? '#fff') : (p.accentColor ?? '#7530fb')};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};text-align:center;">${r[1]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;color:${i === 0 ? (p.headerText ?? '#fff') : '#9ca3af'};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};text-align:center;">${r[2]}</td></tr>`).join('')
                 return wrapBlock('product_comparison' as BlockType, id,
@@ -2798,7 +2798,7 @@ ${thumbCells}
             description: 'Two images side by side comparison',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('before_after' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:${p.labelBg ?? '#f3f4f6'};border-radius:8px;padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#6b7280'};text-transform:uppercase;letter-spacing:1px;">Before</p><img src="{{IMAGE_BEFORE}}" alt="Before" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td><td width="4%" style="text-align:center;font-size:20px;color:#9ca3af;">&#8594;</td><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:${p.labelBg ?? '#f0fdf4'};border-radius:8px;padding:8px;border:1px solid ${p.borderColor ?? '#bbf7d0'};"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#16a34a'};text-transform:uppercase;letter-spacing:1px;">After</p><img src="{{IMAGE_AFTER}}" alt="After" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td></tr></table></td></tr></table>`)
             },
@@ -2830,7 +2830,7 @@ ${thumbCells}
             description: 'Order today for same day dispatch notice',
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#f0fdf4' } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('dispatch_timer' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#f0fdf4'};${pad(p)}border:1px solid ${p.borderColor ?? '#bbf7d0'};border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:24px;">&#9201;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:${p.textColor ?? '#166534'};">Order in the next <span style="color:${p.accentColor ?? '#dc2626'};">{{HOURS_LEFT}} hours</span> for Same Day Dispatch</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#16a34a'};">&#128230; Dispatched same working day if ordered by 2pm</p></td></tr></table>`)
             },
@@ -3159,7 +3159,7 @@ ${thumbCells}
             description: 'Logo, store name and tagline banner',
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#7530fb' } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('store_header' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#7530fb'};${pad(p)}text-align:center;"><h1 style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 24}px;font-weight:700;color:${p.textColor ?? '#ffffff'};">{{SELLER_NAME}}</h1><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${p.accentColor ?? 'rgba(255,255,255,0.7)'};">Quality products &middot; Fast dispatch &middot; Trusted eBay seller</p></td></tr></table>`)
             },
@@ -3298,7 +3298,7 @@ ${thumbCells}
             description: 'Social media icon links row',
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 const socials = [{ icon: '&#128248;', label: 'Instagram', color: '#e1306c' }, { icon: '&#128444;', label: 'Facebook', color: '#1877f2' }, { icon: '&#128140;', label: 'Twitter', color: '#1da1f2' }, { icon: '&#127910;', label: 'YouTube', color: '#ff0000' }]
                 const cells = socials.map(s => `<td style="padding:0 10px;text-align:center;"><p style="margin:0 0 2px;font-size:${p.iconSize ?? 28}px;color:${p.iconColor ?? s.color};">${s.icon}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.labelColor ?? s.color};font-weight:700;">${s.label}</p></td>`).join('')
                 return wrapBlock('social_links' as BlockType, id,
@@ -3330,7 +3330,7 @@ ${thumbCells}
             description: 'Large H1 with decorative underline',
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
+                const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('page_title' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#1e1535;line-height:1.2;">{{PRODUCT_TITLE}}</h1><div style="width:60px;height:4px;background-color:#7530fb;border-radius:2px;"></div></td></tr></table>`)
             },
