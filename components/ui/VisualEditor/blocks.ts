@@ -186,8 +186,10 @@ export type BlockProps =
     | UrgencyTimerBlockProps
     | TrustBadgeBlockProps
     | ConditionBadgeProps
+    | ConditionDetailsProps
     | ItemSpecificsProps
     | AuthenticityGuaranteeProps
+    | CompatibilityTableProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -625,6 +627,15 @@ export interface ConditionBadgeProps extends CommonProps {
     badgeRadius: number
 }
 
+// ── Condition Details ────────────────────────────────────────────────────────
+export interface ConditionDetailsProps extends CommonProps {
+    variant?: string
+    condition?: string
+    conditionNotes?: string
+    heading?: string
+    accentColor?: string
+}
+
 // ── Item Specifics ───────────────────────────────────────────────────────────
 export interface ItemSpecificsProps extends CommonProps {
     rows: Array<{ key: string; value: string }>
@@ -648,6 +659,14 @@ export interface AuthenticityGuaranteeProps extends CommonProps {
     points: Array<{ title: string; sub?: string }>
     accentColor: string
     textColor: string
+}
+
+// ── Compatibility Table ───────────────────────────────────────────────────────
+export interface CompatibilityTableProps extends CommonProps {
+    variant?: string
+    titleText?: string
+    items?: Array<{ model: string; years?: string; make?: string; submodel?: string; notes?: string; status?: boolean; partNumber?: string }>
+    models?: string[]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1024,8 +1043,12 @@ import { getFreeShippingVariant as _getFreeShippingVariant } from './variants/fr
 import { getLimitedTimeOfferVariant as _getLimitedTimeOfferVariant } from './variants/limited_time_offer.variants'
 import { getSatisfactionGuaranteeVariant as _getSatisfactionGuaranteeVariant } from './variants/satisfaction_guarantee.variants'
 import { getConditionBadgeVariant as _getConditionBadgeVariant } from './variants/condition_badge.variants'
+import { getConditionDetailsVariant as _getConditionDetailsVariant } from './variants/condition_details.variants'
 import { getItemSpecificsVariant as _getItemSpecificsVariant } from './variants/item_specifics.variants'
 import { getAuthenticityGuaranteeVariant as _getAuthenticityGuaranteeVariant } from './variants/authenticity_guarantee.variants'
+import { getCompatibilityTableVariant as _getCompatibilityTableVariant } from './variants/compatibility_table.variants'
+import { getProductComparisonVariant as _getProductComparisonVariant } from './variants/product_comparison.variants'
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2643,14 +2666,26 @@ ${thumbCells}
             label: 'Compatibility Table',
             category: 'Product' as BlockCategory,
             icon: 'check',
-            description: 'Compatible models list',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Compatible models list — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'compat-classic-zebra-table',
+                titleText: 'Compatible With:',
+                items: [
+                    { model: 'Model A', years: '2019–2023', status: true },
+                    { model: 'Model B', years: '2020–2024', status: true },
+                    { model: 'Model C Pro', years: 'All years', status: true },
+                    { model: 'Model D Mini', years: '2021+', status: true },
+                ],
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                const models = ['Model A 2019-2023', 'Model B 2020-2024', 'Model C Pro All years', 'Model D Mini 2021+']
-                const rows = models.map((m, i) => `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f0fdf4') : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.headerText ?? '#166534'};border:1px solid ${p.borderColor ?? '#bbf7d0'};">&#10003;</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#1f1d2e'};border:1px solid ${p.borderColor ?? '#bbf7d0'};">${m}</td></tr>`).join('')
-                return wrapBlock('compatibility_table' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.headerBg ?? '#1e1535'};">&#9989; Compatible With:</p><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'compat-classic-zebra-table'
+                return wrapBlock('compatibility_table' as BlockType, id, _getCompatibilityTableVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -2659,12 +2694,24 @@ ${thumbCells}
             label: 'Condition Details',
             category: 'Product' as BlockCategory,
             icon: 'star',
-            description: 'Graded condition explanation block',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Graded condition explanation block — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'cd-cosmetic-grade-split',
+                condition: 'Brand New',
+                conditionNotes: '{{CONDITION_NOTES}}',
+                heading: 'Condition: Brand New',
+                bgColor: '#ffffff',
+                accentColor: '#7530fb',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('condition_details' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">Condition: <span style="color:#7530fb;">{{ITEM_CONDITION}}</span></p><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30%" style="padding:8px;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;text-align:center;"><p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#166534;">COSMETIC GRADE</p><p style="margin:4px 0 0;font-size:20px;">&#9733;&#9733;&#9733;&#9733;&#9733;</p></td><td width="4%"></td><td width="66%" style="padding:12px;background-color:#f8f7ff;border:1px solid #ede9fe;border-radius:6px;vertical-align:top;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;line-height:1.7;">{{CONDITION_NOTES}}</p></td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'cd-cosmetic-grade-split'
+                return wrapBlock('condition_details' as BlockType, id, _getConditionDetailsVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -2719,14 +2766,30 @@ ${thumbCells}
             label: 'Product Comparison',
             category: 'Product' as BlockCategory,
             icon: 'table',
-            description: 'This vs competitors comparison table',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'This vs competitors comparison table — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'comp-classic-header-table',
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                accentColor: '#7530fb',
+                rows: [
+                    { feature: 'Quality', ourValue: '★★★★★', competitorValue: '★★★' },
+                    { feature: 'Warranty', ourValue: '2 Years', competitorValue: '6 Months' },
+                    { feature: 'UK Stock', ourValue: '✓ Yes', competitorValue: 'X No' },
+                    { feature: 'Returns', ourValue: '30 Days', competitorValue: '14 Days' },
+                ],
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                const rows = [['Feature', 'Our Product', 'Competitor'], ['Quality', '&#9733;&#9733;&#9733;&#9733;&#9733;', '&#9733;&#9733;&#9733;'], ['Warranty', '2 Years', '6 Months'], ['UK Stock', '&#10003; Yes', '&#10007; No'], ['Returns', '30 Days', '14 Days']]
-                const rowHtml = rows.map((r, i) => `<tr style="background-color:${i === 0 ? (p.headerBg ?? '#7530fb') : i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : '#fff'};"><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '400'};color:${i === 0 ? (p.headerText ?? '#fff') : '#1f1d2e'};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};">${r[0]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '600'};color:${i === 0 ? (p.headerText ?? '#fff') : (p.accentColor ?? '#7530fb')};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};text-align:center;">${r[1]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;color:${i === 0 ? (p.headerText ?? '#fff') : '#9ca3af'};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};text-align:center;">${r[2]}</td></tr>`).join('')
-                return wrapBlock('product_comparison' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rowHtml}</table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'comp-classic-header-table'
+                return wrapBlock('product_comparison' as BlockType, id, _getProductComparisonVariant(variantId).toHtml(p, id))
             },
         },
 

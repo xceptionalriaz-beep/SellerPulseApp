@@ -32,6 +32,10 @@ export { satisfactionGuaranteeVariants, getSatisfactionGuaranteeVariant, guarant
 export { conditionBadgeVariants, getConditionBadgeVariant, conditionVariants } from './condition_badge.variants'
 export { itemSpecificsVariants, getItemSpecificsVariant, specificsVariants } from './item_specifics.variants'
 export { authenticityGuaranteeVariants, getAuthenticityGuaranteeVariant, authenticityVariants, getAuthenticityVariant } from './authenticity_guarantee.variants'
+export { conditionDetailsVariants, getConditionDetailsVariant, detailsVariants } from './condition_details.variants'
+export { compatibilityTableVariants, getCompatibilityTableVariant, compatibilityVariants } from './compatibility_table.variants'
+export { productComparisonVariants, getProductComparisonVariant, comparisonVariants } from './product_comparison.variants'
+export { keyFeaturesVariants, getKeyFeaturesVariant, KEY_FEATURES_THUMBNAILS, featuresGridVariants, getKeyFeaturesGridVariant } from './key_features.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -64,6 +68,10 @@ import { satisfactionGuaranteeVariants } from './satisfaction_guarantee.variants
 import { conditionBadgeVariants } from './condition_badge.variants'
 import { itemSpecificsVariants } from './item_specifics.variants'
 import { authenticityGuaranteeVariants } from './authenticity_guarantee.variants'
+import { conditionDetailsVariants } from './condition_details.variants'
+import { compatibilityTableVariants } from './compatibility_table.variants'
+import { productComparisonVariants } from './product_comparison.variants'
+import { keyFeaturesVariants } from './key_features.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -98,11 +106,17 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'satisfaction_guarantee': satisfactionGuaranteeVariants,
     'guarantee': satisfactionGuaranteeVariants,
     'condition_badge': conditionBadgeVariants,
+    'condition_details': conditionDetailsVariants,
+    'condition_notes': conditionDetailsVariants,
     'condition': conditionBadgeVariants,
     'item_specifics': itemSpecificsVariants,
     'specs': itemSpecificsVariants,
     'authenticity_guarantee': authenticityGuaranteeVariants,
     'authenticity': authenticityGuaranteeVariants,
+    'compatibility_table': compatibilityTableVariants,
+    'compatibility': compatibilityTableVariants,
+    'product_comparison': productComparisonVariants,
+    'comparison': productComparisonVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
