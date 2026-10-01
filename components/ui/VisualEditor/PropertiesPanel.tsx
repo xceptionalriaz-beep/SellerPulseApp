@@ -6943,11 +6943,22 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Card background" value={props.cardBg ?? '#f8f7ff'} onChange={v => updateProps({ cardBg: v })} />
-                        <ColorRow label="Card border" value={props.cardBorder ?? '#e9e3ff'} onChange={v => updateProps({ cardBorder: v })} />
-                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
-                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
-                        <ColorRow label="Text colour" value={props.textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#0f172a'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent / icon colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={props.fontFamily ?? ''}
+                            onChange={v => updateProps({ fontFamily: v })}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                            ]}
+                        />
                     </Section>
                 </>
             )
@@ -8087,14 +8098,52 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
         }
 
-        case 'key_features_grid':
+        case 'key_features_grid': {
+            const kfFeatures: Array<{ title: string; description: string; icon?: string; badge?: string; metric?: string }> =
+                props.features ?? props.items ?? [
+                    { title: 'High Performance', description: 'Engineered for maximum efficiency', icon: 'shield', badge: 'FLAGSHIP', metric: 'Grade A+' },
+                    { title: 'Secure & Reliable', description: 'Built to last with premium materials', icon: 'check', badge: '02', metric: '' },
+                    { title: 'Premium Quality', description: 'Rigorously tested before dispatch', icon: 'check', badge: '03', metric: '' },
+                ]
+            const updateFeature = (i: number, field: string, val: string) => {
+                const next = kfFeatures.map((f, j) => j === i ? { ...f, [field]: val } : f)
+                updateProps({ features: next })
+            }
             return (
-                <Section title="Feature grid">
-                    <InfoBox>3 feature columns — edit icons, titles and descriptions via the Styles tab background control. Content is fixed in the HTML output.</InfoBox>
-                    <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
-                    <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
-                </Section>
+                <>
+                    <Section title="Section header">
+                        <TextInput
+                            label="Heading"
+                            value={props.heading ?? props.title ?? 'Key Product Features'}
+                            onChange={v => updateProps({ heading: v })}
+                        />
+                        <TextareaInput
+                            label="Subtitle"
+                            value={props.subtitle ?? props.subheading ?? ''}
+                            rows={2}
+                            onChange={v => updateProps({ subtitle: v })}
+                        />
+                    </Section>
+                    <Section title="Feature items">
+                        <InfoBox>Icon options: shield · check · flame · droplet · tool · zap</InfoBox>
+                        {kfFeatures.map((feat, i) => (
+                            <div key={i} style={{ marginBottom: 10, padding: '10px 12px', background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                                <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.secondary }}>Feature {i + 1}</p>
+                                <TextInput label="Title" value={feat.title ?? ''} onChange={v => updateFeature(i, 'title', v)} />
+                                <TextareaInput label="Description" value={feat.description ?? ''} rows={2} onChange={v => updateFeature(i, 'description', v)} />
+                                <TextInput label="Icon" value={feat.icon ?? ''} onChange={v => updateFeature(i, 'icon', v)} />
+                                <TextInput label="Badge label" value={feat.badge ?? ''} onChange={v => updateFeature(i, 'badge', v)} />
+                                <TextInput label="Metric" value={feat.metric ?? ''} onChange={v => updateFeature(i, 'metric', v)} />
+                            </div>
+                        ))}
+                        <button
+                            onClick={() => updateProps({ features: [...kfFeatures, { title: 'New Feature', description: 'Description here', icon: 'check', badge: '', metric: '' }] })}
+                            style={{ marginTop: 4, padding: '7px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+                        >+ Add feature</button>
+                    </Section>
+                </>
             )
+        }
 
         case 'payment_methods':
             return (
