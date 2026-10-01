@@ -6222,7 +6222,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'free_shipping':
+        case 'free_shipping_banner':
             return (
                 <>
                     <Section title="Colours">
