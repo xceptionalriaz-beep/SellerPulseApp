@@ -3219,6 +3219,554 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="22" y="32" width="36" height="2.5" rx="0.5" fill="#78716c" />
         </svg>
     ),
+
+    // ── Limited Time Offer Variants ─────────────────────────────────────
+    'lto-flash-sale-ticker': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#dc2626" />
+            <rect x="5" y="8" width="24" height="6" rx="2" fill="#991b1b" />
+            <rect x="5" y="18" width="38" height="5" rx="1" fill="#ffffff" />
+            <rect x="5" y="27" width="30" height="3" rx="1" fill="#fee2e2" />
+            {/* 4 Digital Timer Boxes */}
+            <rect x="47" y="15" width="6" height="12" rx="1" fill="#18181b" />
+            <rect x="55" y="15" width="6" height="12" rx="1" fill="#18181b" />
+            <rect x="63" y="15" width="6" height="12" rx="1" fill="#18181b" />
+            <rect x="71" y="15" width="6" height="12" rx="1" fill="#18181b" />
+        </svg>
+    ),
+
+    'lto-clearance-stamped-tag': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1" />
+            {/* Stamp Circle */}
+            <circle cx="16" cy="24" r="10" stroke="#b91c1c" strokeWidth="1.5" strokeDasharray="2 1" />
+            <rect x="31" y="12" width="22" height="4" rx="1" fill="#fee2e2" />
+            <rect x="31" y="20" width="28" height="4" rx="1" fill="#1c1917" />
+            <rect x="31" y="27" width="20" height="3" rx="1" fill="#78716c" />
+            {/* Right Tag Border */}
+            <line x1="62" y1="6" x2="62" y2="42" stroke="#d6d3d1" strokeWidth="1" strokeDasharray="2 2" />
+            <rect x="65" y="18" width="11" height="8" rx="2" fill="#b91c1c" />
+        </svg>
+    ),
+
+    'lto-midnight-vip-exclusive': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#09090b" stroke="#d4af37" strokeWidth="1.2" />
+            {/* Gold Diamond Crest */}
+            <polygon points="12,12 15,16 12,20 9,16" fill="#d4af37" />
+            <rect x="18" y="13" width="25" height="4" rx="1" fill="#d4af37" />
+            <rect x="9" y="22" width="44" height="4" rx="1" fill="#fafafa" />
+            <rect x="9" y="29" width="34" height="3" rx="1" fill="#a1a1aa" />
+            {/* Gold Badge */}
+            <rect x="58" y="14" width="17" height="18" rx="2" fill="#18181b" stroke="#d4af37" strokeWidth="1" />
+        </svg>
+    ),
+
+    'lto-industrial-hazard-alert': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#f59e0b" strokeWidth="1" />
+            {/* Top Hazard Caution Stripe */}
+            <rect width="80" height="6" fill="#f59e0b" />
+            <line x1="10" y1="0" x2="16" y2="6" stroke="#000000" strokeWidth="1.5" />
+            <line x1="25" y1="0" x2="31" y2="6" stroke="#000000" strokeWidth="1.5" />
+            <line x1="40" y1="0" x2="46" y2="6" stroke="#000000" strokeWidth="1.5" />
+            <line x1="55" y1="0" x2="61" y2="6" stroke="#000000" strokeWidth="1.5" />
+            <line x1="70" y1="0" x2="76" y2="6" stroke="#000000" strokeWidth="1.5" />
+            <rect x="6" y="14" width="20" height="5" rx="1" fill="#f59e0b" />
+            <rect x="6" y="23" width="46" height="4" rx="1" fill="#f4f4f5" />
+            <rect x="6" y="31" width="38" height="3" rx="1" fill="#a1a1aa" />
+            <rect x="58" y="16" width="16" height="18" rx="2" fill="#27272a" stroke="#3f3f46" strokeWidth="1" />
+        </svg>
+    ),
+
+    'lto-circular-coupon-clip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="3 2" />
+            {/* Scissor Marker */}
+            <text x="5" y="27" fontSize="11" fill="#0284c7">✂</text>
+            <rect x="18" y="12" width="18" height="4" rx="1" fill="#e0f2fe" />
+            <rect x="18" y="20" width="34" height="4" rx="1" fill="#0f172a" />
+            <rect x="18" y="27" width="28" height="3" rx="1" fill="#64748b" />
+            {/* Barcode lines */}
+            <line x1="57" y1="8" x2="57" y2="40" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="2 2" />
+            <line x1="62" y1="20" x2="62" y2="34" stroke="#334155" strokeWidth="1" />
+            <line x1="65" y1="20" x2="65" y2="34" stroke="#334155" strokeWidth="1.5" />
+            <line x1="68" y1="20" x2="68" y2="34" stroke="#334155" strokeWidth="1" />
+            <line x1="71" y1="20" x2="71" y2="34" stroke="#334155" strokeWidth="2" />
+            <line x1="75" y1="20" x2="75" y2="34" stroke="#334155" strokeWidth="1" />
+        </svg>
+    ),
+
+    'lto-live-scarcity-meter': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <circle cx="9" cy="14" r="2.5" fill="#f97316" />
+            <rect x="15" y="11" width="26" height="5" rx="1.5" fill="#f97316" />
+            <rect x="6" y="21" width="42" height="4" rx="1" fill="#ffffff" />
+            <rect x="6" y="28" width="36" height="3" rx="1" fill="#94a3b8" />
+            {/* Scarcity meter card */}
+            <rect x="52" y="12" width="23" height="23" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+            <rect x="55" y="18" width="17" height="4" rx="2" fill="#334155" />
+            <rect x="55" y="18" width="14" height="4" rx="2" fill="#f97316" />
+        </svg>
+    ),
+
+    'lto-multibuy-volume-matrix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect width="80" height="12" fill="#f8fafc" />
+            <rect x="6" y="4" width="30" height="4" rx="1" fill="#2563eb" />
+            {/* 3 Tier Columns */}
+            <rect x="5" y="16" width="21" height="26" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="29" y="15" width="22" height="28" rx="2" fill="#eff6ff" stroke="#2563eb" strokeWidth="1.2" />
+            <rect x="54" y="16" width="21" height="26" rx="2" fill="#f0fdf4" stroke="#16a34a" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'lto-scandinavian-editorial': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e4e4e7" strokeWidth="1" />
+            <rect x="8" y="13" width="26" height="3" rx="0.5" fill="#71717a" />
+            <rect x="8" y="20" width="40" height="4" rx="0.5" fill="#18181b" />
+            <rect x="8" y="28" width="34" height="2.5" rx="0.5" fill="#a1a1aa" />
+            <line x1="56" y1="12" x2="56" y2="36" stroke="#d4d4d8" strokeWidth="0.8" />
+            <rect x="60" y="21" width="14" height="4" rx="0.5" fill="#18181b" />
+        </svg>
+    ),
+
+    'lto-cyber-terminal-deal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            {/* Top Terminal Bar */}
+            <rect width="80" height="8" fill="#0f172a" />
+            <circle cx="6" cy="4" r="1.5" fill="#ef4444" />
+            <circle cx="11" cy="4" r="1.5" fill="#f59e0b" />
+            <circle cx="16" cy="4" r="1.5" fill="#10b981" />
+            <rect x="6" y="14" width="28" height="4" rx="1" fill="#06b6d4" />
+            <rect x="6" y="22" width="46" height="4" rx="1" fill="#f1f5f9" />
+            <rect x="6" y="30" width="34" height="3" rx="1" fill="#10b981" />
+            <rect x="58" y="16" width="16" height="17" rx="2" fill="#0f172a" stroke="#06b6d4" strokeWidth="1" />
+        </svg>
+    ),
+
+    'lto-holiday-gift-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#064e3b" stroke="#fbbf24" strokeWidth="1" />
+            {/* Ribbon Icon */}
+            <text x="6" y="28" fontSize="12">🎀</text>
+            <rect x="22" y="11" width="22" height="4" rx="1" fill="#022c22" stroke="#fbbf24" strokeWidth="0.8" />
+            <rect x="22" y="19" width="34" height="4" rx="1" fill="#ffffff" />
+            <rect x="22" y="27" width="28" height="3" rx="1" fill="#d1fae5" />
+            <rect x="58" y="15" width="16" height="18" rx="2" fill="#022c22" stroke="#fbbf24" strokeWidth="1" />
+        </svg>
+    ),
+
+    // ── Satisfaction Guarantee Variants ──────────────────────────────────
+    'sg-golden-crest-emblem': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#d4af37" strokeWidth="1" />
+            <circle cx="16" cy="24" r="10" stroke="#d4af37" strokeWidth="1.2" fill="#111827" />
+            <text x="16" y="27" fontSize="10" textAnchor="middle" fill="#d4af37">★</text>
+            <rect x="31" y="13" width="22" height="3.5" rx="1" fill="#d4af37" />
+            <rect x="31" y="20" width="30" height="4.5" rx="1" fill="#ffffff" />
+            <rect x="31" y="28" width="24" height="3" rx="1" fill="#94a3b8" />
+            <line x1="64" y1="12" x2="64" y2="36" stroke="#1e293b" strokeWidth="1" />
+            <line x1="68" y1="18" x2="76" y2="18" stroke="#d4af37" strokeWidth="1.5" />
+            <line x1="68" y1="24" x2="76" y2="24" stroke="#10b981" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'sg-five-star-authority-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Rating Box */}
+            <rect x="5" y="10" width="18" height="28" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <text x="14" y="23" fontSize="8" fontWeight="bold" textAnchor="middle" fill="#0f172a">5.0</text>
+            <text x="14" y="32" fontSize="5" textAnchor="middle" fill="#f59e0b">★★★★★</text>
+            <rect x="27" y="12" width="20" height="4" rx="1" fill="#fef3c7" />
+            <rect x="27" y="20" width="34" height="4.5" rx="1" fill="#0f172a" />
+            <rect x="27" y="28" width="26" height="3" rx="1" fill="#64748b" />
+            <rect x="65" y="15" width="11" height="18" rx="2" fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'sg-split-contrast-promise': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Left 38% Dark Split */}
+            <rect width="32" height="48" rx="4" fill="#0f172a" />
+            <rect x="5" y="12" width="16" height="3" rx="1" fill="#10b981" />
+            <rect x="5" y="19" width="22" height="4" rx="1" fill="#ffffff" />
+            <rect x="5" y="27" width="18" height="3" rx="1" fill="#94a3b8" />
+            {/* Right Checklist */}
+            <circle cx="38" cy="16" r="2" fill="#10b981" />
+            <line x1="43" y1="16" x2="72" y2="16" stroke="#0f172a" strokeWidth="2" />
+            <circle cx="38" cy="24" r="2" fill="#10b981" />
+            <line x1="43" y1="24" x2="68" y2="24" stroke="#0f172a" strokeWidth="2" />
+            <circle cx="38" cy="32" r="2" fill="#10b981" />
+            <line x1="43" y1="32" x2="70" y2="32" stroke="#0f172a" strokeWidth="2" />
+        </svg>
+    ),
+
+    'sg-engraved-warranty-ticket': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="4" y="4" width="72" height="40" rx="2" fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="2 1.5" />
+            <rect x="8" y="12" width="22" height="3" rx="0.5" fill="#64748b" />
+            <rect x="8" y="19" width="38" height="4.5" rx="1" fill="#1c1917" />
+            <rect x="8" y="27" width="30" height="3" rx="1" fill="#475569" />
+            <rect x="56" y="13" width="15" height="22" rx="2" fill="#ffffff" stroke="#0284c7" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'sg-handshake-seller-pledge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#e7e5e4" strokeWidth="1" />
+            <text x="7" y="28" fontSize="13">🤝</text>
+            <rect x="22" y="11" width="16" height="3" rx="1" fill="#7530fb" />
+            <rect x="22" y="18" width="36" height="4" rx="1" fill="#1c1917" />
+            <rect x="22" y="26" width="30" height="3" rx="1" fill="#57534e" />
+            <line x1="22" y1="34" x2="40" y2="34" stroke="#78716c" strokeWidth="1.5" />
+            <rect x="62" y="13" width="13" height="22" rx="2" fill="#ffffff" stroke="#d6d3d1" strokeWidth="1" />
+        </svg>
+    ),
+
+    'sg-three-pillar-shield-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect width="80" height="11" fill="#f8fafc" />
+            <rect x="6" y="4" width="28" height="3.5" rx="1" fill="#2563eb" />
+            {/* 3 Pillars */}
+            <rect x="5" y="15" width="21" height="27" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="29" y="14" width="22" height="29" rx="2" fill="#eff6ff" stroke="#2563eb" strokeWidth="1.2" />
+            <rect x="54" y="15" width="21" height="27" rx="2" fill="#f0fdf4" stroke="#86efac" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'sg-minimalist-swiss-rule': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e4e4e7" strokeWidth="1" />
+            <rect x="8" y="13" width="24" height="3" rx="0.5" fill="#71717a" />
+            <rect x="8" y="20" width="38" height="4" rx="0.5" fill="#18181b" />
+            <rect x="8" y="28" width="32" height="2.5" rx="0.5" fill="#71717a" />
+            <line x1="56" y1="12" x2="56" y2="36" stroke="#d4d4d8" strokeWidth="0.8" />
+            <rect x="60" y="21" width="14" height="4" rx="0.5" fill="#18181b" />
+        </svg>
+    ),
+
+    'sg-industrial-field-tested': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#f59e0b" strokeWidth="1" />
+            <rect x="6" y="11" width="24" height="5" rx="1" fill="#f59e0b" />
+            <rect x="6" y="20" width="46" height="4" rx="1" fill="#f4f4f5" />
+            <rect x="6" y="28" width="38" height="3" rx="1" fill="#a1a1aa" />
+            <rect x="58" y="13" width="16" height="22" rx="2" fill="#27272a" stroke="#3f3f46" strokeWidth="1" />
+            <line x1="62" y1="20" x2="70" y2="20" stroke="#f59e0b" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'sg-money-back-speed-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#1e1b4b" />
+            <rect x="6" y="9" width="20" height="4.5" rx="1.5" fill="#312e81" stroke="#4338ca" strokeWidth="0.8" />
+            <rect x="6" y="18" width="44" height="5" rx="1" fill="#ffffff" />
+            <rect x="6" y="27" width="36" height="3.5" rx="1" fill="#c7d2fe" />
+            <rect x="56" y="14" width="18" height="20" rx="3" fill="#ffffff" />
+            <rect x="59" y="20" width="12" height="3" rx="1" fill="#1e1b4b" />
+            <rect x="60" y="25" width="10" height="2" rx="0.5" fill="#4338ca" />
+        </svg>
+    ),
+
+    'sg-white-glove-concierge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#161324" stroke="#fbbf24" strokeWidth="1" />
+            <text x="6" y="27" fontSize="12" fill="#fbbf24">✦</text>
+            <rect x="18" y="11" width="22" height="4" rx="1" fill="#231d38" stroke="#fbbf24" strokeWidth="0.8" />
+            <rect x="18" y="19" width="36" height="4" rx="1" fill="#ffffff" />
+            <rect x="18" y="27" width="28" height="3" rx="1" fill="#d8b4fe" />
+            <rect x="58" y="14" width="16" height="20" rx="2" fill="#231d38" stroke="#fbbf24" strokeWidth="1" />
+        </svg>
+    ),
+
+    // ── Condition Badge Variants ─────────────────────────────────────────
+    'cond-inspected-grade-pill': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="11" width="26" height="6" rx="3" fill="#16a34a" />
+            <rect x="6" y="20" width="38" height="4.5" rx="1" fill="#0f172a" />
+            <rect x="6" y="28" width="30" height="3" rx="1" fill="#64748b" />
+            {/* QC Stamp */}
+            <circle cx="65" cy="24" r="10" stroke="#16a34a" strokeWidth="1.2" strokeDasharray="2 1" />
+            <text x="65" y="26" fontSize="6" fontWeight="bold" textAnchor="middle" fill="#16a34a">QC</text>
+        </svg>
+    ),
+
+    'cond-cosmetic-score-meter': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="11" width="20" height="26" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <text x="15" y="21" fontSize="6.5" fontWeight="bold" textAnchor="middle" fill="#2563eb">A+</text>
+            <text x="15" y="29" fontSize="5" textAnchor="middle" fill="#f59e0b">★★★★★</text>
+            <rect x="29" y="14" width="22" height="3" rx="1" fill="#2563eb" />
+            <rect x="29" y="21" width="32" height="4" rx="1" fill="#0f172a" />
+            <rect x="29" y="28" width="26" height="3" rx="1" fill="#64748b" />
+            <rect x="65" y="14" width="10" height="20" rx="1.5" fill="#eff6ff" />
+        </svg>
+    ),
+
+    'cond-factory-sealed-security': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <rect width="80" height="6" fill="#022c22" />
+            <line x1="12" y1="3" x2="68" y2="3" stroke="#10b981" strokeWidth="1" strokeDasharray="3 1" />
+            <rect x="6" y="13" width="24" height="4" rx="1" fill="#064e3b" stroke="#10b981" strokeWidth="0.6" />
+            <rect x="6" y="21" width="40" height="4.5" rx="1" fill="#ffffff" />
+            <rect x="6" y="29" width="34" height="3" rx="1" fill="#94a3b8" />
+            <rect x="58" y="14" width="16" height="20" rx="2" fill="#0f172a" stroke="#10b981" strokeWidth="1" />
+        </svg>
+    ),
+
+    'cond-collector-archive-tag': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1" strokeDasharray="2 1.5" />
+            <rect x="6" y="12" width="14" height="24" rx="2" fill="#ffffff" stroke="#b91c1c" strokeWidth="1" />
+            <text x="13" y="24" fontSize="7" fontWeight="bold" textAnchor="middle" fill="#b91c1c">9.4</text>
+            <rect x="24" y="13" width="22" height="3" rx="0.5" fill="#78716c" />
+            <rect x="24" y="20" width="32" height="4" rx="1" fill="#1c1917" />
+            <rect x="24" y="28" width="26" height="3" rx="1" fill="#57534e" />
+            <line x1="62" y1="8" x2="62" y2="40" stroke="#d6d3d1" strokeWidth="1" strokeDasharray="2 2" />
+        </svg>
+    ),
+
+    'cond-diagnostic-matrix-table': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect width="80" height="10" fill="#f8fafc" />
+            <rect x="6" y="3.5" width="24" height="3" rx="1" fill="#0284c7" />
+            {/* 4 Diagnostic Chips */}
+            <rect x="4" y="15" width="16" height="26" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="22" y="15" width="16" height="26" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="40" y="15" width="16" height="26" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="58" y="15" width="18" height="26" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'cond-designer-luxury-report': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#09090b" stroke="#d4af37" strokeWidth="1" />
+            <rect x="8" y="11" width="28" height="3" rx="0.5" fill="#d4af37" />
+            <rect x="8" y="18" width="40" height="4" rx="0.5" fill="#fafafa" />
+            <rect x="8" y="26" width="34" height="3" rx="0.5" fill="#a1a1aa" />
+            <rect x="58" y="13" width="16" height="22" rx="2" fill="#18181b" stroke="#d4af37" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'cond-mechanic-auto-tested': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#f59e0b" strokeWidth="1" />
+            <text x="6" y="28" fontSize="12">⚙️</text>
+            <rect x="22" y="10" width="22" height="4" rx="1" fill="#f59e0b" />
+            <rect x="22" y="18" width="34" height="4" rx="1" fill="#f4f4f5" />
+            <rect x="22" y="26" width="28" height="3" rx="1" fill="#a1a1aa" />
+            <rect x="58" y="13" width="16" height="22" rx="2" fill="#27272a" stroke="#3f3f46" strokeWidth="1" />
+        </svg>
+    ),
+
+    'cond-open-box-complete-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e9d5ff" strokeWidth="1" />
+            <text x="6" y="28" fontSize="12">📦</text>
+            <rect x="22" y="10" width="22" height="4" rx="1" fill="#f3e8ff" />
+            <rect x="22" y="18" width="34" height="4" rx="1" fill="#0f172a" />
+            <rect x="22" y="26" width="28" height="3" rx="1" fill="#6b7280" />
+            <line x1="58" y1="10" x2="58" y2="38" stroke="#f3e8ff" strokeWidth="1" />
+            <rect x="62" y="16" width="12" height="16" rx="2" fill="#fdf4ff" />
+        </svg>
+    ),
+
+    'cond-minimal-nordic-pill': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e4e4e7" strokeWidth="1" />
+            <rect x="8" y="12" width="26" height="3" rx="0.5" fill="#71717a" />
+            <rect x="8" y="19" width="38" height="4" rx="0.5" fill="#18181b" />
+            <rect x="8" y="27" width="32" height="2.5" rx="0.5" fill="#71717a" />
+            <line x1="56" y1="10" x2="56" y2="38" stroke="#d4d4d8" strokeWidth="0.8" />
+            <rect x="60" y="20" width="14" height="4" rx="0.5" fill="#18181b" />
+        </svg>
+    ),
+
+    'cond-as-is-parts-honest': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffbeb" stroke="#fde68a" strokeWidth="1" />
+            <text x="6" y="27" fontSize="11">⚠️</text>
+            <rect x="20" y="10" width="24" height="4" rx="1" fill="#fee2e2" />
+            <rect x="20" y="18" width="34" height="4" rx="1" fill="#78350f" />
+            <rect x="20" y="26" width="28" height="3" rx="1" fill="#92400e" />
+            <line x1="58" y1="8" x2="58" y2="40" stroke="#fcd34d" strokeWidth="1" strokeDasharray="2 2" />
+            <rect x="62" y="16" width="12" height="16" rx="2" fill="#fef2f2" />
+        </svg>
+    ),
+
+    // ── Item Specifics Variants ──────────────────────────────────────────
+    'is-dual-column-zebra-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect width="80" height="11" rx="4" fill="#0f172a" />
+            <rect x="6" y="4" width="22" height="3.5" rx="1" fill="#2563eb" />
+            {/* Zebra Rows */}
+            <rect x="0" y="11" width="80" height="9" fill="#f8fafc" />
+            <line x1="28" y1="11" x2="28" y2="48" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="20" x2="80" y2="20" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="0" y="29" width="80" height="9" fill="#f8fafc" />
+            <line x1="0" y1="29" x2="80" y2="29" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="38" x2="80" y2="38" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="6" y1="15" x2="22" y2="15" stroke="#0f172a" strokeWidth="1.5" />
+            <line x1="34" y1="15" x2="65" y2="15" stroke="#64748b" strokeWidth="1.5" />
+            <line x1="6" y1="24" x2="20" y2="24" stroke="#0f172a" strokeWidth="1.5" />
+            <line x1="34" y1="24" x2="58" y2="24" stroke="#64748b" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'is-two-column-card-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="4" width="28" height="3" rx="1" fill="#2563eb" />
+            {/* 4 Bento Micro Cards */}
+            <rect x="4" y="10" width="34" height="16" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="42" y="10" width="34" height="16" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="4" y="28" width="34" height="16" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="42" y="28" width="34" height="16" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="8" y1="14" x2="20" y2="14" stroke="#64748b" strokeWidth="1" />
+            <line x1="8" y1="20" x2="30" y2="20" stroke="#0f172a" strokeWidth="2" />
+            <line x1="46" y1="14" x2="58" y2="14" stroke="#64748b" strokeWidth="1" />
+            <line x1="46" y1="20" x2="68" y2="20" stroke="#0f172a" strokeWidth="2" />
+        </svg>
+    ),
+
+    'is-industrial-blueprint-matrix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+            <rect width="80" height="9" fill="#1e293b" />
+            <line x1="6" y1="4.5" x2="30" y2="4.5" stroke="#f59e0b" strokeWidth="1.5" />
+            <line x1="0" y1="19" x2="80" y2="19" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="0" y1="29" x2="80" y2="29" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="0" y1="39" x2="80" y2="39" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="6" y1="14" x2="20" y2="14" stroke="#f59e0b" strokeWidth="1.5" />
+            <line x1="30" y1="14" x2="68" y2="14" stroke="#f8fafc" strokeWidth="1.5" />
+            <line x1="6" y1="24" x2="18" y2="24" stroke="#f59e0b" strokeWidth="1.5" />
+            <line x1="30" y1="24" x2="60" y2="24" stroke="#f8fafc" strokeWidth="1.5" />
+            <line x1="6" y1="34" x2="22" y2="34" stroke="#f59e0b" strokeWidth="1.5" />
+            <line x1="30" y1="34" x2="65" y2="34" stroke="#f8fafc" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'is-boutique-hairline-editorial': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e4e4e7" strokeWidth="1" />
+            <line x1="8" y1="9" x2="36" y2="9" stroke="#18181b" strokeWidth="1.2" />
+            <line x1="8" y1="19" x2="72" y2="19" stroke="#e4e4e7" strokeWidth="0.8" />
+            <line x1="8" y1="29" x2="72" y2="29" stroke="#e4e4e7" strokeWidth="0.8" />
+            <line x1="8" y1="39" x2="72" y2="39" stroke="#e4e4e7" strokeWidth="0.8" />
+            <line x1="8" y1="14" x2="24" y2="14" stroke="#71717a" strokeWidth="1" />
+            <line x1="34" y1="14" x2="64" y2="14" stroke="#18181b" strokeWidth="1.5" />
+            <line x1="8" y1="24" x2="20" y2="24" stroke="#71717a" strokeWidth="1" />
+            <line x1="34" y1="24" x2="56" y2="24" stroke="#18181b" strokeWidth="1.5" />
+            <line x1="8" y1="34" x2="26" y2="34" stroke="#71717a" strokeWidth="1" />
+            <line x1="34" y1="34" x2="60" y2="34" stroke="#18181b" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'is-stamped-manifest-ledger': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1.5" strokeDasharray="3 2" />
+            <rect x="5" y="4" width="70" height="8" fill="#f5f5f4" />
+            <rect x="8" y="6.5" width="24" height="3" rx="0.5" fill="#b91c1c" />
+            <line x1="8" y1="20" x2="72" y2="20" stroke="#d6d3d1" strokeWidth="0.8" strokeDasharray="2 1" />
+            <line x1="8" y1="30" x2="72" y2="30" stroke="#d6d3d1" strokeWidth="0.8" strokeDasharray="2 1" />
+            <line x1="8" y1="40" x2="72" y2="40" stroke="#d6d3d1" strokeWidth="0.8" strokeDasharray="2 1" />
+            <line x1="10" y1="16" x2="26" y2="16" stroke="#78716c" strokeWidth="1.2" />
+            <line x1="36" y1="16" x2="68" y2="16" stroke="#1c1917" strokeWidth="1.5" />
+            <line x1="10" y1="26" x2="22" y2="26" stroke="#78716c" strokeWidth="1.2" />
+            <line x1="36" y1="26" x2="60" y2="26" stroke="#1c1917" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'is-pill-tag-cluster': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="6" y="4" width="22" height="3.5" rx="1" fill="#7530fb" />
+            {/* Clustered Pill Badges */}
+            <rect x="5" y="11" width="32" height="10" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="40" y="11" width="34" height="10" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="24" width="36" height="10" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="44" y="24" width="30" height="10" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="36" width="30" height="9" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="38" y="36" width="36" height="9" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'is-dark-terminal-console': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <rect width="80" height="7" fill="#0f172a" />
+            <circle cx="6" cy="3.5" r="1.2" fill="#ef4444" />
+            <circle cx="10" cy="3.5" r="1.2" fill="#f59e0b" />
+            <circle cx="14" cy="3.5" r="1.2" fill="#10b981" />
+            <rect x="6" y="10" width="30" height="3" rx="0.5" fill="#06b6d4" />
+            <line x1="0" y1="21" x2="80" y2="21" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="0" y1="31" x2="80" y2="31" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="6" y1="17" x2="22" y2="17" stroke="#06b6d4" strokeWidth="1.2" />
+            <line x1="30" y1="17" x2="68" y2="17" stroke="#f1f5f9" strokeWidth="1.5" />
+            <line x1="6" y1="27" x2="20" y2="27" stroke="#06b6d4" strokeWidth="1.2" />
+            <line x1="30" y1="27" x2="58" y2="27" stroke="#f1f5f9" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'is-split-key-highlight-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            {/* 2 Top Hero Spec Cards */}
+            <rect x="5" y="5" width="33" height="15" rx="2" fill="#eff6ff" stroke="#2563eb" strokeWidth="1" />
+            <rect x="42" y="5" width="33" height="15" rx="2" fill="#f0fdf4" stroke="#16a34a" strokeWidth="1" />
+            <line x1="8" y1="9" x2="18" y2="9" stroke="#2563eb" strokeWidth="1" />
+            <line x1="8" y1="14" x2="30" y2="14" stroke="#0f172a" strokeWidth="1.8" />
+            <line x1="45" y1="9" x2="55" y2="9" stroke="#16a34a" strokeWidth="1" />
+            <line x1="45" y1="14" x2="68" y2="14" stroke="#0f172a" strokeWidth="1.8" />
+            {/* Table Below */}
+            <rect x="5" y="24" width="70" height="19" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="5" y1="33" x2="75" y2="33" stroke="#e2e8f0" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'is-compact-three-column-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect width="80" height="8" fill="#f1f5f9" />
+            <line x1="6" y1="4" x2="26" y2="4" stroke="#0284c7" strokeWidth="1.5" />
+            {/* 3 Columns */}
+            <line x1="27" y1="8" x2="27" y2="48" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="54" y1="8" x2="54" y2="48" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="21" x2="80" y2="21" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="34" x2="80" y2="34" stroke="#e2e8f0" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'is-luxury-gold-accent-band': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#09090b" stroke="#d4af37" strokeWidth="1" />
+            <rect width="80" height="10" fill="#18181b" />
+            <line x1="0" y1="10" x2="80" y2="10" stroke="#d4af37" strokeWidth="0.8" />
+            <line x1="6" y1="5" x2="30" y2="5" stroke="#d4af37" strokeWidth="1" />
+            <line x1="0" y1="22" x2="80" y2="22" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="0" y1="34" x2="80" y2="34" stroke="#27272a" strokeWidth="0.8" />
+            <text x="6" y="18" fontSize="6" fill="#d4af37">◆</text>
+            <line x1="14" y1="17" x2="32" y2="17" stroke="#d4af37" strokeWidth="1" />
+            <line x1="38" y1="17" x2="70" y2="17" stroke="#fafafa" strokeWidth="1.2" />
+            <text x="6" y="29" fontSize="6" fill="#d4af37">◆</text>
+            <line x1="14" y1="28" x2="30" y2="28" stroke="#d4af37" strokeWidth="1" />
+            <line x1="38" y1="28" x2="62" y2="28" stroke="#fafafa" strokeWidth="1.2" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {

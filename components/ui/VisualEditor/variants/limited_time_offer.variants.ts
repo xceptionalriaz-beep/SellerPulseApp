@@ -18,64 +18,116 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared Helpers & Dynamic Resolvers ─────────────────────────────────────
 function pad(p: any, defaultT = 16, defaultR = 24, defaultB = 16, defaultL = 24): string {
-    const top = p.paddingTop ?? defaultT
-    const right = p.paddingRight ?? defaultR
-    const bottom = p.paddingBottom ?? defaultB
-    const left = p.paddingLeft ?? defaultL
-    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+  const top = p.paddingTop ?? defaultT
+  const right = p.paddingRight ?? defaultR
+  const bottom = p.paddingBottom ?? defaultB
+  const left = p.paddingLeft ?? defaultL
+  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
 function font(p: any, defaultFamily = 'Arial, Helvetica, sans-serif'): string {
-    return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
+  return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
 }
 
 function dealTitle(p: any, fallback = 'Limited Time Promotional Offer'): string {
-    return p.dealTitle ?? p.bannerTitle ?? p.heading ?? p.title ?? fallback
+  return p.dealTitle ?? p.bannerTitle ?? p.heading ?? p.title ?? fallback
 }
 
 function dealSubtext(p: any, fallback = 'Special promotional pricing is active for a limited time only. While supplies last.'): string {
-    return p.dealSubtext ?? p.bannerSubtitle ?? p.subText ?? p.subtitle ?? fallback
+  return p.dealSubtext ?? p.bannerSubtitle ?? p.subText ?? p.subtitle ?? fallback
 }
 
 function badgeText(p: any, fallback = '⚡ LIMITED TIME DEAL'): string {
-    return p.badgeText ?? p.badge ?? p.tag ?? fallback
+  return p.badgeText ?? p.badge ?? p.tag ?? fallback
 }
 
 function discountCallout(p: any, fallback = 'SAVE UP TO 40% OFF'): string {
-    return p.discountText ?? p.savingsText ?? p.discount ?? p.savings ?? fallback
+  return p.discountText ?? p.savingsText ?? p.discount ?? p.savings ?? fallback
 }
 
 function expiryNotice(p: any, fallback = 'Ends Sunday at Midnight EST'): string {
-    return p.expiryText ?? p.countdown ?? p.timer ?? p.expiryNotice ?? fallback
+  return p.expiryText ?? p.countdown ?? p.timer ?? p.expiryNotice ?? fallback
 }
+
+/**
+ * List of known template defaults across blocks and previous variants.
+ * If current bgColor matches any of these default palette tokens,
+ * the layout style applies its own signature background so each style
+ * displays with rich, professional colors rather than inheriting clashing reds or whites.
+ */
+const KNOWN_DEFAULT_BGS = [
+  '#dc2626', // Flash Sale Red
+  '#ffffff', // White
+  '#f8fafc', // Slate 50
+  '#f8f7ff', // Purple 50
+  '#1e1535', // Dark Purple
+  '#0f172a', // Slate 900
+  '#18181b', // Zinc 900
+  '#09090b', // Zinc 950
+  '#090d16', // Dark Terminal Navy
+  '#064e3b', // Holiday Emerald
+  '#fffdfa', // Cream Ivory
+]
 
 /**
  * Dynamic background resolver:
- * Only preserves user override if they explicitly altered it from initial white/slate defaults.
+ * Automatically adapts to each style's signature background while preserving
+ * user-chosen custom color overrides.
  */
 function resolveBg(p: any, signatureBg: string): string {
-    if (!p.bgColor || p.bgColor.toLowerCase() === '#f8fafc' || p.bgColor.toLowerCase() === '#ffffff') {
-        return signatureBg
-    }
-    return p.bgColor
+  if (!p.bgColor) return signatureBg
+  const val = p.bgColor.toLowerCase().trim()
+  if (KNOWN_DEFAULT_BGS.includes(val)) {
+    return signatureBg
+  }
+  return p.bgColor
 }
 
 /**
- * Dynamic text resolver.
+ * Dynamic text resolver:
+ * Ensures crisp contrast according to the variant's palette.
  */
-function resolveText(p: any, signatureText: string, isLightVariant = false): string {
-    if (!p.textColor || p.textColor.toLowerCase() === '#0f172a' || (isLightVariant && p.textColor.toLowerCase() === '#ffffff')) {
-        return signatureText
-    }
-    return p.textColor
+function resolveText(p: any, signatureText: string): string {
+  if (!p.textColor) return signatureText
+  const val = p.textColor.toLowerCase().trim()
+  if (
+    val === '#ffffff' ||
+    val === '#0f172a' ||
+    val === '#1e1535' ||
+    val === '#18181b' ||
+    val === '#1c1917' ||
+    val === '#f4f4f5' ||
+    val === '#fafafa' ||
+    val === '#f1f5f9'
+  ) {
+    return signatureText
+  }
+  return p.textColor
+}
+
+/**
+ * Dynamic accent color resolver.
+ */
+function resolveAccent(p: any, signatureAccent: string): string {
+  if (!p.accentColor) return signatureAccent
+  const val = p.accentColor.toLowerCase().trim()
+  const KNOWN_ACCENTS = [
+    '#fef08a', '#7530fb', '#b8fa33', '#f59e0b', '#b91c1c',
+    '#d4af37', '#0284c7', '#f97316', '#2563eb', '#71717a',
+    '#06b6d4', '#fbbf24', '#ffffff', '#000000'
+  ]
+  if (KNOWN_ACCENTS.includes(val)) {
+    return signatureAccent
+  }
+  return p.accentColor
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -83,16 +135,16 @@ function resolveText(p: any, signatureText: string, isLightVariant = false): str
 // High-velocity crimson ticker with 4 digital countdown boxes (Days / Hrs / Mins / Secs)
 // ─────────────────────────────────────────────────────────────────────────────
 function flashSaleTicker(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#dc2626')
-    const textCol = resolveText(p, '#ffffff')
-    const accent = p.accentColor ?? '#fef08a' // pale electric yellow
-    const title = dealTitle(p, '⚡ FLASH SALE — SPECIAL PROMOTIONAL EVENT')
-    const subtitle = dealSubtext(p, 'Instant markdown applied at checkout. Quantities are strictly limited.')
-    const tag = badgeText(p, 'ENDS SOON')
-    const discount = discountCallout(p, 'UP TO 50% OFF')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#dc2626')
+  const textCol = resolveText(p, '#ffffff')
+  const accent = resolveAccent(p, '#fef08a') // pale electric yellow
+  const title = dealTitle(p, '⚡ FLASH SALE — SPECIAL PROMOTIONAL EVENT')
+  const subtitle = dealSubtext(p, 'Instant markdown applied at checkout. Quantities are strictly limited.')
+  const tag = badgeText(p, 'ENDS SOON')
+  const discount = discountCallout(p, 'UP TO 50% OFF')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
@@ -156,16 +208,16 @@ function flashSaleTicker(p: any, id: string): string {
 // Parchment/ivory liquidation stub with circular red inspection stamp
 // ─────────────────────────────────────────────────────────────────────────────
 function clearanceStampedTag(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#fffdfa')
-    const textCol = resolveText(p, '#1c1917', true)
-    const accent = p.accentColor ?? '#b91c1c'
-    const title = dealTitle(p, 'INVENTORY CLEARANCE SALE — FINAL MARKDOWN')
-    const subtitle = dealSubtext(p, 'Genuine factory overstock. Priced to liquidate quickly to make warehouse room.')
-    const discount = discountCallout(p, 'MASSIVE SAVINGS')
-    const expiry = expiryNotice(p, 'While Surplus Allocation Lasts')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#fffdfa')
+  const textCol = resolveText(p, '#1c1917')
+  const accent = resolveAccent(p, '#b91c1c')
+  const title = dealTitle(p, 'INVENTORY CLEARANCE SALE — FINAL MARKDOWN')
+  const subtitle = dealSubtext(p, 'Genuine factory overstock. Priced to liquidate quickly to make warehouse room.')
+  const discount = discountCallout(p, 'MASSIVE SAVINGS')
+  const expiry = expiryNotice(p, 'While Surplus Allocation Lasts')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
@@ -224,16 +276,16 @@ function clearanceStampedTag(p: any, id: string): string {
 // Luxury matte black & metallic champagne gold border with diamond glyph
 // ─────────────────────────────────────────────────────────────────────────────
 function midnightVipExclusive(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#09090b')
-    const textCol = resolveText(p, '#fafafa')
-    const gold = p.accentColor ?? '#d4af37'
-    const title = dealTitle(p, 'VIP ALLOCATION — EXCLUSIVE PROMOTIONAL INVITATION')
-    const subtitle = dealSubtext(p, 'Includes complimentary white-glove courier packaging and priority handling on this listing.')
-    const tag = badgeText(p, '◆ VIP EXCLUSIVE ◆')
-    const discount = discountCallout(p, 'PREMIUM CONCIERGE BENEFIT')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#09090b')
+  const textCol = resolveText(p, '#fafafa')
+  const gold = resolveAccent(p, '#d4af37')
+  const title = dealTitle(p, 'VIP ALLOCATION — EXCLUSIVE PROMOTIONAL INVITATION')
+  const subtitle = dealSubtext(p, 'Includes complimentary white-glove courier packaging and priority handling on this listing.')
+  const tag = badgeText(p, '◆ VIP EXCLUSIVE ◆')
+  const discount = discountCallout(p, 'PREMIUM CONCIERGE BENEFIT')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
@@ -280,21 +332,21 @@ function midnightVipExclusive(p: any, id: string): string {
 // Heavy duty black & warning safety-yellow stripes with contractor caution
 // ─────────────────────────────────────────────────────────────────────────────
 function industrialHazardAlert(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#18181b')
-    const textCol = resolveText(p, '#f4f4f5')
-    const yellow = p.accentColor ?? '#f59e0b'
-    const title = dealTitle(p, '⚠️ SURPLUS LOT NOTICE — CONTRACTOR BULK RATE ACTIVE')
-    const subtitle = dealSubtext(p, 'Direct distributor allocation. Promotional surplus rate valid only while current bin inventory lasts.')
-    const tag = badgeText(p, 'CAUTION: OVERSTOCK')
-    const discount = discountCallout(p, 'HEAVY DISCOUNT LOT')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#18181b')
+  const textCol = resolveText(p, '#f4f4f5')
+  const yellow = resolveAccent(p, '#f59e0b')
+  const title = dealTitle(p, '⚠️ SURPLUS LOT NOTICE — CONTRACTOR BULK RATE ACTIVE')
+  const subtitle = dealSubtext(p, 'Direct distributor allocation. Promotional surplus rate valid only while current bin inventory lasts.')
+  const tag = badgeText(p, 'CAUTION: OVERSTOCK')
+  const discount = discountCallout(p, 'HEAVY DISCOUNT LOT')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${yellow};border-radius:8px;overflow:hidden;">
+  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${yellow};border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <!-- Top Caution Hazard Bar -->
   <tr>
-    <td style="background-color:${yellow};color:#000000;font-size:9.5px;font-weight:900;letter-spacing:2px;text-align:center;padding:4px 0;text-transform:uppercase;">
+    <td style="background-color:${yellow};color:#000000;font-size:9.5px;font-weight:900;letter-spacing:2px;text-align:center;padding:5px 0;text-transform:uppercase;">
       /// PROMOTIONAL OVERSTOCK LOT /// FACTORY DIRECT SURPLUS /// LIMITED INVENTORY ///
     </td>
   </tr>
@@ -347,16 +399,16 @@ function industrialHazardAlert(p: any, id: string): string {
 // Retro dashed border with cut-out scissor marker and authentic voucher details
 // ─────────────────────────────────────────────────────────────────────────────
 function circularCouponClip(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a', true)
-    const accent = p.accentColor ?? '#0284c7'
-    const title = dealTitle(p, 'OFFICIAL STORE COUPON · SAVE INSTANTLY AT CHECKOUT')
-    const subtitle = dealSubtext(p, 'Clip this deal: promotional discount is automatically calculated when you purchase from this eBay listing.')
-    const tag = badgeText(p, '✂ CLIP & SAVE')
-    const discount = discountCallout(p, 'SPECIAL SAVINGS APPLIED')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const accent = resolveAccent(p, '#0284c7')
+  const title = dealTitle(p, 'OFFICIAL STORE COUPON · SAVE INSTANTLY AT CHECKOUT')
+  const subtitle = dealSubtext(p, 'Clip this deal: promotional discount is automatically calculated when you purchase from this eBay listing.')
+  const tag = badgeText(p, '✂ CLIP & SAVE')
+  const discount = discountCallout(p, 'SPECIAL SAVINGS APPLIED')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
@@ -365,7 +417,7 @@ function circularCouponClip(p: any, id: string): string {
         <tr>
           <!-- Scissor Icon & Cut Line -->
           <td width="36" style="width:36px;vertical-align:middle;text-align:center;box-sizing:border-box;">
-            <div style="font-size:24px;line-height:1;">✂</div>
+            <div style="font-size:24px;line-height:1;color:${accent};">✂</div>
           </td>
 
           <!-- Main Coupon Content -->
@@ -412,16 +464,16 @@ function circularCouponClip(p: any, id: string): string {
 // Dynamic velocity bar showing percentage claimed & remaining units warning
 // ─────────────────────────────────────────────────────────────────────────────
 function liveScarcityMeter(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#0f172a')
-    const textCol = resolveText(p, '#ffffff')
-    const accent = p.accentColor ?? '#f97316' // hot energetic orange
-    const title = dealTitle(p, '🔥 HIGH DEMAND — LIMITED REMAINING UNITS AT THIS PRICE')
-    const subtitle = dealSubtext(p, 'Inventory velocity is extremely high today. Units in cart are not reserved until payment is completed.')
-    const tag = badgeText(p, '⚡ LIVE VELOCITY ALERT')
-    const discount = discountCallout(p, '88% CLAIMED')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#0f172a')
+  const textCol = resolveText(p, '#ffffff')
+  const accent = resolveAccent(p, '#f97316') // hot energetic orange
+  const title = dealTitle(p, '🔥 HIGH DEMAND — LIMITED REMAINING UNITS AT THIS PRICE')
+  const subtitle = dealSubtext(p, 'Inventory velocity is extremely high today. Units in cart are not reserved until payment is completed.')
+  const tag = badgeText(p, '⚡ LIVE VELOCITY ALERT')
+  const discount = discountCallout(p, '88% CLAIMED')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
@@ -475,15 +527,15 @@ function liveScarcityMeter(p: any, id: string): string {
 // 3-Column multi-buy volume pricing (Buy 1, Buy 2, Buy 3+)
 // ─────────────────────────────────────────────────────────────────────────────
 function multibuyVolumeMatrix(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a', true)
-    const accent = p.accentColor ?? '#2563eb'
-    const title = dealTitle(p, 'MULTI-BUY VOLUME SAVINGS — BUY MORE & SAVE BIG')
-    const subtitle = dealSubtext(p, 'Automatic tier discounts applied in eBay cart when purchasing multiple quantities.')
-    const tag = badgeText(p, 'TIERED VOLUME PRICING')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const accent = resolveAccent(p, '#2563eb')
+  const title = dealTitle(p, 'MULTI-BUY VOLUME SAVINGS — BUY MORE & SAVE BIG')
+  const subtitle = dealSubtext(p, 'Automatic tier discounts applied in eBay cart when purchasing multiple quantities.')
+  const tag = badgeText(p, 'TIERED VOLUME PRICING')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <!-- Header Bar -->
@@ -509,7 +561,7 @@ function multibuyVolumeMatrix(p: any, id: string): string {
 
   <!-- 3-Tier Grid -->
   <tr>
-    <td style="padding:12px 14px;box-sizing:border-box;">
+    <td style="padding:12px 14px;box-sizing:border-box;background-color:${bgCol};">
       <table width="100%" cellpadding="0" cellspacing="8" border="0" style="border-collapse:separate;">
         <tr>
           <!-- Tier 1 -->
@@ -545,20 +597,20 @@ function multibuyVolumeMatrix(p: any, id: string): string {
 // Delicate 1px hairline rules, wide typographic tracking, muted quiet tones
 // ─────────────────────────────────────────────────────────────────────────────
 function scandinavianEditorial(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#18181b', true)
-    const accent = p.accentColor ?? '#71717a'
-    const title = dealTitle(p, 'SEASONAL ARCHIVE PROMOTION')
-    const subtitle = dealSubtext(p, 'Curated pieces offered at private promotional rates for a short duration. Calculated at final checkout.')
-    const tag = badgeText(p, 'CURATED ALLOCATION')
-    const discount = discountCallout(p, 'SPECIAL INVITATION SAVINGS')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#18181b')
+  const accent = resolveAccent(p, '#71717a')
+  const title = dealTitle(p, 'SEASONAL ARCHIVE PROMOTION')
+  const subtitle = dealSubtext(p, 'Curated pieces offered at private promotional rates for a short duration. Calculated at final checkout.')
+  const tag = badgeText(p, 'CURATED ALLOCATION')
+  const discount = discountCallout(p, 'SPECIAL INVITATION SAVINGS')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:6px;background-color:${bgCol};">
   <tr>
-    <td style="${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border-radius:6px;${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <!-- Editorial Typography Header -->
@@ -598,17 +650,17 @@ function scandinavianEditorial(p: any, id: string): string {
 // Deep matte navy/black terminal with electric cyan/emerald accents and spec checkmarks
 // ─────────────────────────────────────────────────────────────────────────────
 function cyberTerminalDeal(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#090d16')
-    const textCol = resolveText(p, '#f1f5f9')
-    const cyan = p.accentColor ?? '#06b6d4'
-    const emerald = '#10b981'
-    const title = dealTitle(p, 'SYS.PROMO: HARDWARE FLASH EVENT ACTIVE')
-    const subtitle = dealSubtext(p, 'Priority tech allocation. All orders include factory sealed serial verification & same-day tracking dispatch.')
-    const tag = badgeText(p, '[SYS_ACTIVE // CYCLE_2026]')
-    const discount = discountCallout(p, 'SPECIAL HARDWARE RATE')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#090d16')
+  const textCol = resolveText(p, '#f1f5f9')
+  const cyan = resolveAccent(p, '#06b6d4')
+  const emerald = '#10b981'
+  const title = dealTitle(p, 'SYS.PROMO: HARDWARE FLASH EVENT ACTIVE')
+  const subtitle = dealSubtext(p, 'Priority tech allocation. All orders include factory sealed serial verification & same-day tracking dispatch.')
+  const tag = badgeText(p, '[SYS_ACTIVE // CYCLE_2026]')
+  const discount = discountCallout(p, 'SPECIAL HARDWARE RATE')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #1e293b;border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <!-- Terminal Top Bar -->
@@ -621,7 +673,7 @@ function cyberTerminalDeal(p: any, id: string): string {
     </td>
   </tr>
   <tr>
-    <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Content -->
@@ -665,20 +717,20 @@ function cyberTerminalDeal(p: any, id: string): string {
 // Deep emerald velvet / wine container with stitched borders and holiday guarantees
 // ─────────────────────────────────────────────────────────────────────────────
 function holidayGiftRibbon(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#064e3b') // rich festive forest emerald
-    const textCol = resolveText(p, '#ffffff')
-    const gold = p.accentColor ?? '#fbbf24'
-    const title = dealTitle(p, 'HOLIDAY GIFT EVENT — EXTENDED 60-DAY RETURNS INCLUDED')
-    const subtitle = dealSubtext(p, 'Buy early with peace of mind. Every order placed during this event enjoys extended gift returns and complimentary insurance.')
-    const tag = badgeText(p, '🎁 HOLIDAY PROMOTION')
-    const discount = discountCallout(p, 'PEACE-OF-MIND GUARANTEE')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#064e3b') // rich festive forest emerald
+  const textCol = resolveText(p, '#ffffff')
+  const gold = resolveAccent(p, '#fbbf24')
+  const title = dealTitle(p, 'HOLIDAY GIFT EVENT — EXTENDED 60-DAY RETURNS INCLUDED')
+  const subtitle = dealSubtext(p, 'Buy early with peace of mind. Every order placed during this event enjoys extended gift returns and complimentary insurance.')
+  const tag = badgeText(p, '🎁 HOLIDAY PROMOTION')
+  const discount = discountCallout(p, 'PEACE-OF-MIND GUARANTEE')
 
-    return `<!--[riazify:limited_time_offer:${id}]-->
+  return `<!--[riazify:limited_time_offer:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <tr>
-    <td style="${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Left Icon & Details -->
@@ -729,66 +781,66 @@ function holidayGiftRibbon(p: any, id: string): string {
 // Exported Variant Registry (All 10 Distinct Layout Architectures)
 // ─────────────────────────────────────────────────────────────────────────────
 export const limitedTimeOfferVariants: BlockVariant[] = [
-    {
-        id: 'lto-flash-sale-ticker',
-        label: 'Flash Sale Red Ticker',
-        description: 'High-velocity crimson ticker with 4 digital countdown boxes (Days/Hrs/Mins/Secs)',
-        toHtml(props, id) { return flashSaleTicker(props, id) },
-    },
-    {
-        id: 'lto-clearance-stamped-tag',
-        label: 'Clearance Stamped Stub',
-        description: 'Parchment liquidation stub with authentic circular red inspection stamp',
-        toHtml(props, id) { return clearanceStampedTag(props, id) },
-    },
-    {
-        id: 'lto-midnight-vip-exclusive',
-        label: 'Midnight VIP Card',
-        description: 'Luxury matte black & champagne gold hairline card for high-end boutique listings',
-        toHtml(props, id) { return midnightVipExclusive(props, id) },
-    },
-    {
-        id: 'lto-industrial-hazard-alert',
-        label: 'Industrial Hazard Strip',
-        description: 'Heavy-duty black & safety-yellow hazard alert for auto parts and tools',
-        toHtml(props, id) { return industrialHazardAlert(props, id) },
-    },
-    {
-        id: 'lto-circular-coupon-clip',
-        label: 'Newspaper Clip Coupon',
-        description: 'Retro circular coupon with dashed border, cut scissors, and simulated barcode',
-        toHtml(props, id) { return circularCouponClip(props, id) },
-    },
-    {
-        id: 'lto-live-scarcity-meter',
-        label: 'Live Scarcity Meter',
-        description: 'Urgent stock velocity card with live progress bar and remaining units warning',
-        toHtml(props, id) { return liveScarcityMeter(props, id) },
-    },
-    {
-        id: 'lto-multibuy-volume-matrix',
-        label: 'Multi-Buy Volume Matrix',
-        description: '3-column volume pricing grid: Buy 1, Buy 2 (10% Off), Buy 3+ (20% Off)',
-        toHtml(props, id) { return multibuyVolumeMatrix(props, id) },
-    },
-    {
-        id: 'lto-scandinavian-editorial',
-        label: 'Scandinavian Editorial',
-        description: 'High-end minimalist boutique layout with hairline rules and wide letter tracking',
-        toHtml(props, id) { return scandinavianEditorial(props, id) },
-    },
-    {
-        id: 'lto-cyber-terminal-deal',
-        label: 'Cyber Tech Terminal',
-        description: 'Dark terminal console with bracket tags, cyan accents, and hardware checkmarks',
-        toHtml(props, id) { return cyberTerminalDeal(props, id) },
-    },
-    {
-        id: 'lto-holiday-gift-ribbon',
-        label: 'Holiday Gift Ribbon',
-        description: 'Festive emerald/wine ribbon banner with extended 60-day return guarantee',
-        toHtml(props, id) { return holidayGiftRibbon(props, id) },
-    },
+  {
+    id: 'lto-flash-sale-ticker',
+    label: 'Flash Sale Red Ticker',
+    description: 'High-velocity crimson ticker with 4 digital countdown boxes (Days/Hrs/Mins/Secs)',
+    toHtml(props, id) { return flashSaleTicker(props, id) },
+  },
+  {
+    id: 'lto-clearance-stamped-tag',
+    label: 'Clearance Stamped Stub',
+    description: 'Parchment liquidation stub with authentic circular red inspection stamp',
+    toHtml(props, id) { return clearanceStampedTag(props, id) },
+  },
+  {
+    id: 'lto-midnight-vip-exclusive',
+    label: 'Midnight VIP Card',
+    description: 'Luxury matte black & champagne gold hairline card for high-end boutique listings',
+    toHtml(props, id) { return midnightVipExclusive(props, id) },
+  },
+  {
+    id: 'lto-industrial-hazard-alert',
+    label: 'Industrial Hazard Strip',
+    description: 'Heavy-duty black & safety-yellow hazard alert for auto parts and tools',
+    toHtml(props, id) { return industrialHazardAlert(props, id) },
+  },
+  {
+    id: 'lto-circular-coupon-clip',
+    label: 'Newspaper Clip Coupon',
+    description: 'Retro circular coupon with dashed border, cut scissors, and simulated barcode',
+    toHtml(props, id) { return circularCouponClip(props, id) },
+  },
+  {
+    id: 'lto-live-scarcity-meter',
+    label: 'Live Scarcity Meter',
+    description: 'Urgent stock velocity card with live progress bar and remaining units warning',
+    toHtml(props, id) { return liveScarcityMeter(props, id) },
+  },
+  {
+    id: 'lto-multibuy-volume-matrix',
+    label: 'Multi-Buy Volume Matrix',
+    description: '3-column volume pricing grid: Buy 1, Buy 2 (10% Off), Buy 3+ (20% Off)',
+    toHtml(props, id) { return multibuyVolumeMatrix(props, id) },
+  },
+  {
+    id: 'lto-scandinavian-editorial',
+    label: 'Scandinavian Editorial',
+    description: 'High-end minimalist boutique layout with hairline rules and wide letter tracking',
+    toHtml(props, id) { return scandinavianEditorial(props, id) },
+  },
+  {
+    id: 'lto-cyber-terminal-deal',
+    label: 'Cyber Tech Terminal',
+    description: 'Dark terminal console with bracket tags, cyan accents, and hardware checkmarks',
+    toHtml(props, id) { return cyberTerminalDeal(props, id) },
+  },
+  {
+    id: 'lto-holiday-gift-ribbon',
+    label: 'Holiday Gift Ribbon',
+    description: 'Festive emerald/wine ribbon banner with extended 60-day return guarantee',
+    toHtml(props, id) { return holidayGiftRibbon(props, id) },
+  },
 ]
 
 // Backwards-compatible aliases
@@ -801,33 +853,33 @@ export const dealBannerVariants = limitedTimeOfferVariants
  * and matches shorthand IDs seamlessly.
  */
 export function getLimitedTimeOfferVariant(id: string): BlockVariant {
-    if (!id) return limitedTimeOfferVariants[0]
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^lto[-_]/, '')
-        .replace(/^deal[-_]/, '')
-        .replace(/^offer[-_]/, '')
-        .replace(/_/g, '-')
+  if (!id) return limitedTimeOfferVariants[0]
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^lto[-_]/, '')
+    .replace(/^deal[-_]/, '')
+    .replace(/^offer[-_]/, '')
+    .replace(/_/g, '-')
 
-    const match = limitedTimeOfferVariants.find(v => {
-        const vClean = v.id
-            .toLowerCase()
-            .replace(/^lto[-_]/, '')
-            .replace(/^deal[-_]/, '')
-            .replace(/^offer[-_]/, '')
-            .replace(/_/g, '-')
+  const match = limitedTimeOfferVariants.find(v => {
+    const vClean = v.id
+      .toLowerCase()
+      .replace(/^lto[-_]/, '')
+      .replace(/^deal[-_]/, '')
+      .replace(/^offer[-_]/, '')
+      .replace(/_/g, '-')
 
-        return (
-            v.id === id ||
-            vClean === clean ||
-            v.id.endsWith(clean) ||
-            clean.includes(vClean) ||
-            vClean.includes(clean)
-        )
-    })
+    return (
+      v.id === id ||
+      vClean === clean ||
+      v.id.endsWith(clean) ||
+      clean.includes(vClean) ||
+      vClean.includes(clean)
+    )
+  })
 
-    return match ?? limitedTimeOfferVariants[0]
+  return match ?? limitedTimeOfferVariants[0]
 }
 
 // Aliases for callers looking for getLimitedOfferVariant or getDealBannerVariant

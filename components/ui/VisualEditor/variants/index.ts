@@ -27,6 +27,10 @@ export { logoBarVariants, getLogoBarVariant } from './logo_bar.variants'
 export { bundleDealVariants, getBundleDealVariant } from './bundle_deal.variants'
 export { moneyBackVariants, getMoneyBackVariant } from './money_back.variants'
 export { freeShippingVariants, getFreeShippingVariant } from './free_shipping.variants'
+export { limitedTimeOfferVariants, getLimitedTimeOfferVariant, limitedOfferVariants, dealBannerVariants } from './limited_time_offer.variants'
+export { satisfactionGuaranteeVariants, getSatisfactionGuaranteeVariant, guaranteeVariants, buyerProtectionVariants } from './satisfaction_guarantee.variants'
+export { conditionBadgeVariants, getConditionBadgeVariant, conditionVariants } from './condition_badge.variants'
+export { itemSpecificsVariants, getItemSpecificsVariant, specificsVariants } from './item_specifics.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -54,6 +58,10 @@ import { bundleDealVariants } from './bundle_deal.variants'
 import type { BlockVariant } from './hero_header.variants'
 import { moneyBackVariants } from './money_back.variants'
 import { freeShippingVariants } from './free_shipping.variants'
+import { limitedTimeOfferVariants } from './limited_time_offer.variants'
+import { satisfactionGuaranteeVariants } from './satisfaction_guarantee.variants'
+import { conditionBadgeVariants } from './condition_badge.variants'
+import { itemSpecificsVariants } from './item_specifics.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -82,6 +90,15 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'money_back': moneyBackVariants,
     'free_shipping': freeShippingVariants,
     'shipping_banner': freeShippingVariants,
+    'limited_time_offer': limitedTimeOfferVariants,
+    'limited_offer': limitedTimeOfferVariants,
+    'deal_banner': limitedTimeOfferVariants,
+    'satisfaction_guarantee': satisfactionGuaranteeVariants,
+    'guarantee': satisfactionGuaranteeVariants,
+    'condition_badge': conditionBadgeVariants,
+    'condition': conditionBadgeVariants,
+    'item_specifics': itemSpecificsVariants,
+    'specs': itemSpecificsVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

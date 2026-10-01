@@ -1010,6 +1010,10 @@ import { getCategoryNavVariant as _getCategoryNavVariant } from './variants/cate
 import { getSeasonalBannerVariant as _getSeasonalBannerVariant } from './variants/seasonal_banner.variants'
 import { getMoneyBackVariant as _getMoneyBackVariant } from './variants/money_back.variants'
 import { getFreeShippingVariant as _getFreeShippingVariant } from './variants/free_shipping.variants'
+import { getLimitedTimeOfferVariant as _getLimitedTimeOfferVariant } from './variants/limited_time_offer.variants'
+import { getSatisfactionGuaranteeVariant as _getSatisfactionGuaranteeVariant } from './variants/satisfaction_guarantee.variants'
+import { getConditionBadgeVariant as _getConditionBadgeVariant } from './variants/condition_badge.variants'
+import { getItemSpecificsVariant as _getItemSpecificsVariant } from './variants/item_specifics.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2880,29 +2884,25 @@ ${thumbCells}
             label: 'Condition Badge',
             category: 'eBay Specific' as BlockCategory,
             icon: 'tag',
-            description: 'New / Used / Refurbished condition badge with sub-text',
+            description: 'Item condition and inspection verification badge — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                bgColor: '#f0fdf4',
+                variant: 'cond-inspected-grade-pill',
                 condition: 'new',
-                subText: 'Opened for testing only — all functions verified.',
-                showIcon: true,
-                badgeRadius: 8,
+                heading: 'Condition: Brand New',
+                subText: 'Pristine item. All functions and cosmetic standards thoroughly verified.',
+                bgColor: '#ffffff',
+                textColor: '#0f172a',
+                accentColor: '#16a34a',
+                paddingTop: 14,
+                paddingBottom: 14,
+                paddingLeft: 18,
+                paddingRight: 18,
             } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as unknown as ConditionBadgeProps
-                const CONDITION_MAP: Record<string, { label: string; icon: string; bg: string; text: string; border: string; badgeBg: string; badgeText: string }> = {
-                    new: { label: 'New', icon: '✦', bg: '#f0fdf4', text: '#166534', border: '#bbf7d0', badgeBg: '#16a34a', badgeText: '#fff' },
-                    used: { label: 'Used', icon: '↺', bg: '#fff7ed', text: '#9a3412', border: '#fed7aa', badgeBg: '#ea580c', badgeText: '#fff' },
-                    refurbished: { label: 'Refurbished', icon: '⟳', bg: '#eff6ff', text: '#1e40af', border: '#bfdbfe', badgeBg: '#2563eb', badgeText: '#fff' },
-                    for_parts: { label: 'For Parts', icon: '⚙', bg: '#f9fafb', text: '#374151', border: '#e5e7eb', badgeBg: '#6b7280', badgeText: '#fff' },
-                    open_box: { label: 'Open Box', icon: '📦', bg: '#fdf4ff', text: '#7e22ce', border: '#e9d5ff', badgeBg: '#9333ea', badgeText: '#fff' },
-                }
-                const c = CONDITION_MAP[p.condition ?? 'new'] ?? CONDITION_MAP.new
-                const icon = p.showIcon !== false ? `<span style="margin-right:8px;font-size:16px;">${c.icon}</span>` : ''
-                const subText = p.subText ? `<p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${c.text};opacity:0.8;line-height:1.5;">${p.subText}</p>` : ''
-                return wrapBlock('condition_badge' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? c.bg};padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;border:1px solid ${c.border};border-radius:${p.badgeRadius ?? 8}px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="vertical-align:middle;">${icon}<span style="display:inline-block;background-color:${c.badgeBg};color:${c.badgeText};font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;padding:4px 14px;border-radius:100px;letter-spacing:0.03em;">&#10003; ${c.label}</span><span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${c.text};margin-left:10px;">Condition: ${c.label}</span></td></tr>${subText ? `<tr><td>${subText}</td></tr>` : ''}</table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'cond-inspected-grade-pill'
+                return wrapBlock('condition_badge' as BlockType, id, _getConditionBadgeVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -2911,44 +2911,33 @@ ${thumbCells}
             label: 'Item Specifics',
             category: 'eBay Specific' as BlockCategory,
             icon: 'list',
-            description: 'eBay item specifics table — Brand, MPN, EAN, Condition, etc.',
+            description: 'Item specifics and technical specification table — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                bgColor: '#ffffff',
+                variant: 'is-dual-column-zebra-card',
+                titleText: 'Item Specifics & Technical Data',
                 rows: [
                     { key: 'Condition', value: '{{ITEM_CONDITION}}' },
                     { key: 'Brand', value: '{{BRAND}}' },
                     { key: 'Model', value: '{{MODEL}}' },
-                    { key: 'MPN', value: '{{MPN}}' },
+                    { key: 'MPN / Part #', value: '{{MPN}}' },
                     { key: 'EAN / UPC', value: '{{EAN}}' },
                     { key: 'Colour', value: '{{COLOUR}}' },
-                    { key: 'Size', value: '{{SIZE}}' },
+                    { key: 'Size / Dimensions', value: '{{SIZE}}' },
                     { key: 'Material', value: '{{MATERIAL}}' },
                 ],
-                headerBg: '#7530fb',
-                headerText: '#ffffff',
-                evenRowBg: '#ffffff',
-                oddRowBg: '#f8f7ff',
-                borderColor: '#ede9fe',
-                keyColor: '#1e1535',
-                valueColor: '#374151',
-                fontSize: 13,
-                showTitle: true,
-                titleText: 'Item Specifics',
+                bgColor: '#ffffff',
+                keyColor: '#0f172a',
+                headerBg: '#2563eb',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
             } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as unknown as ItemSpecificsProps
-                const rows: Array<{ key: string; value: string }> = p.rows ?? []
-                const fs = p.fontSize ?? 13
-                const rowsHtml = rows.map((r, i) => {
-                    const bg = i % 2 === 0 ? (p.evenRowBg ?? '#ffffff') : (p.oddRowBg ?? '#f8f7ff')
-                    return `<tr style="background-color:${bg};"><td style="padding:9px 14px;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:700;color:${p.keyColor ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:35%;">${r.key}</td><td style="padding:9px 14px;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;color:${p.valueColor ?? '#374151'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r.value}</td></tr>`
-                }).join('')
-                const title = p.showTitle !== false
-                    ? `<tr style="background-color:${p.headerBg ?? '#7530fb'};"><td colspan="2" style="padding:10px 14px;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:700;color:${p.headerText ?? '#ffffff'};letter-spacing:0.04em;text-transform:uppercase;">&#9776; ${p.titleText ?? 'Item Specifics'}</td></tr>`
-                    : ''
-                return wrapBlock('item_specifics' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};padding:${p.paddingTop ?? 16}px ${p.paddingRight ?? 24}px ${p.paddingBottom ?? 16}px ${p.paddingLeft ?? 24}px;"><table width="100%" cellpadding="0" cellspacing="0" border="0">${title}${rowsHtml}</table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'is-dual-column-zebra-card'
+                return wrapBlock('item_specifics' as BlockType, id, _getItemSpecificsVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -3041,12 +3030,25 @@ ${thumbCells}
             label: 'Satisfaction Guarantee',
             category: 'Conversion' as BlockCategory,
             icon: 'star',
-            description: 'Star rating and satisfaction guarantee block',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            description: 'Buyer trust and satisfaction pledge banner — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'sg-golden-crest-emblem',
+                heading: '100% Satisfaction Guaranteed',
+                subText: 'Every purchase is backed by our direct merchant warranty. If you are not completely delighted, we will make it right.',
+                badgeText: 'HERITAGE BUYER PROTECTION',
+                bgColor: '#090d16',
+                textColor: '#ffffff',
+                accentColor: '#d4af37',
+                paddingTop: 18,
+                paddingBottom: 18,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('satisfaction_guarantee' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid #ede9fe;border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:22px;color:#f59e0b;">&#9733;&#9733;&#9733;&#9733;&#9733;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#7530fb;">100% Satisfaction Guaranteed</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">Trusted by thousands of eBay buyers. Your satisfaction is our priority.</p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'sg-golden-crest-emblem'
+                return wrapBlock('satisfaction_guarantee' as BlockType, id, _getSatisfactionGuaranteeVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -3055,12 +3057,27 @@ ${thumbCells}
             label: 'Limited Time Offer',
             category: 'Conversion' as BlockCategory,
             icon: 'clock',
-            description: 'Countdown-style limited offer banner',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#dc2626' } as unknown as BlockProps,
+            description: 'Urgent promotional and flash sale banner — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'lto-flash-sale-ticker',
+                dealTitle: '⚡ FLASH SALE — SPECIAL PROMOTIONAL EVENT',
+                dealSubtext: 'Instant markdown applied at checkout. Quantities are strictly limited.',
+                badgeText: 'ENDS SOON',
+                discountText: 'UP TO 50% OFF',
+                expiryText: 'Ends Sunday at Midnight EST',
+                bgColor: '#dc2626',
+                textColor: '#ffffff',
+                accentColor: '#fef08a',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 22,
+                paddingRight: 22,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('limited_time_offer' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#dc2626;${pad(p)}text-align:center;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:2px;">&#9200; Limited Time Offer</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:22px;font-weight:700;color:#fff;">{{DISCOUNT_PERCENT}}% OFF Today Only</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);">Was <s>{{ORIGINAL_PRICE}}</s> &mdash; Now <strong>{{ITEM_PRICE}}</strong></p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'lto-flash-sale-ticker'
+                return wrapBlock('limited_time_offer' as BlockType, id, _getLimitedTimeOfferVariant(variantId).toHtml(p, id))
             },
         },
 
