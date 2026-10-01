@@ -1110,14 +1110,19 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             borderRadius: 0,
         } as FullWidthSectionProps,
         toHtml(props, id) {
-            const p = props as FullWidthSectionProps
+            const p = props as FullWidthSectionProps & any
             const border = p.borderWidth > 0 ? `border:${p.borderWidth}px solid ${p.borderColor};` : ''
             const radius = p.borderRadius > 0 ? `border-radius:${p.borderRadius}px;` : ''
+            const innerPad = (p.innerPaddingTop || p.innerPaddingBottom || p.innerPaddingLeft || p.innerPaddingRight)
+                ? `padding:${p.innerPaddingTop ?? 0}px ${p.innerPaddingRight ?? 0}px ${p.innerPaddingBottom ?? 0}px ${p.innerPaddingLeft ?? 0}px;`
+                : ''
+            const align = p.contentAlign ? `text-align:${p.contentAlign};` : ''
+            const maxInner = p.capWidth && p.innerMaxWidth ? `max-width:${p.innerMaxWidth}px;margin:0 auto;` : ''
             return wrapBlock('full_width_section', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}${border}${radius}">
-      ${p.content}
+      <div style="${innerPad}${align}${maxInner}">${p.content}</div>
     </td>
   </tr>
 </table>`
@@ -1144,12 +1149,22 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const p = props as TwoColumnProps
             const rightWidth = 100 - p.leftWidth
             const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ leftContent: p.leftContent, rightContent: p.rightContent }]
+            const pa = p as any
+            const valign = pa.colAlign === 'middle' ? 'middle' : pa.colAlign === 'bottom' ? 'bottom' : 'top'
+            const lPad = pa.leftPadding ? `padding:${pa.leftPadding}px;` : ''
+            const rPad = pa.rightPadding ? `padding:${pa.rightPadding}px;` : ''
+            const lRadius = pa.leftRadius ? `border-radius:${pa.leftRadius}px;` : ''
+            const rRadius = pa.rightRadius ? `border-radius:${pa.rightRadius}px;` : ''
+            const divider = pa.showDivider
+                ? `<td width="${pa.dividerWidth ?? 1}px" style="width:${pa.dividerWidth ?? 1}px;background-color:${pa.dividerColor ?? '#ede9fe'};font-size:1px;line-height:1px;">&nbsp;</td>`
+                : ''
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${p.leftWidth}%" valign="top" style="padding-right:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">
+          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
             <div style="width:100%;box-sizing:border-box;">${r.leftContent}</div>
           </td>
-          <td width="${rightWidth}%" valign="top" style="padding-left:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">
+          ${divider}
+          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
             <div style="width:100%;box-sizing:border-box;">${r.rightContent}</div>
           </td>
         </tr>
@@ -1187,11 +1202,23 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         toHtml(props, id) {
             const p = props as ThreeColumnProps
             const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content }]
+            const pa3 = p as any
+            const valign3 = pa3.colAlign === 'middle' ? 'middle' : pa3.colAlign === 'bottom' ? 'bottom' : 'top'
+            const w1 = pa3.customWidths ? (pa3.col1Width ?? 33) : 33
+            const w2 = pa3.customWidths ? (pa3.col2Width ?? 34) : 34
+            const w3 = pa3.customWidths ? (pa3.col3Width ?? 33) : 33
+            const cp3 = pa3.colPadding ? `padding:${pa3.colPadding}px;` : ''
+            const cr3 = pa3.colRadius ? `border-radius:${pa3.colRadius}px;` : ''
+            const div3 = pa3.showDivider
+                ? `<td width="${pa3.dividerWidth ?? 1}px" style="width:${pa3.dividerWidth ?? 1}px;background-color:${pa3.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
+                : ''
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="33%" valign="top" style="padding-right:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
-          <td width="34%" valign="top" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
-          <td width="33%" valign="top" style="padding-left:${p.gap / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp3}${cr3}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          ${div3}
+          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp3}${cr3}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          ${div3}
+          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
         </tr>
             `).join('')
             return wrapBlock('three_column', id,
@@ -1223,14 +1250,18 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             borderRadius: 8,
         } as ContainerProps,
         toHtml(props, id) {
-            const p = props as ContainerProps
+            const p = props as ContainerProps & any
+            const innerPad = `padding:${p.innerPaddingTop ?? 20}px ${p.innerPaddingRight ?? 24}px ${p.innerPaddingBottom ?? 20}px ${p.innerPaddingLeft ?? 24}px;`
+            const textCol = p.textColor ? `color:${p.textColor};` : ''
+            const align = p.textAlign ? `text-align:${p.textAlign};` : ''
+            const overflow = p.overflowHidden ? 'overflow:hidden;' : ''
             return wrapBlock('container', id,
                 `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr>
     <td style="background-color:${p.bgColor};padding:${p.paddingTop}px ${p.paddingRight}px ${p.paddingBottom}px ${p.paddingLeft}px;">
       <table width="${p.maxWidth}" cellpadding="0" cellspacing="0" border="0" align="center"
-        style="max-width:${p.maxWidth}px;width:100%;border:${p.borderWidth}px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
-        <tr><td style="padding:20px;">${p.content}</td></tr>
+        style="max-width:${p.maxWidth}px;width:100%;border:${p.borderWidth}px solid ${p.borderColor};border-radius:${p.borderRadius}px;${overflow}">
+        <tr><td style="${innerPad}${textCol}${align}">${p.content}</td></tr>
       </table>
     </td>
   </tr>
@@ -2351,12 +2382,20 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as FourColumnProps
                 const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content, col4Content: p.col4Content }]
+                const pa4 = p as any
+                const valign4 = pa4.colAlign === 'middle' ? 'middle' : pa4.colAlign === 'bottom' ? 'bottom' : 'top'
+                const fw1 = pa4.customWidths ? (pa4.col1Width ?? 25) : 25
+                const fw2 = pa4.customWidths ? (pa4.col2Width ?? 25) : 25
+                const fw3 = pa4.customWidths ? (pa4.col3Width ?? 25) : 25
+                const fw4 = pa4.customWidths ? (pa4.col4Width ?? 25) : 25
+                const cp4 = pa4.colPadding ? `padding:${pa4.colPadding}px;` : ''
+                const cr4 = pa4.colRadius ? `border-radius:${pa4.colRadius}px;` : ''
                 const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="25%" valign="top" style="padding-right:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
-          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
-          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
-          <td width="25%" valign="top" style="padding-left:${(p.gap || 8) / 2}px; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
+          <td width="${fw1}%" valign="${valign4}" style="padding-right:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="${fw2}%" valign="${valign4}" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="${fw3}%" valign="${valign4}" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="${fw4}%" valign="${valign4}" style="padding-left:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
         </tr>
                 `).join('')
                 return wrapBlock('four_column' as BlockType, id,
@@ -2433,10 +2472,10 @@ ${thumbCells}
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
         <tr>
-          <td width="${leftWidth}%" valign="top" style="padding-right:${(p.gap || 16) / 2}px;">
+          <td width="${leftWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="padding-right:${(p.gap || 16) / 2}px;background-color:${p.imageBg ?? 'transparent'};border-radius:${p.imageRadius ?? 0}px;">
             <div style="width:100%;box-sizing:border-box;">${leftHtml}</div>
           </td>
-          <td width="${rightWidth}%" valign="top" style="padding-left:${(p.gap || 16) / 2}px;">
+          <td width="${rightWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="padding-left:${(p.gap || 16) / 2}px;${p.contentPadding ? `padding:${p.contentPadding}px;` : ''}">
             <div style="width:100%;box-sizing:border-box;">${rightHtml}</div>
           </td>
         </tr>
