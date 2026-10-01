@@ -757,7 +757,7 @@ export interface SellerInfoProps extends CommonProps {
 
 // ── CTA Banner ────────────────────────────────────────────────────────────────
 export interface CtaBannerProps extends CommonProps {
-    variant: string
+    variant?: string
     headingText: string
     subText: string
     bgColor: string
@@ -768,6 +768,7 @@ export interface CtaBannerProps extends CommonProps {
     subTextColor: string
     align: 'left' | 'center' | 'right'
     minHeight: number
+    accentColor?: string
     linkUrl?: string
 }
 
@@ -2017,6 +2018,8 @@ ${thumbCells}
             subTextColor: 'rgba(255,255,255,0.6)',
             align: 'center',
             minHeight: 80,
+            accentColor: '#7530fb',
+            linkUrl: '#',
         } as CtaBannerProps,
         toHtml(props, id) {
             const p = props as CtaBannerProps

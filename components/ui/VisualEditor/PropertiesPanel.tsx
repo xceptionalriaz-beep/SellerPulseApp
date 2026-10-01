@@ -5242,7 +5242,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     <Section title="Button">
                         <TextInput label="Button text" value={props.buttonText ?? 'Shop Now'} onChange={v => updateProps({ buttonText: v })} />
                         {phButton('buttonText', 'button text')}
-                        <TextInput label="Button URL" value={props.buttonUrl ?? '#'} onChange={v => updateProps({ buttonUrl: v })} />
+                        <TextInput label="Button URL" value={(props as any).linkUrl ?? '#'} onChange={v => updateProps({ linkUrl: v } as any)} />
                     </Section>
                 </>
             )
