@@ -17,6 +17,8 @@
 // 10. feat-compact-mobile-capsule-strip— Ultra-dense horizontal capsule pill strip optimized for 0-scroll mobile shoppers
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { getIconSvg } from '../IconLibrary'
+
 export interface BlockVariant {
     id: string
     label: string
@@ -169,38 +171,6 @@ function resolveSubtitle(p: any, fallback = 'Engineered for uncompromising perfo
 // ─────────────────────────────────────────────────────────────────────────────
 // SVG Icon Helpers (eBay & Webmail Safe Inline SVG Strings)
 // ─────────────────────────────────────────────────────────────────────────────
-
-function getIconSvg(type: string, color = '#2563eb', size = 20): string {
-    switch (type?.toLowerCase()) {
-        case 'shield':
-        case 'guarantee':
-        case 'security':
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
-        case 'check':
-        case 'bolt':
-        case 'verified':
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>`
-        case 'flame':
-        case 'thermal':
-        case 'heat':
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>`
-        case 'droplet':
-        case 'water':
-        case 'weather':
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`
-        case 'tool':
-        case 'wrench':
-        case 'gear':
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`
-        case 'zap':
-        case 'speed':
-        case 'power':
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
-        default:
-            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`
-    }
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. CLASSIC CARDS GRID (CURRENT STYLE — 100% KEPT IDENTICAL)
 // Clean 2x2 / 4-card bordered grid with crisp icons, bold headers, and descriptive text
@@ -211,6 +181,9 @@ function classicCardsGrid(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#e2e8f0')
     const accent = resolveAccent(p, '#2563eb')
+    const descCol = p.descriptionColor ?? '#64748b'
+    const cardBg = p.cardBg ?? '#f8fafc'
+    const eyebrow = p.eyebrowText ?? 'OFFICIAL SPECIFICATIONS'
     const heading = resolveHeading(p, 'Key Product Features')
     const subtitle = resolveSubtitle(p, 'Engineered for uncompromising performance, durability, and seamless installation')
     const items = getFeatures(p)
@@ -225,7 +198,7 @@ function classicCardsGrid(p: any, id: string): string {
       <tr>
         <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:#f8fafc;border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
+            style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
             <tr>
               <td valign="top" width="40" style="padding-right:12px;">
                 <div style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;">
@@ -236,7 +209,7 @@ function classicCardsGrid(p: any, id: string): string {
                 <div style="font-family:${f};font-size:14px;font-weight:700;color:${textCol};margin-bottom:6px;line-height:1.3;">
                   ${left.title}
                 </div>
-                <div style="font-family:${f};font-size:12px;color:#64748b;line-height:1.5;">
+                <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.5;">
                   ${left.description}
                 </div>
               </td>
@@ -246,7 +219,7 @@ function classicCardsGrid(p: any, id: string): string {
         ${right ? `
         <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:#f8fafc;border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
+            style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
             <tr>
               <td valign="top" width="40" style="padding-right:12px;">
                 <div style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;">
@@ -257,7 +230,7 @@ function classicCardsGrid(p: any, id: string): string {
                 <div style="font-family:${f};font-size:14px;font-weight:700;color:${textCol};margin-bottom:6px;line-height:1.3;">
                   ${right.title}
                 </div>
-                <div style="font-family:${f};font-size:12px;color:#64748b;line-height:1.5;">
+                <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.5;">
                   ${right.description}
                 </div>
               </td>
@@ -278,12 +251,12 @@ function classicCardsGrid(p: any, id: string): string {
         <tr>
           <td>
             <div style="display:inline-block;padding:3px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;font-family:${f};font-size:10px;font-weight:800;letter-spacing:1px;color:${accent};text-transform:uppercase;margin-bottom:6px;">
-              OFFICIAL SPECIFICATIONS
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:20px;font-weight:800;color:${textCol};letter-spacing:-0.3px;margin-bottom:4px;">
               ${heading}
             </div>
-            <div style="font-family:${f};font-size:12px;color:#64748b;line-height:1.4;">
+            <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.4;">
               ${subtitle}
             </div>
           </td>
@@ -309,6 +282,9 @@ function techBentoFlagship(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#cbd5e1')
     const accent = resolveAccent(p, '#0284c7')
+    const descCol = p.descriptionColor ?? '#64748b'
+    const cardBg = p.cardBg ?? '#f8fafc'
+    const eyebrow = p.eyebrowText ?? 'BENTO ARCHITECTURE • CORE ATTRIBUTES'
     const heading = resolveHeading(p, 'Engineered Advantages')
     const items = getFeatures(p)
     const hero = items[0]
@@ -329,7 +305,7 @@ function techBentoFlagship(p: any, id: string): string {
             <div style="font-family:${f};font-size:13px;font-weight:800;color:${textCol};margin-bottom:4px;line-height:1.3;">
               ${item.title}
             </div>
-            <div style="font-family:${f};font-size:11px;color:#64748b;line-height:1.4;">
+            <div style="font-family:${f};font-size:11px;color:${descCol};line-height:1.4;">
               ${item.description}
             </div>
           </td>
@@ -348,7 +324,7 @@ function techBentoFlagship(p: any, id: string): string {
         <tr>
           <td>
             <div style="font-family:${f};font-size:11px;font-weight:800;letter-spacing:1.5px;color:${accent};text-transform:uppercase;">
-              BENTO ARCHITECTURE • CORE ATTRIBUTES
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:22px;font-weight:900;color:${textCol};letter-spacing:-0.5px;">
               ${heading}
@@ -408,12 +384,15 @@ function industrialSpecBars(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#0f172a')
     const accent = resolveAccent(p, '#d97706') // Amber/industrial caution accent
+    const descCol = p.descriptionColor ?? '#475569'
+    const cardBg = p.cardBg ?? '#f8fafc'
+    const eyebrow = p.eyebrowText ?? 'INDUSTRIAL RATED • BENCHMARK TOLERANCES'
     const heading = resolveHeading(p, 'Heavy-Duty Engineering Specifications')
     const items = getFeatures(p)
 
     const rowsHtml = items.map((item, idx) => `
     <tr>
-      <td style="padding:10px 14px;background:${idx % 2 === 0 ? '#f8fafc' : '#ffffff'};border:1px solid #cbd5e1;border-bottom:2px solid #94a3b8;box-sizing:border-box;">
+      <td style="padding:10px 14px;background:${idx % 2 === 0 ? cardBg : '#ffffff'};border:1px solid #cbd5e1;border-bottom:2px solid #94a3b8;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td width="36" valign="middle" align="center">
@@ -425,7 +404,7 @@ function industrialSpecBars(p: any, id: string): string {
               <div style="font-family:${f};font-size:14px;font-weight:800;color:${textCol};line-height:1.2;">
                 ${item.title}
               </div>
-              <div style="font-family:${f};font-size:12px;color:#475569;margin-top:2px;line-height:1.4;">
+              <div style="font-family:${f};font-size:12px;color:${descCol};margin-top:2px;line-height:1.4;">
                 ${item.description}
               </div>
             </td>
@@ -452,7 +431,7 @@ function industrialSpecBars(p: any, id: string): string {
         <tr>
           <td style="padding:14px 18px;">
             <div style="font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;">
-              INDUSTRIAL RATED • BENCHMARK TOLERANCES
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:18px;font-weight:900;color:#ffffff;letter-spacing:-0.2px;margin-top:2px;">
               ${heading}
@@ -480,6 +459,8 @@ function minimalistHairlineEditorial(p: any, id: string): string {
     const textCol = resolveText(p, '#1e293b')
     const borderCol = resolveBorder(p, '#e2e8f0')
     const accent = resolveAccent(p, '#475569')
+    const descCol = p.descriptionColor ?? '#64748b'
+    const eyebrow = p.eyebrowText ?? 'CURATED EXCELLENCE'
     const heading = resolveHeading(p, 'Distinctive Features')
     const items = getFeatures(p)
 
@@ -491,7 +472,7 @@ function minimalistHairlineEditorial(p: any, id: string): string {
       <div style="font-family:${f};font-size:14px;font-weight:700;color:${textCol};letter-spacing:-0.2px;margin-bottom:6px;line-height:1.3;">
         ${item.title}
       </div>
-      <div style="font-family:${f};font-size:12px;color:#64748b;line-height:1.6;font-weight:400;">
+      <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.6;font-weight:400;">
         ${item.description}
       </div>
     </td>
@@ -518,7 +499,7 @@ function minimalistHairlineEditorial(p: any, id: string): string {
         <tr>
           <td>
             <div style="font-family:${f};font-size:9px;font-weight:800;letter-spacing:3px;color:#64748b;text-transform:uppercase;margin-bottom:4px;">
-              CURATED EXCELLENCE
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:22px;font-weight:800;color:#0f172a;letter-spacing:0.5px;text-transform:uppercase;">
               ${heading}
@@ -551,6 +532,9 @@ function staggeredTimelineFlow(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#e2e8f0')
     const accent = resolveAccent(p, '#4f46e5')
+    const descCol = p.descriptionColor ?? '#64748b'
+    const cardBg = p.cardBg ?? '#f8fafc'
+    const eyebrow = p.eyebrowText ?? 'TIMELINE ARCHITECTURE'
     const heading = resolveHeading(p, 'Step-by-Step Advantage & Workflow')
     const items = getFeatures(p)
 
@@ -568,7 +552,7 @@ function staggeredTimelineFlow(p: any, id: string): string {
         <!-- Step Content Card -->
         <td valign="top" style="padding-bottom:${isLast ? '0' : '16px'};">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:#f8fafc;border:1px solid ${borderCol};border-left:3px solid ${idx === 0 ? accent : '#94a3b8'};border-radius:6px;padding:12px 16px;">
+            style="background:${cardBg};border:1px solid ${borderCol};border-left:3px solid ${idx === 0 ? accent : '#94a3b8'};border-radius:6px;padding:12px 16px;">
             <tr>
               <td>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
@@ -577,7 +561,7 @@ function staggeredTimelineFlow(p: any, id: string): string {
                   </span>
                   ${item.badge ? `<span style="font-family:${f};font-size:9px;font-weight:800;color:${accent};background:#eef2ff;padding:2px 6px;border-radius:4px;text-transform:uppercase;">${item.badge}</span>` : ''}
                 </div>
-                <div style="font-family:${f};font-size:12px;color:#64748b;line-height:1.45;">
+                <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.45;">
                   ${item.description}
                 </div>
               </td>
@@ -598,7 +582,7 @@ function staggeredTimelineFlow(p: any, id: string): string {
         <tr>
           <td>
             <div style="font-family:${f};font-size:10px;font-weight:800;letter-spacing:1px;color:${accent};text-transform:uppercase;">
-              TIMELINE ARCHITECTURE
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:20px;font-weight:900;color:${textCol};">
               ${heading}
@@ -626,6 +610,11 @@ function splitHeroBenefitRail(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#e2e8f0')
     const accent = resolveAccent(p, '#059669') // Emerald green trust
+    const descCol = p.descriptionColor ?? '#64748b'
+    const eyebrow = p.eyebrowText ?? 'SELLER PLEDGE'
+    const pledgeText = p.pledgeText ?? 'Every unit undergoes strict quality benchmarking before packaging to ensure zero defects and exact fitment.'
+    const guaranteeTitle = p.guaranteeTitle ?? '100% MONEY-BACK BACKED'
+    const guaranteeSubtitle = p.guaranteeSubtitle ?? 'Direct eBay Buyer Protection'
     const heading = resolveHeading(p, 'Performance Guaranteed')
     const items = getFeatures(p)
 
@@ -644,7 +633,7 @@ function splitHeroBenefitRail(p: any, id: string): string {
               <div style="font-family:${f};font-size:13px;font-weight:700;color:${textCol};">
                 ${item.title}
               </div>
-              <div style="font-family:${f};font-size:11px;color:#64748b;line-height:1.4;margin-top:2px;">
+              <div style="font-family:${f};font-size:11px;color:${descCol};line-height:1.4;margin-top:2px;">
                 ${item.description}
               </div>
             </td>
@@ -665,20 +654,20 @@ function splitHeroBenefitRail(p: any, id: string): string {
           <!-- Left 35% Branded Spine Column -->
           <td width="35%" valign="top" style="background:#0f172a;padding:24px 20px;box-sizing:border-box;">
             <div style="display:inline-block;padding:3px 8px;background:rgba(5,150,105,0.25);border:1px solid ${accent};border-radius:4px;font-family:${f};font-size:9px;font-weight:800;color:#34d399;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">
-              SELLER PLEDGE
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:18px;font-weight:800;color:#ffffff;line-height:1.3;margin-bottom:8px;">
               ${heading}
             </div>
             <div style="font-family:${f};font-size:12px;color:#94a3b8;line-height:1.5;margin-bottom:16px;">
-              Every unit undergoes strict quality benchmarking before packaging to ensure zero defects and exact fitment.
+              ${pledgeText}
             </div>
             <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:10px;text-align:center;">
               <div style="font-family:${f};font-size:10px;font-weight:800;color:#34d399;text-transform:uppercase;">
-                100% MONEY-BACK BACKED
+                ${guaranteeTitle}
               </div>
               <div style="font-family:${f};font-size:10px;color:#94a3b8;margin-top:2px;">
-                Direct eBay Buyer Protection
+                ${guaranteeSubtitle}
               </div>
             </div>
           </td>
@@ -703,15 +692,18 @@ function splitHeroBenefitRail(p: any, id: string): string {
 function cyberDarkTelemetry(p: any, id: string): string {
     const f = font(p)
     const bgCol = resolveBg(p, '#090d16')
-    const borderCol = '#1e293b'
+    const borderCol = resolveBorder(p, '#1e293b')
     const accent = resolveAccent(p, '#06b6d4') // Cyan HUD
+    const descCol = p.descriptionColor ?? '#94a3b8'
+    const cardBg = p.cardBg ?? '#0f172a'
     const heading = resolveHeading(p, 'Hardware Architecture & Telemetry')
+    const eyebrow = p.eyebrowText ?? 'SYSTEM BENCHMARK // HARDWARE AUDIT'
     const items = getFeatures(p)
 
     const tilesHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:#0f172a;border:1px solid #1e293b;border-top:2px solid ${idx === 0 ? accent : '#334155'};border-radius:4px;padding:14px;box-sizing:border-box;">
+        style="background:${cardBg};border:1px solid ${borderCol};border-top:2px solid ${idx === 0 ? accent : '#334155'};border-radius:4px;padding:14px;box-sizing:border-box;">
         <tr>
           <td>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -725,7 +717,7 @@ function cyberDarkTelemetry(p: any, id: string): string {
             <div style="font-family:${f};font-size:13px;font-weight:800;color:#f8fafc;margin-bottom:4px;line-height:1.3;">
               ${item.title}
             </div>
-            <div style="font-family:${f};font-size:11px;color:#94a3b8;line-height:1.45;">
+            <div style="font-family:${f};font-size:11px;color:${descCol};line-height:1.45;">
               ${item.description}
             </div>
           </td>
@@ -750,11 +742,11 @@ function cyberDarkTelemetry(p: any, id: string): string {
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Cyber HUD Header -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border-bottom:1px solid #1e293b;padding-bottom:10px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;border-bottom:1px solid ${borderCol};padding-bottom:10px;">
         <tr>
           <td>
             <div style="font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;color:${accent};letter-spacing:2px;text-transform:uppercase;">
-              SYSTEM BENCHMARK // HARDWARE AUDIT
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:19px;font-weight:900;color:#ffffff;letter-spacing:-0.3px;margin-top:2px;">
               ${heading}
@@ -787,6 +779,8 @@ function circularBadgeQuadrant(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#e2e8f0')
     const accent = resolveAccent(p, '#7c3aed') // Vibrant violet
+    const descCol = p.descriptionColor ?? '#64748b'
+    const eyebrow = p.eyebrowText ?? 'CERTIFIED HIGHLIGHTS'
     const heading = resolveHeading(p, 'Key Highlights & Benefits')
     const items = getFeatures(p).slice(0, 4)
 
@@ -805,7 +799,7 @@ function circularBadgeQuadrant(p: any, id: string): string {
             <div style="font-family:${f};font-size:13px;font-weight:800;color:${textCol};margin-bottom:4px;line-height:1.2;">
               ${item.title}
             </div>
-            <div style="font-family:${f};font-size:11px;color:#64748b;line-height:1.4;">
+            <div style="font-family:${f};font-size:11px;color:${descCol};line-height:1.4;">
               ${item.description}
             </div>
           </td>
@@ -824,7 +818,7 @@ function circularBadgeQuadrant(p: any, id: string): string {
         <tr>
           <td align="center">
             <div style="font-family:${f};font-size:10px;font-weight:800;letter-spacing:1.5px;color:${accent};text-transform:uppercase;margin-bottom:4px;">
-              CERTIFIED HIGHLIGHTS
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:20px;font-weight:900;color:${textCol};">
               ${heading}
@@ -855,6 +849,9 @@ function accordionStyleLedger(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#e2e8f0')
     const accent = resolveAccent(p, '#ea580c') // Burnt orange
+    const descCol = p.descriptionColor ?? '#475569'
+    const cardBg = p.cardBg ?? '#f8fafc'
+    const eyebrow = p.eyebrowText ?? 'STRUCTURED SPECIFICATIONS'
     const heading = resolveHeading(p, 'Comprehensive Technical Ledger')
     const items = getFeatures(p)
 
@@ -863,7 +860,7 @@ function accordionStyleLedger(p: any, id: string): string {
       <td style="padding-bottom:6px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"
           style="background:#ffffff;border:1px solid ${borderCol};border-radius:6px;overflow:hidden;box-sizing:border-box;">
-          <tr style="background:#f8fafc;border-bottom:1px solid ${borderCol};">
+          <tr style="background:${cardBg};border-bottom:1px solid ${borderCol};">
             <td style="padding:10px 14px;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
@@ -888,7 +885,7 @@ function accordionStyleLedger(p: any, id: string): string {
           </tr>
           <tr>
             <td style="padding:10px 14px 12px 14px;background:#ffffff;">
-              <div style="font-family:${f};font-size:12px;color:#475569;line-height:1.5;">
+              <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.5;">
                 ${item.description}
               </div>
             </td>
@@ -908,7 +905,7 @@ function accordionStyleLedger(p: any, id: string): string {
         <tr>
           <td>
             <div style="font-family:${f};font-size:10px;font-weight:800;letter-spacing:1px;color:${accent};text-transform:uppercase;">
-              STRUCTURED SPECIFICATIONS
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:20px;font-weight:900;color:${textCol};">
               ${heading}
@@ -936,13 +933,16 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
     const textCol = resolveText(p, '#0f172a')
     const borderCol = resolveBorder(p, '#cbd5e1')
     const accent = resolveAccent(p, '#2563eb')
+    const descCol = p.descriptionColor ?? '#64748b'
+    const cardBg = p.cardBg ?? '#f1f5f9'
+    const eyebrow = p.eyebrowText ?? 'RAPID OVERVIEW • 0-SCROLL READY'
     const heading = resolveHeading(p, 'Quick-Scan Feature Index')
     const items = getFeatures(p)
 
     const chipsHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:#f1f5f9;border:1px solid ${borderCol};border-radius:20px;padding:6px 12px;box-sizing:border-box;">
+        style="background:${cardBg};border:1px solid ${borderCol};border-radius:20px;padding:6px 12px;box-sizing:border-box;">
         <tr>
           <td width="20" valign="middle">
             <span style="color:${accent};font-size:12px;font-weight:900;">✓</span>
@@ -951,7 +951,7 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
             <div style="font-family:${f};font-size:11px;font-weight:800;color:${textCol};line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
               ${item.title}
             </div>
-            <div style="font-family:${f};font-size:9.5px;color:#64748b;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <div style="font-family:${f};font-size:9.5px;color:${descCol};line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
               ${item.metric || item.badge || 'OEM Standard'}
             </div>
           </td>
@@ -980,7 +980,7 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
         <tr>
           <td>
             <div style="font-family:${f};font-size:10px;font-weight:800;color:${accent};letter-spacing:1px;text-transform:uppercase;">
-              RAPID OVERVIEW • 0-SCROLL READY
+              ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:16px;font-weight:900;color:${textCol};">
               ${heading}

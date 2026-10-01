@@ -191,6 +191,8 @@ export type BlockProps =
     | AuthenticityGuaranteeProps
     | CompatibilityTableProps
     | KeyFeaturesGridProps
+    | VatNoticeProps
+    | FeedbackScoreProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -691,6 +693,30 @@ export interface KeyFeaturesGridProps extends CommonProps {
     accentColor?: string
 }
 
+// ── VAT Notice ───────────────────────────────────────────────────────────────
+export interface VatNoticeProps extends CommonProps {
+    variant?: string
+    heading?: string
+    vatNumber?: string
+    companyNumber?: string
+    text?: string
+    accentColor?: string
+    titleColor?: string
+    cardBg?: string
+    cardBorder?: string
+}
+
+// ── Feedback Score ──────────────────────────────────────────────────────────
+export interface FeedbackScoreProps extends CommonProps {
+    variant?: string
+    feedbackScore?: string
+    memberSince?: string
+    heading?: string
+    reviewCount?: string
+    starColor?: string
+    accentColor?: string
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MEDIA BLOCKS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1071,6 +1097,8 @@ import { getAuthenticityGuaranteeVariant as _getAuthenticityGuaranteeVariant } f
 import { getCompatibilityTableVariant as _getCompatibilityTableVariant } from './variants/compatibility_table.variants'
 import { getProductComparisonVariant as _getProductComparisonVariant } from './variants/product_comparison.variants'
 import { getKeyFeaturesVariant as _getKeyFeaturesVariant } from './variants/key_features.variants'
+import { getVatNoticeVariant } from './variants/vat_notice.variants'
+import { getFeedbackScoreVariant } from './variants/feedback_score.variants'
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2978,12 +3006,25 @@ ${thumbCells}
             label: 'Feedback Score',
             category: 'eBay Specific' as BlockCategory,
             icon: 'star',
-            description: 'Seller rating display with stars',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
+            description: 'Seller rating display and verified reputation — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'fb-classic-split-card',
+                bgColor: '#f8f7ff',
+                textColor: '#1e1535',
+                starColor: '#f59e0b',
+                feedbackScore: '{{SELLER_FEEDBACK}}',
+                memberSince: '{{MEMBER_SINCE}}',
+                heading: 'Top Rated eBay Seller',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('feedback_score' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="60%" style="vertical-align:middle;padding-right:20px;"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1e1535;">&#11088; {{SELLER_FEEDBACK}}% Positive Feedback</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">Top Rated eBay Seller</p><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:20px;color:#f59e0b;">&#9733;&#9733;&#9733;&#9733;&#9733;</p></td><td width="40%" style="text-align:center;vertical-align:middle;"><div style="background-color:#7530fb;color:#fff;border-radius:8px;padding:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Seller Since</p><p style="margin:4px 0 0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;">{{MEMBER_SINCE}}</p></div></td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'fb-classic-split-card'
+                return wrapBlock('feedback_score' as BlockType, id, getFeedbackScoreVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -2992,12 +3033,28 @@ ${thumbCells}
             label: 'VAT Notice',
             category: 'eBay Specific' as BlockCategory,
             icon: 'file',
-            description: 'VAT registered seller invoice notice',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8fafc' } as unknown as BlockProps,
+            description: 'VAT registered seller invoice notice — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'vat-classic-card',
+                heading: 'VAT Registered Business',
+                vatNumber: '{{VAT_NUMBER}}',
+                companyNumber: 'Company Reg: {{COMPANY_NUMBER}}',
+                text: 'Full VAT invoice included with your order.',
+                bgColor: '#f8fafc',
+                textColor: '#64748b',
+                titleColor: '#1e1535',
+                borderColor: '#e2e8f0',
+                accentColor: '#059669',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('vat_notice' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f8fafc;${pad(p)}border:1px solid #e2e8f0;border-radius:6px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:16px;">&#128196;</td><td valign="top"><p style="margin:0 0 2px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">VAT Registered Business</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">VAT No: {{VAT_NUMBER}} &middot; Full VAT invoice included with your order.</p></td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'vat-classic-card'
+                return wrapBlock('vat_notice' as BlockType, id, getVatNoticeVariant(variantId).toHtml(p, id))
             },
         },
 

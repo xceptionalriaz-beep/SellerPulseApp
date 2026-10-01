@@ -178,6 +178,38 @@ interface PropertiesPanelProps {
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
+// ─── Inline Icon Picker (used inside key_features_grid feature cards) ──────────
+
+import { ICON_LIBRARY, ICON_CATEGORIES, CATEGORY_LABELS, getIconSvg } from './IconLibrary'
+
+function InlineIconPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+    return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {ICON_CATEGORIES.flatMap(cat => ICON_LIBRARY[cat]).map(entry => {
+                const isActive = value === entry.id
+                return (
+                    <button
+                        key={entry.id}
+                        title={`${entry.label} (${entry.id})`}
+                        onClick={() => onChange(entry.id)}
+                        style={{
+                            padding: '5px',
+                            borderRadius: 6,
+                            border: `1.5px solid ${isActive ? '#7530fb' : '#ede9fe'}`,
+                            background: isActive ? '#f3eeff' : '#ffffff',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                        dangerouslySetInnerHTML={{ __html: entry.svg(isActive ? '#7530fb' : '#94a3b8', 16) }}
+                    />
+                )
+            })}
+        </div>
+    )
+}
+
 export default function PropertiesPanel({
     block,
     placeholders,
@@ -4686,6 +4718,239 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="42" y="34" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
         </svg>
     ),
+
+    // VAT Notice Variants (10 Styles)
+    'vat-classic-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="68" height="28" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="11" y="18" width="8" height="12" rx="1" fill="#cbd5e1" />
+            <line x1="24" y1="19" x2="55" y2="19" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="24" y1="26" x2="68" y2="26" stroke="#64748b" strokeWidth="1" />
+        </svg>
+    ),
+    'vat-official-certificate-badge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="70" height="7" fill="#0f172a" />
+            <circle cx="15" cy="27" r="4" fill="#ecfdf5" stroke="#10b981" strokeWidth="0.8" />
+            <line x1="23" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="23" y1="30" x2="44" y2="30" stroke="#64748b" strokeWidth="0.8" />
+            <rect x="53" y="20" width="18" height="13" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.6" />
+        </svg>
+    ),
+    'vat-tax-breakdown-ledger': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="6" width="70" height="36" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="6" width="70" height="8" fill="#f1f5f9" />
+            <line x1="9" y1="10" x2="35" y2="10" stroke="#0f172a" strokeWidth="1.2" />
+            <rect x="9" y="19" width="18" height="18" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="31" y="19" width="18" height="18" rx="1.5" fill="#eff6ff" stroke="#bfdbfe" strokeWidth="0.6" />
+            <rect x="53" y="19" width="18" height="18" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="0.6" />
+        </svg>
+    ),
+    'vat-minimalist-hairline-rule': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="12" x2="72" y2="12" stroke="#0f172a" strokeWidth="1.5" />
+            <line x1="8" y1="18" x2="32" y2="18" stroke="#64748b" strokeWidth="0.8" />
+            <line x1="48" y1="18" x2="72" y2="18" stroke="#0f172a" strokeWidth="1" />
+            <line x1="8" y1="26" x2="42" y2="26" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="8" y1="32" x2="68" y2="32" stroke="#64748b" strokeWidth="0.8" />
+            <line x1="8" y1="38" x2="72" y2="38" stroke="#e2e8f0" strokeWidth="0.8" />
+        </svg>
+    ),
+    'vat-split-guarantee-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="22" height="32" fill="#0f172a" />
+            <line x1="8" y1="18" x2="23" y2="18" stroke="#f59e0b" strokeWidth="1.2" />
+            <line x1="8" y1="24" x2="25" y2="24" stroke="#ffffff" strokeWidth="1.5" />
+            <line x1="33" y1="20" x2="56" y2="20" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="33" y1="28" x2="70" y2="28" stroke="#64748b" strokeWidth="0.8" />
+        </svg>
+    ),
+    'vat-corporate-security-seal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="3" height="32" fill="#1e40af" />
+            <line x1="12" y1="15" x2="36" y2="15" stroke="#1e40af" strokeWidth="1.2" />
+            <line x1="12" y1="21" x2="48" y2="21" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="12" y1="27" x2="68" y2="27" stroke="#64748b" strokeWidth="0.8" />
+            <rect x="12" y="32" width="46" height="5" rx="1" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+        </svg>
+    ),
+    'vat-compact-pill-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="17" width="68" height="14" rx="7" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="13" cy="24" r="2.5" fill="#16a34a" />
+            <line x1="19" y1="24" x2="46" y2="24" stroke="#0f172a" strokeWidth="1.2" />
+            <rect x="56" y="20.5" width="14" height="7" rx="3.5" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.6" />
+        </svg>
+    ),
+    'vat-b2b-contractor-stamp': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="2" fill="#fefce8" stroke="#b45309" strokeWidth="1" strokeDasharray="2 1.5" />
+            <circle cx="18" cy="24" r="9" stroke="#b45309" strokeWidth="1.2" />
+            <text x="18" y="26.5" fontSize="6" fontWeight="bold" fill="#78350f" textAnchor="middle">20%</text>
+            <line x1="32" y1="19" x2="68" y2="19" stroke="#78350f" strokeWidth="1.2" />
+            <line x1="32" y1="25" x2="58" y2="25" stroke="#b45309" strokeWidth="1" />
+            <line x1="32" y1="31" x2="65" y2="31" stroke="#78350f" strokeWidth="0.8" />
+        </svg>
+    ),
+    'vat-digital-download-vault': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="0.8" />
+            <rect x="10" y="16" width="12" height="16" rx="2" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="0.8" />
+            <line x1="28" y1="19" x2="52" y2="19" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="28" y1="27" x2="50" y2="27" stroke="#6b7280" strokeWidth="0.8" />
+            <rect x="56" y="16" width="15" height="16" rx="2" fill="#ffffff" stroke="#ddd6fe" strokeWidth="0.6" />
+        </svg>
+    ),
+    'vat-dual-jurisdiction-eu-uk': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="70" height="8" fill="#0f172a" />
+            <line x1="9" y1="12" x2="38" y2="12" stroke="#38bdf8" strokeWidth="1" />
+            <line x1="56" y1="12" x2="71" y2="12" stroke="#ffffff" strokeWidth="1" />
+            <line x1="9" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="9" y1="31" x2="68" y2="31" stroke="#475569" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    // Feedback Score Variants (10 Styles)
+    'fb-classic-split-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="0.8" />
+            <line x1="9" y1="16" x2="38" y2="16" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="9" y1="22" x2="32" y2="22" stroke="#6b7280" strokeWidth="0.8" />
+            <circle cx="11" cy="29" r="1.5" fill="#f59e0b" />
+            <circle cx="16" cy="29" r="1.5" fill="#f59e0b" />
+            <circle cx="21" cy="29" r="1.5" fill="#f59e0b" />
+            <circle cx="26" cy="29" r="1.5" fill="#f59e0b" />
+            <circle cx="31" cy="29" r="1.5" fill="#f59e0b" />
+            <rect x="46" y="14" width="24" height="20" rx="3" fill="#7530fb" />
+            <line x1="49" y1="21" x2="67" y2="21" stroke="#ffffff" strokeWidth="1" />
+            <line x1="51" y1="27" x2="65" y2="27" stroke="#ffffff" strokeWidth="1.5" />
+        </svg>
+    ),
+    'fb-ebay-top-rated-plus-seal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="70" height="7" fill="#0f172a" />
+            <circle cx="15" cy="27" r="5" fill="#fef3c7" stroke="#f59e0b" strokeWidth="0.8" />
+            <line x1="24" y1="23" x2="52" y2="23" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="24" y1="28" x2="48" y2="28" stroke="#64748b" strokeWidth="0.8" />
+            <circle cx="26" cy="33" r="1.2" fill="#f59e0b" />
+            <circle cx="30" cy="33" r="1.2" fill="#f59e0b" />
+            <circle cx="34" cy="33" r="1.2" fill="#f59e0b" />
+            <rect x="56" y="20" width="16" height="14" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+        </svg>
+    ),
+    'fb-power-seller-metric-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="7" width="70" height="34" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="7" width="70" height="7" fill="#f8fafc" />
+            <rect x="8" y="18" width="19" height="19" rx="1.5" fill="#f8f7ff" stroke="#ddd6fe" strokeWidth="0.6" />
+            <rect x="30" y="18" width="19" height="19" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="0.6" />
+            <rect x="52" y="18" width="19" height="19" rx="1.5" fill="#eff6ff" stroke="#bfdbfe" strokeWidth="0.6" />
+        </svg>
+    ),
+    'fb-minimalist-hairline-prestige': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="12" x2="72" y2="12" stroke="#0f172a" strokeWidth="1.5" />
+            <line x1="8" y1="18" x2="38" y2="18" stroke="#64748b" strokeWidth="0.8" />
+            <line x1="52" y1="18" x2="72" y2="18" stroke="#0f172a" strokeWidth="1" />
+            <line x1="8" y1="26" x2="48" y2="26" stroke="#0f172a" strokeWidth="1.2" />
+            <circle cx="58" cy="26" r="1.5" fill="#d97706" />
+            <circle cx="63" cy="26" r="1.5" fill="#d97706" />
+            <circle cx="68" cy="26" r="1.5" fill="#d97706" />
+            <line x1="8" y1="34" x2="68" y2="34" stroke="#64748b" strokeWidth="0.8" />
+            <line x1="8" y1="39" x2="72" y2="39" stroke="#e2e8f0" strokeWidth="0.8" />
+        </svg>
+    ),
+    'fb-satisfaction-gauge-ring': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="18" cy="24" r="8" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.5" />
+            <line x1="31" y1="19" x2="56" y2="19" stroke="#0f172a" strokeWidth="1.2" />
+            <circle cx="33" cy="25" r="1.2" fill="#f59e0b" />
+            <circle cx="37" cy="25" r="1.2" fill="#f59e0b" />
+            <circle cx="41" cy="25" r="1.2" fill="#f59e0b" />
+            <line x1="31" y1="31" x2="68" y2="31" stroke="#64748b" strokeWidth="0.8" />
+        </svg>
+    ),
+    'fb-veteran-timeline-pillar': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="22" height="32" fill="#0f172a" />
+            <line x1="8" y1="17" x2="23" y2="17" stroke="#f59e0b" strokeWidth="1" />
+            <line x1="8" y1="23" x2="24" y2="23" stroke="#ffffff" strokeWidth="1.5" />
+            <line x1="32" y1="20" x2="56" y2="20" stroke="#0f172a" strokeWidth="1.2" />
+            <circle cx="60" cy="20" r="1.2" fill="#f59e0b" />
+            <circle cx="64" cy="20" r="1.2" fill="#f59e0b" />
+            <line x1="32" y1="28" x2="70" y2="28" stroke="#64748b" strokeWidth="0.8" />
+        </svg>
+    ),
+    'fb-compact-pill-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="17" width="68" height="14" rx="7" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="13" cy="24" r="2.5" fill="#f59e0b" />
+            <line x1="19" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.2" />
+            <rect x="56" y="20.5" width="14" height="7" rx="3.5" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.6" />
+        </svg>
+    ),
+    'fb-recent-reviews-showcase': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="9" y1="18" x2="26" y2="18" stroke="#0f172a" strokeWidth="1.2" />
+            <circle cx="11" cy="24" r="1.2" fill="#f59e0b" />
+            <circle cx="15" cy="24" r="1.2" fill="#f59e0b" />
+            <circle cx="19" cy="24" r="1.2" fill="#f59e0b" />
+            <line x1="31" y1="10" x2="31" y2="38" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="36" y1="18" x2="70" y2="18" stroke="#475569" strokeWidth="0.8" />
+            <line x1="36" y1="24" x2="64" y2="24" stroke="#475569" strokeWidth="0.8" />
+            <line x1="36" y1="30" x2="55" y2="30" stroke="#059669" strokeWidth="0.8" />
+        </svg>
+    ),
+    'fb-enterprise-trust-banner': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+            <line x1="9" y1="14" x2="38" y2="14" stroke="#38bdf8" strokeWidth="1" />
+            <line x1="9" y1="22" x2="48" y2="22" stroke="#ffffff" strokeWidth="1.5" />
+            <circle cx="11" cy="30" r="1.5" fill="#fbbf24" />
+            <circle cx="16" cy="30" r="1.5" fill="#fbbf24" />
+            <circle cx="21" cy="30" r="1.5" fill="#fbbf24" />
+            <rect x="55" y="16" width="17" height="16" rx="2" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" strokeWidth="0.6" />
+        </svg>
+    ),
+    'fb-performance-scorecard-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="7" width="70" height="34" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="7" width="70" height="7" fill="#f1f5f9" />
+            <line x1="9" y1="11" x2="32" y2="11" stroke="#0f172a" strokeWidth="1" />
+            <rect x="8" y="18" width="19" height="18" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="30" y="18" width="19" height="18" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="52" y="18" width="19" height="18" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.6" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -5125,7 +5390,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -6946,6 +7211,8 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Text colour" value={props.textColor ?? '#0f172a'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Accent / icon colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Card / tile background" value={props.cardBg ?? '#f8fafc'} onChange={v => updateProps({ cardBg: v })} />
+                        <ColorRow label="Description text" value={props.descriptionColor ?? '#64748b'} onChange={v => updateProps({ descriptionColor: v })} />
                     </Section>
                     <Section title="Typography">
                         <SelectInput
@@ -8113,6 +8380,11 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 <>
                     <Section title="Section header">
                         <TextInput
+                            label="Eyebrow label"
+                            value={props.eyebrowText ?? ''}
+                            onChange={v => updateProps({ eyebrowText: v })}
+                        />
+                        <TextInput
                             label="Heading"
                             value={props.heading ?? props.title ?? 'Key Product Features'}
                             onChange={v => updateProps({ heading: v })}
@@ -8125,13 +8397,20 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         />
                     </Section>
                     <Section title="Feature items">
-                        <InfoBox>Icon options: shield · check · flame · droplet · tool · zap</InfoBox>
+                        <InfoBox>24 icons across 4 categories — click any icon card to assign it to a feature.</InfoBox>
                         {kfFeatures.map((feat, i) => (
                             <div key={i} style={{ marginBottom: 10, padding: '10px 12px', background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
                                 <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.secondary }}>Feature {i + 1}</p>
                                 <TextInput label="Title" value={feat.title ?? ''} onChange={v => updateFeature(i, 'title', v)} />
                                 <TextareaInput label="Description" value={feat.description ?? ''} rows={2} onChange={v => updateFeature(i, 'description', v)} />
-                                <TextInput label="Icon" value={feat.icon ?? ''} onChange={v => updateFeature(i, 'icon', v)} />
+                                {/* ── Inline icon picker ── */}
+                                <div style={{ marginBottom: 8 }}>
+                                    <p style={{ margin: '0 0 5px', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 600, color: C.secondary }}>Icon</p>
+                                    <InlineIconPicker
+                                        value={feat.icon ?? 'check'}
+                                        onChange={v => updateFeature(i, 'icon', v)}
+                                    />
+                                </div>
                                 <TextInput label="Badge label" value={feat.badge ?? ''} onChange={v => updateFeature(i, 'badge', v)} />
                                 <TextInput label="Metric" value={feat.metric ?? ''} onChange={v => updateFeature(i, 'metric', v)} />
                             </div>
@@ -8140,7 +8419,28 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             onClick={() => updateProps({ features: [...kfFeatures, { title: 'New Feature', description: 'Description here', icon: 'check', badge: '', metric: '' }] })}
                             style={{ marginTop: 4, padding: '7px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
                         >+ Add feature</button>
+                        <InfoBox>ℹ️ The Circular Badge variant displays only the first 4 features.</InfoBox>
                     </Section>
+                    {((props as any).variant === 'feat-split-hero-benefit-rail') && (
+                        <Section title="Pledge column (Split Hero variant)">
+                            <TextareaInput
+                                label="Pledge description"
+                                value={props.pledgeText ?? ''}
+                                rows={3}
+                                onChange={v => updateProps({ pledgeText: v })}
+                            />
+                            <TextInput
+                                label="Guarantee title"
+                                value={props.guaranteeTitle ?? ''}
+                                onChange={v => updateProps({ guaranteeTitle: v })}
+                            />
+                            <TextInput
+                                label="Guarantee subtitle"
+                                value={props.guaranteeSubtitle ?? ''}
+                                onChange={v => updateProps({ guaranteeSubtitle: v })}
+                            />
+                        </Section>
+                    )}
                 </>
             )
         }

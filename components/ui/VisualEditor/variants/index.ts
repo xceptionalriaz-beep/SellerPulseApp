@@ -36,6 +36,8 @@ export { conditionDetailsVariants, getConditionDetailsVariant, detailsVariants }
 export { compatibilityTableVariants, getCompatibilityTableVariant, compatibilityVariants } from './compatibility_table.variants'
 export { productComparisonVariants, getProductComparisonVariant, comparisonVariants } from './product_comparison.variants'
 export { keyFeaturesVariants, getKeyFeaturesVariant, KEY_FEATURES_THUMBNAILS, featuresGridVariants, getKeyFeaturesGridVariant } from './key_features.variants'
+export { vatNoticeVariants, getVatNoticeVariant, vatVariants, getVatVariant } from './vat_notice.variants'
+export { feedbackScoreVariants, getFeedbackScoreVariant, feedbackVariants, getFeedbackVariant } from './feedback_score.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -72,6 +74,8 @@ import { conditionDetailsVariants } from './condition_details.variants'
 import { compatibilityTableVariants } from './compatibility_table.variants'
 import { productComparisonVariants } from './product_comparison.variants'
 import { keyFeaturesVariants } from './key_features.variants'
+import { vatNoticeVariants } from './vat_notice.variants'
+import { feedbackScoreVariants } from './feedback_score.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -120,6 +124,10 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'key_features_grid': keyFeaturesVariants,
     'key_features': keyFeaturesVariants,
     'features_grid': keyFeaturesVariants,
+    'vat_notice': vatNoticeVariants,
+    'vat': vatNoticeVariants,
+    'feedback_score': feedbackScoreVariants,
+    'feedback': feedbackScoreVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
