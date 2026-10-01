@@ -2541,7 +2541,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 return wrapBlock('warning_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#fef9c3;${pad(p)}border:1px solid #fbbf24;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;">&#9888;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#92400e;">Please Read Before Buying</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#78350f;line-height:1.6;">Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.</p></td></tr></table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#fef9c3'};${pad(p)}border:1px solid ${p.borderColor ?? '#fbbf24'};border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;color:${p.accentColor ?? '#f59e0b'};">&#9888;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#92400e'};">Please Read Before Buying</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#78350f'};line-height:1.6;">Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.</p></td></tr></table></td></tr></table>`)
             },
         },
 
@@ -2555,7 +2555,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 return wrapBlock('info_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#eff6ff;${pad(p)}border:1px solid #bfdbfe;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;">&#8505;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e40af;">Important Information</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1d4ed8;line-height:1.6;">This item ships from a UK warehouse. All items are genuine. VAT invoice available on request.</p></td></tr></table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#eff6ff'};${pad(p)}border:1px solid ${p.borderColor ?? '#bfdbfe'};border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;color:${p.accentColor ?? '#3b82f6'};">&#8505;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#1e40af'};">Important Information</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#1d4ed8'};line-height:1.6;">This item ships from a UK warehouse. All items are genuine. VAT invoice available on request.</p></td></tr></table></td></tr></table>`)
             },
         },
 
@@ -2570,7 +2570,7 @@ ${thumbCells}
                 const p = props as CommonProps
                 const rows = [['Brand', '{{BRAND}}'], ['Model', '{{MPN}}'], ['Condition', '{{ITEM_CONDITION}}'], ['Weight', '{{WEIGHT}}'], ['Country', '{{ORIGIN}}']]
                 const rowHtml = rows.map((r, i) =>
-                    `<tr style="background-color:${i % 2 === 0 ? '#f8f7ff' : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;border:1px solid #ede9fe;width:40%;">${r[0]}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;border:1px solid #ede9fe;">${r[1]}</td></tr>`
+                    `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : (p.headerBg ? '#fff' : '#fff')};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.headerText ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:40%;">${r[0]}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#6b7280'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r[1]}</td></tr>`
                 ).join('')
                 return wrapBlock('data_table' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rowHtml}</table></td></tr></table>`)
@@ -2587,7 +2587,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 const badges = ['&#10003; Genuine', '&#128230; UK Stock', '&#9733; Top Rated', '&#128260; Easy Returns']
-                const cells = badges.map(b => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:4px 12px;background-color:#f3eeff;color:#7530fb;font-family:Arial,sans-serif;font-size:12px;font-weight:700;border-radius:100px;border:1px solid #ede9fe;">${b}</span></td>`).join('')
+                const cells = badges.map(b => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:4px 12px;background-color:${p.badgeBg ?? '#f3eeff'};color:${p.badgeText ?? '#7530fb'};font-family:Arial,sans-serif;font-size:12px;font-weight:700;border-radius:100px;border:1px solid ${p.badgeBorder ?? '#ede9fe'};">${b}</span></td>`).join('')
                 return wrapBlock('badge_row' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table cellpadding="0" cellspacing="4" border="0"><tr>${cells}</tr></table></td></tr></table>`)
             },
@@ -2648,9 +2648,9 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 const models = ['Model A 2019-2023', 'Model B 2020-2024', 'Model C Pro All years', 'Model D Mini 2021+']
-                const rows = models.map((m, i) => `<tr style="background-color:${i % 2 === 0 ? '#f0fdf4' : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:#166534;border:1px solid #bbf7d0;">&#10003;</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;border:1px solid #bbf7d0;">${m}</td></tr>`).join('')
+                const rows = models.map((m, i) => `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f0fdf4') : '#fff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.headerText ?? '#166534'};border:1px solid ${p.borderColor ?? '#bbf7d0'};">&#10003;</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#1f1d2e'};border:1px solid ${p.borderColor ?? '#bbf7d0'};">${m}</td></tr>`).join('')
                 return wrapBlock('compatibility_table' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">&#9989; Compatible With:</p><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.headerBg ?? '#1e1535'};">&#9989; Compatible With:</p><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
             },
         },
 
@@ -2708,7 +2708,7 @@ ${thumbCells}
                     { icon: '&#128272;', title: 'Secure & Reliable', text: 'Built to last with premium materials' },
                     { icon: '&#127775;', title: 'Premium Quality', text: 'Rigorously tested before dispatch' },
                 ]
-                const cells = features.map(f => `<td width="33%" style="padding:12px;text-align:center;vertical-align:top;"><p style="margin:0 0 6px;font-size:24px;">${f.icon}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">${f.title}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">${f.text}</p></td>`).join('')
+                const cells = features.map(f => `<td width="33%" style="padding:12px;text-align:center;vertical-align:top;background-color:${p.cardBg ?? '#f8f7ff'};border:1px solid ${p.cardBorder ?? '#e9e3ff'};border-radius:8px;"><p style="margin:0 0 6px;font-size:24px;color:${p.iconColor ?? '#7530fb'};">${f.icon}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.titleColor ?? '#1e1535'};">${f.title}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${p.textColor ?? '#6b7280'};">${f.text}</p></td>`).join('')
                 return wrapBlock('key_features_grid' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
             },
@@ -2724,7 +2724,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 const rows = [['Feature', 'Our Product', 'Competitor'], ['Quality', '&#9733;&#9733;&#9733;&#9733;&#9733;', '&#9733;&#9733;&#9733;'], ['Warranty', '2 Years', '6 Months'], ['UK Stock', '&#10003; Yes', '&#10007; No'], ['Returns', '30 Days', '14 Days']]
-                const rowHtml = rows.map((r, i) => `<tr style="background-color:${i === 0 ? '#7530fb' : i % 2 === 0 ? '#f8f7ff' : '#fff'};"><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '400'};color:${i === 0 ? '#fff' : '#1f1d2e'};border:1px solid ${i === 0 ? '#7530fb' : '#ede9fe'};">${r[0]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '600'};color:${i === 0 ? '#fff' : '#7530fb'};border:1px solid ${i === 0 ? '#7530fb' : '#ede9fe'};text-align:center;">${r[1]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;color:${i === 0 ? '#fff' : '#9ca3af'};border:1px solid ${i === 0 ? '#7530fb' : '#ede9fe'};text-align:center;">${r[2]}</td></tr>`).join('')
+                const rowHtml = rows.map((r, i) => `<tr style="background-color:${i === 0 ? (p.headerBg ?? '#7530fb') : i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : '#fff'};"><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '400'};color:${i === 0 ? (p.headerText ?? '#fff') : '#1f1d2e'};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};">${r[0]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:${i === 0 ? '700' : '600'};color:${i === 0 ? (p.headerText ?? '#fff') : (p.accentColor ?? '#7530fb')};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};text-align:center;">${r[1]}</td><td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;color:${i === 0 ? (p.headerText ?? '#fff') : '#9ca3af'};border:1px solid ${i === 0 ? (p.headerBg ?? '#7530fb') : (p.borderColor ?? '#ede9fe')};text-align:center;">${r[2]}</td></tr>`).join('')
                 return wrapBlock('product_comparison' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rowHtml}</table></td></tr></table>`)
             },
@@ -2800,7 +2800,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 return wrapBlock('before_after' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:#f3f4f6;border-radius:8px;padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Before</p><img src="{{IMAGE_BEFORE}}" alt="Before" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td><td width="4%" style="text-align:center;font-size:20px;color:#9ca3af;">&#8594;</td><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:#f0fdf4;border-radius:8px;padding:8px;border:1px solid #bbf7d0;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">After</p><img src="{{IMAGE_AFTER}}" alt="After" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td></tr></table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:${p.labelBg ?? '#f3f4f6'};border-radius:8px;padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#6b7280'};text-transform:uppercase;letter-spacing:1px;">Before</p><img src="{{IMAGE_BEFORE}}" alt="Before" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td><td width="4%" style="text-align:center;font-size:20px;color:#9ca3af;">&#8594;</td><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:${p.labelBg ?? '#f0fdf4'};border-radius:8px;padding:8px;border:1px solid ${p.borderColor ?? '#bbf7d0'};"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#16a34a'};text-transform:uppercase;letter-spacing:1px;">After</p><img src="{{IMAGE_AFTER}}" alt="After" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td></tr></table></td></tr></table>`)
             },
         },
 
@@ -2832,7 +2832,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 return wrapBlock('dispatch_timer' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f0fdf4;${pad(p)}border:1px solid #bbf7d0;border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:24px;">&#9201;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#166534;">Order in the next <span style="color:#dc2626;">{{HOURS_LEFT}} hours</span> for Same Day Dispatch</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#16a34a;">&#128230; Dispatched same working day if ordered by 2pm</p></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#f0fdf4'};${pad(p)}border:1px solid ${p.borderColor ?? '#bbf7d0'};border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:24px;">&#9201;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:${p.textColor ?? '#166534'};">Order in the next <span style="color:${p.accentColor ?? '#dc2626'};">{{HOURS_LEFT}} hours</span> for Same Day Dispatch</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#16a34a'};">&#128230; Dispatched same working day if ordered by 2pm</p></td></tr></table>`)
             },
         },
 
@@ -3161,7 +3161,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 return wrapBlock('store_header' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background:linear-gradient(135deg,#7530fb 0%,#1e1535 100%);${pad(p)}text-align:center;"><h1 style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:24px;font-weight:700;color:#ffffff;">{{SELLER_NAME}}</h1><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:rgba(255,255,255,0.7);">Quality products &middot; Fast dispatch &middot; Trusted eBay seller</p></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#7530fb'};${pad(p)}text-align:center;"><h1 style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 24}px;font-weight:700;color:${p.textColor ?? '#ffffff'};">{{SELLER_NAME}}</h1><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${p.accentColor ?? 'rgba(255,255,255,0.7)'};">Quality products &middot; Fast dispatch &middot; Trusted eBay seller</p></td></tr></table>`)
             },
         },
 
@@ -3300,9 +3300,9 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 const socials = [{ icon: '&#128248;', label: 'Instagram', color: '#e1306c' }, { icon: '&#128444;', label: 'Facebook', color: '#1877f2' }, { icon: '&#128140;', label: 'Twitter', color: '#1da1f2' }, { icon: '&#127910;', label: 'YouTube', color: '#ff0000' }]
-                const cells = socials.map(s => `<td style="padding:0 10px;text-align:center;"><p style="margin:0 0 2px;font-size:20px;">${s.icon}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${s.color};font-weight:700;">${s.label}</p></td>`).join('')
+                const cells = socials.map(s => `<td style="padding:0 10px;text-align:center;"><p style="margin:0 0 2px;font-size:${p.iconSize ?? 28}px;color:${p.iconColor ?? s.color};">${s.icon}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.labelColor ?? s.color};font-weight:700;">${s.label}</p></td>`).join('')
                 return wrapBlock('social_links' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">Follow us for deals &amp; updates</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#f8f7ff'};${pad(p)}text-align:center;"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:12px;color:${p.labelColor ?? '#6b7280'};">Follow us for deals &amp; updates</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
             },
         },
 
@@ -3439,8 +3439,8 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as FAQBlockProps
                 const rows = (p.faqs || []).map(f =>
-                    `<tr><td colspan="2" style="padding:10px 14px;border-bottom:1px solid ${p.borderColor};font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.questionColor};">${f.question}</td></tr>
-                     <tr><td colspan="2" style="padding:10px 14px 20px;border-bottom:1px solid ${p.borderColor};font-family:Arial,sans-serif;font-size:13px;color:${p.answerColor};line-height:1.6;">${f.answer}</td></tr>`
+                    `<tr><td style="padding:10px 14px;background-color:${(p as any).questionBg ?? '#f8f7ff'};border-bottom:1px solid ${p.borderColor ?? '#e9e3ff'};font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${(p as any).questionText ?? p.questionColor ?? '#1e1535'};">${f.question}</td></tr>
+                     <tr><td style="padding:10px 14px 20px;border-bottom:1px solid ${p.borderColor ?? '#e9e3ff'};font-family:Arial,sans-serif;font-size:13px;color:${(p as any).answerText ?? p.answerColor ?? '#374151'};line-height:1.6;">${f.answer}</td></tr>`
                 ).join('')
                 return wrapBlock('faq_block' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
@@ -3475,7 +3475,7 @@ ${thumbCells}
                 const cards = (p.testimonials || []).map(t => {
                     const stars = '&#9733;'.repeat(t.rating || 5)
                     return `<td width="33%" style="padding:12px;vertical-align:top;text-align:center;">
-                        <div style="background-color:${p.bgColor};border:1px solid ${p.borderColor};border-radius:8px;padding:16px;">
+                        <div style="background-color:${(p as any).cardBg ?? p.bgColor ?? '#f8f7ff'};border:1px solid ${(p as any).cardBorder ?? p.borderColor ?? '#e9e3ff'};border-radius:8px;padding:16px;">
                             <p style="margin:0 0 8px;font-size:16px;color:${p.starColor};">${stars}</p>
                             <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:13px;font-style:italic;color:${p.textColor};line-height:1.5;">${t.text}</p>
                             <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${p.authorColor};">— ${t.author}</p>
@@ -3618,8 +3618,8 @@ ${thumbCells}
   <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.accentColor};">&#128666; ${p.title}</td></tr>
-      <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:13px;color:#4b5563;line-height:1.5;">${p.policyText}</td></tr>
-      <tr><td style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#1e1535;">${p.deliveryTime}</td></tr>
+      <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:13px;color:${(p as any).textColor ?? '#4b5563'};line-height:1.5;">${p.policyText}</td></tr>
+      <tr><td style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${(p as any).textColor ?? '#1e1535'};">${p.deliveryTime}</td></tr>
     </table>
   </td></tr>
 </table>`)
@@ -3645,8 +3645,8 @@ ${thumbCells}
                 return wrapBlock('payment_methods_block' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
   <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;text-align:center;">
-    <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">${p.title}</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">We accept all major credit cards, debit cards, and secure payment options handled directly by eBay.</p>
+    <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${(p as any).textColor ?? '#1e1535'};">${p.title}</p>
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${(p as any).accentColor ?? '#6b7280'};">We accept all major credit cards, debit cards, and secure payment options handled directly by eBay.</p>
   </td></tr>
 </table>`)
             },
@@ -3670,8 +3670,8 @@ ${thumbCells}
                 const p = props as UrgencyTimerBlockProps
                 return wrapBlock('urgency_timer_block' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid #fecaca;border-radius:${p.borderRadius}px;text-align:center;">
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.timerColor};">&#9202; ${p.text}</p>
+  <tr><td style="background-color:${p.bgColor ?? '#fef2f2'};${pad(p)}border:1px solid ${(p as any).borderColor ?? '#fecaca'};border-radius:${p.borderRadius}px;text-align:center;">
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.timerColor ?? '#dc2626'};">&#9202; <span style="color:${(p as any).textColor ?? p.timerColor ?? '#92400e'};">${p.text}</span></p>
   </td></tr>
 </table>`)
             },
@@ -3695,8 +3695,8 @@ ${thumbCells}
                 const p = props as TrustBadgeBlockProps
                 return wrapBlock('trust_badge_block' as BlockType, id,
                     `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;text-align:center;">
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:800;color:${p.textColor};">&#128737; ${p.badgeText}</p>
+  <tr><td style="background-color:${p.bgColor ?? '#f3eeff'};${pad(p)}border:1px solid ${(p as any).borderColor ?? '#e9e3ff'};border-radius:${p.borderRadius}px;text-align:center;">
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:800;color:${(p as any).accentColor ?? p.textColor ?? '#7530fb'};">&#128737; ${p.badgeText}</p>
   </td></tr>
 </table>`)
             },

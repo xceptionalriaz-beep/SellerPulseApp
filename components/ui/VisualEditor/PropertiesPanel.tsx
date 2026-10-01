@@ -5919,6 +5919,519 @@ function BlockStyleProps({ block, props, updateProps }: {
             )
         }
 
+        case 'breadcrumb_bar':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Separator colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'dispatch_timer':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Timer countdown colour" value={props.accentColor ?? '#10b981'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'feedback_score':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Star colour" value={props.accentColor ?? '#f59e0b'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'highlight_text':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Highlight background" value={props.bgColor ?? '#b8fa33'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'info_box':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#eff6ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e40af'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#bfdbfe'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Icon colour" value={props.accentColor ?? '#3b82f6'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'page_title':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Underline colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'payment_methods':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'pull_quote':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f3eeff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Quote mark colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#7530fb'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'quote_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f3eeff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Quote line colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#7530fb'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'section_label':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Label chip colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'vat_notice':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8fafc'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#64748b'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'warning_box':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#fffbeb'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#92400e'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#fcd34d'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Icon colour" value={props.accentColor ?? '#f59e0b'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'why_buy_from_us':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Icon / bullet colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'numbered_list':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Number circle colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 15} min={12} max={24} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <SliderInput label="Line height" value={props.lineHeight ?? 1.6} min={1} max={2.5} step={0.05} onChange={v => updateProps({ lineHeight: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'social_links':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
+                        <ColorRow label="Label colour" value={props.labelColor ?? '#1e1535'} onChange={v => updateProps({ labelColor: v })} />
+                    </Section>
+                    <Section title="Size">
+                        <SliderInput label="Icon size" value={props.iconSize ?? 28} min={16} max={48} suffix="px" onChange={v => updateProps({ iconSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_header':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#7530fb'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent / logo border" value={props.accentColor ?? '#b8fa33'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 20} min={12} max={36} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'badge_row':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Badge text" value={props.badgeText ?? '#ffffff'} onChange={v => updateProps({ badgeText: v })} />
+                        <ColorRow label="Badge border" value={props.badgeBorder ?? '#7530fb'} onChange={v => updateProps({ badgeBorder: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'before_after':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Label background" value={props.labelBg ?? '#1e1535'} onChange={v => updateProps({ labelBg: v })} />
+                        <ColorRow label="Label text" value={props.labelText ?? '#ffffff'} onChange={v => updateProps({ labelText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'bundle_deal':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Price colour" value={props.priceColor ?? '#ffffff'} onChange={v => updateProps({ priceColor: v })} />
+                        <ColorRow label="Badge background" value={props.badgeColor ?? '#b8fa33'} onChange={v => updateProps({ badgeColor: v })} />
+                        <ColorRow label="Badge text" value={props.badgeText ?? '#1e1535'} onChange={v => updateProps({ badgeText: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#3b2a6e'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'bundle_discount_banner':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#b8fa33'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#3b2a6e'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'compatibility_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                        <ColorRow label="Compatible colour" value={props.compatibleColor ?? '#10b981'} onChange={v => updateProps({ compatibleColor: v })} />
+                        <ColorRow label="Incompatible colour" value={props.incompatibleColor ?? '#ef4444'} onChange={v => updateProps({ incompatibleColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'compatibility_table':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                        <ColorRow label="Alt row background" value={props.rowAltBg ?? '#f8f7ff'} onChange={v => updateProps({ rowAltBg: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'data_table':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                        <ColorRow label="Alt row background" value={props.rowAltBg ?? '#f8f7ff'} onChange={v => updateProps({ rowAltBg: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'faq_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Question background" value={props.questionBg ?? '#f8f7ff'} onChange={v => updateProps({ questionBg: v })} />
+                        <ColorRow label="Question text" value={props.questionText ?? '#1e1535'} onChange={v => updateProps({ questionText: v })} />
+                        <ColorRow label="Answer text" value={props.answerText ?? '#374151'} onChange={v => updateProps({ answerText: v })} />
+                        <ColorRow label="Chevron colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'features':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Icon background" value={props.iconBg ?? '#f3eeff'} onChange={v => updateProps({ iconBg: v })} />
+                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
+                        <ColorRow label="Label colour" value={props.labelColor ?? '#1e1535'} onChange={v => updateProps({ labelColor: v })} />
+                        <ColorRow label="Sub-text colour" value={props.subTextColor ?? '#6b7280'} onChange={v => updateProps({ subTextColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'free_shipping':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#0f172a'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#f59e0b'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'key_features_grid':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Card background" value={props.cardBg ?? '#f8f7ff'} onChange={v => updateProps({ cardBg: v })} />
+                        <ColorRow label="Card border" value={props.cardBorder ?? '#e9e3ff'} onChange={v => updateProps({ cardBorder: v })} />
+                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
+                        <ColorRow label="Title colour" value={props.titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'logo_bar':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Logo border / accent" value={props.accentColor ?? '#e2e8f0'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'money_back':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#bbf7d0'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#10b981'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'payment_methods_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent / checkmark" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'product_comparison':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                        <ColorRow label="Alt row background" value={props.rowAltBg ?? '#f8f7ff'} onChange={v => updateProps({ rowAltBg: v })} />
+                        <ColorRow label="Checkmark colour" value={props.accentColor ?? '#10b981'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'product_variants':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Selected swatch border" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Label colour" value={props.labelColor ?? '#1e1535'} onChange={v => updateProps({ labelColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'satisfaction_guarantee':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#10b981'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'seasonal_banner':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#dc2626'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#fef08a'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'shipping_policy_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'single_image':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                    <Section title="Border">
+                        <SliderInput label="Border width" value={props.borderWidth ?? 0} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
+                        <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_footer':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? '#a78bfa'} onChange={v => updateProps({ linkColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#b8fa33'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#3b2a6e'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_nav_bar':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Link colour" value={props.linkColor ?? '#ffffff'} onChange={v => updateProps({ linkColor: v })} />
+                        <ColorRow label="Accent / active colour" value={props.accentColor ?? '#b8fa33'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 14} min={11} max={20} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'testimonial_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Card background" value={props.cardBg ?? '#f8f7ff'} onChange={v => updateProps({ cardBg: v })} />
+                        <ColorRow label="Card border" value={props.cardBorder ?? '#e9e3ff'} onChange={v => updateProps({ cardBorder: v })} />
+                        <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Author colour" value={props.authorColor ?? '#6b7280'} onChange={v => updateProps({ authorColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'trust_badge_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f3eeff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'urgency_timer_block':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#fff7ed'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#92400e'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Timer colour" value={props.timerColor ?? '#dc2626'} onChange={v => updateProps({ timerColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#fed7aa'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'whats_in_the_box':
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                </>
+            )
+
         default:
             return null
     }
@@ -8328,6 +8841,17 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <TextInput label="Minimum quantity" value={String(props.minimumQty ?? 2)} onChange={v => updateProps({ minimumQty: Number(v) || 2 })} />
                     </Section>
                 </>
+            )
+
+        case 'authenticity_guarantee':
+        case 'condition_details':
+        case 'international_shipping':
+        case 'limited_time_offer':
+        case 'video_placeholder':
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>This block displays fixed content — no editable attributes.</InfoBox>
+                </div>
             )
 
         default:
