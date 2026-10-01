@@ -4875,6 +4875,102 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'price_tag': {
+            const pv = (props as any).variant ?? 'classic-strike'
+            return (
+                <>
+                    {/* ── Colours — all variants ── */}
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Price colour" value={(props as any).priceColor ?? '#1e1535'} onChange={v => updateProps({ priceColor: v } as any)} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Strike colour" value={(props as any).strikeColor ?? '#94a3b8'} onChange={v => updateProps({ strikeColor: v } as any)} />
+                    </Section>
+
+                    {/* ── Badge colours — shown for variants that use a badge ── */}
+                    {(pv === 'classic-strike' || pv === 'minimalist-inline' || pv === 'stacked-deal-card' || pv === 'discount-badge-pill' || pv === 'high-contrast-flash') && (
+                        <Section title="Badge">
+                            <ColorRow label="Badge background" value={(props as any).badgeBg ?? '#dc2626'} onChange={v => updateProps({ badgeBg: v } as any)} />
+                            <ColorRow label="Badge text" value={(props as any).badgeTextColor ?? '#ffffff'} onChange={v => updateProps({ badgeTextColor: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Accent — dual-tone-split, elite-luxury, wholesale-b2b ── */}
+                    {(pv === 'dual-tone-split' || pv === 'elite-luxury' || pv === 'wholesale-b2b' || pv === 'modern-glassmorphism') && (
+                        <Section title="Accent">
+                            <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#1e1535'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Urgency banner background — urgency-banner only ── */}
+                    {pv === 'urgency-banner' && (
+                        <Section title="Banner">
+                            <ColorRow label="Banner background" value={(props as any).bannerBg ?? '#dc2626'} onChange={v => updateProps({ bannerBg: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Border — classic-strike, stacked-deal-card ── */}
+                    {(pv === 'classic-strike' || pv === 'stacked-deal-card') && (
+                        <Section title="Border">
+                            <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                        <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
+                    </Section>
+                </>
+            )
+        }
+
+        case 'hero_product': {
+            const hv = (props as any).variant ?? 'hp-default'
+            const isDark = hv === 'hp-dark-hero' || hv === 'hp-dark-premium'
+            return (
+                <>
+                    {/* ── Colours — all variants ── */}
+                    <Section title="Colours">
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Image panel background" value={(props as any).leftBg ?? '#f9fafb'} onChange={v => updateProps({ leftBg: v } as any)} />
+                    </Section>
+
+                    {/* ── Scarcity bar ── */}
+                    <Section title="Scarcity Bar">
+                        <ToggleRow label="Show scarcity bar" value={(props as any).showScarcity ?? false} onChange={v => updateProps({ showScarcity: v } as any)} />
+                        {(props as any).showScarcity && (
+                            <>
+                                <ColorRow label="Bar background" value={(props as any).scarcityBg ?? '#fef2f2'} onChange={v => updateProps({ scarcityBg: v } as any)} />
+                                <ColorRow label="Bar text colour" value={(props as any).scarcityColor ?? '#991b1b'} onChange={v => updateProps({ scarcityColor: v } as any)} />
+                            </>
+                        )}
+                    </Section>
+
+                    {/* ── Guarantee tag ── */}
+                    <Section title="Guarantee Tag">
+                        <ToggleRow label="Show guarantee tag" value={(props as any).showGuaranteeTag ?? true} onChange={v => updateProps({ showGuaranteeTag: v } as any)} />
+                        {(props as any).showGuaranteeTag !== false && (
+                            <>
+                                <ColorRow label="Tag background" value={(props as any).guaranteeTagBg ?? (isDark ? '#1e3a2f' : '#f0fdf4')} onChange={v => updateProps({ guaranteeTagBg: v } as any)} />
+                                <ColorRow label="Tag text colour" value={(props as any).guaranteeTagColor ?? (isDark ? '#6ee7b7' : '#166534')} onChange={v => updateProps({ guaranteeTagColor: v } as any)} />
+                            </>
+                        )}
+                    </Section>
+
+                    {/* ── Stock badge ── */}
+                    <Section title="Stock Badge">
+                        <ToggleRow label="Show stock badge" value={(props as any).showStockBadge ?? true} onChange={v => updateProps({ showStockBadge: v } as any)} />
+                    </Section>
+
+                    {/* ── Original price ── */}
+                    <Section title="Pricing">
+                        <ToggleRow label="Show original price" value={(props as any).showOriginal ?? true} onChange={v => updateProps({ showOriginal: v } as any)} />
+                    </Section>
+                </>
+            )
+        }
+
         default:
             return null
     }
