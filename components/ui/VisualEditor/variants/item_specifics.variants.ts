@@ -21,6 +21,7 @@ export interface BlockVariant {
     id: string
     label: string
     description: string
+    thumbnail?: string
     toHtml: (props: any, id: string) => string
 }
 
@@ -923,6 +924,320 @@ function luxuryGoldAccentBand(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SVG Thumbnail Representations for Visual Editor Carousel & Panels
+// ─────────────────────────────────────────────────────────────────────────────
+export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
+    'is-dual-column-zebra-card': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+  <path d="M2 6C2 3.79086 3.79086 2 6 2H114C116.209 2 118 3.79086 118 6V18H2V6Z" fill="#0f172a"/>
+  <rect x="6" y="6" width="22" height="6" rx="2" fill="#2563eb"/>
+  <rect x="32" y="7" width="46" height="4" rx="1.5" fill="#ffffff"/>
+  <rect x="94" y="8" width="18" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="2" y="18" width="116" height="13" fill="#f8fafc"/>
+  <line x1="2" y1="31" x2="118" y2="31" stroke="#e2e8f0" stroke-width="0.8"/>
+  <line x1="42" y1="18" x2="42" y2="31" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="6" y="22" width="24" height="4" rx="1" fill="#0f172a"/>
+  <rect x="48" y="22" width="50" height="4" rx="1" fill="#64748b"/>
+  <rect x="2" y="31" width="116" height="13" fill="#ffffff"/>
+  <line x1="2" y1="44" x2="118" y2="44" stroke="#e2e8f0" stroke-width="0.8"/>
+  <line x1="42" y1="31" x2="42" y2="44" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="6" y="35" width="28" height="4" rx="1" fill="#0f172a"/>
+  <rect x="48" y="35" width="42" height="4" rx="1" fill="#64748b"/>
+  <rect x="2" y="44" width="116" height="13" fill="#f8fafc"/>
+  <line x1="2" y1="57" x2="118" y2="57" stroke="#e2e8f0" stroke-width="0.8"/>
+  <line x1="42" y1="44" x2="42" y2="57" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="6" y="48" width="20" height="4" rx="1" fill="#0f172a"/>
+  <rect x="48" y="48" width="48" height="4" rx="1" fill="#64748b"/>
+  <rect x="2" y="57" width="116" height="15" rx="0 0 4 4" fill="#ffffff"/>
+  <line x1="42" y1="57" x2="42" y2="72" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="6" y="62" width="22" height="4" rx="1" fill="#0f172a"/>
+  <rect x="48" y="62" width="36" height="4" rx="1" fill="#64748b"/>
+</svg>`,
+
+    'is-two-column-card-grid': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <circle cx="8" cy="10" r="2.5" fill="#2563eb"/>
+  <rect x="14" y="8" width="28" height="4" rx="1" fill="#2563eb"/>
+  <rect x="46" y="8" width="45" height="4" rx="1" fill="#0f172a"/>
+  <rect x="6" y="18" width="51" height="23" rx="3" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="10" y="22" width="18" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="10" y="28" width="32" height="5" rx="1.5" fill="#0f172a"/>
+  <circle cx="51" cy="23" r="1.5" fill="#2563eb" fill-opacity="0.6"/>
+  <rect x="63" y="18" width="51" height="23" rx="3" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="67" y="22" width="16" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="67" y="28" width="34" height="5" rx="1.5" fill="#0f172a"/>
+  <circle cx="108" cy="23" r="1.5" fill="#2563eb" fill-opacity="0.6"/>
+  <rect x="6" y="45" width="51" height="23" rx="3" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="10" y="49" width="16" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="10" y="55" width="28" height="5" rx="1.5" fill="#0f172a"/>
+  <rect x="63" y="45" width="51" height="23" rx="3" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="67" y="49" width="20" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="67" y="55" width="30" height="5" rx="1.5" fill="#0f172a"/>
+</svg>`,
+
+    'is-industrial-blueprint-matrix': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#0c1a2e" stroke="#1e3a5f" stroke-width="1.5"/>
+  <path d="M2 5C2 3.34315 3.34315 2 5 2H115C116.657 2 118 3.34315 118 5V16H2V5Z" fill="#07111e"/>
+  <line x1="2" y1="16" x2="118" y2="16" stroke="#1e3a5f" stroke-width="1"/>
+  <rect x="6" y="5" width="38" height="3" rx="1" fill="#38bdf8"/>
+  <rect x="6" y="10" width="56" height="3.5" rx="1" fill="#ffffff"/>
+  <rect x="96" y="6" width="18" height="5" rx="1" fill="#081322" stroke="#1e3a5f" stroke-width="0.6"/>
+  <rect x="6" y="20" width="51" height="21" fill="#081322" stroke="#1e3a5f" stroke-width="0.8"/>
+  <rect x="6" y="20" width="2" height="21" fill="#38bdf8"/>
+  <rect x="11" y="23" width="16" height="2.5" fill="#64748b"/>
+  <rect x="42" y="23" width="11" height="2" fill="#38bdf8"/>
+  <rect x="11" y="29" width="36" height="4" fill="#e0f2fe"/>
+  <rect x="63" y="20" width="51" height="21" fill="#081322" stroke="#1e3a5f" stroke-width="0.8"/>
+  <rect x="63" y="20" width="2" height="21" fill="#38bdf8"/>
+  <rect x="68" y="23" width="16" height="2.5" fill="#64748b"/>
+  <rect x="99" y="23" width="11" height="2" fill="#38bdf8"/>
+  <rect x="68" y="29" width="34" height="4" fill="#e0f2fe"/>
+  <rect x="6" y="44" width="51" height="20" fill="#081322" stroke="#1e3a5f" stroke-width="0.8"/>
+  <rect x="6" y="44" width="2" height="20" fill="#38bdf8"/>
+  <rect x="11" y="47" width="16" height="2.5" fill="#64748b"/>
+  <rect x="11" y="53" width="32" height="4" fill="#e0f2fe"/>
+  <rect x="63" y="44" width="51" height="20" fill="#081322" stroke="#1e3a5f" stroke-width="0.8"/>
+  <rect x="63" y="44" width="2" height="20" fill="#38bdf8"/>
+  <rect x="68" y="47" width="16" height="2.5" fill="#64748b"/>
+  <rect x="68" y="53" width="30" height="4" fill="#e0f2fe"/>
+  <line x1="2" y1="67" x2="118" y2="67" stroke="#1e3a5f" stroke-width="0.8"/>
+  <rect x="6" y="69.5" width="40" height="2" fill="#64748b"/>
+  <rect x="90" y="69.5" width="24" height="2" fill="#38bdf8"/>
+</svg>`,
+
+    'is-boutique-hairline-editorial': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e4e4e7" stroke-width="1.2"/>
+  <rect x="6" y="8" width="22" height="2.5" rx="0.5" fill="#71717a"/>
+  <rect x="6" y="14" width="30" height="6" rx="1" fill="#18181b"/>
+  <rect x="6" y="22" width="24" height="5" rx="1" fill="#18181b"/>
+  <line x1="6" y1="31" x2="18" y2="31" stroke="#18181b" stroke-width="1.2"/>
+  <rect x="6" y="36" width="30" height="3" fill="#a1a1aa"/>
+  <rect x="6" y="41" width="26" height="3" fill="#d4d4d8"/>
+  <rect x="6" y="54" width="28" height="8" rx="2" fill="#ffffff" stroke="#e4e4e7" stroke-width="0.8"/>
+  <rect x="10" y="57" width="20" height="2.5" fill="#18181b"/>
+  <line x1="42" y1="6" x2="42" y2="68" stroke="#e4e4e7" stroke-width="1"/>
+  <rect x="48" y="10" width="18" height="3" fill="#71717a"/>
+  <rect x="90" y="10" width="22" height="3.5" fill="#18181b"/>
+  <line x1="48" y1="18" x2="114" y2="18" stroke="#f4f4f5" stroke-width="0.8"/>
+  <rect x="48" y="24" width="14" height="3" fill="#71717a"/>
+  <rect x="84" y="24" width="28" height="3.5" fill="#18181b"/>
+  <line x1="48" y1="32" x2="114" y2="32" stroke="#f4f4f5" stroke-width="0.8"/>
+  <rect x="48" y="38" width="22" height="3" fill="#71717a"/>
+  <rect x="88" y="38" width="24" height="3.5" fill="#18181b"/>
+  <line x1="48" y1="46" x2="114" y2="46" stroke="#f4f4f5" stroke-width="0.8"/>
+  <rect x="48" y="52" width="16" height="3" fill="#71717a"/>
+  <rect x="86" y="52" width="26" height="3.5" fill="#18181b"/>
+  <line x1="48" y1="60" x2="114" y2="60" stroke="#f4f4f5" stroke-width="0.8"/>
+</svg>`,
+
+    'is-stamped-manifest-ledger': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#fffefb" stroke="#d6d3d1" stroke-width="1.5"/>
+  <rect x="2" y="2" width="116" height="11" fill="#f5f5f4"/>
+  <line x1="2" y1="13" x2="118" y2="13" stroke="#a8a29e" stroke-dasharray="2,2" stroke-width="0.8"/>
+  <text x="6" y="9" font-size="5" fill="#78716c" font-family="monospace">✂ WAYBILL-DOCKET #88392</text>
+  <rect x="6" y="17" width="26" height="2.5" fill="#78716c"/>
+  <rect x="6" y="22" width="55" height="4.5" fill="#1c1917"/>
+  <g fill="#a8a29e">
+    <rect x="6" y="29" width="1.5" height="6"/>
+    <rect x="9" y="29" width="2.5" height="6"/>
+    <rect x="13" y="29" width="1" height="6"/>
+    <rect x="15" y="29" width="3" height="6"/>
+    <rect x="20" y="29" width="1" height="6"/>
+    <rect x="23" y="29" width="2" height="6"/>
+    <rect x="27" y="29" width="1" height="6"/>
+    <rect x="30" y="29" width="3" height="6"/>
+  </g>
+  <g transform="rotate(-6 100 24)">
+    <rect x="82" y="16" width="30" height="15" rx="2" fill="none" stroke="#b91c1c" stroke-width="1.2"/>
+    <rect x="86" y="19" width="22" height="2" fill="#b91c1c"/>
+    <rect x="84" y="23" width="26" height="3" fill="#b91c1c"/>
+    <rect x="88" y="28" width="18" height="1.5" fill="#b91c1c"/>
+  </g>
+  <line x1="6" y1="38" x2="114" y2="38" stroke="#d6d3d1" stroke-width="0.8"/>
+  <text x="6" y="46" font-size="4.5" fill="#78716c" font-family="monospace">#01</text>
+  <rect x="18" y="42" width="24" height="3.5" fill="#57534e"/>
+  <rect x="58" y="42" width="48" height="3.5" fill="#1c1917"/>
+  <line x1="6" y1="49" x2="114" y2="49" stroke="#e7e5e4" stroke-dasharray="1.5,1.5" stroke-width="0.6"/>
+  <text x="6" y="57" font-size="4.5" fill="#78716c" font-family="monospace">#02</text>
+  <rect x="18" y="53" width="20" height="3.5" fill="#57534e"/>
+  <rect x="58" y="53" width="40" height="3.5" fill="#1c1917"/>
+  <line x1="6" y1="60" x2="114" y2="60" stroke="#e7e5e4" stroke-dasharray="1.5,1.5" stroke-width="0.6"/>
+  <text x="6" y="68" font-size="4.5" fill="#78716c" font-family="monospace">#03</text>
+  <rect x="18" y="64" width="26" height="3.5" fill="#57534e"/>
+  <rect x="58" y="64" width="35" height="3.5" fill="#1c1917"/>
+</svg>`,
+
+    'is-pill-tag-cluster': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#ede9fe" stroke-width="1.2"/>
+  <rect x="6" y="7" width="28" height="6" rx="2" fill="#f3eeff"/>
+  <rect x="10" y="9" width="20" height="2.5" fill="#7530fb"/>
+  <rect x="38" y="8" width="48" height="4.5" rx="1" fill="#0f172a"/>
+  <rect x="6" y="18" width="50" height="14" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <path d="M6 25C6 21.134 9.13401 18 13 18H26V32H13C9.13401 32 6 28.866 6 25Z" fill="#f1f5f9"/>
+  <rect x="10" y="23.5" width="12" height="3" fill="#475569"/>
+  <rect x="30" y="23.5" width="20" height="3" fill="#0f172a"/>
+  <rect x="60" y="18" width="54" height="14" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <path d="M60 25C60 21.134 63.134 18 67 18H80V32H67C63.134 32 60 28.866 60 25Z" fill="#f1f5f9"/>
+  <rect x="64" y="23.5" width="12" height="3" fill="#475569"/>
+  <rect x="84" y="23.5" width="24" height="3" fill="#0f172a"/>
+  <rect x="6" y="36" width="56" height="14" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <path d="M6 43C6 39.134 9.13401 36 13 36H28V50H13C9.13401 50 6 46.866 6 43Z" fill="#f1f5f9"/>
+  <rect x="10" y="41.5" width="14" height="3" fill="#475569"/>
+  <rect x="32" y="41.5" width="24" height="3" fill="#0f172a"/>
+  <rect x="66" y="36" width="48" height="14" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <path d="M66 43C66 39.134 69.134 36 73 36H84V50H73C69.134 50 66 46.866 66 43Z" fill="#f1f5f9"/>
+  <rect x="70" y="41.5" width="10" height="3" fill="#475569"/>
+  <rect x="88" y="41.5" width="20" height="3" fill="#0f172a"/>
+  <rect x="6" y="54" width="48" height="14" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <path d="M6 61C6 57.134 9.13401 54 13 54H24V68H13C9.13401 68 6 64.866 6 61Z" fill="#f1f5f9"/>
+  <rect x="10" y="59.5" width="10" height="3" fill="#475569"/>
+  <rect x="28" y="59.5" width="20" height="3" fill="#0f172a"/>
+  <rect x="58" y="54" width="56" height="14" rx="7" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <path d="M58 61C58 57.134 61.134 54 65 54H78V68H65C61.134 68 58 64.866 58 61Z" fill="#f1f5f9"/>
+  <rect x="62" y="59.5" width="12" height="3" fill="#475569"/>
+  <rect x="82" y="59.5" width="26" height="3" fill="#0f172a"/>
+</svg>`,
+
+    'is-dark-terminal-console': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#070b12" stroke="#1e293b" stroke-width="1.2"/>
+  <path d="M2 5C2 3.34315 3.34315 2 5 2H115C116.657 2 118 3.34315 118 5V14H2V5Z" fill="#0f172a"/>
+  <line x1="2" y1="14" x2="118" y2="14" stroke="#1e293b" stroke-width="0.8"/>
+  <circle cx="7" cy="8" r="2" fill="#ef4444"/>
+  <circle cx="13" cy="8" r="2" fill="#f59e0b"/>
+  <circle cx="19" cy="8" r="2" fill="#10b981"/>
+  <rect x="26" y="6.5" width="38" height="3" rx="0.5" fill="#64748b"/>
+  <circle cx="106" cy="8" r="1.5" fill="#10b981"/>
+  <rect x="110" y="6.5" width="4" height="3" rx="0.5" fill="#10b981"/>
+  <rect x="6" y="18" width="55" height="3.5" rx="0.5" fill="#06b6d4"/>
+  <rect x="6" y="25" width="51" height="20" rx="2" fill="#0c1322" stroke="#1e293b" stroke-width="0.8"/>
+  <rect x="6" y="25" width="51" height="2" fill="#06b6d4"/>
+  <rect x="10" y="29" width="18" height="2.5" fill="#06b6d4"/>
+  <rect x="42" y="29" width="11" height="2" fill="#10b981"/>
+  <rect x="10" y="34.5" width="36" height="4.5" fill="#f8fafc"/>
+  <rect x="10" y="41" width="22" height="1.5" fill="#334155"/>
+  <rect x="63" y="25" width="51" height="20" rx="2" fill="#0c1322" stroke="#1e293b" stroke-width="0.8"/>
+  <rect x="63" y="25" width="51" height="2" fill="#06b6d4"/>
+  <rect x="67" y="29" width="18" height="2.5" fill="#06b6d4"/>
+  <rect x="99" y="29" width="11" height="2" fill="#10b981"/>
+  <rect x="67" y="34.5" width="34" height="4.5" fill="#f8fafc"/>
+  <rect x="67" y="41" width="22" height="1.5" fill="#334155"/>
+  <rect x="6" y="48" width="51" height="18" rx="2" fill="#0c1322" stroke="#1e293b" stroke-width="0.8"/>
+  <rect x="6" y="48" width="51" height="2" fill="#06b6d4"/>
+  <rect x="10" y="52" width="16" height="2.5" fill="#06b6d4"/>
+  <rect x="10" y="57.5" width="30" height="4" fill="#f8fafc"/>
+  <rect x="63" y="48" width="51" height="18" rx="2" fill="#0c1322" stroke="#1e293b" stroke-width="0.8"/>
+  <rect x="63" y="48" width="51" height="2" fill="#06b6d4"/>
+  <rect x="67" y="52" width="16" height="2.5" fill="#06b6d4"/>
+  <rect x="67" y="57.5" width="28" height="4" fill="#f8fafc"/>
+  <line x1="2" y1="68" x2="118" y2="68" stroke="#1e293b" stroke-width="0.8"/>
+  <rect x="6" y="70" width="35" height="2" fill="#475569"/>
+  <rect x="95" y="70" width="19" height="2" fill="#06b6d4"/>
+</svg>`,
+
+    'is-split-key-highlight-card': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <rect x="6" y="7" width="52" height="4.5" rx="1" fill="#0f172a"/>
+  <rect x="6" y="16" width="51" height="25" rx="3" fill="#eff6ff" stroke="#3b82f6" stroke-width="1"/>
+  <rect x="10" y="20" width="18" height="3" rx="0.5" fill="#2563eb"/>
+  <rect x="10" y="26" width="36" height="7" rx="1" fill="#0f172a"/>
+  <rect x="63" y="16" width="51" height="25" rx="3" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
+  <rect x="67" y="20" width="18" height="3" rx="0.5" fill="#16a34a"/>
+  <rect x="67" y="26" width="38" height="7" rx="1" fill="#0f172a"/>
+  <rect x="6" y="45" width="108" height="23" rx="2" fill="#ffffff" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="7" y="46" width="106" height="10" fill="#f8fafc"/>
+  <line x1="6" y1="56" x2="114" y2="56" stroke="#e2e8f0" stroke-width="0.6"/>
+  <rect x="10" y="49.5" width="22" height="3" fill="#64748b"/>
+  <rect x="48" y="49.5" width="46" height="3.5" fill="#0f172a"/>
+  <rect x="10" y="60.5" width="24" height="3" fill="#64748b"/>
+  <rect x="48" y="60.5" width="40" height="3.5" fill="#0f172a"/>
+</svg>`,
+
+    'is-compact-three-column-strip': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
+  <path d="M2 5C2 3.34315 3.34315 2 5 2H115C116.657 2 118 3.34315 118 5V16H2V5Z" fill="#f1f5f9"/>
+  <line x1="2" y1="16" x2="118" y2="16" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="6" y="6" width="22" height="4" rx="1" fill="#0284c7"/>
+  <rect x="32" y="6" width="48" height="4" rx="1" fill="#0f172a"/>
+  <rect x="2" y="16" width="116" height="26" fill="#f8fafc"/>
+  <line x1="2" y1="42" x2="118" y2="42" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="6" y="21" width="16" height="3" fill="#64748b"/>
+  <rect x="6" y="28" width="24" height="5" fill="#0f172a"/>
+  <line x1="40" y1="16" x2="40" y2="42" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="44" y="21" width="18" height="3" fill="#64748b"/>
+  <rect x="44" y="28" width="26" height="5" fill="#0f172a"/>
+  <line x1="78" y1="16" x2="78" y2="42" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="82" y="21" width="14" height="3" fill="#64748b"/>
+  <rect x="82" y="28" width="28" height="5" fill="#0f172a"/>
+  <rect x="2" y="42" width="116" height="31" rx="0 0 4 4" fill="#ffffff"/>
+  <rect x="6" y="48" width="14" height="3" fill="#64748b"/>
+  <rect x="6" y="55" width="22" height="5" fill="#0f172a"/>
+  <line x1="40" y1="42" x2="40" y2="72" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="44" y="48" width="16" height="3" fill="#64748b"/>
+  <rect x="44" y="55" width="24" height="5" fill="#0f172a"/>
+  <line x1="78" y1="42" x2="78" y2="72" stroke="#e2e8f0" stroke-width="0.8"/>
+  <rect x="82" y="48" width="18" height="3" fill="#64748b"/>
+  <rect x="82" y="55" width="25" height="5" fill="#0f172a"/>
+</svg>`,
+
+    'is-luxury-gold-accent-band': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  <rect x="2" y="2" width="116" height="71" rx="4" fill="#09090b" stroke="#d4af37" stroke-width="1.5"/>
+  <rect x="4.5" y="4.5" width="111" height="66" rx="2" fill="none" stroke="#d4af37" stroke-width="0.6" stroke-opacity="0.4"/>
+  <rect x="5" y="5" width="110" height="17" fill="#141416"/>
+  <line x1="5" y1="22" x2="115" y2="22" stroke="#d4af37" stroke-width="0.8"/>
+  <circle cx="60" cy="10" r="1.5" fill="#d4af37"/>
+  <rect x="36" y="9" width="48" height="2" fill="#d4af37"/>
+  <rect x="25" y="14" width="70" height="4" rx="0.5" fill="#ffffff"/>
+  <rect x="8" y="26" width="49" height="19" fill="#121214" stroke="#27272a" stroke-width="0.8"/>
+  <rect x="8" y="26" width="2" height="19" fill="#d4af37"/>
+  <text x="12" y="32" font-size="4" fill="#d4af37" font-family="serif">I.</text>
+  <rect x="18" y="29" width="18" height="2.5" fill="#d4af37"/>
+  <circle cx="51" cy="30" r="1" fill="#d4af37"/>
+  <rect x="12" y="36" width="36" height="4.5" fill="#fafafa"/>
+  <rect x="63" y="26" width="49" height="19" fill="#121214" stroke="#27272a" stroke-width="0.8"/>
+  <rect x="63" y="26" width="2" height="19" fill="#d4af37"/>
+  <text x="67" y="32" font-size="4" fill="#d4af37" font-family="serif">II.</text>
+  <rect x="74" y="29" width="18" height="2.5" fill="#d4af37"/>
+  <circle cx="106" cy="30" r="1" fill="#d4af37"/>
+  <rect x="67" y="36" width="34" height="4.5" fill="#fafafa"/>
+  <rect x="8" y="47" width="49" height="14" fill="#121214" stroke="#27272a" stroke-width="0.8"/>
+  <rect x="8" y="47" width="2" height="14" fill="#d4af37"/>
+  <text x="12" y="53" font-size="4" fill="#d4af37" font-family="serif">III.</text>
+  <rect x="20" y="50" width="16" height="2.5" fill="#d4af37"/>
+  <rect x="12" y="55" width="32" height="4" fill="#fafafa"/>
+  <rect x="63" y="47" width="49" height="14" fill="#121214" stroke="#27272a" stroke-width="0.8"/>
+  <rect x="63" y="47" width="2" height="14" fill="#d4af37"/>
+  <text x="67" y="53" font-size="4" fill="#d4af37" font-family="serif">IV.</text>
+  <rect x="76" y="50" width="16" height="2.5" fill="#d4af37"/>
+  <rect x="67" y="55" width="30" height="4" fill="#fafafa"/>
+  <line x1="5" y1="63" x2="115" y2="63" stroke="#27272a" stroke-width="0.8"/>
+  <rect x="8" y="65.5" width="38" height="2.5" fill="#d4af37"/>
+  <rect x="80" y="65.5" width="32" height="2" fill="#a1a1aa"/>
+</svg>`,
+}
+
+export function getItemSpecificsThumbnailSvg(id: string): string {
+    const clean = id
+        .toLowerCase()
+        .trim()
+        .replace(/^is[-_]/, '')
+        .replace(/^item[-_]/, '')
+        .replace(/^specifics[-_]/, '')
+        .replace(/_/g, '-')
+
+    const key = Object.keys(ITEM_SPECIFICS_THUMBNAILS).find(k => {
+        const kClean = k
+            .toLowerCase()
+            .replace(/^is[-_]/, '')
+            .replace(/^item[-_]/, '')
+            .replace(/^specifics[-_]/, '')
+            .replace(/_/g, '-')
+        return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
+    })
+
+    return key ? ITEM_SPECIFICS_THUMBNAILS[key] : ITEM_SPECIFICS_THUMBNAILS['is-dual-column-zebra-card']
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Exported Variant Registry (All 10 Radically Distinct Architectures)
 // ─────────────────────────────────────────────────────────────────────────────
 export const itemSpecificsVariants: BlockVariant[] = [
@@ -930,60 +1245,70 @@ export const itemSpecificsVariants: BlockVariant[] = [
         id: 'is-dual-column-zebra-card',
         label: 'Executive Zebra Card',
         description: 'Corporate 2-column alternating zebra table with rounded frame and dark header',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-dual-column-zebra-card'],
         toHtml(props, id) { return dualColumnZebraCard(props, id) },
     },
     {
         id: 'is-two-column-card-grid',
         label: '2-Column Bento Grid',
         description: 'Modern 2-column bento micro-card spec grid for tech, gadgets and audio',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-two-column-card-grid'],
         toHtml(props, id) { return twoColumnCardGrid(props, id) },
     },
     {
         id: 'is-industrial-blueprint-matrix',
         label: 'Industrial Blueprint',
         description: 'CAD / Schematic blueprint matrix with coordinate ticks & modular parameter blocks',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-industrial-blueprint-matrix'],
         toHtml(props, id) { return industrialBlueprintMatrix(props, id) },
     },
     {
         id: 'is-boutique-hairline-editorial',
         label: 'Scandinavian Hairline',
         description: 'Asymmetrical Scandinavian fashion magazine editorial split with vertical feature spine',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-boutique-hairline-editorial'],
         toHtml(props, id) { return boutiqueHairlineEditorial(props, id) },
     },
     {
         id: 'is-stamped-manifest-ledger',
         label: 'Vintage Stamped Manifest',
         description: 'Authentic courier waybill manifest ticket with perforated cut line & inspector stamp',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-stamped-manifest-ledger'],
         toHtml(props, id) { return stampedManifestLedger(props, id) },
     },
     {
         id: 'is-pill-tag-cluster',
         label: 'Pill Tag Cluster',
         description: 'Ergonomic dual-tone capsule pill badge cluster for lightning-fast mobile scan',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-pill-tag-cluster'],
         toHtml(props, id) { return pillTagCluster(props, id) },
     },
     {
         id: 'is-dark-terminal-console',
         label: 'Dark Cyber Console',
         description: 'Modular Cyber Diagnostics Telemetry HUD with hex addresses & telemetry cards',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-dark-terminal-console'],
         toHtml(props, id) { return darkTerminalConsole(props, id) },
     },
     {
         id: 'is-split-key-highlight-card',
         label: 'Hero Spec Highlight Split',
         description: 'Top primary specs in prominent hero boxes with secondary details below',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-split-key-highlight-card'],
         toHtml(props, id) { return splitKeyHighlightCard(props, id) },
     },
     {
         id: 'is-compact-three-column-strip',
         label: '3-Column Compact Strip',
         description: 'High-density 3-column quick-scan matrix for large catalogs and multi-attributes',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-compact-three-column-strip'],
         toHtml(props, id) { return compactThreeColumnStrip(props, id) },
     },
     {
         id: 'is-luxury-gold-accent-band',
         label: 'Luxury Gold Provenance',
         description: 'Official Atelier Certificate of Provenance Dossier with double gold plaque frame',
+        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-luxury-gold-accent-band'],
         toHtml(props, id) { return luxuryGoldAccentBand(props, id) },
     },
 ]

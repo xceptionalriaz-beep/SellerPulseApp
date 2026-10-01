@@ -7144,6 +7144,180 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </Section>
             )
 
+        case 'price_tag': {
+            const ptVariant = props.variant ?? 'classic-strike'
+            const hasBadge = ['classic-strike', 'minimalist-inline', 'stacked-deal-card', 'discount-badge-pill', 'high-contrast-flash'].includes(ptVariant)
+            return (
+                <>
+                    <Section title="Pricing">
+                        <TextInput
+                            label="Current price"
+                            value={props.itemPrice ?? props.price ?? '£19.99'}
+                            onChange={v => updateProps({ itemPrice: v, price: v })}
+                        />
+                        <TextInput
+                            label="Original / was price"
+                            value={props.originalPrice ?? props.wasPrice ?? props.msrp ?? '£34.99'}
+                            onChange={v => updateProps({ originalPrice: v, wasPrice: v })}
+                        />
+                        <TextInput
+                            label="Saving amount (e.g. Save £15)"
+                            value={props.discountAmount ?? props.savingsAmount ?? 'Save £15'}
+                            onChange={v => updateProps({ discountAmount: v, savingsAmount: v })}
+                        />
+                        <TextInput
+                            label="Saving percent (e.g. 43% OFF)"
+                            value={props.discountPercent ?? props.savingsPercent ?? '43% OFF'}
+                            onChange={v => updateProps({ discountPercent: v, savingsPercent: v })}
+                        />
+                    </Section>
+                    {hasBadge && (
+                        <Section title="Badge">
+                            <TextInput
+                                label="Badge label"
+                                value={props.badgeText ?? 'BEST PRICE'}
+                                onChange={v => updateProps({ badgeText: v })}
+                            />
+                        </Section>
+                    )}
+                    <Section title="Options">
+                        <ToggleRow
+                            label="Preserve placeholder tokens"
+                            value={props.preserveTokens ?? false}
+                            onChange={v => updateProps({ preserveTokens: v })}
+                        />
+                    </Section>
+                </>
+            )
+        }
+
+        case 'hero_product': {
+            const bullets: string[] = props.rightBullets ?? ['Feature one', 'Feature two', 'Feature three']
+            return (
+                <>
+                    <Section title="Product info">
+                        <TextInput
+                            label="Product title"
+                            value={props.rightTitle ?? 'Premium Product Title'}
+                            onChange={v => updateProps({ rightTitle: v })}
+                        />
+                        <TextInput
+                            label="Current price"
+                            value={props.rightPrice ?? '£19.99'}
+                            onChange={v => updateProps({ rightPrice: v })}
+                        />
+                        <TextInput
+                            label="Original / was price"
+                            value={props.rightOriginal ?? '£34.99'}
+                            onChange={v => updateProps({ rightOriginal: v })}
+                        />
+                        <TextInput
+                            label="Stock quantity"
+                            value={String(props.rightQuantity ?? '12')}
+                            onChange={v => updateProps({ rightQuantity: v })}
+                        />
+                    </Section>
+                    <Section title="Badges">
+                        <TextInput
+                            label="Product badge text"
+                            value={props.rightBadgeText ?? 'TOP PICK'}
+                            onChange={v => updateProps({ rightBadgeText: v })}
+                        />
+                        <TextInput
+                            label="Stock badge text"
+                            value={props.stockBadgeText ?? 'In Stock'}
+                            onChange={v => updateProps({ stockBadgeText: v })}
+                        />
+                        <TextInput
+                            label="Guarantee tag text"
+                            value={props.guaranteeTagText ?? '30-Day Money Back'}
+                            onChange={v => updateProps({ guaranteeTagText: v })}
+                        />
+                    </Section>
+                    <Section title={`Bullet points (${bullets.length})`}>
+                        {bullets.map((b, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                                <input
+                                    style={{
+                                        flex: 1,
+                                        background: 'var(--pp-input-bg)',
+                                        border: '1px solid var(--pp-border)',
+                                        borderRadius: 4,
+                                        color: 'var(--pp-text)',
+                                        fontSize: 12,
+                                        padding: '4px 8px',
+                                    }}
+                                    value={b}
+                                    onChange={e => {
+                                        const next = [...bullets]
+                                        next[i] = e.target.value
+                                        updateProps({ rightBullets: next })
+                                    }}
+                                />
+                                <button
+                                    style={{
+                                        background: 'var(--pp-danger, #dc2626)',
+                                        border: 'none',
+                                        borderRadius: 4,
+                                        color: '#fff',
+                                        cursor: 'pointer',
+                                        fontSize: 12,
+                                        padding: '0 8px',
+                                    }}
+                                    onClick={() => {
+                                        const next = bullets.filter((_, j) => j !== i)
+                                        updateProps({ rightBullets: next })
+                                    }}
+                                >✕</button>
+                            </div>
+                        ))}
+                        {bullets.length < 8 && (
+                            <button
+                                style={{
+                                    background: 'var(--pp-accent, #7530fb)',
+                                    border: 'none',
+                                    borderRadius: 4,
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    fontSize: 12,
+                                    marginTop: 4,
+                                    padding: '4px 12px',
+                                }}
+                                onClick={() => updateProps({ rightBullets: [...bullets, 'New feature'] })}
+                            >+ Add bullet</button>
+                        )}
+                    </Section>
+                    <Section title="Images">
+                        <TextInput
+                            label="Main product image URL"
+                            value={props.leftImage ?? ''}
+                            onChange={v => updateProps({ leftImage: v })}
+                        />
+                        <TextInput
+                            label="Thumbnail 1 URL"
+                            value={props.thumb1 ?? ''}
+                            onChange={v => updateProps({ thumb1: v })}
+                        />
+                        <TextInput
+                            label="Thumbnail 2 URL"
+                            value={props.thumb2 ?? ''}
+                            onChange={v => updateProps({ thumb2: v })}
+                        />
+                        <TextInput
+                            label="Thumbnail 3 URL"
+                            value={props.thumb3 ?? ''}
+                            onChange={v => updateProps({ thumb3: v })}
+                        />
+                        <TextInput
+                            label="Thumbnail 4 URL"
+                            value={props.thumb4 ?? ''}
+                            onChange={v => updateProps({ thumb4: v })}
+                        />
+                    </Section>
+                </>
+            )
+        }
+
         default:
             return (
                 <div style={{ padding: '8px 0' }}>
