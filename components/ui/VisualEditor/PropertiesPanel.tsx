@@ -4547,6 +4547,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="56" y="35.5" width="16" height="6" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.6" />
         </svg>
     ),
+
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {

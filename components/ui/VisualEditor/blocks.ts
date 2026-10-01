@@ -190,6 +190,7 @@ export type BlockProps =
     | ItemSpecificsProps
     | AuthenticityGuaranteeProps
     | CompatibilityTableProps
+    | KeyFeaturesGridProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -669,6 +670,27 @@ export interface CompatibilityTableProps extends CommonProps {
     models?: string[]
 }
 
+// ── Key Features Grid ────────────────────────────────────────────────────────
+export interface KeyFeaturesGridProps extends CommonProps {
+    variant?: string
+    heading?: string
+    subtitle?: string
+    features?: Array<{
+        icon?: string
+        title?: string
+        text?: string
+        description?: string
+        badge?: string
+        metric?: string
+        highlight?: boolean
+    }>
+    cardBg?: string
+    cardBorder?: string
+    iconColor?: string
+    titleColor?: string
+    accentColor?: string
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MEDIA BLOCKS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1048,6 +1070,7 @@ import { getItemSpecificsVariant as _getItemSpecificsVariant } from './variants/
 import { getAuthenticityGuaranteeVariant as _getAuthenticityGuaranteeVariant } from './variants/authenticity_guarantee.variants'
 import { getCompatibilityTableVariant as _getCompatibilityTableVariant } from './variants/compatibility_table.variants'
 import { getProductComparisonVariant as _getProductComparisonVariant } from './variants/product_comparison.variants'
+import { getKeyFeaturesVariant as _getKeyFeaturesVariant } from './variants/key_features.variants'
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2746,18 +2769,31 @@ ${thumbCells}
             label: 'Key Features Grid',
             category: 'Product' as BlockCategory,
             icon: 'grid',
-            description: '3-column feature highlights with icons',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
-            toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                const features = [
+            description: 'Core specifications and feature highlights — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'feat-classic-cards-grid',
+                heading: 'Key Product Features',
+                subtitle: 'Engineered for uncompromising performance, durability, and seamless installation',
+                features: [
                     { icon: '&#9889;', title: 'High Performance', text: 'Engineered for maximum efficiency' },
                     { icon: '&#128272;', title: 'Secure & Reliable', text: 'Built to last with premium materials' },
                     { icon: '&#127775;', title: 'Premium Quality', text: 'Rigorously tested before dispatch' },
-                ]
-                const cells = features.map(f => `<td width="33%" style="padding:12px;text-align:center;vertical-align:top;background-color:${p.cardBg ?? '#f8f7ff'};border:1px solid ${p.cardBorder ?? '#e9e3ff'};border-radius:8px;"><p style="margin:0 0 6px;font-size:24px;color:${p.iconColor ?? '#7530fb'};">${f.icon}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.titleColor ?? '#1e1535'};">${f.title}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${p.textColor ?? '#6b7280'};">${f.text}</p></td>`).join('')
-                return wrapBlock('key_features_grid' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                ],
+                cardBg: '#f8f7ff',
+                cardBorder: '#e9e3ff',
+                iconColor: '#7530fb',
+                titleColor: '#1e1535',
+                accentColor: '#7530fb',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as any
+                const variantId = p.variant ?? 'feat-classic-cards-grid'
+                return wrapBlock('key_features_grid' as BlockType, id, _getKeyFeaturesVariant(variantId).toHtml(p, id))
             },
         },
 
