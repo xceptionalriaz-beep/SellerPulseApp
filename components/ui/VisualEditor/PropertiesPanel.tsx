@@ -4299,7 +4299,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                     {/* ── Flash Deal Urgency ── */}
                     {cv === 'ctab-flash-deal' && (
                         <Section title="Flash Deal">
-                            <InfoBox>Gradient is fixed red-to-orange for urgency. Accent colour controls the icon tint.</InfoBox>
+                            <InfoBox>Gradient is fixed red-to-orange for urgency. Accent colour controls the button tint.</InfoBox>
                         </Section>
                     )}
 
