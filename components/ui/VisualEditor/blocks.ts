@@ -187,6 +187,7 @@ export type BlockProps =
     | TrustBadgeBlockProps
     | ConditionBadgeProps
     | ItemSpecificsProps
+    | AuthenticityGuaranteeProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -637,6 +638,16 @@ export interface ItemSpecificsProps extends CommonProps {
     fontSize: number
     showTitle: boolean
     titleText: string
+}
+
+// ── Authenticity Guarantee ───────────────────────────────────────────────────
+export interface AuthenticityGuaranteeProps extends CommonProps {
+    variant: string
+    heading: string
+    subText: string
+    points: Array<{ title: string; sub?: string }>
+    accentColor: string
+    textColor: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
