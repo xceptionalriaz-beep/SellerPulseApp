@@ -1005,6 +1005,10 @@ import { getLogoBarVariant as _getLogoBarVariant } from './variants/logo_bar.var
 import { getBundleDealVariant as _getBundleDealVariant } from './variants/bundle_deal.variants'
 import { getPriceTagVariant as _getPriceTagVariant } from './variants/price_tag.variants'
 import { getStoreFooterVariant as _getStoreFooterVariant } from './variants/store_footer.variants'
+import { getCategoryNavVariant as _getCategoryNavVariant } from './variants/category_nav.variants'
+import { getSeasonalBannerVariant as _getSeasonalBannerVariant } from './variants/seasonal_banner.variants'
+import { getMoneyBackVariant as _getMoneyBackVariant } from './variants/money_back.variants'
+import { getFreeShippingVariant as _getFreeShippingVariant } from './variants/free_shipping.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2950,26 +2954,64 @@ ${thumbCells}
             label: 'Money Back Guarantee',
             category: 'Conversion' as BlockCategory,
             icon: 'shield',
-            description: '30-day money back guarantee badge block',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f0fdf4' } as unknown as BlockProps,
+            description: '30-day money back guarantee badge block — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#f0fdf4',
+                textColor: '#166534',
+                borderColor: '#bbf7d0',
+                accentColor: '#10b981',
+                variant: 'mb-trust-shield-green',
+                heading: '30-Day Money Back Guarantee',
+                subText: 'Not satisfied? Return it for a full refund. No questions asked.',
+                days: '30',
+                badgeText: '100% BUYER PROTECTION',
+                paddingTop: 18,
+                paddingBottom: 18,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('money_back' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f0fdf4;${pad(p)}border:1px solid #bbf7d0;border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;">&#128260;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#166534;">30-Day Money Back Guarantee</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#16a34a;">Not satisfied? Return it for a full refund. No questions asked.</p></td></tr></table>`)
+                const p = props as CommonProps & {
+                    variant?: string
+                    bgColor?: string
+                    textColor?: string
+                    borderColor?: string
+                    accentColor?: string
+                    heading?: string
+                    subText?: string
+                    days?: string
+                    badgeText?: string
+                }
+                const variantId = p.variant ?? 'mb-trust-shield-green'
+                return wrapBlock('money_back' as BlockType, id, _getMoneyBackVariant(variantId).toHtml(p, id))
             },
         },
 
         {
-            type: 'free_shipping_banner' as BlockType,
+            type: 'free_shipping' as BlockType,
             label: 'Free Shipping Banner',
-            category: 'Conversion' as BlockCategory,
+            category: 'Trust & Badges' as BlockCategory,
             icon: 'truck',
-            description: 'Green free shipping callout banner',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#16a34a' } as unknown as BlockProps,
+            description: 'High-converting free shipping and fast dispatch logistics banner',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#0f172a',
+                textColor: '#ffffff',
+                accentColor: '#f59e0b',
+                variant: 'ship-express-courier-strip',
+                heading: 'Fast & Free Domestic Shipping',
+                subText: 'Orders placed before 2:00 PM EST ship the same business day.',
+                badgeText: '⚡ SAME-DAY DISPATCH',
+                carrier: 'USPS PRIORITY / FEDEX 2-DAY',
+                dispatchTime: 'Same Day',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 22,
+                paddingRight: 22,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('free_shipping_banner' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#16a34a;${pad(p)}text-align:center;"><p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#fff;">&#128230; FREE Shipping &mdash; Dispatched Within 24 Hours &#9989;</p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'ship-express-courier-strip'
+                return wrapBlock('free_shipping' as BlockType, id, _getFreeShippingVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -3038,44 +3080,30 @@ ${thumbCells}
             label: 'Category Navigation',
             category: 'Header & Footer' as BlockCategory,
             icon: 'menu',
-            description: 'Horizontal store category link bar',
+            description: 'Horizontal store category link bar — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
                 bgColor: '#1e1535',
+                textColor: '#ffffff',
+                linkColor: '#ffffff',
+                activeColor: '#b8fa33',
+                variant: 'cat-classic-dark',
+                categories: ['Electronics', 'Clothing', 'Home & Garden', 'Collectibles', 'Auto Parts'],
                 paddingTop: 10,
                 paddingBottom: 10,
-                links: [
-                    { label: 'Electronics', url: '#' },
-                    { label: 'Clothing', url: '#' },
-                    { label: 'Home & Garden', url: '#' },
-                    { label: 'Collectibles', url: '#' },
-                    { label: 'Auto Parts', url: '#' },
-                ],
-                separator: '|',
-                linkColor: 'rgba(255,255,255,0.8)',
-                fontSize: 13,
-                fontWeight: '600',
             } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as any
-                const defaultLinks = [
-                    { label: 'Electronics', url: '#' },
-                    { label: 'Clothing', url: '#' },
-                    { label: 'Home & Garden', url: '#' },
-                    { label: 'Collectibles', url: '#' },
-                    { label: 'Auto Parts', url: '#' },
-                ]
-                const navLinks: Array<{ label: string; url: string }> = (p.links && p.links.length > 0) ? p.links : defaultLinks
-                const sep = p.separator ?? '|'
-                const fontSize = p.fontSize ?? 13
-                const fontWeight = p.fontWeight ?? '600'
-                const linkColor = p.linkColor ?? 'rgba(255,255,255,0.8)'
-                const cells = navLinks.map((link: { label: string; url: string }, i: number) => {
-                    const sepCell = (i > 0 && sep) ? `<td style="padding:0 3px;font-family:Arial,sans-serif;font-size:${fontSize}px;color:rgba(255,255,255,0.3);">${sep}</td>` : ''
-                    return `${sepCell}<td style="padding:0 10px;"><a href="${link.url || '#'}" style="font-family:Arial,sans-serif;font-size:${fontSize}px;color:${linkColor};text-decoration:none;font-weight:${fontWeight};">${link.label}</a></td>`
-                }).join('')
-                return wrapBlock('category_nav' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#1e1535'};${pad(p as CommonProps)}"><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                const p = props as CommonProps & {
+                    variant?: string
+                    categories?: any
+                    bgColor?: string
+                    linkColor?: string
+                    activeColor?: string
+                    textColor?: string
+                    fontSize?: number
+                }
+                const variantId = p.variant ?? 'cat-classic-dark'
+                return wrapBlock('category_nav' as BlockType, id, _getCategoryNavVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -3084,12 +3112,43 @@ ${thumbCells}
             label: 'Seasonal Banner',
             category: 'Header & Footer' as BlockCategory,
             icon: 'star',
-            description: 'Seasonal sale themed header banner',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#dc2626' } as unknown as BlockProps,
+            description: 'Seasonal sale themed header banner — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#dc2626',
+                textColor: '#ffffff',
+                accentColor: '#fef08a',
+                variant: 'seasonal-festive-ribbon',
+                bannerTitle: 'Seasonal Sale — Up To 50% Off!',
+                bannerSubtitle: 'Limited time only · While stocks last',
+                badgeText: 'HOLIDAY SPECIAL',
+                icon: '🎁 🎄 🎁',
+                discountText: '50% OFF',
+                discountSub: 'STOREWIDE',
+                hours: '12',
+                minutes: '45',
+                seconds: '30',
+                paddingTop: 20,
+                paddingBottom: 20,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('seasonal_banner' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background:linear-gradient(135deg,#dc2626 0%,#7f1d1d 100%);${pad(p)}text-align:center;"><p style="margin:0 0 4px;font-size:28px;">&#127873; &#127876; &#127873;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:20px;font-weight:700;color:#fff;">Seasonal Sale &mdash; Up To 50% Off!</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);">Limited time only &middot; While stocks last</p></td></tr></table>`)
+                const p = props as CommonProps & {
+                    variant?: string
+                    bgColor?: string
+                    textColor?: string
+                    accentColor?: string
+                    bannerTitle?: string
+                    bannerSubtitle?: string
+                    badgeText?: string
+                    icon?: string
+                    discountText?: string
+                    discountSub?: string
+                    hours?: string
+                    minutes?: string
+                    seconds?: string
+                }
+                const variantId = p.variant ?? 'seasonal-festive-ribbon'
+                return wrapBlock('seasonal_banner' as BlockType, id, _getSeasonalBannerVariant(variantId).toHtml(p, id))
             },
         },
 

@@ -1099,16 +1099,19 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   var BLOCK_TYPE = "${block.type}";
   document.addEventListener('DOMContentLoaded', function() {
 
-    // Prevent all anchor link navigation inside the canvas editor.
-    // Without this, clicking href="#" (or any href) in a sandbox="allow-same-origin"
-    // iframe causes the iframe to navigate to the app URL, showing the dashboard
-    // inside the block preview. Capture phase ensures this fires before any other handler.
+    // Anchor click handler inside the canvas editor.
+    // - href="#" or empty → block navigation silently (nothing happens).
+    // - Real URL → open in a new tab so the seller can verify the link is correct.
+    // Capture phase fires before any other handler so the iframe never navigates itself.
     document.addEventListener('click', function(e) {
       var t = e.target;
       var link = (t && t.closest) ? t.closest('a') : (t && t.tagName === 'A' ? t : null);
-      if (link) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (!link) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var href = link.getAttribute('href') || '';
+      if (href && href !== '#' && href !== 'javascript:void(0)') {
+        window.parent.postMessage({ type: 'RIAZIFY_OPEN_URL', url: href }, '*');
       }
     }, true);
 

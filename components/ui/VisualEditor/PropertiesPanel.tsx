@@ -2727,6 +2727,498 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="25" y="35" width="30" height="2" rx="1" fill="#9ca3af" />
         </svg>
     ),
+
+    // ── category_nav: cat-classic-dark ────────────────────────────────────────
+    'cat-classic-dark': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="6" y="21" width="12" height="6" rx="2" fill="#b8fa33" />
+            <rect x="22" y="22.5" width="12" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
+            <rect x="38" y="22.5" width="14" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
+            <rect x="56" y="22.5" width="16" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-minimalist-divider ──────────────────────────────────
+    'cat-minimalist-divider': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="14" x2="80" y2="14" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="34" x2="80" y2="34" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="22" width="12" height="3" rx="1.5" fill="#475569" />
+            <line x1="24" y1="21" x2="24" y2="26" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="28" y="22" width="12" height="3" rx="1.5" fill="#475569" />
+            <line x1="44" y1="21" x2="44" y2="26" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="48" y="22" width="12" height="3" rx="1.5" fill="#475569" />
+            <line x1="64" y1="21" x2="64" y2="26" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="68" y="22" width="8" height="3" rx="1.5" fill="#475569" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-pill-badge ──────────────────────────────────────────
+    'cat-pill-badge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="5" y="18" width="16" height="12" rx="6" fill="#b8fa33" />
+            <rect x="24" y="18" width="16" height="12" rx="6" fill="rgba(255,255,255,0.12)" />
+            <rect x="43" y="18" width="16" height="12" rx="6" fill="rgba(255,255,255,0.12)" />
+            <rect x="62" y="18" width="14" height="12" rx="6" fill="rgba(255,255,255,0.12)" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-subtle-underline ────────────────────────────────────
+    'cat-subtle-underline': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="36" x2="80" y2="36" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="20" width="14" height="4" rx="1" fill="#7530fb" />
+            <rect x="8" y="28" width="14" height="2" rx="1" fill="#7530fb" />
+            <rect x="28" y="20" width="14" height="4" rx="1" fill="#1e293b" opacity="0.6" />
+            <rect x="48" y="20" width="14" height="4" rx="1" fill="#1e293b" opacity="0.6" />
+            <rect x="68" y="20" width="8" height="4" rx="1" fill="#1e293b" opacity="0.6" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-two-tier-grid ───────────────────────────────────────
+    'cat-two-tier-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" />
+            <rect x="6" y="11" width="18" height="10" rx="3" fill="#b8fa33" />
+            <rect x="28" y="11" width="22" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
+            <rect x="54" y="11" width="20" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
+            <rect x="10" y="26" width="20" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
+            <rect x="34" y="26" width="20" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
+            <rect x="58" y="26" width="16" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-icon-hybrid ─────────────────────────────────────────
+    'cat-icon-hybrid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="4" y="16" width="22" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <circle cx="9" cy="24" r="2.5" fill="#3b82f6" />
+            <rect x="14" y="22.5" width="9" height="3" rx="1" fill="#1e1535" />
+            <rect x="29" y="16" width="22" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <circle cx="34" cy="24" r="2.5" fill="#10b981" />
+            <rect x="39" y="22.5" width="9" height="3" rx="1" fill="#1e1535" />
+            <rect x="54" y="16" width="22" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <circle cx="59" cy="24" r="2.5" fill="#f59e0b" />
+            <rect x="64" y="22.5" width="9" height="3" rx="1" fill="#1e1535" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-modern-glass ────────────────────────────────────────
+    'cat-modern-glass': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#1e1535" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8" />
+            <rect x="6" y="18" width="16" height="12" rx="3" fill="#b8fa33" />
+            <rect x="26" y="18" width="15" height="12" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+            <rect x="45" y="18" width="15" height="12" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+            <rect x="64" y="18" width="11" height="12" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-wholesale-jump ──────────────────────────────────────
+    'cat-wholesale-jump': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="20" y1="10" x2="20" y2="38" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="40" y1="10" x2="40" y2="38" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="60" y1="10" x2="60" y2="38" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="0" y="10" width="20" height="28" fill="#e2e8f0" />
+            <rect x="4" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="24" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="44" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="64" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-high-contrast-flash ─────────────────────────────────
+    'cat-high-contrast-flash': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#dc2626" />
+            <rect x="6" y="21" width="14" height="6" rx="2" fill="#ffffff" />
+            <rect x="24" y="22.5" width="12" height="3" rx="1.5" fill="#ffffff" />
+            <rect x="40" y="22.5" width="14" height="3" rx="1.5" fill="#ffffff" />
+            <rect x="58" y="22.5" width="16" height="3" rx="1.5" fill="#ffffff" />
+        </svg>
+    ),
+
+    // ── category_nav: cat-elite-luxury ────────────────────────────────────────
+    'cat-elite-luxury': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="0.8" />
+            <line x1="0" y1="12" x2="80" y2="12" stroke="#d97706" strokeWidth="1" />
+            <line x1="0" y1="36" x2="80" y2="36" stroke="#d97706" strokeWidth="1" />
+            <circle cx="40" cy="18" r="1.5" fill="#d97706" />
+            <rect x="12" y="24" width="12" height="3" rx="1" fill="#111827" />
+            <circle cx="30" cy="25.5" r="1" fill="#d97706" />
+            <rect x="35" y="24" width="10" height="3" rx="1" fill="#111827" />
+            <circle cx="50" cy="25.5" r="1" fill="#d97706" />
+            <rect x="55" y="24" width="12" height="3" rx="1" fill="#111827" />
+        </svg>
+    ),
+
+    // ── seasonal_banner: 10 Styles ──────────────────────────────────────────
+    'seasonal-festive-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#dc2626" />
+            <rect x="28" y="10" width="24" height="4" rx="2" fill="#fef08a" opacity="0.9" />
+            <rect x="14" y="18" width="52" height="6" rx="2" fill="#ffffff" />
+            <rect x="20" y="28" width="40" height="4" rx="1.5" fill="#ffffff" opacity="0.8" />
+        </svg>
+    ),
+
+    'seasonal-neon-cyber': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#09090b" />
+            <rect x="2" y="2" width="76" height="44" rx="3" stroke="#22d3ee" strokeWidth="1.5" />
+            <rect x="24" y="10" width="32" height="4" rx="1" fill="#22d3ee" opacity="0.85" />
+            <rect x="14" y="18" width="52" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="22" y="28" width="36" height="4" rx="1" fill="#22d3ee" opacity="0.75" />
+        </svg>
+    ),
+
+    'seasonal-dualtone-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#1e1b4b" />
+            <rect width="28" height="48" rx="4" fill="#ec4899" />
+            <rect x="5" y="15" width="18" height="8" rx="2" fill="#ffffff" />
+            <rect x="7" y="26" width="14" height="4" rx="1" fill="#ffffff" opacity="0.8" />
+            <rect x="34" y="14" width="38" height="5" rx="1.5" fill="#f472b6" />
+            <rect x="34" y="23" width="40" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="34" y="32" width="32" height="4" rx="1" fill="#ffffff" opacity="0.7" />
+        </svg>
+    ),
+
+    'seasonal-countdown-urgency': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#111827" />
+            <rect x="1" y="1" width="78" height="46" rx="3" stroke="#ef4444" strokeWidth="1" />
+            <rect x="8" y="14" width="32" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="8" y="24" width="26" height="4" rx="1" fill="#9ca3af" />
+            {/* 3 countdown boxes */}
+            <rect x="44" y="16" width="9" height="15" rx="2" fill="#1f2937" stroke="#ef4444" strokeWidth="0.8" />
+            <circle cx="55.5" cy="21" r="0.8" fill="#ef4444" />
+            <circle cx="55.5" cy="26" r="0.8" fill="#ef4444" />
+            <rect x="58" y="16" width="9" height="15" rx="2" fill="#1f2937" stroke="#ffffff" strokeWidth="0.8" />
+            <circle cx="69.5" cy="21" r="0.8" fill="#ef4444" />
+            <circle cx="69.5" cy="26" r="0.8" fill="#ef4444" />
+            <rect x="71" y="16" width="7" height="15" rx="2" fill="#1f2937" stroke="#ffffff" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'seasonal-minimalist-elegance': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fafaf9" stroke="#e7e5e4" strokeWidth="1" />
+            <rect x="8" y="8" width="64" height="32" rx="2" stroke="#b45309" strokeWidth="0.8" strokeOpacity="0.4" />
+            <rect x="28" y="14" width="24" height="3" rx="1" fill="#b45309" />
+            <rect x="18" y="21" width="44" height="5" rx="1" fill="#1c1917" />
+            <rect x="24" y="29" width="32" height="3" rx="1" fill="#78716c" />
+        </svg>
+    ),
+
+    'seasonal-glassmorphism-frost': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <rect x="6" y="6" width="68" height="36" rx="4" fill="#ffffff" fillOpacity="0.12" stroke="#ffffff" strokeWidth="0.8" strokeOpacity="0.25" />
+            <rect x="28" y="12" width="24" height="4" rx="2" fill="#93c5fd" />
+            <rect x="14" y="20" width="52" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="29" width="40" height="4" rx="1" fill="#ffffff" fillOpacity="0.7" />
+        </svg>
+    ),
+
+    'seasonal-gradient-burst': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="gb-thumb" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#6366f1" />
+                    <stop offset="0.5" stopColor="#ec4899" />
+                    <stop offset="1" stopColor="#f97316" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="4" fill="url(#gb-thumb)" />
+            <rect x="26" y="9" width="28" height="4" rx="2" fill="#000000" fillOpacity="0.3" stroke="#ffffff" strokeWidth="0.6" />
+            <rect x="12" y="18" width="56" height="7" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="29" width="40" height="4" rx="1" fill="#ffffff" fillOpacity="0.85" />
+        </svg>
+    ),
+
+    'seasonal-wholesale-strobe': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f59e0b" stroke="#b45309" strokeWidth="1.2" />
+            <path d="M12 28L18 16L24 28Z" fill="#78350f" />
+            <rect x="28" y="13" width="30" height="4" rx="1" fill="#78350f" />
+            <rect x="28" y="20" width="44" height="6" rx="1.5" fill="#0f172a" />
+            <rect x="28" y="29" width="38" height="4" rx="1" fill="#451a03" />
+        </svg>
+    ),
+
+    'seasonal-gift-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="6" fill="#065f46" stroke="#ffffff" strokeWidth="0.8" strokeOpacity="0.3" />
+            <rect x="26" y="9" width="28" height="4" rx="2" fill="#ffffff" fillOpacity="0.2" />
+            <rect x="14" y="18" width="52" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="28" width="40" height="4" rx="1" fill="#a7f3d0" />
+        </svg>
+    ),
+
+    'seasonal-elite-luxury': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <line x1="0" y1="4" x2="80" y2="4" stroke="#d4af37" strokeWidth="1" />
+            <line x1="0" y1="44" x2="80" y2="44" stroke="#d4af37" strokeWidth="1" />
+            <circle cx="40" cy="12" r="1.5" fill="#d4af37" />
+            <rect x="12" y="19" width="56" height="5" rx="1" fill="#f8fafc" />
+            <rect x="22" y="28" width="36" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    // ── money_back: 10 Styles ───────────────────────────────────────────────
+    'mb-trust-shield-green': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" />
+            <circle cx="40" cy="14" r="6" fill="#dcfce7" stroke="#86efac" strokeWidth="0.8" />
+            <path d="M38 14L40 16L43 12" stroke="#16a34a" strokeWidth="1" strokeLinecap="round" />
+            <rect x="18" y="24" width="44" height="5" rx="1.5" fill="#166534" />
+            <rect x="22" y="32" width="36" height="3" rx="1" fill="#15803d" opacity="0.8" />
+        </svg>
+    ),
+
+    'mb-minimalist-outline': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="8" y="14" width="16" height="20" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <path d="M13 24L15.5 26.5L19 21.5" stroke="#0f172a" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="30" y="14" width="22" height="3" rx="1" fill="#0284c7" />
+            <rect x="30" y="21" width="42" height="5" rx="1.5" fill="#0f172a" />
+            <rect x="30" y="29" width="36" height="3" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'mb-bold-dark-trust': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#1e293b" strokeWidth="1" />
+            <rect x="24" y="9" width="32" height="4" rx="2" fill="#10b981" fillOpacity="0.2" stroke="#10b981" strokeWidth="0.8" />
+            <rect x="14" y="18" width="52" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="28" width="40" height="4" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'mb-dualtone-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#1e1b4b" />
+            <rect width="28" height="48" rx="4" fill="#6366f1" />
+            <rect x="5" y="16" width="18" height="7" rx="1.5" fill="#ffffff" />
+            <rect x="7" y="26" width="14" height="3" rx="1" fill="#ffffff" opacity="0.8" />
+            <rect x="34" y="14" width="28" height="3" rx="1" fill="#a5b4fc" />
+            <rect x="34" y="21" width="40" height="5" rx="1.5" fill="#ffffff" />
+            <rect x="34" y="30" width="34" height="3" rx="1" fill="#ffffff" opacity="0.75" />
+        </svg>
+    ),
+
+    'mb-golden-elite': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fafaf9" stroke="#e7e5e4" strokeWidth="1" />
+            <rect x="8" y="7" width="64" height="34" rx="2" stroke="#b45309" strokeWidth="0.8" strokeOpacity="0.4" />
+            <rect x="26" y="13" width="28" height="3" rx="1" fill="#b45309" />
+            <rect x="16" y="20" width="48" height="5" rx="1" fill="#1c1917" />
+            <rect x="22" y="28" width="36" height="3" rx="1" fill="#78716c" />
+        </svg>
+    ),
+
+    'mb-glassmorphism-trust': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <rect x="6" y="6" width="68" height="36" rx="4" fill="#ffffff" fillOpacity="0.12" stroke="#ffffff" strokeWidth="0.8" strokeOpacity="0.25" />
+            <rect x="26" y="11" width="28" height="4" rx="2" fill="#38bdf8" />
+            <rect x="14" y="19" width="52" height="5" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="28" width="40" height="3" rx="1" fill="#ffffff" fillOpacity="0.7" />
+        </svg>
+    ),
+
+    'mb-gradient-trust': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="gt-thumb" x1="0" y1="0" x2="80" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#0d9488" />
+                    <stop offset="1" stopColor="#059669" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="4" fill="url(#gt-thumb)" />
+            <rect x="26" y="9" width="28" height="4" rx="2" fill="#000000" fillOpacity="0.25" stroke="#ffffff" strokeWidth="0.6" />
+            <rect x="12" y="18" width="56" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="28" width="40" height="4" rx="1" fill="#ffffff" fillOpacity="0.85" />
+        </svg>
+    ),
+
+    'mb-risk-free-card': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="6" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="20" cy="24" r="8" fill="#ecfdf5" stroke="#a7f3d0" strokeWidth="1" />
+            <path d="M17 24L19.5 26.5L23.5 21.5" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="34" y="14" width="22" height="3" rx="1" fill="#0f172a" />
+            <rect x="34" y="21" width="38" height="5" rx="1.5" fill="#0f172a" />
+            <rect x="34" y="29" width="30" height="3" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'mb-neon-secure': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#09090b" />
+            <rect x="2" y="2" width="76" height="44" rx="3" stroke="#10b981" strokeWidth="1.5" />
+            <rect x="22" y="9" width="36" height="4" rx="1" fill="#10b981" opacity="0.85" />
+            <rect x="14" y="18" width="52" height="6" rx="1.5" fill="#ffffff" />
+            <rect x="20" y="28" width="40" height="4" rx="1" fill="#10b981" opacity="0.75" />
+        </svg>
+    ),
+
+    'mb-verified-banner': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+            <line x1="0" y1="2" x2="80" y2="2" stroke="#0284c7" strokeWidth="2.5" />
+            <circle cx="16" cy="24" r="5" fill="#0284c7" />
+            <path d="M14 24L15.5 25.5L18.5 22" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" />
+            <rect x="26" y="14" width="36" height="3" rx="1" fill="#0284c7" />
+            <rect x="26" y="20" width="46" height="5" rx="1.5" fill="#0f172a" />
+            <rect x="26" y="28" width="40" height="3" rx="1" fill="#475569" />
+        </svg>
+    ),
+
+    // ── free_shipping: 10 Styles ─────────────────────────────────────────────
+    'ship-express-courier-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <rect x="8" y="10" width="22" height="4" rx="1.5" fill="#f59e0b" />
+            <rect x="8" y="18" width="36" height="5" rx="1" fill="#ffffff" />
+            <rect x="8" y="27" width="28" height="3" rx="1" fill="#94a3b8" />
+            <rect x="50" y="12" width="22" height="24" rx="3" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+            <rect x="53" y="17" width="16" height="3" rx="0.5" fill="#f59e0b" />
+            <rect x="54" y="23" width="14" height="2.5" rx="0.5" fill="#38bdf8" />
+        </svg>
+    ),
+
+    'ship-two-tone-split': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <path d="M 0 4 Q 0 0 4 0 L 26 0 L 26 48 L 4 48 Q 0 48 0 44 Z" fill="#2563eb" />
+            <rect x="6" y="11" width="14" height="3" rx="0.8" fill="#bfdbfe" />
+            <rect x="4" y="17" width="18" height="9" rx="1" fill="#ffffff" />
+            <rect x="32" y="11" width="36" height="4" rx="1" fill="#1e3a8a" />
+            <rect x="32" y="18" width="42" height="3" rx="0.5" fill="#64748b" />
+            <circle cx="34" cy="26" r="1.5" fill="#16a34a" />
+            <rect x="38" y="25" width="32" height="2" rx="0.5" fill="#334155" />
+            <circle cx="34" cy="33" r="1.5" fill="#16a34a" />
+            <rect x="38" y="32" width="28" height="2" rx="0.5" fill="#334155" />
+        </svg>
+    ),
+
+    'ship-warehouse-direct-matrix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="0" y="0" width="80" height="3" fill="#2563eb" />
+            <rect x="6" y="7" width="26" height="3" rx="0.8" fill="#2563eb" />
+            <rect x="52" y="6" width="22" height="4" rx="1.5" fill="#16a34a" />
+            <rect x="5" y="14" width="21" height="26" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="15.5" cy="20" r="2.5" fill="#2563eb" />
+            <rect x="8" y="26" width="15" height="3" rx="0.5" fill="#0f172a" />
+            <rect x="29.5" y="14" width="21" height="26" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="40" cy="20" r="2.5" fill="#2563eb" />
+            <rect x="32.5" y="26" width="15" height="3" rx="0.5" fill="#0f172a" />
+            <rect x="54" y="14" width="21" height="26" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="64.5" cy="20" r="2.5" fill="#2563eb" />
+            <rect x="57" y="26" width="15" height="3" rx="0.5" fill="#0f172a" />
+        </svg>
+    ),
+
+    'ship-minimalist-editorial': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="12" x2="80" y2="12" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="0" y1="36" x2="80" y2="36" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="16" y="18" width="48" height="4" rx="1" fill="#0f172a" />
+            <rect x="12" y="26" width="56" height="2.5" rx="0.5" fill="#64748b" />
+        </svg>
+    ),
+
+    'ship-parcel-post-ticket': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fefce8" stroke="#b45309" strokeWidth="1.2" strokeDasharray="3 2" />
+            <circle cx="16" cy="24" r="8" fill="none" stroke="#b45309" strokeWidth="1" />
+            <line x1="10" y1="24" x2="22" y2="24" stroke="#b45309" strokeWidth="0.8" />
+            <line x1="28" y1="10" x2="28" y2="38" stroke="#d97706" strokeWidth="0.8" strokeDasharray="2 1.5" />
+            <rect x="32" y="12" width="22" height="3" rx="0.5" fill="#b45309" />
+            <rect x="32" y="18" width="28" height="4" rx="1" fill="#451a03" />
+            <rect x="32" y="27" width="20" height="4" rx="0.5" fill="#92400e" opacity="0.6" />
+            <rect x="62" y="14" width="13" height="20" rx="2" fill="#ffffff" stroke="#d97706" strokeWidth="0.8" />
+            <rect x="64" y="20" width="9" height="3" rx="0.5" fill="#b45309" />
+        </svg>
+    ),
+
+    'ship-stepper-tracker-bar': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="24" y="8" width="32" height="3.5" rx="1" fill="#0f172a" />
+            <line x1="14" y1="22" x2="66" y2="22" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="15" cy="22" r="3.5" fill="#16a34a" />
+            <circle cx="32" cy="22" r="3.5" fill="#16a34a" />
+            <circle cx="48" cy="22" r="3.5" fill="#2563eb" />
+            <circle cx="65" cy="22" r="3.5" fill="#0f172a" />
+            <rect x="8" y="30" width="14" height="2.5" rx="0.5" fill="#334155" />
+            <rect x="25" y="30" width="14" height="2.5" rx="0.5" fill="#334155" />
+            <rect x="41" y="30" width="14" height="2.5" rx="0.5" fill="#334155" />
+            <rect x="58" y="30" width="14" height="2.5" rx="0.5" fill="#16a34a" />
+        </svg>
+    ),
+
+    'ship-heavy-duty-cargo': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#facc15" strokeWidth="1" />
+            <rect x="0" y="0" width="80" height="4" fill="#facc15" />
+            <rect x="8" y="14" width="42" height="6" rx="1" fill="#facc15" />
+            <rect x="8" y="24" width="36" height="3" rx="0.5" fill="#d4d4d8" />
+            <rect x="56" y="14" width="18" height="20" rx="2" fill="#27272a" stroke="#3f3f46" strokeWidth="0.8" />
+            <rect x="59" y="20" width="12" height="3" rx="0.5" fill="#facc15" />
+        </svg>
+    ),
+
+    'ship-global-transit-matrix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0c4a6e" />
+            <rect x="24" y="8" width="32" height="3.5" rx="1" fill="#38bdf8" />
+            <rect x="6" y="16" width="32" height="22" rx="2" fill="#075985" stroke="#0284c7" strokeWidth="0.6" />
+            <rect x="9" y="20" width="16" height="3" rx="0.5" fill="#38bdf8" />
+            <rect x="9" y="26" width="24" height="3.5" rx="0.5" fill="#ffffff" />
+            <rect x="42" y="16" width="32" height="22" rx="2" fill="#075985" stroke="#0284c7" strokeWidth="0.6" />
+            <rect x="45" y="20" width="18" height="3" rx="0.5" fill="#38bdf8" />
+            <rect x="45" y="26" width="24" height="3.5" rx="0.5" fill="#ffffff" />
+        </svg>
+    ),
+
+    'ship-urgent-cutoff-bar': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#064e3b" stroke="#059669" strokeWidth="1" />
+            <circle cx="8" cy="14" r="2.5" fill="#10b981" />
+            <rect x="14" y="12" width="24" height="3.5" rx="0.5" fill="#34d399" />
+            <rect x="7" y="19" width="38" height="5" rx="1" fill="#ffffff" />
+            <rect x="7" y="28" width="30" height="3" rx="0.5" fill="#a7f3d0" />
+            <rect x="49" y="11" width="25" height="25" rx="3" fill="#022c22" stroke="#047857" strokeWidth="0.8" />
+            <rect x="52" y="16" width="19" height="2.5" rx="0.5" fill="#6ee7b7" />
+            <rect x="52" y="22" width="19" height="6" rx="1" fill="#ffffff" />
+        </svg>
+    ),
+
+    'ship-white-glove-guarantee': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fafaf9" stroke="#b45309" strokeWidth="1" />
+            <rect x="5" y="5" width="70" height="38" rx="2" fill="none" stroke="#b45309" strokeWidth="0.7" />
+            <circle cx="40" cy="12" r="2.5" fill="#b45309" />
+            <rect x="26" y="17" width="28" height="3" rx="0.5" fill="#b45309" />
+            <rect x="16" y="23" width="48" height="5" rx="1" fill="#1c1917" />
+            <rect x="22" y="32" width="36" height="2.5" rx="0.5" fill="#78716c" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -3095,9 +3587,11 @@ function VariantPicker({
             {/* Variant cards grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                 gap: 6,
                 padding: '10px 10px 4px',
+                width: '100%',
+                boxSizing: 'border-box',
             }}>
                 {variants.map((variant: BlockVariant) => {
                     const isSelected = currentVariant === variant.id
@@ -3107,6 +3601,9 @@ function VariantPicker({
                             onClick={() => onChange(variant.id)}
                             title={variant.description}
                             style={{
+                                width: '100%',
+                                minWidth: 0,
+                                boxSizing: 'border-box',
                                 padding: '8px 6px',
                                 border: `2px solid ${isSelected ? C.primary : C.border}`,
                                 borderRadius: 8,
@@ -3114,12 +3611,16 @@ function VariantPicker({
                                 cursor: 'pointer',
                                 textAlign: 'center' as const,
                                 transition: 'all 0.12s',
+                                overflow: 'hidden',
                             }}
                         >
                             {/* Mini visual thumbnail */}
                             <VariantThumbnail variantId={variant.id} isSelected={isSelected} />
                             <p style={{
                                 margin: '5px 0 0',
+                                width: '100%',
+                                display: 'block',
+                                boxSizing: 'border-box',
                                 fontFamily: 'DM Sans, sans-serif',
                                 fontSize: 10,
                                 fontWeight: isSelected ? 700 : 500,
@@ -3157,7 +3658,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -3777,23 +4278,65 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'cta_banner':
+        case 'cta_banner': {
+            const cv = (props as any).variant ?? 'ctab-trust-bar'
             return (
                 <>
                     <Section title="Layout">
                         <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
                     </Section>
+
+                    {/* ── Colours: shown for all variants ── */}
+                    <Section title="Colours">
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        {cv !== 'ctab-flash-deal' && cv !== 'ctab-dark-premium' && (
+                            <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        )}
+                        <ColorRow label="Heading colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Subtext colour" value={props.subTextColor ?? '#6b7280'} onChange={v => updateProps({ subTextColor: v })} />
+                    </Section>
+
+                    {/* ── Flash Deal Urgency ── */}
+                    {cv === 'ctab-flash-deal' && (
+                        <Section title="Flash Deal">
+                            <InfoBox>Gradient is fixed red-to-orange for urgency. Accent colour controls the icon tint.</InfoBox>
+                        </Section>
+                    )}
+
+                    {/* ── Gradient Hero ── */}
+                    {cv === 'ctab-gradient-hero' && (
+                        <Section title="Gradient">
+                            <ColorRow label="Gradient from" value={(props as any).gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Dark Premium ── */}
+                    {cv === 'ctab-dark-premium' && (
+                        <Section title="Dark Premium">
+                            <InfoBox>Gold outer border and purple inner border are fixed for the premium look. Accent colour controls the purple border.</InfoBox>
+                        </Section>
+                    )}
+
+                    {/* ── Social Proof ── */}
+                    {cv === 'ctab-social-proof' && (
+                        <Section title="Social Proof">
+                            <InfoBox>Stars are fixed gold. Accent colour controls the rating number and store link.</InfoBox>
+                        </Section>
+                    )}
+
+                    {/* ── Typography ── */}
                     <Section title="Typography">
-                        <ColorRow label="Heading colour" value={props.textColor ?? (block.type === 'cta_banner' ? '#b8fa33' : '#ffffff')} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Subtext colour" value={props.subColor ?? props.subTextColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps({ subColor: v })} />
                         <SliderInput label="Heading size" value={props.headingSize ?? 26} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
                         <SelectInput label="Heading weight" value={props.fontWeight ?? '700'}
                             options={[{ v: '400', l: 'Regular' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }, { v: '900', l: 'Black' }]}
                             onChange={v => updateProps({ fontWeight: v })} />
-                        <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        {cv !== 'ctab-ribbon' && cv !== 'ctab-announcement' && (
+                            <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
+                        )}
                     </Section>
                 </>
             )
+        }
 
         case 'trust_badges': {
             const pv = props.variant ?? 'row'

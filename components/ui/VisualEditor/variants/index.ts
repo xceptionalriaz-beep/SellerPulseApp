@@ -7,8 +7,10 @@ export type { BlockVariant } from './hero_header.variants'
 export { heroHeaderVariants, getHeroVariant } from './hero_header.variants'
 export { productImageVariants, getProductImageVariant } from './product_image.variants'
 export { priceBlockVariants, getPriceVariant } from './price_block.variants'
-export { priceTagVariants, getPriceTagVariant } from './price_tag.variants' // <── Added for Price Tag
+export { priceTagVariants, getPriceTagVariant } from './price_tag.variants'
 export { storeFooterVariants, getStoreFooterVariant } from './store_footer.variants'
+export { categoryNavVariants, getCategoryNavVariant } from './category_nav.variants'
+export { seasonalBannerVariants, getSeasonalBannerVariant } from './seasonal_banner.variants'
 export { trustBadgesVariants, getTrustBadgesVariant } from './trust_badges.variants'
 export { navBarVariants, getNavBarVariant } from './nav_bar.variants'
 export { specsTableVariants, getSpecsTableVariant } from './specs_table.variants'
@@ -23,6 +25,8 @@ export { ctaBannerVariants, getCtaBannerVariant } from './cta_banner.variants'
 export { sellerInfoVariants, getSellerInfoVariant } from './seller_info.variants'
 export { logoBarVariants, getLogoBarVariant } from './logo_bar.variants'
 export { bundleDealVariants, getBundleDealVariant } from './bundle_deal.variants'
+export { moneyBackVariants, getMoneyBackVariant } from './money_back.variants'
+export { freeShippingVariants, getFreeShippingVariant } from './free_shipping.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -30,6 +34,8 @@ import { productImageVariants } from './product_image.variants'
 import { priceBlockVariants } from './price_block.variants'
 import { priceTagVariants } from './price_tag.variants' // <── Added for Price Tag
 import { storeFooterVariants } from './store_footer.variants'
+import { categoryNavVariants } from './category_nav.variants'
+import { seasonalBannerVariants } from './seasonal_banner.variants'
 import { trustBadgesVariants } from './trust_badges.variants'
 import { navBarVariants } from './nav_bar.variants'
 import { specsTableVariants } from './specs_table.variants'
@@ -46,6 +52,8 @@ import { singleImageVariants } from './single_image.variants'
 import { logoBarVariants } from './logo_bar.variants'
 import { bundleDealVariants } from './bundle_deal.variants'
 import type { BlockVariant } from './hero_header.variants'
+import { moneyBackVariants } from './money_back.variants'
+import { freeShippingVariants } from './free_shipping.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -54,6 +62,8 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'price_block': priceBlockVariants,
     'price_tag': priceTagVariants, // <── Added for Price Tag
     'store_footer': storeFooterVariants,
+    'category_nav': categoryNavVariants,
+    'seasonal_banner': seasonalBannerVariants,
     'trust_badges': trustBadgesVariants,
     'nav_bar': navBarVariants,
     'specs_table': specsTableVariants,
@@ -69,6 +79,9 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'seller_info': sellerInfoVariants,
     'logo_bar': logoBarVariants,
     'bundle_deal': bundleDealVariants,
+    'money_back': moneyBackVariants,
+    'free_shipping': freeShippingVariants,
+    'shipping_banner': freeShippingVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
