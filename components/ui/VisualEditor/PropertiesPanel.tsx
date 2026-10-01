@@ -8854,6 +8854,56 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </div>
             )
 
+        case 'authenticity_guarantee':
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        ✅ This block displays a fixed authenticity guarantee badge — no editable attributes.
+                        Use the Styles tab to adjust colours and spacing.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'condition_details':
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        📋 This block displays fixed condition grading — no editable attributes.
+                        Use the Styles tab to adjust colours and spacing.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'international_shipping':
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        🌍 This block displays fixed international shipping information — no editable attributes.
+                        Use the Styles tab to adjust colours and spacing.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'limited_time_offer':
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        ⏱ This block displays a fixed limited time offer notice — no editable attributes.
+                        Use the Styles tab to adjust colours and spacing.
+                    </InfoBox>
+                </div>
+            )
+
+        case 'video_placeholder':
+            return (
+                <div style={{ padding: '8px 0' }}>
+                    <InfoBox>
+                        🎬 This block shows a fixed video placeholder — no editable attributes.
+                        Use the Styles tab to adjust colours and spacing.
+                    </InfoBox>
+                </div>
+            )
+
         default:
             return (
                 <div style={{ padding: '8px 0' }}>
