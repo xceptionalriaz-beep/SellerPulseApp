@@ -31,6 +31,7 @@ export { limitedTimeOfferVariants, getLimitedTimeOfferVariant, limitedOfferVaria
 export { satisfactionGuaranteeVariants, getSatisfactionGuaranteeVariant, guaranteeVariants, buyerProtectionVariants } from './satisfaction_guarantee.variants'
 export { conditionBadgeVariants, getConditionBadgeVariant, conditionVariants } from './condition_badge.variants'
 export { itemSpecificsVariants, getItemSpecificsVariant, specificsVariants } from './item_specifics.variants'
+export { authenticityGuaranteeVariants, getAuthenticityGuaranteeVariant, authenticityVariants, getAuthenticityVariant } from './authenticity_guarantee.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -62,6 +63,7 @@ import { limitedTimeOfferVariants } from './limited_time_offer.variants'
 import { satisfactionGuaranteeVariants } from './satisfaction_guarantee.variants'
 import { conditionBadgeVariants } from './condition_badge.variants'
 import { itemSpecificsVariants } from './item_specifics.variants'
+import { authenticityGuaranteeVariants } from './authenticity_guarantee.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -99,6 +101,8 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'condition': conditionBadgeVariants,
     'item_specifics': itemSpecificsVariants,
     'specs': itemSpecificsVariants,
+    'authenticity_guarantee': authenticityGuaranteeVariants,
+    'authenticity': authenticityGuaranteeVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

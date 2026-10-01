@@ -3811,6 +3811,176 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <line x1="45" y1="39" x2="66" y2="39" stroke="#fafafa" strokeWidth="1.6" />
         </svg>
     ),
+
+    // ── Authenticity Guarantee Variants ────────────────────────────────────
+    'auth-ebay-blue-official-shield': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0053a0" stroke="#003d75" strokeWidth="1" />
+            <circle cx="40" cy="11" r="5" fill="#ffffff" fillOpacity="0.2" />
+            <path d="M40 7L43 10V14L40 16L37 14V10L40 7Z" fill="#38bdf8" />
+            <rect x="18" y="19" width="44" height="4" rx="1" fill="#ffffff" />
+            <rect x="22" y="25" width="36" height="2.5" rx="0.5" fill="#bae6fd" />
+            <rect x="6" y="32" width="20" height="9" rx="4.5" fill="#ffffff" fillOpacity="0.15" />
+            <rect x="30" y="32" width="20" height="9" rx="4.5" fill="#ffffff" fillOpacity="0.15" />
+            <rect x="54" y="32" width="20" height="9" rx="4.5" fill="#ffffff" fillOpacity="0.15" />
+        </svg>
+    ),
+
+    'auth-luxury-atelier-wax-seal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#09090b" stroke="#d4af37" strokeWidth="1" />
+            <rect x="2" y="2" width="76" height="44" rx="2" stroke="#d4af37" strokeWidth="0.5" strokeOpacity="0.4" />
+            <rect x="2.5" y="2.5" width="75" height="9" fill="#141416" />
+            <line x1="2.5" y1="11.5" x2="77.5" y2="11.5" stroke="#d4af37" strokeWidth="0.7" />
+            <circle cx="40" cy="5.5" r="1" fill="#d4af37" />
+            <rect x="24" y="8" width="32" height="2" fill="#ffffff" />
+            <rect x="4" y="16" width="22" height="18" fill="#121214" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="4" y1="16" x2="26" y2="16" stroke="#d4af37" strokeWidth="1.2" />
+            <rect x="29" y="16" width="22" height="18" fill="#121214" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="29" y1="16" x2="51" y2="16" stroke="#d4af37" strokeWidth="1.2" />
+            <rect x="54" y="16" width="22" height="18" fill="#121214" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="54" y1="16" x2="76" y2="16" stroke="#d4af37" strokeWidth="1.2" />
+            <line x1="2" y1="38" x2="78" y2="38" stroke="#27272a" strokeWidth="0.6" />
+            <rect x="6" y="41" width="30" height="2" fill="#d4af37" />
+        </svg>
+    ),
+
+    'auth-sneaker-streetwear-pass': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0a0a0c" stroke="#27272a" strokeWidth="1" />
+            <rect width="80" height="8" fill="#121216" />
+            <line x1="0" y1="8" x2="80" y2="8" stroke="#b8fa33" strokeWidth="1" />
+            <rect x="4" y="2.5" width="24" height="3" rx="0.5" fill="#b8fa33" />
+            <rect x="4" y="12" width="46" height="4" rx="0.5" fill="#ffffff" />
+            <g fill="#71717a">
+                <rect x="64" y="11" width="1" height="5" />
+                <rect x="66" y="11" width="1.5" height="5" />
+                <rect x="69" y="11" width="1" height="5" />
+                <rect x="71" y="11" width="2" height="5" />
+                <rect x="74" y="11" width="1" height="5" />
+            </g>
+            <rect x="4" y="21" width="22" height="16" fill="#141419" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="4" y1="21" x2="4" y2="37" stroke="#b8fa33" strokeWidth="1.5" />
+            <rect x="29" y="21" width="22" height="16" fill="#141419" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="29" y1="21" x2="29" y2="37" stroke="#b8fa33" strokeWidth="1.5" />
+            <rect x="54" y="21" width="22" height="16" fill="#141419" stroke="#27272a" strokeWidth="0.8" />
+            <line x1="54" y1="21" x2="54" y2="37" stroke="#b8fa33" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'auth-security-tamper-evident': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+            <rect width="80" height="5" fill="#0284c7" />
+            <rect x="20" y="8" width="40" height="3" fill="#06b6d4" />
+            <rect x="14" y="13" width="52" height="4.5" rx="0.5" fill="#f8fafc" />
+            <rect x="4" y="22" width="22" height="16" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+            <circle cx="15" cy="27" r="2" fill="#06b6d4" />
+            <rect x="29" y="22" width="22" height="16" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+            <circle cx="40" cy="27" r="2" fill="#06b6d4" />
+            <rect x="54" y="22" width="22" height="16" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+            <circle cx="65" cy="27" r="2" fill="#06b6d4" />
+        </svg>
+    ),
+
+    'auth-psa-graded-slab-vault': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect width="80" height="9" fill="#b91c1c" />
+            <rect x="4" y="3" width="30" height="3" fill="#ffffff" />
+            <rect x="56" y="2.5" width="20" height="4" rx="1" fill="#ffffff" />
+            <rect x="4" y="13" width="44" height="4" fill="#0f172a" />
+            <g fill="#94a3b8">
+                <rect x="62" y="12" width="1" height="5" />
+                <rect x="64" y="12" width="1.5" height="5" />
+                <rect x="67" y="12" width="1" height="5" />
+                <rect x="69" y="12" width="2" height="5" />
+                <rect x="72" y="12" width="1" height="5" />
+            </g>
+            <rect x="4" y="22" width="72" height="18" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="28" y1="22" x2="28" y2="40" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="52" y1="22" x2="52" y2="40" stroke="#e2e8f0" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'auth-manufacturer-oem-seal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+            <rect width="80" height="7" fill="#0f172a" />
+            <rect x="4" y="2" width="24" height="3" fill="#f59e0b" />
+            <rect x="4" y="11" width="50" height="4" fill="#f8fafc" />
+            <rect x="4" y="17" width="60" height="2.5" fill="#94a3b8" />
+            <rect x="4" y="24" width="22" height="16" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+            <line x1="4" y1="24" x2="26" y2="24" stroke="#f59e0b" strokeWidth="1.2" />
+            <rect x="29" y="24" width="22" height="16" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+            <line x1="29" y1="24" x2="51" y2="24" stroke="#f59e0b" strokeWidth="1.2" />
+            <rect x="54" y="24" width="22" height="16" fill="#0f172a" stroke="#334155" strokeWidth="0.8" />
+            <line x1="54" y1="24" x2="76" y2="24" stroke="#f59e0b" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'auth-swiss-minimalist-dossier': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e4e4e7" strokeWidth="1" />
+            <rect x="4" y="6" width="16" height="2" fill="#71717a" />
+            <rect x="4" y="11" width="22" height="5" fill="#18181b" />
+            <line x1="4" y1="19" x2="14" y2="19" stroke="#18181b" strokeWidth="1" />
+            <rect x="4" y="23" width="20" height="16" fill="#f4f4f5" />
+            <line x1="28" y1="4" x2="28" y2="44" stroke="#e4e4e7" strokeWidth="0.8" />
+            <rect x="34" y="8" width="40" height="8" rx="1" fill="#fafafa" />
+            <rect x="34" y="20" width="40" height="8" rx="1" fill="#fafafa" />
+            <rect x="34" y="32" width="40" height="8" rx="1" fill="#fafafa" />
+        </svg>
+    ),
+
+    'auth-triple-badge-crest-matrix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="26" y="4" width="28" height="3" rx="1" fill="#eff6ff" />
+            <rect x="18" y="9" width="44" height="4" rx="0.5" fill="#0f172a" />
+            <rect x="4" y="17" width="22" height="24" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="15" cy="24" r="3" fill="#2563eb" fillOpacity="0.2" />
+            <rect x="7" y="30" width="16" height="3" fill="#0f172a" />
+            <rect x="29" y="17" width="22" height="24" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="40" cy="24" r="3" fill="#2563eb" fillOpacity="0.2" />
+            <rect x="32" y="30" width="16" height="3" fill="#0f172a" />
+            <rect x="54" y="17" width="22" height="24" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="65" cy="24" r="3" fill="#2563eb" fillOpacity="0.2" />
+            <rect x="57" y="30" width="16" height="3" fill="#0f172a" />
+        </svg>
+    ),
+
+    'auth-vintage-notary-parchment': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffefb" stroke="#d6d3d1" strokeWidth="1.2" />
+            <rect x="2" y="2" width="76" height="44" rx="2" stroke="#d6d3d1" strokeWidth="0.6" strokeDasharray="2 1" />
+            <rect x="24" y="6" width="32" height="3" rx="0.5" fill="#b91c1c" />
+            <rect x="14" y="11" width="52" height="4" fill="#1c1917" />
+            <rect x="5" y="19" width="21" height="16" fill="#faf8f5" stroke="#d6d3d1" strokeWidth="0.6" strokeDasharray="1.5 1" />
+            <rect x="29.5" y="19" width="21" height="16" fill="#faf8f5" stroke="#d6d3d1" strokeWidth="0.6" strokeDasharray="1.5 1" />
+            <rect x="54" y="19" width="21" height="16" fill="#faf8f5" stroke="#d6d3d1" strokeWidth="0.6" strokeDasharray="1.5 1" />
+            <line x1="6" y1="39" x2="74" y2="39" stroke="#d6d3d1" strokeWidth="0.6" strokeDasharray="2 1" />
+            <rect x="6" y="42" width="24" height="2" fill="#78716c" />
+            <rect x="52" y="42" width="22" height="2" fill="#b91c1c" />
+        </svg>
+    ),
+
+    'auth-sports-memorabilia-holotag': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#070f1e" stroke="#1e3a5f" strokeWidth="1" />
+            <rect width="80" height="8" fill="#0c1a2e" />
+            <circle cx="6" cy="4" r="1.5" fill="#fbbf24" />
+            <rect x="10" y="2.5" width="34" height="3" fill="#ffffff" />
+            <rect x="4" y="12" width="52" height="4" fill="#f8fafc" />
+            <rect x="4" y="18" width="60" height="2.5" fill="#94a3b8" />
+            <rect x="4" y="24" width="22" height="16" fill="#0b192e" stroke="#1e3a5f" strokeWidth="0.8" />
+            <line x1="4" y1="24" x2="26" y2="24" stroke="#fbbf24" strokeWidth="1.2" />
+            <rect x="29" y="24" width="22" height="16" fill="#0b192e" stroke="#1e3a5f" strokeWidth="0.8" />
+            <line x1="29" y1="24" x2="51" y2="24" stroke="#fbbf24" strokeWidth="1.2" />
+            <rect x="54" y="24" width="22" height="16" fill="#0b192e" stroke="#1e3a5f" strokeWidth="0.8" />
+            <line x1="54" y1="24" x2="76" y2="24" stroke="#fbbf24" strokeWidth="1.2" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -5019,6 +5189,30 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <SliderInput label="Border width" value={props.borderWidth ?? 0} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
                         <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                     </Section>
+                    <AdvancedSection>
+                        <Section title="Inner padding">
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                <SliderInput label="Top" value={props.innerPaddingTop ?? 0} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingTop: v })} />
+                                <SliderInput label="Bottom" value={props.innerPaddingBottom ?? 0} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingBottom: v })} />
+                                <SliderInput label="Left" value={props.innerPaddingLeft ?? 0} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingLeft: v })} />
+                                <SliderInput label="Right" value={props.innerPaddingRight ?? 0} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingRight: v })} />
+                            </div>
+                        </Section>
+                        <Section title="Content alignment">
+                            <SelectInput
+                                label="Horizontal align"
+                                value={props.contentAlign ?? 'left'}
+                                options={[{ v: 'left', l: 'Left' }, { v: 'center', l: 'Center' }, { v: 'right', l: 'Right' }]}
+                                onChange={v => updateProps({ contentAlign: v })}
+                            />
+                        </Section>
+                        <Section title="Width cap">
+                            <ToggleRow label="Cap inner content width" value={props.capWidth ?? false} onChange={v => updateProps({ capWidth: v })} />
+                            {props.capWidth && (
+                                <SliderInput label="Max inner width" value={props.innerMaxWidth ?? 600} min={400} max={700} suffix="px" onChange={v => updateProps({ innerMaxWidth: v })} />
+                            )}
+                        </Section>
+                    </AdvancedSection>
                 </>
             )
 
@@ -5031,6 +5225,31 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Border colour" value={props.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
                         <SliderInput label="Border width" value={props.borderWidth ?? 1} min={0} max={4} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
                     </Section>
+                    <AdvancedSection>
+                        <Section title="Inner padding">
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                <SliderInput label="Top" value={props.innerPaddingTop ?? 20} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingTop: v })} />
+                                <SliderInput label="Bottom" value={props.innerPaddingBottom ?? 20} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingBottom: v })} />
+                                <SliderInput label="Left" value={props.innerPaddingLeft ?? 24} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingLeft: v })} />
+                                <SliderInput label="Right" value={props.innerPaddingRight ?? 24} min={0} max={80} suffix="px" onChange={v => updateProps({ innerPaddingRight: v })} />
+                            </div>
+                        </Section>
+                        <Section title="Colours">
+                            <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                            <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        </Section>
+                        <Section title="Content alignment">
+                            <SelectInput
+                                label="Text align"
+                                value={props.textAlign ?? 'left'}
+                                options={[{ v: 'left', l: 'Left' }, { v: 'center', l: 'Center' }, { v: 'right', l: 'Right' }]}
+                                onChange={v => updateProps({ textAlign: v })}
+                            />
+                        </Section>
+                        <Section title="Overflow">
+                            <ToggleRow label="Clip overflow content" value={props.overflowHidden ?? false} onChange={v => updateProps({ overflowHidden: v })} />
+                        </Section>
+                    </AdvancedSection>
                 </>
             )
 
@@ -5045,6 +5264,44 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Left background" value={props.leftBg ?? '#ffffff'} onChange={v => updateProps({ leftBg: v })} />
                         <ColorRow label="Right background" value={props.rightBg ?? '#ffffff'} onChange={v => updateProps({ rightBg: v })} />
                     </Section>
+                    <AdvancedSection>
+                        <Section title="Vertical alignment">
+                            <SelectInput
+                                label="Align columns"
+                                value={props.colAlign ?? 'top'}
+                                options={[{ v: 'top', l: 'Top' }, { v: 'middle', l: 'Middle' }, { v: 'bottom', l: 'Bottom' }]}
+                                onChange={v => updateProps({ colAlign: v })}
+                            />
+                        </Section>
+                        <Section title="Column padding">
+                            <SliderInput label="Left col padding" value={props.leftPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ leftPadding: v })} />
+                            <SliderInput label="Right col padding" value={props.rightPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ rightPadding: v })} />
+                        </Section>
+                        <Section title="Column border radius">
+                            <SliderInput label="Left col radius" value={props.leftRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ leftRadius: v })} />
+                            <SliderInput label="Right col radius" value={props.rightRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ rightRadius: v })} />
+                        </Section>
+                        <Section title="Divider">
+                            <ToggleRow label="Show column divider" value={props.showDivider ?? false} onChange={v => updateProps({ showDivider: v })} />
+                            {props.showDivider && (
+                                <>
+                                    <ColorRow label="Divider colour" value={props.dividerColor ?? '#ede9fe'} onChange={v => updateProps({ dividerColor: v })} />
+                                    <SliderInput label="Divider width" value={props.dividerWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ dividerWidth: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Mobile">
+                            <ToggleRow label="Stack columns on mobile" value={props.stackMobile ?? true} onChange={v => updateProps({ stackMobile: v })} />
+                            {props.stackMobile && (
+                                <SelectInput
+                                    label="Stack order"
+                                    value={props.stackOrder ?? 'left-first'}
+                                    options={[{ v: 'left-first', l: 'Left column first' }, { v: 'right-first', l: 'Right column first' }]}
+                                    onChange={v => updateProps({ stackOrder: v })}
+                                />
+                            )}
+                        </Section>
+                    </AdvancedSection>
                 </>
             )
 
@@ -5059,6 +5316,45 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Col 2 background" value={props.col2Bg ?? '#ffffff'} onChange={v => updateProps({ col2Bg: v })} />
                         <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
                     </Section>
+                    <AdvancedSection>
+                        <Section title="Custom column widths">
+                            <ToggleRow label="Use custom widths" value={props.customWidths ?? false} onChange={v => updateProps({ customWidths: v })} />
+                            {props.customWidths && (
+                                <>
+                                    <SliderInput label="Col 1 width" value={props.col1Width ?? 33} min={10} max={80} suffix="%" onChange={v => updateProps({ col1Width: v })} />
+                                    <SliderInput label="Col 2 width" value={props.col2Width ?? 34} min={10} max={80} suffix="%" onChange={v => updateProps({ col2Width: v })} />
+                                    <SliderInput label="Col 3 width" value={props.col3Width ?? 33} min={10} max={80} suffix="%" onChange={v => updateProps({ col3Width: v })} />
+                                    <InfoBox>Widths should add up to 100%.</InfoBox>
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Vertical alignment">
+                            <SelectInput
+                                label="Align columns"
+                                value={props.colAlign ?? 'top'}
+                                options={[{ v: 'top', l: 'Top' }, { v: 'middle', l: 'Middle' }, { v: 'bottom', l: 'Bottom' }]}
+                                onChange={v => updateProps({ colAlign: v })}
+                            />
+                        </Section>
+                        <Section title="Column padding">
+                            <SliderInput label="Inner padding (all cols)" value={props.colPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ colPadding: v })} />
+                        </Section>
+                        <Section title="Column border radius">
+                            <SliderInput label="Border radius (all cols)" value={props.colRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ colRadius: v })} />
+                        </Section>
+                        <Section title="Dividers">
+                            <ToggleRow label="Show column dividers" value={props.showDivider ?? false} onChange={v => updateProps({ showDivider: v })} />
+                            {props.showDivider && (
+                                <>
+                                    <ColorRow label="Divider colour" value={props.dividerColor ?? '#ede9fe'} onChange={v => updateProps({ dividerColor: v })} />
+                                    <SliderInput label="Divider width" value={props.dividerWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ dividerWidth: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Mobile">
+                            <ToggleRow label="Stack columns on mobile" value={props.stackMobile ?? true} onChange={v => updateProps({ stackMobile: v })} />
+                        </Section>
+                    </AdvancedSection>
                 </>
             )
 
@@ -5074,6 +5370,38 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Col 3 background" value={props.col3Bg ?? '#ffffff'} onChange={v => updateProps({ col3Bg: v })} />
                         <ColorRow label="Col 4 background" value={props.col4Bg ?? '#ffffff'} onChange={v => updateProps({ col4Bg: v })} />
                     </Section>
+                    <AdvancedSection>
+                        <Section title="Custom column widths">
+                            <ToggleRow label="Use custom widths" value={props.customWidths ?? false} onChange={v => updateProps({ customWidths: v })} />
+                            {props.customWidths && (
+                                <>
+                                    <SliderInput label="Col 1 width" value={props.col1Width ?? 25} min={10} max={60} suffix="%" onChange={v => updateProps({ col1Width: v })} />
+                                    <SliderInput label="Col 2 width" value={props.col2Width ?? 25} min={10} max={60} suffix="%" onChange={v => updateProps({ col2Width: v })} />
+                                    <SliderInput label="Col 3 width" value={props.col3Width ?? 25} min={10} max={60} suffix="%" onChange={v => updateProps({ col3Width: v })} />
+                                    <SliderInput label="Col 4 width" value={props.col4Width ?? 25} min={10} max={60} suffix="%" onChange={v => updateProps({ col4Width: v })} />
+                                    <InfoBox>Widths should add up to 100%.</InfoBox>
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Vertical alignment">
+                            <SelectInput
+                                label="Align columns"
+                                value={props.colAlign ?? 'top'}
+                                options={[{ v: 'top', l: 'Top' }, { v: 'middle', l: 'Middle' }, { v: 'bottom', l: 'Bottom' }]}
+                                onChange={v => updateProps({ colAlign: v })}
+                            />
+                        </Section>
+                        <Section title="Column padding">
+                            <SliderInput label="Inner padding (all cols)" value={props.colPadding ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ colPadding: v })} />
+                        </Section>
+                        <Section title="Column border radius">
+                            <SliderInput label="Border radius (all cols)" value={props.colRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ colRadius: v })} />
+                        </Section>
+                        <Section title="Mobile">
+                            <ToggleRow label="Stack to 2 cols on mobile" value={props.stackTo2 ?? true} onChange={v => updateProps({ stackTo2: v })} />
+                            <ToggleRow label="Stack to 1 col on mobile" value={props.stackTo1 ?? false} onChange={v => updateProps({ stackTo1: v })} />
+                        </Section>
+                    </AdvancedSection>
                 </>
             )
 
@@ -5143,6 +5471,34 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
                     </Section>
+                    <AdvancedSection>
+                        <Section title="Vertical alignment">
+                            <SelectInput
+                                label="Align columns"
+                                value={props.colAlign ?? 'top'}
+                                options={[{ v: 'top', l: 'Top' }, { v: 'middle', l: 'Middle' }, { v: 'bottom', l: 'Bottom' }]}
+                                onChange={v => updateProps({ colAlign: v })}
+                            />
+                        </Section>
+                        <Section title="Content padding">
+                            <SliderInput label="Content col padding" value={props.contentPadding ?? 16} min={0} max={60} suffix="px" onChange={v => updateProps({ contentPadding: v })} />
+                        </Section>
+                        <Section title="Image">
+                            <SliderInput label="Image border radius" value={props.imageRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ imageRadius: v })} />
+                            <ColorRow label="Image background" value={props.imageBg ?? '#f3f4f6'} onChange={v => updateProps({ imageBg: v })} />
+                        </Section>
+                        <Section title="Mobile">
+                            <ToggleRow label="Stack on mobile" value={props.stackMobile ?? true} onChange={v => updateProps({ stackMobile: v })} />
+                            {props.stackMobile && (
+                                <SelectInput
+                                    label="Stack order"
+                                    value={props.mobileOrder ?? 'image-first'}
+                                    options={[{ v: 'image-first', l: 'Image first' }, { v: 'content-first', l: 'Content first' }]}
+                                    onChange={v => updateProps({ mobileOrder: v })}
+                                />
+                            )}
+                        </Section>
+                    </AdvancedSection>
                 </>
             )
 
@@ -8552,6 +8908,48 @@ function PlaceholderPicker({
 // ─────────────────────────────────────────────────────────────────────────────
 // REUSABLE PRIMITIVE CONTROLS
 // ─────────────────────────────────────────────────────────────────────────────
+
+function AdvancedSection({ children }: { children: React.ReactNode }) {
+    const [open, setOpen] = React.useState(false)
+    return (
+        <div style={{ marginTop: 4, marginBottom: 8 }}>
+            <button
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'rgba(117,48,251,0.08)',
+                    border: '1px solid rgba(117,48,251,0.2)',
+                    borderRadius: 6,
+                    color: '#7530fb',
+                    cursor: 'pointer',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.04em',
+                    padding: '6px 10px',
+                    textTransform: 'uppercase',
+                }}
+            >
+                <span>⚙ Advanced options</span>
+                <span style={{ fontSize: 9 }}>{open ? '▲' : '▼'}</span>
+            </button>
+            {open && (
+                <div style={{
+                    border: '1px solid rgba(117,48,251,0.15)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 6px 6px',
+                    padding: '12px 10px 4px',
+                    marginBottom: 8,
+                }}>
+                    {children}
+                </div>
+            )}
+        </div>
+    )
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (

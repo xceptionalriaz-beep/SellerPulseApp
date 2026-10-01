@@ -1014,6 +1014,7 @@ import { getLimitedTimeOfferVariant as _getLimitedTimeOfferVariant } from './var
 import { getSatisfactionGuaranteeVariant as _getSatisfactionGuaranteeVariant } from './variants/satisfaction_guarantee.variants'
 import { getConditionBadgeVariant as _getConditionBadgeVariant } from './variants/condition_badge.variants'
 import { getItemSpecificsVariant as _getItemSpecificsVariant } from './variants/item_specifics.variants'
+import { getAuthenticityGuaranteeVariant as _getAuthenticityGuaranteeVariant } from './variants/authenticity_guarantee.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2870,12 +2871,29 @@ ${thumbCells}
             label: 'Authenticity Guarantee',
             category: 'eBay Specific' as BlockCategory,
             icon: 'shield',
-            description: 'Genuine product certificate style block',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#1e1535' } as unknown as BlockProps,
+            description: 'Genuine product certificate and verified authenticity banner — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'auth-ebay-blue-official-shield',
+                heading: '100% Authenticity Guaranteed',
+                subText: 'Every item verified genuine. Sourced directly from authorised distributors.',
+                points: [
+                    { title: 'Official Supplier', sub: 'Direct authorized pipeline' },
+                    { title: 'Anti-counterfeit Checked', sub: 'Multi-point inspection' },
+                    { title: 'Money Back Guarantee', sub: '100% complete refund protection' },
+                ],
+                bgColor: '#0053a0',
+                textColor: '#ffffff',
+                accentColor: '#38bdf8',
+                paddingTop: 20,
+                paddingBottom: 20,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('authenticity_guarantee' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#1e1535;${pad(p)}border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:32px;">&#128737;</p><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#b8fa33;">100% Authenticity Guaranteed</p><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.7);">Every item verified genuine. Sourced directly from authorised distributors.</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Official Supplier</td><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Anti-counterfeit Checked</td><td style="padding:0 12px;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">&#10003; Money Back</td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'auth-ebay-blue-official-shield'
+                return wrapBlock('authenticity_guarantee' as BlockType, id, _getAuthenticityGuaranteeVariant(variantId).toHtml(p, id))
             },
         },
 
