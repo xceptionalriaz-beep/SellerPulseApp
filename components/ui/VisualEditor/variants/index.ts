@@ -117,6 +117,9 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'compatibility': compatibilityTableVariants,
     'product_comparison': productComparisonVariants,
     'comparison': productComparisonVariants,
+    'key_features_grid': keyFeaturesVariants,
+    'key_features': keyFeaturesVariants,
+    'features_grid': keyFeaturesVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

@@ -4548,6 +4548,144 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
+    // ── Key Features Grid (10 Distinct Retail Layouts) ──
+    'feat-classic-cards-grid': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="10" width="21" height="28" rx="3" fill="#f8f7ff" stroke="#e9e3ff" strokeWidth="0.8" />
+            <circle cx="15.5" cy="18" r="3.5" fill="#ede9fe" />
+            <line x1="8" y1="26" x2="23" y2="26" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="9" y1="31" x2="22" y2="31" stroke="#6b7280" strokeWidth="0.8" />
+
+            <rect x="29.5" y="10" width="21" height="28" rx="3" fill="#f8f7ff" stroke="#e9e3ff" strokeWidth="0.8" />
+            <circle cx="40" cy="18" r="3.5" fill="#ede9fe" />
+            <line x1="32.5" y1="26" x2="47.5" y2="26" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="33.5" y1="31" x2="46.5" y2="31" stroke="#6b7280" strokeWidth="0.8" />
+
+            <rect x="54" y="10" width="21" height="28" rx="3" fill="#f8f7ff" stroke="#e9e3ff" strokeWidth="0.8" />
+            <circle cx="64.5" cy="18" r="3.5" fill="#ede9fe" />
+            <line x1="57" y1="26" x2="72" y2="26" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="58" y1="31" x2="71" y2="31" stroke="#6b7280" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'feat-tech-bento-flagship': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="6" width="68" height="20" rx="3" fill="#0f172a" />
+            <line x1="11" y1="12" x2="38" y2="12" stroke="#38bdf8" strokeWidth="1.5" />
+            <line x1="11" y1="17" x2="52" y2="17" stroke="#94a3b8" strokeWidth="1" />
+            <rect x="58" y="10" width="12" height="10" rx="2" fill="#1e293b" stroke="#38bdf8" strokeWidth="0.6" />
+            <rect x="6" y="29" width="21" height="13" rx="2" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="29" y="29" width="22" height="13" rx="2" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="53" y="29" width="21" height="13" rx="2" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'feat-industrial-spec-bars': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="5" width="70" height="10" rx="1.5" fill="#0f172a" />
+            <rect x="5" y="5" width="3" height="10" fill="#d97706" />
+            <line x1="12" y1="10" x2="40" y2="10" stroke="#fcd34d" strokeWidth="1.2" />
+            <rect x="5" y="18" width="70" height="7" rx="1" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.6" />
+            <rect x="55" y="19" width="17" height="5" rx="1" fill="#fef3c7" />
+            <rect x="5" y="28" width="70" height="7" rx="1" fill="#ffffff" stroke="#94a3b8" strokeWidth="0.6" />
+            <rect x="55" y="29" width="17" height="5" rx="1" fill="#fef3c7" />
+            <rect x="5" y="37" width="70" height="7" rx="1" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.6" />
+            <rect x="55" y="38" width="17" height="5" rx="1" fill="#fef3c7" />
+        </svg>
+    ),
+
+    'feat-minimalist-hairline-editorial': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="8" x2="72" y2="8" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="8" y1="28" x2="72" y2="28" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="40" y1="14" x2="40" y2="42" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="10" y1="18" x2="16" y2="18" stroke="#94a3b8" strokeWidth="0.8" />
+            <line x1="10" y1="22" x2="32" y2="22" stroke="#0f172a" strokeWidth="1" />
+            <line x1="44" y1="18" x2="50" y2="18" stroke="#94a3b8" strokeWidth="0.8" />
+            <line x1="44" y1="22" x2="66" y2="22" stroke="#0f172a" strokeWidth="1" />
+            <line x1="10" y1="33" x2="16" y2="33" stroke="#94a3b8" strokeWidth="0.8" />
+            <line x1="10" y1="37" x2="32" y2="37" stroke="#0f172a" strokeWidth="1" />
+            <line x1="44" y1="33" x2="50" y2="33" stroke="#94a3b8" strokeWidth="0.8" />
+            <line x1="44" y1="37" x2="66" y2="37" stroke="#0f172a" strokeWidth="1" />
+        </svg>
+    ),
+
+    'feat-staggered-timeline-flow': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="14" y1="10" x2="14" y2="38" stroke="#cbd5e1" strokeWidth="1.2" />
+            <circle cx="14" cy="12" r="3" fill="#4f46e5" />
+            <rect x="22" y="8" width="50" height="8" rx="1.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+            <circle cx="14" cy="24" r="3" fill="#ffffff" stroke="#4f46e5" strokeWidth="1.2" />
+            <rect x="22" y="20" width="50" height="8" rx="1.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+            <circle cx="14" cy="36" r="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="22" y="32" width="50" height="8" rx="1.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+        </svg>
+    ),
+
+    'feat-split-hero-benefit-rail': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="5" width="70" height="38" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <path d="M5 8a3 3 0 0 1 3-3h18v38H8a3 3 0 0 1-3-3V8z" fill="#0f172a" />
+            <rect x="9" y="10" width="12" height="3" rx="1" fill="#059669" />
+            <line x1="9" y1="17" x2="21" y2="17" stroke="#ffffff" strokeWidth="1.2" />
+            <rect x="30" y="8" width="42" height="9" rx="1.5" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="30" y="19" width="42" height="9" rx="1.5" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="30" y="30" width="42" height="9" rx="1.5" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+        </svg>
+    ),
+
+    'feat-cyber-dark-telemetry': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <line x1="8" y1="8" x2="42" y2="8" stroke="#06b6d4" strokeWidth="1.5" />
+            <rect x="8" y="15" width="30" height="12" rx="1.5" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="42" y="15" width="30" height="12" rx="1.5" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="8" y="30" width="30" height="12" rx="1.5" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
+            <rect x="42" y="30" width="30" height="12" rx="1.5" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'feat-circular-badge-quadrant': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="32" rx="3" fill="#faf5ff" stroke="#ede9fe" strokeWidth="0.8" />
+            <circle cx="15" cy="20" r="5" fill="#f59e0b" stroke="#7c3aed" strokeWidth="1" />
+            <circle cx="32" cy="20" r="5" fill="#f59e0b" stroke="#7c3aed" strokeWidth="1" />
+            <circle cx="49" cy="20" r="5" fill="#f59e0b" stroke="#7c3aed" strokeWidth="1" />
+            <circle cx="66" cy="20" r="5" fill="#f59e0b" stroke="#7c3aed" strokeWidth="1" />
+        </svg>
+    ),
+
+    'feat-accordion-style-ledger': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="7" y="13" width="66" height="9" rx="1.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="56" y="15" width="14" height="5" rx="1" fill="#fff7ed" />
+            <rect x="7" y="24" width="66" height="9" rx="1.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="56" y="26" width="14" height="5" rx="1" fill="#fff7ed" />
+            <rect x="7" y="35" width="66" height="9" rx="1.5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="56" y="37" width="14" height="5" rx="1" fill="#fff7ed" />
+        </svg>
+    ),
+
+    'feat-compact-mobile-capsule-strip': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <line x1="8" y1="8" x2="38" y2="8" stroke="#2563eb" strokeWidth="1.5" />
+            <rect x="6" y="14" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="42" y="14" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="6" y="24" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="42" y="24" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="6" y="34" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
+            <rect x="42" y="34" width="32" height="8" rx="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.6" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -4987,7 +5125,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
