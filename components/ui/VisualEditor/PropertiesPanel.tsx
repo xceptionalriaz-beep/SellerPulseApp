@@ -5246,7 +5246,12 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
 
-        case 'cta_banner':
+        case 'cta_banner': {
+            const av = (props as any).variant ?? 'ctab-trust-bar'
+            // variants with no standalone CTA button
+            const noButton = av === 'ctab-trust-bar' || av === 'ctab-announcement'
+            // variants with a button
+            const hasButton = !noButton
             return (
                 <>
                     <Section title="Content">
@@ -5255,13 +5260,21 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
                         {phButton('subText', 'subtext')}
                     </Section>
-                    <Section title="Button">
-                        <TextInput label="Button text" value={props.buttonText ?? 'Shop Now'} onChange={v => updateProps({ buttonText: v })} />
-                        {phButton('buttonText', 'button text')}
-                        <TextInput label="Button URL" value={(props as any).linkUrl ?? '#'} onChange={v => updateProps({ linkUrl: v } as any)} />
-                    </Section>
+                    {av === 'ctab-flash-deal' && (
+                        <Section title="Urgency Ribbon">
+                            <TextInput label="Ribbon text" value={(props as any).ribbonText ?? 'LIMITED TIME — ENDS MIDNIGHT'} onChange={v => updateProps({ ribbonText: v } as any)} />
+                        </Section>
+                    )}
+                    {hasButton && (
+                        <Section title="Button">
+                            <TextInput label="Button text" value={props.buttonText ?? 'Shop Now'} onChange={v => updateProps({ buttonText: v })} />
+                            {phButton('buttonText', 'button text')}
+                            <TextInput label="Button URL" value={(props as any).linkUrl ?? '#'} onChange={v => updateProps({ linkUrl: v } as any)} />
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'gallery_row':
             return (

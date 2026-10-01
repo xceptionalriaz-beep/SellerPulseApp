@@ -2020,6 +2020,8 @@ ${thumbCells}
             minHeight: 80,
             accentColor: '#7530fb',
             linkUrl: '#',
+            buttonText: 'Shop Now',
+            ribbonText: 'LIMITED TIME — ENDS MIDNIGHT',
         } as CtaBannerProps,
         toHtml(props, id) {
             const p = props as CtaBannerProps
