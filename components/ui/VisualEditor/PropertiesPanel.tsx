@@ -3707,18 +3707,38 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
 
     'is-dark-terminal-console': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <rect width="80" height="48" rx="4" fill="#070b12" stroke="#1e293b" strokeWidth="1" />
+            {/* Terminal Window Header */}
             <rect width="80" height="7" fill="#0f172a" />
-            <circle cx="6" cy="3.5" r="1.2" fill="#ef4444" />
-            <circle cx="10" cy="3.5" r="1.2" fill="#f59e0b" />
-            <circle cx="14" cy="3.5" r="1.2" fill="#10b981" />
-            <rect x="6" y="10" width="30" height="3" rx="0.5" fill="#06b6d4" />
-            <line x1="0" y1="21" x2="80" y2="21" stroke="#1e293b" strokeWidth="0.8" />
-            <line x1="0" y1="31" x2="80" y2="31" stroke="#1e293b" strokeWidth="0.8" />
-            <line x1="6" y1="17" x2="22" y2="17" stroke="#06b6d4" strokeWidth="1.2" />
-            <line x1="30" y1="17" x2="68" y2="17" stroke="#f1f5f9" strokeWidth="1.5" />
-            <line x1="6" y1="27" x2="20" y2="27" stroke="#06b6d4" strokeWidth="1.2" />
-            <line x1="30" y1="27" x2="58" y2="27" stroke="#f1f5f9" strokeWidth="1.5" />
+            <circle cx="5" cy="3.5" r="1.1" fill="#ef4444" />
+            <circle cx="8" cy="3.5" r="1.1" fill="#f59e0b" />
+            <circle cx="11" cy="3.5" r="1.1" fill="#10b981" />
+            <line x1="16" y1="3.5" x2="38" y2="3.5" stroke="#64748b" strokeWidth="1" />
+            <circle cx="74" cy="3.5" r="1" fill="#10b981" />
+            {/* Command Subtitle */}
+            <line x1="4" y1="10.5" x2="32" y2="10.5" stroke="#06b6d4" strokeWidth="1.5" />
+            {/* 4 Modular HUD Telemetry Blocks */}
+            <rect x="4" y="14" width="34" height="14" rx="1.5" fill="#0c1322" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="4" y1="14" x2="38" y2="14" stroke="#06b6d4" strokeWidth="1.2" />
+            <line x1="7" y1="18" x2="18" y2="18" stroke="#06b6d4" strokeWidth="1" />
+            <line x1="7" y1="23" x2="28" y2="23" stroke="#f8fafc" strokeWidth="1.6" />
+            <circle cx="34" cy="18" r="1" fill="#10b981" />
+
+            <rect x="42" y="14" width="34" height="14" rx="1.5" fill="#0c1322" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="42" y1="14" x2="76" y2="14" stroke="#06b6d4" strokeWidth="1.2" />
+            <line x1="45" y1="18" x2="56" y2="18" stroke="#06b6d4" strokeWidth="1" />
+            <line x1="45" y1="23" x2="66" y2="23" stroke="#f8fafc" strokeWidth="1.6" />
+            <circle cx="72" cy="18" r="1" fill="#10b981" />
+
+            <rect x="4" y="30" width="34" height="13" rx="1.5" fill="#0c1322" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="4" y1="30" x2="38" y2="30" stroke="#06b6d4" strokeWidth="1.2" />
+            <line x1="7" y1="34" x2="16" y2="34" stroke="#06b6d4" strokeWidth="1" />
+            <line x1="7" y1="38.5" x2="26" y2="38.5" stroke="#f8fafc" strokeWidth="1.6" />
+
+            <rect x="42" y="30" width="34" height="13" rx="1.5" fill="#0c1322" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="42" y1="30" x2="76" y2="30" stroke="#06b6d4" strokeWidth="1.2" />
+            <line x1="45" y1="34" x2="54" y2="34" stroke="#06b6d4" strokeWidth="1" />
+            <line x1="45" y1="38.5" x2="64" y2="38.5" stroke="#f8fafc" strokeWidth="1.6" />
         </svg>
     ),
 
@@ -3753,18 +3773,42 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
 
     'is-luxury-gold-accent-band': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Outer Obsidian Frame with 18k Gold Border */}
             <rect width="80" height="48" rx="4" fill="#09090b" stroke="#d4af37" strokeWidth="1" />
-            <rect width="80" height="10" fill="#18181b" />
-            <line x1="0" y1="10" x2="80" y2="10" stroke="#d4af37" strokeWidth="0.8" />
-            <line x1="6" y1="5" x2="30" y2="5" stroke="#d4af37" strokeWidth="1" />
-            <line x1="0" y1="22" x2="80" y2="22" stroke="#27272a" strokeWidth="0.8" />
-            <line x1="0" y1="34" x2="80" y2="34" stroke="#27272a" strokeWidth="0.8" />
-            <text x="6" y="18" fontSize="6" fill="#d4af37">◆</text>
-            <line x1="14" y1="17" x2="32" y2="17" stroke="#d4af37" strokeWidth="1" />
-            <line x1="38" y1="17" x2="70" y2="17" stroke="#fafafa" strokeWidth="1.2" />
-            <text x="6" y="29" fontSize="6" fill="#d4af37">◆</text>
-            <line x1="14" y1="28" x2="30" y2="28" stroke="#d4af37" strokeWidth="1" />
-            <line x1="38" y1="28" x2="62" y2="28" stroke="#fafafa" strokeWidth="1.2" />
+            {/* Inner Gold Hairline Inset */}
+            <rect x="2" y="2" width="76" height="44" rx="2" stroke="#d4af37" strokeWidth="0.5" strokeOpacity="0.4" />
+            {/* Plaque Crest Header */}
+            <rect x="2.5" y="2.5" width="75" height="9" fill="#141416" />
+            <line x1="2.5" y1="11.5" x2="77.5" y2="11.5" stroke="#d4af37" strokeWidth="0.7" />
+            <circle cx="40" cy="5.5" r="0.8" fill="#d4af37" />
+            <line x1="26" y1="5.5" x2="36" y2="5.5" stroke="#d4af37" strokeWidth="0.7" />
+            <line x1="44" y1="5.5" x2="54" y2="5.5" stroke="#d4af37" strokeWidth="0.7" />
+            <line x1="22" y1="8.5" x2="58" y2="8.5" stroke="#ffffff" strokeWidth="1.2" />
+
+            {/* 4 Luxury Dossier Cards (Roman Numerals I, II, III, IV) */}
+            <rect x="5" y="14" width="33" height="14" fill="#121214" stroke="#27272a" strokeWidth="0.7" />
+            <line x1="5" y1="14" x2="5" y2="28" stroke="#d4af37" strokeWidth="1.5" />
+            <text x="8" y="19" fontSize="4.5" fill="#d4af37" fontFamily="serif">I.</text>
+            <line x1="14" y1="18" x2="26" y2="18" stroke="#d4af37" strokeWidth="0.8" />
+            <line x1="8" y1="23.5" x2="31" y2="23.5" stroke="#fafafa" strokeWidth="1.6" />
+
+            <rect x="42" y="14" width="33" height="14" fill="#121214" stroke="#27272a" strokeWidth="0.7" />
+            <line x1="42" y1="14" x2="42" y2="28" stroke="#d4af37" strokeWidth="1.5" />
+            <text x="45" y="19" fontSize="4.5" fill="#d4af37" fontFamily="serif">II.</text>
+            <line x1="52" y1="18" x2="64" y2="18" stroke="#d4af37" strokeWidth="0.8" />
+            <line x1="45" y1="23.5" x2="68" y2="23.5" stroke="#fafafa" strokeWidth="1.6" />
+
+            <rect x="5" y="30" width="33" height="13" fill="#121214" stroke="#27272a" strokeWidth="0.7" />
+            <line x1="5" y1="30" x2="5" y2="43" stroke="#d4af37" strokeWidth="1.5" />
+            <text x="8" y="35" fontSize="4.5" fill="#d4af37" fontFamily="serif">III.</text>
+            <line x1="16" y1="34" x2="26" y2="34" stroke="#d4af37" strokeWidth="0.8" />
+            <line x1="8" y1="39" x2="28" y2="39" stroke="#fafafa" strokeWidth="1.6" />
+
+            <rect x="42" y="30" width="33" height="13" fill="#121214" stroke="#27272a" strokeWidth="0.7" />
+            <line x1="42" y1="30" x2="42" y2="43" stroke="#d4af37" strokeWidth="1.5" />
+            <text x="45" y="35" fontSize="4.5" fill="#d4af37" fontFamily="serif">IV.</text>
+            <line x1="54" y1="34" x2="64" y2="34" stroke="#d4af37" strokeWidth="0.8" />
+            <line x1="45" y1="39" x2="66" y2="39" stroke="#fafafa" strokeWidth="1.6" />
         </svg>
     ),
 }
@@ -7317,6 +7361,379 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
         }
+
+        case 'heading':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Text" value={props.text ?? 'Section Heading'} onChange={v => updateProps({ text: v })} />
+                        <SelectInput
+                            label="Level"
+                            value={props.level ?? 'h2'}
+                            options={[
+                                { v: 'h1', l: 'H1 — Page title' },
+                                { v: 'h2', l: 'H2 — Section heading' },
+                                { v: 'h3', l: 'H3 — Sub heading' },
+                                { v: 'h4', l: 'H4 — Small heading' },
+                            ]}
+                            onChange={v => updateProps({ level: v })}
+                        />
+                    </Section>
+                </>
+            )
+
+        case 'paragraph':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextareaInput
+                            label="Text"
+                            value={props.text ?? 'Enter your paragraph text here.'}
+                            rows={5}
+                            onChange={v => updateProps({ text: v })}
+                        />
+                        {phButton('text', 'text')}
+                    </Section>
+                </>
+            )
+
+        case 'image':
+            return (
+                <>
+                    <Section title="Image">
+                        <TextInput label="Image URL" value={props.src ?? '{{MAIN_IMAGE_URL}}'} onChange={v => updateProps({ src: v })} />
+                        {phButton('src', 'image URL')}
+                        <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
+                        <TextInput label="Link URL (optional)" value={props.linkUrl ?? ''} onChange={v => updateProps({ linkUrl: v })} />
+                    </Section>
+                    <Section title="Layout">
+                        <TextInput label="Width" value={String(props.width ?? 100)} onChange={v => updateProps({ width: Number(v) || 100 })} />
+                        <SelectInput
+                            label="Width unit"
+                            value={props.widthUnit ?? '%'}
+                            options={[
+                                { v: '%', l: '% — Percentage' },
+                                { v: 'px', l: 'px — Fixed pixels' },
+                            ]}
+                            onChange={v => updateProps({ widthUnit: v })}
+                        />
+                        <SelectInput
+                            label="Alignment"
+                            value={props.align ?? 'center'}
+                            options={[
+                                { v: 'left', l: 'Left' },
+                                { v: 'center', l: 'Center' },
+                                { v: 'right', l: 'Right' },
+                            ]}
+                            onChange={v => updateProps({ align: v })}
+                        />
+                    </Section>
+                </>
+            )
+
+        case 'bullet_list': {
+            const blItems: string[] = props.items ?? ['Feature one — describe your product benefit', 'Feature two — another key selling point', 'Feature three — quality guarantee']
+            return (
+                <>
+                    <Section title={`Items (${blItems.length})`}>
+                        {blItems.map((item, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                                <input
+                                    style={{ flex: 1, background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '4px 8px' }}
+                                    value={item}
+                                    onChange={e => {
+                                        const next = [...blItems]
+                                        next[i] = e.target.value
+                                        updateProps({ items: next })
+                                    }}
+                                />
+                                <button
+                                    style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, padding: '0 8px' }}
+                                    onClick={() => updateProps({ items: blItems.filter((_, j) => j !== i) })}
+                                >✕</button>
+                            </div>
+                        ))}
+                        {blItems.length < 12 && (
+                            <button
+                                style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }}
+                                onClick={() => updateProps({ items: [...blItems, 'New feature'] })}
+                            >+ Add item</button>
+                        )}
+                    </Section>
+                    <Section title="Style">
+                        <SelectInput
+                            label="Bullet style"
+                            value={props.bulletStyle ?? 'check'}
+                            options={[
+                                { v: 'check', l: '✔ Check' },
+                                { v: 'dot', l: '• Dot' },
+                                { v: 'arrow', l: '→ Arrow' },
+                                { v: 'star', l: '★ Star' },
+                                { v: 'none', l: 'None' },
+                            ]}
+                            onChange={v => updateProps({ bulletStyle: v })}
+                        />
+                    </Section>
+                </>
+            )
+        }
+
+        case 'features': {
+            const feats: { icon: string; label: string; subText: string }[] = props.features ?? [
+                { icon: '⭐', label: 'Top Quality', subText: 'Premium Materials' },
+                { icon: '🚚', label: 'Fast Shipping', subText: 'Tracked Delivery' },
+                { icon: '↩️', label: 'Easy Returns', subText: '30-Day Policy' },
+            ]
+            return (
+                <>
+                    <Section title={`Features (${feats.length})`}>
+                        {feats.map((f, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>Feature {i + 1}</span>
+                                    <button
+                                        style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}
+                                        onClick={() => updateProps({ features: feats.filter((_, j) => j !== i) })}
+                                    >✕</button>
+                                </div>
+                                <input placeholder="Icon (emoji)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={f.icon} onChange={e => { const next = [...feats]; next[i] = { ...next[i], icon: e.target.value }; updateProps({ features: next }) }} />
+                                <input placeholder="Label" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={f.label} onChange={e => { const next = [...feats]; next[i] = { ...next[i], label: e.target.value }; updateProps({ features: next }) }} />
+                                <input placeholder="Sub text" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', boxSizing: 'border-box' }} value={f.subText} onChange={e => { const next = [...feats]; next[i] = { ...next[i], subText: e.target.value }; updateProps({ features: next }) }} />
+                            </div>
+                        ))}
+                        {feats.length < 6 && (
+                            <button
+                                style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }}
+                                onClick={() => updateProps({ features: [...feats, { icon: '✅', label: 'New Feature', subText: 'Description here' }] })}
+                            >+ Add feature</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'faq_block': {
+            const faqs: { question: string; answer: string }[] = props.faqs ?? [
+                { question: 'What is the warranty?', answer: 'All items come with a 30-day money back guarantee.' },
+                { question: 'How long does shipping take?', answer: 'Most orders ship within 24 hours of payment clearance.' },
+            ]
+            return (
+                <>
+                    <Section title={`FAQs (${faqs.length})`}>
+                        {faqs.map((faq, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>FAQ {i + 1}</span>
+                                    <button
+                                        style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}
+                                        onClick={() => updateProps({ faqs: faqs.filter((_, j) => j !== i) })}
+                                    >✕</button>
+                                </div>
+                                <input placeholder="Question" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={faq.question} onChange={e => { const next = [...faqs]; next[i] = { ...next[i], question: e.target.value }; updateProps({ faqs: next }) }} />
+                                <textarea placeholder="Answer" rows={2} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', resize: 'vertical', boxSizing: 'border-box' }} value={faq.answer} onChange={e => { const next = [...faqs]; next[i] = { ...next[i], answer: e.target.value }; updateProps({ faqs: next }) }} />
+                            </div>
+                        ))}
+                        {faqs.length < 10 && (
+                            <button
+                                style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }}
+                                onClick={() => updateProps({ faqs: [...faqs, { question: 'New question?', answer: 'Answer here.' }] })}
+                            >+ Add FAQ</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'testimonial_block': {
+            const testimonials: { text: string; author: string; rating: number }[] = props.testimonials ?? [
+                { text: 'Amazing product! Exactly as described.', author: 'John D.', rating: 5 },
+                { text: 'Fast shipping and great quality.', author: 'Sarah M.', rating: 4 },
+            ]
+            return (
+                <>
+                    <Section title={`Testimonials (${testimonials.length})`}>
+                        {testimonials.map((t, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>Review {i + 1}</span>
+                                    <button
+                                        style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }}
+                                        onClick={() => updateProps({ testimonials: testimonials.filter((_, j) => j !== i) })}
+                                    >✕</button>
+                                </div>
+                                <textarea placeholder="Review text" rows={2} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, resize: 'vertical', boxSizing: 'border-box' }} value={t.text} onChange={e => { const next = [...testimonials]; next[i] = { ...next[i], text: e.target.value }; updateProps({ testimonials: next }) }} />
+                                <input placeholder="Author name" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={t.author} onChange={e => { const next = [...testimonials]; next[i] = { ...next[i], author: e.target.value }; updateProps({ testimonials: next }) }} />
+                                <SelectInput
+                                    label="Rating"
+                                    value={String(t.rating ?? 5)}
+                                    options={[
+                                        { v: '5', l: '★★★★★ 5 stars' },
+                                        { v: '4', l: '★★★★☆ 4 stars' },
+                                        { v: '3', l: '★★★☆☆ 3 stars' },
+                                    ]}
+                                    onChange={v => { const next = [...testimonials]; next[i] = { ...next[i], rating: Number(v) }; updateProps({ testimonials: next }) }}
+                                />
+                            </div>
+                        ))}
+                        {testimonials.length < 6 && (
+                            <button
+                                style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }}
+                                onClick={() => updateProps({ testimonials: [...testimonials, { text: 'Great product!', author: 'Happy Customer', rating: 5 }] })}
+                            >+ Add review</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'compatibility_block': {
+            const compatModels: string[] = props.compatibleModels ?? ['Model A 2020+', 'Model B Pro', 'Model C']
+            const incompatModels: string[] = props.incompatibleModels ?? ['Old Model X', 'Legacy Series']
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={props.title ?? 'Check Compatibility'} onChange={v => updateProps({ title: v })} />
+                    </Section>
+                    <Section title={`Compatible models (${compatModels.length})`}>
+                        {compatModels.map((m, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                                <input style={{ flex: 1, background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '4px 8px' }} value={m} onChange={e => { const next = [...compatModels]; next[i] = e.target.value; updateProps({ compatibleModels: next }) }} />
+                                <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, padding: '0 8px' }} onClick={() => updateProps({ compatibleModels: compatModels.filter((_, j) => j !== i) })}>✕</button>
+                            </div>
+                        ))}
+                        <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ compatibleModels: [...compatModels, 'New Model'] })}>+ Add model</button>
+                    </Section>
+                    <Section title={`Incompatible models (${incompatModels.length})`}>
+                        {incompatModels.map((m, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                                <input style={{ flex: 1, background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '4px 8px' }} value={m} onChange={e => { const next = [...incompatModels]; next[i] = e.target.value; updateProps({ incompatibleModels: next }) }} />
+                                <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, padding: '0 8px' }} onClick={() => updateProps({ incompatibleModels: incompatModels.filter((_, j) => j !== i) })}>✕</button>
+                            </div>
+                        ))}
+                        <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ incompatibleModels: [...incompatModels, 'Incompatible Model'] })}>+ Add model</button>
+                    </Section>
+                </>
+            )
+        }
+
+        case 'container':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextareaInput
+                            label="Content"
+                            value={props.content ?? 'Your content goes here.'}
+                            rows={4}
+                            onChange={v => updateProps({ content: v })}
+                        />
+                        {phButton('content', 'content')}
+                    </Section>
+                    <Section title="Layout">
+                        <TextInput label="Max width (px)" value={String(props.maxWidth ?? 600)} onChange={v => updateProps({ maxWidth: Number(v) || 600 })} />
+                    </Section>
+                </>
+            )
+
+        case 'store_nav_bar':
+            return (
+                <>
+                    <Section title={`Links (${(props.links ?? []).length}/8)`}>
+                        <NavLinksEditor
+                            links={props.links ?? [
+                                { label: 'Electronics', url: '#' },
+                                { label: 'Home & Garden', url: '#' },
+                                { label: 'Fashion', url: '#' },
+                            ]}
+                            onChange={links => updateProps({ links })}
+                        />
+                        <InfoBox>
+                            Paste your eBay Store category URL into each link.
+                            Example: https://www.ebay.com/str/yourstore/Clothing/_i.html
+                        </InfoBox>
+                    </Section>
+                </>
+            )
+
+        case 'free_shipping_banner':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? 'Fast & Free Domestic Shipping'} onChange={v => updateProps({ heading: v })} />
+                        <TextInput label="Sub text" value={props.subText ?? 'Orders placed before 2:00 PM dispatch same day'} onChange={v => updateProps({ subText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'money_back':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={props.heading ?? '30-Day Money Back Guarantee'} onChange={v => updateProps({ heading: v })} />
+                        <TextInput label="Sub text" value={props.subText ?? 'Not satisfied? Return it — no questions asked.'} onChange={v => updateProps({ subText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'trust_badge_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Badge text" value={props.badgeText ?? '100% Satisfaction Guaranteed or Your Money Back'} onChange={v => updateProps({ badgeText: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'urgency_timer_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Banner text" value={props.text ?? 'Limited Time Promotional Price — Order Soon!'} onChange={v => updateProps({ text: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'payment_methods_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={props.title ?? 'Secure Checkout via eBay Managed Payments'} onChange={v => updateProps({ title: v })} />
+                    </Section>
+                    <Section title="Options">
+                        <ToggleRow label="Show PayPal" value={props.showPayPal ?? true} onChange={v => updateProps({ showPayPal: v })} />
+                        <ToggleRow label="Show credit cards" value={props.showCreditCards ?? true} onChange={v => updateProps({ showCreditCards: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'shipping_policy_block':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={props.title ?? 'Fast & Reliable Shipping'} onChange={v => updateProps({ title: v })} />
+                        <TextareaInput
+                            label="Policy text"
+                            value={props.policyText ?? 'We ship all orders within 24 hours of payment clearance via tracked carrier services.'}
+                            rows={3}
+                            onChange={v => updateProps({ policyText: v })}
+                        />
+                        <TextInput label="Delivery time" value={props.deliveryTime ?? 'Estimated delivery: 2-5 business days'} onChange={v => updateProps({ deliveryTime: v })} />
+                    </Section>
+                </>
+            )
+
+        case 'bundle_discount_banner':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Banner text" value={props.bannerText ?? 'Buy {{QUANTITY}} or more and save!'} onChange={v => updateProps({ bannerText: v })} />
+                        {phButton('bannerText', 'banner text')}
+                    </Section>
+                    <Section title="Discount">
+                        <TextInput label="Discount %" value={String(props.discountPercentage ?? 15)} onChange={v => updateProps({ discountPercentage: Number(v) || 15 })} />
+                        <TextInput label="Minimum quantity" value={String(props.minimumQty ?? 2)} onChange={v => updateProps({ minimumQty: Number(v) || 2 })} />
+                    </Section>
+                </>
+            )
 
         default:
             return (
