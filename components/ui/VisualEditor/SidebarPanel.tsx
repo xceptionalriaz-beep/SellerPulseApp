@@ -29,6 +29,7 @@ import ImagesTab from './ImagesTab'
 import AuditTab from './AuditTab'
 import TokensTab from './TokensTab'
 import SavedTab from './SavedTab'
+import IconsPanel from './IconsPanel'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -94,6 +95,10 @@ interface SidebarPanelProps {
 
     // SavedTab props
     onLoadTemplate: (name: string, blocks: Block[], settings: CanvasSettings) => void
+
+    // IconsPanel props
+    selectedFeatureIndex: number | null
+    onIconSelect: (iconId: string) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,6 +126,8 @@ export default function SidebarPanel({
     tokenFeedback,
     selectedBlockLabel,
     onLoadTemplate,
+    selectedFeatureIndex,
+    onIconSelect,
 }: SidebarPanelProps) {
     return (
         <div style={{
@@ -214,6 +221,13 @@ export default function SidebarPanel({
                         />
                     )}
 
+                    {activeTab === 'icons' && (
+                        <IconsPanel
+                            selectedFeatureIndex={selectedFeatureIndex}
+                            onIconSelect={onIconSelect}
+                        />
+                    )}
+
                     {/* Null state — no tab selected (panel shouldn't open, but safety fallback) */}
                     {!activeTab && (
                         <div style={{
@@ -252,6 +266,7 @@ const TAB_LABELS: Record<RailTabId, string> = {
     templates: 'Section Templates',
     body: 'Canvas Settings',
     images: 'Images',
+    icons: 'Icon Library',
     audit: 'eBay Audit',
     tokens: 'Dynamic Tokens',
     saved: 'Saved Templates',
