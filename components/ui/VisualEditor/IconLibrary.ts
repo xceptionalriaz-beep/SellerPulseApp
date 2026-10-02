@@ -100,42 +100,37 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
         },
         {
             id: 'scale',
-            label: 'Compliance / Legal',
+            label: 'Compliance',
             svg: (c, s) => wrap(c, s, `<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>`)
         },
         {
             id: 'crown',
-            label: 'VIP / Luxury',
+            label: 'VIP Luxury',
             svg: (c, s) => wrap(c, s, `<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>`)
         },
         {
             id: 'shield-alert',
-            label: 'Surge Protection',
+            label: 'Protected',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`)
         },
         {
-            id: 'user-check',
-            label: 'Verified Merchant',
-            svg: (c, s) => wrap(c, s, `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>`)
-        },
-        {
             id: 'file-check',
-            label: 'Certified Authentic',
+            label: 'Authentic',
             svg: (c, s) => wrap(c, s, `<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>`)
         },
         {
             id: 'sparkle',
-            label: 'Authenticity Sparkle',
+            label: 'Sparkle',
             svg: (c, s) => wrap(c, s, `<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>`)
         },
         {
             id: 'bookmark-check',
-            label: 'Guaranteed Fit',
+            label: 'Exact Fit',
             svg: (c, s) => wrap(c, s, `<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/><path d="m9 10 2 2 4-4"/>`)
         },
         {
             id: 'fingerprint',
-            label: 'Original Serial No.',
+            label: 'Serial No.',
             svg: (c, s) => wrap(c, s, `<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>`)
         },
         // ── New Short-Labeled Trust & Quality Icons ──────────────────────────
@@ -146,7 +141,7 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
         },
         {
             id: 'inspected',
-            label: 'Inspected',
+            label: 'Checklist',
             svg: (c, s) => wrap(c, s, `<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>`)
         },
         {
@@ -884,7 +879,7 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
         },
         {
             id: 'phone-call-check',
-            label: 'Dedicated UK / US Phone Line',
+            label: 'Dedicated Phone Line',
             svg: (c, s) => wrap(c, s, `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/><path d="m14 5 2 2 4-4"/>`)
         },
         {
@@ -1261,82 +1256,82 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
         },
         {
             id: 'diamond',
-            label: 'Scratch Resistant',
+            label: 'Scratch Safe',
             svg: (c, s) => wrap(c, s, `<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/><path d="M2 9h20"/>`)
         },
         {
             id: 'gem',
-            label: 'Gemstone Certified',
+            label: 'Gemstone',
             svg: (c, s) => wrap(c, s, `<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/>`)
         },
         {
             id: 'shirt',
-            label: '100% Cotton / Apparel',
+            label: 'Apparel',
             svg: (c, s) => wrap(c, s, `<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>`)
         },
         {
             id: 'watch',
-            label: 'Chronograph Watch',
+            label: 'Watch',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"/>`)
         },
         {
             id: 'glasses',
-            label: 'Eyewear / UV Optics',
+            label: 'Eyewear',
             svg: (c, s) => wrap(c, s, `<circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-4 0"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>`)
         },
         {
             id: 'palette',
-            label: 'Color Variety',
+            label: 'Color',
             svg: (c, s) => wrap(c, s, `<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>`)
         },
         {
             id: 'ruler',
-            label: 'Exact Size / Scale',
+            label: 'Scale',
             svg: (c, s) => wrap(c, s, `<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>`)
         },
         {
             id: 'umbrella',
-            label: 'Weatherproof Fabric',
+            label: 'Rainproofc',
             svg: (c, s) => wrap(c, s, `<path d="M22 12a10.06 10.06 0 0 0-20 0Z"/><path d="M12 12v8a2 2 0 0 0 4 0"/><path d="M12 2v1"/>`)
         },
         {
             id: 'wind',
-            label: 'Breathable Material',
+            label: 'Material',
             svg: (c, s) => wrap(c, s, `<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>`)
         },
         {
             id: 'sparkle-gold',
-            label: 'Gold Plated / Finished',
+            label: 'Plated',
             svg: (c, s) => wrap(c, s, `<polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/>`)
         },
         {
             id: 'phone',
-            label: 'Phone Support Line',
+            label: 'Phone Call',
             svg: (c, s) => wrap(c, s, `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>`)
         },
         {
             id: 'mail',
-            label: '24/7 Email Inquiries',
+            label: 'Email',
             svg: (c, s) => wrap(c, s, `<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>`)
         },
         {
             id: 'message-square',
-            label: 'Fast Reply Messages',
+            label: 'Messages',
             svg: (c, s) => wrap(c, s, `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`)
         },
         {
             id: 'help-circle',
-            label: 'FAQ / Help Guide',
+            label: 'Help Guide',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>`)
         },
         {
             id: 'info',
-            label: 'Important Notice',
+            label: 'Info',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`)
         },
         {
             id: 'check-circle-2',
-            label: 'Quality Checked Double',
+            label: 'Checked',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>`)
         },
     ],
