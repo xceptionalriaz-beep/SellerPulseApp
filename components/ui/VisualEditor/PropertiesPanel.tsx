@@ -5074,17 +5074,17 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
-    'sl-industrial-technical-stencil': (col: string = '#f59e0b', light: string = '#0f172a') => (
+    'sl-minimalist-hairline-accent': (col: string = '#7530fb', _light: string = '#f8fafc') => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
-            <rect x="8" y="17" width="64" height="14" rx="2" fill={light || '#0f172a'} />
-            <rect x="8" y="17" width="3" height="14" fill={col || '#f59e0b'} />
-            <circle cx="16" cy="24" r="1.5" fill={col || '#f59e0b'} />
-            <line x1="22" y1="24" x2="64" y2="24" stroke="#f8fafc" strokeWidth="1.8" />
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="17" width="3" height="14" fill={col || '#7530fb'} />
+            <circle cx="15" cy="24" r="1.5" fill={col || '#7530fb'} />
+            <line x1="20" y1="24" x2="64" y2="24" stroke="#0f172a" strokeWidth="1.8" />
         </svg>
     ),
 
-    'sl-luxury-atelier-roman': (col: string = '#d4af37', _light: string = '#ffffff') => (
+    'sl-editorial-serif-crest': (col: string = '#d4af37', _light: string = '#ffffff') => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e7e5e4" strokeWidth="1" />
             <line x1="8" y1="24" x2="26" y2="24" stroke={col || '#d4af37'} strokeWidth="0.8" />
@@ -5095,7 +5095,36 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
-    'sl-official-security-stamp': (col: string = '#10b981', light: string = '#f1f5f9') => (
+    'sl-industrial-spec-badge': (col: string = '#f59e0b', light: string = '#0f172a') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill={light || '#0f172a'} />
+            <rect x="8" y="17" width="3" height="14" fill={col || '#f59e0b'} />
+            <circle cx="16" cy="24" r="1.5" fill={col || '#f59e0b'} />
+            <line x1="22" y1="24" x2="64" y2="24" stroke="#f8fafc" strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'sl-segmented-dualtone-chip': (col: string = '#7530fb', light: string = '#f8fafc') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="17" width="60" height="14" rx="4" fill={light || '#f8fafc'} stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="10" y="17" width="14" height="14" fill={col || '#7530fb'} />
+            <circle cx="17" cy="24" r="2" fill="#ffffff" />
+            <line x1="30" y1="24" x2="62" y2="24" stroke="#1e1535" strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'sl-numbered-index-rule': (col: string = '#7530fb', _light: string = '#ffffff') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="22" width="6" height="4" rx="1" fill={col || '#7530fb'} />
+            <line x1="18" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.8" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+        </svg>
+    ),
+
+    'sl-official-verification-seal': (col: string = '#10b981', light: string = '#f1f5f9') => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
             <rect x="8" y="17" width="64" height="14" rx="2" fill="#ffffff" stroke="#0f172a" strokeWidth="1" />
@@ -5107,7 +5136,7 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
-    'sl-bold-solid-block-tag': (col: string = '#7530fb', _light: string = '#ffffff') => (
+    'sl-bold-contrast-banner': (col: string = '#7530fb', _light: string = '#ffffff') => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
             <rect x="12" y="18" width="56" height="14" rx="2" fill="#0f172a" />
@@ -5116,45 +5145,17 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
-    'sl-editorial-hairline-rule': (col: string = '#7530fb', _light: string = '#ffffff') => (
+    'sl-tailor-stitched-parchment': (col: string = '#78716c', light: string = '#fffdfa') => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
-            <rect x="8" y="22" width="6" height="4" rx="1" fill={col || '#7530fb'} />
-            <line x1="18" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.8" />
-            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#d6d3d1" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill={light || '#fffdfa'} stroke="#d6d3d1" strokeWidth="1" strokeDasharray="2 1.5" />
+            <rect x="8" y="17" width="16" height="14" fill="#f5f5f4" />
+            <line x1="12" y1="24" x2="20" y2="24" stroke={col || '#78716c'} strokeWidth="1.2" />
+            <line x1="28" y1="24" x2="66" y2="24" stroke="#1c1917" strokeWidth="1.8" />
         </svg>
     ),
 
-    'sl-cyber-terminal-badge': (col: string = '#06b6d4', light: string = '#090d16') => (
-        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="4" fill={light || '#090d16'} stroke="#1e293b" strokeWidth="1" />
-            <rect x="8" y="17" width="64" height="14" rx="2" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
-            <line x1="13" y1="24" x2="16" y2="24" stroke="#10b981" strokeWidth="1.5" />
-            <line x1="20" y1="24" x2="60" y2="24" stroke={col || '#06b6d4'} strokeWidth="1.8" />
-        </svg>
-    ),
-
-    'sl-modern-dualtone-chip': (col: string = '#7530fb', light: string = '#f8fafc') => (
-        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
-            <rect x="10" y="17" width="60" height="14" rx="4" fill={light || '#f8fafc'} stroke="#cbd5e1" strokeWidth="0.8" />
-            <rect x="10" y="17" width="14" height="14" fill={col || '#7530fb'} />
-            <circle cx="17" cy="24" r="2" fill="#ffffff" />
-            <line x1="30" y1="24" x2="62" y2="24" stroke="#1e1535" strokeWidth="1.8" />
-        </svg>
-    ),
-
-    'sl-warehouse-dispatch-ticket': (col: string = '#b45309', light: string = '#fefce8') => (
-        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
-            <rect x="8" y="17" width="64" height="14" rx="2" fill={light || '#fefce8'} stroke={col || '#b45309'} strokeWidth="1" strokeDasharray="2 1.5" />
-            <rect x="8" y="17" width="16" height="14" fill="#fef3c7" />
-            <line x1="12" y1="24" x2="20" y2="24" stroke="#92400e" strokeWidth="1.2" />
-            <line x1="28" y1="24" x2="66" y2="24" stroke="#78350f" strokeWidth="1.8" />
-        </svg>
-    ),
-
-    'sl-compact-minimal-bullet': (col: string = '#7530fb', _light: string = '#ffffff') => (
+    'sl-compact-dot-bullet': (col: string = '#7530fb', _light: string = '#ffffff') => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
             <circle cx="16" cy="24" r="3" fill={col || '#7530fb'} />
