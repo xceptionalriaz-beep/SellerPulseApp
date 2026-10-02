@@ -4951,6 +4951,216 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="52" y="18" width="19" height="18" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.6" />
         </svg>
     ),
+
+    // ── Pull Quote Thumbnails (10 Styles) ──────────────────────────────────
+    'pq-classic-serif-centered': (col: string = '#7530fb', light: string = '#ede9fe') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="40" cy="12" r="2.5" fill={light || '#ede9fe'} />
+            <line x1="12" y1="21" x2="68" y2="21" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="18" y1="27" x2="62" y2="27" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="28" y1="36" x2="52" y2="36" stroke={col || '#7530fb'} strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'pq-editorial-thick-accent-pillar': (col: string = '#7530fb', light: string = '#f8fafc') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="0" y="0" width="4" height="48" rx="1" fill={col || '#7530fb'} />
+            <line x1="10" y1="12" x2="34" y2="12" stroke={col || '#7530fb'} strokeWidth="1" />
+            <line x1="10" y1="19" x2="68" y2="19" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="10" y1="25" x2="60" y2="25" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="10" y1="34" x2="42" y2="34" stroke={light !== '#f8fafc' ? light : '#64748b'} strokeWidth="1" />
+        </svg>
+    ),
+
+    'pq-customer-testimonial-stars': (col: string = '#7530fb', light: string = '#f1f5f9') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <circle cx="28" cy="11" r="1.5" fill="#f59e0b" />
+            <circle cx="34" cy="11" r="1.5" fill="#f59e0b" />
+            <circle cx="40" cy="11" r="1.5" fill="#f59e0b" />
+            <circle cx="46" cy="11" r="1.5" fill="#f59e0b" />
+            <circle cx="52" cy="11" r="1.5" fill="#f59e0b" />
+            <line x1="12" y1="20" x2="68" y2="20" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="16" y1="26" x2="64" y2="26" stroke="#0f172a" strokeWidth="1.2" />
+            <rect x="22" y="33" width="36" height="7" rx="3.5" fill={light || '#f1f5f9'} />
+            <line x1="28" y1="36.5" x2="52" y2="36.5" stroke={col || '#16a34a'} strokeWidth="1" />
+        </svg>
+    ),
+
+    'pq-minimalist-hairline-bracket': (_col: string = '#7530fb', _light: string = '#94a3b8') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="9" x2="72" y2="9" stroke="#0f172a" strokeWidth="1.2" />
+            <circle cx="40" cy="15" r="1.5" fill={_light || '#94a3b8'} />
+            <line x1="14" y1="23" x2="66" y2="23" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="20" y1="29" x2="60" y2="29" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="8" y1="37" x2="72" y2="37" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="30" y1="42" x2="50" y2="42" stroke={_col || '#64748b'} strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'pq-merchant-founder-signature': (col: string = '#b45309', light: string = '#fffdfa') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill={light || '#fffdfa'} stroke="#e7e5e4" strokeWidth="1" />
+            <line x1="10" y1="16" x2="16" y2="28" stroke={col || '#b45309'} strokeWidth="1.5" />
+            <line x1="22" y1="16" x2="70" y2="16" stroke="#1c1917" strokeWidth="1.2" />
+            <line x1="22" y1="23" x2="64" y2="23" stroke="#1c1917" strokeWidth="1.2" />
+            <line x1="22" y1="32" x2="48" y2="32" stroke="#78716c" strokeWidth="1" />
+        </svg>
+    ),
+
+    'pq-industrial-heavy-spec-box': (col: string = '#7530fb', light: string = '#f8fafc') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="6" width="70" height="36" rx="2" fill={light || '#f8fafc'} stroke="#0f172a" strokeWidth="1" />
+            <rect x="5" y="6" width="70" height="8" fill="#0f172a" />
+            <line x1="9" y1="10" x2="38" y2="10" stroke="#f59e0b" strokeWidth="1.2" />
+            <line x1="9" y1="22" x2="66" y2="22" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="9" y1="28" x2="54" y2="28" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="9" y1="35" x2="40" y2="35" stroke={col || '#10b981'} strokeWidth="1" />
+        </svg>
+    ),
+
+    'pq-modern-offset-speech-bubble': (col: string = '#7530fb', light: string = '#f1f5f9') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="32" rx="6" fill={light || '#f1f5f9'} stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="12" y1="17" x2="64" y2="17" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="12" y1="23" x2="52" y2="23" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="12" y1="31" x2="36" y2="31" stroke={col || '#7530fb'} strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'pq-dark-midnight-prestige': (col: string = '#f59e0b', light: string = '#0f172a') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill={light || '#0f172a'} stroke="#334155" strokeWidth="1" />
+            <circle cx="40" cy="12" r="2.5" fill={col || '#f59e0b'} />
+            <line x1="14" y1="21" x2="66" y2="21" stroke="#ffffff" strokeWidth="1.2" />
+            <line x1="18" y1="27" x2="62" y2="27" stroke="#ffffff" strokeWidth="1.2" />
+            <line x1="28" y1="36" x2="52" y2="36" stroke={col || '#f59e0b'} strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'pq-split-brand-flag': (col: string = '#7530fb', light: string = '#f8fafc') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="5" y="8" width="70" height="32" rx="3" fill={light || '#f8fafc'} stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="5" y="8" width="18" height="32" fill={col || '#7530fb'} />
+            <circle cx="14" cy="24" r="3.5" fill="#ffffff" />
+            <line x1="28" y1="18" x2="68" y2="18" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="28" y1="24" x2="62" y2="24" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="28" y1="31" x2="48" y2="31" stroke={col || '#7530fb'} strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'pq-compact-inline-callout': (col: string = '#7530fb', light: string = '#f1f5f9') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="16" width="68" height="16" rx="8" fill={light || '#f1f5f9'} stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="14" cy="24" r="2.5" fill={col || '#7530fb'} />
+            <line x1="21" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.2" />
+            <line x1="53" y1="24" x2="68" y2="24" stroke={col || '#7530fb'} strokeWidth="1" />
+        </svg>
+    ),
+
+    // ── Section Label Thumbnails (10 Styles) ────────────────────────────────
+    'sl-classic-pill-capsule': (col: string = '#7530fb', light: string = '#f3eeff') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="18" width="60" height="12" rx="6" fill={light || '#f3eeff'} stroke="#ede9fe" strokeWidth="0.8" />
+            <line x1="20" y1="24" x2="60" y2="24" stroke={col || '#7530fb'} strokeWidth="2" />
+        </svg>
+    ),
+
+    'sl-industrial-technical-stencil': (col: string = '#f59e0b', light: string = '#0f172a') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill={light || '#0f172a'} />
+            <rect x="8" y="17" width="3" height="14" fill={col || '#f59e0b'} />
+            <circle cx="16" cy="24" r="1.5" fill={col || '#f59e0b'} />
+            <line x1="22" y1="24" x2="64" y2="24" stroke="#f8fafc" strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'sl-luxury-atelier-roman': (col: string = '#d4af37', _light: string = '#ffffff') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e7e5e4" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke={col || '#d4af37'} strokeWidth="0.8" />
+            <circle cx="31" cy="24" r="1" fill={col || '#d4af37'} />
+            <line x1="36" y1="24" x2="44" y2="24" stroke="#1c1917" strokeWidth="2" />
+            <circle cx="49" cy="24" r="1" fill={col || '#d4af37'} />
+            <line x1="54" y1="24" x2="72" y2="24" stroke={col || '#d4af37'} strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'sl-official-security-stamp': (col: string = '#10b981', light: string = '#f1f5f9') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill="#ffffff" stroke="#0f172a" strokeWidth="1" />
+            <rect x="8" y="17" width="12" height="14" fill="#0f172a" />
+            <circle cx="14" cy="24" r="1.5" fill={col || '#10b981'} />
+            <line x1="24" y1="24" x2="52" y2="24" stroke="#0f172a" strokeWidth="1.8" />
+            <rect x="58" y="17" width="14" height="14" fill={light || '#f1f5f9'} />
+            <line x1="61" y1="24" x2="69" y2="24" stroke="#64748b" strokeWidth="1" />
+        </svg>
+    ),
+
+    'sl-bold-solid-block-tag': (col: string = '#7530fb', _light: string = '#ffffff') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="12" y="18" width="56" height="14" rx="2" fill="#0f172a" />
+            <rect x="10" y="16" width="56" height="14" rx="2" fill={col || '#7530fb'} />
+            <line x1="18" y1="23" x2="58" y2="23" stroke="#ffffff" strokeWidth="2" />
+        </svg>
+    ),
+
+    'sl-editorial-hairline-rule': (col: string = '#7530fb', _light: string = '#ffffff') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="22" width="6" height="4" rx="1" fill={col || '#7530fb'} />
+            <line x1="18" y1="24" x2="48" y2="24" stroke="#0f172a" strokeWidth="1.8" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+        </svg>
+    ),
+
+    'sl-cyber-terminal-badge': (col: string = '#06b6d4', light: string = '#090d16') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill={light || '#090d16'} stroke="#1e293b" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill="#0f172a" stroke="#1e293b" strokeWidth="0.8" />
+            <line x1="13" y1="24" x2="16" y2="24" stroke="#10b981" strokeWidth="1.5" />
+            <line x1="20" y1="24" x2="60" y2="24" stroke={col || '#06b6d4'} strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'sl-modern-dualtone-chip': (col: string = '#7530fb', light: string = '#f8fafc') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="17" width="60" height="14" rx="4" fill={light || '#f8fafc'} stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="10" y="17" width="14" height="14" fill={col || '#7530fb'} />
+            <circle cx="17" cy="24" r="2" fill="#ffffff" />
+            <line x1="30" y1="24" x2="62" y2="24" stroke="#1e1535" strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'sl-warehouse-dispatch-ticket': (col: string = '#b45309', light: string = '#fefce8') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="8" y="17" width="64" height="14" rx="2" fill={light || '#fefce8'} stroke={col || '#b45309'} strokeWidth="1" strokeDasharray="2 1.5" />
+            <rect x="8" y="17" width="16" height="14" fill="#fef3c7" />
+            <line x1="12" y1="24" x2="20" y2="24" stroke="#92400e" strokeWidth="1.2" />
+            <line x1="28" y1="24" x2="66" y2="24" stroke="#78350f" strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'sl-compact-minimal-bullet': (col: string = '#7530fb', _light: string = '#ffffff') => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="16" cy="24" r="3" fill={col || '#7530fb'} />
+            <line x1="24" y1="24" x2="66" y2="24" stroke="#0f172a" strokeWidth="2" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -5390,7 +5600,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}

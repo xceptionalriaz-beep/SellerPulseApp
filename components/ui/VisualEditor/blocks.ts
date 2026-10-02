@@ -193,6 +193,8 @@ export type BlockProps =
     | KeyFeaturesGridProps
     | VatNoticeProps
     | FeedbackScoreProps
+    | PullQuoteProps
+    | SectionLabelProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -717,6 +719,32 @@ export interface FeedbackScoreProps extends CommonProps {
     accentColor?: string
 }
 
+// ── Pull Quote ──────────────────────────────────────────────────────────────
+export interface PullQuoteProps extends CommonProps {
+    variant?: string
+    quoteText?: string
+    author?: string
+    quoteColor?: string
+    fontSize?: number
+    accentColor?: string
+}
+
+// ── Section Label ───────────────────────────────────────────────────────────
+export interface SectionLabelProps extends CommonProps {
+    variant?: string
+    text?: string
+    label?: string
+    labelText?: string
+    heading?: string
+    color?: string
+    textColor?: string
+    accentColor?: string
+    fontSize?: number
+    fontWeight?: string
+    letterSpacing?: number
+    align?: 'left' | 'center' | 'right'
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MEDIA BLOCKS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1099,6 +1127,8 @@ import { getProductComparisonVariant as _getProductComparisonVariant } from './v
 import { getKeyFeaturesVariant as _getKeyFeaturesVariant } from './variants/key_features.variants'
 import { getVatNoticeVariant } from './variants/vat_notice.variants'
 import { getFeedbackScoreVariant } from './variants/feedback_score.variants'
+import { getPullQuoteVariant } from './variants/pull_quote.variants'
+import { getSectionLabelVariant } from './variants/section_label.variants'
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3497,12 +3527,25 @@ ${thumbCells}
             label: 'Section Label',
             category: 'Typography' as BlockCategory,
             icon: 'type',
-            description: 'Small uppercase category label with accent',
-            defaultProps: { ...DEFAULT_COMMON, paddingTop: 8, paddingBottom: 4 } as unknown as BlockProps,
+            description: 'Small uppercase category label with accent — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'sl-classic-pill-capsule',
+                text: '{{SECTION_LABEL}}',
+                color: '#7530fb',
+                textColor: '#1e1535',
+                accentColor: '#7530fb',
+                bgColor: '#ffffff',
+                fontSize: 11,
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('section_label' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#7530fb;text-transform:uppercase;letter-spacing:3px;">{{SECTION_LABEL}}</p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'sl-classic-pill-capsule'
+                return wrapBlock('section_label' as BlockType, id, getSectionLabelVariant(variantId).toHtml(p, id))
             },
         },
 
@@ -3511,12 +3554,26 @@ ${thumbCells}
             label: 'Pull Quote',
             category: 'Typography' as BlockCategory,
             icon: 'quote',
-            description: 'Large styled quote with accent colour',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Highlighted quotation, merchant statement or customer voice — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'pq-classic-serif-centered',
+                quoteText: 'Quality is not an act, it is a habit. Every item we sell reflects our commitment to excellence.',
+                author: '— {{SELLER_NAME}}',
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
+                accentColor: '#7530fb',
+                quoteColor: '#ede9fe',
+                fontSize: 18,
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('pull_quote' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Georgia,serif;font-size:36px;color:#ede9fe;line-height:1;">&ldquo;</p><p style="margin:0;font-family:Georgia,serif;font-size:18px;color:#1e1535;line-height:1.6;font-style:italic;">Quality is not an act, it is a habit. Every item we sell reflects our commitment to excellence.</p><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#7530fb;font-weight:700;">— {{SELLER_NAME}}</p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'pq-classic-serif-centered'
+                return wrapBlock('pull_quote' as BlockType, id, getPullQuoteVariant(variantId).toHtml(p, id))
             },
         },
 

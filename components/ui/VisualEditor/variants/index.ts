@@ -38,6 +38,8 @@ export { productComparisonVariants, getProductComparisonVariant, comparisonVaria
 export { keyFeaturesVariants, getKeyFeaturesVariant, KEY_FEATURES_THUMBNAILS, featuresGridVariants, getKeyFeaturesGridVariant } from './key_features.variants'
 export { vatNoticeVariants, getVatNoticeVariant, vatVariants, getVatVariant } from './vat_notice.variants'
 export { feedbackScoreVariants, getFeedbackScoreVariant, feedbackVariants, getFeedbackVariant } from './feedback_score.variants'
+export { pullQuoteVariants, getPullQuoteVariant, quoteVariants, getQuoteVariant } from './pull_quote.variants'
+export { sectionLabelVariants, getSectionLabelVariant, SECTION_LABEL_THUMBNAILS } from './section_label.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -76,6 +78,8 @@ import { productComparisonVariants } from './product_comparison.variants'
 import { keyFeaturesVariants } from './key_features.variants'
 import { vatNoticeVariants } from './vat_notice.variants'
 import { feedbackScoreVariants } from './feedback_score.variants'
+import { pullQuoteVariants } from './pull_quote.variants'
+import { sectionLabelVariants } from './section_label.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -128,6 +132,10 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'vat': vatNoticeVariants,
     'feedback_score': feedbackScoreVariants,
     'feedback': feedbackScoreVariants,
+    'pull_quote': pullQuoteVariants,
+    'quote': pullQuoteVariants,
+    'section_label': sectionLabelVariants,
+    'label': sectionLabelVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
