@@ -187,23 +187,76 @@ interface CategoryGroupProps {
 }
 
 function CategoryGroup({ cat, icons, iconColor, activeIcon, disabled, onSelect }: CategoryGroupProps) {
+    const [isOpen, setIsOpen] = useState(true)
+
     return (
-        <div style={{ marginBottom: 18 }}>
-            <p style={{ margin: '0 0 8px', fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.secondary }}>
-                {CATEGORY_LABELS[cat]}
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-                {icons.map(entry => (
-                    <IconCard
-                        key={entry.id}
-                        id={entry.id}
-                        label={entry.label}
-                        svg={entry.svg(iconColor, 22)}
-                        isActive={activeIcon === entry.id}
-                        onClick={() => { if (!disabled) onSelect(entry.id) }}
-                    />
-                ))}
-            </div>
+        <div style={{ marginBottom: 10 }}>
+            {/* Accordion header */}
+            <button
+                onClick={() => setIsOpen(o => !o)}
+                style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '7px 10px',
+                    marginBottom: isOpen ? 8 : 0,
+                    borderRadius: 7,
+                    border: `1.5px solid ${C.border}`,
+                    background: C.surface,
+                    cursor: 'pointer',
+                    boxSizing: 'border-box',
+                }}
+            >
+                {/* Preview: first 3 icon thumbnails */}
+                <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                    {icons.slice(0, 3).map(e => (
+                        <span
+                            key={e.id}
+                            dangerouslySetInnerHTML={{ __html: e.svg(iconColor, 14) }}
+                            style={{ lineHeight: 1, display: 'flex', alignItems: 'center', opacity: 0.7 }}
+                        />
+                    ))}
+                </div>
+                {/* Label */}
+                <span style={{
+                    flex: 1,
+                    textAlign: 'left',
+                    fontFamily: 'DM Sans, Arial, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase' as const,
+                    color: C.secondary,
+                }}>
+                    {CATEGORY_LABELS[cat]}
+                    <span style={{ fontWeight: 400, marginLeft: 4, color: C.muted }}>({icons.length})</span>
+                </span>
+                {/* Chevron */}
+                <svg
+                    width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke={C.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ flexShrink: 0, transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.15s' }}
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </button>
+
+            {/* Icon grid — only when open */}
+            {isOpen && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                    {icons.map(entry => (
+                        <IconCard
+                            key={entry.id}
+                            id={entry.id}
+                            label={entry.label}
+                            svg={entry.svg(iconColor, 22)}
+                            isActive={activeIcon === entry.id}
+                            onClick={() => { if (!disabled) onSelect(entry.id) }}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
