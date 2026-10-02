@@ -185,6 +185,7 @@ export default function VisualEditor({
     // ── Sidebar state ─────────────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<RailTabId | null>('blocks')
     const [panelOpen, setPanelOpen] = useState(true)
+    const [selectedFeatureIndex, setSelectedFeatureIndex] = useState<number | null>(null)
     type DropSlot = 'leftImage' | 'leftContent' | 'rightContent' | 'content' | 'col1Content' | 'col2Content' | 'col3Content' | 'col4Content'
     const [activeDropSlot, setActiveDropSlot] = useState<{ blockId: string; slot: DropSlot } | null>(null)
 
@@ -1070,6 +1071,7 @@ export default function VisualEditor({
                     case 't': e.preventDefault(); setActiveTab('templates'); setPanelOpen(true); break
                     case 'o': e.preventDefault(); setActiveTab('body'); setPanelOpen(true); break
                     case 'i': e.preventDefault(); setActiveTab('images'); setPanelOpen(true); break
+                    case 'n': e.preventDefault(); setActiveTab('icons'); setPanelOpen(true); break
                     case 'a': e.preventDefault(); setActiveTab('audit'); setPanelOpen(true); break
                     case 'k': e.preventDefault(); setActiveTab('tokens'); setPanelOpen(true); break
                     case 's': e.preventDefault(); setActiveTab('saved'); setPanelOpen(true); break
@@ -1209,6 +1211,11 @@ export default function VisualEditor({
                         commitBlocks(newBlocks, blocks);
                     }
                 }
+            } else if (event.data?.type === 'RIAZIFY_ICON_CLICK') {
+                const { featureIndex } = event.data;
+                setSelectedFeatureIndex(featureIndex);
+                setActiveTab('icons');
+                setPanelOpen(true);
             } else if (event.data?.type === 'RIAZIFY_DROP_BLOCK') {
                 const { propKey, blockType, blockId } = event.data;
                 const VALID_SLOTS: DropSlot[] = ['leftImage', 'leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
@@ -1443,6 +1450,21 @@ export default function VisualEditor({
                     tokenFeedback={tokenFeedback}
                     selectedBlockLabel={selectedBlock ? (getDefinition(selectedBlock.type)?.label ?? null) : null}
                     onLoadTemplate={handleLoadTemplate}
+                    selectedFeatureIndex={selectedFeatureIndex}
+                    onIconSelect={(iconId) => {
+                        if (selectedFeatureIndex === null) return;
+                        const idx = blocks.findIndex(b => b.type === 'key_features_grid');
+                        if (idx < 0) return;
+                        const block = blocks[idx];
+                        const features = (block.props as any).features ?? [];
+                        const updatedFeatures = features.map((f: any, i: number) =>
+                            i === selectedFeatureIndex ? { ...f, icon: iconId } : f
+                        );
+                        const updatedBlock = { ...block, props: { ...block.props, features: updatedFeatures } };
+                        const newBlocks = [...blocks];
+                        newBlocks[idx] = updatedBlock as any;
+                        commitBlocks(newBlocks, blocks);
+                    }}
                 />}
 
                 {/* CENTRE — Canvas or Live Preview */}
