@@ -12,7 +12,7 @@
 //   getIconSvg(id, color, size) — renders one icon SVG string
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type IconCategory = 'trust' | 'product' | 'tech' | 'lifestyle' | 'pricing' | 'customer' | 'business' | 'tools' | 'safety' | 'returns' | 'packaging' | 'compatibility' | 'condition' | 'eco' | 'payment'
+export type IconCategory = 'trust' | 'product' | 'tech' | 'lifestyle' | 'pricing' | 'customer' | 'business' | 'tools' | 'safety' | 'returns' | 'packaging' | 'compatibility' | 'condition' | 'eco' | 'payment' | 'location'
 
 export interface IconEntry {
     id: string
@@ -1617,11 +1617,24 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`)
         },
     ],
+
+    location: [
+        {
+            id: 'loc-map-pin',
+            label: 'Local Pickup',
+            svg: (c, s) => wrap(c, s, `<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>`)
+        },
+        {
+            id: 'loc-flag',
+            label: 'Made in USA',
+            svg: (c, s) => wrap(c, s, `<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>`)
+        },
+    ],
 }
 
 // ─── Category order ───────────────────────────────────────────────────────────
 
-export const ICON_CATEGORIES: IconCategory[] = ['trust', 'product', 'tech', 'lifestyle', 'pricing', 'customer', 'business', 'tools', 'safety', 'returns', 'packaging', 'compatibility', 'condition', 'eco', 'payment']
+export const ICON_CATEGORIES: IconCategory[] = ['trust', 'product', 'tech', 'lifestyle', 'pricing', 'customer', 'business', 'tools', 'safety', 'returns', 'packaging', 'compatibility', 'condition', 'eco', 'payment', 'location']
 
 export const CATEGORY_LABELS: Record<IconCategory, string> = {
     trust: 'Trust & Quality',
@@ -1639,6 +1652,7 @@ export const CATEGORY_LABELS: Record<IconCategory, string> = {
     condition: 'Item Condition',
     eco: 'Eco & Sustainability',
     payment: 'Payment & Checkout',
+    location: 'Location & Origin',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

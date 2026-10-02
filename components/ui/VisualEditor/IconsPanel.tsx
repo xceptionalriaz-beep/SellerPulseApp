@@ -114,6 +114,7 @@ const CATEGORY_PREVIEW_ICONS: Record<IconCategory, [string, string, string, stri
     condition: ['cond-sparkles', 'cond-refresh', 'cond-sparkles', 'cond-refresh'],
     eco: ['eco-leaf', 'eco-recycle', 'eco-leaf', 'eco-recycle'],
     payment: ['pay-credit-card', 'pay-lock', 'pay-credit-card', 'pay-lock'],
+    location: ['loc-map-pin', 'loc-flag', 'loc-map-pin', 'loc-flag'],
 }
 
 export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: IconsPanelProps) {
@@ -242,13 +243,10 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                                                     />
                                                 ))}
                                             </div>
-                                            {/* Label + count */}
+                                            {/* Label */}
                                             <div style={{ textAlign: 'center' }}>
-                                                <div style={{ fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, fontWeight: 700, color: C.text, marginBottom: 2 }}>
+                                                <div style={{ fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, fontWeight: 700, color: C.text }}>
                                                     {CATEGORY_LABELS[cat]}
-                                                </div>
-                                                <div style={{ fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 10, color: C.muted }}>
-                                                    {count} icons
                                                 </div>
                                             </div>
                                         </button>
@@ -265,12 +263,12 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                         {/* Category label row when inside a category */}
                         {activeCategory && activeCategory !== 'all' && !query.trim() && (
                             <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.secondary }}>
-                                {CATEGORY_LABELS[activeCategory as IconCategory]} · {ICON_LIBRARY[activeCategory as IconCategory].length} icons
+                                {CATEGORY_LABELS[activeCategory as IconCategory]}
                             </p>
                         )}
                         {query.trim() && (
                             <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.secondary }}>
-                                Search results · {searchResults?.length ?? 0} icons
+                                Search results
                             </p>
                         )}
                         {(searchResults?.length === 0 && query.trim()) ? (
