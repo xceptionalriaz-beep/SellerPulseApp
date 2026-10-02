@@ -20,152 +20,152 @@
 import { getIconSvg } from '../IconLibrary'
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    thumbnail?: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  thumbnail?: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared Helpers & Dynamic Resolvers ─────────────────────────────────────
 
 function pad(p: any, defaultT = 16, defaultR = 24, defaultB = 16, defaultL = 24): string {
-    const top = p.paddingTop ?? defaultT
-    const right = p.paddingRight ?? defaultR
-    const bottom = p.paddingBottom ?? defaultB
-    const left = p.paddingLeft ?? defaultL
-    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+  const top = p.paddingTop ?? defaultT
+  const right = p.paddingRight ?? defaultR
+  const bottom = p.paddingBottom ?? defaultB
+  const left = p.paddingLeft ?? defaultL
+  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
 function font(p: any, defaultFamily = 'Arial, Helvetica, sans-serif'): string {
-    return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
+  return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
 }
 
 export interface KeyFeatureItem {
-    title: string
-    description: string
-    icon?: string
-    badge?: string
-    metric?: string
-    highlight?: boolean
+  title: string
+  description: string
+  icon?: string
+  badge?: string
+  metric?: string
+  highlight?: boolean
 }
 
 const DEFAULT_FEATURES: KeyFeatureItem[] = [
-    {
-        title: 'Aircraft-Grade Aluminum Housing',
-        description: 'Precision CNC-machined from 6061-T6 alloy for maximum structural integrity and ultra-lightweight durability.',
-        icon: 'shield',
-        badge: 'MIL-SPEC',
-        metric: '6061-T6 Alloy',
-        highlight: true,
-    },
-    {
-        title: 'Plug & Play Direct Fitment',
-        description: 'Designed as a direct OEM bolt-on replacement. Installs in under 15 minutes with standard hand tools and zero wire splicing.',
-        icon: 'check',
-        badge: '100% BOLT-ON',
-        metric: '15 Min Install',
-    },
-    {
-        title: 'Advanced Thermal Heat Dissipation',
-        description: 'Engineered finned heatsink channels airflow efficiently, reducing operating temperatures by up to 45% under continuous load.',
-        icon: 'flame',
-        badge: '-45°C COOLER',
-        metric: '45% Thermal Cut',
-    },
-    {
-        title: 'Weatherproof & Dust Sealed',
-        description: 'IP67 waterproof rating with automotive-grade silicone gasket seals to withstand torrential rain, mud, and dust storms.',
-        icon: 'droplet',
-        badge: 'IP67 RATED',
-        metric: 'Submersible 1M',
-    },
+  {
+    title: 'Aircraft-Grade Aluminum Housing',
+    description: 'Precision CNC-machined from 6061-T6 alloy for maximum structural integrity and ultra-lightweight durability.',
+    icon: 'shield',
+    badge: 'MIL-SPEC',
+    metric: '6061-T6 Alloy',
+    highlight: true,
+  },
+  {
+    title: 'Plug & Play Direct Fitment',
+    description: 'Designed as a direct OEM bolt-on replacement. Installs in under 15 minutes with standard hand tools and zero wire splicing.',
+    icon: 'check',
+    badge: '100% BOLT-ON',
+    metric: '15 Min Install',
+  },
+  {
+    title: 'Advanced Thermal Heat Dissipation',
+    description: 'Engineered finned heatsink channels airflow efficiently, reducing operating temperatures by up to 45% under continuous load.',
+    icon: 'flame',
+    badge: '-45°C COOLER',
+    metric: '45% Thermal Cut',
+  },
+  {
+    title: 'Weatherproof & Dust Sealed',
+    description: 'IP67 waterproof rating with automotive-grade silicone gasket seals to withstand torrential rain, mud, and dust storms.',
+    icon: 'droplet',
+    badge: 'IP67 RATED',
+    metric: 'Submersible 1M',
+  },
 ]
 
 function getFeatures(p: any): KeyFeatureItem[] {
-    // If array provided in items, features, highlights, or keyFeatures
-    const raw = p.features ?? p.items ?? p.highlights ?? p.keyFeatures ?? p.list
+  // If array provided in items, features, highlights, or keyFeatures
+  const raw = p.features ?? p.items ?? p.highlights ?? p.keyFeatures ?? p.list
 
-    if (Array.isArray(raw) && raw.length > 0) {
-        return raw.map((item: any, idx: number) => {
-            if (typeof item === 'string') {
-                const parts = item.split(/[-–—:|]/)
-                if (parts.length >= 2) {
-                    return {
-                        title: parts[0].trim(),
-                        description: parts.slice(1).join(' - ').trim(),
-                        badge: `0${idx + 1}`,
-                        metric: `SPEC ${idx + 1}`,
-                    }
-                }
-                return {
-                    title: item.trim(),
-                    description: 'Premium engineered specification designed for reliability and extended service life.',
-                    badge: `0${idx + 1}`,
-                    metric: `FEAT ${idx + 1}`,
-                }
-            }
-
-            return {
-                title: item.title ?? item.name ?? item.heading ?? `Feature 0${idx + 1}`,
-                description: item.description ?? item.desc ?? item.detail ?? item.text ?? 'Built to strict manufacturer tolerances for seamless operation.',
-                icon: item.icon ?? (idx === 0 ? 'shield' : idx === 1 ? 'check' : idx === 2 ? 'flame' : 'droplet'),
-                badge: item.badge ?? item.tag ?? `0${idx + 1}`,
-                metric: item.metric ?? item.spec ?? '',
-                highlight: item.highlight ?? (idx === 0),
-            }
-        })
-    }
-
-    // Multiline string fallback
-    if (typeof raw === 'string' && raw.trim().length > 0) {
-        const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
-        if (lines.length > 0) {
-            return lines.map((line, idx) => {
-                const parts = line.split(/[-–—:|]/)
-                if (parts.length >= 2) {
-                    return {
-                        title: parts[0].trim(),
-                        description: parts.slice(1).join(' - ').trim(),
-                        badge: `0${idx + 1}`,
-                        metric: `SPEC ${idx + 1}`,
-                    }
-                }
-                return {
-                    title: line.replace(/^[•\-\*✓\d\.]+\s*/, ''),
-                    description: 'Tested and certified for dependable performance in demanding operational environments.',
-                    badge: `0${idx + 1}`,
-                    metric: `FEAT ${idx + 1}`,
-                }
-            })
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.map((item: any, idx: number) => {
+      if (typeof item === 'string') {
+        const parts = item.split(/[-–—:|]/)
+        if (parts.length >= 2) {
+          return {
+            title: parts[0].trim(),
+            description: parts.slice(1).join(' - ').trim(),
+            badge: `0${idx + 1}`,
+            metric: `SPEC ${idx + 1}`,
+          }
         }
-    }
+        return {
+          title: item.trim(),
+          description: 'Premium engineered specification designed for reliability and extended service life.',
+          badge: `0${idx + 1}`,
+          metric: `FEAT ${idx + 1}`,
+        }
+      }
 
-    return DEFAULT_FEATURES
+      return {
+        title: item.title ?? item.name ?? item.heading ?? `Feature 0${idx + 1}`,
+        description: item.description ?? item.desc ?? item.detail ?? item.text ?? 'Built to strict manufacturer tolerances for seamless operation.',
+        icon: item.icon ?? (idx === 0 ? 'shield' : idx === 1 ? 'check' : idx === 2 ? 'flame' : 'droplet'),
+        badge: item.badge ?? item.tag ?? `0${idx + 1}`,
+        metric: item.metric ?? item.spec ?? '',
+        highlight: item.highlight ?? (idx === 0),
+      }
+    })
+  }
+
+  // Multiline string fallback
+  if (typeof raw === 'string' && raw.trim().length > 0) {
+    const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+    if (lines.length > 0) {
+      return lines.map((line, idx) => {
+        const parts = line.split(/[-–—:|]/)
+        if (parts.length >= 2) {
+          return {
+            title: parts[0].trim(),
+            description: parts.slice(1).join(' - ').trim(),
+            badge: `0${idx + 1}`,
+            metric: `SPEC ${idx + 1}`,
+          }
+        }
+        return {
+          title: line.replace(/^[•\-\*✓\d\.]+\s*/, ''),
+          description: 'Tested and certified for dependable performance in demanding operational environments.',
+          badge: `0${idx + 1}`,
+          metric: `FEAT ${idx + 1}`,
+        }
+      })
+    }
+  }
+
+  return DEFAULT_FEATURES
 }
 
 function resolveBg(p: any, fallback = '#ffffff'): string {
-    return p.bgColor ?? p.backgroundColor ?? fallback
+  return p.bgColor ?? p.backgroundColor ?? fallback
 }
 
 function resolveText(p: any, fallback = '#0f172a'): string {
-    return p.textColor ?? fallback
+  return p.textColor ?? fallback
 }
 
 function resolveAccent(p: any, fallback = '#2563eb'): string {
-    return p.accentColor ?? p.primaryColor ?? fallback
+  return p.accentColor ?? p.primaryColor ?? fallback
 }
 
 function resolveBorder(p: any, fallback = '#e2e8f0'): string {
-    return p.borderColor ?? p.borderColour ?? fallback
+  return p.borderColor ?? p.borderColour ?? fallback
 }
 
 function resolveHeading(p: any, fallback = 'Key Product Features'): string {
-    return p.heading ?? p.title ?? p.sectionTitle ?? fallback
+  return p.heading ?? p.title ?? p.sectionTitle ?? fallback
 }
 
 function resolveSubtitle(p: any, fallback = 'Engineered for uncompromising performance, durability, and seamless installation'): string {
-    return p.subtitle ?? p.subheading ?? p.description ?? fallback
+  return p.subtitle ?? p.subheading ?? p.description ?? fallback
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -176,32 +176,32 @@ function resolveSubtitle(p: any, fallback = 'Engineered for uncompromising perfo
 // Clean 2x2 / 4-card bordered grid with crisp icons, bold headers, and descriptive text
 // ─────────────────────────────────────────────────────────────────────────────
 function classicCardsGrid(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#e2e8f0')
-    const accent = resolveAccent(p, '#2563eb')
-    const descCol = p.descriptionColor ?? '#64748b'
-    const cardBg = p.cardBg ?? '#f8fafc'
-    const eyebrow = p.eyebrowText ?? 'OFFICIAL SPECIFICATIONS'
-    const heading = resolveHeading(p, 'Key Product Features')
-    const subtitle = resolveSubtitle(p, 'Engineered for uncompromising performance, durability, and seamless installation')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#e2e8f0')
+  const accent = resolveAccent(p, '#2563eb')
+  const descCol = p.descriptionColor ?? '#64748b'
+  const cardBg = p.cardBg ?? '#f8fafc'
+  const eyebrow = p.eyebrowText ?? 'OFFICIAL SPECIFICATIONS'
+  const heading = resolveHeading(p, 'Key Product Features')
+  const subtitle = resolveSubtitle(p, 'Engineered for uncompromising performance, durability, and seamless installation')
+  const items = getFeatures(p)
 
-    // Render cards in pairs for 2-column email/eBay table stability
-    const rows: string[] = []
-    for (let i = 0; i < items.length; i += 2) {
-        const left = items[i]
-        const right = items[i + 1]
+  // Render cards in pairs for 2-column email/eBay table stability
+  const rows: string[] = []
+  for (let i = 0; i < items.length; i += 2) {
+    const left = items[i]
+    const right = items[i + 1]
 
-        rows.push(`
+    rows.push(`
       <tr>
         <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
             style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
             <tr>
               <td valign="top" width="40" style="padding-right:12px;">
-                <div style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;">
+                <div data-feature-index="${i}" style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;cursor:pointer;">
                   ${getIconSvg(left.icon || 'shield', accent, 18)}
                 </div>
               </td>
@@ -222,7 +222,7 @@ function classicCardsGrid(p: any, id: string): string {
             style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
             <tr>
               <td valign="top" width="40" style="padding-right:12px;">
-                <div style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;">
+                <div data-feature-index="${i + 1}" style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;cursor:pointer;">
                   ${getIconSvg(right.icon || 'check', accent, 18)}
                 </div>
               </td>
@@ -239,9 +239,9 @@ function classicCardsGrid(p: any, id: string): string {
         </td>` : `<td width="50%" style="padding:6px;"></td>`}
       </tr>
     `)
-    }
+  }
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -277,20 +277,20 @@ function classicCardsGrid(p: any, id: string): string {
 // 1 large flagship hero card (full width or 60%) + 3 compact technical spec tiles
 // ─────────────────────────────────────────────────────────────────────────────
 function techBentoFlagship(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#cbd5e1')
-    const accent = resolveAccent(p, '#0284c7')
-    const descCol = p.descriptionColor ?? '#64748b'
-    const cardBg = p.cardBg ?? '#f8fafc'
-    const eyebrow = p.eyebrowText ?? 'BENTO ARCHITECTURE • CORE ATTRIBUTES'
-    const heading = resolveHeading(p, 'Engineered Advantages')
-    const items = getFeatures(p)
-    const hero = items[0]
-    const rest = items.slice(1, 4)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#cbd5e1')
+  const accent = resolveAccent(p, '#0284c7')
+  const descCol = p.descriptionColor ?? '#64748b'
+  const cardBg = p.cardBg ?? '#f8fafc'
+  const eyebrow = p.eyebrowText ?? 'BENTO ARCHITECTURE • CORE ATTRIBUTES'
+  const heading = resolveHeading(p, 'Engineered Advantages')
+  const items = getFeatures(p)
+  const hero = items[0]
+  const rest = items.slice(1, 4)
 
-    const restTilesHtml = rest.map((item, idx) => `
+  const restTilesHtml = rest.map((item, idx) => `
     <td width="33.33%" valign="top" style="padding:5px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
         style="background:#f8fafc;border:1px solid ${borderCol};border-radius:8px;padding:14px;box-sizing:border-box;">
@@ -314,7 +314,7 @@ function techBentoFlagship(p: any, id: string): string {
     </td>
   `).join('')
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -379,18 +379,18 @@ function techBentoFlagship(p: any, id: string): string {
 // Heavy-duty horizontal spec strips with monospace parameters & bold category tags
 // ─────────────────────────────────────────────────────────────────────────────
 function industrialSpecBars(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#0f172a')
-    const accent = resolveAccent(p, '#d97706') // Amber/industrial caution accent
-    const descCol = p.descriptionColor ?? '#475569'
-    const cardBg = p.cardBg ?? '#f8fafc'
-    const eyebrow = p.eyebrowText ?? 'INDUSTRIAL RATED • BENCHMARK TOLERANCES'
-    const heading = resolveHeading(p, 'Heavy-Duty Engineering Specifications')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#0f172a')
+  const accent = resolveAccent(p, '#d97706') // Amber/industrial caution accent
+  const descCol = p.descriptionColor ?? '#475569'
+  const cardBg = p.cardBg ?? '#f8fafc'
+  const eyebrow = p.eyebrowText ?? 'INDUSTRIAL RATED • BENCHMARK TOLERANCES'
+  const heading = resolveHeading(p, 'Heavy-Duty Engineering Specifications')
+  const items = getFeatures(p)
 
-    const rowsHtml = items.map((item, idx) => `
+  const rowsHtml = items.map((item, idx) => `
     <tr>
       <td style="padding:10px 14px;background:${idx % 2 === 0 ? cardBg : '#ffffff'};border:1px solid #cbd5e1;border-bottom:2px solid #94a3b8;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -420,7 +420,7 @@ function industrialSpecBars(p: any, id: string): string {
     <tr><td height="5"></td></tr>
   `).join('')
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -454,17 +454,17 @@ function industrialSpecBars(p: any, id: string): string {
 // Ultra-delicate 1px borders, generous whitespace, uppercase tracking & 01-04 numerals
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalistHairlineEditorial(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#1e293b')
-    const borderCol = resolveBorder(p, '#e2e8f0')
-    const accent = resolveAccent(p, '#475569')
-    const descCol = p.descriptionColor ?? '#64748b'
-    const eyebrow = p.eyebrowText ?? 'CURATED EXCELLENCE'
-    const heading = resolveHeading(p, 'Distinctive Features')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#1e293b')
+  const borderCol = resolveBorder(p, '#e2e8f0')
+  const accent = resolveAccent(p, '#475569')
+  const descCol = p.descriptionColor ?? '#64748b'
+  const eyebrow = p.eyebrowText ?? 'CURATED EXCELLENCE'
+  const heading = resolveHeading(p, 'Distinctive Features')
+  const items = getFeatures(p)
 
-    const itemsHtml = items.map((item, idx) => `
+  const itemsHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:16px 18px;border-bottom:1px solid ${borderCol};${idx % 2 === 0 ? `border-right:1px solid ${borderCol};` : ''}box-sizing:border-box;">
       <div style="font-family:${f};font-size:10px;font-weight:700;letter-spacing:2.5px;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;">
         PART 0${idx + 1}
@@ -478,18 +478,18 @@ function minimalistHairlineEditorial(p: any, id: string): string {
     </td>
   `)
 
-    // Group into pairs of 2
-    const pairedRows: string[] = []
-    for (let i = 0; i < itemsHtml.length; i += 2) {
-        pairedRows.push(`
+  // Group into pairs of 2
+  const pairedRows: string[] = []
+  for (let i = 0; i < itemsHtml.length; i += 2) {
+    pairedRows.push(`
       <tr>
         ${itemsHtml[i]}
         ${itemsHtml[i + 1] || '<td width="50%" style="border-bottom:1px solid #e2e8f0;"></td>'}
       </tr>
     `)
-    }
+  }
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -527,20 +527,20 @@ function minimalistHairlineEditorial(p: any, id: string): string {
 // 4-step progressive workflow with vertical spine & index nodes
 // ─────────────────────────────────────────────────────────────────────────────
 function staggeredTimelineFlow(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#e2e8f0')
-    const accent = resolveAccent(p, '#4f46e5')
-    const descCol = p.descriptionColor ?? '#64748b'
-    const cardBg = p.cardBg ?? '#f8fafc'
-    const eyebrow = p.eyebrowText ?? 'TIMELINE ARCHITECTURE'
-    const heading = resolveHeading(p, 'Step-by-Step Advantage & Workflow')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#e2e8f0')
+  const accent = resolveAccent(p, '#4f46e5')
+  const descCol = p.descriptionColor ?? '#64748b'
+  const cardBg = p.cardBg ?? '#f8fafc'
+  const eyebrow = p.eyebrowText ?? 'TIMELINE ARCHITECTURE'
+  const heading = resolveHeading(p, 'Step-by-Step Advantage & Workflow')
+  const items = getFeatures(p)
 
-    const stepsHtml = items.map((item, idx) => {
-        const isLast = idx === items.length - 1
-        return `
+  const stepsHtml = items.map((item, idx) => {
+    const isLast = idx === items.length - 1
+    return `
       <tr>
         <!-- Timeline Marker Column -->
         <td width="44" valign="top" align="center" style="padding-right:12px;">
@@ -570,9 +570,9 @@ function staggeredTimelineFlow(p: any, id: string): string {
         </td>
       </tr>
     `
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -605,20 +605,20 @@ function staggeredTimelineFlow(p: any, id: string): string {
 // Left dark branded pledge column + Right stacked micro-feature benefit cards
 // ─────────────────────────────────────────────────────────────────────────────
 function splitHeroBenefitRail(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#e2e8f0')
-    const accent = resolveAccent(p, '#059669') // Emerald green trust
-    const descCol = p.descriptionColor ?? '#64748b'
-    const eyebrow = p.eyebrowText ?? 'SELLER PLEDGE'
-    const pledgeText = p.pledgeText ?? 'Every unit undergoes strict quality benchmarking before packaging to ensure zero defects and exact fitment.'
-    const guaranteeTitle = p.guaranteeTitle ?? '100% MONEY-BACK BACKED'
-    const guaranteeSubtitle = p.guaranteeSubtitle ?? 'Direct eBay Buyer Protection'
-    const heading = resolveHeading(p, 'Performance Guaranteed')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#e2e8f0')
+  const accent = resolveAccent(p, '#059669') // Emerald green trust
+  const descCol = p.descriptionColor ?? '#64748b'
+  const eyebrow = p.eyebrowText ?? 'SELLER PLEDGE'
+  const pledgeText = p.pledgeText ?? 'Every unit undergoes strict quality benchmarking before packaging to ensure zero defects and exact fitment.'
+  const guaranteeTitle = p.guaranteeTitle ?? '100% MONEY-BACK BACKED'
+  const guaranteeSubtitle = p.guaranteeSubtitle ?? 'Direct eBay Buyer Protection'
+  const heading = resolveHeading(p, 'Performance Guaranteed')
+  const items = getFeatures(p)
 
-    const rightCardsHtml = items.map((item, idx) => `
+  const rightCardsHtml = items.map((item, idx) => `
     <tr>
       <td style="padding-bottom:8px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -643,7 +643,7 @@ function splitHeroBenefitRail(p: any, id: string): string {
     </tr>
   `).join('')
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -690,17 +690,17 @@ function splitHeroBenefitRail(p: any, id: string): string {
 // Stealth obsidian & cyan telemetry HUD with hardware framing & monospaced stats
 // ─────────────────────────────────────────────────────────────────────────────
 function cyberDarkTelemetry(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#090d16')
-    const borderCol = resolveBorder(p, '#1e293b')
-    const accent = resolveAccent(p, '#06b6d4') // Cyan HUD
-    const descCol = p.descriptionColor ?? '#94a3b8'
-    const cardBg = p.cardBg ?? '#0f172a'
-    const heading = resolveHeading(p, 'Hardware Architecture & Telemetry')
-    const eyebrow = p.eyebrowText ?? 'SYSTEM BENCHMARK // HARDWARE AUDIT'
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#090d16')
+  const borderCol = resolveBorder(p, '#1e293b')
+  const accent = resolveAccent(p, '#06b6d4') // Cyan HUD
+  const descCol = p.descriptionColor ?? '#94a3b8'
+  const cardBg = p.cardBg ?? '#0f172a'
+  const heading = resolveHeading(p, 'Hardware Architecture & Telemetry')
+  const eyebrow = p.eyebrowText ?? 'SYSTEM BENCHMARK // HARDWARE AUDIT'
+  const items = getFeatures(p)
 
-    const tilesHtml = items.map((item, idx) => `
+  const tilesHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
         style="background:${cardBg};border:1px solid ${borderCol};border-top:2px solid ${idx === 0 ? accent : '#334155'};border-radius:4px;padding:14px;box-sizing:border-box;">
@@ -726,17 +726,17 @@ function cyberDarkTelemetry(p: any, id: string): string {
     </td>
   `)
 
-    const pairedRows: string[] = []
-    for (let i = 0; i < tilesHtml.length; i += 2) {
-        pairedRows.push(`
+  const pairedRows: string[] = []
+  for (let i = 0; i < tilesHtml.length; i += 2) {
+    pairedRows.push(`
       <tr>
         ${tilesHtml[i]}
         ${tilesHtml[i + 1] || '<td width="50%" style="padding:6px;"></td>'}
       </tr>
     `)
-    }
+  }
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -774,22 +774,22 @@ function cyberDarkTelemetry(p: any, id: string): string {
 // 4-column round emblem badge showcase with centered copy & vibrant iconography
 // ─────────────────────────────────────────────────────────────────────────────
 function circularBadgeQuadrant(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#e2e8f0')
-    const accent = resolveAccent(p, '#7c3aed') // Vibrant violet
-    const descCol = p.descriptionColor ?? '#64748b'
-    const eyebrow = p.eyebrowText ?? 'CERTIFIED HIGHLIGHTS'
-    const heading = resolveHeading(p, 'Key Highlights & Benefits')
-    const items = getFeatures(p).slice(0, 4)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#e2e8f0')
+  const accent = resolveAccent(p, '#7c3aed') // Vibrant violet
+  const descCol = p.descriptionColor ?? '#64748b'
+  const eyebrow = p.eyebrowText ?? 'CERTIFIED HIGHLIGHTS'
+  const heading = resolveHeading(p, 'Key Highlights & Benefits')
+  const items = getFeatures(p).slice(0, 4)
 
-    const columnsHtml = items.map((item, idx) => `
+  const columnsHtml = items.map((item, idx) => `
     <td width="25%" valign="top" align="center" style="padding:8px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center" style="padding-bottom:10px;">
-            <div style="width:48px;height:48px;border-radius:24px;background:#f5f3ff;border:2px solid #ddd6fe;text-align:center;line-height:48px;">
+            <div data-feature-index="${idx}" style="width:48px;height:48px;border-radius:24px;background:#f5f3ff;border:2px solid #ddd6fe;text-align:center;line-height:48px;cursor:pointer;">
               ${getIconSvg(item.icon || 'shield', accent, 22)}
             </div>
           </td>
@@ -808,7 +808,7 @@ function circularBadgeQuadrant(p: any, id: string): string {
     </td>
   `).join('')
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -844,18 +844,18 @@ function circularBadgeQuadrant(p: any, id: string): string {
 // Clean stacked expandable-look ledger bars with prominent status pills & metadata
 // ─────────────────────────────────────────────────────────────────────────────
 function accordionStyleLedger(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#e2e8f0')
-    const accent = resolveAccent(p, '#ea580c') // Burnt orange
-    const descCol = p.descriptionColor ?? '#475569'
-    const cardBg = p.cardBg ?? '#f8fafc'
-    const eyebrow = p.eyebrowText ?? 'STRUCTURED SPECIFICATIONS'
-    const heading = resolveHeading(p, 'Comprehensive Technical Ledger')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#e2e8f0')
+  const accent = resolveAccent(p, '#ea580c') // Burnt orange
+  const descCol = p.descriptionColor ?? '#475569'
+  const cardBg = p.cardBg ?? '#f8fafc'
+  const eyebrow = p.eyebrowText ?? 'STRUCTURED SPECIFICATIONS'
+  const heading = resolveHeading(p, 'Comprehensive Technical Ledger')
+  const items = getFeatures(p)
 
-    const barsHtml = items.map((item, idx) => `
+  const barsHtml = items.map((item, idx) => `
     <tr>
       <td style="padding-bottom:6px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -895,7 +895,7 @@ function accordionStyleLedger(p: any, id: string): string {
     </tr>
   `).join('')
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -928,18 +928,18 @@ function accordionStyleLedger(p: any, id: string): string {
 // Ultra-dense horizontal capsule pill strip optimized for 0-scroll mobile shoppers
 // ─────────────────────────────────────────────────────────────────────────────
 function compactMobileCapsuleStrip(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const borderCol = resolveBorder(p, '#cbd5e1')
-    const accent = resolveAccent(p, '#2563eb')
-    const descCol = p.descriptionColor ?? '#64748b'
-    const cardBg = p.cardBg ?? '#f1f5f9'
-    const eyebrow = p.eyebrowText ?? 'RAPID OVERVIEW • 0-SCROLL READY'
-    const heading = resolveHeading(p, 'Quick-Scan Feature Index')
-    const items = getFeatures(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const borderCol = resolveBorder(p, '#cbd5e1')
+  const accent = resolveAccent(p, '#2563eb')
+  const descCol = p.descriptionColor ?? '#64748b'
+  const cardBg = p.cardBg ?? '#f1f5f9'
+  const eyebrow = p.eyebrowText ?? 'RAPID OVERVIEW • 0-SCROLL READY'
+  const heading = resolveHeading(p, 'Quick-Scan Feature Index')
+  const items = getFeatures(p)
 
-    const chipsHtml = items.map((item, idx) => `
+  const chipsHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
         style="background:${cardBg};border:1px solid ${borderCol};border-radius:20px;padding:6px 12px;box-sizing:border-box;">
@@ -960,17 +960,17 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
     </td>
   `)
 
-    const pairedChips: string[] = []
-    for (let i = 0; i < chipsHtml.length; i += 2) {
-        pairedChips.push(`
+  const pairedChips: string[] = []
+  for (let i = 0; i < chipsHtml.length; i += 2) {
+    pairedChips.push(`
       <tr>
         ${chipsHtml[i]}
         ${chipsHtml[i + 1] || '<td width="50%" style="padding:4px;"></td>'}
       </tr>
     `)
-    }
+  }
 
-    return `<!--[riazify:key_features:${id}]-->
+  return `<!--[riazify:key_features:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
   style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
@@ -1003,8 +1003,8 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
-    // 1. Classic 2x2 Grid (4 clean boxes)
-    'feat-classic-cards-grid': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 1. Classic 2x2 Grid (4 clean boxes)
+  'feat-classic-cards-grid': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <line x1="8" y1="8" x2="36" y2="8" stroke="#2563eb" stroke-width="1.8"/>
     <!-- 2x2 grid -->
@@ -1029,8 +1029,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="52" y1="38.5" x2="64" y2="38.5" stroke="#94a3b8" stroke-width="0.8"/>
   </svg>`,
 
-    // 2. Tech Bento Flagship (1 large dark hero + 3 small tiles)
-    'feat-tech-bento-flagship': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 2. Tech Bento Flagship (1 large dark hero + 3 small tiles)
+  'feat-tech-bento-flagship': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <!-- Top Hero Bento Card -->
     <rect x="6" y="6" width="68" height="20" rx="3" fill="#0f172a"/>
@@ -1046,8 +1046,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="56" y1="34" x2="70" y2="34" stroke="#0f172a" stroke-width="1"/>
   </svg>`,
 
-    // 3. Industrial Spec Bars (Dark caution header + 3 stacked bars)
-    'feat-industrial-spec-bars': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 3. Industrial Spec Bars (Dark caution header + 3 stacked bars)
+  'feat-industrial-spec-bars': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
     <!-- Industrial Header -->
     <rect x="5" y="5" width="70" height="10" rx="1.5" fill="#0f172a"/>
@@ -1070,8 +1070,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <rect x="55" y="38" width="17" height="5" rx="1" fill="#fef3c7"/>
   </svg>`,
 
-    // 4. Minimalist Hairline Editorial (1px grid, generous tracking)
-    'feat-minimalist-hairline-editorial': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 4. Minimalist Hairline Editorial (1px grid, generous tracking)
+  'feat-minimalist-hairline-editorial': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <!-- Editorial rule header -->
     <line x1="8" y1="8" x2="72" y2="8" stroke="#0f172a" stroke-width="1.2"/>
@@ -1091,8 +1091,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="43" y1="35.5" x2="65" y2="35.5" stroke="#0f172a" stroke-width="1"/>
   </svg>`,
 
-    // 5. Staggered Timeline Flow (Vertical line + 3 nodes)
-    'feat-staggered-timeline-flow': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 5. Staggered Timeline Flow (Vertical line + 3 nodes)
+  'feat-staggered-timeline-flow': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <!-- Vertical Spine -->
     <line x1="14" y1="10" x2="14" y2="38" stroke="#cbd5e1" stroke-width="1.2"/>
@@ -1110,8 +1110,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="26" y1="36" x2="48" y2="36" stroke="#0f172a" stroke-width="1"/>
   </svg>`,
 
-    // 6. Split Hero Benefit Rail (Left dark pillar 35% + Right cards)
-    'feat-split-hero-benefit-rail': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 6. Split Hero Benefit Rail (Left dark pillar 35% + Right cards)
+  'feat-split-hero-benefit-rail': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <rect x="5" y="5" width="70" height="38" rx="3" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.8"/>
     <!-- Left dark pillar -->
@@ -1133,8 +1133,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="38" y1="34.5" x2="65" y2="34.5" stroke="#0f172a" stroke-width="1"/>
   </svg>`,
 
-    // 7. Cyber Dark Telemetry (Obsidian + cyan matrix)
-    'feat-cyber-dark-telemetry': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 7. Cyber Dark Telemetry (Obsidian + cyan matrix)
+  'feat-cyber-dark-telemetry': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" stroke-width="1"/>
     <!-- Top cyan bar -->
     <line x1="8" y1="8" x2="42" y2="8" stroke="#06b6d4" stroke-width="1.5"/>
@@ -1154,8 +1154,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="46" y1="35" x2="66" y2="35" stroke="#f8fafc" stroke-width="1"/>
   </svg>`,
 
-    // 8. Circular Badge Quadrant (4 round emblems)
-    'feat-circular-badge-quadrant': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 8. Circular Badge Quadrant (4 round emblems)
+  'feat-circular-badge-quadrant': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <rect x="6" y="8" width="68" height="32" rx="3" fill="#faf5ff" stroke="#ede9fe" stroke-width="0.8"/>
     <!-- 4 circles -->
@@ -1176,8 +1176,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <line x1="62" y1="33" x2="70" y2="33" stroke="#94a3b8" stroke-width="0.8"/>
   </svg>`,
 
-    // 9. Accordion Style Ledger (Stacked bars with category badges)
-    'feat-accordion-style-ledger': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 9. Accordion Style Ledger (Stacked bars with category badges)
+  'feat-accordion-style-ledger': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <line x1="8" y1="8" x2="35" y2="8" stroke="#ea580c" stroke-width="1.8"/>
     <!-- Stacked Ledgers -->
@@ -1197,8 +1197,8 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
     <rect x="56" y="37" width="14" height="5" rx="1" fill="#fff7ed"/>
   </svg>`,
 
-    // 10. Compact Mobile Capsule Strip (2-column pill capsules)
-    'feat-compact-mobile-capsule-strip': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 10. Compact Mobile Capsule Strip (2-column pill capsules)
+  'feat-compact-mobile-capsule-strip': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
     <!-- Mobile Capsule Header -->
     <line x1="8" y1="8" x2="38" y2="8" stroke="#2563eb" stroke-width="1.5"/>
@@ -1230,18 +1230,18 @@ export const KEY_FEATURES_THUMBNAILS: Record<string, string> = {
 }
 
 export function getKeyFeaturesThumbnailSvg(id: string): string {
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^feat[-_]/, '')
-        .replace(/_/g, '-')
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^feat[-_]/, '')
+    .replace(/_/g, '-')
 
-    const key = Object.keys(KEY_FEATURES_THUMBNAILS).find(k => {
-        const kClean = k.toLowerCase().replace(/^feat[-_]/, '').replace(/_/g, '-')
-        return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
-    })
+  const key = Object.keys(KEY_FEATURES_THUMBNAILS).find(k => {
+    const kClean = k.toLowerCase().replace(/^feat[-_]/, '').replace(/_/g, '-')
+    return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
+  })
 
-    return key ? KEY_FEATURES_THUMBNAILS[key] : KEY_FEATURES_THUMBNAILS['feat-classic-cards-grid']
+  return key ? KEY_FEATURES_THUMBNAILS[key] : KEY_FEATURES_THUMBNAILS['feat-classic-cards-grid']
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1249,76 +1249,76 @@ export function getKeyFeaturesThumbnailSvg(id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const keyFeaturesVariants: BlockVariant[] = [
-    {
-        id: 'feat-classic-cards-grid',
-        label: 'Classic 2x2 Feature Grid',
-        description: 'Current classic 4-card bordered grid with crisp icons & descriptive text (KEPT 100% IDENTICAL)',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-classic-cards-grid'],
-        toHtml(props, id) { return classicCardsGrid(props, id) },
-    },
-    {
-        id: 'feat-tech-bento-flagship',
-        label: 'Bento Flagship Architecture',
-        description: 'Asymmetrical modern bento grid: 1 wide flagship hero card + 3 compact spec tiles',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-tech-bento-flagship'],
-        toHtml(props, id) { return techBentoFlagship(props, id) },
-    },
-    {
-        id: 'feat-industrial-spec-bars',
-        label: 'Industrial Heavy-Duty Bars',
-        description: 'Rugged horizontal spec strips with monospace parameters for tools, parts & machinery',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-industrial-spec-bars'],
-        toHtml(props, id) { return industrialSpecBars(props, id) },
-    },
-    {
-        id: 'feat-minimalist-hairline-editorial',
-        label: 'Minimalist Hairline Editorial',
-        description: 'Delicate 1px border dividers, generous whitespace & 01-04 numerals for luxury & apparel',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-minimalist-hairline-editorial'],
-        toHtml(props, id) { return minimalistHairlineEditorial(props, id) },
-    },
-    {
-        id: 'feat-staggered-timeline-flow',
-        label: 'Step-by-Step Workflow Spine',
-        description: '4-step progressive benefit roadmap with connecting vertical spine & circular nodes',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-staggered-timeline-flow'],
-        toHtml(props, id) { return staggeredTimelineFlow(props, id) },
-    },
-    {
-        id: 'feat-split-hero-benefit-rail',
-        label: '35/65 Split Guarantee Rail',
-        description: 'Left dark branded pledge column + right stacked micro-feature benefit cards',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-split-hero-benefit-rail'],
-        toHtml(props, id) { return splitHeroBenefitRail(props, id) },
-    },
-    {
-        id: 'feat-cyber-dark-telemetry',
-        label: 'Obsidian Cyan Cyber HUD',
-        description: 'Stealth dark telemetry differential matrix for gaming peripherals & PC hardware',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-cyber-dark-telemetry'],
-        toHtml(props, id) { return cyberDarkTelemetry(props, id) },
-    },
-    {
-        id: 'feat-circular-badge-quadrant',
-        label: 'Circular Emblem Quadrant',
-        description: '4-column round emblem badge showcase with centered copy for fitness & lifestyle',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-circular-badge-quadrant'],
-        toHtml(props, id) { return circularBadgeQuadrant(props, id) },
-    },
-    {
-        id: 'feat-accordion-style-ledger',
-        label: 'Stacked Technical Ledger',
-        description: 'Clean stacked expandable-look ledger bars with prominent status pills & metadata',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-accordion-style-ledger'],
-        toHtml(props, id) { return accordionStyleLedger(props, id) },
-    },
-    {
-        id: 'feat-compact-mobile-capsule-strip',
-        label: 'Mobile Capsule Pill Strip',
-        description: 'Ultra-dense horizontal capsule pill strip taking minimal vertical screen height on phones',
-        thumbnail: KEY_FEATURES_THUMBNAILS['feat-compact-mobile-capsule-strip'],
-        toHtml(props, id) { return compactMobileCapsuleStrip(props, id) },
-    },
+  {
+    id: 'feat-classic-cards-grid',
+    label: 'Classic 2x2 Feature Grid',
+    description: 'Current classic 4-card bordered grid with crisp icons & descriptive text (KEPT 100% IDENTICAL)',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-classic-cards-grid'],
+    toHtml(props, id) { return classicCardsGrid(props, id) },
+  },
+  {
+    id: 'feat-tech-bento-flagship',
+    label: 'Bento Flagship Architecture',
+    description: 'Asymmetrical modern bento grid: 1 wide flagship hero card + 3 compact spec tiles',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-tech-bento-flagship'],
+    toHtml(props, id) { return techBentoFlagship(props, id) },
+  },
+  {
+    id: 'feat-industrial-spec-bars',
+    label: 'Industrial Heavy-Duty Bars',
+    description: 'Rugged horizontal spec strips with monospace parameters for tools, parts & machinery',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-industrial-spec-bars'],
+    toHtml(props, id) { return industrialSpecBars(props, id) },
+  },
+  {
+    id: 'feat-minimalist-hairline-editorial',
+    label: 'Minimalist Hairline Editorial',
+    description: 'Delicate 1px border dividers, generous whitespace & 01-04 numerals for luxury & apparel',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-minimalist-hairline-editorial'],
+    toHtml(props, id) { return minimalistHairlineEditorial(props, id) },
+  },
+  {
+    id: 'feat-staggered-timeline-flow',
+    label: 'Step-by-Step Workflow Spine',
+    description: '4-step progressive benefit roadmap with connecting vertical spine & circular nodes',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-staggered-timeline-flow'],
+    toHtml(props, id) { return staggeredTimelineFlow(props, id) },
+  },
+  {
+    id: 'feat-split-hero-benefit-rail',
+    label: '35/65 Split Guarantee Rail',
+    description: 'Left dark branded pledge column + right stacked micro-feature benefit cards',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-split-hero-benefit-rail'],
+    toHtml(props, id) { return splitHeroBenefitRail(props, id) },
+  },
+  {
+    id: 'feat-cyber-dark-telemetry',
+    label: 'Obsidian Cyan Cyber HUD',
+    description: 'Stealth dark telemetry differential matrix for gaming peripherals & PC hardware',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-cyber-dark-telemetry'],
+    toHtml(props, id) { return cyberDarkTelemetry(props, id) },
+  },
+  {
+    id: 'feat-circular-badge-quadrant',
+    label: 'Circular Emblem Quadrant',
+    description: '4-column round emblem badge showcase with centered copy for fitness & lifestyle',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-circular-badge-quadrant'],
+    toHtml(props, id) { return circularBadgeQuadrant(props, id) },
+  },
+  {
+    id: 'feat-accordion-style-ledger',
+    label: 'Stacked Technical Ledger',
+    description: 'Clean stacked expandable-look ledger bars with prominent status pills & metadata',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-accordion-style-ledger'],
+    toHtml(props, id) { return accordionStyleLedger(props, id) },
+  },
+  {
+    id: 'feat-compact-mobile-capsule-strip',
+    label: 'Mobile Capsule Pill Strip',
+    description: 'Ultra-dense horizontal capsule pill strip taking minimal vertical screen height on phones',
+    thumbnail: KEY_FEATURES_THUMBNAILS['feat-compact-mobile-capsule-strip'],
+    toHtml(props, id) { return compactMobileCapsuleStrip(props, id) },
+  },
 ]
 
 // Backwards-compatible aliases
@@ -1332,19 +1332,19 @@ export const featuresVariants = keyFeaturesVariants
  * and matches shorthand IDs seamlessly.
  */
 export function getKeyFeaturesVariant(id: string): BlockVariant {
-    if (!id) return keyFeaturesVariants[0]
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^feat[-_]/, '')
-        .replace(/_/g, '-')
+  if (!id) return keyFeaturesVariants[0]
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^feat[-_]/, '')
+    .replace(/_/g, '-')
 
-    const found = keyFeaturesVariants.find(v => {
-        const vClean = v.id.toLowerCase().replace(/^feat[-_]/, '').replace(/_/g, '-')
-        return v.id === id || vClean === clean || v.id.endsWith(clean) || clean.includes(vClean)
-    })
+  const found = keyFeaturesVariants.find(v => {
+    const vClean = v.id.toLowerCase().replace(/^feat[-_]/, '').replace(/_/g, '-')
+    return v.id === id || vClean === clean || v.id.endsWith(clean) || clean.includes(vClean)
+  })
 
-    return found ?? keyFeaturesVariants[0]
+  return found ?? keyFeaturesVariants[0]
 }
 
 export const getFeaturesGridVariant = getKeyFeaturesVariant

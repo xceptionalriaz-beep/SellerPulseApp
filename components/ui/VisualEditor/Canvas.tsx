@@ -1313,6 +1313,20 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         }
       });
     });
+    // Icon click — detect clicks on feature icon wrappers [data-feature-index]
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      if (!target) return;
+      // Walk up from click target (handles clicks on svg/path/circle inside the div)
+      var wrapper = target.closest('[data-feature-index]');
+      if (!wrapper) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var featureIndex = parseInt(wrapper.getAttribute('data-feature-index'), 10);
+      if (!isNaN(featureIndex) && window.parent) {
+        window.parent.postMessage({ type: 'RIAZIFY_ICON_CLICK', featureIndex: featureIndex, blockId: BLOCK_ID }, '*');
+      }
+    });
     // Dropzone click also triggers selection (for full-width / gallery thumbnails)
     document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
       zone.addEventListener('click', function(e) {
