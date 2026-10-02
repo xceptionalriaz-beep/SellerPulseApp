@@ -107,6 +107,13 @@ const CATEGORY_PREVIEW_ICONS: Record<IconCategory, [string, string, string, stri
     customer: ['cs-phone', 'cs-chat', 'cs-smile', 'cs-rating'],
     business: ['biz-store', 'biz-globe', 'biz-verified-seller', 'biz-award'],
     tools: ['hw-wrench', 'hw-hammer', 'hw-settings', 'hw-sliders'],
+    safety: ['saf-shield-check', 'saf-alert-triangle', 'saf-shield-check', 'saf-alert-triangle'],
+    returns: ['ret-rotate-ccw', 'ret-badge-check', 'ret-rotate-ccw', 'ret-badge-check'],
+    packaging: ['pkg-package', 'pkg-gift', 'pkg-package', 'pkg-gift'],
+    compatibility: ['compat-plug', 'compat-link', 'compat-plug', 'compat-link'],
+    condition: ['cond-sparkles', 'cond-refresh', 'cond-sparkles', 'cond-refresh'],
+    eco: ['eco-leaf', 'eco-recycle', 'eco-leaf', 'eco-recycle'],
+    payment: ['pay-credit-card', 'pay-lock', 'pay-credit-card', 'pay-lock'],
 }
 
 export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: IconsPanelProps) {

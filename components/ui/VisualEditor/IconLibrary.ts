@@ -12,7 +12,7 @@
 //   getIconSvg(id, color, size) — renders one icon SVG string
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type IconCategory = 'trust' | 'product' | 'tech' | 'lifestyle' | 'pricing' | 'customer' | 'business' | 'tools'
+export type IconCategory = 'trust' | 'product' | 'tech' | 'lifestyle' | 'pricing' | 'customer' | 'business' | 'tools' | 'safety' | 'returns' | 'packaging' | 'compatibility' | 'condition' | 'eco' | 'payment'
 
 export interface IconEntry {
     id: string
@@ -376,29 +376,29 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
         },
         {
             id: 'non-fade',
-            label: 'UV Safe',
+            label: 'Sun',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="4"/><path d="M12 4h.01M20 12h.01M12 20h.01M4 12h.01M17.65 6.35h.01M17.65 17.65h.01M6.35 17.65h.01M6.35 6.35h.01"/>`)
         },
         {
             id: 'ltd-co',
-            label: 'UK Ltd / LLC',
+            label: 'Building',
             svg: (c, s) => wrap(c, s, `<line x1="2" y1="20" x2="22" y2="20"/><line x1="6" y1="11" x2="6" y2="16"/><line x1="10" y1="11" x2="10" y2="16"/><line x1="14" y1="11" x2="14" y2="16"/><line x1="18" y1="11" x2="18" y2="16"/><polygon points="12 2 20 7 4 7"/><line x1="1" y1="20" x2="23" y2="20"/>`)
         },
 
         // ── 60 New Trust & Quality Icons ─────────────────────────────────────
         {
             id: 'check-check',
-            label: 'Double QC Passed',
+            label: 'Check',
             svg: (c, s) => wrap(c, s, `<path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/>`)
         },
         {
             id: 'clipboard-check',
-            label: 'Inspected Checklist',
+            label: 'Checklist',
             svg: (c, s) => wrap(c, s, `<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>`)
         },
         {
             id: 'heart-handshake',
-            label: 'Customer Care Pledge',
+            label: 'Heart ',
             svg: (c, s) => wrap(c, s, `<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/>`)
         },
         {
@@ -408,343 +408,343 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
         },
         {
             id: 'stars',
-            label: '5-Star Excellence',
+            label: 'Stars',
             svg: (c, s) => wrap(c, s, `<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="m5 21 1.4-3"/><path d="M3.6 17 6.4 19"/>`)
         },
         {
             id: 'badge-check',
-            label: 'Authorized Dealer',
+            label: 'Badge Check',
             svg: (c, s) => wrap(c, s, `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>`)
         },
         {
             id: 'stamp',
-            label: 'Official Notary Seal',
+            label: 'Stamp',
             svg: (c, s) => wrap(c, s, `<path d="M5 22h14"/><path d="M19.27 13.73A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.66-.26-1.3-.73-1.77Z"/><path d="M14 13V8.5C14 7.12 12.88 6 11.5 6S9 7.12 9 8.5V13"/>`)
         },
         {
             id: 'file-signature',
-            label: 'Certificate Signed',
+            label: 'File Signature',
             svg: (c, s) => wrap(c, s, `<path d="M20 19.5v.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8.5L20 7.5V11"/><polyline points="14 2 14 8 20 8"/><path d="M18.42 15.61a2.1 2.1 0 1 1 2.97 2.97L15.5 24.5 12 25l.5-3.5 5.92-5.89Z"/>`)
         },
         {
             id: 'gem',
-            label: 'Precious & Authentic',
+            label: 'Gem / Diamond',
             svg: (c, s) => wrap(c, s, `<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/>`)
         },
         {
             id: 'microscope',
-            label: 'Lab Tested Quality',
+            label: 'Microscope',
             svg: (c, s) => wrap(c, s, `<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>`)
         },
         {
             id: 'test-tube',
-            label: 'Material Chemical Tested',
+            label: 'Test Tube',
             svg: (c, s) => wrap(c, s, `<path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5h0c-1.4 0-2.5-1.1-2.5-2.5V2"/><path d="M8.5 2h7"/><path d="M14.5 16h-5"/>`)
         },
         {
             id: 'stethoscope',
-            label: 'Medical Grade Tested',
+            label: 'Stethoscope',
             svg: (c, s) => wrap(c, s, `<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/>`)
         },
         {
             id: 'ribbon',
-            label: '1st Place Quality',
+            label: 'Trophy',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>`)
         },
         {
             id: 'shield-star',
-            label: 'Elite Star Seller',
+            label: 'Shield Star',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polygon points="12 8 13.5 11 17 11.5 14.5 14 15 17.5 12 16 9 17.5 9.5 14 7 11.5 10.5 11 12 8"/>`)
         },
         {
             id: 'copyright',
-            label: 'Genuine Original IP',
+            label: 'Fingerprint',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M15 9.354a4 4 0 1 0 0 5.292"/>`)
         },
         {
             id: 'eye',
-            label: '100% Transparent Spec',
+            label: 'Eye',
             svg: (c, s) => wrap(c, s, `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`)
         },
         {
             id: 'scan-face',
-            label: 'Authenticity ID Checked',
+            label: 'Scan Face',
             svg: (c, s) => wrap(c, s, `<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>`)
         },
         {
             id: 'hard-hat',
-            label: 'Safety Standards Met',
+            label: 'Shield Alert',
             svg: (c, s) => wrap(c, s, `<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6h0"/><path d="M14 6h0a6 6 0 0 1 6 6v3"/>`)
         },
         {
             id: 'zap-off',
-            label: 'Shock Proof / Safe',
+            label: 'Zap Off',
             svg: (c, s) => wrap(c, s, `<polyline points="12.41 6.75 13 2 10.57 4.92"/><polyline points="18.57 12.91 21 10 15.66 10"/><polyline points="8 8 3 14 12 14 11 22 16 16"/><line x1="1" y1="1" x2="23" y2="23"/>`)
         },
         {
             id: 'flame-kindling',
-            label: 'Fire Retardant Tested',
+            label: 'Flame Kindling',
             svg: (c, s) => wrap(c, s, `<path d="M12 2c1 3 2.5 3.5 3.5 4.5A5 5 0 0 1 17 10c0 2.5-2 4.5-5 4.5s-5-2-5-4.5c0-1.5.5-2.5 1.5-3.5C9.5 5.5 11 5 12 2Z"/><path d="m4 19 16-2"/><path d="m4 17 16 2"/>`)
         },
         {
             id: 'leaf-check',
-            label: 'RoHS / Eco Compliant',
+            label: 'Leaf Check',
             svg: (c, s) => wrap(c, s, `<path d="M11 20A7 7 0 0 1 4 13C4 8 9 3 17 2c0 8-5 13-10 13"/><path d="m14 14 2 2 4-4"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>`)
         },
         {
             id: 'recycle-check',
-            label: 'Non-Toxic Recyclable',
+            label: 'Recycle Check',
             svg: (c, s) => wrap(c, s, `<path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-.9 1.8 1.8 0 0 1 0-1.8L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-.9 1.8 1.8 0 0 0 0-1.8l-1.2-2.1"/><path d="m14 16 3 3-3 3"/><path d="m18 10-3-3 3-3"/>`)
         },
         {
             id: 'sparkles-check',
-            label: 'Sanitized Clean Item',
+            label: 'Sparkles Check',
             svg: (c, s) => wrap(c, s, `<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="m9 12 2 2 4-4"/>`)
         },
         {
             id: 'building-2',
-            label: 'Direct Manufacturer',
+            label: 'Building',
             svg: (c, s) => wrap(c, s, `<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>`)
         },
         {
             id: 'store',
-            label: 'Authorized Storefront',
+            label: 'Store',
             svg: (c, s) => wrap(c, s, `<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><circle cx="12" cy="12" r="2"/>`)
         },
         {
             id: 'user-shield',
-            label: 'Merchant Security',
+            label: 'User Shield',
             svg: (c, s) => wrap(c, s, `<path d="M14 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8" cy="7" r="4"/><path d="M18 11s3-1.5 3-4V4l-3-1-3 1v3c0 2.5 3 4 3 4z"/>`)
         },
         {
             id: 'globe-check',
-            label: 'ISO Global Standard',
+            label: 'Globe Check',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`)
         },
         {
             id: 'badge-dollar',
-            label: 'Price Match Guarantee',
+            label: 'Badge Dollar',
             svg: (c, s) => wrap(c, s, `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M12 8v8"/><path d="M10 10h4a1 1 0 0 1 0 2h-4a1 1 0 0 0 0 2h4"/>`)
         },
         {
             id: 'clock-check',
-            label: '24hr Resolution Guarantee',
+            label: 'Clock Check',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/><path d="m16 16 2 2 4-4"/>`)
         },
         {
             id: 'thumbs-up-double',
-            label: '100% Positive Feedback',
+            label: 'Thumbs Up Duble',
             svg: (c, s) => wrap(c, s, `<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h3"/><path d="M19 14h3a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-3"/>`)
         },
         {
             id: 'smile-plus',
-            label: 'Delight Guaranteed',
+            label: 'Smile Plus',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>`)
         },
         {
             id: 'shield-minus',
-            label: 'Zero Defect Policy',
+            label: 'Shield Minus',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><line x1="9" y1="12" x2="15" y2="12"/>`)
         },
         {
             id: 'badge-alert',
-            label: 'Authenticity Warning Protected',
+            label: 'Badge Alert',
             svg: (c, s) => wrap(c, s, `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`)
         },
         {
             id: 'key-round',
-            label: 'Genuine License Key',
+            label: 'Key Round',
             svg: (c, s) => wrap(c, s, `<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>`)
         },
         {
             id: 'history',
-            label: 'Established Heritage',
+            label: 'History',
             svg: (c, s) => wrap(c, s, `<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><polyline points="12 7 12 12 15 15"/>`)
         },
         {
             id: 'file-lock',
-            label: 'Encrypted VAT Invoice',
+            label: 'File Lock',
             svg: (c, s) => wrap(c, s, `<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><rect width="6" height="5" x="9" y="13" rx="1"/><path d="M10 13V11a2 2 0 0 1 4 0v2"/>`)
         },
         {
             id: 'server-shield',
-            label: 'Data Privacy Guard',
+            label: 'Server Shield',
             svg: (c, s) => wrap(c, s, `<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M12 12s3-1.5 3-4V5l-3-1-3 1v3c0 2.5 3 4 3 4z"/>`)
         },
         {
             id: 'check-circle',
-            label: '100% Tested Working',
+            label: 'Check Circle',
             svg: (c, s) => wrap(c, s, `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`)
         },
         {
             id: 'search-check',
-            label: 'Counterfeit Inspection',
+            label: 'Search Check',
             svg: (c, s) => wrap(c, s, `<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="m8 11 2 2 4-4"/>`)
         },
         {
             id: 'shield-half',
-            label: 'Limited Manufacturer Warranty',
+            label: 'Shield Half',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M12 22V2"/>`)
         },
         {
             id: 'shield-ellipsis',
-            label: 'Full Protection Policy',
+            label: 'Shield Ellipsis',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/>`)
         },
         {
             id: 'lock-keyhole',
-            label: 'Tamper Resistant Seal',
+            label: 'Lock Keyhole',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>`)
         },
         {
             id: 'award-ribbon',
-            label: 'Customer Choice Winner',
+            label: 'Award Ribbon',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="9" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/>`)
         },
         {
             id: 'message-circle-heart',
-            label: '5-Star Buyer Endorsed',
+            label: 'Star',
             svg: (c, s) => wrap(c, s, `<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M12 8c.5-1 1.5-1.5 2.5-1.5 1.5 0 2.5 1 2.5 2.5 0 2-2.5 3.5-5 5.5-2.5-2-5-3.5-5-5.5 0-1.5 1-2.5 2.5-2.5 1 0 2 .5 2.5 1.5"/>`)
         },
         {
             id: 'badge-help',
-            label: 'Free Lifetime Support',
+            label: 'Badge Help',
             svg: (c, s) => wrap(c, s, `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>`)
         },
         {
             id: 'shield-question',
-            label: 'Buyer Protection FAQ',
+            label: 'Shield Question',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>`)
         },
         {
             id: 'check-square',
-            label: 'Box Contents Inspected',
+            label: 'Check Square',
             svg: (c, s) => wrap(c, s, `<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>`)
         },
         {
             id: 'user-star',
-            label: 'Rated Power Seller',
+            label: 'User Star',
             svg: (c, s) => wrap(c, s, `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polygon points="19 8 20 10.5 22.5 10.8 20.5 12.5 21 15 19 13.8 17 15 17.5 12.5 15.5 10.8 18 10.5 19 8"/>`)
         },
         {
             id: 'star-half',
-            label: 'Top 1% Rated Category',
+            label: 'Star Half',
             svg: (c, s) => wrap(c, s, `<path d="M12 17.8 5.8 21 7 14.1 2 9.3l7-1L12 2"/><path d="M12 2v15.8"/>`)
         },
         {
             id: 'tag-check',
-            label: 'Authentic Retail Tag',
+            label: 'Tag Check',
             svg: (c, s) => wrap(c, s, `<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><path d="m9 11 2 2 4-4"/>`)
         },
         {
             id: 'box-check',
-            label: 'Unopened Factory Sealed',
+            label: 'Box Check',
             svg: (c, s) => wrap(c, s, `<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m9 12 2 2 4-4"/>`)
         },
         {
             id: 'truck-check',
-            label: 'Guaranteed Arrival Safe',
+            label: 'Truck Check',
             svg: (c, s) => wrap(c, s, `<rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/><path d="m6 9 2 2 4-4"/>`)
         },
         {
             id: 'package-check',
-            label: 'Checked & Repacked',
+            label: 'Package Check',
             svg: (c, s) => wrap(c, s, `<path d="m16 16 2 2 4-4"/><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>`)
         },
         {
             id: 'badge-award',
-            label: 'Certificate of Provenance',
+            label: 'Badge Award',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="5"/><path d="m9.5 13-2 8 4.5-2.5L16.5 21l-2-8"/>`)
         },
         {
             id: 'shield-x',
-            label: 'Defect Free Guarantee',
+            label: 'Shield X',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><line x1="9.5" y1="9.5" x2="14.5" y2="14.5"/><line x1="14.5" y1="9.5" x2="9.5" y2="14.5"/>`)
         },
         {
             id: 'award-star',
-            label: 'Top Quality Choice',
+            label: 'Award Star',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="6"/><polygon points="12 5 13 7 15 7.5 13.5 9 14 11 12 10 10 11 10.5 9 9 7.5 11 7 12 5"/><path d="m15.5 13 1.5 8-5-2.5L7 21l1.5-8"/>`)
         },
         {
             id: 'shield-check-gold',
-            label: '100% Lifetime Protection',
+            label: 'Infinity',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="8 11 11 14 17 8" stroke-width="2.5"/>`)
         },
         {
             id: 'check-decagram',
-            label: 'Accredited Merchant Seal',
+            label: 'Badge Check',
             svg: (c, s) => wrap(c, s, `<polygon points="12 2 15 5 19 5 20 9 23 12 20 15 19 19 15 19 12 22 9 19 5 19 4 15 1 12 4 9 5 5 9 5 12 2"/><polyline points="8 12 11 15 16 10"/>`)
         },
         {
             id: 'badge-verified-solid',
-            label: 'Official Seller Seal',
+            label: 'Stamp',
             svg: (c, s) => wrap(c, s, `<path d="M12 2l2.4 2.5 3.4-.4 1.4 3.1 3.2 1.3-.3 3.5 2.1 2.8-2.1 2.8.3 3.5-3.2 1.3-1.4 3.1-3.4-.4L12 22l-2.4-2.5-3.4.4-1.4-3.1-3.2-1.3.3-3.5L-.2 9.2l2.1-2.8-.3-3.5 3.2-1.3 1.4-3.1 3.4.4L12 2z"/><polyline points="8 12 11 15 16 10"/>`)
         },
         // ── 50 Advanced eBay Trust & Quality Icons ────────────────────────────
         {
             id: 'infinity',
-            label: 'Lifetime Warranty Guarantee',
+            label: 'Shield Plus',
             svg: (c, s) => wrap(c, s, `<path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>`)
         },
         {
             id: 'shield-dollar',
-            label: 'No Restocking Fee Refund',
+            label: 'Rotate Ccw / Refresh',
             svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8"/><path d="M10 10h4a1 1 0 0 1 0 2h-4a1 1 0 0 0 0 2h4"/>`)
         },
         {
             id: 'car-check',
-            label: 'eBay Motors Fitment Guaranteed',
+            label: 'Wrench / Car',
             svg: (c, s) => wrap(c, s, `<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="m9 9 2 2 4-4"/>`)
         },
         {
             id: 'vault',
-            label: 'Vault Authenticated Storage',
+            label: 'Vault / Safe',
             svg: (c, s) => wrap(c, s, `<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M12 8V6"/><path d="M12 18v-2"/><path d="M8 12H6"/><path d="M18 12h-2"/>`)
         },
         {
             id: 'battery-check',
-            label: '85%+ Battery Health Tested',
+            label: 'Battery Charging',
             svg: (c, s) => wrap(c, s, `<rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/><path d="m7 12 2 2 4-4"/>`)
         },
         {
             id: 'cpu-check',
-            label: 'Logic Board 100% Tested',
+            label: 'Cpu / Chip',
             svg: (c, s) => wrap(c, s, `<rect x="4" y="4" width="16" height="16" rx="2"/><path d="m9 12 2 2 4-4"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/>`)
         },
         {
             id: 'screen-check',
-            label: 'Zero Dead Pixels Certified',
+            label: 'Monitor Check',
             svg: (c, s) => wrap(c, s, `<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/><path d="m8 10 2 2 4-4"/>`)
         },
         {
             id: 'refresh-cw',
-            label: 'Factory Certified Refurbished',
+            label: 'Refresh Cw',
             svg: (c, s) => wrap(c, s, `<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>`)
         },
         {
             id: 'grade-a-plus',
-            label: 'Grade A+ Pristine Cosmetic',
+            label: 'Sparkle',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 15h3m-1.5-6v6M14 12h4M16 10v4"/>`)
         },
         {
             id: 'shoe-check',
-            label: 'Sneaker Con Authenticated',
+            label: 'Footprints',
             svg: (c, s) => wrap(c, s, `<path d="M2 17h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 17c0-3 1.5-6 4-7l5-2 4 4 5 1a2 2 0 0 1 2 2v2"/><path d="m9 11 2 2 4-4"/>`)
         },
         {
             id: 'watch-check',
-            label: 'Timegrapher Precision Tested',
+            label: 'Watch / Timer',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="7"/><path d="M12 9v3l2 2"/><path d="m8 1 1 3h6l1-3"/><path d="m8 23 1-3h6l1 3"/><path d="m17 9 2 2 3-3"/>`)
         },
         {
             id: 'bag-check',
-            label: 'Luxury Leather Verified',
+            label: 'Layers',
             svg: (c, s) => wrap(c, s, `<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="m9 13 2 2 4-4"/>`)
         },
         {
             id: 'coins-stack',
-            label: 'Bullion .999 Purity Assay',
+            label: 'Scale / Coins',
             svg: (c, s) => wrap(c, s, `<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>`)
         },
         {
@@ -1526,11 +1526,102 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/>`)
         },
     ],
+
+    safety: [
+        {
+            id: 'saf-shield-check',
+            label: 'Safety Certified',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>`)
+        },
+        {
+            id: 'saf-alert-triangle',
+            label: 'Safety Warning',
+            svg: (c, s) => wrap(c, s, `<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`)
+        },
+    ],
+
+    returns: [
+        {
+            id: 'ret-rotate-ccw',
+            label: '30-Day Returns',
+            svg: (c, s) => wrap(c, s, `<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>`)
+        },
+        {
+            id: 'ret-badge-check',
+            label: 'Money-Back Guarantee',
+            svg: (c, s) => wrap(c, s, `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76z"/><path d="m9 12 2 2 4-4"/>`)
+        },
+    ],
+
+    packaging: [
+        {
+            id: 'pkg-package',
+            label: 'Secure Packaging',
+            svg: (c, s) => wrap(c, s, `<path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>`)
+        },
+        {
+            id: 'pkg-gift',
+            label: 'Gift Wrap Available',
+            svg: (c, s) => wrap(c, s, `<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>`)
+        },
+    ],
+
+    compatibility: [
+        {
+            id: 'compat-plug',
+            label: 'Universal Fit',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/>`)
+        },
+        {
+            id: 'compat-link',
+            label: 'Works With',
+            svg: (c, s) => wrap(c, s, `<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>`)
+        },
+    ],
+
+    condition: [
+        {
+            id: 'cond-sparkles',
+            label: 'Brand New',
+            svg: (c, s) => wrap(c, s, `<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>`)
+        },
+        {
+            id: 'cond-refresh',
+            label: 'Refurbished',
+            svg: (c, s) => wrap(c, s, `<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>`)
+        },
+    ],
+
+    eco: [
+        {
+            id: 'eco-leaf',
+            label: 'Eco-Friendly',
+            svg: (c, s) => wrap(c, s, `<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>`)
+        },
+        {
+            id: 'eco-recycle',
+            label: 'Recyclable',
+            svg: (c, s) => wrap(c, s, `<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/>`)
+        },
+    ],
+
+    payment: [
+        {
+            id: 'pay-credit-card',
+            label: 'Secure Payment',
+            svg: (c, s) => wrap(c, s, `<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>`)
+        },
+        {
+            id: 'pay-lock',
+            label: 'Checkout Protection',
+            svg: (c, s) => wrap(c, s, `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`)
+        },
+    ],
 }
 
 // ─── Category order ───────────────────────────────────────────────────────────
 
-export const ICON_CATEGORIES: IconCategory[] = ['trust', 'product', 'tech', 'lifestyle', 'pricing', 'customer', 'business', 'tools']
+export const ICON_CATEGORIES: IconCategory[] = ['trust', 'product', 'tech', 'lifestyle', 'pricing', 'customer', 'business', 'tools', 'safety', 'returns', 'packaging', 'compatibility', 'condition', 'eco', 'payment']
 
 export const CATEGORY_LABELS: Record<IconCategory, string> = {
     trust: 'Trust & Quality',
@@ -1541,6 +1632,13 @@ export const CATEGORY_LABELS: Record<IconCategory, string> = {
     customer: 'Customer Service',
     business: 'Seller & Business',
     tools: 'Tools & Hardware',
+    safety: 'Safety & Compliance',
+    returns: 'Returns & Warranty',
+    packaging: 'Packaging',
+    compatibility: 'Compatibility',
+    condition: 'Item Condition',
+    eco: 'Eco & Sustainability',
+    payment: 'Payment & Checkout',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
