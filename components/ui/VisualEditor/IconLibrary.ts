@@ -512,11 +512,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><circle cx="12" cy="12" r="2"/>`)
         },
         {
-            id: 'users',
-            label: '50k+ Happy Buyers',
-            svg: (c, s) => wrap(c, s, `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`)
-        },
-        {
             id: 'user-shield',
             label: 'Merchant Security',
             svg: (c, s) => wrap(c, s, `<path d="M14 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8" cy="7" r="4"/><path d="M18 11s3-1.5 3-4V4l-3-1-3 1v3c0 2.5 3 4 3 4z"/>`)
@@ -977,11 +972,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`)
         },
         {
-            id: 'globe',
-            label: 'Global Transit',
-            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`)
-        },
-        {
             id: 'plane',
             label: 'Air Express Shipping',
             svg: (c, s) => wrap(c, s, `<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>`)
@@ -1062,19 +1052,9 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>`)
         },
         {
-            id: 'percent',
-            label: 'Volume Discount',
-            svg: (c, s) => wrap(c, s, `<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>`)
-        },
-        {
             id: 'coins',
             label: 'Cashback & Rewards',
             svg: (c, s) => wrap(c, s, `<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>`)
-        },
-        {
-            id: 'banknote',
-            label: 'Money Back Guarantee',
-            svg: (c, s) => wrap(c, s, `<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>`)
         },
         {
             id: 'gift',
@@ -1126,11 +1106,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>`)
         },
         {
-            id: 'wrench',
-            label: 'Wrench',
-            svg: (c, s) => wrap(c, s, `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>`)
-        },
-        {
             id: 'settings',
             label: 'Settings / Gear',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>`)
@@ -1171,11 +1146,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<path d="M14 9V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2Z"/><path d="M18 7h4"/><path d="M14 11l4 8h-4l-3-6"/>`)
         },
         {
-            id: 'key',
-            label: 'OEM Fitment Key',
-            svg: (c, s) => wrap(c, s, `<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>`)
-        },
-        {
             id: 'disc',
             label: 'Brake Disc / Rotor',
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>`)
@@ -1184,11 +1154,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             id: 'magnet',
             label: 'Magnetic Clamp',
             svg: (c, s) => wrap(c, s, `<path d="m6 15-4-4 6.7-6.7a5.5 5.5 0 0 1 7.8 0l1.2 1.2a5.5 5.5 0 0 1 0 7.8L11 20l-4-4"/><path d="m9 9 4 4"/><path d="m4 13 4 4"/>`)
-        },
-        {
-            id: 'sliders',
-            label: 'Calibrated Precision',
-            svg: (c, s) => wrap(c, s, `<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>`)
         },
         {
             id: 'anchor-hardware',
@@ -1204,11 +1169,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             id: 'layers',
             label: 'Multi-Layer Protection',
             svg: (c, s) => wrap(c, s, `<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>`)
-        },
-        {
-            id: 'scissors',
-            label: 'Trim-to-Fit',
-            svg: (c, s) => wrap(c, s, `<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/>`)
         },
     ],
 
@@ -1260,11 +1220,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/><path d="M2 9h20"/>`)
         },
         {
-            id: 'gem',
-            label: 'Gemstone',
-            svg: (c, s) => wrap(c, s, `<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3 8 9l4 12 4-12-3-6"/>`)
-        },
-        {
             id: 'shirt',
             label: 'Apparel',
             svg: (c, s) => wrap(c, s, `<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>`)
@@ -1303,26 +1258,6 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             id: 'sparkle-gold',
             label: 'Plated',
             svg: (c, s) => wrap(c, s, `<polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/>`)
-        },
-        {
-            id: 'phone',
-            label: 'Phone Call',
-            svg: (c, s) => wrap(c, s, `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>`)
-        },
-        {
-            id: 'mail',
-            label: 'Email',
-            svg: (c, s) => wrap(c, s, `<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>`)
-        },
-        {
-            id: 'message-square',
-            label: 'Messages',
-            svg: (c, s) => wrap(c, s, `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`)
-        },
-        {
-            id: 'help-circle',
-            label: 'Help Guide',
-            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>`)
         },
         {
             id: 'info',
