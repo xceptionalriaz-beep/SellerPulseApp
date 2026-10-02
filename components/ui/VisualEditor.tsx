@@ -186,6 +186,7 @@ export default function VisualEditor({
     const [activeTab, setActiveTab] = useState<RailTabId | null>('blocks')
     const [panelOpen, setPanelOpen] = useState(true)
     const [selectedFeatureIndex, setSelectedFeatureIndex] = useState<number | null>(null)
+    const [selectedIconBlockId, setSelectedIconBlockId] = useState<string | null>(null)
     type DropSlot = 'leftImage' | 'leftContent' | 'rightContent' | 'content' | 'col1Content' | 'col2Content' | 'col3Content' | 'col4Content'
     const [activeDropSlot, setActiveDropSlot] = useState<{ blockId: string; slot: DropSlot } | null>(null)
 
@@ -1212,8 +1213,9 @@ export default function VisualEditor({
                     }
                 }
             } else if (event.data?.type === 'RIAZIFY_ICON_CLICK') {
-                const { featureIndex } = event.data;
+                const { featureIndex, blockId } = event.data;
                 setSelectedFeatureIndex(featureIndex);
+                setSelectedIconBlockId(blockId ?? null);
                 setActiveTab('icons');
                 setPanelOpen(true);
             } else if (event.data?.type === 'RIAZIFY_DROP_BLOCK') {
@@ -1453,14 +1455,21 @@ export default function VisualEditor({
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
                         if (selectedFeatureIndex === null) return;
-                        const idx = blocks.findIndex(b => b.type === 'key_features_grid');
+                        // Find block by ID (works for any block type with features[])
+                        const idx = selectedIconBlockId
+                            ? blocks.findIndex(b => b.id === selectedIconBlockId)
+                            : blocks.findIndex(b => b.type === 'key_features_grid');
                         if (idx < 0) return;
                         const block = blocks[idx];
-                        const features = (block.props as any).features ?? [];
-                        const updatedFeatures = features.map((f: any, i: number) =>
+                        // Support both features[] and badges[] prop names
+                        const propKey = (block.props as any).features !== undefined ? 'features'
+                            : (block.props as any).badges !== undefined ? 'badges'
+                                : 'features';
+                        const items = (block.props as any)[propKey] ?? [];
+                        const updated = items.map((f: any, i: number) =>
                             i === selectedFeatureIndex ? { ...f, icon: iconId } : f
                         );
-                        const updatedBlock = { ...block, props: { ...block.props, features: updatedFeatures } };
+                        const updatedBlock = { ...block, props: { ...block.props, [propKey]: updated } };
                         const newBlocks = [...blocks];
                         newBlocks[idx] = updatedBlock as any;
                         commitBlocks(newBlocks, blocks);
