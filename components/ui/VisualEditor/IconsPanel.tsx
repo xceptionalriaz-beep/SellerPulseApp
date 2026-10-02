@@ -277,7 +277,7 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                             </p>
                         ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-                                {(query.trim() ? searchResults! : ICON_LIBRARY[activeCategory as IconCategory]).map(entry => (
+                                {(query.trim() ? searchResults! : (activeCategory && activeCategory !== 'all' ? ICON_LIBRARY[activeCategory as IconCategory] : [])).map(entry => (
                                     <IconCard
                                         key={entry.id}
                                         id={entry.id}
