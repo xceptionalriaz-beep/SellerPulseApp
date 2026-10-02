@@ -183,6 +183,8 @@ function classicCardsGrid(p: any, id: string): string {
   const accent = resolveAccent(p, '#2563eb')
   const descCol = p.descriptionColor ?? '#64748b'
   const cardBg = p.cardBg ?? '#f8fafc'
+  const iconBg = p.iconBg ?? '#eff6ff'
+  const iconBorderColor = p.iconBorderColor ?? '#bfdbfe'
   const eyebrow = p.eyebrowText ?? 'OFFICIAL SPECIFICATIONS'
   const heading = resolveHeading(p, 'Key Product Features')
   const subtitle = resolveSubtitle(p, 'Engineered for uncompromising performance, durability, and seamless installation')
@@ -201,7 +203,7 @@ function classicCardsGrid(p: any, id: string): string {
             style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
             <tr>
               <td valign="top" width="40" style="padding-right:12px;">
-                <div data-feature-index="${i}" style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;cursor:pointer;">
+                <div data-feature-index="${i}" style="width:36px;height:36px;border-radius:8px;background:${iconBg};border:1px solid ${iconBorderColor};text-align:center;line-height:36px;cursor:pointer;">
                   ${getIconSvg(left.icon || 'shield', accent, 18)}
                 </div>
               </td>
@@ -222,7 +224,7 @@ function classicCardsGrid(p: any, id: string): string {
             style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
             <tr>
               <td valign="top" width="40" style="padding-right:12px;">
-                <div data-feature-index="${i + 1}" style="width:36px;height:36px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;text-align:center;line-height:36px;cursor:pointer;">
+                <div data-feature-index="${i + 1}" style="width:36px;height:36px;border-radius:8px;background:${iconBg};border:1px solid ${iconBorderColor};text-align:center;line-height:36px;cursor:pointer;">
                   ${getIconSvg(right.icon || 'check', accent, 18)}
                 </div>
               </td>
@@ -780,6 +782,8 @@ function circularBadgeQuadrant(p: any, id: string): string {
   const borderCol = resolveBorder(p, '#e2e8f0')
   const accent = resolveAccent(p, '#7c3aed') // Vibrant violet
   const descCol = p.descriptionColor ?? '#64748b'
+  const iconBg = p.iconBg ?? '#f5f3ff'
+  const iconBorderColor = p.iconBorderColor ?? '#ddd6fe'
   const eyebrow = p.eyebrowText ?? 'CERTIFIED HIGHLIGHTS'
   const heading = resolveHeading(p, 'Key Highlights & Benefits')
   const items = getFeatures(p).slice(0, 4)
@@ -789,7 +793,7 @@ function circularBadgeQuadrant(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center" style="padding-bottom:10px;">
-            <div data-feature-index="${idx}" style="width:48px;height:48px;border-radius:24px;background:#f5f3ff;border:2px solid #ddd6fe;text-align:center;line-height:48px;cursor:pointer;">
+            <div data-feature-index="${idx}" style="width:48px;height:48px;border-radius:24px;background:${iconBg};border:2px solid ${iconBorderColor};text-align:center;line-height:48px;cursor:pointer;">
               ${getIconSvg(item.icon || 'shield', accent, 22)}
             </div>
           </td>

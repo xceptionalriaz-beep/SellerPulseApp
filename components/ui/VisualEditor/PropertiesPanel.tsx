@@ -6305,6 +6305,12 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Subtext colour" value={props.subTextColor ?? '#6b7280'} onChange={v => updateProps({ subTextColor: v })} />
                         <ColorRow label="Badge background" value={props.badgeBg ?? '#f0f9ff'} onChange={v => updateProps({ badgeBg: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#bfdbfe'} onChange={v => updateProps({ borderColor: v })} />
+                        {(pv === 'row' || pv === 'grid') && (
+                            <>
+                                <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
+                                <ColorRow label="Icon background" value={props.iconBg ?? '#f5f3ff'} onChange={v => updateProps({ iconBg: v })} />
+                            </>
+                        )}
                     </Section>
                     {(pv === 'row' || pv === 'grid') && (
                         <Section title="Layout">
@@ -7420,6 +7426,8 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#0f172a'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Accent / icon colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Icon background" value={props.iconBg ?? '#eff6ff'} onChange={v => updateProps({ iconBg: v })} />
+                        <ColorRow label="Icon border colour" value={props.iconBorderColor ?? '#bfdbfe'} onChange={v => updateProps({ iconBorderColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
                         <ColorRow label="Card / tile background" value={props.cardBg ?? '#f8fafc'} onChange={v => updateProps({ cardBg: v })} />
                         <ColorRow label="Description text" value={props.descriptionColor ?? '#64748b'} onChange={v => updateProps({ descriptionColor: v })} />

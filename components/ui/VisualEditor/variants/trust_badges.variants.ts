@@ -31,11 +31,12 @@ export const trustBadgesVariants: BlockVariant[] = [
     toHtml(p: any, id: string): string {
       const badges = (p.badges?.length ? p.badges : FALLBACK_BADGES).slice(0, 4)
       const iconColor = p.iconColor ?? '#7530fb'
+      const iconBg = p.iconBg ?? '#f5f3ff'
       const cols = badges.map((b: any, i: number) => `
       <td width="${Math.floor(100 / badges.length)}%" style="text-align:center;vertical-align:top;padding:0 4px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border:1px solid #e5e7eb;border-radius:12px;">
           <tr><td style="padding:14px 8px;text-align:center;">
-            <div data-feature-index="${i}" style="display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;background-color:#f5f3ff;color:${iconColor};border-radius:8px;font-size:18px;cursor:pointer;">${b.icon ?? '✓'}</div>
+            <div data-feature-index="${i}" style="display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;background-color:${iconBg};color:${iconColor};border-radius:8px;font-size:18px;cursor:pointer;">${b.icon ?? '✓'}</div>
             <p style="margin:8px 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${p.textColor ?? '#1e1535'};">${b.text}</p>
             ${b.subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.subTextColor ?? '#6b7280'};">${b.subText}</p>` : ''}
           </td></tr>
@@ -61,6 +62,7 @@ export const trustBadgesVariants: BlockVariant[] = [
     toHtml(p: any, id: string): string {
       const badges = (p.badges?.length ? p.badges : FALLBACK_BADGES).slice(0, 4)
       const iconColor = p.iconColor ?? '#7530fb'
+      const iconBg = p.iconBg ?? '#f5f3ff'
       const rows = [badges.slice(0, 2), badges.slice(2, 4)]
       const rowHtml = rows.map((row: any[], rowIdx: number) => `
       <tr>${row.map((b: any, colIdx: number) => `
@@ -70,7 +72,7 @@ export const trustBadgesVariants: BlockVariant[] = [
               <td style="padding:14px 16px;vertical-align:middle;">
                 <table cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    <td data-feature-index="${rowIdx * 2 + colIdx}" width="36" height="36" style="width:36px;height:36px;padding-right:12px;vertical-align:middle;text-align:center;background-color:#f5f3ff;border-radius:8px;color:${iconColor};font-size:18px;line-height:36px;cursor:pointer;">${b.icon ?? '✓'}</td>
+                    <td data-feature-index="${rowIdx * 2 + colIdx}" width="36" height="36" style="width:36px;height:36px;padding-right:12px;vertical-align:middle;text-align:center;background-color:${iconBg};border-radius:8px;color:${iconColor};font-size:18px;line-height:36px;cursor:pointer;">${b.icon ?? '✓'}</td>
                     <td style="vertical-align:middle;">
                       <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#1e1535'};">${b.text}</p>
                       ${b.subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:${p.subTextColor ?? '#6b7280'};">${b.subText}</p>` : ''}
