@@ -101,36 +101,41 @@ function IconCard({ id, label, svg, onClick, isActive }: IconCardProps) {
 export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: IconsPanelProps) {
     const [query, setQuery] = useState('')
     const [activeIcon, setActiveIcon] = useState<string | null>(null)
+    const [activeCategory, setActiveCategory] = useState<IconCategory | 'all'>('all')
 
     const iconColor = C.primary
+    const noBlock = selectedFeatureIndex === null
 
-    const filteredCategories = useMemo(() => {
-        if (!query.trim()) return null
+    const visibleIcons = useMemo(() => {
+        const pool = activeCategory === 'all'
+            ? ICON_CATEGORIES.flatMap(cat => ICON_LIBRARY[cat])
+            : ICON_LIBRARY[activeCategory]
+        if (!query.trim()) return pool
         const q = query.toLowerCase()
-        return ICON_CATEGORIES.map(cat => ({
-            cat,
-            icons: ICON_LIBRARY[cat].filter(
-                e => e.id.includes(q) || e.label.toLowerCase().includes(q)
-            )
-        })).filter(g => g.icons.length > 0)
-    }, [query])
+        return pool.filter(e => e.id.includes(q) || e.label.toLowerCase().includes(q))
+    }, [query, activeCategory])
 
     function handleSelect(id: string) {
         setActiveIcon(id)
         onIconSelect(id)
     }
 
-    const noBlock = selectedFeatureIndex === null
+    const pills: Array<{ id: IconCategory | 'all'; label: string }> = [
+        { id: 'all', label: 'All' },
+        ...ICON_CATEGORIES.map(cat => ({ id: cat, label: CATEGORY_LABELS[cat] })),
+    ]
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: C.bg, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: C.bg }}>
 
-            {/* Header */}
-            <div style={{ padding: '14px 14px 10px', borderBottom: `1px solid ${C.border}` }}>
+            {/* ── Header: search + category pills ── */}
+            <div style={{ padding: '14px 14px 0', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
                 <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary }}>
                     Icon Library
                 </p>
-                <div style={{ position: 'relative' }}>
+
+                {/* Search */}
+                <div style={{ position: 'relative', marginBottom: 10 }}>
                     <input
                         type="text"
                         placeholder="Search icons…"
@@ -142,121 +147,75 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                         <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
                 </div>
+
+                {/* Category pills — horizontal scroll */}
+                <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 10, scrollbarWidth: 'none' }}>
+                    {pills.map(pill => {
+                        const isActive = activeCategory === pill.id
+                        return (
+                            <button
+                                key={pill.id}
+                                onClick={() => setActiveCategory(pill.id)}
+                                style={{
+                                    flexShrink: 0,
+                                    padding: '4px 12px',
+                                    borderRadius: 20,
+                                    border: `1.5px solid ${isActive ? C.primary : C.border}`,
+                                    background: isActive ? C.primary : C.surface,
+                                    color: isActive ? '#ffffff' : C.secondary,
+                                    fontFamily: 'DM Sans, Arial, sans-serif',
+                                    fontSize: 11,
+                                    fontWeight: isActive ? 700 : 500,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.12s',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {pill.label}
+                            </button>
+                        )
+                    })}
+                </div>
             </div>
 
-            {/* Status banner */}
-            {noBlock && (
-                <div style={{ margin: '10px 14px 0', padding: '8px 10px', borderRadius: 7, background: '#fff7ed', border: '1px solid #fed7aa' }}>
-                    <p style={{ margin: 0, fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, color: '#92400e', lineHeight: 1.4 }}>
-                        ⚡ Select a feature card in the Properties Panel first, then click an icon to assign it.
-                    </p>
-                </div>
-            )}
-            {!noBlock && (
-                <div style={{ margin: '10px 14px 0', padding: '8px 10px', borderRadius: 7, background: C.primaryLight, border: `1px solid ${C.border}` }}>
-                    <p style={{ margin: 0, fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, color: C.primary, lineHeight: 1.4 }}>
-                        ✓ Clicking an icon will update Feature {selectedFeatureIndex! + 1}
-                    </p>
-                </div>
-            )}
-
-            {/* Grid */}
-            <div style={{ padding: '12px 14px 20px', flex: 1 }}>
-                {filteredCategories !== null
-                    ? filteredCategories.length === 0
-                        ? <p style={{ fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 12, color: C.muted, textAlign: 'center', marginTop: 20 }}>No icons match "{query}"</p>
-                        : filteredCategories.map(({ cat, icons }) => (
-                            <CategoryGroup key={cat} cat={cat} icons={icons} iconColor={iconColor} activeIcon={activeIcon} disabled={noBlock} onSelect={handleSelect} />
-                        ))
-                    : ICON_CATEGORIES.map(cat => (
-                        <CategoryGroup key={cat} cat={cat} icons={ICON_LIBRARY[cat]} iconColor={iconColor} activeIcon={activeIcon} disabled={noBlock} onSelect={handleSelect} />
-                    ))
-                }
+            {/* ── Status banner ── */}
+            <div style={{ padding: '8px 14px 0', flexShrink: 0 }}>
+                {noBlock ? (
+                    <div style={{ padding: '7px 10px', borderRadius: 7, background: '#fff7ed', border: '1px solid #fed7aa' }}>
+                        <p style={{ margin: 0, fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, color: '#92400e', lineHeight: 1.4 }}>
+                            ⚡ Select a feature card in the Properties Panel first, then click an icon to assign it.
+                        </p>
+                    </div>
+                ) : (
+                    <div style={{ padding: '7px 10px', borderRadius: 7, background: C.primaryLight, border: `1px solid ${C.border}` }}>
+                        <p style={{ margin: 0, fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, color: C.primary, lineHeight: 1.4 }}>
+                            ✓ Clicking an icon will update Feature {selectedFeatureIndex! + 1}
+                        </p>
+                    </div>
+                )}
             </div>
-        </div>
-    )
-}
 
-interface CategoryGroupProps {
-    cat: IconCategory
-    icons: Array<{ id: string; label: string; svg: (c: string, s: number) => string }>
-    iconColor: string
-    activeIcon: string | null
-    disabled: boolean
-    onSelect: (id: string) => void
-}
-
-function CategoryGroup({ cat, icons, iconColor, activeIcon, disabled, onSelect }: CategoryGroupProps) {
-    const [isOpen, setIsOpen] = useState(true)
-
-    return (
-        <div style={{ marginBottom: 10 }}>
-            {/* Accordion header */}
-            <button
-                onClick={() => setIsOpen(o => !o)}
-                style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '7px 10px',
-                    marginBottom: isOpen ? 8 : 0,
-                    borderRadius: 7,
-                    border: `1.5px solid ${C.border}`,
-                    background: C.surface,
-                    cursor: 'pointer',
-                    boxSizing: 'border-box',
-                }}
-            >
-                {/* Preview: first 3 icon thumbnails */}
-                <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                    {icons.slice(0, 3).map(e => (
-                        <span
-                            key={e.id}
-                            dangerouslySetInnerHTML={{ __html: e.svg(iconColor, 14) }}
-                            style={{ lineHeight: 1, display: 'flex', alignItems: 'center', opacity: 0.7 }}
-                        />
-                    ))}
-                </div>
-                {/* Label */}
-                <span style={{
-                    flex: 1,
-                    textAlign: 'left',
-                    fontFamily: 'DM Sans, Arial, sans-serif',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase' as const,
-                    color: C.secondary,
-                }}>
-                    {CATEGORY_LABELS[cat]}
-                    <span style={{ fontWeight: 400, marginLeft: 4, color: C.muted }}>({icons.length})</span>
-                </span>
-                {/* Chevron */}
-                <svg
-                    width="12" height="12" viewBox="0 0 24 24" fill="none"
-                    stroke={C.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                    style={{ flexShrink: 0, transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.15s' }}
-                >
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
-            </button>
-
-            {/* Icon grid — only when open */}
-            {isOpen && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-                    {icons.map(entry => (
-                        <IconCard
-                            key={entry.id}
-                            id={entry.id}
-                            label={entry.label}
-                            svg={entry.svg(iconColor, 22)}
-                            isActive={activeIcon === entry.id}
-                            onClick={() => { if (!disabled) onSelect(entry.id) }}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* ── Icon grid ── */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px 20px' }}>
+                {visibleIcons.length === 0 ? (
+                    <p style={{ fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 12, color: C.muted, textAlign: 'center', marginTop: 24 }}>
+                        No icons match &ldquo;{query}&rdquo;
+                    </p>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                        {visibleIcons.map(entry => (
+                            <IconCard
+                                key={entry.id}
+                                id={entry.id}
+                                label={entry.label}
+                                svg={entry.svg(iconColor, 22)}
+                                isActive={activeIcon === entry.id}
+                                onClick={() => { if (!noBlock) handleSelect(entry.id) }}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
