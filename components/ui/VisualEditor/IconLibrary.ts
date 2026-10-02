@@ -12,7 +12,7 @@
 //   getIconSvg(id, color, size) — renders one icon SVG string
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type IconCategory = 'trust' | 'product' | 'tech' | 'lifestyle'
+export type IconCategory = 'trust' | 'product' | 'tech' | 'lifestyle' | 'pricing' | 'customer' | 'business' | 'tools'
 
 export interface IconEntry {
     id: string
@@ -1335,17 +1335,277 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>`)
         },
     ],
+
+    // ── Pricing & Value ───────────────────────────────────────────────────────
+    pricing: [
+        {
+            id: 'price-coins',
+            label: 'Coins',
+            svg: (c, s) => wrap(c, s, `<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><line x1="16.71" y1="13.88" x2="13.63" y2="17.02"/>`)
+        },
+        {
+            id: 'price-wallet',
+            label: 'Wallet',
+            svg: (c, s) => wrap(c, s, `<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>`)
+        },
+        {
+            id: 'price-percent',
+            label: 'Discount',
+            svg: (c, s) => wrap(c, s, `<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>`)
+        },
+        {
+            id: 'price-tag',
+            label: 'Price Tag',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.29-7.29a1 1 0 0 0 0-1.41z"/><path d="M7 7h.01"/>`)
+        },
+        {
+            id: 'price-receipt',
+            label: 'Receipt',
+            svg: (c, s) => wrap(c, s, `<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M16 8H8"/><path d="M16 12H8"/><path d="M16 16H8"/>`)
+        },
+        {
+            id: 'price-gift',
+            label: 'Free Gift',
+            svg: (c, s) => wrap(c, s, `<polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>`)
+        },
+        {
+            id: 'price-banknote',
+            label: 'Cash / Banknote',
+            svg: (c, s) => wrap(c, s, `<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>`)
+        },
+        {
+            id: 'price-creditcard',
+            label: 'Credit Card',
+            svg: (c, s) => wrap(c, s, `<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>`)
+        },
+        {
+            id: 'price-piggybank',
+            label: 'Savings',
+            svg: (c, s) => wrap(c, s, `<path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2z"/><path d="M2 9v1a2 2 0 0 0 2 2h1"/><path d="M16 11h.01"/>`)
+        },
+        {
+            id: 'price-calculator',
+            label: 'Calculator',
+            svg: (c, s) => wrap(c, s, `<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="8" y2="14"/><line x1="16" y1="18" x2="8" y2="18"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/>`)
+        },
+        {
+            id: 'price-shoppingbag',
+            label: 'Shopping Bag',
+            svg: (c, s) => wrap(c, s, `<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>`)
+        },
+        {
+            id: 'price-sale',
+            label: 'Sale',
+            svg: (c, s) => wrap(c, s, `<path d="m7 7 10 10-5 5V12H7V7Z"/><path d="M10.7 3H7a2 2 0 0 0-2 2v3.7a2 2 0 0 0 .6 1.4l7.3 7.3a2 2 0 0 0 2.8 0l3.7-3.7a2 2 0 0 0 0-2.8z"/>`)
+        },
+    ],
+
+    // ── Customer Service ──────────────────────────────────────────────────────
+    customer: [
+        {
+            id: 'cs-phone',
+            label: 'Support Line',
+            svg: (c, s) => wrap(c, s, `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.04 3.38 2 2 0 0 1 3 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>`)
+        },
+        {
+            id: 'cs-mail',
+            label: 'Email Support',
+            svg: (c, s) => wrap(c, s, `<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>`)
+        },
+        {
+            id: 'cs-chat',
+            label: 'Live Chat',
+            svg: (c, s) => wrap(c, s, `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`)
+        },
+        {
+            id: 'cs-help',
+            label: 'Help Centre',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>`)
+        },
+        {
+            id: 'cs-handshake',
+            label: 'Handshake',
+            svg: (c, s) => wrap(c, s, `<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-1"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>`)
+        },
+        {
+            id: 'cs-response',
+            label: 'Fast Response',
+            svg: (c, s) => wrap(c, s, `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/>`)
+        },
+        {
+            id: 'cs-smile',
+            label: 'Happy Customer',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>`)
+        },
+        {
+            id: 'cs-userheart',
+            label: 'Valued Customer',
+            svg: (c, s) => wrap(c, s, `<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`)
+        },
+        {
+            id: 'cs-24hrs',
+            label: '24/7 Support',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`)
+        },
+        {
+            id: 'cs-reply',
+            label: 'Quick Reply',
+            svg: (c, s) => wrap(c, s, `<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>`)
+        },
+        {
+            id: 'cs-rating',
+            label: 'Top Rated',
+            svg: (c, s) => wrap(c, s, `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`)
+        },
+        {
+            id: 'cs-feedback',
+            label: 'Feedback',
+            svg: (c, s) => wrap(c, s, `<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>`)
+        },
+    ],
+
+    // ── Seller & Business ─────────────────────────────────────────────────────
+    business: [
+        {
+            id: 'biz-store',
+            label: 'Store',
+            svg: (c, s) => wrap(c, s, `<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>`)
+        },
+        {
+            id: 'biz-building',
+            label: 'Company',
+            svg: (c, s) => wrap(c, s, `<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>`)
+        },
+        {
+            id: 'biz-users',
+            label: 'Team',
+            svg: (c, s) => wrap(c, s, `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`)
+        },
+        {
+            id: 'biz-globe',
+            label: 'Global',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`)
+        },
+        {
+            id: 'biz-factory',
+            label: 'Factory Direct',
+            svg: (c, s) => wrap(c, s, `<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/>`)
+        },
+        {
+            id: 'biz-buyers',
+            label: 'Buyer Count',
+            svg: (c, s) => wrap(c, s, `<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M20 8v6"/><path d="M23 11h-6"/>`)
+        },
+        {
+            id: 'biz-verified-seller',
+            label: 'Verified Seller',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>`)
+        },
+        {
+            id: 'biz-iso',
+            label: 'ISO Certified',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>`)
+        },
+        {
+            id: 'biz-toprated',
+            label: 'Top Seller',
+            svg: (c, s) => wrap(c, s, `<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7z"/>`)
+        },
+        {
+            id: 'biz-award',
+            label: 'Award Winner',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>`)
+        },
+        {
+            id: 'biz-pricematch',
+            label: 'Price Match',
+            svg: (c, s) => wrap(c, s, `<path d="M20.91 8.84 8.56 2.23a1.93 1.93 0 0 0-1.81 0L3.1 4.13a2.12 2.12 0 0 0-.05 3.69l12.22 6.93a2 2 0 0 0 1.94 0L21 12.51a2.12 2.12 0 0 0-.09-3.67Z"/><path d="m3.09 14.85 12.22 6.93a2 2 0 0 0 1.94 0L21 19.51a2.12 2.12 0 0 0-.09-3.67l-12.22-6.93"/>`)
+        },
+        {
+            id: 'biz-positive',
+            label: '100% Positive',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>`)
+        },
+    ],
+
+    // ── Tools & Hardware ──────────────────────────────────────────────────────
+    tools: [
+        {
+            id: 'hw-wrench',
+            label: 'Wrench',
+            svg: (c, s) => wrap(c, s, `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>`)
+        },
+        {
+            id: 'hw-hammer',
+            label: 'Hammer',
+            svg: (c, s) => wrap(c, s, `<path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172V7l-2.26-2.26a6 6 0 0 0-4.202-1.756L9 2.96l.92.82A6.18 6.18 0 0 1 12 8.4V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/>`)
+        },
+        {
+            id: 'hw-drill',
+            label: 'Drill',
+            svg: (c, s) => wrap(c, s, `<path d="M14 9c0 .55-.45 1-1 1H9l-3 3-3-3V9c0-.55.45-1 1-1h10c.55 0 1 .45 1 1z"/><path d="M14 9h2.5"/><path d="M20 7v4"/><path d="M20 9h2"/>`)
+        },
+        {
+            id: 'hw-screwdriver',
+            label: 'Screwdriver',
+            svg: (c, s) => wrap(c, s, `<path d="m3 2 3.6 10"/><path d="M6.6 12 10 3"/><path d="m6.6 12-1 4.5L22 22l-3.5-3.5-1.1-4.5-6.4-5z"/>`)
+        },
+        {
+            id: 'hw-settings',
+            label: 'Settings',
+            svg: (c, s) => wrap(c, s, `<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>`)
+        },
+        {
+            id: 'hw-key',
+            label: 'Key',
+            svg: (c, s) => wrap(c, s, `<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>`)
+        },
+        {
+            id: 'hw-disc',
+            label: 'Disc / Blade',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>`)
+        },
+        {
+            id: 'hw-magnet',
+            label: 'Magnet',
+            svg: (c, s) => wrap(c, s, `<path d="M6 15A6 6 0 0 0 18 15V5h-3v10a3 3 0 0 1-6 0V5H6z"/><line x1="2" y1="5" x2="6" y2="5"/><line x1="18" y1="5" x2="22" y2="5"/>`)
+        },
+        {
+            id: 'hw-sliders',
+            label: 'Adjustable',
+            svg: (c, s) => wrap(c, s, `<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>`)
+        },
+        {
+            id: 'hw-scissors',
+            label: 'Cut / Precision',
+            svg: (c, s) => wrap(c, s, `<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/>`)
+        },
+        {
+            id: 'hw-bolt',
+            label: 'Bolt / Fastener',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`)
+        },
+        {
+            id: 'hw-construction',
+            label: 'Construction',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/>`)
+        },
+    ],
 }
 
 // ─── Category order ───────────────────────────────────────────────────────────
 
-export const ICON_CATEGORIES: IconCategory[] = ['trust', 'product', 'tech', 'lifestyle']
+export const ICON_CATEGORIES: IconCategory[] = ['trust', 'product', 'tech', 'lifestyle', 'pricing', 'customer', 'business', 'tools']
 
 export const CATEGORY_LABELS: Record<IconCategory, string> = {
     trust: 'Trust & Quality',
     product: 'Product & Shipping',
     tech: 'Tech & Performance',
     lifestyle: 'Lifestyle & Nature',
+    pricing: 'Pricing & Value',
+    customer: 'Customer Service',
+    business: 'Seller & Business',
+    tools: 'Tools & Hardware',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

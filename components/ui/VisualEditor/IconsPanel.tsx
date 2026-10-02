@@ -98,12 +98,15 @@ function IconCard({ id, label, svg, onClick, isActive }: IconCardProps) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-// ── Category mosaic thumbnails (4 representative icon ids per category) ────────
 const CATEGORY_PREVIEW_ICONS: Record<IconCategory, [string, string, string, string]> = {
     trust: ['shield', 'check', 'star', 'verified'],
     product: ['box', 'tag', 'package', 'truck'],
     tech: ['zap', 'cpu', 'tool', 'wrench'],
     lifestyle: ['flame', 'droplet', 'leaf', 'heart'],
+    pricing: ['price-coins', 'price-percent', 'price-gift', 'price-receipt'],
+    customer: ['cs-phone', 'cs-chat', 'cs-smile', 'cs-rating'],
+    business: ['biz-store', 'biz-globe', 'biz-verified-seller', 'biz-award'],
+    tools: ['hw-wrench', 'hw-hammer', 'hw-settings', 'hw-sliders'],
 }
 
 export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: IconsPanelProps) {
