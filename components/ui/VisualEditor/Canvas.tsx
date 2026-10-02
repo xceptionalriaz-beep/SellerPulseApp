@@ -1080,6 +1080,14 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   img[data-slot].riazify-active-slot {
     transition: outline 0.15s ease !important;
   }
+  /* Selected icon wrapper highlight */
+  [data-feature-index].riazify-icon-selected {
+    outline: 3px solid #7530fb !important;
+    outline-offset: 3px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 0 4px rgba(117,48,251,0.25) !important;
+    transition: outline 0.15s ease !important;
+  }
 </style>
 <style id="canvas-hover-styles">
   div[data-canvas-overlay] { opacity: 0; transition: opacity 0.15s ease; pointer-events: none; }
@@ -1322,6 +1330,12 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       if (!wrapper) return;
       e.preventDefault();
       e.stopPropagation();
+      // Clear any previously selected icon highlight
+      document.querySelectorAll('[data-feature-index].riazify-icon-selected').forEach(function(el) {
+        el.classList.remove('riazify-icon-selected');
+      });
+      // Highlight this icon wrapper
+      wrapper.classList.add('riazify-icon-selected');
       var featureIndex = parseInt(wrapper.getAttribute('data-feature-index'), 10);
       if (!isNaN(featureIndex) && window.parent) {
         window.parent.postMessage({ type: 'RIAZIFY_ICON_CLICK', featureIndex: featureIndex, blockId: BLOCK_ID }, '*');
