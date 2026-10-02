@@ -1152,6 +1152,11 @@ export default function VisualEditor({
                         selectedText: event.data.selectedText ?? '',
                         selectedHtml: event.data.selectedHtml ?? '',
                     })
+                    // Clear icon selection if user clicked a different block
+                    if (event.data.blockId !== selectedIconBlockId) {
+                        setSelectedFeatureIndex(null);
+                        setSelectedIconBlockId(null);
+                    }
                 } else {
                     // Delay clearing so toolbar button clicks can still read the selection
                     setTimeout(() => setActiveSelection(null), 300)
@@ -1218,6 +1223,7 @@ export default function VisualEditor({
                 setSelectedIconBlockId(blockId ?? null);
                 setActiveTab('icons');
                 setPanelOpen(true);
+                setSelectedId(blockId ?? null);
             } else if (event.data?.type === 'RIAZIFY_DROP_BLOCK') {
                 const { propKey, blockType, blockId } = event.data;
                 const VALID_SLOTS: DropSlot[] = ['leftImage', 'leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
