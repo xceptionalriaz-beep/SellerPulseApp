@@ -6805,13 +6805,29 @@ function BlockStyleProps({ block, props, updateProps }: {
             )
         }
 
-        case 'category_nav':
+        case 'category_nav': {
+            const cnv = (props as any).variant ?? 'cat-classic-dark'
             return (
                 <>
-                    <Section title="Links">
-                        <ColorRow label="Text colour" value={props.linkColor ?? 'rgba(255,255,255,0.8)'} onChange={v => updateProps({ linkColor: v })} />
-                        <ColorRow label="Hover colour" value={props.hoverColor ?? '#ffffff'} onChange={v => updateProps({ hoverColor: v })} />
+                    {/* ── Background ── */}
+                    <Section title="Background">
+                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+
+                    {/* ── Colours ── */}
+                    <Section title="Colours">
+                        <ColorRow label="Link colour" value={props.linkColor ?? 'rgba(255,255,255,0.8)'} onChange={v => updateProps({ linkColor: v })} />
                         <ColorRow label="Active colour" value={props.activeColor ?? '#b8fa33'} onChange={v => updateProps({ activeColor: v })} />
+                        {cnv === 'cat-minimalist-divider' && (
+                            <ColorRow label="Separator colour" value={props.borderColor ?? '#cbd5e1'} onChange={v => updateProps({ borderColor: v })} />
+                        )}
+                        {cnv === 'cat-elite-luxury' && (
+                            <ColorRow label="Gold accent" value={(props as any).accentColor ?? '#d97706'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        )}
+                    </Section>
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
                         <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                         <SelectInput label="Font weight" value={props.fontWeight ?? '600'}
                             options={[{ v: '400', l: 'Regular' }, { v: '500', l: 'Medium' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }]}
@@ -6819,11 +6835,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <SliderInput label="Letter spacing" value={props.letterSpacing ?? 0} min={0} max={10} step={0.5} suffix="px" onChange={v => updateProps({ letterSpacing: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
-                    <Section title="Background">
-                        <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
-                    </Section>
                 </>
             )
+        }
 
         case 'urgency_bar':
             return (
