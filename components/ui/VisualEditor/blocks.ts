@@ -195,6 +195,9 @@ export type BlockProps =
     | FeedbackScoreProps
     | PullQuoteProps
     | SectionLabelProps
+    | BreadcrumbBarProps
+    | InternationalShippingProps
+    | HighlightTextProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -745,6 +748,52 @@ export interface SectionLabelProps extends CommonProps {
     align?: 'left' | 'center' | 'right'
 }
 
+// ── Breadcrumb Bar ───────────────────────────────────────────────────────────
+export interface BreadcrumbBarProps extends CommonProps {
+    variant?: string
+    storeName?: string
+    category?: string
+    productTitle?: string
+    sellerName?: string
+    categoryName?: string
+    title?: string
+    textColor?: string
+    separatorColor?: string
+    accentColor?: string
+    linkColor?: string
+    activeColor?: string
+    preserveTokens?: boolean
+}
+
+// ── International Shipping ───────────────────────────────────────────────────
+export interface InternationalShippingProps extends CommonProps {
+    variant?: string
+    heading?: string
+    title?: string
+    headingText?: string
+    text?: string
+    noticeText?: string
+    subText?: string
+    headingColor?: string
+    textColor?: string
+    accentColor?: string
+    preserveTokens?: boolean
+}
+
+// ── Highlight Text ───────────────────────────────────────────────────────────
+export interface HighlightTextProps extends CommonProps {
+    variant?: string
+    text?: string
+    highlightText?: string
+    textColor?: string
+    highlightColor?: string
+    accentColor?: string
+    fontSize?: number
+    fontWeight?: string
+    letterSpacing?: number
+    align?: 'left' | 'center' | 'right'
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MEDIA BLOCKS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1007,11 +1056,13 @@ export interface HeroHeaderProps extends CommonProps {
 
 // ── FAQ Block ─────────────────────────────────────────────────────────
 export interface FAQBlockProps extends CommonProps {
-    faqs: Array<{ question: string; answer: string }>
+    variant?: string
+    faqs?: Array<{ question: string; answer: string }>
+    items?: Array<{ id?: string; question: string; answer: string }>
+    questionBg?: string
     questionColor: string
     answerColor: string
-    bgColor: string
-    borderRadius: number
+    chevronColor?: string
 }
 
 // ── Testimonial Block ───────────────────────────────────────────────
@@ -1129,6 +1180,11 @@ import { getVatNoticeVariant } from './variants/vat_notice.variants'
 import { getFeedbackScoreVariant } from './variants/feedback_score.variants'
 import { getPullQuoteVariant } from './variants/pull_quote.variants'
 import { getSectionLabelVariant } from './variants/section_label.variants'
+import { getBreadcrumbBarVariant } from './variants/breadcrumb_bar.variants'
+import { getInternationalShippingVariant } from './variants/international_shipping.variants'
+import { getHighlightTextVariant } from './variants/highlight_text.variants'
+import { getProductTitleVariant } from './variants/product_title.variants'
+import { getFaqBlockVariant } from './variants/faq_block.variants'
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1566,23 +1622,9 @@ ${rows}
             conditionFontSize: 13,
         } as ProductTitleProps,
         toHtml(props, id) {
-            const p = props as ProductTitleProps
-            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 24)).toFixed(4)
-            const conditionHtml = p.showCondition
-                ? `<p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:${p.conditionFontSize ?? 13}px;color:${p.conditionColor ?? '#6b7280'};">Condition: <strong style="color:${p.conditionColor ?? '#6b7280'};">${p.conditionText}</strong></p>`
-                : ''
-            return wrapBlock('product_title', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <h1 style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};line-height:${p.lineHeight ?? 1.3};letter-spacing:${lsEm}em;color:${p.color};${textAlign(p.align)}">
-        ${p.text}
-      </h1>
-      ${conditionHtml}
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'pt-classic-baseline'
+            return wrapBlock('product_title', id, getProductTitleVariant(variantId).toHtml(p, id), p)
         },
     },
 
@@ -2004,10 +2046,10 @@ ${thumbCells}
             ...DEFAULT_COMMON,
             bgColor: '#f8f7ff',
             badges: [
-                { icon: '✅', text: 'Authentic Product' },
-                { icon: '🚚', text: 'Fast Dispatch' },
-                { icon: '↩️', text: '30-Day Returns' },
-                { icon: '⭐', text: 'Top Rated Seller' },
+                { icon: 'shield-check', text: 'Authentic Product', subText: '100% Genuine' },
+                { icon: 'truck', text: 'Fast Dispatch', subText: 'Within 24 Hours' },
+                { icon: 'rotate-ccw', text: '30-Day Returns', subText: 'Hassle-Free' },
+                { icon: 'star', text: 'Top Rated Seller', subText: 'Trusted Merchant' },
             ],
             iconColor: '#7530fb',
             textColor: '#1e1535',
@@ -3093,12 +3135,27 @@ ${thumbCells}
             label: 'International Shipping',
             category: 'eBay Specific' as BlockCategory,
             icon: 'globe',
-            description: 'Customs and import duty warning notice',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#fff7ed' } as unknown as BlockProps,
+            description: 'Customs and import duty warning notice — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'is-classic-amber-notice',
+                bgColor: '#fff7ed',
+                borderColor: '#fed7aa',
+                showBorder: true,
+                heading: 'International Buyers — Import Duties Notice',
+                text: "Import duties and taxes are not included in the price. These are the buyer's responsibility. Please check your country's customs rules before purchasing.",
+                headingColor: '#c2410c',
+                textColor: '#9a3412',
+                accentColor: '#ea580c',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('international_shipping' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#fff7ed;${pad(p)}border:1px solid #fed7aa;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;">&#127760;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#c2410c;">International Buyers — Import Duties Notice</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#9a3412;line-height:1.6;">Import duties and taxes are not included in the price. These are the buyer's responsibility. Please check your country's customs rules before purchasing.</p></td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'is-classic-amber-notice'
+                return wrapBlock('international_shipping' as BlockType, id, getInternationalShippingVariant(variantId).toHtml(p, id), p)
             },
         },
 
@@ -3497,12 +3554,28 @@ ${thumbCells}
             label: 'Breadcrumb Bar',
             category: 'Header & Footer' as BlockCategory,
             icon: 'chevron-right',
-            description: 'Home > Category > Item navigation bar',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff', paddingTop: 10, paddingBottom: 10 } as unknown as BlockProps,
+            description: 'Store > Category > Item navigation bar — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'bb-classic-inline',
+                bgColor: '#f8f7ff',
+                textColor: '#1e1535',
+                separatorColor: '#7530fb',
+                accentColor: '#7530fb',
+                storeName: 'Trusted Seller',
+                category: '{{ITEM_CATEGORY}}',
+                productTitle: 'Premium Product Sample Listing',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+                showBorder: false,
+                borderColor: '#ede9fe',
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('breadcrumb_bar' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#9ca3af;"><a href="#" style="color:#7530fb;text-decoration:none;">{{SELLER_NAME}}</a> &rsaquo; <a href="#" style="color:#7530fb;text-decoration:none;">{{ITEM_CATEGORY}}</a> &rsaquo; <span style="color:#1f1d2e;font-weight:600;">{{PRODUCT_TITLE}}</span></p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'bb-classic-inline'
+                return wrapBlock('breadcrumb_bar' as BlockType, id, getBreadcrumbBarVariant(variantId).toHtml(p, id), p)
             },
         },
 
@@ -3582,12 +3655,23 @@ ${thumbCells}
             label: 'Highlight Text',
             category: 'Typography' as BlockCategory,
             icon: 'type',
-            description: 'Coloured background text callout',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#b8fa33' } as unknown as BlockProps,
+            description: 'Coloured background text callout — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'ht-classic-neon-strip',
+                bgColor: '#b8fa33',
+                textColor: '#1e1535',
+                text: '{{HIGHLIGHT_TEXT}}',
+                fontSize: 15,
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('highlight_text' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#b8fa33;${pad(p)}text-align:center;border-radius:4px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1e1535;">&#9889; {{HIGHLIGHT_TEXT}}</p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'ht-classic-neon-strip'
+                return wrapBlock('highlight_text' as BlockType, id, getHighlightTextVariant(variantId).toHtml(p, id), p)
             },
         },
 
@@ -3636,31 +3720,29 @@ ${thumbCells}
             label: 'FAQ Section',
             category: 'Content' as BlockCategory,
             icon: 'help-circle',
-            description: 'Expandable FAQ list to reduce support queries',
+            description: 'Frequently asked questions — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                paddingTop: 20,
-                paddingBottom: 20,
+                variant: 'faq-classic-stacked',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
                 faqs: [
                     { question: 'What is the warranty?', answer: 'All items come with a 30-day money back guarantee.' },
                     { question: 'How long does shipping take?', answer: 'Most orders ship within 24 hours.' },
                     { question: 'Do you accept returns?', answer: 'Yes, we accept returns within 30 days.' },
                 ],
+                questionBg: '#f8f7ff',
                 questionColor: '#1e1535',
-                answerColor: '#6b7280',
-            } as FAQBlockProps,
+                answerColor: '#374151',
+                chevronColor: '#7530fb',
+                borderColor: '#ede9fe',
+            } as unknown as FAQBlockProps,
             toHtml(props, id) {
-                const p = props as FAQBlockProps
-                const rows = (p.faqs || []).map(f =>
-                    `<tr><td style="padding:10px 14px;background-color:${(p as any).questionBg ?? '#f8f7ff'};border-bottom:1px solid ${p.borderColor ?? '#e9e3ff'};font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${(p as any).questionText ?? p.questionColor ?? '#1e1535'};">${f.question}</td></tr>
-                     <tr><td style="padding:10px 14px 20px;border-bottom:1px solid ${p.borderColor ?? '#e9e3ff'};font-family:Arial,sans-serif;font-size:13px;color:${(p as any).answerText ?? p.answerColor ?? '#374151'};line-height:1.6;">${f.answer}</td></tr>`
-                ).join('')
-                return wrapBlock('faq_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
-  </td></tr>
-</table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'faq-classic-stacked'
+                return wrapBlock('faq_block' as BlockType, id, getFaqBlockVariant(variantId).toHtml(p, id), p)
             },
         },
 
