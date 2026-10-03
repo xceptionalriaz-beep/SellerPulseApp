@@ -3842,44 +3842,774 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             label: 'Multi Device',
             svg: (c, s) => wrap(c, s, `<rect x="2" y="4" width="14" height="10" rx="1"/><rect x="12" y="10" width="10" height="10" rx="1"/><line x1="6" y1="17" x2="10" y2="17"/>`)
         },
+        // ── 50 Advanced Automotive, Audio, Video & Smart Home Standards ──
+        {
+            id: 'compat-thunderbolt',
+            label: 'Thunderbolt',
+            svg: (c, s) => wrap(c, s, `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/><line x1="2" y1="2" x2="7" y2="2"/>`)
+        },
+        {
+            id: 'compat-displayport',
+            label: 'DisplayPort',
+            svg: (c, s) => wrap(c, s, `<path d="M4 6h12l4 4v8H4z"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="8" y1="14" x2="12" y2="14"/>`)
+        },
+        {
+            id: 'compat-vga-analog',
+            label: 'VGA Port',
+            svg: (c, s) => wrap(c, s, `<path d="M4 7h16l-2 10H6z"/><circle cx="8" cy="11" r=".7" fill="currentColor"/><circle cx="12" cy="11" r=".7" fill="currentColor"/><circle cx="16" cy="11" r=".7" fill="currentColor"/><circle cx="10" cy="14" r=".7" fill="currentColor"/><circle cx="14" cy="14" r=".7" fill="currentColor"/>`)
+        },
+        {
+            id: 'compat-dvi-video',
+            label: 'DVI Port',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="7" width="18" height="10" rx="2"/><line x1="6" y1="10" x2="14" y2="10" stroke-dasharray="1 1"/><line x1="6" y1="14" x2="14" y2="14" stroke-dasharray="1 1"/><line x1="17" y1="10" x2="17" y2="14"/>`)
+        },
+        {
+            id: 'compat-ethernet-rj45',
+            label: 'RJ45 LAN',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 15h8v4H8z"/><line x1="9" y1="9" x2="9" y2="11"/><line x1="12" y1="9" x2="12" y2="11"/><line x1="15" y1="9" x2="15" y2="11"/>`)
+        },
+        {
+            id: 'compat-optical-audio',
+            label: 'Optical Audio',
+            svg: (c, s) => wrap(c, s, `<polygon points="7 4 17 4 20 8 20 16 17 20 7 20 4 16 4 8 7 4"/><circle cx="12" cy="12" r="3"/>`)
+        },
+        {
+            id: 'compat-rca-phono',
+            label: 'RCA Phono',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>`)
+        },
+        {
+            id: 'compat-xlr-studio',
+            label: 'XLR Studio',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1" fill="currentColor"/><circle cx="15.5" cy="10" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'compat-midi-din',
+            label: 'MIDI Port',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r=".8" fill="currentColor"/><circle cx="10" cy="7.5" r=".8" fill="currentColor"/><circle cx="12" cy="7" r=".8" fill="currentColor"/><circle cx="14" cy="7.5" r=".8" fill="currentColor"/><circle cx="16" cy="9" r=".8" fill="currentColor"/>`)
+        },
+        {
+            id: 'compat-microsd-slot',
+            label: 'MicroSD',
+            svg: (c, s) => wrap(c, s, `<path d="M6 3h10a2 2 0 0 1 2 2v16H6l-2-3V5a2 2 0 0 1 2-2z"/><line x1="8" y1="7" x2="8" y2="10"/><line x1="11" y1="7" x2="11" y2="10"/><line x1="14" y1="7" x2="14" y2="10"/>`)
+        },
+        {
+            id: 'compat-sd-card-slot',
+            label: 'SD Card',
+            svg: (c, s) => wrap(c, s, `<path d="M5 3h11l4 4v14H5z"/><line x1="8" y1="7" x2="8" y2="11"/><line x1="11" y1="7" x2="11" y2="11"/><line x1="14" y1="7" x2="14" y2="11"/><line x1="17" y1="9" x2="17" y2="11"/>`)
+        },
+        {
+            id: 'compat-sim-tray',
+            label: 'SIM Slot',
+            svg: (c, s) => wrap(c, s, `<path d="M6 3h9l4 4v14H6z"/><circle cx="12" cy="13" r="3"/><line x1="12" y1="13" x2="12" y2="16"/>`)
+        },
+        {
+            id: 'compat-esim-ready',
+            label: 'eSIM Ready',
+            svg: (c, s) => wrap(c, s, `<rect x="5" y="4" width="14" height="16" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/>`)
+        },
+        {
+            id: 'compat-magsafe-ring',
+            label: 'MagSafe',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="8" stroke-dasharray="3 2"/><line x1="12" y1="20" x2="12" y2="23"/>`)
+        },
+        {
+            id: 'compat-qi-wireless',
+            label: 'Qi Wireless',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><path d="M9 15a4 4 0 1 1 6-3.46"/><line x1="15" y1="16" x2="19" y2="20"/>`)
+        },
+        {
+            id: 'compat-sata-drive',
+            label: 'SATA 3',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="6" width="18" height="12" rx="2"/><line x1="6" y1="13" x2="11" y2="13"/><line x1="14" y1="13" x2="18" y2="13"/>`)
+        },
+        {
+            id: 'compat-atx-motherboard',
+            label: 'ATX Case',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="8" cy="6" r="1"/><circle cx="16" cy="6" r="1"/><circle cx="8" cy="18" r="1"/><circle cx="16" cy="18" r="1"/>`)
+        },
+        {
+            id: 'compat-sfx-psu',
+            label: 'SFX Power',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="10" cy="12" r="2.5"/><line x1="15" y1="10" x2="17" y2="10"/><line x1="15" y1="14" x2="17" y2="14"/>`)
+        },
+        {
+            id: 'compat-tripod-thread',
+            label: '1/4" Thread',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2v6"/><circle cx="12" cy="15" r="7"/><line x1="7" y1="22" x2="10" y2="15"/><line x1="17" y1="22" x2="14" y2="15"/>`)
+        },
+        {
+            id: 'compat-cold-shoe',
+            label: 'Cold Shoe',
+            svg: (c, s) => wrap(c, s, `<rect x="5" y="8" width="14" height="10" rx="1"/><path d="M8 8V5h8v3"/>`)
+        },
+        {
+            id: 'compat-arca-swiss',
+            label: 'Arca Swiss',
+            svg: (c, s) => wrap(c, s, `<polygon points="5 8 19 8 17 16 7 16 5 8"/><line x1="2" y1="8" x2="22" y2="8"/>`)
+        },
+        {
+            id: 'compat-nato-rail',
+            label: 'NATO Rail',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="9" width="20" height="6" rx="1"/><line x1="6" y1="9" x2="6" y2="15"/><line x1="10" y1="9" x2="10" y2="15"/><line x1="14" y1="9" x2="14" y2="15"/><line x1="18" y1="9" x2="18" y2="15"/>`)
+        },
+        {
+            id: 'compat-picatinny',
+            label: 'Picatinny',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="10" width="18" height="4"/><path d="M6 7v3M10 7v3M14 7v3M18 7v3"/>`)
+        },
+        {
+            id: 'compat-canbus-free',
+            label: 'Canbus OK',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="m13 9 3 3-3 3"/>`)
+        },
+        {
+            id: 'compat-obd2-port',
+            label: 'OBD2 Plug',
+            svg: (c, s) => wrap(c, s, `<polygon points="4 7 20 7 18 17 6 17 4 7"/><line x1="8" y1="11" x2="16" y2="11"/>`)
+        },
+        {
+            id: 'compat-isofix-seat',
+            label: 'ISOFIX Seat',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="3"/><path d="M7 21v-4a5 5 0 0 1 10 0v4"/><line x1="4" y1="21" x2="20" y2="21"/>`)
+        },
+        {
+            id: 'compat-double-din',
+            label: '2-DIN Radio',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="5" width="18" height="14" rx="2"/><rect x="6" y="8" width="12" height="8" rx="1"/>`)
+        },
+        {
+            id: 'compat-single-din',
+            label: '1-DIN Radio',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="8" width="18" height="8" rx="2"/><circle cx="7" cy="12" r="1.5"/><line x1="12" y1="12" x2="17" y2="12"/>`)
+        },
+        {
+            id: 'compat-lhd-drive',
+            label: 'Left Hand',
+            svg: (c, s) => wrap(c, s, `<circle cx="8" cy="12" r="5"/><circle cx="8" cy="12" r="1.5"/><line x1="15" y1="8" x2="20" y2="8"/><line x1="15" y1="16" x2="20" y2="16"/>`)
+        },
+        {
+            id: 'compat-rhd-drive',
+            label: 'Right Hand',
+            svg: (c, s) => wrap(c, s, `<circle cx="16" cy="12" r="5"/><circle cx="16" cy="12" r="1.5"/><line x1="4" y1="8" x2="9" y2="8"/><line x1="4" y1="16" x2="9" y2="16"/>`)
+        },
+        {
+            id: 'compat-4wd-awd',
+            label: '4WD AWD',
+            svg: (c, s) => wrap(c, s, `<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><line x1="6" y1="9.5" x2="6" y2="14.5"/><line x1="18" y1="9.5" x2="18" y2="14.5"/><line x1="6" y1="12" x2="18" y2="12"/>`)
+        },
+        {
+            id: 'compat-ev-charging',
+            label: 'EV Electric',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="6" width="12" height="15" rx="2"/><polygon points="9 10 7 14 10 14 9 18 12 13 9 13 9 10"/><path d="M15 11h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1"/>`)
+        },
+        {
+            id: 'compat-hybrid-car',
+            label: 'Hybrid Auto',
+            svg: (c, s) => wrap(c, s, `<path d="M11 20A7 7 0 0 1 4 13C4 8 9 3 17 2c0 8-5 13-10 13"/><polygon points="12 6 9 10 11 10 10 14 13 9 11 9 12 6"/>`)
+        },
+        {
+            id: 'compat-diesel-engine',
+            label: 'Diesel Fuel',
+            svg: (c, s) => wrap(c, s, `<rect x="5" y="4" width="14" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M10 10v4h2a2 2 0 0 0 0-4h-2z"/>`)
+        },
+        {
+            id: 'compat-petrol-gas',
+            label: 'Petrol Fuel',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="9" width="10" height="12" rx="1"/><path d="M14 9V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4"/><path d="M14 13h2a2 2 0 0 1 2 2v3a1 1 0 0 0 1 1h1"/>`)
+        },
+        {
+            id: 'compat-motorcycle',
+            label: 'Moto Fit',
+            svg: (c, s) => wrap(c, s, `<circle cx="5" cy="16" r="3"/><circle cx="19" cy="16" r="3"/><path d="M5 16l4-5h4l4 5"/><path d="M12 7h3l-2 4"/>`)
+        },
+        {
+            id: 'compat-trailer-tow',
+            label: 'Tow Hitch',
+            svg: (c, s) => wrap(c, s, `<circle cx="18" cy="12" r="3"/><path d="M3 12h12"/><path d="M7 7l5 5-5 5"/>`)
+        },
+        {
+            id: 'compat-boat-marine',
+            label: 'Marine Boat',
+            svg: (c, s) => wrap(c, s, `<path d="M2 17c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/><path d="M4 14l2-6h12l2 6z"/><line x1="12" y1="4" x2="12" y2="8"/>`)
+        },
+        {
+            id: 'compat-echo-alexa',
+            label: 'Alexa Voice',
+            svg: (c, s) => wrap(c, s, `<ellipse cx="12" cy="12" rx="8" ry="7"/><circle cx="12" cy="12" r="3"/>`)
+        },
+        {
+            id: 'compat-google-home',
+            label: 'Google Home',
+            svg: (c, s) => wrap(c, s, `<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polygon points="9 21 9 12 15 12 15 21"/>`)
+        },
+        {
+            id: 'compat-siri-homekit',
+            label: 'HomeKit',
+            svg: (c, s) => wrap(c, s, `<rect x="5" y="4" width="14" height="16" rx="4"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5"/>`)
+        },
+        {
+            id: 'compat-zigbee-mesh',
+            label: 'Zigbee',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="6" r="2.5"/><circle cx="6" cy="16" r="2.5"/><circle cx="18" cy="16" r="2.5"/><line x1="12" y1="8.5" x2="6" y2="13.5"/><line x1="12" y1="8.5" x2="18" y2="13.5"/><line x1="8.5" y1="16" x2="15.5" y2="16"/>`)
+        },
+        {
+            id: 'compat-zwave-radio',
+            label: 'Z-Wave',
+            svg: (c, s) => wrap(c, s, `<path d="M4 12a8 8 0 0 1 16 0"/><path d="M7 12a5 5 0 0 1 10 0"/><circle cx="12" cy="12" r="2"/>`)
+        },
+        {
+            id: 'compat-rf-433mhz',
+            label: '433MHz RF',
+            svg: (c, s) => wrap(c, s, `<path d="M2 12a10 10 0 0 1 20 0"/><path d="M6 12a6 6 0 0 1 12 0"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="14" x2="12" y2="22"/>`)
+        },
+        {
+            id: 'compat-dmx512-light',
+            label: 'DMX512',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="8" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="16" cy="12" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'compat-wheel-pcd',
+            label: 'Wheel PCD',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><circle cx="12" cy="7" r="1" fill="currentColor"/><circle cx="16.5" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="15.5" r="1" fill="currentColor"/><circle cx="9" cy="15.5" r="1" fill="currentColor"/><circle cx="7.5" cy="10" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'compat-rotor-size',
+            label: 'Rotor Size',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="21"/>`)
+        },
+        {
+            id: 'compat-wiper-fit',
+            label: 'Wiper Fit',
+            svg: (c, s) => wrap(c, s, `<path d="M3 18c6-8 12-8 18 0"/><line x1="12" y1="10" x2="6" y2="18"/>`)
+        },
+        {
+            id: 'compat-bulb-h7',
+            label: 'H7 H4 Lamp',
+            svg: (c, s) => wrap(c, s, `<rect x="8" y="10" width="8" height="10" rx="2"/><path d="M10 10V5a2 2 0 0 1 4 0v5"/><line x1="6" y1="20" x2="18" y2="20"/>`)
+        },
+        {
+            id: 'compat-snap-clip',
+            label: 'Snap Clip',
+            svg: (c, s) => wrap(c, s, `<rect x="6" y="4" width="12" height="16" rx="3"/><line x1="10" y1="12" x2="14" y2="12"/><line x1="12" y1="10" x2="12" y2="14"/>`)
+        },
     ],
 
     condition: [
         {
             id: 'cond-sparkles',
             label: 'Brand New',
-            svg: (c, s) => wrap(c, s, `<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>`)
+            svg: (c, s) => wrap(c, s, `<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3v4"/><path d="M19 17v4"/>`)
         },
         {
             id: 'cond-refresh',
-            label: 'Refurbished',
-            svg: (c, s) => wrap(c, s, `<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>`)
+            label: 'Refurb Unit',
+            svg: (c, s) => wrap(c, s, `<path d="M3 12a9 9 0 0 1 9-9 9.8 9.8 0 0 1 6.7 2.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.8 9.8 0 0 1-6.7-2.7L3 16"/><path d="M8 16H3v5"/>`)
+        },
+        // ── 35 eBay Condition Tiers, Tech Grades & Collector Standards ──
+        {
+            id: 'cond-bnib-box',
+            label: 'New in Box',
+            svg: (c, s) => wrap(c, s, `<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="2" fill="currentColor"/>`)
+        },
+        {
+            id: 'cond-bnwt-tags',
+            label: 'New with Tag',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l7.29-7.29a1 1 0 0 0 0-1.41z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/><path d="m14 10 2 2 4-4"/>`)
+        },
+        {
+            id: 'cond-bnwot-clean',
+            label: 'New No Tag',
+            svg: (c, s) => wrap(c, s, `<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/><path d="m9 12 2 2 4-4"/>`)
+        },
+        {
+            id: 'cond-factory-seal',
+            label: 'Factory Seal',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'cond-cert-refurb',
+            label: 'Cert Refurb',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="6"/><path d="M15.5 13 17 22l-5-3-5 3 1.5-9"/><path d="m9 8 2 2 4-4"/>`)
+        },
+        {
+            id: 'cond-seller-refurb',
+            label: 'Seller Refurb',
+            svg: (c, s) => wrap(c, s, `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/><circle cx="18" cy="18" r="3"/>`)
+        },
+        {
+            id: 'cond-open-box',
+            label: 'Open Box',
+            svg: (c, s) => wrap(c, s, `<polyline points="16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/>`)
+        },
+        {
+            id: 'cond-ex-display',
+            label: 'Ex-Display',
+            svg: (c, s) => wrap(c, s, `<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><circle cx="12" cy="10" r="3"/>`)
+        },
+        {
+            id: 'cond-mint-10',
+            label: 'Mint 10/10',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/><circle cx="12" cy="12" r="7"/>`)
+        },
+        {
+            id: 'cond-near-mint',
+            label: 'Near Mint',
+            svg: (c, s) => wrap(c, s, `<polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/><circle cx="12" cy="12" r="2"/>`)
+        },
+        {
+            id: 'cond-grade-a-plus',
+            label: 'Grade A+',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 15h3m-1.5-6v6M14 12h4M16 10v4"/>`)
+        },
+        {
+            id: 'cond-grade-a',
+            label: 'Grade A',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9 16l3-8 3 8M10 13h4"/>`)
+        },
+        {
+            id: 'cond-grade-b',
+            label: 'Grade B',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9 8h4a2 2 0 0 1 0 4H9m0 0h4.5a2 2 0 0 1 0 4H9V8z"/>`)
+        },
+        {
+            id: 'cond-grade-c',
+            label: 'Grade C',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M15 9a4 4 0 1 0 0 6"/>`)
+        },
+        {
+            id: 'cond-pre-owned',
+            label: 'Pre-Owned',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>`)
+        },
+        {
+            id: 'cond-vintage',
+            label: 'Vintage',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M10 2h4"/><line x1="12" y1="2" x2="12" y2="5"/>`)
+        },
+        {
+            id: 'cond-antique',
+            label: 'Antique',
+            svg: (c, s) => wrap(c, s, `<path d="M8 3h8v3a4 4 0 0 1-8 0V3z"/><path d="M6 9h12v3a6 6 0 0 1-12 0V9z"/><path d="M10 18h4v3h-4zM8 21h8"/>`)
+        },
+        {
+            id: 'cond-deadstock',
+            label: 'Deadstock',
+            svg: (c, s) => wrap(c, s, `<path d="M2 17h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M2 17c0-3 1.5-6 4-7l5-2 4 4 5 1a2 2 0 0 1 2 2v2"/><polygon points="12 4 13 6 15 6 13.5 7.5 14 9.5 12 8.5 10 9.5 10.5 7.5 9 6 11 6 12 4"/>`)
+        },
+        {
+            id: 'cond-graded-slab',
+            label: 'Graded Slab',
+            svg: (c, s) => wrap(c, s, `<rect x="5" y="2" width="14" height="20" rx="2"/><rect x="8" y="4" width="8" height="4" rx="1"/><rect x="8" y="10" width="8" height="9" rx="1"/>`)
+        },
+        {
+            id: 'cond-sealed-foil',
+            label: 'Sealed Foil',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="3" width="16" height="18" rx="1"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/><polygon points="12 8 13.5 11 16.5 11.5 14 13.5 14.5 16.5 12 15 9.5 16.5 10 13.5 7.5 11.5 10.5 11 12 8"/>`)
+        },
+        {
+            id: 'cond-like-new',
+            label: 'Like New',
+            svg: (c, s) => wrap(c, s, `<polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/><polyline points="9 11 11 13 15 9"/>`)
+        },
+        {
+            id: 'cond-very-good',
+            label: 'Very Good',
+            svg: (c, s) => wrap(c, s, `<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h3"/>`)
+        },
+        {
+            id: 'cond-acceptable',
+            label: 'Acceptable',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/>`)
+        },
+        {
+            id: 'cond-for-parts',
+            label: 'For Parts',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><line x1="3.6" y1="3.6" x2="20.4" y2="20.4"/><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6"/>`)
+        },
+        {
+            id: 'cond-sanitized',
+            label: 'Sanitized',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/><circle cx="8" cy="8" r=".5" fill="currentColor"/><circle cx="16" cy="16" r=".5" fill="currentColor"/>`)
+        },
+        {
+            id: 'cond-repackaged',
+            label: 'Repackaged',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 12a9 9 0 0 1 15-4"/><polyline points="18 4 18 8 14 8"/>`)
+        },
+        {
+            id: 'cond-complete-cib',
+            label: 'Complete CIB',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 12 2.5 2.5L16 9"/><line x1="7" y1="18" x2="17" y2="18"/>`)
+        },
+        {
+            id: 'cond-battery-85',
+            label: 'Battery 85%+',
+            svg: (c, s) => wrap(c, s, `<rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="11" x2="23" y2="13"/><polyline points="6 12 9 14 14 10"/>`)
+        },
+        {
+            id: 'cond-zero-pixels',
+            label: 'Zero Pixels',
+            svg: (c, s) => wrap(c, s, `<rect width="20" height="14" x="2" y="3" rx="2"/><circle cx="12" cy="10" r="1.5"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>`)
+        },
+        {
+            id: 'cond-scratch-free',
+            label: 'Scratch Free',
+            svg: (c, s) => wrap(c, s, `<polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/><line x1="11" y1="3" x2="8" y2="9"/><line x1="13" y1="3" x2="16" y2="9"/>`)
+        },
+        {
+            id: 'cond-smoke-free',
+            label: 'Smoke Free',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9 16c0-2 1-3 1-5s-1-3-1-5"/><path d="M14 16c0-2 1-3 1-5s-1-3-1-5"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>`)
+        },
+        {
+            id: 'cond-pet-free',
+            label: 'Pet Free',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="16" r="3"/><circle cx="7" cy="11" r="1.5"/><circle cx="17" cy="11" r="1.5"/><circle cx="10" cy="7" r="1.5"/><circle cx="14" cy="7" r="1.5"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>`)
+        },
+        {
+            id: 'cond-tested-100',
+            label: '100% Tested',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/><circle cx="12" cy="12" r="7"/>`)
+        },
+        {
+            id: 'cond-data-wiped',
+            label: 'Data Wiped',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="12" x2="17" y2="12"/><path d="m10 9 2 3-2 3"/>`)
+        },
+        {
+            id: 'cond-oem-parts',
+            label: '100% OEM',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/><line x1="12" y1="2" x2="12" y2="4"/>`)
         },
     ],
 
     eco: [
         {
             id: 'eco-leaf',
-            label: 'Eco-Friendly',
+            label: 'Eco Friendly',
             svg: (c, s) => wrap(c, s, `<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>`)
         },
         {
             id: 'eco-recycle',
-            label: 'Recyclable',
-            svg: (c, s) => wrap(c, s, `<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/>`)
+            label: 'Recycle Loop',
+            svg: (c, s) => wrap(c, s, `<path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-.9 1.8 1.8 0 0 1 0-1.8L7.2 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-.9 1.8 1.8 0 0 0 0-1.8l-1.2-2.1"/><path d="m14 16 3 3-3 3"/><path d="m18 10-3-3 3-3"/>`)
+        },
+        // ── 30 Green Energy, Circular Economy & Sustainable Badges ──
+        {
+            id: 'eco-bio-degrade',
+            label: 'Bio Degrade',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12"/><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="2" fill="currentColor"/>`)
+        },
+        {
+            id: 'eco-compostable',
+            label: 'Compostable',
+            svg: (c, s) => wrap(c, s, `<path d="M12 3c-4 0-7 3-7 7v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9c0-4-3-7-7-7z"/><path d="M12 9v5"/><path d="m10 12 2-2 2 2"/>`)
+        },
+        {
+            id: 'eco-zero-waste',
+            label: 'Zero Waste',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>`)
+        },
+        {
+            id: 'eco-carbon-zero',
+            label: 'Carbon Zero',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0z"/><path d="M12 2v4M12 18v4"/>`)
+        },
+        {
+            id: 'eco-solar-power',
+            label: 'Solar Power',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="6" width="18" height="12" rx="1"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/><line x1="12" y1="2" x2="12" y2="4"/>`)
+        },
+        {
+            id: 'eco-wind-energy',
+            label: 'Wind Power',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="8" r="2"/><line x1="12" y1="10" x2="12" y2="22"/><path d="M12 8C8 5 9 2 11 2s3 4 1 6z"/><path d="M12 8c4 3 6 1 6-1s-4-3-6 1z"/><path d="M12 8c-3 4-1 6 1 6s3-4-1-6z"/>`)
+        },
+        {
+            id: 'eco-water-saving',
+            label: 'Water Saving',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="m8 14 3-3 5 5"/>`)
+        },
+        {
+            id: 'eco-organic-cotton',
+            label: 'Organic Bio',
+            svg: (c, s) => wrap(c, s, `<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><circle cx="12" cy="7" r="3"/><path d="M5 12a7 7 0 0 0 14 0c0 4-4 8-7 10-3-2-7-6-7-10z"/>`)
+        },
+        {
+            id: 'eco-fsc-wood',
+            label: 'FSC Wood',
+            svg: (c, s) => wrap(c, s, `<path d="m12 2 4 6h-3l3 5h-3l4 6H4l4-6H5l3-5H5l4-6z"/><line x1="12" y1="19" x2="12" y2="22"/>`)
+        },
+        {
+            id: 'eco-cruelty-free',
+            label: 'Cruelty Free',
+            svg: (c, s) => wrap(c, s, `<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/><circle cx="9" cy="8.5" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'eco-vegan-leaf',
+            label: '100% Vegan',
+            svg: (c, s) => wrap(c, s, `<path d="M3 21c8-2 15-9 17-17-8 2-15 9-17 17z"/><path d="M3 21c4-8 9-13 17-17"/>`)
+        },
+        {
+            id: 'eco-plastic-free',
+            label: 'Plastic Free',
+            svg: (c, s) => wrap(c, s, `<path d="M8 3h8v3H8z"/><path d="M6 8h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8z"/><line x1="3" y1="3" x2="21" y2="21"/>`)
+        },
+        {
+            id: 'eco-rechargeable',
+            label: 'Rechargeable',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><polygon points="10 8 7 12 10 12 9 16 12 11 9 11 10 8"/>`)
+        },
+        {
+            id: 'eco-energy-a-plus',
+            label: 'Energy A+++',
+            svg: (c, s) => wrap(c, s, `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/><polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/>`)
+        },
+        {
+            id: 'eco-upcycled-item',
+            label: 'Upcycled',
+            svg: (c, s) => wrap(c, s, `<path d="M3 12a9 9 0 0 1 9-9 9.8 9.8 0 0 1 6.7 2.7L21 8"/><path d="M21 3v5h-5"/><path d="m10 12 2 2 4-4"/>`)
+        },
+        {
+            id: 'eco-natural-dyes',
+            label: 'Natural Dyes',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><circle cx="12" cy="14" r="2.5"/>`)
+        },
+        {
+            id: 'eco-fair-trade',
+            label: 'Fair Trade',
+            svg: (c, s) => wrap(c, s, `<path d="m11 17 2 2a1 1 0 0 0 1.4 0l4.6-4.6a2 2 0 0 0 0-2.8l-3.4-3.4a2 2 0 0 0-2.8 0L9 12"/><circle cx="12" cy="12" r="10"/>`)
+        },
+        {
+            id: 'eco-local-source',
+            label: 'Local Origin',
+            svg: (c, s) => wrap(c, s, `<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><path d="M11 11a2 2 0 1 0 2-2"/>`)
+        },
+        {
+            id: 'eco-reclaimed-wood',
+            label: 'Reclaimed',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="8" y1="4" x2="8" y2="20"/><line x1="16" y1="4" x2="16" y2="20"/>`)
+        },
+        {
+            id: 'eco-bamboo-plant',
+            label: 'Eco Bamboo',
+            svg: (c, s) => wrap(c, s, `<line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="16" x2="10" y2="16"/><line x1="14" y1="12" x2="18" y2="12"/>`)
+        },
+        {
+            id: 'eco-refillable-pack',
+            label: 'Refillable',
+            svg: (c, s) => wrap(c, s, `<path d="M9 2h6v3H9z"/><path d="M7 8h10v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8z"/><polyline points="10 13 12 11 14 13"/><line x1="12" y1="11" x2="12" y2="17"/>`)
+        },
+        {
+            id: 'eco-ocean-plastic',
+            label: 'Ocean Clean',
+            svg: (c, s) => wrap(c, s, `<path d="M2 17c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/><path d="M2 21c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/><circle cx="12" cy="8" r="4"/><path d="m10 8 1.5 1.5 3-3"/>`)
+        },
+        {
+            id: 'eco-oeko-tex-cert',
+            label: 'OEKO-TEX',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/><circle cx="12" cy="12" r="7"/>`)
+        },
+        {
+            id: 'eco-paper-tape',
+            label: 'Paper Tape',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="20" x2="21" y2="20"/>`)
+        },
+        {
+            id: 'eco-rain-harvest',
+            label: 'Rain Harvest',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2v6"/><path d="M4 11a8 8 0 0 0 16 0"/><rect x="8" y="14" width="8" height="8" rx="1"/>`)
+        },
+        {
+            id: 'eco-green-footprint',
+            label: 'Eco Footprint',
+            svg: (c, s) => wrap(c, s, `<ellipse cx="12" cy="14" rx="4" ry="6"/><circle cx="8" cy="6" r="1"/><circle cx="11" cy="5" r="1.2"/><circle cx="14" cy="5" r="1.2"/><circle cx="17" cy="6" r="1"/>`)
+        },
+        {
+            id: 'eco-sustainable-tree',
+            label: 'Sustainable',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="9" r="6"/><path d="M12 15v7"/><line x1="8" y1="22" x2="16" y2="22"/>`)
+        },
+        {
+            id: 'eco-zero-emission',
+            label: 'Zero Emission',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 12a4 4 0 0 1 8 0"/><path d="M12 8v4"/>`)
+        },
+        // ── Exactly 2 Final Eco Badges ──
+        {
+            id: 'eco-soy-ink',
+            label: 'Soy Ink',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><path d="M12 12c-1.5 1-2 2-2 3s1 2 2 2 2-1 2-2-0.5-2-2-3Z"/>`)
+        },
+        {
+            id: 'eco-beeswax-wrap',
+            label: 'Eco Beeswax',
+            svg: (c, s) => wrap(c, s, `<polygon points="12 2 21 7.2 21 16.8 12 22 3 16.8 3 7.2 12 2"/><circle cx="12" cy="12" r="3"/>`)
         },
     ],
 
     payment: [
         {
             id: 'pay-credit-card',
-            label: 'Secure Payment',
+            label: 'Credit Cards',
             svg: (c, s) => wrap(c, s, `<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>`)
         },
         {
             id: 'pay-lock',
-            label: 'Checkout Protection',
+            label: 'Safe Checkout',
             svg: (c, s) => wrap(c, s, `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`)
+        },
+        // ── 30 Digital Wallets, Gateway Standards & Payment Terms ──
+        {
+            id: 'pay-paypal',
+            label: 'PayPal',
+            svg: (c, s) => wrap(c, s, `<path d="M7 4h7a4 4 0 0 1 0 8H9l-2 9H3L7 4z"/><path d="M11 9h5a4 4 0 0 1 0 8h-3l-1.5 6H7.5"/>`)
+        },
+        {
+            id: 'pay-visa-card',
+            label: 'Visa Card',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 15l2-6h2l-2 6H6zM15 9l-1.5 6h1.5l1.5-6h-1.5z"/>`)
+        },
+        {
+            id: 'pay-mastercard',
+            label: 'Mastercard',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="10" cy="12" r="3.5"/><circle cx="14" cy="12" r="3.5"/>`)
+        },
+        {
+            id: 'pay-amex-card',
+            label: 'AMEX Card',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 15l2-6 2 6M7 13h2M14 9v6h3v-2h-2v-1h2V9h-3z"/>`)
+        },
+        {
+            id: 'pay-apple-pay',
+            label: 'Apple Pay',
+            svg: (c, s) => wrap(c, s, `<path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/>`)
+        },
+        {
+            id: 'pay-google-pay',
+            label: 'Google Pay',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M12 8a4 4 0 0 1 3.5 2h-3.5v2h5.5A4 4 0 1 1 12 8z"/>`)
+        },
+        {
+            id: 'pay-nfc-tap',
+            label: 'Tap & Pay',
+            svg: (c, s) => wrap(c, s, `<path d="M6 8a6 6 0 0 1 6-6"/><path d="M6 12a10 10 0 0 1 10-10"/><path d="M6 16a14 14 0 0 1 14-14"/><rect x="2" y="10" width="10" height="12" rx="2"/>`)
+        },
+        {
+            id: 'pay-klarna-split',
+            label: 'Klarna Pay',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 9v6M12 9l3 3-3 3M16 9v6"/>`)
+        },
+        {
+            id: 'pay-afterpay',
+            label: 'Afterpay',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/><path d="M12 3a9 9 0 0 1 9 9"/>`)
+        },
+        {
+            id: 'pay-wire-transfer',
+            label: 'Wire Transfer',
+            svg: (c, s) => wrap(c, s, `<line x1="2" y1="20" x2="22" y2="20"/><line x1="6" y1="11" x2="6" y2="16"/><line x1="10" y1="11" x2="10" y2="16"/><line x1="14" y1="11" x2="14" y2="16"/><line x1="18" y1="11" x2="18" y2="16"/><polygon points="12 2 20 7 4 7"/>`)
+        },
+        {
+            id: 'pay-cod-cash',
+            label: 'COD Cash',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>`)
+        },
+        {
+            id: 'pay-coc-pickup',
+            label: 'Cash Pickup',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="6" width="16" height="10" rx="1"/><circle cx="10" cy="11" r="2"/><path d="M18 10h4v7a2 2 0 0 1-2 2H8v-3"/>`)
+        },
+        {
+            id: 'pay-sepa-debit',
+            label: 'Direct Debit',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m8 15 2 2 4-4"/>`)
+        },
+        {
+            id: 'pay-ssl-256',
+            label: '256-Bit SSL',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect x="9" y="10" width="6" height="5" rx="1"/><path d="M10 10V8.5a2 2 0 0 1 4 0V10"/>`)
+        },
+        {
+            id: 'pay-pci-dss',
+            label: 'PCI Guard',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="6"/>`)
+        },
+        {
+            id: 'pay-3d-secure',
+            label: '3D Secure',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><text x="12" y="15" font-size="7" font-weight="bold" text-anchor="middle" fill="currentColor">3D</text>`)
+        },
+        {
+            id: 'pay-1-click',
+            label: '1-Click Pay',
+            svg: (c, s) => wrap(c, s, `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/><path d="m14 14 3-3 3 3"/>`)
+        },
+        {
+            id: 'pay-escrow-safe',
+            label: 'Escrow Safe',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16.5" r="1.5"/>`)
+        },
+        {
+            id: 'pay-gift-card',
+            label: 'Gift Card',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="8" cy="15" r="1.5"/><polyline points="14 14 16 16 19 13"/>`)
+        },
+        {
+            id: 'pay-store-credit',
+            label: 'Store Credit',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="9" x2="22" y2="9"/>`)
+        },
+        {
+            id: 'pay-no-surcharge',
+            label: '0% Surcharge',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><line x1="8" y1="8" x2="16" y2="16"/>`)
+        },
+        {
+            id: 'pay-vat-receipt',
+            label: 'VAT Invoice',
+            svg: (c, s) => wrap(c, s, `<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="m9 11 2 2 4-4"/>`)
+        },
+        {
+            id: 'pay-multi-currency',
+            label: 'Multi Currency',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`)
+        },
+        {
+            id: 'pay-crypto-btc',
+            label: 'Crypto Pay',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M9 8h4a2 2 0 0 1 0 4H9m0 0h4.5a2 2 0 0 1 0 4H9V6"/><line x1="11" y1="4" x2="11" y2="6"/><line x1="13" y1="4" x2="13" y2="6"/><line x1="11" y1="18" x2="11" y2="20"/><line x1="13" y1="18" x2="13" y2="20"/>`)
+        },
+        {
+            id: 'pay-split-installment',
+            label: 'Split Pay',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/>`)
+        },
+        {
+            id: 'pay-auto-renew',
+            label: 'Auto Pay',
+            svg: (c, s) => wrap(c, s, `<path d="M3 12a9 9 0 0 1 9-9 9.8 9.8 0 0 1 6.7 2.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.8 9.8 0 0 1-6.7-2.7L3 16"/><path d="M8 16H3v5"/><circle cx="12" cy="12" r="2"/>`)
+        },
+        {
+            id: 'pay-instant-auth',
+            label: 'Instant Auth',
+            svg: (c, s) => wrap(c, s, `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/><path d="m14 12 2 2 4-4"/>`)
+        },
+        {
+            id: 'pay-buyer-cover',
+            label: 'Buyer Cover',
+            svg: (c, s) => wrap(c, s, `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="8 12 11 15 16 9"/>`)
+        },
+        {
+            id: 'pay-mobile-wallet',
+            label: 'Phone Wallet',
+            svg: (c, s) => wrap(c, s, `<rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="17" r="1"/><rect x="8" y="7" width="8" height="5" rx="1"/>`)
+        },
+        {
+            id: 'pay-bank-debit',
+            label: 'Debit Card',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="17" cy="15" r="1.5"/>`)
         },
     ],
 
@@ -3893,6 +4623,157 @@ export const ICON_LIBRARY: Record<IconCategory, IconEntry[]> = {
             id: 'loc-flag',
             label: 'Made in USA',
             svg: (c, s) => wrap(c, s, `<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>`)
+        },
+        // ── 30 Global Origins, Domestic Hubs & Manufacturing Badges ──
+        {
+            id: 'loc-made-in-uk',
+            label: 'Made in UK',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/>`)
+        },
+        {
+            id: 'loc-made-in-de',
+            label: 'Made in DE',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="14" x2="21" y2="14"/>`)
+        },
+        {
+            id: 'loc-made-in-jp',
+            label: 'Made in JP',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-made-in-it',
+            label: 'Made in IT',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/>`)
+        },
+        {
+            id: 'loc-made-in-fr',
+            label: 'Made in FR',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/><circle cx="12" cy="12" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-made-in-au',
+            label: 'Made in AU',
+            svg: (c, s) => wrap(c, s, `<polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/><circle cx="17" cy="6" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-made-in-ca',
+            label: 'Made in CA',
+            svg: (c, s) => wrap(c, s, `<path d="M12 2l2 4 4 1-3 3 1 4-4-2-4 2 1-4-3-3 4-1z"/><line x1="12" y1="17" x2="12" y2="22"/>`)
+        },
+        {
+            id: 'loc-made-in-eu',
+            label: 'Made in EU',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><circle cx="12" cy="5" r=".7" fill="currentColor"/><circle cx="17" cy="7" r=".7" fill="currentColor"/><circle cx="19" cy="12" r=".7" fill="currentColor"/><circle cx="17" cy="17" r=".7" fill="currentColor"/><circle cx="12" cy="19" r=".7" fill="currentColor"/><circle cx="7" cy="17" r=".7" fill="currentColor"/><circle cx="5" cy="12" r=".7" fill="currentColor"/><circle cx="7" cy="7" r=".7" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-swiss-made',
+            label: 'Swiss Made',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="4" width="18" height="16" rx="3"/><line x1="12" y1="8" x2="12" y2="16" stroke-width="2.5"/><line x1="8" y1="12" x2="16" y2="12" stroke-width="2.5"/>`)
+        },
+        {
+            id: 'loc-domestic-stock',
+            label: 'Local Stock',
+            svg: (c, s) => wrap(c, s, `<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m9 12 2 2 4-4"/>`)
+        },
+        {
+            id: 'loc-warehouse-hub',
+            label: 'Local Hub',
+            svg: (c, s) => wrap(c, s, `<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 10h6"/><path d="M9 14h6"/><path d="M9 18h6"/>`)
+        },
+        {
+            id: 'loc-no-customs',
+            label: 'No Customs',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/><circle cx="12" cy="12" r="6"/>`)
+        },
+        {
+            id: 'loc-gsp-global',
+            label: 'Global GSP',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><polyline points="8 12 11 15 16 9"/>`)
+        },
+        {
+            id: 'loc-factory-origin',
+            label: 'Direct Origin',
+            svg: (c, s) => wrap(c, s, `<path d="M2 20h20"/><path d="M5 20V8l5 4V8l5 4V4h4v16"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="14" cy="16" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-cross-border',
+            label: 'Cross Border',
+            svg: (c, s) => wrap(c, s, `<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>`)
+        },
+        {
+            id: 'loc-worldwide-ship',
+            label: 'Worldwide',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`)
+        },
+        {
+            id: 'loc-coast-to-coast',
+            label: 'Continental',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="6" width="18" height="12" rx="2"/><path d="m7 12 3 3 7-7"/>`)
+        },
+        {
+            id: 'loc-regional-depot',
+            label: 'Regional Hub',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="22" y2="12"/>`)
+        },
+        {
+            id: 'loc-click-collect',
+            label: 'Click & Collect',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="m10 16 2-2 2 2"/><path d="M12 14v4"/>`)
+        },
+        {
+            id: 'loc-trade-counter',
+            label: 'Trade Pickup',
+            svg: (c, s) => wrap(c, s, `<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="10" x2="22" y2="10"/>`)
+        },
+        {
+            id: 'loc-live-gps',
+            label: 'Live GPS',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>`)
+        },
+        {
+            id: 'loc-duty-free-zone',
+            label: 'Duty Free',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/><circle cx="12" cy="12" r="6"/>`)
+        },
+        {
+            id: 'loc-island-delivery',
+            label: 'Island Post',
+            svg: (c, s) => wrap(c, s, `<path d="M2 17c2 1 4 1 6 0s4-1 6 0 4 1 6 0"/><path d="M12 3a4 4 0 0 1 4 4c0 3-4 8-4 8s-4-5-4-8a4 4 0 0 1 4-4z"/>`)
+        },
+        {
+            id: 'loc-post-office-drop',
+            label: 'Post Office',
+            svg: (c, s) => wrap(c, s, `<path d="M4 19v-9a6 6 0 0 1 12 0v9"/><path d="M4 19h12"/><line x1="10" y1="19" x2="10" y2="23"/>`)
+        },
+        {
+            id: 'loc-parcel-locker',
+            label: 'Parcel Locker',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="8" cy="5.5" r=".7" fill="currentColor"/><circle cx="8" cy="12.5" r=".7" fill="currentColor"/><circle cx="8" cy="19.5" r=".7" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-customs-cleared',
+            label: 'Cleared Port',
+            svg: (c, s) => wrap(c, s, `<circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/><path d="M2 12h2M20 12h2"/>`)
+        },
+        {
+            id: 'loc-artisan-studio',
+            label: 'Artisan Made',
+            svg: (c, s) => wrap(c, s, `<path d="m15 4 5 5-9 9H6v-5l9-9z"/><line x1="18.5" y1="2.5" x2="21.5" y2="5.5"/><circle cx="5" cy="19" r="1" fill="currentColor"/>`)
+        },
+        {
+            id: 'loc-imported-goods',
+            label: 'Import Goods',
+            svg: (c, s) => wrap(c, s, `<rect x="3" y="8" width="18" height="12" rx="2"/><path d="m9 14 3 3 3-3"/><line x1="12" y1="3" x2="12" y2="17"/>`)
+        },
+        {
+            id: 'loc-rail-depot',
+            label: 'Rail Depot',
+            svg: (c, s) => wrap(c, s, `<rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/><path d="m8 19-3 3"/><path d="m16 19 3 3"/>`)
+        },
+        {
+            id: 'loc-air-terminal',
+            label: 'Air Terminal',
+            svg: (c, s) => wrap(c, s, `<path d="m15 12 7-7"/><path d="M18 4l3 3-14 14H3v-4z"/><circle cx="12" cy="12" r="9"/>`)
         },
     ],
 }
