@@ -12,13 +12,17 @@
 //   onIconSelect(id)       — fires with the icon ID when user clicks
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import {
     ICON_LIBRARY,
     ICON_CATEGORIES,
     CATEGORY_LABELS,
     getIconSvg,
+    getCustomIcons,
+    saveCustomIcon,
+    deleteCustomIcon,
     type IconCategory,
+    type IconEntry,
 } from './IconLibrary'
 
 // ─── Design tokens (match PropertiesPanel C object) ───────────────────────────
@@ -50,9 +54,90 @@ interface IconCardProps {
     svg: string
     onClick: () => void
     isActive?: boolean
+    isCustom?: boolean
+    onDelete?: () => void
 }
 
-function IconCard({ id, label, svg, onClick, isActive }: IconCardProps) {
+function IconCard({ id, label, svg, onClick, isActive, isCustom, onDelete }: IconCardProps) {
+    const [hovered, setHovered] = useState(false)
+
+    return (
+        <div style={{ position: 'relative' }}>
+            <button
+                onClick={onClick}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+                title={`${label} (${id})`}
+                style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 5,
+                    padding: '10px 6px 8px',
+                    borderRadius: 8,
+                    border: `1.5px solid ${isActive ? C.primary : hovered ? C.primary : C.border}`,
+                    background: isActive ? C.primaryLight : hovered ? C.primaryLight : C.surface,
+                    cursor: 'pointer',
+                    transition: 'border-color 0.12s, background 0.12s',
+                    minWidth: 0,
+                }}
+            >
+                <span
+                    dangerouslySetInnerHTML={{ __html: svg }}
+                    style={{ lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                />
+                <span style={{
+                    fontFamily: 'DM Sans, Arial, sans-serif',
+                    fontSize: 9,
+                    fontWeight: 500,
+                    color: isActive ? C.primary : C.secondary,
+                    textAlign: 'center',
+                    lineHeight: 1.2,
+                    wordBreak: 'break-word',
+                    maxWidth: 54,
+                }}>
+                    {label}
+                </span>
+            </button>
+
+            {/* Delete button for custom uploaded icons */}
+            {isCustom && onDelete && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        onDelete()
+                    }}
+                    title="Remove uploaded icon"
+                    style={{
+                        position: 'absolute',
+                        top: -4,
+                        right: -4,
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        background: '#ef4444',
+                        color: '#fff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: 10,
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    }}
+                >
+                    ×
+                </button>
+            )}
+        </div>
+    )
+}
+
+function UploadIconCard({ onClick }: { onClick: () => void }) {
     const [hovered, setHovered] = useState(false)
 
     return (
@@ -60,7 +145,7 @@ function IconCard({ id, label, svg, onClick, isActive }: IconCardProps) {
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            title={`${label} (${id})`}
+            title="Upload custom SVG icon (.svg only)"
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -69,28 +154,37 @@ function IconCard({ id, label, svg, onClick, isActive }: IconCardProps) {
                 gap: 5,
                 padding: '10px 6px 8px',
                 borderRadius: 8,
-                border: `1.5px solid ${isActive ? C.primary : hovered ? C.primary : C.border}`,
-                background: isActive ? C.primaryLight : hovered ? C.primaryLight : C.surface,
+                border: `1.5px dashed ${hovered ? C.primary : '#c4b5fd'}`,
+                background: hovered ? C.primaryLight : '#faf5ff',
                 cursor: 'pointer',
                 transition: 'border-color 0.12s, background 0.12s',
                 minWidth: 0,
             }}
         >
-            <span
-                dangerouslySetInnerHTML={{ __html: svg }}
-                style={{ lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            />
+            <div style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: C.primaryLight,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: C.primary
+            }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+            </div>
             <span style={{
                 fontFamily: 'DM Sans, Arial, sans-serif',
                 fontSize: 9,
-                fontWeight: 500,
-                color: isActive ? C.primary : C.secondary,
+                fontWeight: 600,
+                color: C.primary,
                 textAlign: 'center',
                 lineHeight: 1.2,
-                wordBreak: 'break-word',
-                maxWidth: 54,
             }}>
-                {label}
+                Upload
             </span>
         </button>
     )
@@ -120,30 +214,85 @@ const CATEGORY_PREVIEW_ICONS: Record<IconCategory, [string, string, string, stri
 export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: IconsPanelProps) {
     const [query, setQuery] = useState('')
     const [activeIcon, setActiveIcon] = useState<string | null>(null)
-    const [activeCategory, setActiveCategory] = useState<IconCategory | 'all' | null>(null)
+    const [activeCategory, setActiveCategory] = useState<IconCategory | 'all' | 'custom' | null>(null)
+    const [customIcons, setCustomIcons] = useState<IconEntry[]>([])
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => {
+        setCustomIcons(getCustomIcons())
+    }, [])
 
     const iconColor = C.primary
     const noBlock = selectedFeatureIndex === null
 
-    const visibleIcons = useMemo(() => {
+    function handleUploadClick() {
+        fileInputRef.current?.click()
+    }
+
+    function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // Strict SVG validation
+        const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')
+        if (!isSvg) {
+            alert('Please select an SVG file (.svg). Raster images (PNG, JPG) are not allowed.')
+            e.target.value = ''
+            return
+        }
+
+        const cleanLabel = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').slice(0, 16)
+        const newId = `custom-${Date.now()}`
+
+        const reader = new FileReader()
+        reader.onload = (event) => {
+            const text = (event.target?.result as string) || ''
+            // Extract the inner paths/shapes from the SVG tag
+            const innerMatch = text.match(/<svg[^>]*>([\s\S]*?)<\/svg>/i)
+            const svgContent = innerMatch ? innerMatch[1] : text
+
+            saveCustomIcon({ id: newId, label: cleanLabel, svgContent, isImage: false })
+            setCustomIcons(getCustomIcons())
+            handleSelect(newId)
+        }
+        reader.readAsText(file)
+
+        // Reset input value so same file can be uploaded again if needed
+        e.target.value = ''
+    }
+
+    function handleDeleteCustom(id: string) {
+        deleteCustomIcon(id)
+        setCustomIcons(getCustomIcons())
+        if (activeIcon === id) setActiveIcon(null)
+    }
+
+    const visibleIcons = useMemo<IconEntry[]>(() => {
         if (activeCategory === null) return []
-        const pool = activeCategory === 'all'
-            ? ICON_CATEGORIES.flatMap(cat => ICON_LIBRARY[cat])
-            : ICON_LIBRARY[activeCategory]
+
+        let pool: IconEntry[] = []
+        if (activeCategory === 'custom') {
+            pool = customIcons
+        } else if (activeCategory === 'all') {
+            pool = [...customIcons, ...ICON_CATEGORIES.flatMap(cat => ICON_LIBRARY[cat])]
+        } else {
+            pool = ICON_LIBRARY[activeCategory as IconCategory] || []
+        }
+
         if (!query.trim()) return pool
         const q = query.toLowerCase()
-        return pool.filter(e => e.id.includes(q) || e.label.toLowerCase().includes(q))
-    }, [query, activeCategory])
+        return pool.filter(e => e.id.toLowerCase().includes(q) || e.label.toLowerCase().includes(q))
+    }, [query, activeCategory, customIcons])
 
     // When searching, auto-expand all
     const effectiveCategory = query.trim() ? 'all' : activeCategory
 
-    const searchResults = useMemo(() => {
+    const searchResults = useMemo<IconEntry[] | null>(() => {
         if (!query.trim()) return null
         const q = query.toLowerCase()
-        return ICON_CATEGORIES.flatMap(cat => ICON_LIBRARY[cat])
-            .filter(e => e.id.includes(q) || e.label.toLowerCase().includes(q))
-    }, [query])
+        const allPool: IconEntry[] = [...customIcons, ...ICON_CATEGORIES.flatMap(cat => ICON_LIBRARY[cat])]
+        return allPool.filter(e => e.id.toLowerCase().includes(q) || e.label.toLowerCase().includes(q))
+    }, [query, customIcons])
 
     function handleSelect(id: string) {
         setActiveIcon(id)
@@ -155,11 +304,47 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: C.bg }}>
 
+            {/* ── Hidden File Picker (Strict SVG Only) ── */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".svg,image/svg+xml"
+                style={{ display: 'none' }}
+                onChange={handleFileSelected}
+            />
+
             {/* ── Header ── */}
             <div style={{ padding: '14px 14px 10px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-                <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary }}>
-                    Icon Library
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <p style={{ margin: 0, fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.secondary }}>
+                        Icon Library
+                    </p>
+                    <button
+                        onClick={handleUploadClick}
+                        title="Upload custom SVG icon (.svg only)"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            padding: '3px 8px',
+                            background: C.primaryLight,
+                            color: C.primary,
+                            border: `1px solid ${C.border}`,
+                            borderRadius: 6,
+                            fontFamily: 'DM Sans, Arial, sans-serif',
+                            fontSize: 10,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Upload
+                    </button>
+                </div>
+
                 {/* Search */}
                 <div style={{ position: 'relative' }}>
                     <input
@@ -277,7 +462,25 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                             </p>
                         ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-                                {(query.trim() ? searchResults! : (activeCategory && activeCategory !== 'all' ? ICON_LIBRARY[activeCategory as IconCategory] : [])).map(entry => (
+                                {/* Always accessible + Upload card in the grid */}
+                                <UploadIconCard onClick={handleUploadClick} />
+
+                                {/* Render custom uploaded icons first if any */}
+                                {customIcons.map(entry => (
+                                    <IconCard
+                                        key={entry.id}
+                                        id={entry.id}
+                                        label={entry.label}
+                                        svg={entry.svg(iconColor, 22)}
+                                        isActive={activeIcon === entry.id}
+                                        isCustom={true}
+                                        onDelete={() => handleDeleteCustom(entry.id)}
+                                        onClick={() => { if (!noBlock) handleSelect(entry.id) }}
+                                    />
+                                ))}
+
+                                {/* Built-in icons */}
+                                {(query.trim() ? searchResults! : (activeCategory && activeCategory !== 'all' && activeCategory !== 'custom' ? ICON_LIBRARY[activeCategory as IconCategory] : [])).map(entry => (
                                     <IconCard
                                         key={entry.id}
                                         id={entry.id}
