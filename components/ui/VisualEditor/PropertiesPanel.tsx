@@ -7706,6 +7706,57 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'limited_time_offer': {
+            const ltov = ((props as any).variant ?? 'lto-flash-sale-ticker') as string
+
+            // Per-variant signature colours
+            const ltoSig: Record<string, { bg: string; text: string; accent: string }> = {
+                'lto-flash-sale-ticker': { bg: '#dc2626', text: '#ffffff', accent: '#fef08a' },
+                'lto-clearance-stamped-tag': { bg: '#fffdfa', text: '#1c1917', accent: '#b91c1c' },
+                'lto-midnight-vip-exclusive': { bg: '#09090b', text: '#fafafa', accent: '#d4af37' },
+                'lto-industrial-hazard-alert': { bg: '#18181b', text: '#f4f4f5', accent: '#f59e0b' },
+                'lto-circular-coupon-clip': { bg: '#ffffff', text: '#0f172a', accent: '#0284c7' },
+                'lto-live-scarcity-meter': { bg: '#0f172a', text: '#ffffff', accent: '#f97316' },
+                'lto-multibuy-volume-matrix': { bg: '#ffffff', text: '#0f172a', accent: '#2563eb' },
+                'lto-scandinavian-editorial': { bg: '#ffffff', text: '#18181b', accent: '#71717a' },
+                'lto-cyber-terminal-deal': { bg: '#090d16', text: '#f1f5f9', accent: '#06b6d4' },
+                'lto-holiday-gift-ribbon': { bg: '#064e3b', text: '#ffffff', accent: '#fbbf24' },
+            }
+            const ltoSigVal = ltoSig[ltov] ?? { bg: '#dc2626', text: '#ffffff', accent: '#fef08a' }
+
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={(props as any).bgColor ?? ltoSigVal.bg} onChange={v => updateProps({ bgColor: v } as any)} />
+                        <ColorRow label="Text colour" value={(props as any).textColor ?? ltoSigVal.text} onChange={v => updateProps({ textColor: v } as any)} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? ltoSigVal.accent} onChange={v => updateProps({ accentColor: v } as any)} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? ''}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'monospace', l: 'Monospace' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 16} min={0} max={120} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 16} min={0} max={120} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 24} min={0} max={120} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 24} min={0} max={120} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
+                    </Section>
+                </>
+            )
+        }
+
         case 'condition_details': {
             const cdv = ((props as any).variant ?? 'cd-cosmetic-grade-split') as string
 
@@ -7730,6 +7781,27 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? sig.bg} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? sig.text} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? sig.accent} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={props.fontFamily ?? ''}
+                            onChange={v => updateProps({ fontFamily: v })}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                            ]}
+                        />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Top" value={props.paddingTop ?? 16} min={0} max={120} onChange={v => updateProps({ paddingTop: v } as any)} suffix="px" />
+                            <NumberInput label="Bottom" value={props.paddingBottom ?? 16} min={0} max={120} onChange={v => updateProps({ paddingBottom: v } as any)} suffix="px" />
+                            <NumberInput label="Left" value={props.paddingLeft ?? 20} min={0} max={120} onChange={v => updateProps({ paddingLeft: v } as any)} suffix="px" />
+                            <NumberInput label="Right" value={props.paddingRight ?? 20} min={0} max={120} onChange={v => updateProps({ paddingRight: v } as any)} suffix="px" />
+                        </div>
                     </Section>
                 </>
             )
@@ -10377,15 +10449,174 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </div>
             )
 
-        case 'limited_time_offer':
+        case 'limited_time_offer': {
+            const ltov = ((props as any).variant ?? 'lto-flash-sale-ticker') as string
             return (
-                <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        ⏱ This block displays a fixed limited time offer notice — no editable attributes.
-                        Use the Styles tab to adjust colours and spacing.
-                    </InfoBox>
-                </div>
+                <>
+                    {/* ── Core Deal Text ── */}
+                    <Section title="Deal Text">
+                        <TextInput
+                            label="Deal title"
+                            value={(props as any).dealTitle ?? ''}
+                            placeholder={
+                                ltov === 'lto-flash-sale-ticker' ? '⚡ FLASH SALE — SPECIAL PROMOTIONAL EVENT' :
+                                    ltov === 'lto-clearance-stamped-tag' ? 'INVENTORY CLEARANCE SALE — FINAL MARKDOWN' :
+                                        ltov === 'lto-midnight-vip-exclusive' ? 'VIP ALLOCATION — EXCLUSIVE PROMOTIONAL INVITATION' :
+                                            ltov === 'lto-industrial-hazard-alert' ? '⚠️ SURPLUS LOT NOTICE — CONTRACTOR BULK RATE ACTIVE' :
+                                                ltov === 'lto-circular-coupon-clip' ? 'OFFICIAL STORE COUPON · SAVE INSTANTLY AT CHECKOUT' :
+                                                    ltov === 'lto-live-scarcity-meter' ? '🔥 HIGH DEMAND — LIMITED REMAINING UNITS AT THIS PRICE' :
+                                                        ltov === 'lto-multibuy-volume-matrix' ? 'MULTI-BUY VOLUME SAVINGS — BUY MORE & SAVE BIG' :
+                                                            ltov === 'lto-scandinavian-editorial' ? 'SEASONAL ARCHIVE PROMOTION' :
+                                                                ltov === 'lto-cyber-terminal-deal' ? 'SYS.PROMO: HARDWARE FLASH EVENT ACTIVE' :
+                                                                    'HOLIDAY GIFT EVENT — EXTENDED 60-DAY RETURNS INCLUDED'
+                            }
+                            onChange={v => updateProps({ dealTitle: v } as any)}
+                        />
+                        <TextareaInput
+                            label="Deal subtitle"
+                            value={(props as any).dealSubtext ?? ''}
+                            placeholder="Promotional pricing is active for a limited time. While supplies last."
+                            onChange={v => updateProps({ dealSubtext: v } as any)}
+                        />
+                    </Section>
+
+                    {/* ── Badge & Discount ── */}
+                    <Section title="Badge & Discount">
+                        <TextInput
+                            label="Badge / tag"
+                            value={(props as any).badgeText ?? ''}
+                            placeholder={
+                                ltov === 'lto-flash-sale-ticker' ? 'ENDS SOON' :
+                                    ltov === 'lto-clearance-stamped-tag' ? 'CLEARANCE LOT' :
+                                        ltov === 'lto-midnight-vip-exclusive' ? '◆ VIP EXCLUSIVE ◆' :
+                                            ltov === 'lto-industrial-hazard-alert' ? 'CAUTION: OVERSTOCK' :
+                                                ltov === 'lto-circular-coupon-clip' ? '✂ CLIP & SAVE' :
+                                                    ltov === 'lto-live-scarcity-meter' ? '⚡ LIVE VELOCITY ALERT' :
+                                                        ltov === 'lto-multibuy-volume-matrix' ? 'TIERED VOLUME PRICING' :
+                                                            ltov === 'lto-scandinavian-editorial' ? 'CURATED ALLOCATION' :
+                                                                ltov === 'lto-cyber-terminal-deal' ? '[SYS_ACTIVE // CYCLE_2026]' :
+                                                                    '🎁 HOLIDAY PROMOTION'
+                            }
+                            onChange={v => updateProps({ badgeText: v } as any)}
+                        />
+                        <TextInput
+                            label="Discount / savings callout"
+                            value={(props as any).discountText ?? ''}
+                            placeholder={
+                                ltov === 'lto-flash-sale-ticker' ? 'UP TO 50% OFF' :
+                                    ltov === 'lto-clearance-stamped-tag' ? 'MASSIVE SAVINGS' :
+                                        ltov === 'lto-midnight-vip-exclusive' ? 'PREMIUM CONCIERGE BENEFIT' :
+                                            ltov === 'lto-industrial-hazard-alert' ? 'HEAVY DISCOUNT LOT' :
+                                                ltov === 'lto-circular-coupon-clip' ? 'SPECIAL SAVINGS APPLIED' :
+                                                    ltov === 'lto-live-scarcity-meter' ? '88% CLAIMED' :
+                                                        ltov === 'lto-scandinavian-editorial' ? 'SPECIAL INVITATION SAVINGS' :
+                                                            ltov === 'lto-cyber-terminal-deal' ? 'SPECIAL HARDWARE RATE' :
+                                                                ltov === 'lto-holiday-gift-ribbon' ? 'PEACE-OF-MIND GUARANTEE' :
+                                                                    'SAVE BIG'
+                            }
+                            onChange={v => updateProps({ discountText: v } as any)}
+                        />
+                        <TextInput
+                            label="Expiry / timer text"
+                            value={(props as any).expiryText ?? ''}
+                            placeholder={
+                                ltov === 'lto-clearance-stamped-tag' ? 'While Surplus Allocation Lasts' :
+                                    'Ends Sunday at Midnight EST'
+                            }
+                            onChange={v => updateProps({ expiryText: v } as any)}
+                        />
+                    </Section>
+
+                    {/* ── Flash Sale: Countdown Labels ── */}
+                    {ltov === 'lto-flash-sale-ticker' && (
+                        <Section title="Countdown Labels">
+                            <TextInput label="Label 1" value={(props as any).label1 ?? ''} placeholder="DAYS" onChange={v => updateProps({ label1: v } as any)} />
+                            <TextInput label="Label 2" value={(props as any).label2 ?? ''} placeholder="HOURS" onChange={v => updateProps({ label2: v } as any)} />
+                            <TextInput label="Label 3" value={(props as any).label3 ?? ''} placeholder="MINS" onChange={v => updateProps({ label3: v } as any)} />
+                            <TextInput label="Label 4" value={(props as any).label4 ?? ''} placeholder="SECS" onChange={v => updateProps({ label4: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Clearance Stamped Tag: Stamp & Status ── */}
+                    {ltov === 'lto-clearance-stamped-tag' && (
+                        <Section title="Stamp & Status Labels">
+                            <TextInput label="Stamp line 1" value={(props as any).stampLine1 ?? ''} placeholder="OFFICIAL" onChange={v => updateProps({ stampLine1: v } as any)} />
+                            <TextInput label="Stamp line 2" value={(props as any).stampLine2 ?? ''} placeholder="CLEAR" onChange={v => updateProps({ stampLine2: v } as any)} />
+                            <TextInput label="Stamp line 3" value={(props as any).stampLine3 ?? ''} placeholder="MARKED" onChange={v => updateProps({ stampLine3: v } as any)} />
+                            <TextInput label="Lot label" value={(props as any).clearanceLot ?? ''} placeholder="CLEARANCE LOT" onChange={v => updateProps({ clearanceLot: v } as any)} />
+                            <TextInput label="Status label" value={(props as any).specialStatus ?? ''} placeholder="SPECIAL STATUS" onChange={v => updateProps({ specialStatus: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Midnight VIP: Availability & Seller Notes ── */}
+                    {ltov === 'lto-midnight-vip-exclusive' && (
+                        <Section title="VIP Badge Labels">
+                            <TextInput label="Availability note" value={(props as any).availabilityNote ?? ''} placeholder="LIMITED AVAILABILITY" onChange={v => updateProps({ availabilityNote: v } as any)} />
+                            <TextInput label="Seller note" value={(props as any).sellerNote ?? ''} placeholder="Direct From Verified Seller" onChange={v => updateProps({ sellerNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Industrial Hazard: Grade & Dispatch ── */}
+                    {ltov === 'lto-industrial-hazard-alert' && (
+                        <Section title="Status Labels">
+                            <TextInput label="Grade note" value={(props as any).gradeNote ?? ''} placeholder="Commercial &amp; Industrial Grade" onChange={v => updateProps({ gradeNote: v } as any)} />
+                            <TextInput label="Dispatch note" value={(props as any).dispatchNote ?? ''} placeholder="IMMEDIATE DISPATCH" onChange={v => updateProps({ dispatchNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Circular Coupon: Scope & Cart Note ── */}
+                    {ltov === 'lto-circular-coupon-clip' && (
+                        <Section title="Coupon Labels">
+                            <TextInput label="Coupon scope" value={(props as any).couponScope ?? ''} placeholder="Valid For This eBay Item Only" onChange={v => updateProps({ couponScope: v } as any)} />
+                            <TextInput label="Cart note" value={(props as any).cartNote ?? ''} placeholder="AUTO-APPLIED IN CART" onChange={v => updateProps({ cartNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Live Scarcity: Scarcity Label ── */}
+                    {ltov === 'lto-live-scarcity-meter' && (
+                        <Section title="Scarcity Label">
+                            <TextInput label="Scarcity label" value={(props as any).scarcityLabel ?? ''} placeholder="ALMOST SOLD OUT" onChange={v => updateProps({ scarcityLabel: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Multi-Buy Volume Matrix: Tier Labels ── */}
+                    {ltov === 'lto-multibuy-volume-matrix' && (
+                        <Section title="Volume Tier Labels">
+                            <TextInput label="Tier 1 label" value={(props as any).tier1Label ?? ''} placeholder="BUY 1 ITEM" onChange={v => updateProps({ tier1Label: v } as any)} />
+                            <TextInput label="Tier 1 price" value={(props as any).tier1Price ?? ''} placeholder="STANDARD PRICE" onChange={v => updateProps({ tier1Price: v } as any)} />
+                            <TextInput label="Tier 1 note" value={(props as any).tier1Note ?? ''} placeholder="Standard Value" onChange={v => updateProps({ tier1Note: v } as any)} />
+                            <TextInput label="Tier 2 label" value={(props as any).tier2Label ?? ''} placeholder="★ BUY 2 ITEMS ★" onChange={v => updateProps({ tier2Label: v } as any)} />
+                            <TextInput label="Tier 2 price" value={(props as any).tier2Price ?? ''} placeholder="EXTRA 10% OFF" onChange={v => updateProps({ tier2Price: v } as any)} />
+                            <TextInput label="Tier 2 note" value={(props as any).tier2Note ?? ''} placeholder="Most Popular Choice" onChange={v => updateProps({ tier2Note: v } as any)} />
+                            <TextInput label="Tier 3 label" value={(props as any).tier3Label ?? ''} placeholder="BUY 3 OR MORE" onChange={v => updateProps({ tier3Label: v } as any)} />
+                            <TextInput label="Tier 3 price" value={(props as any).tier3Price ?? ''} placeholder="EXTRA 20% OFF" onChange={v => updateProps({ tier3Price: v } as any)} />
+                            <TextInput label="Tier 3 note" value={(props as any).tier3Note ?? ''} placeholder="Maximum Bulk Savings" onChange={v => updateProps({ tier3Note: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Scandinavian Editorial: Apply Note ── */}
+                    {ltov === 'lto-scandinavian-editorial' && (
+                        <Section title="Apply Note">
+                            <TextInput label="Apply note" value={(props as any).applyNote ?? ''} placeholder="Applied at eBay purchase" onChange={v => updateProps({ applyNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Cyber Terminal: Activation Note ── */}
+                    {ltov === 'lto-cyber-terminal-deal' && (
+                        <Section title="Status Note">
+                            <TextInput label="Activation note" value={(props as any).activationNote ?? ''} placeholder="Instant Activation" onChange={v => updateProps({ activationNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Holiday Gift Ribbon: Dispatch Guarantee ── */}
+                    {ltov === 'lto-holiday-gift-ribbon' && (
+                        <Section title="Dispatch Label">
+                            <TextInput label="Dispatch guarantee" value={(props as any).dispatchGuarantee ?? ''} placeholder="Guaranteed Pre-Holiday Dispatch" onChange={v => updateProps({ dispatchGuarantee: v } as any)} />
+                        </Section>
+                    )}
+                </>
             )
+        }
 
         case 'video_placeholder':
             return (

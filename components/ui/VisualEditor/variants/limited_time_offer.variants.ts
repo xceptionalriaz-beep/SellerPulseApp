@@ -175,22 +175,22 @@ function flashSaleTicker(p: any, id: string): string {
               <tr>
                 <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
                   <div style="color:#ffffff;font-size:16px;font-weight:900;line-height:1;font-family:monospace;">01</div>
-                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">DAYS</div>
+                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label1 ?? 'DAYS'}</div>
                 </td>
                 <td style="color:${accent};font-weight:900;font-size:14px;padding:0 2px;">:</td>
                 <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
                   <div style="color:#ffffff;font-size:16px;font-weight:900;line-height:1;font-family:monospace;">14</div>
-                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">HOURS</div>
+                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label2 ?? 'HOURS'}</div>
                 </td>
                 <td style="color:${accent};font-weight:900;font-size:14px;padding:0 2px;">:</td>
                 <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
                   <div style="color:#ffffff;font-size:16px;font-weight:900;line-height:1;font-family:monospace;">28</div>
-                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">MINS</div>
+                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label3 ?? 'MINS'}</div>
                 </td>
                 <td style="color:${accent};font-weight:900;font-size:14px;padding:0 2px;">:</td>
                 <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
                   <div style="color:${accent};font-size:16px;font-weight:900;line-height:1;font-family:monospace;">45</div>
-                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">SECS</div>
+                  <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label4 ?? 'SECS'}</div>
                 </td>
               </tr>
             </table>
@@ -227,9 +227,9 @@ function clearanceStampedTag(p: any, id: string): string {
           <!-- Circular Red Inspection Stamp -->
           <td width="72" style="width:72px;vertical-align:middle;padding-right:16px;box-sizing:border-box;">
             <div style="width:68px;height:68px;border:2.5px dashed ${accent};border-radius:50%;text-align:center;box-sizing:border-box;padding:8px 2px;">
-              <div style="color:${accent};font-size:8px;font-weight:900;letter-spacing:0.5px;line-height:1.1;text-transform:uppercase;">OFFICIAL</div>
-              <div style="color:${accent};font-size:11px;font-weight:900;line-height:1.2;margin:2px 0;">CLEAR</div>
-              <div style="color:${accent};font-size:7.5px;font-weight:800;letter-spacing:0.5px;line-height:1;">MARKED</div>
+              <div style="color:${accent};font-size:8px;font-weight:900;letter-spacing:0.5px;line-height:1.1;text-transform:uppercase;">${p.stampLine1 ?? 'OFFICIAL'}</div>
+              <div style="color:${accent};font-size:11px;font-weight:900;line-height:1.2;margin:2px 0;">${p.stampLine2 ?? 'CLEAR'}</div>
+              <div style="color:${accent};font-size:7.5px;font-weight:800;letter-spacing:0.5px;line-height:1;">${p.stampLine3 ?? 'MARKED'}</div>
             </div>
           </td>
 
@@ -237,7 +237,7 @@ function clearanceStampedTag(p: any, id: string): string {
           <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:4px;">
               <span style="display:inline-block;background-color:#fee2e2;color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
-                CLEARANCE LOT
+                ${p.clearanceLot ?? 'CLEARANCE LOT'}
               </span>
               <span style="color:#78716c;font-size:11px;font-weight:600;margin-left:8px;">
                 &bull; ${expiry}
@@ -253,8 +253,8 @@ function clearanceStampedTag(p: any, id: string): string {
 
           <!-- Right: Price Tag Stub -->
           <td width="160" style="width:160px;text-align:right;vertical-align:middle;padding-left:14px;border-left:1.5px dashed #d6d3d1;box-sizing:border-box;">
-            <div style="color:#78716c;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">
-              SPECIAL STATUS
+            <div style=\"color:#78716c;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;\">
+              ${p.specialStatus ?? 'SPECIAL STATUS'}
             </div>
             <div style="color:${accent};font-size:16px;font-weight:900;line-height:1.2;">
               ${discount}
@@ -308,14 +308,14 @@ function midnightVipExclusive(p: any, id: string): string {
           <!-- Right: Champagne Gold Badge -->
           <td width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
             <div style="display:inline-block;background-color:#18181b;border:1px solid ${gold};border-radius:6px;padding:9px 14px;text-align:center;">
-              <div style="color:${gold};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">
-                LIMITED AVAILABILITY
+              <div style=\"color:${gold};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;\">
+                ${p.availabilityNote ?? 'LIMITED AVAILABILITY'}
               </div>
               <div style="color:#ffffff;font-size:12px;font-weight:800;letter-spacing:0.3px;">
                 ${discount}
               </div>
-              <div style="color:${gold};font-size:9.5px;font-weight:600;margin-top:3px;">
-                Direct From Verified Seller
+              <div style=\"color:${gold};font-size:9.5px;font-weight:600;margin-top:3px;\">
+                ${p.sellerNote ?? 'Direct From Verified Seller'}
               </div>
             </div>
           </td>
@@ -360,8 +360,8 @@ function industrialHazardAlert(p: any, id: string): string {
               <span style="display:inline-block;background-color:${yellow};color:#000000;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;">
                 ${tag}
               </span>
-              <span style="color:#a1a1aa;font-size:11px;font-weight:700;margin-left:8px;">
-                Commercial & Industrial Grade
+              <span style=\"color:#a1a1aa;font-size:11px;font-weight:700;margin-left:8px;\">
+                ${p.gradeNote ?? 'Commercial & Industrial Grade'}
               </span>
             </div>
             <div style="color:${textCol};font-size:16.5px;font-weight:900;letter-spacing:0.2px;line-height:1.25;margin:0 0 4px 0;">
@@ -378,8 +378,8 @@ function industrialHazardAlert(p: any, id: string): string {
               <div style="color:${yellow};font-size:13px;font-weight:900;line-height:1.2;">
                 ${discount}
               </div>
-              <div style="color:#e4e4e7;font-size:10px;font-weight:700;margin-top:2px;">
-                IMMEDIATE DISPATCH
+              <div style=\"color:#e4e4e7;font-size:10px;font-weight:700;margin-top:2px;\">
+                ${p.dispatchNote ?? 'IMMEDIATE DISPATCH'}
               </div>
               <div style="color:#10b981;font-size:9.5px;font-weight:800;margin-top:2px;">
                 &#10003; 100% Genuine OEM
@@ -426,8 +426,8 @@ function circularCouponClip(p: any, id: string): string {
               <span style="display:inline-block;background-color:#e0f2fe;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
                 ${tag}
               </span>
-              <span style="color:#64748b;font-size:10.5px;font-weight:700;margin-left:8px;">
-                Valid For This eBay Item Only
+              <span style=\"color:#64748b;font-size:10.5px;font-weight:700;margin-left:8px;\">
+                ${p.couponScope ?? 'Valid For This eBay Item Only'}
               </span>
             </div>
             <div style="color:${textCol};font-size:16px;font-weight:900;line-height:1.25;margin:0 0 3px 0;">
@@ -447,8 +447,8 @@ function circularCouponClip(p: any, id: string): string {
             <div style="letter-spacing:2px;font-family:monospace;font-size:13px;color:#334155;margin:3px 0 2px 0;line-height:1;">
               ||||| | |||| || |||
             </div>
-            <div style="color:#64748b;font-size:8.5px;font-weight:700;letter-spacing:1px;">
-              AUTO-APPLIED IN CART
+            <div style=\"color:#64748b;font-size:8.5px;font-weight:700;letter-spacing:1px;\">
+              ${p.cartNote ?? 'AUTO-APPLIED IN CART'}
             </div>
           </td>
         </tr>
@@ -502,7 +502,7 @@ function liveScarcityMeter(p: any, id: string): string {
           <td width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
             <div style="background-color:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px 12px;text-align:left;">
               <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                <span style="color:#f8fafc;font-size:10px;font-weight:800;">ALMOST SOLD OUT</span>
+                <span style=\"color:#f8fafc;font-size:10px;font-weight:800;\">${p.scarcityLabel ?? 'ALMOST SOLD OUT'}</span>
                 <span style="color:${accent};font-size:10px;font-weight:900;float:right;">${discount}</span>
               </div>
               <!-- Progress Bar -->
@@ -566,23 +566,23 @@ function multibuyVolumeMatrix(p: any, id: string): string {
         <tr>
           <!-- Tier 1 -->
           <td width="33%" align="center" style="background-color:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:10px 8px;">
-            <div style="color:#64748b;font-size:10px;font-weight:800;text-transform:uppercase;">BUY 1 ITEM</div>
-            <div style="color:#0f172a;font-size:14px;font-weight:900;margin:3px 0;">STANDARD PRICE</div>
-            <div style="color:#64748b;font-size:10px;font-weight:600;">Standard Value</div>
+            <div style=\"color:#64748b;font-size:10px;font-weight:800;text-transform:uppercase;\">${p.tier1Label ?? 'BUY 1 ITEM'}</div>
+            <div style=\"color:#0f172a;font-size:14px;font-weight:900;margin:3px 0;\">${p.tier1Price ?? 'STANDARD PRICE'}</div>
+            <div style=\"color:#64748b;font-size:10px;font-weight:600;\">${p.tier1Note ?? 'Standard Value'}</div>
           </td>
 
           <!-- Tier 2 (Highlighted) -->
           <td width="33%" align="center" style="background-color:#eff6ff;border:1.5px solid ${accent};border-radius:6px;padding:10px 8px;position:relative;">
-            <div style="color:${accent};font-size:10px;font-weight:900;text-transform:uppercase;">★ BUY 2 ITEMS ★</div>
-            <div style="color:${accent};font-size:16px;font-weight:900;margin:3px 0;">EXTRA 10% OFF</div>
-            <div style="color:#1d4ed8;font-size:10px;font-weight:700;">Most Popular Choice</div>
+            <div style="color:${accent};font-size:10px;font-weight:900;text-transform:uppercase;">${p.tier2Label ?? '★ BUY 2 ITEMS ★'}</div>
+            <div style="color:${accent};font-size:16px;font-weight:900;margin:3px 0;">${p.tier2Price ?? 'EXTRA 10% OFF'}</div>
+            <div style="color:#1d4ed8;font-size:10px;font-weight:700;">${p.tier2Note ?? 'Most Popular Choice'}</div>
           </td>
 
           <!-- Tier 3 -->
           <td width="33%" align="center" style="background-color:#f0fdf4;border:1.5px solid #16a34a;border-radius:6px;padding:10px 8px;">
-            <div style="color:#15803d;font-size:10px;font-weight:900;text-transform:uppercase;">BUY 3 OR MORE</div>
-            <div style="color:#15803d;font-size:16px;font-weight:900;margin:3px 0;">EXTRA 20% OFF</div>
-            <div style="color:#16a34a;font-size:10px;font-weight:800;">Maximum Bulk Savings</div>
+            <div style="color:#15803d;font-size:10px;font-weight:900;text-transform:uppercase;">${p.tier3Label ?? 'BUY 3 OR MORE'}</div>
+            <div style="color:#15803d;font-size:16px;font-weight:900;margin:3px 0;">${p.tier3Price ?? 'EXTRA 20% OFF'}</div>
+            <div style="color:#16a34a;font-size:10px;font-weight:800;">${p.tier3Note ?? 'Maximum Bulk Savings'}</div>
           </td>
         </tr>
       </table>
@@ -632,8 +632,8 @@ function scandinavianEditorial(p: any, id: string): string {
               <div style="color:#18181b;font-size:12.5px;font-weight:700;letter-spacing:0.5px;">
                 ${discount}
               </div>
-              <div style="color:#71717a;font-size:10px;font-weight:500;margin-top:2px;">
-                Applied at eBay purchase
+              <div style=\"color:#71717a;font-size:10px;font-weight:500;margin-top:2px;\">
+                ${p.applyNote ?? 'Applied at eBay purchase'}
               </div>
             </div>
           </td>
@@ -699,8 +699,8 @@ function cyberTerminalDeal(p: any, id: string): string {
               <div style="color:${cyan};font-size:13px;font-weight:900;line-height:1.2;font-family:monospace;">
                 ${discount}
               </div>
-              <div style="color:#38bdf8;font-size:9.5px;font-weight:700;margin-top:3px;">
-                Instant Activation
+              <div style=\"color:#38bdf8;font-size:9.5px;font-weight:700;margin-top:3px;\">
+                ${p.activationNote ?? 'Instant Activation'}
               </div>
             </div>
           </td>
@@ -743,8 +743,8 @@ function holidayGiftRibbon(p: any, id: string): string {
               <span style="display:inline-block;background-color:#022c22;color:${gold};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;border:1px solid ${gold};">
                 ${tag}
               </span>
-              <span style="color:#a7f3d0;font-size:11px;font-weight:700;margin-left:8px;">
-                Guaranteed Pre-Holiday Dispatch
+              <span style=\"color:#a7f3d0;font-size:11px;font-weight:700;margin-left:8px;\">
+                ${p.dispatchGuarantee ?? 'Guaranteed Pre-Holiday Dispatch'}
               </span>
             </div>
             <div style="color:${textCol};font-size:17px;font-weight:800;letter-spacing:0.2px;line-height:1.25;margin:0 0 3px 0;">
