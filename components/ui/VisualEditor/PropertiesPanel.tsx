@@ -10250,24 +10250,50 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </div>
             )
 
-        case 'condition_details':
+        case 'condition_details': {
+            const cdv2 = (props as any).variant ?? 'cd-cosmetic-grade-split'
+            const cdTitleFallback: Record<string, string> = {
+                'cd-cosmetic-grade-split': 'Brand New',
+                'cd-certified-refurb-diagnostic': 'Certified Refurbished (Grade A+)',
+                'cd-archival-vintage-tier': 'Near Mint (NM 9.0)',
+                'cd-open-box-inventory-audit': 'Open Box — 100% Complete & Tested',
+                'cd-honest-wear-transparency': 'Excellent Pre-Owned Condition',
+                'cd-parts-repair-warning': 'For Parts or Not Working',
+                'cd-jeweler-curator-provenance': 'Near Mint Collector Grade',
+                'cd-automotive-core-fitment': 'Tested OEM Used — Excellent Functionality',
+                'cd-scandinavian-minimal-ledger': 'Pristine Studio Condition',
+                'cd-mobile-compact-badge-strip': 'Brand New & Sealed',
+            }
+            const cdNotesFallback: Record<string, string> = {
+                'cd-cosmetic-grade-split': '{{CONDITION_NOTES}}',
+                'cd-certified-refurb-diagnostic': 'Unit in pristine mechanical condition. Thoroughly sanitized, factory reset, and tested across all hardware modules.',
+                'cd-archival-vintage-tier': 'Carefully preserved in collector sleeve. Minor edge handling consistent with gentle storage. Spine completely tight with zero splits.',
+                'cd-open-box-inventory-audit': 'Customer return in flawless working order. Verified complete with original retail packaging, cables, documentation, and all factory accessories.',
+                'cd-honest-wear-transparency': 'Gently worn 2-3 times with excellent fabric integrity. No stains, pulls, tears, or loose stitching. Stored in a smoke-free, pet-free home environment.',
+                'cd-parts-repair-warning': 'Device powers on but displays blinking error code E-04. Sold strictly as-is for spare components, teardown, or repair projects. No returns accepted for stated defects.',
+                'cd-jeweler-curator-provenance': 'Case and bezel retain sharp factory bevels with no deep scratches or dings. Dial and indices 100% original. Movement tested on timegrapher keeping accurate timing.',
+                'cd-automotive-core-fitment': 'Removed from low-mileage donor vehicle. Thoroughly inspected for structural integrity with zero cracks, stripped threads, or fluid leaks.',
+                'cd-scandinavian-minimal-ledger': 'Exhibition display piece with virtually zero signs of handling. Materials retain original matte texture and finish.',
+                'cd-mobile-compact-badge-strip': 'Unopened retail package with intact factory seals. 100% manufacturer warranty included.',
+            }
             return (
                 <>
                     <Section title="Condition">
                         <TextInput
                             label="Condition title"
-                            value={props.conditionText ?? ''}
+                            value={props.conditionText ?? cdTitleFallback[cdv2] ?? ''}
                             onChange={v => updateProps({ conditionText: v })}
                         />
                         <TextareaInput
                             label="Condition notes"
-                            value={props.conditionNotes ?? ''}
+                            value={props.conditionNotes ?? cdNotesFallback[cdv2] ?? ''}
                             rows={5}
                             onChange={v => updateProps({ conditionNotes: v })}
                         />
                     </Section>
                 </>
             )
+        }
 
         case 'international_shipping':
             return (
