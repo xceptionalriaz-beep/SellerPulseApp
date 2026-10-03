@@ -7706,6 +7706,34 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'condition_details': {
+            const cdv = (props as any).variant ?? 'cd-cosmetic-grade-split'
+
+            // Per-variant accent colour default
+            const cdAccentDefault: Record<string, string> = {
+                'cd-cosmetic-grade-split': '#7530fb',
+                'cd-certified-refurb-diagnostic': '#2563eb',
+                'cd-archival-vintage-tier': '#059669',
+                'cd-open-box-inventory-audit': '#9333ea',
+                'cd-honest-wear-transparency': '#f59e0b',
+                'cd-parts-repair-warning': '#f59e0b',
+                'cd-jeweler-curator-provenance': '#d4af37',
+                'cd-automotive-core-fitment': '#f59e0b',
+                'cd-scandinavian-minimal-ledger': '#71717a',
+                'cd-mobile-compact-badge-strip': '#2563eb',
+            }
+
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? (cdAccentDefault[cdv] ?? '#7530fb')} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                </>
+            )
+        }
+
         default:
             return null
     }
