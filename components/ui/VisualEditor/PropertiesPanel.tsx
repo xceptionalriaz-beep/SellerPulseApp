@@ -7573,16 +7573,35 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'seasonal_banner':
+        case 'seasonal_banner': {
+            const sv = (props as any).variant ?? 'seasonal-festive-ribbon'
+
+            // Per-variant accent label + default — only shown for variants that use it
+            const accentMeta: Record<string, { label: string; default: string }> = {
+                'seasonal-neon-cyber': { label: 'Neon glow colour', default: '#22d3ee' },
+                'seasonal-dualtone-split': { label: 'Right panel colour', default: '#ec4899' },
+                'seasonal-countdown-urgency': { label: 'Timer accent', default: '#ef4444' },
+                'seasonal-minimalist-elegance': { label: 'Gold accent', default: '#b45309' },
+                'seasonal-elite-luxury': { label: 'Gold accent', default: '#d4af37' },
+            }
+            const accent = accentMeta[sv]
+
             return (
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#dc2626'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Accent colour" value={props.accentColor ?? '#fef08a'} onChange={v => updateProps({ accentColor: v })} />
+                        {accent && (
+                            <ColorRow
+                                label={accent.label}
+                                value={props.accentColor ?? accent.default}
+                                onChange={v => updateProps({ accentColor: v })}
+                            />
+                        )}
                     </Section>
                 </>
             )
+        }
 
         case 'shipping_policy_block':
             return (
