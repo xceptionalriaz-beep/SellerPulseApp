@@ -7709,26 +7709,27 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'condition_details': {
             const cdv = (props as any).variant ?? 'cd-cosmetic-grade-split'
 
-            // Per-variant accent colour default
-            const cdAccentDefault: Record<string, string> = {
-                'cd-cosmetic-grade-split': '#7530fb',
-                'cd-certified-refurb-diagnostic': '#2563eb',
-                'cd-archival-vintage-tier': '#059669',
-                'cd-open-box-inventory-audit': '#9333ea',
-                'cd-honest-wear-transparency': '#f59e0b',
-                'cd-parts-repair-warning': '#f59e0b',
-                'cd-jeweler-curator-provenance': '#d4af37',
-                'cd-automotive-core-fitment': '#f59e0b',
-                'cd-scandinavian-minimal-ledger': '#71717a',
-                'cd-mobile-compact-badge-strip': '#2563eb',
+            // Per-variant RENDERED colours — matches signature values in condition_details.variants.ts
+            const cdSig: Record<string, { bg: string; text: string; accent: string }> = {
+                'cd-cosmetic-grade-split': { bg: '#f8f7ff', text: '#1e1535', accent: '#7530fb' },
+                'cd-certified-refurb-diagnostic': { bg: '#f8fafc', text: '#0f172a', accent: '#2563eb' },
+                'cd-archival-vintage-tier': { bg: '#f0fdf4', text: '#064e3b', accent: '#059669' },
+                'cd-open-box-inventory-audit': { bg: '#faf5ff', text: '#1e1535', accent: '#9333ea' },
+                'cd-honest-wear-transparency': { bg: '#fffbeb', text: '#1c1917', accent: '#f59e0b' },
+                'cd-parts-repair-warning': { bg: '#1e293b', text: '#f8fafc', accent: '#f59e0b' },
+                'cd-jeweler-curator-provenance': { bg: '#09090b', text: '#f4f4f5', accent: '#d4af37' },
+                'cd-automotive-core-fitment': { bg: '#0f172a', text: '#f8fafc', accent: '#f59e0b' },
+                'cd-scandinavian-minimal-ledger': { bg: '#ffffff', text: '#18181b', accent: '#71717a' },
+                'cd-mobile-compact-badge-strip': { bg: '#ffffff', text: '#18181b', accent: '#2563eb' },
             }
+            const sig = cdSig[cdv] ?? { bg: '#ffffff', text: '#1e1535', accent: '#7530fb' }
 
             return (
                 <>
                     <Section title="Colours">
-                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Accent colour" value={props.accentColor ?? (cdAccentDefault[cdv] ?? '#7530fb')} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Background" value={props.bgColor ?? sig.bg} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? sig.text} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? sig.accent} onChange={v => updateProps({ accentColor: v })} />
                     </Section>
                 </>
             )
@@ -10251,12 +10252,21 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 
         case 'condition_details':
             return (
-                <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        📋 This block displays fixed condition grading — no editable attributes.
-                        Use the Styles tab to adjust colours and spacing.
-                    </InfoBox>
-                </div>
+                <>
+                    <Section title="Condition">
+                        <TextInput
+                            label="Condition title"
+                            value={props.conditionText ?? ''}
+                            onChange={v => updateProps({ conditionText: v })}
+                        />
+                        <TextareaInput
+                            label="Condition notes"
+                            value={props.conditionNotes ?? ''}
+                            rows={5}
+                            onChange={v => updateProps({ conditionNotes: v })}
+                        />
+                    </Section>
+                </>
             )
 
         case 'international_shipping':
