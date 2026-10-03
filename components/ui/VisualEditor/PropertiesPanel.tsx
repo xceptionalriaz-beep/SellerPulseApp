@@ -6178,37 +6178,75 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'banner':
+        case 'banner': {
+            const bv = (props as any).variant ?? 'simple'
             return (
                 <>
-                    <Section title="Colours">
-                        <ColorRow label="Heading text" value={props.headingColor ?? '#ffffff'} onChange={v => updateProps({ headingColor: v })} />
-                        <ColorRow label="Sub text" value={props.subColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps({ subColor: v })} />
+                    {/* ── Background ── */}
+                    <Section title="Background">
+                        {bv !== 'minimal-bordered' && bv !== 'floating-card' && (
+                            <>
+                                <ToggleRow label="Use gradient" value={props.bgGradient ?? false} onChange={v => updateProps({ bgGradient: v })} />
+                                {props.bgGradient ? (
+                                    <>
+                                        <ColorRow label="Gradient from" value={(props as any).bgGradientFrom ?? '#7530fb'} onChange={v => updateProps({ bgGradientFrom: v } as any)} />
+                                        <ColorRow label="Gradient to" value={(props as any).bgGradientTo ?? '#1e1535'} onChange={v => updateProps({ bgGradientTo: v } as any)} />
+                                    </>
+                                ) : (
+                                    <ColorRow label="Background colour" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                                )}
+                            </>
+                        )}
+                        {(bv === 'minimal-bordered' || bv === 'floating-card') && (
+                            <InfoBox>Background is fixed white for this style.</InfoBox>
+                        )}
                     </Section>
+
+                    {/* ── Text colours ── */}
+                    <Section title="Text Colours">
+                        <ColorRow label="Heading colour" value={props.headingColor ?? '#ffffff'} onChange={v => updateProps({ headingColor: v })} />
+                        <ColorRow label="Sub text colour" value={props.subColor ?? 'rgba(255,255,255,0.75)'} onChange={v => updateProps({ subColor: v })} />
+                    </Section>
+
+                    {/* ── CTA Button ── */}
+                    {bv !== 'minimal-bordered' && bv !== 'floating-card' && bv !== 'diagonal-accent-hero' && (
+                        <Section title="CTA Button">
+                            <ColorRow label="Button background" value={(props as any).ctaBgColor ?? '#b8fa33'} onChange={v => updateProps({ ctaBgColor: v } as any)} />
+                            <ColorRow label="Button text" value={(props as any).ctaTextColor ?? '#1e1535'} onChange={v => updateProps({ ctaTextColor: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Badge ── */}
+                    <Section title="Badge">
+                        <TextInput label="Badge text" value={props.badgeText ?? ''} onChange={v => updateProps({ badgeText: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#fff'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Badge colour" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
+                    </Section>
+
+                    {/* ── Typography ── */}
                     <Section title="Typography">
                         <SliderInput label="Heading size" value={props.headingSize ?? 24} min={14} max={48} suffix="px" onChange={v => updateProps({ headingSize: v })} />
                         <SelectInput label="Heading weight" value={props.fontWeight ?? '700'}
                             options={[{ v: '400', l: 'Regular' }, { v: '600', l: 'Semibold' }, { v: '700', l: 'Bold' }, { v: '800', l: 'Extrabold' }, { v: '900', l: 'Black' }]}
                             onChange={v => updateProps({ fontWeight: v })} />
                     </Section>
+
+                    {/* ── Layout ── */}
                     <Section title="Layout">
                         <SliderInput label="Min height" value={props.minHeight ?? 80} min={40} max={300} suffix="px" onChange={v => updateProps({ minHeight: v })} />
                         <AlignButtons value={props.align ?? 'center'} onChange={v => updateProps({ align: v })} />
                     </Section>
-                    {/* Badge customization */}
-                    <Section title="Badge">
-                        <TextInput label="Badge text" value={props.badgeText ?? ''} onChange={v => updateProps({ badgeText: v })} />
-                        <ColorRow label="Badge background" value={props.badgeBg ?? '#fff'} onChange={v => updateProps({ badgeBg: v })} />
-                        <ColorRow label="Badge colour" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
-                    </Section>
-                    {/* Padding controls */}
+
+                    {/* ── Padding ── */}
                     <Section title="Padding">
                         <SliderInput label="Top" value={props.paddingTop ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
                         <SliderInput label="Right" value={props.paddingRight ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
                         <SliderInput label="Bottom" value={props.paddingBottom ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
                         <SliderInput label="Left" value={props.paddingLeft ?? 0} min={0} max={100} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
                     </Section>
-                    {props.variant === 'split-image-text' && (
+
+                    {/* ── Split Image ── */}
+                    {bv === 'split-image-text' && (
                         <>
                             <Section title="Image">
                                 <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
@@ -6220,6 +6258,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                     )}
                 </>
             )
+        }
 
         case 'cta_banner': {
             const cv = (props as any).variant ?? 'ctab-trust-bar'
