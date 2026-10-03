@@ -129,7 +129,7 @@ function cosmeticGradeSplit(p: any, id: string): string {
         <tr>
           <td width="30%" style="padding:8px;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;text-align:center;">
             <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#166534;">
-              COSMETIC GRADE
+              ${p.badgeLabel ?? 'COSMETIC GRADE'}
             </p>
             <p style="margin:4px 0 0;font-size:20px;color:#16a34a;">
               &#9733;&#9733;&#9733;&#9733;&#9733;
@@ -171,14 +171,14 @@ function certifiedRefurbDiagnostic(p: any, id: string): string {
         <tr>
           <td>
             <span style="background-color:${accent};color:#ffffff;font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
-              30-POINT DIAGNOSTIC AUDIT
+              ${p.headerBadge ?? '30-POINT DIAGNOSTIC AUDIT'}
             </span>
             <span style="color:#ffffff;font-size:13.5px;font-weight:800;margin-left:8px;letter-spacing:0.3px;">
               ${condition}
             </span>
           </td>
           <td align="right" style="color:#22c55e;font-size:10.5px;font-weight:700;font-family:monospace;">
-            [100% OPERATIONAL]
+            ${p.statusBadge ?? '[100% OPERATIONAL]'}
           </td>
         </tr>
       </table>
@@ -190,13 +190,13 @@ function certifiedRefurbDiagnostic(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td width="33%" style="font-size:11px;font-weight:700;color:#166534;">
-            ✓ Battery &bull; 85%+ Capacity Tested
+            ${p.check1 ?? '✓ Battery &bull; 85%+ Capacity Tested'}
           </td>
           <td width="33%" style="font-size:11px;font-weight:700;color:#166534;text-align:center;">
-            ✓ Screen &bull; Zero Dead Pixels
+            ${p.check2 ?? '✓ Screen &bull; Zero Dead Pixels'}
           </td>
           <td width="33%" style="font-size:11px;font-weight:700;color:#166534;text-align:right;">
-            ✓ Reset &bull; Sanitized &amp; Ready
+            ${p.check3 ?? '✓ Reset &bull; Sanitized &amp; Ready'}
           </td>
         </tr>
       </table>
@@ -328,10 +328,10 @@ function openBoxInventoryAudit(p: any, id: string): string {
                 AUDIT CHECKLIST:
               </div>
               <div style="color:#1e1b4b;font-size:11.5px;font-weight:700;line-height:1.8;">
-                ✓ Retail Packaging Present<br>
-                ✓ All Cables Included<br>
-                ✓ Manuals &amp; Inserts Present<br>
-                ✓ No Cosmetic Imperfections
+                ${p.check1 ?? '✓ Retail Packaging Present'}<br>
+                ${p.check2 ?? '✓ All Cables Included'}<br>
+                ${p.check3 ?? '✓ Manuals &amp; Inserts Present'}<br>
+                ${p.check4 ?? '✓ No Cosmetic Imperfections'}
               </div>
             </div>
           </td>
@@ -383,7 +383,7 @@ function honestWearTransparency(p: any, id: string): string {
           </td>
           <td align="right">
             <span style="background-color:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:10px;font-weight:800;padding:3px 8px;border-radius:3px;">
-              RATING: 9 / 10
+              ${p.ratingBadge ?? 'RATING: 9 / 10'}
             </span>
           </td>
         </tr>
@@ -397,7 +397,7 @@ function honestWearTransparency(p: any, id: string): string {
           "${notes}"
         </div>
         <div style="color:#78716c;font-size:11px;margin-top:6px;font-style:italic;">
-          ✓ Fully laundered and sanitized according to manufacturer garment standards.
+          ${p.laundryNote ?? '✓ Fully laundered and sanitized according to manufacturer garment standards.'}
         </div>
       </div>
     </td>
@@ -428,11 +428,11 @@ function partsRepairWarning(p: any, id: string): string {
         <tr>
           <td>
             <span style="color:#ffffff;font-size:11.5px;font-weight:900;letter-spacing:1px;font-family:Arial,sans-serif;">
-              ⚠ AS-IS SALVAGE NOTICE &bull; FOR PARTS / REPAIR ONLY
+              ${p.warningBanner ?? '⚠ AS-IS SALVAGE NOTICE &bull; FOR PARTS / REPAIR ONLY'}
             </span>
           </td>
           <td align="right" style="color:#fef3c7;font-size:10px;font-weight:700;font-family:monospace;">
-            NON-FUNCTIONING
+            ${p.statusBadge ?? 'NON-FUNCTIONING'}
           </td>
         </tr>
       </table>
@@ -454,7 +454,7 @@ function partsRepairWarning(p: any, id: string): string {
         </div>
       </div>
       <div style="color:#94a3b8;font-size:11px;font-family:monospace;">
-        * By bidding or purchasing, you acknowledge this unit requires technical repair or parts harvesting.
+        ${p.disclaimer ?? '* By bidding or purchasing, you acknowledge this unit requires technical repair or parts harvesting.'}
       </div>
     </td>
   </tr>
@@ -501,7 +501,7 @@ function jewelerCuratorProvenance(p: any, id: string): string {
               ${notes}
             </div>
             <div style="margin-top:8px;padding-top:8px;border-top:1px solid #27272a;color:#a1a1aa;font-size:10.5px;font-family:Arial,sans-serif;">
-              Audited under 10x binocular magnification by certified specialist.
+              ${p.auditNote ?? 'Audited under 10x binocular magnification by certified specialist.'}
             </div>
           </td>
         </tr>
@@ -541,7 +541,7 @@ function automotiveCoreFitment(p: any, id: string): string {
             </span>
           </td>
           <td align="right" style="color:#22c55e;font-size:10px;font-family:monospace;font-weight:700;">
-            BENCH TESTED: 100% OK
+            ${p.benchStatus ?? 'BENCH TESTED: 100% OK'}
           </td>
         </tr>
       </table>
@@ -553,13 +553,13 @@ function automotiveCoreFitment(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td width="33%" style="color:#94a3b8;font-size:10.5px;font-family:monospace;">
-            [1] HOUSING: INTACT
+            ${p.metric1 ?? '[1] HOUSING: INTACT'}
           </td>
           <td width="33%" style="color:#94a3b8;font-size:10.5px;font-family:monospace;text-align:center;">
-            [2] MOUNTS: ZERO CRACKS
+            ${p.metric2 ?? '[2] MOUNTS: ZERO CRACKS'}
           </td>
           <td width="33%" style="color:#94a3b8;font-size:10.5px;font-family:monospace;text-align:right;">
-            [3] OEM FIT: DIRECT BOLT-ON
+            ${p.metric3 ?? '[3] OEM FIT: DIRECT BOLT-ON'}
           </td>
         </tr>
       </table>
@@ -606,7 +606,7 @@ function scandinavianMinimalLedger(p: any, id: string): string {
         ${notes}
       </div>
       <div style="font-family:Arial,sans-serif;color:${accent};font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
-        ✓ AUDITED &bull; SMOKE-FREE ENVIRONMENT
+        ${p.auditBadge ?? '✓ AUDITED &bull; SMOKE-FREE ENVIRONMENT'}
       </div>
     </td>
   </tr>
@@ -656,28 +656,28 @@ function mobileCompactBadgeStrip(p: any, id: string): string {
         <tr>
           <td width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;box-sizing:border-box;">
             <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
-              PHYSICAL HOUSING
+              ${p.chip1Label ?? 'PHYSICAL HOUSING'}
             </div>
             <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:${textCol};margin-top:2px;">
-              Pristine Condition
+              ${p.chip1Value ?? 'Pristine Condition'}
             </div>
           </td>
           <td width="2%"></td>
           <td width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;box-sizing:border-box;">
             <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
-              FUNCTIONAL CHECK
+              ${p.chip2Label ?? 'FUNCTIONAL CHECK'}
             </div>
             <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:${emerald};margin-top:2px;">
-              100% Tested Working
+              ${p.chip2Value ?? '100% Tested Working'}
             </div>
           </td>
           <td width="2%"></td>
           <td width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;box-sizing:border-box;">
             <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
-              ACCESSORIES
+              ${p.chip3Label ?? 'ACCESSORIES'}
             </div>
             <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:${textCol};margin-top:2px;">
-              Complete Retail Set
+              ${p.chip3Value ?? 'Complete Retail Set'}
             </div>
           </td>
         </tr>

@@ -7707,7 +7707,7 @@ function BlockStyleProps({ block, props, updateProps }: {
             )
 
         case 'condition_details': {
-            const cdv = (props as any).variant ?? 'cd-cosmetic-grade-split'
+            const cdv = ((props as any).variant ?? 'cd-cosmetic-grade-split') as string
 
             // Per-variant RENDERED colours — matches signature values in condition_details.variants.ts
             const cdSig: Record<string, { bg: string; text: string; accent: string }> = {
@@ -10251,46 +10251,118 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
 
         case 'condition_details': {
-            const cdv2 = (props as any).variant ?? 'cd-cosmetic-grade-split'
-            const cdTitleFallback: Record<string, string> = {
-                'cd-cosmetic-grade-split': 'Brand New',
-                'cd-certified-refurb-diagnostic': 'Certified Refurbished (Grade A+)',
-                'cd-archival-vintage-tier': 'Near Mint (NM 9.0)',
-                'cd-open-box-inventory-audit': 'Open Box — 100% Complete & Tested',
-                'cd-honest-wear-transparency': 'Excellent Pre-Owned Condition',
-                'cd-parts-repair-warning': 'For Parts or Not Working',
-                'cd-jeweler-curator-provenance': 'Near Mint Collector Grade',
-                'cd-automotive-core-fitment': 'Tested OEM Used — Excellent Functionality',
-                'cd-scandinavian-minimal-ledger': 'Pristine Studio Condition',
-                'cd-mobile-compact-badge-strip': 'Brand New & Sealed',
-            }
-            const cdNotesFallback: Record<string, string> = {
-                'cd-cosmetic-grade-split': '{{CONDITION_NOTES}}',
-                'cd-certified-refurb-diagnostic': 'Unit in pristine mechanical condition. Thoroughly sanitized, factory reset, and tested across all hardware modules.',
-                'cd-archival-vintage-tier': 'Carefully preserved in collector sleeve. Minor edge handling consistent with gentle storage. Spine completely tight with zero splits.',
-                'cd-open-box-inventory-audit': 'Customer return in flawless working order. Verified complete with original retail packaging, cables, documentation, and all factory accessories.',
-                'cd-honest-wear-transparency': 'Gently worn 2-3 times with excellent fabric integrity. No stains, pulls, tears, or loose stitching. Stored in a smoke-free, pet-free home environment.',
-                'cd-parts-repair-warning': 'Device powers on but displays blinking error code E-04. Sold strictly as-is for spare components, teardown, or repair projects. No returns accepted for stated defects.',
-                'cd-jeweler-curator-provenance': 'Case and bezel retain sharp factory bevels with no deep scratches or dings. Dial and indices 100% original. Movement tested on timegrapher keeping accurate timing.',
-                'cd-automotive-core-fitment': 'Removed from low-mileage donor vehicle. Thoroughly inspected for structural integrity with zero cracks, stripped threads, or fluid leaks.',
-                'cd-scandinavian-minimal-ledger': 'Exhibition display piece with virtually zero signs of handling. Materials retain original matte texture and finish.',
-                'cd-mobile-compact-badge-strip': 'Unopened retail package with intact factory seals. 100% manufacturer warranty included.',
-            }
+            const cdv = (props as any).variant ?? 'cd-cosmetic-grade-split'
             return (
                 <>
-                    <Section title="Condition">
+                    <Section title="Condition Text">
                         <TextInput
                             label="Condition title"
-                            value={props.conditionText ?? cdTitleFallback[cdv2] ?? ''}
+                            value={props.conditionText ?? ''}
+                            placeholder={({
+                                'cd-cosmetic-grade-split': 'Brand New',
+                                'cd-certified-refurb-diagnostic': 'Certified Refurbished (Grade A+)',
+                                'cd-archival-vintage-tier': 'Near Mint (NM 9.0)',
+                                'cd-open-box-inventory-audit': 'Open Box — 100% Complete & Tested',
+                                'cd-honest-wear-transparency': 'Excellent Pre-Owned Condition',
+                                'cd-parts-repair-warning': 'For Parts or Not Working',
+                                'cd-jeweler-curator-provenance': 'Near Mint Collector Grade',
+                                'cd-automotive-core-fitment': 'Tested OEM Used — Excellent Functionality',
+                                'cd-scandinavian-minimal-ledger': 'Pristine Studio Condition',
+                                'cd-mobile-compact-badge-strip': 'Brand New & Sealed',
+                            } as Record<string, string>)[cdv] ?? 'e.g. Brand New'}
                             onChange={v => updateProps({ conditionText: v })}
                         />
                         <TextareaInput
                             label="Condition notes"
-                            value={props.conditionNotes ?? cdNotesFallback[cdv2] ?? ''}
+                            value={props.conditionNotes ?? ''}
+                            placeholder={({
+                                'cd-cosmetic-grade-split': '{{CONDITION_NOTES}}',
+                                'cd-certified-refurb-diagnostic': 'Unit in pristine mechanical condition. Thoroughly sanitized, factory reset, and tested across all hardware modules.',
+                                'cd-archival-vintage-tier': 'Carefully preserved in collector sleeve. Minor edge handling consistent with gentle storage. Spine completely tight with zero splits.',
+                                'cd-open-box-inventory-audit': 'Customer return in flawless working order. Verified complete with original retail packaging, cables, documentation, and all factory accessories.',
+                                'cd-honest-wear-transparency': 'Gently worn 2-3 times with excellent fabric integrity. No stains, pulls, tears, or loose stitching. Stored in a smoke-free, pet-free home environment.',
+                                'cd-parts-repair-warning': 'Device powers on but displays blinking error code E-04. Sold strictly as-is for spare components, teardown, or repair projects. No returns accepted for stated defects.',
+                                'cd-jeweler-curator-provenance': 'Case and bezel retain sharp factory bevels with no deep scratches or dings. Dial and indices 100% original. Movement tested on timegrapher keeping accurate timing.',
+                                'cd-automotive-core-fitment': 'Removed from low-mileage donor vehicle. Thoroughly inspected for structural integrity with zero cracks, stripped threads, or fluid leaks.',
+                                'cd-scandinavian-minimal-ledger': 'Exhibition display piece with virtually zero signs of handling. Materials retain original matte texture and finish.',
+                                'cd-mobile-compact-badge-strip': 'Unopened retail package with intact factory seals. 100% manufacturer warranty included.',
+                            } as Record<string, string>)[cdv] ?? 'Describe the condition of this item...'}
                             rows={5}
                             onChange={v => updateProps({ conditionNotes: v })}
                         />
                     </Section>
+
+                    {cdv === 'cd-cosmetic-grade-split' && (
+                        <Section title="Badge">
+                            <TextInput label="Grade badge label" value={(props as any).badgeLabel ?? ''} placeholder="COSMETIC GRADE" onChange={v => updateProps({ badgeLabel: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-certified-refurb-diagnostic' && (
+                        <Section title="Header & Checks">
+                            <TextInput label="Header badge" value={(props as any).headerBadge ?? ''} placeholder="30-POINT DIAGNOSTIC AUDIT" onChange={v => updateProps({ headerBadge: v } as any)} />
+                            <TextInput label="Status badge" value={(props as any).statusBadge ?? ''} placeholder="[100% OPERATIONAL]" onChange={v => updateProps({ statusBadge: v } as any)} />
+                            <TextInput label="Check 1" value={(props as any).check1 ?? ''} placeholder="✓ Battery • 85%+ Capacity Tested" onChange={v => updateProps({ check1: v } as any)} />
+                            <TextInput label="Check 2" value={(props as any).check2 ?? ''} placeholder="✓ Screen • Zero Dead Pixels" onChange={v => updateProps({ check2: v } as any)} />
+                            <TextInput label="Check 3" value={(props as any).check3 ?? ''} placeholder="✓ Reset • Sanitized & Ready" onChange={v => updateProps({ check3: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-open-box-inventory-audit' && (
+                        <Section title="Audit Checklist">
+                            <TextInput label="Check 1" value={(props as any).check1 ?? ''} placeholder="✓ Retail Packaging Present" onChange={v => updateProps({ check1: v } as any)} />
+                            <TextInput label="Check 2" value={(props as any).check2 ?? ''} placeholder="✓ All Cables Included" onChange={v => updateProps({ check2: v } as any)} />
+                            <TextInput label="Check 3" value={(props as any).check3 ?? ''} placeholder="✓ Manuals & Inserts Present" onChange={v => updateProps({ check3: v } as any)} />
+                            <TextInput label="Check 4" value={(props as any).check4 ?? ''} placeholder="✓ No Cosmetic Imperfections" onChange={v => updateProps({ check4: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-honest-wear-transparency' && (
+                        <Section title="Wear Labels">
+                            <TextInput label="Rating badge" value={(props as any).ratingBadge ?? ''} placeholder="RATING: 9 / 10" onChange={v => updateProps({ ratingBadge: v } as any)} />
+                            <TextInput label="Laundry / care note" value={(props as any).laundryNote ?? ''} placeholder="✓ Fully laundered and sanitized according to manufacturer garment standards." onChange={v => updateProps({ laundryNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-parts-repair-warning' && (
+                        <Section title="Warning Labels">
+                            <TextInput label="Warning banner" value={(props as any).warningBanner ?? ''} placeholder="⚠ AS-IS SALVAGE NOTICE • FOR PARTS / REPAIR ONLY" onChange={v => updateProps({ warningBanner: v } as any)} />
+                            <TextInput label="Status badge" value={(props as any).statusBadge ?? ''} placeholder="NON-FUNCTIONING" onChange={v => updateProps({ statusBadge: v } as any)} />
+                            <TextInput label="Disclaimer" value={(props as any).disclaimer ?? ''} placeholder="* By bidding or purchasing, you acknowledge this unit requires technical repair or parts harvesting." onChange={v => updateProps({ disclaimer: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-jeweler-curator-provenance' && (
+                        <Section title="Audit Note">
+                            <TextInput label="Audit note" value={(props as any).auditNote ?? ''} placeholder="Audited under 10x binocular magnification by certified specialist." onChange={v => updateProps({ auditNote: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-automotive-core-fitment' && (
+                        <Section title="Inspection Metrics">
+                            <TextInput label="Bench status" value={(props as any).benchStatus ?? ''} placeholder="BENCH TESTED: 100% OK" onChange={v => updateProps({ benchStatus: v } as any)} />
+                            <TextInput label="Metric 1" value={(props as any).metric1 ?? ''} placeholder="[1] HOUSING: INTACT" onChange={v => updateProps({ metric1: v } as any)} />
+                            <TextInput label="Metric 2" value={(props as any).metric2 ?? ''} placeholder="[2] MOUNTS: ZERO CRACKS" onChange={v => updateProps({ metric2: v } as any)} />
+                            <TextInput label="Metric 3" value={(props as any).metric3 ?? ''} placeholder="[3] OEM FIT: DIRECT BOLT-ON" onChange={v => updateProps({ metric3: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-scandinavian-minimal-ledger' && (
+                        <Section title="Footer Badge">
+                            <TextInput label="Audit badge" value={(props as any).auditBadge ?? ''} placeholder="✓ AUDITED • SMOKE-FREE ENVIRONMENT" onChange={v => updateProps({ auditBadge: v } as any)} />
+                        </Section>
+                    )}
+
+                    {cdv === 'cd-mobile-compact-badge-strip' && (
+                        <Section title="Inspection Chips">
+                            <TextInput label="Chip 1 label" value={(props as any).chip1Label ?? ''} placeholder="PHYSICAL HOUSING" onChange={v => updateProps({ chip1Label: v } as any)} />
+                            <TextInput label="Chip 1 value" value={(props as any).chip1Value ?? ''} placeholder="Pristine Condition" onChange={v => updateProps({ chip1Value: v } as any)} />
+                            <TextInput label="Chip 2 label" value={(props as any).chip2Label ?? ''} placeholder="FUNCTIONAL CHECK" onChange={v => updateProps({ chip2Label: v } as any)} />
+                            <TextInput label="Chip 2 value" value={(props as any).chip2Value ?? ''} placeholder="100% Tested Working" onChange={v => updateProps({ chip2Value: v } as any)} />
+                            <TextInput label="Chip 3 label" value={(props as any).chip3Label ?? ''} placeholder="ACCESSORIES" onChange={v => updateProps({ chip3Label: v } as any)} />
+                            <TextInput label="Chip 3 value" value={(props as any).chip3Value ?? ''} placeholder="Complete Retail Set" onChange={v => updateProps({ chip3Value: v } as any)} />
+                        </Section>
+                    )}
                 </>
             )
         }
@@ -11258,13 +11330,14 @@ function TableRowEditor({
     )
 }
 
-function TextInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function TextInput({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
     return (
         <div style={{ marginBottom: 8 }}>
             {label && <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>{label}</p>}
             <input
                 type="text"
                 value={value}
+                placeholder={placeholder}
                 onChange={e => onChange(e.target.value)}
                 style={inputStyle}
             />
@@ -11272,13 +11345,14 @@ function TextInput({ label, value, onChange }: { label: string; value: string; o
     )
 }
 
-function TextareaInput({ label, value, rows = 3, onChange }: { label: string; value: string; rows?: number; onChange: (v: string) => void }) {
+function TextareaInput({ label, value, rows = 3, onChange, placeholder }: { label: string; value: string; rows?: number; onChange: (v: string) => void; placeholder?: string }) {
     return (
         <div style={{ marginBottom: 8 }}>
             {label && <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.body }}>{label}</p>}
             <textarea
                 value={value}
                 rows={rows}
+                placeholder={placeholder}
                 onChange={e => onChange(e.target.value)}
                 style={{
                     ...inputStyle,
