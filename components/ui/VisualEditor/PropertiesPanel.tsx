@@ -8764,30 +8764,61 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
 
-        case 'banner':
+        case 'banner': {
+            const bv = (props as any).variant ?? 'simple'
             return (
                 <>
+                    {/* ── Core Content ── */}
                     <Section title="Content">
                         <TextareaInput label="Heading" value={props.headingText ?? ''} rows={2} onChange={v => updateProps({ headingText: v })} />
                         {phButton('headingText', 'heading')}
                         <TextareaInput label="Subtext" value={props.subText ?? ''} rows={2} onChange={v => updateProps({ subText: v })} />
                         {phButton('subText', 'subtext')}
+                        <AlignButtons value={(props as any).align ?? 'center'} onChange={v => updateProps({ align: v } as any)} />
                     </Section>
-                    {props.variant === 'full-width-hero' && (
-                        <>
-                            <Section title="Background Image">
-                                <TextInput label="Image URL" value={props.imageUrl ?? ''} onChange={v => updateProps({ imageUrl: v })} />
-                                {phButton('imageUrl', 'background image')}
-                            </Section>
-                            <Section title="Size">
-                                <SliderInput label="Top padding" value={props.paddingTop ?? 120} min={20} max={300} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
-                                <SliderInput label="Bottom padding" value={props.paddingBottom ?? 120} min={20} max={300} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
-                                <SliderInput label="Min height" value={props.minHeight ?? 400} min={200} max={800} suffix="px" onChange={v => updateProps({ minHeight: v })} />
-                            </Section>
-                        </>
+
+                    {/* ── Badge (simple, left-badge, full-width-hero, diagonal-accent-hero) ── */}
+                    {(bv === 'simple' || bv === 'left-badge' || bv === 'full-width-hero' || bv === 'diagonal-accent-hero') && (
+                        <Section title="Badge">
+                            <TextInput label="Badge text" value={(props as any).badgeText ?? ''} placeholder="e.g. NEW ARRIVAL" onChange={v => updateProps({ badgeText: v } as any)} />
+                        </Section>
                     )}
+
+                    {/* ── CTA Button (simple, full-width-hero) ── */}
+                    {(bv === 'simple' || bv === 'full-width-hero') && (
+                        <Section title="CTA Button">
+                            <TextInput label="Button label" value={(props as any).ctaText ?? ''} placeholder="e.g. Shop Now" onChange={v => updateProps({ ctaText: v } as any)} />
+                            <TextInput label="Button URL" value={(props as any).ctaUrl ?? '#'} placeholder="https://" onChange={v => updateProps({ ctaUrl: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Background Image (split-image-text, full-width-hero) ── */}
+                    {(bv === 'split-image-text' || bv === 'full-width-hero') && (
+                        <Section title="Background Image">
+                            <TextInput label="Image URL" value={(props as any).imageUrl ?? ''} placeholder="https://...jpg" onChange={v => updateProps({ imageUrl: v } as any)} />
+                            {phButton('imageUrl', 'background image')}
+                            {bv === 'split-image-text' && (
+                                <SelectInput
+                                    label="Image position"
+                                    value={(props as any).imagePosition ?? 'left'}
+                                    options={[{ v: 'left', l: 'Image left, text right' }, { v: 'right', l: 'Image right, text left' }]}
+                                    onChange={v => updateProps({ imagePosition: v } as any)}
+                                />
+                            )}
+                        </Section>
+                    )}
+
+                    {/* ── Size ── */}
+                    <Section title="Size">
+                        <SliderInput label="Min height" value={(props as any).minHeight ?? 80} min={40} max={600} suffix="px" onChange={v => updateProps({ minHeight: v } as any)} />
+                        <SliderInput label="Top padding" value={(props as any).paddingTop ?? 0} min={0} max={200} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <SliderInput label="Bottom padding" value={(props as any).paddingBottom ?? 0} min={0} max={200} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <SliderInput label="Left padding" value={(props as any).paddingLeft ?? 0} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <SliderInput label="Right padding" value={(props as any).paddingRight ?? 0} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
                 </>
             )
+        }
 
         case 'cta_banner': {
             const av = (props as any).variant ?? 'ctab-trust-bar'
@@ -9115,14 +9146,56 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
 
-        case 'button_block':
+        case 'button_block': {
+            const bbv = (props as any).variant ?? 'button-solid'
             return (
-                <Section title="Button">
-                    <TextInput label="Button label" value={props.label ?? 'Buy It Now'} onChange={v => updateProps({ label: v })} />
-                    {phButton('label', 'button label')}
-                    <TextInput label="Link URL" value={props.url ?? '#'} onChange={v => updateProps({ url: v })} />
-                </Section>
+                <>
+                    <Section title="Button">
+                        <TextInput label="Button label" value={(props as any).label ?? 'Buy It Now'} onChange={v => updateProps({ label: v } as any)} />
+                        {phButton('label', 'button label')}
+                        <TextInput label="Link URL" value={(props as any).url ?? '#'} placeholder="https://" onChange={v => updateProps({ url: v } as any)} />
+                    </Section>
+
+                    <Section title="Layout">
+                        <AlignButtons value={(props as any).align ?? 'center'} onChange={v => updateProps({ align: v } as any)} />
+                        <ToggleRow label="Full width" value={(props as any).fullWidth ?? false} onChange={v => updateProps({ fullWidth: v } as any)} />
+                    </Section>
+
+                    <Section title="Size">
+                        <SliderInput label="Font size" value={(props as any).fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v } as any)} />
+                        <SliderInput label="Padding V" value={(props as any).paddingV ?? 14} min={4} max={30} suffix="px" onChange={v => updateProps({ paddingV: v } as any)} />
+                        <SliderInput label="Padding H" value={(props as any).paddingH ?? 40} min={8} max={80} suffix="px" onChange={v => updateProps({ paddingH: v } as any)} />
+                        <SliderInput label="Border radius" value={(props as any).borderRadius ?? 10} min={0} max={40} suffix="px" onChange={v => updateProps({ borderRadius: v } as any)} />
+                    </Section>
+
+                    <Section title="Font Weight">
+                        <SelectInput
+                            label="Weight"
+                            value={(props as any).fontWeight ?? '700'}
+                            options={[
+                                { v: '400', l: 'Regular' },
+                                { v: '600', l: 'Semibold' },
+                                { v: '700', l: 'Bold' },
+                                { v: '800', l: 'Extrabold' },
+                            ]}
+                            onChange={v => updateProps({ fontWeight: v } as any)}
+                        />
+                    </Section>
+
+                    {/* Gradient end colour — only for gradient variant */}
+                    {bbv === 'button-gradient' && (
+                        <Section title="Gradient">
+                            <ColorRow label="Gradient end colour" value={(props as any).gradientTo ?? '#b8fa33'} onChange={v => updateProps({ gradientTo: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* Container background — wraps the button */}
+                    <Section title="Container">
+                        <ColorRow label="Container background" value={(props as any).containerBg ?? 'transparent'} onChange={v => updateProps({ containerBg: v } as any)} />
+                    </Section>
+                </>
             )
+        }
 
         case 'rectangle':
             return (
