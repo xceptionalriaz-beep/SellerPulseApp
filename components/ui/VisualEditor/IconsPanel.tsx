@@ -166,7 +166,7 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                         type="text"
                         placeholder="Search icons…"
                         value={query}
-                        onChange={e => { setQuery(e.target.value); if (e.target.value.trim()) setActiveCategory('all') }}
+                        onChange={e => { setQuery(e.target.value); if (e.target.value.trim()) { setActiveCategory('all') } else { setActiveCategory(null) } }}
                         style={{ width: '100%', boxSizing: 'border-box', padding: '7px 10px 7px 30px', borderRadius: 7, border: `1.5px solid ${C.border}`, background: C.surface, fontFamily: 'DM Sans, Arial, sans-serif', fontSize: 12, color: C.text, outline: 'none' }}
                     />
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.secondary} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
