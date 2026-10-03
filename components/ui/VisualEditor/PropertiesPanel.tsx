@@ -8822,10 +8822,9 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 
         case 'cta_banner': {
             const av = (props as any).variant ?? 'ctab-trust-bar'
-            // variants with no standalone CTA button
             const noButton = av === 'ctab-trust-bar' || av === 'ctab-announcement'
-            // variants with a button
             const hasButton = !noButton
+            const hasGradient = av === 'ctab-gradient-hero' || av === 'ctab-split-action'
             return (
                 <>
                     <Section title="Content">
@@ -8846,6 +8845,28 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             <TextInput label="Button URL" value={(props as any).linkUrl ?? '#'} onChange={v => updateProps({ linkUrl: v } as any)} />
                         </Section>
                     )}
+                    {hasGradient && (
+                        <Section title="Gradient Background">
+                            <ToggleRow label="Use gradient" value={(props as any).bgGradient ?? false} onChange={v => updateProps({ bgGradient: v } as any)} />
+                            {(props as any).bgGradient && (
+                                <>
+                                    <ColorRow label="Gradient from" value={(props as any).gradientFrom ?? '#7530fb'} onChange={v => updateProps({ gradientFrom: v } as any)} />
+                                    <ColorRow label="Gradient to" value={(props as any).gradientTo ?? '#1e1535'} onChange={v => updateProps({ gradientTo: v } as any)} />
+                                </>
+                            )}
+                        </Section>
+                    )}
+                    <Section title="Text Colours">
+                        <ColorRow label="Subtext colour" value={(props as any).subTextColor ?? '#6b7280'} onChange={v => updateProps({ subTextColor: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 0} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 0} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 0} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 0} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
+                    </Section>
                 </>
             )
         }
@@ -9705,9 +9726,31 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                                     }
                                     return { model: line.trim(), years: '', status: true }
                                 })
-                                updateProps({ items, models: lines })
+                                updateProps({ items, models: lines, compatibilityList: lines })
                             }}
                         />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? ''}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'monospace', l: 'Monospace' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 16} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 16} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 24} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 24} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
                     </Section>
                 </>
             )
@@ -9860,6 +9903,9 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             ]}
                             onChange={v => updateProps({ separator: v })}
                         />
+                    </Section>
+                    <Section title="Typography">
+                        <SliderInput label="Font size" value={(props as any).fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v } as any)} />
                     </Section>
                     <Section title="Behaviour">
                         <ToggleRow label="Sticky on scroll" value={props.sticky ?? false} onChange={v => updateProps({ sticky: v })} />
@@ -10142,16 +10188,31 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             ]}
                             onChange={v => updateProps({ condition: v })}
                         />
+                        <TextInput
+                            label="Custom condition label"
+                            value={(props as any).conditionLabel ?? ''}
+                            placeholder="e.g. Certified Pre-Owned"
+                            onChange={v => updateProps({ conditionLabel: v } as any)}
+                        />
+                        <InfoBox>Leave blank to use the default label for the selected condition above.</InfoBox>
                         <ToggleRow label="Show icon" value={props.showIcon ?? true} onChange={v => updateProps({ showIcon: v })} />
                     </Section>
-                    <Section title="Sub-text">
+                    <Section title="Heading">
+                        <TextInput
+                            label="Heading text"
+                            value={(props as any).heading ?? ''}
+                            placeholder="e.g. Item Condition"
+                            onChange={v => updateProps({ heading: v } as any)}
+                        />
+                    </Section>
+                    <Section title="Description">
                         <TextareaInput
                             label="Condition description"
-                            value={props.subText ?? ''}
+                            value={props.subText ?? (props as any).conditionNotes ?? (props as any).notes ?? ''}
                             rows={3}
-                            onChange={v => updateProps({ subText: v })}
+                            placeholder="Describe the item's exact condition — scratches, testing status, accessories included, etc."
+                            onChange={v => updateProps({ subText: v, conditionNotes: v, notes: v } as any)}
                         />
-                        <InfoBox>Describe the item's exact condition — scratches, testing status, accessories included, etc.</InfoBox>
                     </Section>
                 </>
             )
