@@ -1353,9 +1353,15 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         // Use the pre-embedded BLOCK_ID constant instead of reading
         // from window.frameElement which may not be available in all cases
         var blockId = BLOCK_ID;
+        // Image slots (div[data-canvas-dropzone] wrapping an img[data-slot]) must
+        // always fire RIAZIFY_SELECT_SLOT — never the rich-text slot editor —
+        // because image blocks have no rich-text content to edit.
+        // Text slots without content (.add-btn present) also fire SELECT_SLOT.
+        // Only non-image slots that already have content fire EDIT_SLOT_CONTENT.
+        var hasImageSlot = zone.querySelector('img[data-slot]') !== null;
         var hasContent = zone.querySelector('.add-btn') === null;
         if (slot && window.parent) {
-          if (hasContent) {
+          if (hasContent && !hasImageSlot) {
             var slotHtml = zone.innerHTML || '';
             window.parent.postMessage({ type: 'RIAZIFY_EDIT_SLOT_CONTENT', propKey: slot, blockId: blockId, currentHtml: slotHtml }, '*');
           } else {
