@@ -8151,6 +8151,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'free_shipping':
         case 'free_shipping_banner':
             return (
                 <>
@@ -10205,6 +10206,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
 
+        case 'free_shipping':
         case 'free_shipping_banner':
             return (
                 <>
@@ -10877,16 +10879,6 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             Paste your eBay Store category URL into each link.
                             Example: https://www.ebay.com/str/yourstore/Clothing/_i.html
                         </InfoBox>
-                    </Section>
-                </>
-            )
-
-        case 'free_shipping_banner':
-            return (
-                <>
-                    <Section title="Content">
-                        <TextInput label="Heading" value={props.heading ?? 'Fast & Free Domestic Shipping'} onChange={v => updateProps({ heading: v })} />
-                        <TextInput label="Sub text" value={props.subText ?? 'Orders placed before 2:00 PM dispatch same day'} onChange={v => updateProps({ subText: v })} />
                     </Section>
                 </>
             )

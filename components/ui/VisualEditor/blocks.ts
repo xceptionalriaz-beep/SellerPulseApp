@@ -111,6 +111,7 @@ export type BlockType =
     | 'raw_html'
     | 'money_back'
     | 'free_shipping_banner'
+    | 'free_shipping'
     | 'why_buy_from_us'
     | 'satisfaction_guarantee'
     | 'limited_time_offer'
