@@ -274,6 +274,40 @@ export default function Canvas({
                 minHeight: '100%',
                 width: '100%',
             }}>
+                {/* ── Device mode indicator badge ── */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: 14,
+                    right: 14,
+                    zIndex: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 20,
+                    padding: '4px 10px',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: C.secondary,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    backdropFilter: 'blur(6px)',
+                    pointerEvents: 'none',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                }}>
+                    <span style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        backgroundColor: deviceWidth === 'desktop' ? C.primary : deviceWidth === 'tablet' ? '#f59e0b' : '#10b981',
+                        display: 'inline-block',
+                        flexShrink: 0,
+                    }} />
+                    {deviceWidth === 'desktop' ? 'Desktop · 700px' : deviceWidth === 'tablet' ? 'Tablet · 480px' : 'Mobile · 375px'}
+                </div>
+
                 {/* ── Drop overlay — handled by EmptyState when canvas is empty ── */}
 
                 {/* ── Canvas frame ── */}
@@ -625,6 +659,7 @@ function BlockCard({
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
+    const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // ── Extract the {{TOKENS}} used in this block so we can surface them as a
     //    hover badge — keeps the dynamic identifiers visible while the canvas
@@ -642,12 +677,14 @@ function BlockCard({
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation()
         if (deleteConfirm) {
+            if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
             onDelete()
             setDeleteConfirm(false)
         } else {
             setDeleteConfirm(true)
-            // Auto-reset after 2.5s
-            setTimeout(() => setDeleteConfirm(false), 2500)
+            // Auto-reset after 2.5s — cleared on unmount to prevent memory leak
+            if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+            deleteTimerRef.current = setTimeout(() => setDeleteConfirm(false), 2500)
         }
     }
 
@@ -698,11 +735,11 @@ function BlockCard({
                 overflow: 'visible',
             }}
         >
-            {/* ── Selected label badge ── */}
+            {/* ── Selected label badge — sits above block top-left ── */}
             {isSelected && (
                 <div style={{
                     position: 'absolute',
-                    top: -11,
+                    top: -22,
                     left: 12,
                     backgroundColor: C.primary,
                     color: '#fff',
@@ -712,18 +749,18 @@ function BlockCard({
                     padding: '2px 8px',
                     borderRadius: 20,
                     letterSpacing: '0.04em',
-                    zIndex: 2,
+                    zIndex: 4,
                     pointerEvents: 'none',
                 }}>
                     {(() => { const I = BLOCK_ICONS[def.icon]; return I ? <I size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 3 }} /> : null })()} {def.label}
                 </div>
             )}
 
-            {/* ── Drag handle (top centre) ── */}
+            {/* ── Drag handle — centred above block, below the selected badge ── */}
             {(hovered || isSelected) && (
                 <div style={{
                     position: 'absolute',
-                    top: -10,
+                    top: -18,
                     left: '50%',
                     transform: 'translateX(-50%)',
                     backgroundColor: C.surface,
@@ -951,7 +988,7 @@ function BlockCard({
                     alignItems: 'center',
                     gap: 5,
                 }}>
-                    <span>{def.icon}</span>
+                    {(() => { const I = BLOCK_ICONS[def.icon]; return I ? <I size={10} style={{ display: 'inline', verticalAlign: 'middle' }} /> : null })()}
                     <span>{def.label}</span>
                     <span style={{
                         backgroundColor: C.bg,
@@ -1525,7 +1562,18 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     // We use block.props as a proxy for content changes — when the slot
     // content updates via drag-and-drop, props changes and the key changes,
     // forcing React to unmount/remount the iframe so srcDoc reloads.
-    const htmlKey = `${block.id}-${block.type}-${JSON.stringify(props)}`
+    // Cheap content key: sum of char codes of the JSON string.
+    // Avoids calling JSON.stringify on every render for large props objects
+    // while still forcing iframe remount when any prop value changes.
+    const propsHash = React.useMemo(() => {
+        try {
+            const s = JSON.stringify(props)
+            let h = 0
+            for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
+            return h
+        } catch { return 0 }
+    }, [props])
+    const htmlKey = `${block.id}-${block.type}-${propsHash}`
 
     const onLoad = React.useCallback(() => {
         const iframe = iframeRef.current
