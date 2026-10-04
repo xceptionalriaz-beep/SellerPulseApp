@@ -6883,6 +6883,19 @@ function BlockStyleProps({ block, props, updateProps }: {
                             <InfoBox>Use overlay tint to darken the image. Add overlay text in the Attributes tab.</InfoBox>
                         </Section>
                     )}
+                    {pv === 'gallery' && (
+                        <Section title="Gallery">
+                            <SliderInput label="Thumbnail border radius" value={(props as any).thumbBorderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ thumbBorderRadius: v } as any)} />
+                            <SliderInput label="Main image max height" value={(props as any).mainImageMaxHeight ?? 420} min={200} max={600} suffix="px" onChange={v => updateProps({ mainImageMaxHeight: v } as any)} />
+                        </Section>
+                    )}
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 12} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 12} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
                 </>
             )
         }
@@ -9318,6 +9331,46 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             {phButton('image2Url', 'image 2 URL')}
                             <TextInput label="Image 3 URL" value={props.image3Url ?? ''} onChange={v => updateProps({ image3Url: v })} />
                             {phButton('image3Url', 'image 3 URL')}
+                        </Section>
+                    )}
+                    {av === 'polaroid' && (
+                        <Section title="Polaroid suffix">
+                            <TextInput label="Edition suffix (optional)" value={(props as any).polaroidSuffix ?? ''} onChange={v => updateProps({ polaroidSuffix: v } as any)} />
+                            <InfoBox>Appended after the caption, e.g. "Premium Edition". Leave blank to hide.</InfoBox>
+                        </Section>
+                    )}
+                    {(av === 'split' || av === 'split-right') && (
+                        <Section title="Layout behaviour">
+                            <SelectInput
+                                label="Image position"
+                                value={(props as any).imagePosition ?? 'left'}
+                                options={[{ v: 'left', l: 'Image left' }, { v: 'right', l: 'Image right' }]}
+                                onChange={v => updateProps({ imagePosition: v } as any)}
+                            />
+                            <SelectInput
+                                label="Vertical align"
+                                value={(props as any).verticalAlign ?? 'middle'}
+                                options={[{ v: 'top', l: 'Top' }, { v: 'middle', l: 'Middle' }, { v: 'bottom', l: 'Bottom' }]}
+                                onChange={v => updateProps({ verticalAlign: v } as any)}
+                            />
+                            <SliderInput label="Image width %" value={(props as any).imageWidthPercent ?? 45} min={30} max={60} suffix="%" onChange={v => updateProps({ imageWidthPercent: v } as any)} />
+                        </Section>
+                    )}
+                    {av === 'gallery' && (
+                        <Section title="Gallery options">
+                            <SliderInput label="Image count" value={(props as any).imageCount ?? 4} min={2} max={5} suffix="" onChange={v => updateProps({ imageCount: v } as any)} />
+                            <ToggleRow label="Show scroll hint" value={(props as any).showScrollHint ?? true} onChange={v => updateProps({ showScrollHint: v } as any)} />
+                            <ToggleRow label="Show thumb border" value={(props as any).showThumbBorder ?? false} onChange={v => updateProps({ showThumbBorder: v } as any)} />
+                        </Section>
+                    )}
+                    {av === 'single' && (
+                        <Section title="Alignment">
+                            <SelectInput
+                                label="Image align"
+                                value={(props as any).align ?? 'center'}
+                                options={[{ v: 'left', l: 'Left' }, { v: 'center', l: 'Center' }, { v: 'right', l: 'Right' }]}
+                                onChange={v => updateProps({ align: v } as any)}
+                            />
                         </Section>
                     )}
                 </>
