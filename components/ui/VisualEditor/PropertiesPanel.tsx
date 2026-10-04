@@ -5757,6 +5757,330 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <circle cx="72" cy="20" r="3" fill="#b8fa33" />
         </svg>
     ),
+    // ── Why Buy From Us (10 Variants) ──────────────────────────────────────────
+    'why-classic-centered': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="28" y1="8" x2="52" y2="8" stroke="#1e1535" strokeWidth="2" />
+            <circle cx="16" cy="18" r="3" fill={col} />
+            <line x1="10" y1="26" x2="22" y2="26" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="12" y1="31" x2="20" y2="31" stroke="#94a3b8" strokeWidth="1" />
+            <circle cx="40" cy="18" r="3" fill={col} />
+            <line x1="34" y1="26" x2="46" y2="26" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="36" y1="31" x2="44" y2="31" stroke="#94a3b8" strokeWidth="1" />
+            <circle cx="64" cy="18" r="3" fill={col} />
+            <line x1="58" y1="26" x2="70" y2="26" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="60" y1="31" x2="68" y2="31" stroke="#94a3b8" strokeWidth="1" />
+        </svg>
+    ),
+
+    'why-boxed-cards-grid': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="5" y="10" width="21" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="29" y="10" width="22" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="54" y="10" width="21" height="28" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="15.5" cy="18" r="3" fill={col} />
+            <circle cx="40" cy="18" r="3" fill={col} />
+            <circle cx="64.5" cy="18" r="3" fill={col} />
+        </svg>
+    ),
+
+    'why-horizontal-feature-rows': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="9" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="11" cy="12.5" r="2" fill={col} />
+            <line x1="17" y1="12.5" x2="68" y2="12.5" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="6" y="20" width="68" height="9" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="11" cy="24.5" r="2" fill={col} />
+            <line x1="17" y1="24.5" x2="68" y2="24.5" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="6" y="32" width="68" height="9" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="11" cy="36.5" r="2" fill={col} />
+            <line x1="17" y1="36.5" x2="68" y2="36.5" stroke="#1e1535" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'why-split-hero-pledge': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="4" y="6" width="26" height="36" rx="3" fill={col} />
+            <circle cx="17" cy="20" r="5" fill="#ffffff" />
+            <line x1="36" y1="12" x2="74" y2="12" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="36" y1="16" x2="68" y2="16" stroke="#94a3b8" strokeWidth="1" />
+            <line x1="36" y1="24" x2="74" y2="24" stroke="#1e1535" strokeWidth="1.5" />
+            <line x1="36" y1="28" x2="68" y2="28" stroke="#94a3b8" strokeWidth="1" />
+            <line x1="36" y1="36" x2="74" y2="36" stroke="#1e1535" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'why-numbered-editorial-ledger': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="10" x2="74" y2="10" stroke="#0f172a" strokeWidth="1.5" />
+            <line x1="30" y1="16" x2="30" y2="40" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="54" y1="16" x2="54" y2="40" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="10" y1="18" x2="18" y2="18" stroke={col} strokeWidth="2" />
+            <line x1="34" y1="18" x2="42" y2="18" stroke={col} strokeWidth="2" />
+            <line x1="58" y1="18" x2="66" y2="18" stroke={col} strokeWidth="2" />
+        </svg>
+    ),
+
+    'why-numbered-steps-timeline': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="16" y1="20" x2="64" y2="20" stroke="#bbf7d0" strokeWidth="2" />
+            <circle cx="16" cy="20" r="4.5" fill="#16a34a" />
+            <circle cx="40" cy="20" r="4.5" fill="#16a34a" />
+            <circle cx="64" cy="20" r="4.5" fill="#16a34a" />
+            <line x1="11" y1="29" x2="21" y2="29" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="35" y1="29" x2="45" y2="29" stroke="#1e1535" strokeWidth="1.2" />
+            <line x1="59" y1="29" x2="69" y2="29" stroke="#1e1535" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'why-compact-banner-strip': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="1" />
+            <circle cx="12" cy="24" r="3" fill={col} />
+            <line x1="17" y1="24" x2="26" y2="24" stroke="#1e1535" strokeWidth="1.8" />
+            <line x1="30" y1="18" x2="30" y2="30" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="36" cy="24" r="3" fill={col} />
+            <line x1="41" y1="24" x2="50" y2="24" stroke="#1e1535" strokeWidth="1.8" />
+            <line x1="54" y1="18" x2="54" y2="30" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="60" cy="24" r="3" fill={col} />
+            <line x1="65" y1="24" x2="74" y2="24" stroke="#1e1535" strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'why-official-guarantee-shield': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1.2" />
+            <circle cx="16" cy="22" r="5" fill="#ffffff" stroke="#16a34a" strokeWidth="1" />
+            <circle cx="40" cy="22" r="5" fill="#ffffff" stroke="#16a34a" strokeWidth="1" />
+            <circle cx="64" cy="22" r="5" fill="#ffffff" stroke="#16a34a" strokeWidth="1" />
+        </svg>
+    ),
+
+    'why-dark-merchant-flagship': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" />
+            <circle cx="16" cy="20" r="3" fill="#b8fa33" />
+            <line x1="30" y1="14" x2="30" y2="34" stroke="#27272a" strokeWidth="0.8" />
+            <circle cx="40" cy="20" r="3" fill="#b8fa33" />
+            <line x1="54" y1="14" x2="54" y2="34" stroke="#27272a" strokeWidth="0.8" />
+            <circle cx="64" cy="20" r="3" fill="#b8fa33" />
+        </svg>
+    ),
+
+    'why-two-column-checklist': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="32" height="14" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="42" y="8" width="32" height="14" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="6" y="26" width="32" height="14" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="42" y="26" width="32" height="14" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    // ── Urgency Stock Bar (10 Styles) ──────────────────────────────────────────
+    'urgency-classic-pulse': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fee2e2" />
+            <circle cx="16" cy="24" r="3.5" fill="#ef4444" />
+            <line x1="24" y1="24" x2="68" y2="24" stroke="#991b1b" strokeWidth="2" />
+        </svg>
+    ),
+
+    'urgency-inventory-progress-track': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#fed7aa" strokeWidth="1" />
+            <rect x="6" y="10" width="18" height="5" rx="1.5" fill="#ffedd5" />
+            <line x1="28" y1="12.5" x2="74" y2="12.5" stroke="#0f172a" strokeWidth="1.5" />
+            <rect x="6" y="22" width="68" height="5" rx="2" fill="#f1f5f9" />
+            <rect x="6" y="22" width="54" height="5" rx="2" fill="#ea580c" />
+            <line x1="6" y1="34" x2="48" y2="34" stroke="#64748b" strokeWidth="1" />
+            <line x1="56" y1="34" x2="74" y2="34" stroke="#ea580c" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'urgency-high-velocity-ticker': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="1" />
+            <circle cx="14" cy="24" r="4.5" fill="#ede9fe" />
+            <path d="M14 20l-1.5 3.5h3l-1.5 4.5 4-5h-3l1.5-3z" fill={col} />
+            <line x1="22" y1="21" x2="52" y2="21" stroke="#1e1535" strokeWidth="1.8" />
+            <line x1="22" y1="27" x2="46" y2="27" stroke="#6b7280" strokeWidth="1" />
+            <rect x="56" y="18" width="18" height="12" rx="6" fill="#ffffff" stroke="#ddd6fe" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'urgency-industrial-caution-stripe': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#27272a" strokeWidth="1" />
+            <rect x="0" y="0" width="4" height="48" fill="#f59e0b" />
+            <rect x="8" y="10" width="26" height="5" rx="1.5" fill="#27272a" stroke="#f59e0b" strokeWidth="0.6" />
+            <line x1="8" y1="22" x2="52" y2="22" stroke="#ffffff" strokeWidth="1.8" />
+            <line x1="8" y1="28" x2="44" y2="28" stroke="#a1a1aa" strokeWidth="1" />
+            <rect x="58" y="16" width="16" height="16" rx="2" fill="#f59e0b" />
+        </svg>
+    ),
+
+    'urgency-warehouse-clearance-dossier': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1.2" strokeDasharray="3 2" />
+            <circle cx="15" cy="24" r="5" stroke="#b91c1c" strokeWidth="1" />
+            <rect x="24" y="14" width="22" height="4" rx="1" fill="#fee2e2" />
+            <line x1="24" y1="23" x2="54" y2="23" stroke="#1c1917" strokeWidth="1.8" />
+            <line x1="24" y1="29" x2="48" y2="29" stroke="#78716c" strokeWidth="1" />
+            <rect x="58" y="19" width="16" height="10" rx="2" fill="#fee2e2" stroke="#fecaca" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'urgency-minimalist-hairline-banner': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" />
+            <line x1="6" y1="14" x2="74" y2="14" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="34" x2="74" y2="34" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="16" cy="24" r="2.5" fill="#0f172a" />
+            <line x1="22" y1="24" x2="52" y2="24" stroke="#0f172a" strokeWidth="1.6" />
+            <line x1="56" y1="20" x2="56" y2="28" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="60" y1="24" x2="70" y2="24" stroke={col} strokeWidth="1.8" />
+        </svg>
+    ),
+
+    'urgency-split-hero-countdown-dispatch': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="40" y1="8" x2="40" y2="40" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="14" cy="24" r="3.5" fill="#fee2e2" />
+            <line x1="20" y1="21" x2="35" y2="21" stroke="#dc2626" strokeWidth="1.5" />
+            <line x1="20" y1="27" x2="33" y2="27" stroke="#0f172a" strokeWidth="1.2" />
+            <circle cx="48" cy="24" r="3.5" fill="#dcfce7" />
+            <line x1="54" y1="21" x2="70" y2="21" stroke="#16a34a" strokeWidth="1.5" />
+            <line x1="54" y1="27" x2="68" y2="27" stroke="#475569" strokeWidth="1" />
+        </svg>
+    ),
+
+    'urgency-bold-dark-midnight-alert': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <rect x="8" y="12" width="24" height="4" rx="1.5" fill="#1e293b" />
+            <line x1="8" y1="23" x2="52" y2="23" stroke="#ffffff" strokeWidth="1.8" />
+            <line x1="8" y1="29" x2="42" y2="29" stroke="#94a3b8" strokeWidth="1" />
+            <rect x="56" y="16" width="18" height="16" rx="3" fill="#b8fa33" />
+        </svg>
+    ),
+
+    'urgency-collector-vault-numbered-batch': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fefce8" stroke="#fde68a" strokeWidth="1" />
+            <circle cx="14" cy="24" r="4.5" fill="#ffffff" stroke="#fde68a" strokeWidth="0.8" />
+            <line x1="22" y1="18" x2="48" y2="18" stroke="#b45309" strokeWidth="1" />
+            <line x1="22" y1="25" x2="56" y2="25" stroke="#1e1535" strokeWidth="1.8" />
+            <rect x="58" y="18" width="16" height="12" rx="2" fill="#ffffff" stroke="#fde68a" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'urgency-compact-inline-capsule': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" />
+            {/* Clean Rounded Capsule with Slate Border */}
+            <rect x="5" y="16" width="70" height="16" rx="8" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+            {/* Left Red Badge */}
+            <rect x="7" y="18" width="18" height="12" rx="6" fill="#dc2626" />
+            <line x1="10" y1="24" x2="22" y2="24" stroke="#ffffff" strokeWidth="1.5" />
+            {/* White Center Text Line */}
+            <line x1="28" y1="24" x2="52" y2="24" stroke="#ffffff" strokeWidth="1.5" />
+            {/* Cyan Right Status Pill */}
+            <rect x="55" y="19" width="18" height="10" rx="5" fill="#1e293b" stroke="#38bdf8" strokeWidth="0.8" />
+            <line x1="59" y1="24" x2="69" y2="24" stroke="#38bdf8" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    // ── Rectangle / Shape Container (10 Styles) ────────────────────────────────
+    'rect-solid-fill': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="4" fill="#f3eeff" stroke="#ede9fe" strokeWidth="1" />
+        </svg>
+    ),
+
+    'rect-two-tone-split': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="14" width="46" height="20" rx="3" fill="#0f172a" />
+            <rect x="56" y="14" width="16" height="20" rx="3" fill={col} />
+        </svg>
+    ),
+
+    'rect-triple-accent-stripe': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="4" fill="#ffffff" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="8" y="10" width="3" height="28" fill={col} />
+            <rect x="12" y="10" width="3" height="28" fill="#38bdf8" />
+            <rect x="16" y="10" width="3" height="28" fill="#b8fa33" />
+        </svg>
+    ),
+
+    'rect-accent-left-rail': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="4" fill="#ffffff" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="8" y="10" width="4" height="28" rx="1" fill={col} />
+        </svg>
+    ),
+
+    'rect-gradient-horizon': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <defs>
+                <linearGradient id="rectGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={col} />
+                    <stop offset="100%" stopColor="#0f172a" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="14" width="64" height="20" rx="4" fill="url(#rectGrad)" />
+        </svg>
+    ),
+
+    'rect-etched-luxury-hairline': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="16" x2="72" y2="16" stroke="#0f172a" strokeWidth="1" />
+            <line x1="8" y1="32" x2="72" y2="32" stroke="#0f172a" strokeWidth="1" />
+        </svg>
+    ),
+
+    'rect-industrial-hazard': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#27272a" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="4" fill="#f59e0b" />
+        </svg>
+    ),
+
+    'rect-dashed-coupon-frame': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1.2" strokeDasharray="3 2" />
+        </svg>
+    ),
+
+    'rect-pill-capsule-badge': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="16" width="64" height="16" rx="8" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="1" />
+        </svg>
+    ),
+
+    'rect-warning-amber-notice': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="68" height="28" rx="4" fill="#fffbeb" stroke="#fcd34d" strokeWidth="1" />
+            <rect x="6" y="10" width="4" height="28" fill="#f59e0b" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -6196,7 +6520,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -6409,6 +6733,29 @@ function BlockStyleProps({ block, props, updateProps }: {
                             )}
                         </Section>
                     )}
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
                 </>
             )
         }
@@ -7748,6 +8095,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Price colour" value={(props as any).priceColor ?? '#1e1535'} onChange={v => updateProps({ priceColor: v } as any)} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Strike colour" value={(props as any).strikeColor ?? '#94a3b8'} onChange={v => updateProps({ strikeColor: v } as any)} />
+                        <ColorRow label="Original price colour" value={(props as any).originalColor ?? '#94a3b8'} onChange={v => updateProps({ originalColor: v } as any)} />
                     </Section>
 
                     {/* ── Badge colours — shown for variants that use a badge ── */}
@@ -7783,6 +8131,26 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Typography">
                         <SliderInput label="Font size" value={props.fontSize ?? 14} min={10} max={22} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                         <AlignButtons value={props.align ?? 'left'} onChange={v => updateProps({ align: v })} />
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 22} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 22} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -8342,11 +8710,36 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v })} />
-                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
-                        <ColorRow label="Alt row background" value={props.rowAltBg ?? '#f8f7ff'} onChange={v => updateProps({ rowAltBg: v })} />
+                        <ColorRow label="Header background" value={props.headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v, headerBackground: v } as any)} />
+                        <ColorRow label="Header text" value={props.headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v, headerTextColor: v } as any)} />
+                        <ColorRow label="Alt row background" value={props.rowAltBg ?? '#f8f7ff'} onChange={v => updateProps({ rowAltBg: v, altRowBg: v } as any)} />
                         <ColorRow label="Checkmark colour" value={props.accentColor ?? '#10b981'} onChange={v => updateProps({ accentColor: v })} />
-                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v, borderColour: v } as any)} />
+                        <ColorRow label="Our column colour" value={(props as any).ourColor ?? '#7530fb'} onChange={v => updateProps({ ourColor: v } as any)} />
+                        <ColorRow label="Text colour" value={(props as any).textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v } as any)} />
+                    </Section>
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -8768,8 +9161,10 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     )}
                     {av === 'sale' && (
                         <Section title="Savings badge">
-                            <TextInput label="Badge text" value={props.savingsText ?? ''} onChange={v => updateProps({ savingsText: v })} />
+                            <TextInput label="Savings text" value={props.savingsText ?? ''} onChange={v => updateProps({ savingsText: v })} />
                             {phButton('savingsText', 'savings text')}
+                            <TextInput label="Badge label" value={props.badgeText ?? ''} onChange={v => updateProps({ badgeText: v })} />
+                            {phButton('badgeText', 'badge label')}
                         </Section>
                     )}
                     {av === 'urgency' && (
@@ -9988,19 +10383,25 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     <InfoBox>Header row + data rows. Format: Feature | Our Product | Competitor (one per line)</InfoBox>
                     <TextareaInput
                         label="Rows (3 columns | separated)"
-                        value={Array.isArray(props.rows)
-                            ? props.rows.map((r: string[]) => r.join(' | ')).join('\n')
-                            : 'Feature | Our Product | Competitor\nWarranty | 2 Years | 6 Months\nUK Stock | ✓ Yes | ✗ No'
+                        value={
+                            Array.isArray(props.rows) && props.rows.length > 0
+                                ? props.rows.map((r: any) =>
+                                    Array.isArray(r)
+                                        ? r.join(' | ')
+                                        : `${r.feature ?? ''} | ${r.ourValue ?? ''} | ${r.competitorValue ?? ''}`
+                                ).join('\n')
+                                : typeof (props as any).content === 'string' && (props as any).content.includes('|')
+                                    ? (props as any).content
+                                    : 'Feature | Our Product | Competitor\nWarranty | 2 Years | 6 Months\nUK Stock | ✓ Yes | ✗ No'
                         }
                         rows={6}
-                        onChange={v => updateProps({
-                            rows: v.split('\n')
+                        onChange={v => {
+                            const parsed = v.split('\n')
                                 .filter((s: string) => s.includes('|'))
                                 .map((s: string) => s.split('|').map((p: string) => p.trim()))
-                        })}
+                            updateProps({ rows: parsed, content: v } as any)
+                        }}
                     />
-                    <ColorRow label="Header background" value={props.headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
-                    <ColorRow label="Our column colour" value={props.ourColor ?? '#7530fb'} onChange={v => updateProps({ ourColor: v })} />
                 </Section>
             )
 

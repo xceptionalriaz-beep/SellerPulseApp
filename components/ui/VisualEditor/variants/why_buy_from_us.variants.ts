@@ -154,10 +154,24 @@ function pad(p: any): string {
 }
 
 function resolveReasons(p: any): WhyBuyReason[] {
-    if (Array.isArray(p.reasons) && p.reasons.length > 0) {
-        return p.reasons
-    }
-    return DEFAULT_REASONS
+    // Support p.points (original why_buy_from_us schema), p.reasons, p.features, p.badges, and p.items
+    const rawList = Array.isArray(p.points) && p.points.length > 0
+        ? p.points
+        : Array.isArray(p.reasons) && p.reasons.length > 0
+            ? p.reasons
+            : Array.isArray(p.features) && p.features.length > 0
+                ? p.features
+                : Array.isArray(p.badges) && p.badges.length > 0
+                    ? p.badges
+                    : Array.isArray(p.items) && p.items.length > 0
+                        ? p.items
+                        : DEFAULT_REASONS
+
+    return rawList.map((item: any, idx: number) => ({
+        icon: item.icon ?? item.svg ?? (idx === 0 ? 'shield-check' : idx === 1 ? 'truck' : 'rotate-ccw'),
+        title: item.title ?? item.label ?? item.heading ?? `Benefit ${idx + 1}`,
+        desc: item.desc ?? item.text ?? item.description ?? item.subText ?? '',
+    }))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -173,7 +187,7 @@ function variantClassicCentered(p: any, id: string): string {
 
     const cols = reasons.map((r, i) => `
     <td width="${colWidth}%" style="text-align:center;padding:12px 10px;vertical-align:top;">
-      <div data-feature-index="${i}" style="margin-bottom:10px;cursor:pointer;">
+      <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="margin-bottom:10px;cursor:pointer;">
         ${resolveIconSvg(r.icon, iconColor, 28)}
       </div>
       <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${titleColor};line-height:1.3;">${r.title}</p>
@@ -211,7 +225,7 @@ function variantBoxedCardsGrid(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${cardBg};border:1.5px solid ${cardBorder};border-radius:10px;border-collapse:collapse;">
         <tr>
           <td style="padding:18px 14px;text-align:center;">
-            <div data-feature-index="${i}" style="display:inline-block;width:44px;height:44px;line-height:44px;background-color:#f5f3ff;border-radius:10px;margin-bottom:12px;cursor:pointer;">
+            <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="display:inline-block;width:44px;height:44px;line-height:44px;background-color:#f5f3ff;border-radius:10px;margin-bottom:12px;cursor:pointer;">
               ${resolveIconSvg(r.icon, iconColor, 22)}
             </div>
             <p style="margin:0 0 6px;font-size:13px;font-weight:800;color:${titleColor};line-height:1.3;">${r.title}</p>
@@ -254,7 +268,7 @@ function variantHorizontalFeatureRows(p: any, id: string): string {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
           <tr>
             <td width="46" style="width:46px;vertical-align:top;padding-right:14px;">
-              <div data-feature-index="${i}" style="width:42px;height:42px;line-height:42px;text-align:center;background-color:#f5f3ff;border-radius:10px;cursor:pointer;">
+              <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="width:42px;height:42px;line-height:42px;text-align:center;background-color:#f5f3ff;border-radius:10px;cursor:pointer;">
                 ${resolveIconSvg(r.icon, iconColor, 20)}
               </div>
             </td>
@@ -299,7 +313,7 @@ function variantSplitHeroPledge(p: any, id: string): string {
         <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
           <tr>
             <td width="30" style="width:30px;vertical-align:top;padding-top:2px;">
-              <div data-feature-index="${i}" style="cursor:pointer;">
+              <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="cursor:pointer;">
                 ${resolveIconSvg(r.icon, accent, 18)}
               </div>
             </td>
@@ -388,8 +402,8 @@ function variantNumberedStepsTimeline(p: any, id: string): string {
 
     const steps = reasons.map((r, i) => `
     <td width="${colWidth}%" style="text-align:center;vertical-align:top;padding:0 8px;position:relative;">
-      <div data-feature-index="${i}" style="width:36px;height:36px;line-height:36px;border-radius:50%;background-color:#dcfce7;border:2px solid ${accent};color:${accent};font-size:13px;font-weight:900;margin:0 auto 10px;text-align:center;cursor:pointer;">
-        ${i + 1}
+      <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="width:36px;height:36px;line-height:36px;border-radius:50%;background-color:#dcfce7;border:2px solid ${accent};color:${accent};font-size:13px;font-weight:900;margin:0 auto 10px;text-align:center;cursor:pointer;">
+        ${resolveIconSvg(r.icon, accent, 18)}
       </div>
       <p style="margin:0 0 4px;font-size:12px;font-weight:800;color:${titleColor};">${r.title}</p>
       <p style="margin:0;font-size:10px;color:${descColor};line-height:1.4;">${r.desc}</p>
@@ -420,7 +434,7 @@ function variantCompactBannerStrip(p: any, id: string): string {
     const pills = reasons.map((r, i) => `
     ${i > 0 ? `<td style="padding:0 12px;color:#cbd5e1;font-size:16px;">|</td>` : ''}
     <td style="white-space:nowrap;vertical-align:middle;padding:6px 4px;">
-      <span data-feature-index="${i}" style="vertical-align:middle;margin-right:6px;display:inline-block;cursor:pointer;">
+      <span data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="vertical-align:middle;margin-right:6px;display:inline-block;cursor:pointer;">
         ${resolveIconSvg(r.icon, accent, 18)}
       </span>
       <span style="font-size:12px;font-weight:800;color:${titleColor};vertical-align:middle;">${r.title}</span>
@@ -451,7 +465,7 @@ function variantOfficialGuaranteeShield(p: any, id: string): string {
 
     const cells = reasons.map((r, i) => `
     <td width="${colWidth}%" style="vertical-align:top;padding:12px 10px;text-align:center;">
-      <div data-feature-index="${i}" style="width:40px;height:40px;line-height:40px;background-color:#ffffff;border:1.5px solid #bbf7d0;border-radius:50%;margin:0 auto 10px;cursor:pointer;">
+      <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="width:40px;height:40px;line-height:40px;background-color:#ffffff;border:1.5px solid #bbf7d0;border-radius:50%;margin:0 auto 10px;cursor:pointer;">
         ${resolveIconSvg(r.icon, accent, 20)}
       </div>
       <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:${titleColor};">${r.title}</p>
@@ -485,7 +499,7 @@ function variantDarkMerchantFlagship(p: any, id: string): string {
 
     const cells = reasons.map((r, i) => `
     <td width="${colWidth}%" style="vertical-align:top;padding:16px 12px;border-right:${i < reasons.length - 1 ? '1px solid #27272a' : 'none'};text-align:center;">
-      <div data-feature-index="${i}" style="margin-bottom:10px;cursor:pointer;">
+      <div data-feature-index="${i}" data-badge-index="${i}" data-icon-index="${i}" data-reason-index="${i}" data-point-index="${i}" data-item-index="${i}" data-index="${i}" data-field="icon" data-editable="icon" style="margin-bottom:10px;cursor:pointer;">
         ${resolveIconSvg(r.icon, accent, 24)}
       </div>
       <p style="margin:0 0 6px;font-size:13px;font-weight:800;color:#ffffff;letter-spacing:0.3px;">${r.title}</p>
@@ -533,7 +547,7 @@ function variantTwoColumnChecklist(p: any, id: string): string {
               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                 <tr>
                   <td width="36" style="width:36px;vertical-align:top;padding-right:12px;">
-                    <div data-feature-index="${rowIdx * 2 + colIdx}" style="width:34px;height:34px;line-height:34px;text-align:center;background-color:#f0fdf4;border-radius:6px;cursor:pointer;">
+                    <div data-feature-index="${rowIdx * 2 + colIdx}" data-badge-index="${rowIdx * 2 + colIdx}" data-icon-index="${rowIdx * 2 + colIdx}" data-reason-index="${rowIdx * 2 + colIdx}" data-point-index="${rowIdx * 2 + colIdx}" data-item-index="${rowIdx * 2 + colIdx}" data-index="${rowIdx * 2 + colIdx}" data-field="icon" data-editable="icon" style="width:34px;height:34px;line-height:34px;text-align:center;background-color:#f0fdf4;border-radius:6px;cursor:pointer;">
                       ${resolveIconSvg(r.icon, accent, 18)}
                     </div>
                   </td>

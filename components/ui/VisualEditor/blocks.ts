@@ -987,6 +987,7 @@ export interface NavBarProps extends CommonProps {
 
 // ── Urgency Bar ───────────────────────────────────────────────────────────────
 export interface UrgencyBarProps extends CommonProps {
+    variant?: string
     text: string              // e.g. "Only {{QUANTITY}} Left — Order Soon!"
     bgColor: string
     textColor: string
@@ -996,6 +997,8 @@ export interface UrgencyBarProps extends CommonProps {
     pulse: boolean            // adds pulsing dot
     align: 'left' | 'center' | 'right'
     fontSize: number
+    quantity?: string | number
+    percentRemaining?: number
 }
 
 // ── Cross-Sell Grid ───────────────────────────────────────────────────────────
@@ -1035,6 +1038,7 @@ export interface ButtonBlockProps extends CommonProps {
 
 // ── Rectangle ─────────────────────────────────────────────────────────────────
 export interface RectangleProps extends CommonProps {
+    variant?: string
     height: number            // px
     fillColor: string
     borderColor: string
@@ -1042,6 +1046,8 @@ export interface RectangleProps extends CommonProps {
     borderRadius: number
     content: string           // optional HTML inside
     align: 'left' | 'center' | 'right'
+    accentColor?: string
+    badgeText?: string
 }
 
 // ── Hero Header ───────────────────────────────────────────────────────────────
@@ -1200,7 +1206,8 @@ import { getHighlightTextVariant } from './variants/highlight_text.variants'
 import { getProductTitleVariant } from './variants/product_title.variants'
 import { getFaqBlockVariant } from './variants/faq_block.variants'
 import { getWhyBuyFromUsVariant } from './variants/why_buy_from_us.variants'
-
+import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
+import { getRectangleVariant } from './variants/rectangle.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2311,9 +2318,10 @@ ${thumbCells}
         label: 'Urgency Stock Bar',
         category: 'Conversion',
         icon: 'flame',
-        description: 'Low stock / urgency callout banner',
+        description: 'Low stock / urgency callout banner — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
+            variant: 'urgency-classic-pulse',
             paddingTop: 12,
             paddingBottom: 12,
             text: 'Only {{QUANTITY}} Left in Stock — Order Soon!',
@@ -2327,21 +2335,9 @@ ${thumbCells}
             fontSize: 13,
         } as UrgencyBarProps,
         toHtml(props, id) {
-            const p = props as UrgencyBarProps
-            const dot = p.showIcon
-                ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${p.iconColor};margin-right:8px;vertical-align:middle;"></span>`
-                : ''
-            return wrapBlock('urgency_bar', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;text-align:${p.align};">
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:800;color:${p.textColor};letter-spacing:0.02em;">
-        ${dot}${p.text}
-      </p>
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'urgency-classic-pulse'
+            return wrapBlock('urgency_bar', id, getUrgencyBarVariant(variantId).toHtml(p, id), p)
         },
     },
 
@@ -2437,9 +2433,10 @@ ${thumbCells}
         label: 'Rectangle',
         category: 'Conversion',
         icon: 'square',
-        description: 'Shape container for background fills and callouts',
+        description: 'Shape container for background fills and callouts — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
+            variant: 'rect-solid-fill',
             paddingTop: 0,
             paddingBottom: 0,
             height: 60,
@@ -2451,16 +2448,9 @@ ${thumbCells}
             align: 'center',
         } as RectangleProps,
         toHtml(props, id) {
-            const p = props as RectangleProps
-            return wrapBlock('rectangle', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.fillColor};height:${p.height}px;min-height:${p.height}px;border:${p.borderWidth}px solid ${p.borderColor};border-radius:${p.borderRadius}px;text-align:${p.align};vertical-align:middle;${pad(p)}">
-      ${p.content || '&nbsp;'}
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'rect-solid-fill'
+            return wrapBlock('rectangle', id, getRectangleVariant(variantId).toHtml(p, id), p)
         },
     },
 
@@ -3346,9 +3336,14 @@ ${thumbCells}
                 variant: 'why-classic-centered',
                 title: 'Why Shop With Us?',
                 reasons: [
-                    { icon: 'shield-check', title: '100% Authentic Stock', desc: 'All items genuine & verified' },
-                    { icon: 'truck', title: 'Same-Day Fast Dispatch', desc: 'Orders before 2pm ship today' },
-                    { icon: 'rotate-ccw', title: '30-Day Hassle-Free Returns', desc: '30-day hassle-free returns' },
+                    { icon: 'shield-check', title: '100% Authentic Stock', desc: 'All items genuine & verified', text: 'All items genuine & verified' },
+                    { icon: 'truck', title: 'Same-Day Fast Dispatch', desc: 'Orders before 2pm ship today', text: 'Orders before 2pm ship today' },
+                    { icon: 'rotate-ccw', title: '30-Day Hassle-Free Returns', desc: '30-day hassle-free returns', text: '30-day hassle-free returns' },
+                ],
+                points: [
+                    { icon: 'shield-check', title: '100% Authentic Stock', desc: 'All items genuine & verified', text: 'All items genuine & verified' },
+                    { icon: 'truck', title: 'Same-Day Fast Dispatch', desc: 'Orders before 2pm ship today', text: 'Orders before 2pm ship today' },
+                    { icon: 'rotate-ccw', title: '30-Day Hassle-Free Returns', desc: '30-day hassle-free returns', text: '30-day hassle-free returns' },
                 ],
                 titleColor: '#1e1535',
                 descColor: '#6b7280',
@@ -3359,6 +3354,20 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as any
                 const variantId = p.variant ?? 'why-classic-centered'
+                // Two-way synchronization: If the Icon Library updated `points`, sync to `reasons`. If it updated `reasons`, sync to `points`.
+                if (Array.isArray(p.points) && Array.isArray(p.reasons)) {
+                    p.points.forEach((pt: any, idx: number) => {
+                        if (p.reasons[idx] && pt.icon && pt.icon !== p.reasons[idx].icon) {
+                            p.reasons[idx].icon = pt.icon
+                        } else if (p.reasons[idx] && p.reasons[idx].icon && p.reasons[idx].icon !== pt.icon) {
+                            pt.icon = p.reasons[idx].icon
+                        }
+                    })
+                } else if (Array.isArray(p.points) && !Array.isArray(p.reasons)) {
+                    p.reasons = p.points
+                } else if (Array.isArray(p.reasons) && !Array.isArray(p.points)) {
+                    p.points = p.reasons
+                }
                 return wrapBlock('why_buy_from_us' as BlockType, id, getWhyBuyFromUsVariant(variantId).toHtml(p, id), p)
             },
         },

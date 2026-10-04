@@ -1461,21 +1461,30 @@ export default function VisualEditor({
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
                         if (selectedFeatureIndex === null) return;
-                        // Find block by ID (works for any block type with features[])
+                        // Find block by ID (supports why_buy_from_us, key_features_grid, trust_badges, etc.)
                         const idx = selectedIconBlockId
                             ? blocks.findIndex(b => b.id === selectedIconBlockId)
-                            : blocks.findIndex(b => b.type === 'key_features_grid');
+                            : selectedId
+                                ? blocks.findIndex(b => b.id === selectedId)
+                                : blocks.findIndex(b => b.type === 'key_features_grid' || b.type === 'why_buy_from_us' || b.type === 'trust_badges');
                         if (idx < 0) return;
                         const block = blocks[idx];
-                        // Support both features[] and badges[] prop names
-                        const propKey = (block.props as any).features !== undefined ? 'features'
-                            : (block.props as any).badges !== undefined ? 'badges'
-                                : 'features';
-                        const items = (block.props as any)[propKey] ?? [];
-                        const updated = items.map((f: any, i: number) =>
-                            i === selectedFeatureIndex ? { ...f, icon: iconId } : f
-                        );
-                        const updatedBlock = { ...block, props: { ...block.props, [propKey]: updated } };
+                        const p = block.props as any;
+
+                        // Detect which array holds the icons (reasons, points, features, badges, or items)
+                        const allKeys = ['reasons', 'points', 'features', 'badges', 'items'];
+                        const matchedKeys = allKeys.filter(k => Array.isArray(p[k]));
+                        const keysToUpdate = matchedKeys.length > 0 ? matchedKeys : ['features'];
+
+                        const updatedProps = { ...p };
+                        for (const key of keysToUpdate) {
+                            const list = p[key] ?? [];
+                            updatedProps[key] = list.map((item: any, i: number) =>
+                                i === selectedFeatureIndex ? { ...item, icon: iconId } : item
+                            );
+                        }
+
+                        const updatedBlock = { ...block, props: updatedProps };
                         const newBlocks = [...blocks];
                         newBlocks[idx] = updatedBlock as any;
                         commitBlocks(newBlocks, blocks);

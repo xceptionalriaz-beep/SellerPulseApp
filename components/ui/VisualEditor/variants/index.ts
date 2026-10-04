@@ -46,7 +46,8 @@ export { highlightTextVariants, getHighlightTextVariant, highlightVariants, high
 export { productTitleVariants, getProductTitleVariant, titleVariants, productTitleBlockVariants, PRODUCT_TITLE_THUMBNAILS } from './product_title.variants'
 export { faqBlockVariants, getFaqBlockVariant, faqVariants, faqSectionVariants, FAQ_BLOCK_THUMBNAILS } from './faq_block.variants'
 export { whyBuyFromUsVariants, getWhyBuyFromUsVariant, WHY_BUY_FROM_US_THUMBNAILS } from './why_buy_from_us.variants'
-
+export { urgencyBarVariants, getUrgencyBarVariant } from './urgency_bar.variants'
+export { rectangleVariants, getRectangleVariant } from './rectangle.variants'
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -93,6 +94,8 @@ import { highlightTextVariants } from './highlight_text.variants'
 import { productTitleVariants } from './product_title.variants'
 import { faqBlockVariants } from './faq_block.variants'
 import { whyBuyFromUsVariants } from './why_buy_from_us.variants'
+import { urgencyBarVariants } from './urgency_bar.variants'
+import { rectangleVariants } from './rectangle.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -164,6 +167,11 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'why_buy_from_us': whyBuyFromUsVariants,
     'why_buy': whyBuyFromUsVariants,
     'why_shop': whyBuyFromUsVariants,
+    'urgency_bar': urgencyBarVariants,
+    'urgency': urgencyBarVariants,
+    'urgency_stock': urgencyBarVariants,
+    'rectangle': rectangleVariants,
+    'shape': rectangleVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
