@@ -70,12 +70,12 @@ const C = {
     successLight: '#dcfce7',
 }
 
-// Device canvas widths
-const DEVICE_WIDTHS = {
+// Device preview widths — used in BlockPreview iframe sizing only
+const DEVICE_PREVIEW_WIDTHS = {
     desktop: 700,
     tablet: 480,
     mobile: 375,
-}
+} as const
 
 
 // ── Lucide icon lookup ────────────────────────────────────────────────────────
@@ -916,14 +916,24 @@ function BlockCard({
                     <Divider />
 
                     {!hasActiveSlot && (
-                        <ActionButton
-                            onClick={() => onAddBelow('spacer')}
-                            title="Add spacer below"
-                            color={C.success}
-                            bg={C.successLight}
-                        >
-                            <PlusCircle size={13} />
-                        </ActionButton>
+                        <>
+                            <ActionButton
+                                onClick={() => onAddBelow('spacer')}
+                                title="Add spacer below"
+                                color={C.success}
+                                bg={C.successLight}
+                            >
+                                <PlusCircle size={13} />
+                            </ActionButton>
+                            <ActionButton
+                                onClick={() => onAddBelow('divider')}
+                                title="Add divider below"
+                                color={C.success}
+                                bg={C.successLight}
+                            >
+                                <Minus size={13} />
+                            </ActionButton>
+                        </>
                     )}
                 </div>
             )}
@@ -1576,6 +1586,8 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     const htmlKey = `${block.id}-${block.type}-${propsHash}`
 
     const onLoad = React.useCallback(() => {
+        // iframeRef is a stable ref object — reading .current inside the callback
+        // is intentional and safe. No deps needed; the ref never changes identity.
         const iframe = iframeRef.current
         if (!iframe) return
         try {
@@ -1586,6 +1598,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
             const h = body.scrollHeight || body.offsetHeight
             setHeight(Math.max(40, h + 4))
         } catch { /* cross-origin guard */ }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     if (!html) {
