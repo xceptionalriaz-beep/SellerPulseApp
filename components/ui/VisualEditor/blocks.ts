@@ -4111,7 +4111,7 @@ export interface CanvasSettings {
 }
 
 export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
-    maxWidth: 700,
+    maxWidth: 1000,
     bgColor: '#f8f8f8',
     canvasBg: '#ffffff',
     fontStack: 'Arial, Helvetica, sans-serif',

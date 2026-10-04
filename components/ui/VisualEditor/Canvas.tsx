@@ -72,8 +72,8 @@ const C = {
 
 // Device preview widths — used in BlockPreview iframe sizing only
 const DEVICE_PREVIEW_WIDTHS = {
-    desktop: 700,
-    tablet: 480,
+    desktop: 1000,
+    tablet: 768,
     mobile: 375,
 } as const
 
@@ -305,7 +305,7 @@ export default function Canvas({
                         display: 'inline-block',
                         flexShrink: 0,
                     }} />
-                    {deviceWidth === 'desktop' ? 'Desktop · 700px' : deviceWidth === 'tablet' ? 'Tablet · 480px' : 'Mobile · 375px'}
+                    {deviceWidth === 'desktop' ? 'Desktop · 1000px' : deviceWidth === 'tablet' ? 'Tablet · 768px' : 'Mobile · 375px'}
                 </div>
 
                 {/* ── Drop overlay — handled by EmptyState when canvas is empty ── */}
@@ -807,7 +807,7 @@ function BlockCard({
                         const recalcScale = () => {
                             if (deviceWidth === 'desktop') {
                                 const w = el.getBoundingClientRect().width
-                                const scale = w > 32 ? ((w - 32) / 700) : 1
+                                const scale = w > 32 ? ((w - 32) / 1000) : 1
                                 el.style.setProperty('--canvas-scale', String(scale))
                             } else {
                                 el.style.setProperty('--canvas-scale', '1')
@@ -820,7 +820,7 @@ function BlockCard({
                             ; (el as any).__ro = ro
                     }}
                     style={{
-                        width: deviceWidth === 'desktop' ? '100%' : deviceWidth === 'tablet' ? '480px' : '375px',
+                        width: deviceWidth === 'desktop' ? '100%' : deviceWidth === 'tablet' ? '768px' : '375px',
                         overflow: 'hidden',
                         borderRadius: deviceWidth === 'desktop' ? 0 : 8,
                         boxShadow: deviceWidth === 'desktop' ? 'none' : '0 4px 24px rgba(0,0,0,0.18)',
@@ -1093,7 +1093,7 @@ function ActionButton({
 function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: { block: Block; def: BlockDefinition; activeCategory?: CategoryId; deviceWidth?: 'desktop' | 'tablet' | 'mobile' }) {
     const props = block.props as any
     const iframeRef = React.useRef<HTMLIFrameElement>(null)
-    const previewWidth = deviceWidth === 'mobile' ? 375 : deviceWidth === 'tablet' ? 480 : 700
+    const previewWidth = deviceWidth === 'mobile' ? 375 : deviceWidth === 'tablet' ? 768 : 1000
 
     // Build the full HTML for this single block
     const html = React.useMemo(() => {

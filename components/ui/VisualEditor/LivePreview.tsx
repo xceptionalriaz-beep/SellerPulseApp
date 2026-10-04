@@ -50,8 +50,8 @@ const C = {
 
 // ── Device config ─────────────────────────────────────────────────────────────
 const DEVICES = [
-    { id: 'desktop' as const, label: 'Desktop', Icon: Monitor, width: 700 },
-    { id: 'tablet' as const, label: 'Tablet', Icon: Tablet, width: 480 },
+    { id: 'desktop' as const, label: 'Desktop', Icon: Monitor, width: 1000 },
+    { id: 'tablet' as const, label: 'Tablet', Icon: Tablet, width: 768 },
     { id: 'mobile' as const, label: 'Mobile', Icon: Smartphone, width: 375 },
 ]
 
@@ -66,7 +66,7 @@ interface TestField {
 const TEST_FIELDS: TestField[] = [
     { key: 'title', placeholder: '{{PRODUCT_TITLE}}', label: 'Product Title', defaultExample: 'Sony WH-1000XM5 Wireless Headphones' },
     { key: 'price', placeholder: '{{ITEM_PRICE}}', label: 'Price', defaultExample: '£249.99' },
-    { key: 'imageUrl', placeholder: '{{MAIN_IMAGE_URL}}', label: 'Main Image URL', defaultExample: 'https://via.placeholder.com/500x500/f3eeff/7530fb?text=Product+Image' },
+    { key: 'imageUrl', placeholder: '{{MAIN_IMAGE_URL}}', label: 'Main Image URL', defaultExample: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&h=700&fit=crop&auto=format&q=80' },
     { key: 'description', placeholder: '{{ITEM_DESCRIPTION}}', label: 'Description', defaultExample: 'Premium wireless headphones with industry-leading noise cancellation.' },
     { key: 'condition', placeholder: '{{ITEM_CONDITION}}', label: 'Condition', defaultExample: 'Brand New' },
     { key: 'seller', placeholder: '{{SELLER_NAME}}', label: 'Seller Name', defaultExample: 'TechStore_UK' },
@@ -85,6 +85,7 @@ interface LivePreviewProps {
     html: string
     deviceWidth: 'desktop' | 'tablet' | 'mobile'
     onDeviceChange: (d: 'desktop' | 'tablet' | 'mobile') => void
+    onClose?: () => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -104,7 +105,7 @@ function substituteAll(html: string, values: TestValues): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function LivePreview({ html, deviceWidth, onDeviceChange }: LivePreviewProps) {
+export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose }: LivePreviewProps) {
     const [testValues, setTestValues] = useState<TestValues>({})
     const [ebayId, setEbayId] = useState('')
     const [testLoading, setTestLoading] = useState(false)
@@ -117,10 +118,16 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange }: LiveP
     // Current device config
     const device = DEVICES.find(d => d.id === deviceWidth) ?? DEVICES[0]
 
-    // Build preview HTML — substitute test values into assembled HTML
-    const previewHtml = Object.keys(testValues).length > 0
-        ? substituteAll(html, testValues)
-        : html
+    // Build preview HTML — substitute test values, or default sample data so images/text don't show as broken tokens
+    const previewHtml = React.useMemo(() => {
+        const values: TestValues = { ...testValues }
+        TEST_FIELDS.forEach(f => {
+            if (!values[f.key]) {
+                values[f.key] = f.defaultExample
+            }
+        })
+        return substituteAll(html, values)
+    }, [html, testValues])
 
     // ── Load from eBay Item ID ─────────────────────────────────────────────
     const handleEbayTest = useCallback(async () => {
@@ -386,7 +393,7 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange }: LiveP
                     </button>
                 </div>
 
-                {/* Right — test data panel toggle + fullscreen */}
+                {/* Right — test data panel toggle + fullscreen + exit eye button */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <button
                         onClick={() => setShowTestPanel(p => !p)}
@@ -430,6 +437,27 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange }: LiveP
                     >
                         <Maximize2 size={13} />
                     </button>
+                    {onClose && (
+                        <>
+                            <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+                            <button
+                                onClick={onClose}
+                                title="Exit Live Preview"
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    width: 30, height: 30,
+                                    border: `1px solid ${C.border}`, borderRadius: 7,
+                                    backgroundColor: '#f3eeff',
+                                    color: '#7530fb',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 

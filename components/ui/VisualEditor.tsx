@@ -1538,33 +1538,13 @@ export default function VisualEditor({
                             </button>
                         </div>
                     )}
-                    {/* Eye icon row — always visible when in live preview */}
-                    {livePreview && (
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e2e8f0', backgroundColor: '#ffffff', flexShrink: 0 }}>
-                            <button
-                                onClick={() => setLivePreview(p => !p)}
-                                title="Exit Live Preview"
-                                style={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    width: 40, height: 40, flexShrink: 0,
-                                    border: 'none',
-                                    borderLeft: '1px solid #e2e8f0',
-                                    backgroundColor: '#f3eeff',
-                                    color: '#7530fb',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.15s',
-                                }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
-                            </button>
-                        </div>
-                    )}
                     {/* ── Canvas or Live Preview ── */}
                     {livePreview ? (
                         <LivePreview
                             html={currentHtml}
                             deviceWidth={deviceWidth}
                             onDeviceChange={setDeviceWidth}
+                            onClose={() => setLivePreview(false)}
                         />
                     ) : (
                         <div
@@ -2080,8 +2060,8 @@ function EditorToolbar({
                 {/* Device width toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '2px', backgroundColor: '#f1f5f9', borderRadius: 6 }}>
                     {([
-                        { id: 'desktop', Icon: Monitor, label: 'Desktop (700px)' },
-                        { id: 'tablet', Icon: Tablet, label: 'Tablet (480px)' },
+                        { id: 'desktop', Icon: Monitor, label: 'Desktop (1000px)' },
+                        { id: 'tablet', Icon: Tablet, label: 'Tablet (768px)' },
                         { id: 'mobile', Icon: Smartphone, label: 'Mobile (375px)' },
                     ] as const).map(({ id, Icon, label }) => (
                         <button

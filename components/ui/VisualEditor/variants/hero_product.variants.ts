@@ -95,7 +95,7 @@ function detailsRight(p: HeroProductProps, titleColor = '#1e1535', textColor = '
 function wrapOuter(id: string, bg: string, p: HeroProductProps, inner: string, mobileStyle = ''): string {
   return `<!--[hero_product:${id}]--><div class="vb-block" data-block-id="${id}" data-block-type="hero_product">
 ${mobileStyle}
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:100%;">
   <tr>
     <td style="background-color:${bg};${pad(p)}">
       ${inner}
