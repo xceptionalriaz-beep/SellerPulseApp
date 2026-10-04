@@ -529,7 +529,7 @@ ${captionRow}
           <!-- Before card -->
           <td width="50%" align="center" style="vertical-align:top;text-align:center;padding-right:6px;">
             <div align="center" style="margin:0 auto;text-align:center;">
-              <div align="center" style="display:block;width:100%;position:relative;height:0;padding-bottom:75%;border-radius:${p.borderRadius ?? 8}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+              <div align="center" data-canvas-dropzone="src" style="display:block;width:100%;position:relative;height:0;padding-bottom:75%;border-radius:${p.borderRadius ?? 8}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
                 <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${beforeLabel}" data-slot="src"
                   style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 8}px;${shadowStyle(p)}" />
               </div>
@@ -543,7 +543,7 @@ ${captionRow}
           <!-- After card -->
           <td width="50%" align="center" style="vertical-align:top;text-align:center;padding-left:6px;">
             <div align="center" style="margin:0 auto;text-align:center;">
-              <div align="center" style="display:block;width:100%;position:relative;height:0;padding-bottom:75%;border-radius:${p.borderRadius ?? 8}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+              <div align="center" data-canvas-dropzone="image2Url" style="display:block;width:100%;position:relative;height:0;padding-bottom:75%;border-radius:${p.borderRadius ?? 8}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
                 <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${afterLabel}" data-slot="image2Url"
                   style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 8}px;${shadowStyle(p)}" />
               </div>
@@ -578,18 +578,18 @@ ${captionRow}
         <tr style="height:100%;">
           <!-- Large hero left (60%) — fixed height matching full row -->
           <td width="60%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-right:${gap}px;height:380px;">
-            <div align="center" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+            <div align="center" data-canvas-dropzone="src" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
               <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;bforder-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
           </td>
           <!-- Two stacked images right (40%) — exact split: (380-8)/2 -->
           <td width="40%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-left:${gap}px;height:380px;">
-            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;margin-bottom:${gap}px;">
+            <div align="center" data-canvas-dropzone="image2Url" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;margin-bottom:${gap}px;">
               <img src="${p.image2Url ?? '{{IMAGE_2_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 2" data-slot="image2Url"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
-            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+            <div align="center" data-canvas-dropzone="image3Url" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
               <img src="${p.image3Url ?? '{{IMAGE_3_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 3" data-slot="image3Url"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
@@ -623,18 +623,18 @@ ${captionRow}
         <tr style="height:100%;">
           <!-- Two stacked images left (40%) — exact split: (380-8)/2 -->
           <td width="40%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-right:${gap}px;height:380px;">
-            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;margin-bottom:${gap}px;">
+            <div align="center" data-canvas-dropzone="src" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;margin-bottom:${gap}px;">
               <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 1" data-slot="src"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
-            <div align="center" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+            <div align="center" data-canvas-dropzone="image2Url" style="position:relative;width:100%;height:186px;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
               <img src="${p.image2Url ?? '{{SECONDARY_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'} view 2" data-slot="image2Url"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
           </td>
           <!-- Large hero right (60%) — fixed height matching full row -->
           <td width="60%" valign="top" align="center" style="vertical-align:top;text-align:center;padding-left:${gap}px;height:380px;">
-            <div align="center" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
+            <div align="center" data-canvas-dropzone="image3Url" style="position:relative;width:100%;height:100%;border-radius:${p.borderRadius ?? 6}px;overflow:hidden;background-color:#f3f4f6;margin:0 auto;">
               <img src="${p.image3Url ?? '{{IMAGE_3_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="image3Url"
                 style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;margin:0 auto;object-fit:cover;object-position:center;border-radius:${p.borderRadius ?? 6}px;${shadowStyle(p)}" />
             </div>
