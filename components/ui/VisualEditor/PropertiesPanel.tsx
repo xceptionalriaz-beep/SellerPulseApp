@@ -7848,7 +7848,31 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Star colour" value={props.accentColor ?? '#f59e0b'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Star colour" value={(props as any).starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v } as any)} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? ''}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'monospace', l: 'Monospace' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 16} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 16} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 24} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 24} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
                     </Section>
                 </>
             )
@@ -8133,7 +8157,30 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#0f172a'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Accent colour" value={props.accentColor ?? '#f59e0b'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#f59e0b'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v } as any)} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? ''}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'monospace', l: 'Monospace' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 16} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 16} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 24} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 24} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
                     </Section>
                 </>
             )
@@ -9280,7 +9327,12 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </Section>
             )
 
-        case 'hero_header':
+        case 'hero_header': {
+            const hhv = (props as any).variant ?? 'gradient'
+            const isImageBg = hhv === 'image-bg'
+            const isSeasonal = hhv === 'seasonal'
+            const isCategory = hhv === 'category'
+            const hasGrad = !isImageBg && hhv !== 'typographic'
             return (
                 <>
                     <Section title="Store details">
@@ -9297,6 +9349,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             onChange={v => updateProps({ tagline: v })}
                         />
                         {phButton('tagline', 'tagline')}
+                        <AlignButtons value={(props as any).align ?? 'center'} onChange={v => updateProps({ align: v } as any)} />
                     </Section>
                     <Section title="Logo / Background image">
                         <ToggleRow
@@ -9318,14 +9371,37 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                                 </InfoBox>
                             </>
                         )}
-                        {(props.variant === 'image-bg') && !props.showLogo && (
+                        {isImageBg && !props.showLogo && (
                             <InfoBox>
                                 Enable "Show logo" above to set a background image URL for the Image Background variant.
                             </InfoBox>
                         )}
                     </Section>
+                    {hasGrad && (
+                        <Section title="Gradient Background">
+                            <ToggleRow label="Use gradient" value={(props as any).bgGradient ?? true} onChange={v => updateProps({ bgGradient: v } as any)} />
+                            {((props as any).bgGradient ?? true) && (
+                                <>
+                                    <ColorRow label="Gradient from" value={(props as any).bgGradientFrom ?? props.gradientFrom ?? '#7530fb'} onChange={v => updateProps({ bgGradientFrom: v, gradientFrom: v } as any)} />
+                                    <ColorRow label="Gradient to" value={(props as any).bgGradientTo ?? props.gradientTo ?? '#1e1535'} onChange={v => updateProps({ bgGradientTo: v, gradientTo: v } as any)} />
+                                    <SliderInput label="Gradient angle" value={(props as any).bgGradientDir ?? 135} min={0} max={360} suffix="°" onChange={v => updateProps({ bgGradientDir: v } as any)} />
+                                </>
+                            )}
+                        </Section>
+                    )}
+                    {isSeasonal && (
+                        <Section title="Sale Badge">
+                            <TextInput label="Badge text" value={(props as any).saleBadgeText ?? 'SALE'} onChange={v => updateProps({ saleBadgeText: v } as any)} />
+                        </Section>
+                    )}
+                    {isCategory && (
+                        <Section title="Category Badge">
+                            <TextInput label="Badge text" value={(props as any).categoryBadge ?? 'Specialist Seller'} onChange={v => updateProps({ categoryBadge: v } as any)} />
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'raw_html':
             return (
@@ -9610,14 +9686,21 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Seller details">
-                        <TextInput label="Feedback %" value={props.feedbackPercent ?? '{{SELLER_FEEDBACK}}'} onChange={v => updateProps({ feedbackPercent: v })} />
-                        {phButton('feedbackPercent', 'feedback %')}
-                        <TextInput label="Member since" value={props.memberSince ?? '{{MEMBER_SINCE}}'} onChange={v => updateProps({ memberSince: v })} />
+                        <TextInput label="Feedback score" value={(props as any).feedbackScore ?? props.feedbackPercent ?? '{{SELLER_FEEDBACK}}'} onChange={v => updateProps({ feedbackScore: v, feedbackPercent: v, feedbackText: v } as any)} />
+                        {phButton('feedbackScore', 'feedback score')}
+                        <TextInput label="Member since" value={(props as any).memberSince ?? '{{MEMBER_SINCE}}'} onChange={v => updateProps({ memberSince: v } as any)} />
                         {phButton('memberSince', 'member since')}
+                        <TextInput label="Review count" value={(props as any).reviewCount ?? ''} placeholder="e.g. 10,000+" onChange={v => updateProps({ reviewCount: v, ratingsCount: v, totalReviews: v } as any)} />
+                        {phButton('reviewCount', 'review count')}
+                    </Section>
+                    <Section title="Heading">
+                        <TextInput label="Heading text" value={(props as any).heading ?? ''} placeholder="e.g. Top Rated eBay Seller" onChange={v => updateProps({ heading: v, tagline: v } as any)} />
+                        {phButton('heading', 'heading')}
                     </Section>
                     <Section title="Colours">
-                        <ColorRow label="Badge background" value={props.badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v })} />
-                        <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
+                        <ColorRow label="Badge background" value={(props as any).badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v } as any)} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Star colour" value={(props as any).starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v } as any)} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
                     </Section>
                 </>
@@ -10125,13 +10208,20 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'free_shipping_banner':
             return (
                 <>
-                    <Section title="Message">
-                        <TextInput label="Banner text" value={props.text ?? '🚚 FREE Shipping — Dispatched Within 24 Hours ✅'} onChange={v => updateProps({ text: v })} />
-                        {phButton('text', 'banner text')}
+                    <Section title="Content">
+                        <TextInput label="Heading" value={(props as any).heading ?? (props as any).bannerTitle ?? (props as any).shippingTitle ?? 'Fast & Free Domestic Shipping'} onChange={v => updateProps({ heading: v, bannerTitle: v, shippingTitle: v } as any)} />
+                        {phButton('heading', 'heading')}
+                        <TextInput label="Sub text" value={(props as any).subText ?? (props as any).bannerSubtitle ?? (props as any).shippingSubtext ?? ''} placeholder="e.g. Orders placed before 2 PM dispatch same day" onChange={v => updateProps({ subText: v, bannerSubtitle: v, shippingSubtext: v } as any)} />
+                        {phButton('subText', 'sub text')}
                     </Section>
-                    <Section title="Colours">
-                        <ColorRow label="Background" value={props.bgColor ?? '#16a34a'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Text colour" value={props.textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v })} />
+                    <Section title="Badge">
+                        <TextInput label="Badge text" value={(props as any).badge ?? (props as any).badgeText ?? (props as any).tag ?? 'SAME-DAY DISPATCH'} onChange={v => updateProps({ badge: v, badgeText: v, tag: v } as any)} />
+                    </Section>
+                    <Section title="Carrier & Dispatch">
+                        <TextInput label="Carrier name" value={(props as any).carrier ?? (props as any).carrierName ?? (props as any).courier ?? ''} placeholder="e.g. FedEx Tracked / Royal Mail" onChange={v => updateProps({ carrier: v, carrierName: v, courier: v } as any)} />
+                        {phButton('carrier', 'carrier')}
+                        <TextInput label="Dispatch time" value={(props as any).dispatchTime ?? (props as any).handlingTime ?? (props as any).cutoff ?? ''} placeholder="e.g. Within 24 Hours" onChange={v => updateProps({ dispatchTime: v, handlingTime: v, cutoff: v } as any)} />
+                        {phButton('dispatchTime', 'dispatch time')}
                     </Section>
                 </>
             )

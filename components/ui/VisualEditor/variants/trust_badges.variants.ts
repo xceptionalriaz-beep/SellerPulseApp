@@ -35,56 +35,172 @@ export interface TrustBadgeItem {
   subText?: string
 }
 
-// ── Smart Vector SVG Icon Renderer (No Emojis, No External Images) ───────────
+// ── Smart Vector SVG Icon Renderer (Supports Raw SVG, IconLibrary IDs, Lucide Names) ──
+
+import { getIconSvg as getLibraryIconSvg, ICON_LIBRARY, ICON_CATEGORIES } from '../IconLibrary'
 
 function getVectorIconSvg(icon: string, color = '#7530fb', size = 18): string {
-  const norm = (icon || '').toLowerCase().trim()
+  if (!icon) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`
+  }
 
-  // 1. Authentic / Shield Check / Genuine
-  if (norm.includes('shield') || norm.includes('auth') || norm.includes('✅') || norm.includes('check') || norm.includes('genuine')) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="m9 12 2 2 4-4" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  const raw = String(icon).trim()
+
+  // 1. Raw SVG String (from custom uploads, SVG icons or icon library payload)
+  if (raw.startsWith('<svg') || raw.includes('xmlns="http://www.w3.org/2000/svg"')) {
+    let svg = raw
+    if (svg.includes('width=')) {
+      svg = svg.replace(/width="[^"]*"/, `width="${size}"`)
+    } else {
+      svg = svg.replace('<svg', `<svg width="${size}"`)
+    }
+    if (svg.includes('height=')) {
+      svg = svg.replace(/height="[^"]*"/, `height="${size}"`)
+    } else {
+      svg = svg.replace('<svg', `<svg height="${size}"`)
+    }
+    if (!svg.includes('style=')) {
+      svg = svg.replace('<svg', `<svg style="display:inline-block;vertical-align:middle;"`)
+    }
+    svg = svg.replace(/stroke="currentColor"/g, `stroke="${color}"`)
+      .replace(/fill="currentColor"/g, `fill="${color}"`)
+    return svg
+  }
+
+  const norm = raw.toLowerCase().replace(/_/g, '-').trim()
+
+  // 2. Check IconLibrary.ts exact matches
+  try {
+    for (const cat of ICON_CATEGORIES) {
+      const match = ICON_LIBRARY[cat]?.find(e => e.id === norm || norm.includes(e.id))
+      if (match) {
+        return match.svg(color, size)
+      }
+    }
+  } catch (_e) {
+    // continue to built-in dictionary
+  }
+
+  // 3. Eco & Sustainable Icons (Eco-friendly, Zero Waste, Solar, Organic, etc.)
+  if (norm.includes('waste') || norm.includes('recycle') || norm.includes('loop')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/>
+      <path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/>
+      <path d="m14 16 3 3 3-3"/>
+      <path d="M8.293 13.596 4.8 7.4a1.82 1.82 0 0 1 .002-1.782A1.828 1.828 0 0 1 6.37 4.74l4.24-.04"/>
+      <path d="m2 11 3-3-3-3"/>
+      <path d="m10.5 4.7 3.93 6.84"/>
+      <path d="m15 4 3 3-3 3"/>
     </svg>`
   }
 
-  // 2. Fast Shipping / Truck / Dispatch
-  if (norm.includes('truck') || norm.includes('ship') || norm.includes('🚚') || norm.includes('dispatch') || norm.includes('delivery')) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M15 18H9" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M19 18h2a1 1 0 0 0 1-1v-5l-3-4h-5v10" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="7" cy="18" r="2" stroke="${color}" stroke-width="2"/>
-      <circle cx="17" cy="18" r="2" stroke="${color}" stroke-width="2"/>
+  if (norm.includes('leaf') || norm.includes('organic') || norm.includes('compost') || norm.includes('bio') || norm.includes('vegan') || norm.includes('eco')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
     </svg>`
   }
 
-  // 3. Returns / Rotate-CCW / 30-Day
-  if (norm.includes('rotate') || norm.includes('return') || norm.includes('↩') || norm.includes('refund') || norm.includes('30')) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M3 3v5h5" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  if (norm.includes('solar') || norm.includes('sun') || norm.includes('carbon') || norm.includes('energy')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+      <path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
     </svg>`
   }
 
-  // 4. Top Rated Seller / Star / Award
-  if (norm.includes('star') || norm.includes('⭐') || norm.includes('rated') || norm.includes('award') || norm.includes('top')) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${color}" fill-opacity="0.15"/>
+  if (norm.includes('wind') || norm.includes('air') || norm.includes('emission')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+      <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+      <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
     </svg>`
   }
 
-  // 5. Clock / Fast
-  if (norm.includes('clock') || norm.includes('time') || norm.includes('hour') || norm.includes('timer')) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-      <circle cx="12" cy="12" r="10" stroke="${color}" stroke-width="2"/>
-      <polyline points="12 6 12 12 16 14" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+  if (norm.includes('water') || norm.includes('rain') || norm.includes('ocean') || norm.includes('droplet')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
     </svg>`
   }
 
-  // Fallback Clean Checkmark
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
-    <polyline points="20 6 9 17 4 12" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  if (norm.includes('wood') || norm.includes('tree') || norm.includes('fsc') || norm.includes('bamboo')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M12 22v-7"/><path d="M7 15l5-5 5 5H7z"/><path d="M8.5 10l3.5-3.5 3.5 3.5H8.5z"/>
+    </svg>`
+  }
+
+  if (norm.includes('cruelty') || norm.includes('heart') || norm.includes('love')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+    </svg>`
+  }
+
+  if (norm.includes('battery') || norm.includes('recharge') || norm.includes('charge')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <rect width="16" height="10" x="2" y="7" rx="2"/><line x1="22" x2="22" y1="11" y2="13"/><polyline points="11 9 9 12 13 12 11 15"/>
+    </svg>`
+  }
+
+  if (norm.includes('refill') || norm.includes('bottle') || norm.includes('plastic')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M9 2h6"/><path d="M10 2v3h4V2"/><path d="M7 8a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2Z"/>
+    </svg>`
+  }
+
+  // 4. Core Retail Badges (Authentic, Truck, Returns, Top Rated)
+  if (norm.includes('shield') || norm.includes('auth') || norm.includes('genuine') || norm.includes('guarantee') || norm.includes('safe') || norm.includes('protect')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="m9 12 2 2 4-4"/>
+    </svg>`
+  }
+
+  if (norm.includes('truck') || norm.includes('ship') || norm.includes('dispatch') || norm.includes('delivery') || norm.includes('courier')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+      <path d="M15 18H9"/>
+      <path d="M19 18h2a1 1 0 0 0 1-1v-5l-3-4h-5v10"/>
+      <circle cx="7" cy="18" r="2"/>
+      <circle cx="17" cy="18" r="2"/>
+    </svg>`
+  }
+
+  if (norm.includes('rotate') || norm.includes('return') || norm.includes('refund') || norm.includes('undo') || norm.includes('refresh') || norm.includes('30')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+      <path d="M3 3v5h5"/>
+    </svg>`
+  }
+
+  if (norm.includes('star') || norm.includes('rated') || norm.includes('award') || norm.includes('top') || norm.includes('medal') || norm.includes('badge')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="${color}" fill-opacity="0.15"/>
+    </svg>`
+  }
+
+  if (norm.includes('clock') || norm.includes('time') || norm.includes('hour') || norm.includes('timer') || norm.includes('24')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>`
+  }
+
+  if (norm.includes('box') || norm.includes('package') || norm.includes('parcel')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+    </svg>`
+  }
+
+  if (norm.includes('lock') || norm.includes('secure') || norm.includes('ssl')) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>`
+  }
+
+  // Fallback Clean Shield Checkmark
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path d="m9 12 2 2 4-4"/>
   </svg>`
 }
 
