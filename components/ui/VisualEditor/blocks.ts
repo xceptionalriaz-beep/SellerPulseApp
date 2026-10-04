@@ -199,6 +199,7 @@ export type BlockProps =
     | BreadcrumbBarProps
     | InternationalShippingProps
     | HighlightTextProps
+    | WhyBuyFromUsProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -934,6 +935,18 @@ export interface FeaturesProps extends CommonProps {
     iconColor: string
     textColor: string
     variant: string
+}
+
+// ── Why Buy From Us ──────────────────────────────────────────────────────────
+export interface WhyBuyFromUsProps extends CommonProps {
+    variant?: string
+    title: string
+    reasons: Array<{ icon: string; title: string; desc: string }>
+    titleColor: string
+    descColor: string
+    iconColor: string
+    cardBg?: string
+    cardBorder?: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3327,14 +3340,26 @@ ${thumbCells}
             label: 'Why Buy From Us',
             category: 'Conversion' as BlockCategory,
             icon: 'star',
-            description: '3-column trust icons block',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Highlight your unique selling points — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'why-classic-centered',
+                title: 'Why Shop With Us?',
+                reasons: [
+                    { icon: 'shield-check', title: '100% Authentic Stock', desc: 'All items genuine & verified' },
+                    { icon: 'truck', title: 'Same-Day Fast Dispatch', desc: 'Orders before 2pm ship today' },
+                    { icon: 'rotate-ccw', title: '30-Day Hassle-Free Returns', desc: '30-day hassle-free returns' },
+                ],
+                titleColor: '#1e1535',
+                descColor: '#6b7280',
+                iconColor: '#7530fb',
+                paddingTop: 24,
+                paddingBottom: 24,
+            } as unknown as WhyBuyFromUsProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                const points = [{ icon: '&#9989;', title: '100% Authentic', text: 'All items genuine & verified' }, { icon: '&#128230;', title: 'Fast Dispatch', text: 'Same day if ordered by 2pm' }, { icon: '&#128260;', title: 'Easy Returns', text: '30-day hassle-free returns' }]
-                const cells = points.map(pt => `<td width="33%" style="padding:16px 12px;text-align:center;vertical-align:top;"><p style="margin:0 0 6px;font-size:28px;">${pt.icon}</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#1e1535;">${pt.title}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">${pt.text}</p></td>`).join('')
-                return wrapBlock('why_buy_from_us' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;text-align:center;">Why Shop With Us?</p><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'why-classic-centered'
+                return wrapBlock('why_buy_from_us' as BlockType, id, getWhyBuyFromUsVariant(variantId).toHtml(p, id), p)
             },
         },
 

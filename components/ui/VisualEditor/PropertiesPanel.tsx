@@ -6196,7 +6196,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -7709,6 +7709,32 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Value colour" value={props.valueColor ?? '#374151'} onChange={v => updateProps({ valueColor: v })} />
                         <SliderInput label="Font size" value={props.fontSize ?? 13} min={10} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                     </Section>
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={props.fontFamily ?? 'Arial, Helvetica, sans-serif'}
+                            options={[
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
+                                { v: 'Tahoma, Geneva, sans-serif', l: 'Tahoma' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v })}
+                        />
+                    </Section>
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={props.paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <NumberInput label="Pad bottom" value={props.paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <NumberInput label="Pad left" value={props.paddingLeft ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <NumberInput label="Pad right" value={props.paddingRight ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
+                    </Section>
                 </>
             )
 
@@ -8238,6 +8264,16 @@ function BlockStyleProps({ block, props, updateProps }: {
                             ]}
                         />
                     </Section>
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={props.paddingTop ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <NumberInput label="Pad bottom" value={props.paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <NumberInput label="Pad left" value={props.paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <NumberInput label="Pad right" value={props.paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
+                    </Section>
                 </>
             )
 
@@ -8259,6 +8295,32 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#bbf7d0'} onChange={v => updateProps({ borderColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? '#10b981'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={props.fontFamily ?? 'Arial, Helvetica, sans-serif'}
+                            options={[
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
+                                { v: 'Tahoma, Geneva, sans-serif', l: 'Tahoma' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v })}
+                        />
+                    </Section>
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={props.paddingTop ?? 18} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <NumberInput label="Pad bottom" value={props.paddingBottom ?? 18} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <NumberInput label="Pad left" value={props.paddingLeft ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <NumberInput label="Pad right" value={props.paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
                     </Section>
                 </>
             )
@@ -10926,8 +10988,28 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Content">
-                        <TextInput label="Heading" value={props.heading ?? '30-Day Money Back Guarantee'} onChange={v => updateProps({ heading: v })} />
-                        <TextInput label="Sub text" value={props.subText ?? 'Not satisfied? Return it — no questions asked.'} onChange={v => updateProps({ subText: v })} />
+                        <TextInput
+                            label="Guarantee title"
+                            value={props.heading ?? props.guaranteeTitle ?? '30-Day Money Back Guarantee'}
+                            onChange={v => updateProps({ heading: v, guaranteeTitle: v } as any)}
+                        />
+                        <TextInput
+                            label="Sub text"
+                            value={props.subText ?? props.guaranteeSubtext ?? props.subtitle ?? 'Not satisfied? Return it — no questions asked.'}
+                            onChange={v => updateProps({ subText: v, guaranteeSubtext: v, subtitle: v } as any)}
+                        />
+                        <TextInput
+                            label="Badge text"
+                            value={(props as any).badgeText ?? 'Money Back Guaranteed'}
+                            onChange={v => updateProps({ badgeText: v } as any)}
+                        />
+                    </Section>
+                    <Section title="Period">
+                        <TextInput
+                            label="Days (e.g. 30)"
+                            value={String((props as any).days ?? (props as any).periodDays ?? '30')}
+                            onChange={v => updateProps({ days: v, periodDays: v } as any)}
+                        />
                     </Section>
                 </>
             )
