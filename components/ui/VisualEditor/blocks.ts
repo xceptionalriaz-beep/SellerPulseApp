@@ -1186,6 +1186,7 @@ import { getInternationalShippingVariant } from './variants/international_shippi
 import { getHighlightTextVariant } from './variants/highlight_text.variants'
 import { getProductTitleVariant } from './variants/product_title.variants'
 import { getFaqBlockVariant } from './variants/faq_block.variants'
+import { getWhyBuyFromUsVariant } from './variants/why_buy_from_us.variants'
 
 
 // ─────────────────────────────────────────────────────────────────────────────

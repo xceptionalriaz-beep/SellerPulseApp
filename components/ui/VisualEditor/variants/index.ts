@@ -45,6 +45,8 @@ export { internationalShippingVariants, getInternationalShippingVariant, interna
 export { highlightTextVariants, getHighlightTextVariant, highlightVariants, highlightTextBlockVariants, HIGHLIGHT_TEXT_THUMBNAILS } from './highlight_text.variants'
 export { productTitleVariants, getProductTitleVariant, titleVariants, productTitleBlockVariants, PRODUCT_TITLE_THUMBNAILS } from './product_title.variants'
 export { faqBlockVariants, getFaqBlockVariant, faqVariants, faqSectionVariants, FAQ_BLOCK_THUMBNAILS } from './faq_block.variants'
+export { whyBuyFromUsVariants, getWhyBuyFromUsVariant, WHY_BUY_FROM_US_THUMBNAILS } from './why_buy_from_us.variants'
+
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -90,6 +92,7 @@ import { internationalShippingVariants } from './international_shipping.variants
 import { highlightTextVariants } from './highlight_text.variants'
 import { productTitleVariants } from './product_title.variants'
 import { faqBlockVariants } from './faq_block.variants'
+import { whyBuyFromUsVariants } from './why_buy_from_us.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -158,6 +161,9 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'faq_block': faqBlockVariants,
     'faq': faqBlockVariants,
     'faq_section': faqBlockVariants,
+    'why_buy_from_us': whyBuyFromUsVariants,
+    'why_buy': whyBuyFromUsVariants,
+    'why_shop': whyBuyFromUsVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
