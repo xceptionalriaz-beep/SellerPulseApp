@@ -7630,14 +7630,68 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </Section>
             )
 
-        case 'condition_badge':
+        case 'condition_badge': {
+            const cbv = (props as any).variant ?? 'cond-inspected-grade-pill'
             return (
                 <>
+                    {/* ── Background ── */}
+                    <Section title="Background">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+
+                    {/* ── Colours ── */}
+                    <Section title="Colours">
+                        <ColorRow label="Text colour" value={props.textColor ?? '#0f172a'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#16a34a'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        {(cbv === 'cond-inspected-grade-pill' || cbv === 'cond-cosmetic-score-meter' || cbv === 'cond-open-box-complete-strip' || cbv === 'cond-minimal-nordic-pill') && (
+                            <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v } as any)} />
+                        )}
+                    </Section>
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? ''}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'monospace', l: 'Monospace' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 14} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 14} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 20} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 20} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
+                    </Section>
+
+                    {/* ── Badge ── */}
                     <Section title="Badge">
                         <SliderInput label="Border radius" value={props.badgeRadius ?? 8} min={0} max={40} suffix="px" onChange={v => updateProps({ badgeRadius: v })} />
                     </Section>
+
+                    {/* ── Border ── */}
+                    <Section title="Border">
+                        <ToggleRow label="Show border" value={(props as any).showBorder ?? false} onChange={v => updateProps({ showBorder: v } as any)} />
+                        {(props as any).showBorder && (
+                            <>
+                                <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v } as any)} />
+                                <SliderInput label="Border width" value={(props as any).borderWidth ?? 1} min={1} max={6} suffix="px" onChange={v => updateProps({ borderWidth: v } as any)} />
+                            </>
+                        )}
+                    </Section>
                 </>
             )
+        }
 
         case 'item_specifics':
             return (
