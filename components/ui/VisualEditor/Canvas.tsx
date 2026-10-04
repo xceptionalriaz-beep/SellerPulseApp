@@ -273,7 +273,6 @@ export default function Canvas({
             {/* ── Canvas frame ── */}
             <div style={{
                 width: '100%',
-                maxWidth: canvasWidth,
                 minHeight: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -734,28 +733,46 @@ function BlockCard({
             )}
 
             {/* ── Block preview content ── */}
-            <div
-                ref={el => {
-                    if (!el) return
-                    // Recompute scale whenever this element's width changes —
-                    // covers initial mount, device-width switches, sidebar toggles,
-                    // window resize, and zoom changes. No stale reads.
-                    const recalcScale = () => {
-                        const w = el.getBoundingClientRect().width
-                        const contentWidth = deviceWidth === 'mobile' ? 375 : deviceWidth === 'tablet' ? 480 : 700
-                        const scale = w > 32 ? ((w - 32) / contentWidth) : 1
-                        el.style.setProperty('--canvas-scale', String(scale))
-                    }
-                    recalcScale()
-                    const ro = new ResizeObserver(recalcScale)
-                    ro.observe(el)
-                        // Cleanup stored on element so it runs on unmountf
-                        ; (el as any).__ro?.disconnect()
-                        ; (el as any).__ro = ro
-                }}
-                style={{ padding: '14px 16px 12px', pointerEvents: 'auto', overflow: 'hidden' }}
-            >
-                <BlockPreview block={block} def={def} activeCategory={activeCategory} deviceWidth={deviceWidth} />
+            {/* Desktop: full-width inner wrapper so 700px iframe fills the stage */}
+            {/* Tablet/Mobile: centred constrained wrapper with device framing    */}
+            <div style={{
+                padding: deviceWidth === 'desktop' ? '0' : '16px 0',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto',
+                overflow: 'hidden',
+            }}>
+                <div
+                    ref={el => {
+                        if (!el) return
+                        // For desktop: scale = container / 700 so content fills the full stage width.
+                        // For tablet/mobile: the wrapper is already constrained to previewWidth,
+                        // so scale stays 1 — content renders at true device width, no shrinking.
+                        const recalcScale = () => {
+                            if (deviceWidth === 'desktop') {
+                                const w = el.getBoundingClientRect().width
+                                const scale = w > 32 ? ((w - 32) / 700) : 1
+                                el.style.setProperty('--canvas-scale', String(scale))
+                            } else {
+                                el.style.setProperty('--canvas-scale', '1')
+                            }
+                        }
+                        recalcScale()
+                        const ro = new ResizeObserver(recalcScale)
+                        ro.observe(el)
+                            ; (el as any).__ro?.disconnect()
+                            ; (el as any).__ro = ro
+                    }}
+                    style={{
+                        width: deviceWidth === 'desktop' ? '100%' : deviceWidth === 'tablet' ? '480px' : '375px',
+                        overflow: 'hidden',
+                        borderRadius: deviceWidth === 'desktop' ? 0 : 8,
+                        boxShadow: deviceWidth === 'desktop' ? 'none' : '0 4px 24px rgba(0,0,0,0.18)',
+                        border: deviceWidth === 'desktop' ? 'none' : '1px solid rgba(0,0,0,0.10)',
+                    }}
+                >
+                    <BlockPreview block={block} def={def} activeCategory={activeCategory} deviceWidth={deviceWidth} />
+                </div>
             </div>
 
             {/* ── Action toolbar — horizontal, top of block ── */}
@@ -1517,11 +1534,9 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     }
 
     return (
-        <div style={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
+        <div style={{ width: '100%', overflow: 'hidden' }}>
             <div style={{
-                width: '100%',
                 overflow: 'hidden',
-                // Scale 700px content down to container width
                 transformOrigin: 'top left',
             }}>
                 <iframe
@@ -1533,6 +1548,9 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                     scrolling="no"
                     data-block-id={block.id}
                     style={{
+                        // Desktop: iframe is 700px and scaled up to fill the stage.
+                        // Tablet: iframe is 480px, rendered 1:1 inside 480px wrapper.
+                        // Mobile: iframe is 375px, rendered 1:1 inside 375px wrapper.
                         width: `${previewWidth}px`,
                         height: height,
                         border: 'none',
