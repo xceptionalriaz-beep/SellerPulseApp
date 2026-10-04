@@ -186,7 +186,7 @@ export default function Canvas({
     // Which canvas block is being reordered?
     const [reorderFrom, setReorderFrom] = useState<number | null>(null)
     const [reorderOver, setReorderOver] = useState<number | null>(null)
-    const canvasWidth = DEVICE_WIDTHS[deviceWidth]
+    // canvasWidth removed — canvas frame now fills full width (device framing handled per-block)
 
     // ── Library block drop handlers (from BlockLibrary) ───────────────────────
     const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -251,13 +251,7 @@ export default function Canvas({
                 overflowY: 'auto',
                 overflowX: 'auto',
                 backgroundColor: '#e8e6f0',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '20px 20px 40px',
                 position: 'relative',
-                transformOrigin: 'top center',
-                transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
             }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -268,101 +262,118 @@ export default function Canvas({
                 if (e.target === e.currentTarget) onDeselect?.()
             }}
         >
-            {/* ── Drop overlay — handled by EmptyState when canvas is empty ── */}
-
-            {/* ── Canvas frame ── */}
+            {/* ── Zoom wrapper — scale() must be on an inner div, NOT the scroll root.
+                 Applying scale() to the overflow:auto parent clips content and breaks scroll. ── */}
             <div style={{
-                width: '100%',
-                minHeight: '100%',
                 display: 'flex',
                 flexDirection: 'column',
+                alignItems: 'center',
+                padding: '20px 20px 40px',
+                transformOrigin: 'top center',
+                transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
+                minHeight: '100%',
+                width: '100%',
             }}>
+                {/* ── Drop overlay — handled by EmptyState when canvas is empty ── */}
 
-                {/* ── Empty state ── */}
-                {blocks.length === 0 && (
-                    <EmptyState
-                        isDropTarget={isDropTarget}
-                        draggedType={draggedType}
-                        onAddBlock={onAddBlock}
-                        onLoadTemplate={onLoadTemplate}
-                    />
-                )}
+                {/* ── Canvas frame ── */}
+                <div style={{
+                    width: '100%',
+                    minHeight: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}>
 
-                {/* ── Block cards ── */}
-                {blocks.map((block, index) => {
-                    const def = getDefinition(block.type)
-                    if (!def) return null
-                    const isSelected = block.id === selectedId
-                    const isReorderOver = reorderOver === index
-                    const isBeingDragged = reorderFrom === index
+                    {/* ── Empty state ── */}
+                    {blocks.length === 0 && (
+                        <EmptyState
+                            isDropTarget={isDropTarget}
+                            draggedType={draggedType}
+                            onAddBlock={onAddBlock}
+                            onLoadTemplate={onLoadTemplate}
+                        />
+                    )}
 
-                    return (
-                        <div key={block.id}>
-                            {/* Reorder drop indicator — line above this block */}
-                            {isReorderOver && reorderFrom !== null && reorderFrom > index && (
-                                <DropIndicator />
-                            )}
+                    {/* ── Block cards ── */}
+                    {blocks.map((block, index) => {
+                        const def = getDefinition(block.type)
+                        if (!def) return null
+                        const isSelected = block.id === selectedId
+                        const isReorderOver = reorderOver === index
+                        const isBeingDragged = reorderFrom === index
 
-                            <BlockCard
-                                block={block}
-                                def={def}
-                                index={index}
-                                total={blocks.length}
-                                isSelected={isSelected}
-                                isLocked={lockedIds.has(block.id)}
-                                isHidden={hiddenIds.has(block.id)}
-                                searchMatch={!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true)}
-                                isBeingDragged={isBeingDragged}
-                                onSelect={() => onSelect(block.id)}
-                                onDelete={() => onDelete(block.id)}
-                                onDuplicate={() => onDuplicate(block.id)}
-                                onMoveUp={() => onMoveUp(block.id)}
-                                onMoveDown={() => onMoveDown(block.id)}
-                                onCopyStyle={() => onCopyStyle(block.id)}
-                                onPasteStyle={() => onPasteStyle(block.id)}
-                                hasCopiedStyle={hasCopiedStyle}
-                                onToggleLock={() => onToggleLock?.(block.id)}
-                                onToggleHide={() => onToggleHide?.(block.id)}
-                                onReorderDragStart={() => handleReorderDragStart(index)}
-                                onReorderDragOver={(e) => handleReorderDragOver(e, index)}
-                                onReorderDrop={(e) => handleReorderDrop(e, index)}
-                                onReorderDragEnd={handleReorderDragEnd}
-                                onAddBelow={(type) => onAddBlockBelow?.(block.id, type)}
-                                hasActiveSlot={hasActiveSlot}
-                                activeCategory={activeCategory}
-                                deviceWidth={deviceWidth}
-                            />
+                        return (
+                            <div key={block.id}>
+                                {/* Reorder drop indicator — line above this block */}
+                                {isReorderOver && reorderFrom !== null && reorderFrom > index && (
+                                    <DropIndicator />
+                                )}
 
-                            {/* Reorder drop indicator — line below this block */}
-                            {isReorderOver && reorderFrom !== null && reorderFrom < index && (
-                                <DropIndicator />
-                            )}
-                        </div>
-                    )
-                })}
+                                <BlockCard
+                                    block={block}
+                                    def={def}
+                                    index={index}
+                                    total={blocks.length}
+                                    isSelected={isSelected}
+                                    isLocked={lockedIds.has(block.id)}
+                                    isHidden={hiddenIds.has(block.id)}
+                                    searchMatch={
+                                        matchedIds
+                                            ? matchedIds.has(block.id)
+                                            : (!canvasSearch || (getDefinition(block.type)?.label?.toLowerCase().includes(canvasSearch.toLowerCase()) ?? true))
+                                    }
+                                    isBeingDragged={isBeingDragged}
+                                    onSelect={() => onSelect(block.id)}
+                                    onDelete={() => onDelete(block.id)}
+                                    onDuplicate={() => onDuplicate(block.id)}
+                                    onMoveUp={() => onMoveUp(block.id)}
+                                    onMoveDown={() => onMoveDown(block.id)}
+                                    onCopyStyle={() => onCopyStyle(block.id)}
+                                    onPasteStyle={() => onPasteStyle(block.id)}
+                                    hasCopiedStyle={hasCopiedStyle}
+                                    onToggleLock={() => onToggleLock?.(block.id)}
+                                    onToggleHide={() => onToggleHide?.(block.id)}
+                                    onReorderDragStart={() => handleReorderDragStart(index)}
+                                    onReorderDragOver={(e) => handleReorderDragOver(e, index)}
+                                    onReorderDrop={(e) => handleReorderDrop(e, index)}
+                                    onReorderDragEnd={handleReorderDragEnd}
+                                    onAddBelow={(type) => onAddBlockBelow?.(block.id, type)}
+                                    hasActiveSlot={hasActiveSlot}
+                                    activeCategory={activeCategory}
+                                    deviceWidth={deviceWidth}
+                                />
 
-                {/* ── Add block hint (when blocks exist) ── */}
-                {blocks.length > 0 && (
-                    <div style={{
-                        marginTop: 12,
-                        padding: '10px 0',
-                        textAlign: 'center',
-                    }}>
-                        <p style={{
-                            margin: 0,
-                            fontFamily: 'DM Sans, sans-serif',
-                            fontSize: 11,
-                            color: C.muted,
+                                {/* Reorder drop indicator — line below this block */}
+                                {isReorderOver && reorderFrom !== null && reorderFrom < index && (
+                                    <DropIndicator />
+                                )}
+                            </div>
+                        )
+                    })}
+
+                    {/* ── Add block hint (when blocks exist) ── */}
+                    {blocks.length > 0 && (
+                        <div style={{
+                            marginTop: 12,
+                            padding: '10px 0',
+                            textAlign: 'center',
                         }}>
-                            {draggedType
-                                ? `Drop to add ${getDefinition(draggedType)?.label ?? 'block'} here`
-                                : '← Drag blocks from the library to add more'
-                            }
-                        </p>
-                    </div>
-                )}
-            </div>
-        </div>
+                            <p style={{
+                                margin: 0,
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 11,
+                                color: C.muted,
+                            }}>
+                                {draggedType
+                                    ? `Drop to add ${getDefinition(draggedType)?.label ?? 'block'} here`
+                                    : '← Drag blocks from the library to add more'
+                                }
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>{/* ── /zoom wrapper ── */}
+        </div >
     )
 }
 
@@ -530,14 +541,22 @@ function EmptyState({
 // ─────────────────────────────────────────────────────────────────────────────
 function DropIndicator() {
     return (
-        <div style={{
-            height: 3,
-            backgroundColor: C.primary,
-            borderRadius: 3,
-            margin: '2px 0',
-            boxShadow: `0 0 8px ${C.primary}88`,
-            animation: 'pulse 0.8s ease-in-out infinite',
-        }} />
+        <>
+            <style>{`
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50%       { opacity: 0.4; }
+                }
+            `}</style>
+            <div style={{
+                height: 3,
+                backgroundColor: C.primary,
+                borderRadius: 3,
+                margin: '2px 0',
+                boxShadow: `0 0 8px ${C.primary}88`,
+                animation: 'pulse 0.8s ease-in-out infinite',
+            }} />
+        </>
     )
 }
 
@@ -1376,13 +1395,15 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         // Text slots without content (.add-btn present) also fire SELECT_SLOT.
         // Only non-image slots that already have content fire EDIT_SLOT_CONTENT.
         var hasImageSlot = zone.querySelector('img[data-slot]') !== null;
-        var hasContent = zone.querySelector('.add-btn') === null;
+        // hasContent: zone has a real image (data-slot img) → always open asset picker (SELECT_SLOT).
+        // Never open the rich-text EDIT_SLOT_CONTENT for image dropzones.
+        var hasImageSlot = zone.querySelector('img[data-slot]') !== null;
         if (slot && window.parent) {
-          if (hasContent && !hasImageSlot) {
+          if (hasImageSlot) {
+            window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: blockId }, '*');
+          } else {
             var slotHtml = zone.innerHTML || '';
             window.parent.postMessage({ type: 'RIAZIFY_EDIT_SLOT_CONTENT', propKey: slot, blockId: blockId, currentHtml: slotHtml }, '*');
-          } else {
-            window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: blockId }, '*');
           }
         }
       });
