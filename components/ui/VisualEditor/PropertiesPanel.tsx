@@ -7804,6 +7804,32 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Pricing">
                         <ToggleRow label="Show original price" value={(props as any).showOriginal ?? true} onChange={v => updateProps({ showOriginal: v } as any)} />
                     </Section>
+
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'Arial, Helvetica, sans-serif'}
+                            options={[
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
+                                { v: 'Tahoma, Geneva, sans-serif', l: 'Tahoma' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={(props as any).paddingTop ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Pad bottom" value={(props as any).paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Pad left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Pad right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
+                    </Section>
                 </>
             )
         }
@@ -10585,6 +10611,19 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             label="Thumbnail 4 URL"
                             value={props.thumb4 ?? ''}
                             onChange={v => updateProps({ thumb4: v })}
+                        />
+                    </Section>
+
+                    {/* ── Behaviour ── */}
+                    <Section title="Behaviour">
+                        <ToggleRow label="Show original / was price" value={(props as any).showOriginal ?? true} onChange={v => updateProps({ showOriginal: v } as any)} />
+                        <ToggleRow label="Show scarcity bar" value={(props as any).showScarcity ?? false} onChange={v => updateProps({ showScarcity: v } as any)} />
+                        <ToggleRow label="Show stock badge" value={(props as any).showStockBadge ?? true} onChange={v => updateProps({ showStockBadge: v } as any)} />
+                        <ToggleRow label="Show guarantee tag" value={(props as any).showGuaranteeTag ?? true} onChange={v => updateProps({ showGuaranteeTag: v } as any)} />
+                        <TextInput
+                            label="Condition"
+                            value={(props as any).rightCondition ?? ''}
+                            onChange={v => updateProps({ rightCondition: v } as any)}
                         />
                     </Section>
                 </>
