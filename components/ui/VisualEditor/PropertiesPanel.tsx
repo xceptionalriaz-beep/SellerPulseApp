@@ -3857,6 +3857,18 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                                 onChange={v => updateProps({ align: v } as any)} />
                         </Section>
                     )}
+                    {(av === 'lifestyle' || av === 'before_after') && (
+                        <Section title="Use Cases">
+                            <TextInput label="Use case 1" value={(props as any).useCase1 ?? ''} onChange={v => updateProps({ useCase1: v } as any)} />
+                            <TextInput label="Use case 2" value={(props as any).useCase2 ?? ''} onChange={v => updateProps({ useCase2: v } as any)} />
+                            <TextInput label="Use case 3" value={(props as any).useCase3 ?? ''} onChange={v => updateProps({ useCase3: v } as any)} />
+                        </Section>
+                    )}
+                    <Section title="Shadow">
+                        <SelectInput label="Shadow preset" value={(props as any).shadow ?? (props as any).shadowPreset ?? 'none'}
+                            options={[{ v: 'none', l: 'None' }, { v: 'sm', l: 'Small' }, { v: 'md', l: 'Medium' }, { v: 'lg', l: 'Large' }, { v: 'xl', l: 'Extra large' }]}
+                            onChange={v => updateProps({ shadow: v, shadowPreset: v } as any)} />
+                    </Section>
                 </>
             )
         }
