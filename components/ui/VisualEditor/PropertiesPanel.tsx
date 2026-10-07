@@ -2785,6 +2785,31 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#f8fafc'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#64748b'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v } as any)} />
+                    </Section>
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 12} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 12} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -4714,6 +4739,29 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <ColorRow label="Background" value={props.bgColor ?? '#f8fafc'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#e2e8f0'} onChange={v => updateProps({ borderColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                    <Section title="Company Details">
+                        <TextInput label="Heading" value={(props as any).heading ?? (props as any).headingText ?? (props as any).title ?? ''} onChange={v => updateProps({ heading: v, headingText: v, title: v } as any)} />
+                        <TextInput label="Company number" value={(props as any).companyNo ?? (props as any).companyNumber ?? (props as any).crn ?? (props as any).registrationNumber ?? ''} onChange={v => updateProps({ companyNo: v, companyNumber: v, crn: v } as any)} />
+                        <TextInput label="VAT ID (alias)" value={(props as any).vatId ?? (props as any).vatNo ?? (props as any).taxNumber ?? ''} onChange={v => updateProps({ vatId: v, vatNo: v, taxNumber: v } as any)} />
+                        <TextareaInput label="Notice text" value={(props as any).noticeText ?? (props as any).description ?? ''} rows={2} onChange={v => updateProps({ noticeText: v, description: v } as any)} />
+                        <TextInput label="Sub text" value={(props as any).subText ?? ''} onChange={v => updateProps({ subText: v } as any)} />
+                        <ColorRow label="Title colour" value={(props as any).titleColor ?? '#1e1535'} onChange={v => updateProps({ titleColor: v } as any)} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
                     </Section>
                 </>
             )
