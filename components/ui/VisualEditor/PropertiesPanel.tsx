@@ -10934,13 +10934,6 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         />
                         <InfoBox>Use eBay tokens like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — replaced at listing time.</InfoBox>
                     </Section>
-                    <Section title="Colours">
-                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v } as any)} />
-                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v } as any)} />
-                        <ColorRow label="Row background" value={(props as any).rowBg ?? '#ffffff'} onChange={v => updateProps({ rowBg: v } as any)} />
-                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8fafc'} onChange={v => updateProps({ altRowBg: v } as any)} />
-                        <ColorRow label="Block background" value={(props as any).bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v } as any)} />
-                    </Section>
                 </>
             )
         }
