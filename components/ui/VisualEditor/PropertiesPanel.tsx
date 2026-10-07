@@ -1278,7 +1278,9 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="45" y="12" width="14" height="12" rx="6" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
             <rect x="62" y="12" width="15" height="12" rx="6" fill={col} opacity="0.2" stroke={col} strokeWidth="1" />
         </svg>
-    ),    // ── Nav Bar ───────────────────────────────────────────────────────────────
+    ),
+
+    // ── Nav Bar ───────────────────────────────────────────────────────────────
     'dark': (col: string, _light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
             <rect width="80" height="36" rx="3" fill="#1e293b" />
@@ -1333,6 +1335,74 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="42" y="15" width="10" height="3" rx="1.5" fill="white" opacity="0.5" />
             <rect x="55" y="15" width="10" height="3" rx="1.5" fill="white" opacity="0.5" />
             <rect x="68" y="15" width="8" height="3" rx="1.5" fill="white" opacity="0.5" />
+        </svg>
+    ),
+    'tabs': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#f8fafc" />
+            <line x1="0" y1="30" x2="80" y2="30" stroke="#cbd5e1" strokeWidth="1" />
+            {/* Active Tab */}
+            <rect x="4" y="12" width="20" height="18" rx="2" fill="white" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="4" y="12" width="20" height="2.5" fill={col} />
+            <rect x="8" y="18" width="12" height="3" rx="1" fill={col} />
+            {/* Tab 2 */}
+            <rect x="27" y="15" width="16" height="3" rx="1.5" fill="#64748b" opacity="0.7" />
+            <line x1="46" y1="14" x2="46" y2="24" stroke="#e2e8f0" strokeWidth="0.8" />
+            {/* Tab 3 */}
+            <rect x="50" y="15" width="14" height="3" rx="1.5" fill="#64748b" opacity="0.7" />
+            <line x1="67" y1="14" x2="67" y2="24" stroke="#e2e8f0" strokeWidth="0.8" />
+            {/* Tab 4 */}
+            <rect x="70" y="15" width="8" height="3" rx="1.5" fill="#64748b" opacity="0.7" />
+        </svg>
+    ),
+    'boxed_tiles': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#ffffff" />
+            {/* Tile 1 with accent dot */}
+            <rect x="3" y="10" width="18" height="16" rx="3" fill="#f8fafc" stroke={col} strokeWidth="1" />
+            <circle cx="7" cy="18" r="1.5" fill={col} />
+            <rect x="10" y="16.5" width="8" height="3" rx="1" fill="#1e293b" />
+            {/* Tile 2 */}
+            <rect x="23" y="10" width="17" height="16" rx="3" fill="white" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="26" y="16.5" width="11" height="3" rx="1" fill="#475569" />
+            {/* Tile 3 */}
+            <rect x="42" y="10" width="17" height="16" rx="3" fill="white" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="45" y="16.5" width="11" height="3" rx="1" fill="#475569" />
+            {/* Tile 4 */}
+            <rect x="61" y="10" width="16" height="16" rx="3" fill="white" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="64" y="16.5" width="10" height="3" rx="1" fill="#475569" />
+        </svg>
+    ),
+    'brand_ribbon': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="#0f172a" />
+            {/* Top brand accent stripe */}
+            <rect x="0" y="0" width="80" height="3" fill={col} />
+            {/* Item 1 with subtle pill highlight */}
+            <rect x="4" y="10" width="17" height="16" rx="2" fill="white" opacity="0.1" />
+            <rect x="7" y="16.5" width="11" height="3" rx="1" fill="white" opacity="0.95" />
+            {/* Item 2 */}
+            <rect x="25" y="16.5" width="14" height="3" rx="1" fill="white" opacity="0.65" />
+            {/* Item 3 */}
+            <rect x="43" y="16.5" width="15" height="3" rx="1" fill="white" opacity="0.65" />
+            {/* Item 4 */}
+            <rect x="62" y="16.5" width="14" height="3" rx="1" fill="white" opacity="0.65" />
+        </svg>
+    ),
+    'minimal_bullet': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
+            <rect width="80" height="36" rx="3" fill="white" />
+            {/* Double hairline borders top and bottom */}
+            <line x1="0" y1="4" x2="80" y2="4" stroke="#e4e4e7" strokeWidth="0.8" />
+            <line x1="0" y1="32" x2="80" y2="32" stroke="#e4e4e7" strokeWidth="0.8" />
+            {/* Links separated by bullet dots */}
+            <rect x="5" y="16.5" width="12" height="3" rx="1" fill="#18181b" />
+            <circle cx="21" cy="18" r="1.2" fill={col} />
+            <rect x="26" y="16.5" width="13" height="3" rx="1" fill="#18181b" />
+            <circle cx="43" cy="18" r="1.2" fill={col} />
+            <rect x="48" y="16.5" width="12" height="3" rx="1" fill="#18181b" />
+            <circle cx="64" cy="18" r="1.2" fill={col} />
+            <rect x="69" y="16.5" width="8" height="3" rx="1" fill="#18181b" />
         </svg>
     ),
     // ── Specs Table ───────────────────────────────────────────────────────────
@@ -1408,86 +1478,133 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     // ── Policy Tabs ───────────────────────────────────────────────────────────
     'tabbed': (col: string, light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="0" y="0" width="20" height="10" rx="2" fill={col} opacity="0.85" />
-            <rect x="22" y="0" width="20" height="10" rx="2" fill="#e5e7eb" />
-            <rect x="44" y="0" width="20" height="10" rx="2" fill="#e5e7eb" />
-            <rect x="0" y="10" width="80" height="26" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="6" y="17" width="50" height="3" rx="1.5" fill="#9ca3af" opacity="0.6" />
-            <rect x="6" y="23" width="40" height="3" rx="1.5" fill="#9ca3af" opacity="0.4" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            {/* Top Tab Bar */}
+            <rect x="3" y="3" width="16" height="6" rx="1.5" fill={col} opacity="0.9" />
+            <rect x="21" y="3" width="16" height="6" rx="1.5" fill="#f3f4f6" />
+            <rect x="39" y="3" width="16" height="6" rx="1.5" fill="#f3f4f6" />
+            <rect x="57" y="3" width="16" height="6" rx="1.5" fill="#f3f4f6" />
+            {/* Live Policy Panel 1 */}
+            <rect x="3" y="11" width="74" height="10" rx="1.5" fill={light} />
+            <rect x="6" y="13.5" width="18" height="2" rx="1" fill={col} opacity="0.85" />
+            <rect x="6" y="17" width="60" height="1.8" rx="0.9" fill="#64748b" opacity="0.7" />
+            {/* Live Policy Panel 2 */}
+            <rect x="3" y="23" width="74" height="10" rx="1.5" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="6" y="25.5" width="16" height="2" rx="1" fill={col} opacity="0.6" />
+            <rect x="6" y="29" width="54" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.7" />
         </svg>
     ),
-    'stacked': (col: string, light: string) => (
+    'stacked': (col: string, _light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="2" width="3" height="10" rx="1.5" fill={col} opacity="0.9" />
-            <rect x="8" y="4" width="20" height="3" rx="1" fill={col} opacity="0.7" />
-            <rect x="8" y="9" width="50" height="2" rx="1" fill="#9ca3af" opacity="0.5" />
-            <rect x="2" y="15" width="3" height="10" rx="1.5" fill={col} opacity="0.9" />
-            <rect x="8" y="17" width="24" height="3" rx="1" fill={col} opacity="0.7" />
-            <rect x="8" y="22" width="45" height="2" rx="1" fill="#9ca3af" opacity="0.5" />
-            <rect x="2" y="28" width="3" height="7" rx="1.5" fill={col} opacity="0.9" />
-            <rect x="8" y="30" width="18" height="3" rx="1" fill={col} opacity="0.7" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            {/* Stacked Row 1 */}
+            <rect x="3" y="3" width="74" height="9" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="5" y="4.5" width="2" height="6" rx="1" fill={col} />
+            <rect x="9" y="5" width="18" height="2" rx="1" fill={col} opacity="0.9" />
+            <rect x="9" y="8.5" width="56" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.8" />
+            {/* Stacked Row 2 */}
+            <rect x="3" y="14" width="74" height="9" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="5" y="15.5" width="2" height="6" rx="1" fill={col} />
+            <rect x="9" y="16" width="16" height="2" rx="1" fill={col} opacity="0.9" />
+            <rect x="9" y="19.5" width="52" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.8" />
+            {/* Stacked Row 3 */}
+            <rect x="3" y="25" width="74" height="8" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="5" y="26.5" width="2" height="5" rx="1" fill={col} />
+            <rect x="9" y="27" width="15" height="2" rx="1" fill={col} opacity="0.9" />
+            <rect x="9" y="30" width="48" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.8" />
         </svg>
     ),
     'accordion': (col: string, light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="2" y="2" width="76" height="8" rx="3" fill={col} opacity="0.85" />
-            <rect x="6" y="4.5" width="20" height="3" rx="1" fill="white" opacity="0.9" />
-            <rect x="70" y="4.5" width="6" height="3" rx="1" fill="white" opacity="0.7" />
-            <rect x="2" y="12" width="76" height="14" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="6" y="16" width="50" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
-            <rect x="6" y="20" width="40" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
-            <rect x="2" y="28" width="76" height="7" rx="3" fill="#f3f4f6" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="6" y="30" width="18" height="3" rx="1" fill="#6b7280" opacity="0.6" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            {/* Open Panel 1 (No Click Needed) */}
+            <rect x="3" y="3" width="74" height="6" rx="1.5" fill={light} />
+            <rect x="6" y="5" width="18" height="2" rx="1" fill={col} opacity="0.9" />
+            <circle cx="73" cy="6" r="1.2" fill={col} />
+            <rect x="3" y="9" width="74" height="7" fill="white" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="6" y="11" width="62" height="1.6" rx="0.8" fill="#64748b" opacity="0.8" />
+            <rect x="6" y="13.5" width="48" height="1.6" rx="0.8" fill="#94a3b8" opacity="0.8" />
+            {/* Open Panel 2 (No Click Needed) */}
+            <rect x="3" y="18" width="74" height="6" rx="1.5" fill={light} />
+            <rect x="6" y="20" width="16" height="2" rx="1" fill={col} opacity="0.9" />
+            <circle cx="73" cy="21" r="1.2" fill={col} />
+            <rect x="3" y="24" width="74" height="7" fill="white" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="6" y="26" width="60" height="1.6" rx="0.8" fill="#64748b" opacity="0.8" />
+            <rect x="6" y="28.5" width="44" height="1.6" rx="0.8" fill="#94a3b8" opacity="0.8" />
         </svg>
     ),
-    'simple-thumb': (col: string, _light: string) => (
+    'simple-thumb': (col: string, light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={col} opacity="0.85" />
-            <rect x="20" y="8" width="40" height="6" rx="2" fill="white" opacity="0.9" />
-            <rect x="24" y="18" width="32" height="3" rx="1.5" fill="white" opacity="0.6" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="4" y="4" width="72" height="12" rx="2" fill={light} />
+            <rect x="8" y="7" width="22" height="2.5" rx="1" fill={col} opacity="0.9" />
+            <rect x="8" y="11" width="56" height="2" rx="1" fill="#64748b" opacity="0.7" />
+            <rect x="4" y="19" width="72" height="13" rx="2" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="8" y="22" width="18" height="2.5" rx="1" fill={col} opacity="0.7" />
+            <rect x="8" y="26" width="50" height="2" rx="1" fill="#94a3b8" opacity="0.7" />
         </svg>
     ),
     'side-nav': (col: string, light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="0" y="0" width="22" height="36" rx="3" fill="#f3f4f6" />
-            <rect x="2" y="4" width="18" height="6" rx="2" fill={col} opacity="0.85" />
-            <rect x="4" y="13" width="14" height="3" rx="1" fill="#9ca3af" opacity="0.6" />
-            <rect x="4" y="19" width="14" height="3" rx="1" fill="#9ca3af" opacity="0.6" />
-            <rect x="4" y="25" width="14" height="3" rx="1" fill="#9ca3af" opacity="0.6" />
-            <rect x="26" y="4" width="40" height="3" rx="1" fill={col} opacity="0.7" />
-            <rect x="26" y="10" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
-            <rect x="26" y="15" width="44" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
-            <rect x="26" y="20" width="46" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            {/* Left Nav Strip */}
+            <rect x="2" y="2" width="20" height="32" rx="2" fill="#f8fafc" />
+            <rect x="4" y="4" width="16" height="5" rx="1" fill={col} opacity="0.9" />
+            <rect x="4" y="11" width="16" height="5" rx="1" fill="#e5e7eb" />
+            <rect x="4" y="18" width="16" height="5" rx="1" fill="#e5e7eb" />
+            <rect x="4" y="25" width="16" height="5" rx="1" fill="#e5e7eb" />
+            {/* Right Open Panels */}
+            <rect x="25" y="3" width="52" height="14" rx="1.5" fill={light} />
+            <rect x="28" y="5.5" width="16" height="2" rx="1" fill={col} opacity="0.9" />
+            <rect x="28" y="9" width="44" height="1.8" rx="0.9" fill="#64748b" opacity="0.8" />
+            <rect x="28" y="12" width="36" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.7" />
+            <rect x="25" y="19" width="52" height="14" rx="1.5" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="28" y="21.5" width="14" height="2" rx="1" fill={col} opacity="0.7" />
+            <rect x="28" y="25" width="44" height="1.8" rx="0.9" fill="#64748b" opacity="0.8" />
+            <rect x="28" y="28" width="32" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.7" />
         </svg>
     ),
     'pills-nav': (col: string, light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="4" y="3" width="16" height="8" rx="4" fill={col} opacity="0.85" />
-            <rect x="23" y="3" width="20" height="8" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="46" y="3" width="14" height="8" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="63" y="3" width="14" height="8" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="2" y="14" width="76" height="20" rx="4" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="6" y="19" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
-            <rect x="6" y="24" width="38" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            {/* Top Pill Badges */}
+            <rect x="3" y="3" width="16" height="5" rx="2.5" fill={col} opacity="0.9" />
+            <rect x="22" y="3" width="16" height="5" rx="2.5" fill="#f3f4f6" />
+            <rect x="41" y="3" width="16" height="5" rx="2.5" fill="#f3f4f6" />
+            <rect x="60" y="3" width="16" height="5" rx="2.5" fill="#f3f4f6" />
+            {/* Live Policy Panel 1 */}
+            <rect x="3" y="10" width="74" height="11" rx="2" fill={light} />
+            <rect x="6" y="12.5" width="14" height="2" rx="1" fill={col} opacity="0.9" />
+            <rect x="6" y="16" width="64" height="1.8" rx="0.9" fill="#64748b" opacity="0.8" />
+            {/* Live Policy Panel 2 */}
+            <rect x="3" y="23" width="74" height="10" rx="2" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="6" y="25" width="14" height="2" rx="1" fill={col} opacity="0.7" />
+            <rect x="6" y="28.5" width="58" height="1.8" rx="0.9" fill="#94a3b8" opacity="0.8" />
         </svg>
     ),
-    'icon-tabs': (col: string, light: string) => (
+    'icon-tabs': (col: string, _light: string) => (
         <svg viewBox="0 0 80 36" fill="none" style={{ width: '100%', height: 32 }}>
-            <rect width="80" height="36" rx="3" fill={light} />
-            <rect x="0" y="0" width="20" height="12" rx="2" fill={col} opacity="0.85" />
-            <rect x="21" y="0" width="19" height="12" rx="2" fill="#e5e7eb" />
-            <rect x="41" y="0" width="19" height="12" rx="2" fill="#e5e7eb" />
-            <rect x="61" y="0" width="19" height="12" rx="2" fill="#e5e7eb" />
-            <circle cx="10" cy="5" r="2.5" fill="white" opacity="0.8" />
-            <rect x="4" y="9" width="12" height="2" rx="1" fill="white" opacity="0.6" />
-            <rect x="0" y="12" width="80" height="24" rx="0" fill="white" stroke="#e5e7eb" strokeWidth="1" />
-            <rect x="6" y="19" width="48" height="2.5" rx="1" fill="#9ca3af" opacity="0.5" />
-            <rect x="6" y="24" width="36" height="2.5" rx="1" fill="#9ca3af" opacity="0.4" />
+            <rect width="80" height="36" rx="3" fill="white" stroke="#e5e7eb" strokeWidth="1" />
+            {/* Card 1 - Shipping */}
+            <rect x="3" y="3" width="35" height="13" rx="1.5" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="5" y="5" width="3" height="3" rx="0.5" fill={col} />
+            <rect x="10" y="5.5" width="14" height="2" rx="1" fill="#1e293b" />
+            <rect x="5" y="10" width="28" height="1.5" rx="0.75" fill="#64748b" />
+            {/* Card 2 - Returns */}
+            <rect x="42" y="3" width="35" height="13" rx="1.5" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="44" y="5" width="3" height="3" rx="0.5" fill={col} />
+            <rect x="49" y="5.5" width="14" height="2" rx="1" fill="#1e293b" />
+            <rect x="44" y="10" width="28" height="1.5" rx="0.75" fill="#64748b" />
+            {/* Card 3 - Payment */}
+            <rect x="3" y="19" width="35" height="13" rx="1.5" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="5" y="21" width="3" height="3" rx="0.5" fill={col} />
+            <rect x="10" y="21.5" width="14" height="2" rx="1" fill="#1e293b" />
+            <rect x="5" y="26" width="28" height="1.5" rx="0.75" fill="#64748b" />
+            {/* Card 4 - Warranty */}
+            <rect x="42" y="19" width="35" height="13" rx="1.5" fill="#f8fafc" stroke="#e5e7eb" strokeWidth="0.8" />
+            <rect x="44" y="21" width="3" height="3" rx="0.5" fill={col} />
+            <rect x="49" y="21.5" width="14" height="2" rx="1" fill="#1e293b" />
+            <rect x="44" y="26" width="28" height="1.5" rx="0.75" fill="#64748b" />
         </svg>
     ),
     // ── Button Block Variants ─────────────────────────────────────────────────
@@ -7527,6 +7644,17 @@ function BlockStyleProps({ block, props, updateProps }: {
                             <ColorRow label="Accent colour" value={props.headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
                         </Section>
                     )}
+                    {/* ── Page background ── */}
+                    <Section title="Background">
+                        <ColorRow label="Block background" value={(props as any).bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v } as any)} />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
                 </>
             )
         }
@@ -10805,6 +10933,13 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             phButton={rowPhButton}
                         />
                         <InfoBox>Use eBay tokens like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — replaced at listing time.</InfoBox>
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#1e1535'} onChange={v => updateProps({ headerBg: v } as any)} />
+                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v } as any)} />
+                        <ColorRow label="Row background" value={(props as any).rowBg ?? '#ffffff'} onChange={v => updateProps({ rowBg: v } as any)} />
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8fafc'} onChange={v => updateProps({ altRowBg: v } as any)} />
+                        <ColorRow label="Block background" value={(props as any).bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v } as any)} />
                     </Section>
                 </>
             )
