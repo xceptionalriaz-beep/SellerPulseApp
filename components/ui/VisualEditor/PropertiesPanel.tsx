@@ -3285,6 +3285,30 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Link colour" value={props.linkColor ?? '#a78bfa'} onChange={v => updateProps({ linkColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? '#b8fa33'} onChange={v => updateProps({ accentColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#3b2a6e'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Button text colour" value={(props as any).buttonTextColor ?? '#1e1535'} onChange={v => updateProps({ buttonTextColor: v } as any)} />
+                    </Section>
+                    {/* ── Typography ── */}
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -4705,6 +4729,36 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <ColorRow label="Background" value={props.bgColor ?? '#1e1535'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Link colour" value={props.linkColor ?? 'rgba(255,255,255,0.6)'} onChange={v => updateProps({ linkColor: v })} />
                         <ColorRow label="Copyright colour" value={props.mutedColor ?? 'rgba(255,255,255,0.3)'} onChange={v => updateProps({ mutedColor: v })} />
+                    </Section>
+                    <Section title="Brand">
+                        <TextInput label="Brand name" value={(props as any).brandName ?? (props as any).storeName ?? (props as any).sellerName ?? ''} onChange={v => updateProps({ brandName: v, storeName: v } as any)} />
+                    </Section>
+                    <Section title="Footer Links">
+                        <TextInput label="Link 1 text" value={(props as any).link1Text ?? ''} onChange={v => updateProps({ link1Text: v } as any)} />
+                        <TextInput label="Link 1 URL" value={(props as any).link1Url ?? ''} onChange={v => updateProps({ link1Url: v } as any)} />
+                        <TextInput label="Link 2 text" value={(props as any).link2Text ?? ''} onChange={v => updateProps({ link2Text: v } as any)} />
+                        <TextInput label="Link 2 URL" value={(props as any).link2Url ?? ''} onChange={v => updateProps({ link2Url: v } as any)} />
+                        <TextInput label="Link 3 text" value={(props as any).link3Text ?? ''} onChange={v => updateProps({ link3Text: v } as any)} />
+                        <TextInput label="Link 3 URL" value={(props as any).link3Url ?? ''} onChange={v => updateProps({ link3Url: v } as any)} />
+                        <TextInput label="Link 4 text" value={(props as any).link4Text ?? ''} onChange={v => updateProps({ link4Text: v } as any)} />
+                        <TextInput label="Link 4 URL" value={(props as any).link4Url ?? ''} onChange={v => updateProps({ link4Url: v } as any)} />
+                        <TextInput label="Link 5 text" value={(props as any).link5Text ?? ''} onChange={v => updateProps({ link5Text: v } as any)} />
+                        <TextInput label="Link 5 URL" value={(props as any).link5Url ?? ''} onChange={v => updateProps({ link5Url: v } as any)} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? 'inherit'}
+                            options={[
+                                { v: 'inherit', l: 'Theme default' },
+                                { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: '"Courier New", monospace', l: 'Courier New' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
                     </Section>
                 </>
             )
