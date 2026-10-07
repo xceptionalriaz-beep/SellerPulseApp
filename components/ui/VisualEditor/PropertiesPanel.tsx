@@ -1446,6 +1446,25 @@ function BlockStyleProps({ block, props, updateProps }: {
                             </p>
                         </Section>
                     )}
+
+                    {/* ── Background colour — plain, accent-bar, card-elevated, split-story ── */}
+                    {!isDarkLuxury && (
+                        <Section title="Background">
+                            <ColorRow
+                                label="Background colour"
+                                value={props.bgColor ?? '#ffffff'}
+                                onChange={v => updateProps({ bgColor: v })}
+                            />
+                        </Section>
+                    )}
+
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 20} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 20} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 24} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 24} onChange={v => updateProps({ paddingRight: v })} />
+                    </Section>
                 </>
             )
         }
@@ -3893,6 +3912,23 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                                 onChange={v => updateProps({ titleText: v })}
                             />
                             {phButton('titleText', 'section title')}
+                        </Section>
+                    )}
+                    {((props as any).variant ?? 'plain') === 'feature-box' && (
+                        <Section title="Feature Pills">
+                            <TextInput label="Pill 1" value={(props as any).feature1 ?? '✓ Premium Quality'} onChange={v => updateProps({ feature1: v } as any)} />
+                            <TextInput label="Pill 2" value={(props as any).feature2 ?? '✓ Fast Dispatch'} onChange={v => updateProps({ feature2: v } as any)} />
+                            <TextInput label="Pill 3" value={(props as any).feature3 ?? '✓ 30-Day Returns'} onChange={v => updateProps({ feature3: v } as any)} />
+                        </Section>
+                    )}
+                    {((props as any).variant ?? 'plain') === 'dark-luxury' && (
+                        <Section title="Dark Background">
+                            <ColorRow label="Dark background colour" value={(props as any).darkBg ?? '#1e1535'} onChange={v => updateProps({ darkBg: v } as any)} />
+                        </Section>
+                    )}
+                    {((props as any).variant ?? 'plain') === 'split-story' && (
+                        <Section title="Split Story">
+                            <ToggleRow label="Left column italic" value={(props as any).splitItalic ?? true} onChange={v => updateProps({ splitItalic: v } as any)} />
                         </Section>
                     )}
                 </>
