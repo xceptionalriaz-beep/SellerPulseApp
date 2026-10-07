@@ -8811,6 +8811,14 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Label chip colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Label text colour" value={(props as any).labelColor ?? '#ffffff'} onChange={v => updateProps({ labelColor: v } as any)} />
+                    </Section>
+                    {/* ── Spacing ── */}
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 12} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 12} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -11345,6 +11353,32 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                     <Section title="Style">
                         <ColorRow label="Text colour" value={props.color ?? '#7530fb'} onChange={v => updateProps({ color: v })} />
                         <SliderInput label="Font size" value={props.fontSize ?? 11} min={8} max={18} suffix="px" onChange={v => updateProps({ fontSize: v })} />
+                    </Section>
+                    <Section title="Content">
+                        <TextInput label="Heading" value={(props as any).heading ?? ''} onChange={v => updateProps({ heading: v } as any)} />
+                        <TextInput label="Label text" value={(props as any).labelText ?? (props as any).label ?? ''} onChange={v => updateProps({ labelText: v, label: v } as any)} />
+                    </Section>
+                    <Section title="Alignment">
+                        <SelectInput
+                            label="Align"
+                            value={(props as any).align ?? 'left'}
+                            options={[
+                                { v: 'left', l: 'Left' },
+                                { v: 'center', l: 'Center' },
+                                { v: 'right', l: 'Right' },
+                            ]}
+                            onChange={v => updateProps({ align: v } as any)}
+                        />
+                        <SelectInput
+                            label="Text align"
+                            value={(props as any).textAlign ?? 'left'}
+                            options={[
+                                { v: 'left', l: 'Left' },
+                                { v: 'center', l: 'Center' },
+                                { v: 'right', l: 'Right' },
+                            ]}
+                            onChange={v => updateProps({ textAlign: v } as any)}
+                        />
                     </Section>
                 </>
             )
