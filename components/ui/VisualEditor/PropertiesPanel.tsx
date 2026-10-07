@@ -1710,6 +1710,15 @@ function BlockStyleProps({ block, props, updateProps }: {
                             <ColorRow label="Accent (stars/badge)" value={props.iconColor ?? '#f59e0b'} onChange={v => updateProps({ iconColor: v })} />
                         </Section>
                     )}
+                    <Section title="Background">
+                        <ColorRow label="Block background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v })} />
+                    </Section>
                 </>
             )
         }
@@ -1744,11 +1753,19 @@ function BlockStyleProps({ block, props, updateProps }: {
 
         case 'seller_info':
             return (
-                <Section title="Colours">
-                    <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
-                    <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
-                    <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
-                </Section>
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v })} />
+                    </Section>
+                </>
             )
 
         case 'full_width_section':
@@ -2373,6 +2390,12 @@ function BlockStyleProps({ block, props, updateProps }: {
                             <ColorRow label="Badge colour" value={props.bgGradientFrom ?? '#dc2626'} onChange={v => updateProps({ bgGradientFrom: v, gradientFrom: v })} />
                         </Section>
                     )}
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 0} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 0} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 0} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 0} onChange={v => updateProps({ paddingRight: v })} />
+                    </Section>
                 </>
             )
         }
@@ -3124,6 +3147,12 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Logo border / accent" value={props.accentColor ?? '#e2e8f0'} onChange={v => updateProps({ accentColor: v })} />
                     </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v })} />
+                    </Section>
                 </>
             )
 
@@ -3445,6 +3474,12 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v })} />
                     </Section>
                 </>
             )
