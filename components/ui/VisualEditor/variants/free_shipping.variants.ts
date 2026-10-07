@@ -18,64 +18,77 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared Helpers & Dynamic Resolvers ─────────────────────────────────────
 function pad(p: any, defaultT = 16, defaultR = 24, defaultB = 16, defaultL = 24): string {
-    const top = p.paddingTop ?? defaultT
-    const right = p.paddingRight ?? defaultR
-    const bottom = p.paddingBottom ?? defaultB
-    const left = p.paddingLeft ?? defaultL
-    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+  const top = p.paddingTop ?? defaultT
+  const right = p.paddingRight ?? defaultR
+  const bottom = p.paddingBottom ?? defaultB
+  const left = p.paddingLeft ?? defaultL
+  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
 function font(p: any, defaultFamily = 'Arial, Helvetica, sans-serif'): string {
-    return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
+  return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
 }
 
 function titleText(p: any, fallback = 'Fast & Free Domestic Shipping'): string {
-    return p.heading ?? p.title ?? p.shippingTitle ?? p.bannerTitle ?? fallback
+  return p.heading ?? p.title ?? p.shippingTitle ?? p.bannerTitle ?? fallback
 }
 
 function subText(p: any, fallback = 'Guaranteed safe delivery with real-time tracking uploaded directly to eBay.'): string {
-    return p.subText ?? p.subtitle ?? p.shippingSubtext ?? p.bannerSubtitle ?? fallback
+  return p.subText ?? p.subtitle ?? p.shippingSubtext ?? p.bannerSubtitle ?? fallback
 }
 
 function badgeLabel(p: any, fallback = 'SAME-DAY DISPATCH'): string {
-    return p.badgeText ?? p.badge ?? p.tag ?? fallback
+  return p.badgeText ?? p.badge ?? p.tag ?? fallback
 }
 
 function dispatchTime(p: any, fallback = 'Within 24 Hours'): string {
-    return p.dispatchTime ?? p.handlingTime ?? p.cutoff ?? fallback
+  return p.dispatchTime ?? p.handlingTime ?? p.cutoff ?? fallback
 }
 
 function carrierName(p: any, fallback = 'USPS Priority & FedEx Tracked'): string {
-    return p.carrier ?? p.courier ?? p.carrierName ?? fallback
+  return p.carrier ?? p.courier ?? p.carrierName ?? fallback
 }
 
 /**
  * Dynamic background resolver:
  * Only preserves user override if they explicitly altered it from default initial slate/white.
  */
+const KNOWN_DEFAULT_BGS = [
+  '#f8fafc',
+  '#ffffff',
+  '#0f172a', // Dark Navy from Express Courier
+  '#18181b', // Dark Slate from Heavy Cargo
+  '#1e1535', // Purple
+  '#0c4a6e', // Marine Blue from Global Transit
+  '#064e3b', // Emerald from Urgent Cutoff
+  '#fafaf9', // Ivory from White Glove
+]
+
 function resolveBg(p: any, signatureBg: string): string {
-    if (!p.bgColor || p.bgColor.toLowerCase() === '#f8fafc' || p.bgColor.toLowerCase() === '#ffffff') {
-        return signatureBg
-    }
-    return p.bgColor
+  if (!p.bgColor) return signatureBg
+  const val = p.bgColor.toLowerCase().trim()
+  if (KNOWN_DEFAULT_BGS.includes(val)) {
+    return signatureBg
+  }
+  return p.bgColor
 }
 
 /**
  * Dynamic text resolver.
  */
 function resolveText(p: any, signatureText: string, isLightVariant = false): string {
-    if (!p.textColor || p.textColor.toLowerCase() === '#0f172a' || (isLightVariant && p.textColor.toLowerCase() === '#ffffff')) {
-        return signatureText
-    }
-    return p.textColor
+  if (!p.textColor || p.textColor.toLowerCase() === '#0f172a' || (isLightVariant && p.textColor.toLowerCase() === '#ffffff')) {
+    return signatureText
+  }
+  return p.textColor
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -83,30 +96,36 @@ function resolveText(p: any, signatureText: string, isLightVariant = false): str
 // Horizontal dark-slate container with prominent amber dispatch pill & tracking badge.
 // ─────────────────────────────────────────────────────────────────────────────
 function expressCourierStrip(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#0f172a')
-    const textCol = resolveText(p, '#ffffff')
-    const accent = p.accentColor ?? '#f59e0b'
-    const title = titleText(p, 'Fast & Free Domestic Shipping')
-    const subtitle = subText(p, 'Orders placed before 2:00 PM EST ship the same business day.')
-    const tag = badgeLabel(p, '⚡ SAME-DAY DISPATCH')
-    const carrier = carrierName(p, 'USPS PRIORITY / FEDEX 2-DAY')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#0f172a')
+  const textCol = resolveText(p, '#ffffff')
+  const accent = p.accentColor ?? '#f59e0b'
+  const title = titleText(p, 'Fast & Free Domestic Shipping')
+  const subtitle = subText(p, 'Orders placed before 2:00 PM EST ship the same business day.')
+  const tag = badgeLabel(p, '⚡ SAME-DAY DISPATCH')
+  const carrier = carrierName(p, 'USPS PRIORITY / FEDEX 2-DAY')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<style>
+@media only screen and (max-width: 620px) {
+  .ship-exp-left { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 12px !important; }
+  .ship-exp-right { display: block !important; width: 100% !important; text-align: center !important; padding-left: 0 !important; }
+}
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border-radius:8px;${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border-radius:0;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <!-- Left Icon Pill + Content -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <!-- Left Icon Pill + Content (Centered on mobile) -->
+          <td class="ship-exp-left" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:6px;">
-              <span style="display:inline-block;background-color:${accent};color:#0f172a;font-size:10px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;padding:3.5px 9px;border-radius:4px;vertical-align:middle;">
+              <span style="display:inline-block;background-color:${accent};color:#0f172a;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3.5px 9px;border-radius:0;vertical-align:middle;white-space:nowrap;">
                 ${tag}
               </span>
-              <span style="display:inline-block;color:#94a3b8;font-size:11px;font-weight:700;margin-left:8px;vertical-align:middle;">
-                &bull; 100% Free Shipping Included
+              <span style="display:inline-block;color:#94a3b8;font-size:11px;font-weight:700;margin-left:6px;vertical-align:middle;">
+                &bull; Free Shipping
               </span>
             </div>
             <div style="color:${textCol};font-size:18px;font-weight:800;letter-spacing:0.2px;line-height:1.25;margin:0 0 4px 0;">
@@ -117,13 +136,13 @@ function expressCourierStrip(p: any, id: string): string {
             </div>
           </td>
 
-          <!-- Right Carrier Badge Pill -->
-          <td width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
-            <div style="display:inline-block;background-color:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px 14px;text-align:center;">
-              <div style="color:${accent};font-size:13px;font-weight:900;line-height:1;margin-bottom:3px;">
-                &#10003; VERIFIED COURIER
+          <!-- Right Carrier Badge Pill (Centered on mobile) -->
+          <td class="ship-exp-right" width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
+            <div style="display:inline-block;background-color:#1e293b;border:1px solid #334155;border-radius:0;padding:8px 14px;text-align:center;">
+              <div style="color:${accent};font-size:12px;font-weight:900;line-height:1;margin-bottom:3px;white-space:nowrap;">
+                &#10003;&nbsp;VERIFIED COURIER
               </div>
-              <div style="color:#f8fafc;font-size:10px;font-weight:700;letter-spacing:0.5px;line-height:1.2;">
+              <div style="color:#f8fafc;font-size:10px;font-weight:700;letter-spacing:0.5px;line-height:1.2;white-space:nowrap;">
                 ${carrier}
               </div>
               <div style="color:#38bdf8;font-size:9.5px;font-weight:600;margin-top:2px;">
@@ -144,63 +163,69 @@ function expressCourierStrip(p: any, id: string): string {
 // Deep navy left block highlighting $0.00 cost with clean right checklist.
 // ─────────────────────────────────────────────────────────────────────────────
 function dualtoneSplit(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#0f172a')
-    const splitBg = p.accentColor ?? '#2563eb'
-    const title = titleText(p, 'Complimentary Expedited Delivery')
-    const subtitle = subText(p, 'We pack every order with industrial care to ensure flawless arrival.')
-    const tag = badgeLabel(p, 'FREE FREIGHT')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#0f172a')
+  const splitBg = p.accentColor ?? '#2563eb'
+  const title = titleText(p, 'Complimentary Expedited Delivery')
+  const subtitle = subText(p, 'We pack every order with industrial care to ensure flawless arrival.')
+  const tag = badgeLabel(p, 'FREE FREIGHT')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<style>
+@media only screen and (max-width: 620px) {
+  .ship-split-cost { display: block !important; width: 100% !important; padding: 14px 10px !important; }
+  .ship-split-content { display: block !important; width: 100% !important; padding: 14px 16px !important; }
+}
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:#ffffff;border:2px solid #e2e8f0;border-radius:8px;overflow:hidden;padding:0;box-sizing:border-box;">
+    <td style="background-color:#ffffff;border:2px solid #e2e8f0;border-radius:0;overflow:hidden;padding:0;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <!-- Solid Cobalt Left Block -->
-          <td width="170" style="width:170px;background-color:${splitBg};padding:22px 14px;text-align:center;vertical-align:middle;box-sizing:border-box;">
-            <div style="color:#bfdbfe;font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">
+          <!-- Solid Cobalt Left Block (Stacks on top on mobile) -->
+          <td class="ship-split-cost" width="170" style="width:170px;background-color:${splitBg};padding:22px 14px;text-align:center;vertical-align:middle;box-sizing:border-box;">
+            <div style="color:#bfdbfe;font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;">
               SHIPPING COST
             </div>
-            <div style="color:#ffffff;font-size:36px;font-weight:900;letter-spacing:1px;line-height:1;margin-bottom:2px;">
+            <div style="color:#ffffff;font-size:34px;font-weight:900;letter-spacing:1px;line-height:1;margin-bottom:2px;">
               $0.00
             </div>
-            <div style="color:#ffffff;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">
+            <div style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">
               100% FREE
             </div>
-            <div style="display:inline-block;background-color:rgba(0,0,0,0.25);color:#ffffff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:3px;letter-spacing:0.5px;">
+            <div style="display:inline-block;background-color:rgba(0,0,0,0.25);color:#ffffff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:0;letter-spacing:0.5px;white-space:nowrap;">
               ${tag}
             </div>
           </td>
 
-          <!-- Right Content with Delivery Reassurance Checklist -->
-          <td style="${pad(p, 16, 20, 16, 20)}text-align:left;vertical-align:middle;background-color:#ffffff;box-sizing:border-box;">
-            <div style="color:#1e3a8a;font-size:10.5px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">
-              &#10003; GUARANTEED SAFE TRANSIT
+          <!-- Right Content (Full width on mobile) -->
+          <td class="ship-split-content" style="${pad(p, 16, 20, 16, 20)}text-align:left;vertical-align:middle;background-color:#ffffff;box-sizing:border-box;">
+            <div style="color:#1e3a8a;font-size:10px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:3px;">
+              &#10003;&nbsp;GUARANTEED SAFE TRANSIT
             </div>
-            <div style="color:#0f172a;font-size:17px;font-weight:800;letter-spacing:0.1px;line-height:1.3;margin-bottom:4px;">
+            <div style="color:#0f172a;font-size:16px;font-weight:800;letter-spacing:0.1px;line-height:1.25;margin-bottom:4px;">
               ${title}
             </div>
-            <div style="color:#64748b;font-size:12px;font-weight:400;line-height:1.4;margin-bottom:10px;">
+            <div style="color:#64748b;font-size:11.5px;font-weight:400;line-height:1.4;margin-bottom:8px;">
               ${subtitle}
             </div>
 
             <!-- Bullet Matrix -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
               <tr>
-                <td style="padding:2px 0;vertical-align:middle;color:#1e293b;font-size:11.5px;font-weight:600;">
+                <td style="padding:2px 0;vertical-align:middle;color:#1e293b;font-size:11px;font-weight:600;">
                   <span style="color:#16a34a;font-weight:900;margin-right:4px;">&#10003;</span> In-Stock &amp; Ready for Immediate Dispatch
                 </td>
               </tr>
               <tr>
-                <td style="padding:2px 0;vertical-align:middle;color:#1e293b;font-size:11.5px;font-weight:600;">
+                <td style="padding:2px 0;vertical-align:middle;color:#1e293b;font-size:11px;font-weight:600;">
                   <span style="color:#16a34a;font-weight:900;margin-right:4px;">&#10003;</span> Official eBay Tracking Uploaded Automatically
                 </td>
               </tr>
               <tr>
-                <td style="padding:2px 0;vertical-align:middle;color:#1e293b;font-size:11.5px;font-weight:600;">
-                  <span style="color:#16a34a;font-weight:900;margin-right:4px;">&#10003;</span> Fully Insured Against In-Transit Loss or Breakage
+                <td style="padding:2px 0;vertical-align:middle;color:#1e293b;font-size:11px;font-weight:600;">
+                  <span style="color:#16a34a;font-weight:900;margin-right:4px;">&#10003;</span> Fully Insured Against In-Transit Loss
                 </td>
               </tr>
             </table>
@@ -218,20 +243,20 @@ function dualtoneSplit(p: any, id: string): string {
 // Clean 3-box feature matrix showing Speed, Security, and Tracking side-by-side.
 // ─────────────────────────────────────────────────────────────────────────────
 function warehouseDirectMatrix(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#f8fafc')
-    const borderCol = p.borderColor ?? '#cbd5e1'
-    const title = titleText(p, 'Direct-From-Warehouse Fulfillment')
-    const tag = badgeLabel(p, 'LOGISTICS SPECIFICATION')
-    const isCustomDarkBg = p.bgColor && p.bgColor !== '#f8fafc' && p.bgColor !== '#ffffff'
-    const titleCol = isCustomDarkBg ? '#ffffff' : '#0f172a'
-    const tagCol = isCustomDarkBg ? '#93c5fd' : '#2563eb'
+  const f = font(p)
+  const bgCol = resolveBg(p, '#f8fafc')
+  const borderCol = p.borderColor ?? '#cbd5e1'
+  const title = titleText(p, 'Direct-From-Warehouse Fulfillment')
+  const tag = badgeLabel(p, 'LOGISTICS SPECIFICATION')
+  const isCustomDarkBg = p.bgColor && p.bgColor !== '#f8fafc' && p.bgColor !== '#ffffff'
+  const titleCol = isCustomDarkBg ? '#ffffff' : '#0f172a'
+  const tagCol = isCustomDarkBg ? '#93c5fd' : '#2563eb'
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:8px;${pad(p, 16, 16, 16, 16)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:0;${pad(p, 16, 16, 16, 16)}box-sizing:border-box;">
 
       <!-- Top Title Bar -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:12px;">
@@ -245,40 +270,45 @@ function warehouseDirectMatrix(p: any, id: string): string {
             </div>
           </td>
           <td style="text-align:right;vertical-align:middle;">
-            <span style="display:inline-block;background-color:#16a34a;color:#ffffff;font-size:10px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:4px;">
+            <span style="display:inline-block;background-color:#16a34a;color:#ffffff;font-size:10px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:0;">
               100% FREE SHIPPING
             </span>
           </td>
         </tr>
       </table>
 
-      <!-- 3-Column Spec Cards -->
+      <!-- 3-Column Spec Cards (Stacks into clean full-width cards on mobile) -->
+      <style>
+      @media only screen and (max-width: 600px) {
+        .ship-matrix-card { display: block !important; width: 100% !important; padding: 0 !important; margin-bottom: 8px !important; }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Col 1: Speed -->
-          <td width="33.3%" style="padding:0 5px 0 0;vertical-align:top;box-sizing:border-box;">
-            <div style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:12px 10px;text-align:center;box-sizing:border-box;">
-              <div style="font-size:22px;line-height:1;margin-bottom:4px;color:#2563eb;">&#128666;</div>
-              <div style="color:#0f172a;font-size:13px;font-weight:800;margin-bottom:3px;">Same-Day Dispatch</div>
+          <td class="ship-matrix-card" width="33.3%" style="padding:0 4px 0 0;vertical-align:top;box-sizing:border-box;">
+            <div style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:0;padding:10px;text-align:center;box-sizing:border-box;">
+              <div style="font-size:20px;line-height:1;margin-bottom:3px;color:#2563eb;">&#128666;</div>
+              <div style="color:#0f172a;font-size:13px;font-weight:800;margin-bottom:2px;">Same-Day Dispatch</div>
               <div style="color:#64748b;font-size:11px;font-weight:500;line-height:1.35;">Orders processed rapidly from our domestic distribution center.</div>
             </div>
           </td>
 
           <!-- Col 2: Packaging -->
-          <td width="33.3%" style="padding:0 2.5px;vertical-align:top;box-sizing:border-box;">
-            <div style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:12px 10px;text-align:center;box-sizing:border-box;">
-              <div style="font-size:22px;line-height:1;margin-bottom:4px;color:#2563eb;">&#128230;</div>
-              <div style="color:#0f172a;font-size:13px;font-weight:800;margin-bottom:3px;">Armor-Packed</div>
-              <div style="color:#64748b;font-size:11px;font-weight:500;line-height:1.35;">Heavy-gauge boxes, bubble-wrap &amp; anti-static protection.</div>
+          <td class="ship-matrix-card" width="33.3%" style="padding:0 2px;vertical-align:top;box-sizing:border-box;">
+            <div style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:0;padding:10px;text-align:center;box-sizing:border-box;">
+              <div style="font-size:20px;line-height:1;margin-bottom:3px;color:#2563eb;">&#128230;</div>
+              <div style="color:#0f172a;font-size:13px;font-weight:800;margin-bottom:2px;">Armor-Packed</div>
+              <div style="color:#64748b;font-size:11px;font-weight:500;line-height:1.35;">Heavy-gauge boxes, bubble-wrap &amp; protection.</div>
             </div>
           </td>
 
           <!-- Col 3: GPS Tracking -->
-          <td width="33.3%" style="padding:0 0 0 5px;vertical-align:top;box-sizing:border-box;">
-            <div style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:12px 10px;text-align:center;box-sizing:border-box;">
-              <div style="font-size:22px;line-height:1;margin-bottom:4px;color:#2563eb;">&#128269;</div>
-              <div style="color:#0f172a;font-size:13px;font-weight:800;margin-bottom:3px;">Live GPS Tracking</div>
-              <div style="color:#64748b;font-size:11px;font-weight:500;line-height:1.35;">Official tracking uploaded directly to your eBay purchase history.</div>
+          <td class="ship-matrix-card" width="33.3%" style="padding:0 0 0 4px;vertical-align:top;box-sizing:border-box;">
+            <div style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:0;padding:10px;text-align:center;box-sizing:border-box;">
+              <div style="font-size:20px;line-height:1;margin-bottom:3px;color:#2563eb;">&#128269;</div>
+              <div style="color:#0f172a;font-size:13px;font-weight:800;margin-bottom:2px;">Live GPS Tracking</div>
+              <div style="color:#64748b;font-size:11px;font-weight:500;line-height:1.35;">Official tracking uploaded directly to your purchase history.</div>
             </div>
           </td>
         </tr>
@@ -295,16 +325,16 @@ function warehouseDirectMatrix(p: any, id: string): string {
 // Ultra-clean white background with crisp 1px borders & spaced uppercase tracking.
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalistEditorial(p: any, id: string): string {
-    const f = p.fontFamily ? `${p.fontFamily}, 'Helvetica Neue', Arial, sans-serif` : "'Helvetica Neue', Arial, sans-serif"
-    const bgCol = resolveBg(p, '#ffffff')
-    const borderCol = p.borderColor ?? '#e2e8f0'
-    const textCol = resolveText(p, '#0f172a', true)
-    const title = titleText(p, 'COMPLIMENTARY DOMESTIC SHIPPING')
-    const subtitle = subText(p, 'Insured delivery &middot; Signature tracking &middot; Dispatched within 24 hours')
+  const f = p.fontFamily ? `${p.fontFamily}, 'Helvetica Neue', Arial, sans-serif` : "'Helvetica Neue', Arial, sans-serif"
+  const bgCol = resolveBg(p, '#ffffff')
+  const borderCol = p.borderColor ?? '#e2e8f0'
+  const textCol = resolveText(p, '#0f172a', true)
+  const title = titleText(p, 'COMPLIMENTARY DOMESTIC SHIPPING')
+  const subtitle = subText(p, 'Insured delivery &middot; Signature tracking &middot; Dispatched within 24 hours')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bgCol};border-top:1px solid ${borderCol};border-bottom:1px solid ${borderCol};${pad(p, 18, 16, 18, 16)}text-align:center;box-sizing:border-box;">
 
@@ -320,7 +350,7 @@ function minimalistEditorial(p: any, id: string): string {
 
       <!-- Micro Reassurance Divider -->
       <div style="margin-top:8px;">
-        <span style="display:inline-block;border:1px solid #cbd5e1;padding:2px 10px;border-radius:2px;font-size:9.5px;font-weight:700;letter-spacing:1.2px;color:#475569;text-transform:uppercase;">
+        <span style="display:inline-block;border:1px solid #cbd5e1;padding:2px 10px;border-radius:0;font-size:9.5px;font-weight:700;letter-spacing:1.2px;color:#475569;text-transform:uppercase;">
           No Import Fees &middot; No Handling Surcharges
         </span>
       </div>
@@ -336,31 +366,39 @@ function minimalistEditorial(p: any, id: string): string {
 // Physical parcel aesthetic with classic dashed airmail frame & cancellation seal.
 // ─────────────────────────────────────────────────────────────────────────────
 function parcelPostTicket(p: any, id: string): string {
-    const f = p.fontFamily ? `${p.fontFamily}, 'Courier New', Courier, monospace` : "'Courier New', Courier, monospace"
-    const bgCol = resolveBg(p, '#fefce8')
-    const title = titleText(p, 'PRIORITY AIR PARCEL POST')
-    const subtitle = subText(p, 'Handled under postal priority protocols with barcode tracking.')
-    const tag = badgeLabel(p, 'OFFICIAL AIR MAIL')
+  const f = p.fontFamily ? `${p.fontFamily}, 'Courier New', Courier, monospace` : "'Courier New', Courier, monospace"
+  const bgCol = resolveBg(p, '#fefce8')
+  const title = titleText(p, 'PRIORITY AIR PARCEL POST')
+  const subtitle = subText(p, 'Handled under postal priority protocols with barcode tracking.')
+  const tag = badgeLabel(p, 'OFFICIAL AIR MAIL')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<style>
+@media only screen and (max-width: 620px) {
+  .ship-post-seal { display: block !important; width: 100% !important; text-align: center !important; padding-right: 0 !important; margin-bottom: 12px !important; }
+  .ship-post-content { display: block !important; width: 100% !important; text-align: center !important; border-left: none !important; padding-left: 0 !important; margin-bottom: 12px !important; }
+  .ship-post-stamp { display: block !important; width: 100% !important; text-align: center !important; }
+  .ship-post-stamp div { margin: 0 auto !important; display: inline-block !important; }
+}
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border:2px dashed #b45309;border-radius:6px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border:2px dashed #b45309;border-radius:0;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <!-- Left Cancellation Seal -->
-          <td width="90" style="width:90px;text-align:center;vertical-align:middle;padding-right:14px;box-sizing:border-box;">
-            <div style="width:72px;height:72px;border:2px solid #b45309;border-radius:50%;margin:0 auto;text-align:center;box-sizing:border-box;padding-top:10px;">
+          <!-- Cancellation Seal (Centered on mobile) -->
+          <td class="ship-post-seal" width="90" style="width:90px;text-align:center;vertical-align:middle;padding-right:14px;box-sizing:border-box;">
+            <div style="width:68px;height:68px;border:2px solid #b45309;border-radius:50%;margin:0 auto;text-align:center;box-sizing:border-box;padding-top:10px;">
               <div style="color:#b45309;font-size:8px;font-weight:900;letter-spacing:1px;line-height:1;">POSTAGE</div>
-              <div style="color:#b45309;font-size:18px;font-weight:900;line-height:1.2;">PAID</div>
-              <div style="color:#b45309;font-size:7.5px;font-weight:700;letter-spacing:0.5px;">&star; FREE &star;</div>
+              <div style="color:#b45309;font-size:17px;font-weight:900;line-height:1.2;">PAID</div>
+              <div style="color:#b45309;font-size:7px;font-weight:700;letter-spacing:0.5px;">&star; FREE &star;</div>
             </div>
           </td>
 
-          <!-- Middle Ticket Content -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;border-left:1px dashed #d97706;padding-left:14px;">
-            <div style="color:#b45309;font-size:9.5px;font-weight:900;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;">
+          <!-- Ticket Content (Full-width and centered on mobile) -->
+          <td class="ship-post-content" style="text-align:left;vertical-align:middle;box-sizing:border-box;border-left:1px dashed #d97706;padding-left:14px;">
+            <div style="color:#b45309;font-size:9.5px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;">
               &bull; ${tag} &bull; DISPATCH TICKET
             </div>
             <div style="color:#451a03;font-size:17px;font-weight:900;letter-spacing:0.5px;line-height:1.2;margin-bottom:4px;">
@@ -369,18 +407,18 @@ function parcelPostTicket(p: any, id: string): string {
             <div style="color:#78350f;font-family:Arial,sans-serif;font-size:11.5px;font-weight:500;line-height:1.4;margin-bottom:6px;">
               ${subtitle}
             </div>
-            <div style="font-family:monospace;font-size:10px;color:#92400e;letter-spacing:1px;">
+            <div style="font-family:monospace;font-size:10px;color:#92400e;letter-spacing:1px;white-space:nowrap;">
               ||| |||| || |||||| | ||||||| ||| ||| #TRK-EXP-4892
             </div>
           </td>
 
-          <!-- Right Stamp Badge -->
-          <td width="130" style="width:130px;text-align:right;vertical-align:middle;box-sizing:border-box;">
-            <div style="background-color:#ffffff;border:1px solid #d97706;padding:8px 10px;border-radius:4px;text-align:center;">
-              <div style="color:#b45309;font-size:11px;font-weight:900;letter-spacing:1px;line-height:1;">
+          <!-- Right Stamp Badge (Centered at bottom on mobile) -->
+          <td class="ship-post-stamp" width="130" style="width:130px;text-align:right;vertical-align:middle;box-sizing:border-box;">
+            <div style="background-color:#ffffff;border:1px solid #d97706;padding:8px 14px;border-radius:0;text-align:center;">
+              <div style="color:#b45309;font-size:11px;font-weight:900;letter-spacing:1px;line-height:1;white-space:nowrap;">
                 COST: $0.00
               </div>
-              <div style="color:#0f172a;font-family:Arial,sans-serif;font-size:9.5px;font-weight:700;margin-top:2px;">
+              <div style="color:#0f172a;font-family:Arial,sans-serif;font-size:9.5px;font-weight:700;margin-top:2px;white-space:nowrap;">
                 Priority Delivery
               </div>
             </div>
@@ -398,21 +436,21 @@ function parcelPostTicket(p: any, id: string): string {
 // Real-world package tracking progress line simulating live order progression.
 // ─────────────────────────────────────────────────────────────────────────────
 function stepperTrackerBar(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const borderCol = p.borderColor ?? '#cbd5e1'
-    const title = titleText(p, 'Transparent 4-Step Delivery Roadmap')
-    const tag = badgeLabel(p, 'REAL-TIME TRACKING INCLUDED')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const borderCol = p.borderColor ?? '#cbd5e1'
+  const title = titleText(p, 'Transparent 4-Step Delivery Roadmap')
+  const tag = badgeLabel(p, 'REAL-TIME TRACKING INCLUDED')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:8px;${pad(p, 16, 16, 16, 16)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:0;${pad(p, 16, 16, 16, 16)}box-sizing:border-box;">
 
       <!-- Header -->
       <div style="text-align:center;margin-bottom:14px;">
-        <span style="display:inline-block;background-color:#0f172a;color:#ffffff;font-size:9.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:3px;margin-bottom:4px;">
+        <span style="display:inline-block;background-color:#0f172a;color:#ffffff;font-size:9.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:0;margin-bottom:4px;">
           ${tag}
         </span>
         <div style="color:#0f172a;font-size:16px;font-weight:800;letter-spacing:0.1px;margin:2px 0 0 0;">
@@ -472,18 +510,18 @@ function stepperTrackerBar(p: any, id: string): string {
 // High-visibility hazard strobe accents & bold industrial typography for tools/auto parts.
 // ─────────────────────────────────────────────────────────────────────────────
 function heavyDutyCargo(p: any, id: string): string {
-    const f = p.fontFamily ? `${p.fontFamily}, 'Impact', Arial Black, sans-serif` : "'Impact', Arial Black, sans-serif"
-    const bgCol = resolveBg(p, '#18181b')
-    const yellow = p.accentColor ?? '#facc15'
-    const title = titleText(p, 'HEAVY CARGO &bull; FAST & FREE DISPATCH')
-    const subtitle = subText(p, 'Reinforced packaging for heavy freight, tools, hardware & auto components.')
-    const tag = badgeLabel(p, 'ZERO SURCHARGES')
+  const f = p.fontFamily ? `${p.fontFamily}, 'Impact', Arial Black, sans-serif` : "'Impact', Arial Black, sans-serif"
+  const bgCol = resolveBg(p, '#18181b')
+  const yellow = p.accentColor ?? '#facc15'
+  const title = titleText(p, 'HEAVY CARGO &bull; FAST & FREE DISPATCH')
+  const subtitle = subText(p, 'Reinforced packaging for heavy freight, tools, hardware & auto components.')
+  const tag = badgeLabel(p, 'ZERO SURCHARGES')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${font(p)};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${font(p)};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border:2px solid ${yellow};border-radius:6px;overflow:hidden;padding:0;box-sizing:border-box;">
+    <td style="background-color:${bgCol};border:2px solid ${yellow};border-radius:0;overflow:hidden;padding:0;box-sizing:border-box;">
 
       <!-- Top Caution Strip -->
       <div style="background-color:${yellow};color:#18181b;font-size:9.5px;font-weight:900;letter-spacing:2px;text-align:center;padding:3px 0;line-height:1;">
@@ -494,20 +532,28 @@ function heavyDutyCargo(p: any, id: string): string {
       <div style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
           <tr>
-            <td style="text-align:left;vertical-align:middle;">
-              <div style="color:${yellow};font-family:${f};font-size:22px;letter-spacing:1px;line-height:1.2;margin-bottom:4px;">
+            <style>
+            @media only screen and (max-width: 600px) {
+              .ship-cargo-left { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 10px !important; }
+              .ship-cargo-right { display: block !important; width: 100% !important; text-align: center !important; padding-left: 0 !important; }
+            }
+            </style>
+            <!-- Left Info (Centered on mobile) -->
+            <td class="ship-cargo-left" style="text-align:left;vertical-align:middle;">
+              <div style="color:${yellow};font-family:${f};font-size:20px;letter-spacing:0.5px;line-height:1.2;margin-bottom:4px;">
                 ${title}
               </div>
-              <div style="color:#d4d4d8;font-size:12px;font-weight:500;line-height:1.4;">
+              <div style="color:#d4d4d8;font-size:11.5px;font-weight:500;line-height:1.4;">
                 ${subtitle}
               </div>
             </td>
-            <td width="160" style="width:160px;text-align:right;vertical-align:middle;padding-left:14px;">
-              <div style="background-color:#27272a;border:1px solid #3f3f46;border-radius:4px;padding:8px 12px;text-align:center;">
-                <div style="color:${yellow};font-size:11px;font-weight:900;letter-spacing:1px;">
+            <!-- Right Badge (Centered in middle on mobile) -->
+            <td class="ship-cargo-right" width="160" style="width:160px;text-align:right;vertical-align:middle;padding-left:14px;">
+              <div style="display:inline-block;background-color:#27272a;border:1px solid #3f3f46;border-radius:0;padding:8px 14px;text-align:center;">
+                <div style="color:${yellow};font-size:11px;font-weight:900;letter-spacing:1px;white-space:nowrap;">
                   ${tag}
                 </div>
-                <div style="color:#ffffff;font-size:10px;font-weight:700;margin-top:2px;">
+                <div style="color:#ffffff;font-size:9.5px;font-weight:700;margin-top:2px;white-space:nowrap;">
                   Fully Insured Freight
                 </div>
               </div>
@@ -527,16 +573,16 @@ function heavyDutyCargo(p: any, id: string): string {
 // Deep maritime navy container with side-by-side domestic vs international breakdown.
 // ─────────────────────────────────────────────────────────────────────────────
 function globalTransitMatrix(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#0c4a6e')
-    const title = titleText(p, 'Worldwide & Domestic Shipping Solutions')
-    const tag = badgeLabel(p, 'GLOBAL & DOMESTIC LOGISTICS')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#0c4a6e')
+  const title = titleText(p, 'Worldwide & Domestic Shipping Solutions')
+  const tag = badgeLabel(p, 'GLOBAL & DOMESTIC LOGISTICS')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border-radius:0;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
 
       <!-- Top Title -->
       <div style="text-align:center;margin-bottom:12px;">
@@ -548,12 +594,17 @@ function globalTransitMatrix(p: any, id: string): string {
         </div>
       </div>
 
-      <!-- 2-Tier Breakdown Table -->
+      <!-- 2-Tier Breakdown Table (Stacks cleanly on mobile) -->
+      <style>
+      @media only screen and (max-width: 600px) {
+        .ship-global-card { display: block !important; width: 100% !important; padding: 0 !important; margin-bottom: 8px !important; }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Tier 1: Domestic -->
-          <td width="50%" style="padding:0 6px 0 0;vertical-align:top;box-sizing:border-box;">
-            <div style="background-color:#075985;border:1px solid #0284c7;border-radius:6px;padding:12px 14px;box-sizing:border-box;">
+          <td class="ship-global-card" width="50%" style="padding:0 4px 0 0;vertical-align:top;box-sizing:border-box;">
+            <div style="background-color:#075985;border:1px solid #0284c7;border-radius:0;padding:12px 14px;box-sizing:border-box;">
               <div style="color:#38bdf8;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">
                 DOMESTIC DESTINATIONS
               </div>
@@ -567,8 +618,8 @@ function globalTransitMatrix(p: any, id: string): string {
           </td>
 
           <!-- Tier 2: International -->
-          <td width="50%" style="padding:0 0 0 6px;vertical-align:top;box-sizing:border-box;">
-            <div style="background-color:#075985;border:1px solid #0284c7;border-radius:6px;padding:12px 14px;box-sizing:border-box;">
+          <td class="ship-global-card" width="50%" style="padding:0 0 0 4px;vertical-align:top;box-sizing:border-box;">
+            <div style="background-color:#075985;border:1px solid #0284c7;border-radius:0;padding:12px 14px;box-sizing:border-box;">
               <div style="color:#38bdf8;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">
                 INTERNATIONAL BUYERS
               </div>
@@ -576,7 +627,7 @@ function globalTransitMatrix(p: any, id: string): string {
                 eBay Global Shipping Program
               </div>
               <div style="color:#e0f2fe;font-size:11px;font-weight:400;line-height:1.35;">
-                Full international customs clearance, duty tracking &amp; seamless air transit.
+                Full international customs clearance, duty tracking &amp; air transit.
               </div>
             </div>
           </td>
@@ -594,25 +645,31 @@ function globalTransitMatrix(p: any, id: string): string {
 // Urgency-driven retail banner with prominent digital cutoff clock display.
 // ─────────────────────────────────────────────────────────────────────────────
 function urgentCutoffBar(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#064e3b')
-    const accent = p.accentColor ?? '#34d399'
-    const title = titleText(p, 'Order Now for Guaranteed Same-Day Dispatch!')
-    const subtitle = subText(p, 'Our fulfillment center is actively packaging orders.')
-    const tag = badgeLabel(p, 'ACTIVE DISPATCH HUB')
+  const f = font(p)
+  const bgCol = resolveBg(p, '#064e3b')
+  const accent = p.accentColor ?? '#34d399'
+  const title = titleText(p, 'Order Now for Guaranteed Same-Day Dispatch!')
+  const subtitle = subText(p, 'Our fulfillment center is actively packaging orders.')
+  const tag = badgeLabel(p, 'ACTIVE DISPATCH HUB')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border:2px solid #059669;border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td style="background-color:${bgCol};border:2px solid #059669;border-radius:0;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <!-- Left Info & Status -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <style>
+          @media only screen and (max-width: 600px) {
+            .ship-cutoff-left { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 12px !important; }
+            .ship-cutoff-right { display: block !important; width: 100% !important; text-align: center !important; padding-left: 0 !important; }
+          }
+          </style>
+          <!-- Left Info & Status (Centered on mobile) -->
+          <td class="ship-cutoff-left" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:4px;">
               <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:#10b981;margin-right:6px;vertical-align:middle;"></span>
-              <span style="color:${accent};font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;vertical-align:middle;">
+              <span style="color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;vertical-align:middle;">
                 ${tag}
               </span>
             </div>
@@ -624,13 +681,13 @@ function urgentCutoffBar(p: any, id: string): string {
             </div>
           </td>
 
-          <!-- Right Cutoff Timer Clock Mockup -->
-          <td width="220" style="width:220px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
-            <div style="display:inline-block;background-color:#022c22;border:1px solid #047857;border-radius:6px;padding:8px 12px;text-align:center;">
-              <div style="color:#6ee7b7;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">
+          <!-- Right Cutoff Timer Clock (Centered in middle on mobile) -->
+          <td class="ship-cutoff-right" width="220" style="width:220px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
+            <div style="display:inline-block;background-color:#022c22;border:1px solid #047857;border-radius:0;padding:8px 14px;text-align:center;">
+              <div style="color:#6ee7b7;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;white-space:nowrap;">
                 TODAY'S CUTOFF COUNTDOWN
               </div>
-              <div style="font-family:monospace;color:#ffffff;font-size:18px;font-weight:900;letter-spacing:1.5px;line-height:1;">
+              <div style="font-family:monospace;color:#ffffff;font-size:18px;font-weight:900;letter-spacing:1.5px;line-height:1;white-space:nowrap;">
                 02 : 45 : 30
               </div>
               <div style="color:#a7f3d0;font-size:9px;font-weight:600;margin-top:2px;">
@@ -651,20 +708,20 @@ function urgentCutoffBar(p: any, id: string): string {
 // Aristocratic double-bordered container with gold seal for collectibles & luxury items.
 // ─────────────────────────────────────────────────────────────────────────────
 function whiteGloveGuarantee(p: any, id: string): string {
-    const f = p.fontFamily ? `${p.fontFamily}, Georgia, serif` : 'Georgia, serif'
-    const bgCol = resolveBg(p, '#fafaf9')
-    const gold = p.accentColor ?? '#b45309'
-    const textCol = resolveText(p, '#1c1917', true)
-    const title = titleText(p, 'Certified White-Glove Packaging & Delivery')
-    const subtitle = subText(p, 'Multi-tier electrostatic protection, reinforced corners, and 100% transit damage guarantee.')
-    const tag = badgeLabel(p, 'PREMIER HANDLING PLEDGE')
+  const f = p.fontFamily ? `${p.fontFamily}, Georgia, serif` : 'Georgia, serif'
+  const bgCol = resolveBg(p, '#fafaf9')
+  const gold = p.accentColor ?? '#b45309'
+  const textCol = resolveText(p, '#1c1917', true)
+  const title = titleText(p, 'Certified White-Glove Packaging & Delivery')
+  const subtitle = subText(p, 'Multi-tier electrostatic protection, reinforced corners, and 100% transit damage guarantee.')
+  const tag = badgeLabel(p, 'PREMIER HANDLING PLEDGE')
 
-    return `<!--[riazify:free_shipping:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+  return `<!--[riazify:free_shipping:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
-    <td style="background-color:${bgCol};border:2px solid ${gold};${pad(p, 16, 20, 16, 20)}border-radius:4px;text-align:center;box-sizing:border-box;">
-      <div style="border:1px solid ${gold};padding:18px 24px;border-radius:2px;box-sizing:border-box;">
+    <td style="background-color:${bgCol};border:2px solid ${gold};${pad(p, 16, 20, 16, 20)}border-radius:0;text-align:center;box-sizing:border-box;">
+      <div style="border:1px solid ${gold};padding:18px 24px;border-radius:0;box-sizing:border-box;">
 
         <!-- Wax Seal / Emblem -->
         <div style="color:${gold};font-size:20px;line-height:1;margin-bottom:4px;">
@@ -698,66 +755,66 @@ function whiteGloveGuarantee(p: any, id: string): string {
 // REGISTRY
 // ─────────────────────────────────────────────────────────────────────────────
 export const freeShippingVariants: BlockVariant[] = [
-    {
-        id: 'ship-express-courier-strip',
-        label: 'Express Courier Strip',
-        description: 'Corporate carrier dispatch strip with tracking badge and same-day pill',
-        toHtml(props, id) { return expressCourierStrip(props, id) },
-    },
-    {
-        id: 'ship-two-tone-split',
-        label: 'Dual-Tone Split',
-        description: 'Asymmetric 2-tone split: $0.00 cost callout on left, delivery checklist on right',
-        toHtml(props, id) { return dualtoneSplit(props, id) },
-    },
-    {
-        id: 'ship-warehouse-direct-matrix',
-        label: 'Warehouse Fulfillment Matrix',
-        description: '3-column specification grid detailing speed, packaging armor, and GPS tracking',
-        toHtml(props, id) { return warehouseDirectMatrix(props, id) },
-    },
-    {
-        id: 'ship-minimalist-editorial',
-        label: 'Minimalist Editorial',
-        description: 'High-end boutique luxury strip with crisp hairline borders and spaced uppercase tracking',
-        toHtml(props, id) { return minimalistEditorial(props, id) },
-    },
-    {
-        id: 'ship-parcel-post-ticket',
-        label: 'Postal Airmail Ticket',
-        description: 'Vintage airmail parcel ticket with dashed borders, circular postmark and barcode',
-        toHtml(props, id) { return parcelPostTicket(props, id) },
-    },
-    {
-        id: 'ship-stepper-tracker-bar',
-        label: '4-Step Transit Stepper',
-        description: 'Visual order timeline showing Verified -> Packed -> In Transit -> Delivered',
-        toHtml(props, id) { return stepperTrackerBar(props, id) },
-    },
-    {
-        id: 'ship-heavy-duty-cargo',
-        label: 'Heavy Cargo Freight Bar',
-        description: 'Rugged industrial dark bar with hazard accents for tools, auto parts, and heavy goods',
-        toHtml(props, id) { return heavyDutyCargo(props, id) },
-    },
-    {
-        id: 'ship-global-transit-matrix',
-        label: 'Worldwide & Domestic Matrix',
-        description: 'Dual-tier breakdown covering fast free domestic delivery alongside Global Shipping',
-        toHtml(props, id) { return globalTransitMatrix(props, id) },
-    },
-    {
-        id: 'ship-urgent-cutoff-bar',
-        label: 'Same-Day Cutoff Countdown',
-        description: 'Urgency-driven retail banner with live dispatch status and cutoff countdown clock',
-        toHtml(props, id) { return urgentCutoffBar(props, id) },
-    },
-    {
-        id: 'ship-white-glove-guarantee',
-        label: 'White-Glove Luxury Certificate',
-        description: 'Double-bordered certificate with gold seal for delicate, fragile, or luxury items',
-        toHtml(props, id) { return whiteGloveGuarantee(props, id) },
-    },
+  {
+    id: 'ship-express-courier-strip',
+    label: 'Express Courier Strip',
+    description: 'Corporate carrier dispatch strip with tracking badge and same-day pill',
+    toHtml(props, id) { return expressCourierStrip(props, id) },
+  },
+  {
+    id: 'ship-two-tone-split',
+    label: 'Dual-Tone Split',
+    description: 'Asymmetric 2-tone split: $0.00 cost callout on left, delivery checklist on right',
+    toHtml(props, id) { return dualtoneSplit(props, id) },
+  },
+  {
+    id: 'ship-warehouse-direct-matrix',
+    label: 'Warehouse Fulfillment Matrix',
+    description: '3-column specification grid detailing speed, packaging armor, and GPS tracking',
+    toHtml(props, id) { return warehouseDirectMatrix(props, id) },
+  },
+  {
+    id: 'ship-minimalist-editorial',
+    label: 'Minimalist Editorial',
+    description: 'High-end boutique luxury strip with crisp hairline borders and spaced uppercase tracking',
+    toHtml(props, id) { return minimalistEditorial(props, id) },
+  },
+  {
+    id: 'ship-parcel-post-ticket',
+    label: 'Postal Airmail Ticket',
+    description: 'Vintage airmail parcel ticket with dashed borders, circular postmark and barcode',
+    toHtml(props, id) { return parcelPostTicket(props, id) },
+  },
+  {
+    id: 'ship-stepper-tracker-bar',
+    label: '4-Step Transit Stepper',
+    description: 'Visual order timeline showing Verified -> Packed -> In Transit -> Delivered',
+    toHtml(props, id) { return stepperTrackerBar(props, id) },
+  },
+  {
+    id: 'ship-heavy-duty-cargo',
+    label: 'Heavy Cargo Freight Bar',
+    description: 'Rugged industrial dark bar with hazard accents for tools, auto parts, and heavy goods',
+    toHtml(props, id) { return heavyDutyCargo(props, id) },
+  },
+  {
+    id: 'ship-global-transit-matrix',
+    label: 'Worldwide & Domestic Matrix',
+    description: 'Dual-tier breakdown covering fast free domestic delivery alongside Global Shipping',
+    toHtml(props, id) { return globalTransitMatrix(props, id) },
+  },
+  {
+    id: 'ship-urgent-cutoff-bar',
+    label: 'Same-Day Cutoff Countdown',
+    description: 'Urgency-driven retail banner with live dispatch status and cutoff countdown clock',
+    toHtml(props, id) { return urgentCutoffBar(props, id) },
+  },
+  {
+    id: 'ship-white-glove-guarantee',
+    label: 'White-Glove Luxury Certificate',
+    description: 'Double-bordered certificate with gold seal for delicate, fragile, or luxury items',
+    toHtml(props, id) { return whiteGloveGuarantee(props, id) },
+  },
 ]
 
 // Alias for backwards compatibility if callers look for shippingBannerVariants
@@ -769,34 +826,34 @@ export const shippingBannerVariants = freeShippingVariants
  * and matches shorthand IDs seamlessly.
  */
 export function getFreeShippingVariant(id: string): BlockVariant {
-    if (!id) return freeShippingVariants[0]
+  if (!id) return freeShippingVariants[0]
 
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^ship[-_]/, '')
-        .replace(/^shipping[-_]/, '')
-        .replace(/^free[-_]shipping[-_]/, '')
-        .replace(/_/g, '-')
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^ship[-_]/, '')
+    .replace(/^shipping[-_]/, '')
+    .replace(/^free[-_]shipping[-_]/, '')
+    .replace(/_/g, '-')
 
-    const match = freeShippingVariants.find(v => {
-        const vClean = v.id
-            .toLowerCase()
-            .replace(/^ship[-_]/, '')
-            .replace(/^shipping[-_]/, '')
-            .replace(/^free[-_]shipping[-_]/, '')
-            .replace(/_/g, '-')
+  const match = freeShippingVariants.find(v => {
+    const vClean = v.id
+      .toLowerCase()
+      .replace(/^ship[-_]/, '')
+      .replace(/^shipping[-_]/, '')
+      .replace(/^free[-_]shipping[-_]/, '')
+      .replace(/_/g, '-')
 
-        return (
-            v.id === id ||
-            vClean === clean ||
-            v.id.endsWith(clean) ||
-            clean.includes(vClean) ||
-            vClean.includes(clean)
-        )
-    })
+    return (
+      v.id === id ||
+      vClean === clean ||
+      v.id.endsWith(clean) ||
+      clean.includes(vClean) ||
+      vClean.includes(clean)
+    )
+  })
 
-    return match ?? freeShippingVariants[0]
+  return match ?? freeShippingVariants[0]
 }
 
 // Alias for callers looking for getShippingBannerVariant

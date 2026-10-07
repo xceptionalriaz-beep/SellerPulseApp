@@ -145,16 +145,45 @@ function flashSaleTicker(p: any, id: string): string {
   const discount = discountCallout(p, 'UP TO 50% OFF')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .lto-tbl-${id},
+    .lto-tbl-${id} tbody,
+    .lto-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .lto-col-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 12px !important;
+      box-sizing: border-box !important;
+    }
+    .lto-col-timer-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .lto-timer-grid-${id} {
+      margin: 0 auto !important;
+      float: none !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
-    <td style="background-color:${bgCol};border-radius:8px;${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+    <td style="background-color:${bgCol};border-radius:0;${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
+      <table class="lto-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Left: Urgency Title & Discount Callout -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="lto-col-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:6px;">
-              <span style="display:inline-block;background-color:#991b1b;color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3.5px 8px;border-radius:4px;vertical-align:middle;border:1px solid #b91c1c;">
+              <span style="display:inline-block;background-color:#991b1b;color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3.5px 8px;border-radius:0;vertical-align:middle;border:1px solid #b91c1c;">
                 ${tag}
               </span>
               <span style="display:inline-block;color:${accent};font-size:12px;font-weight:900;letter-spacing:0.5px;margin-left:8px;vertical-align:middle;">
@@ -170,25 +199,25 @@ function flashSaleTicker(p: any, id: string): string {
           </td>
 
           <!-- Right: Digital Countdown Grid -->
-          <td width="230" style="width:230px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
-            <table cellpadding="0" cellspacing="2" border="0" align="right" style="border-collapse:separate;margin:0;">
+          <td class="lto-col-timer-${id}" width="230" style="width:230px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
+            <table class="lto-timer-grid-${id}" cellpadding="0" cellspacing="2" border="0" align="right" style="border-collapse:separate;margin:0;">
               <tr>
-                <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
+                <td align="center" style="background-color:#18181b;border-radius:0;padding:6px 7px;min-width:38px;">
                   <div style="color:#ffffff;font-size:16px;font-weight:900;line-height:1;font-family:monospace;">01</div>
                   <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label1 ?? 'DAYS'}</div>
                 </td>
                 <td style="color:${accent};font-weight:900;font-size:14px;padding:0 2px;">:</td>
-                <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
+                <td align="center" style="background-color:#18181b;border-radius:0;padding:6px 7px;min-width:38px;">
                   <div style="color:#ffffff;font-size:16px;font-weight:900;line-height:1;font-family:monospace;">14</div>
                   <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label2 ?? 'HOURS'}</div>
                 </td>
                 <td style="color:${accent};font-weight:900;font-size:14px;padding:0 2px;">:</td>
-                <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
+                <td align="center" style="background-color:#18181b;border-radius:0;padding:6px 7px;min-width:38px;">
                   <div style="color:#ffffff;font-size:16px;font-weight:900;line-height:1;font-family:monospace;">28</div>
                   <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label3 ?? 'MINS'}</div>
                 </td>
                 <td style="color:${accent};font-weight:900;font-size:14px;padding:0 2px;">:</td>
-                <td align="center" style="background-color:#18181b;border-radius:4px;padding:6px 7px;min-width:38px;">
+                <td align="center" style="background-color:#18181b;border-radius:0;padding:6px 7px;min-width:38px;">
                   <div style="color:${accent};font-size:16px;font-weight:900;line-height:1;font-family:monospace;">45</div>
                   <div style="color:#a1a1aa;font-size:8px;font-weight:700;letter-spacing:0.5px;margin-top:2px;">${p.label4 ?? 'SECS'}</div>
                 </td>
@@ -218,14 +247,54 @@ function clearanceStampedTag(p: any, id: string): string {
   const expiry = expiryNotice(p, 'While Surplus Allocation Lasts')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .clr-tbl-${id},
+    .clr-tbl-${id} tbody,
+    .clr-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .clr-stamp-${id} {
+      display: block !important;
+      width: 100% !important;
+      padding-right: 0 !important;
+      padding-bottom: 12px !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+    }
+    .clr-stamp-${id} div {
+      margin: 0 auto !important;
+    }
+    .clr-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 4px !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .clr-stub-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      padding-top: 12px !important;
+      border-left: none !important;
+      border-top: 1.5px dashed #d6d3d1 !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
-    <td style="background-color:${bgCol};border:2px solid #e7e5e4;border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+    <td style="background-color:${bgCol};border:2px solid #e7e5e4;border-radius:0;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+      <table class="clr-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Circular Red Inspection Stamp -->
-          <td width="72" style="width:72px;vertical-align:middle;padding-right:16px;box-sizing:border-box;">
+          <td class="clr-stamp-${id}" width="72" style="width:72px;vertical-align:middle;padding-right:16px;box-sizing:border-box;">
             <div style="width:68px;height:68px;border:2.5px dashed ${accent};border-radius:50%;text-align:center;box-sizing:border-box;padding:8px 2px;">
               <div style="color:${accent};font-size:8px;font-weight:900;letter-spacing:0.5px;line-height:1.1;text-transform:uppercase;">${p.stampLine1 ?? 'OFFICIAL'}</div>
               <div style="color:${accent};font-size:11px;font-weight:900;line-height:1.2;margin:2px 0;">${p.stampLine2 ?? 'CLEAR'}</div>
@@ -234,9 +303,9 @@ function clearanceStampedTag(p: any, id: string): string {
           </td>
 
           <!-- Main Liquidation Details -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="clr-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:4px;">
-              <span style="display:inline-block;background-color:#fee2e2;color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
+              <span style="display:inline-block;background-color:#fee2e2;color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:0;">
                 ${p.clearanceLot ?? 'CLEARANCE LOT'}
               </span>
               <span style="color:#78716c;font-size:11px;font-weight:600;margin-left:8px;">
@@ -252,8 +321,8 @@ function clearanceStampedTag(p: any, id: string): string {
           </td>
 
           <!-- Right: Price Tag Stub -->
-          <td width="160" style="width:160px;text-align:right;vertical-align:middle;padding-left:14px;border-left:1.5px dashed #d6d3d1;box-sizing:border-box;">
-            <div style=\"color:#78716c;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;\">
+          <td class="clr-stub-${id}" width="160" style="width:160px;text-align:right;vertical-align:middle;padding-left:14px;border-left:1.5px dashed #d6d3d1;box-sizing:border-box;">
+            <div style="color:#78716c;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;">
               ${p.specialStatus ?? 'SPECIAL STATUS'}
             </div>
             <div style="color:${accent};font-size:16px;font-weight:900;line-height:1.2;">
@@ -286,14 +355,43 @@ function midnightVipExclusive(p: any, id: string): string {
   const discount = discountCallout(p, 'PREMIUM CONCIERGE BENEFIT')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .vip-tbl-${id},
+    .vip-tbl-${id} tbody,
+    .vip-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .vip-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .vip-badge-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .vip-badge-${id} {
+      display: inline-block !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
-    <td style="background-color:${bgCol};border:1.5px solid ${gold};border-radius:8px;${pad(p, 18, 24, 18, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+    <td style="background-color:${bgCol};border:1.5px solid ${gold};border-radius:0;${pad(p, 18, 24, 18, 24)}box-sizing:border-box;">
+      <table class="vip-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Left: Gold VIP Branding & Text -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="vip-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="color:${gold};font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">
               ${tag}
             </div>
@@ -306,15 +404,15 @@ function midnightVipExclusive(p: any, id: string): string {
           </td>
 
           <!-- Right: Champagne Gold Badge -->
-          <td width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
-            <div style="display:inline-block;background-color:#18181b;border:1px solid ${gold};border-radius:6px;padding:9px 14px;text-align:center;">
-              <div style=\"color:${gold};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;\">
+          <td class="vip-badge-col-${id}" width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
+            <div class="vip-badge-${id}" style="display:inline-block;background-color:#18181b;border:1px solid ${gold};border-radius:0;padding:9px 14px;text-align:center;">
+              <div style="color:${gold};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">
                 ${p.availabilityNote ?? 'LIMITED AVAILABILITY'}
               </div>
               <div style="color:#ffffff;font-size:12px;font-weight:800;letter-spacing:0.3px;">
                 ${discount}
               </div>
-              <div style=\"color:${gold};font-size:9.5px;font-weight:600;margin-top:3px;\">
+              <div style="color:${gold};font-size:9.5px;font-weight:600;margin-top:3px;">
                 ${p.sellerNote ?? 'Direct From Verified Seller'}
               </div>
             </div>
@@ -342,25 +440,59 @@ function industrialHazardAlert(p: any, id: string): string {
   const discount = discountCallout(p, 'HEAVY DISCOUNT LOT')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${yellow};border-radius:8px;overflow:hidden;background-color:${bgCol};">
+<style>
+  @media only screen and (max-width: 680px) {
+    .hzd-bar-${id} {
+      font-size: 8px !important;
+      letter-spacing: 1px !important;
+      padding: 4px 4px !important;
+    }
+    .hzd-tbl-${id},
+    .hzd-tbl-${id} tbody,
+    .hzd-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .hzd-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .hzd-box-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .hzd-box-${id} {
+      display: inline-block !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${yellow};border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Top Caution Hazard Bar -->
   <tr>
-    <td style="background-color:${yellow};color:#000000;font-size:9.5px;font-weight:900;letter-spacing:2px;text-align:center;padding:5px 0;text-transform:uppercase;">
+    <td class="hzd-bar-${id}" style="background-color:${yellow};color:#000000;font-size:9.5px;font-weight:900;letter-spacing:2px;text-align:center;padding:5px 0;text-transform:uppercase;">
       /// PROMOTIONAL OVERSTOCK LOT /// FACTORY DIRECT SURPLUS /// LIMITED INVENTORY ///
     </td>
   </tr>
   <tr>
     <td style="background-color:${bgCol};${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+      <table class="hzd-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Main Content -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="hzd-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:6px;">
-              <span style="display:inline-block;background-color:${yellow};color:#000000;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;">
+              <span style="display:inline-block;background-color:${yellow};color:#000000;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:0;">
                 ${tag}
               </span>
-              <span style=\"color:#a1a1aa;font-size:11px;font-weight:700;margin-left:8px;\">
+              <span style="color:#a1a1aa;font-size:11px;font-weight:700;margin-left:8px;">
                 ${p.gradeNote ?? 'Commercial & Industrial Grade'}
               </span>
             </div>
@@ -373,12 +505,12 @@ function industrialHazardAlert(p: any, id: string): string {
           </td>
 
           <!-- Right Status Box -->
-          <td width="170" style="width:170px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
-            <div style="background-color:#27272a;border:1.5px solid #3f3f46;border-radius:6px;padding:8px 12px;text-align:center;">
+          <td class="hzd-box-col-${id}" width="170" style="width:170px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
+            <div class="hzd-box-${id}" style="background-color:#27272a;border:1.5px solid #3f3f46;border-radius:0;padding:8px 12px;text-align:center;">
               <div style="color:${yellow};font-size:13px;font-weight:900;line-height:1.2;">
                 ${discount}
               </div>
-              <div style=\"color:#e4e4e7;font-size:10px;font-weight:700;margin-top:2px;\">
+              <div style="color:#e4e4e7;font-size:10px;font-weight:700;margin-top:2px;">
                 ${p.dispatchNote ?? 'IMMEDIATE DISPATCH'}
               </div>
               <div style="color:#10b981;font-size:9.5px;font-weight:800;margin-top:2px;">
@@ -409,24 +541,60 @@ function circularCouponClip(p: any, id: string): string {
   const discount = discountCallout(p, 'SPECIAL SAVINGS APPLIED')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .cpn-tbl-${id},
+    .cpn-tbl-${id} tbody,
+    .cpn-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .cpn-scissor-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 6px !important;
+      box-sizing: border-box !important;
+    }
+    .cpn-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .cpn-barcode-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      padding-top: 12px !important;
+      border-left: none !important;
+      border-top: 1.5px dashed #cbd5e1 !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
-    <td style="background-color:${bgCol};border:2px dashed #94a3b8;border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+    <td style="background-color:${bgCol};border:2px dashed #94a3b8;border-radius:0;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+      <table class="cpn-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Scissor Icon & Cut Line -->
-          <td width="36" style="width:36px;vertical-align:middle;text-align:center;box-sizing:border-box;">
+          <td class="cpn-scissor-${id}" width="36" style="width:36px;vertical-align:middle;text-align:center;box-sizing:border-box;">
             <div style="font-size:24px;line-height:1;color:${accent};">✂</div>
           </td>
 
           <!-- Main Coupon Content -->
-          <td style="text-align:left;vertical-align:middle;padding:0 14px;box-sizing:border-box;">
+          <td class="cpn-text-${id}" style="text-align:left;vertical-align:middle;padding:0 14px;box-sizing:border-box;">
             <div style="margin-bottom:3px;">
-              <span style="display:inline-block;background-color:#e0f2fe;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
+              <span style="display:inline-block;background-color:#e0f2fe;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:0;">
                 ${tag}
               </span>
-              <span style=\"color:#64748b;font-size:10.5px;font-weight:700;margin-left:8px;\">
+              <span style="color:#64748b;font-size:10.5px;font-weight:700;margin-left:8px;">
                 ${p.couponScope ?? 'Valid For This eBay Item Only'}
               </span>
             </div>
@@ -439,7 +607,7 @@ function circularCouponClip(p: any, id: string): string {
           </td>
 
           <!-- Barcode / Value Box -->
-          <td width="150" style="width:150px;text-align:center;vertical-align:middle;border-left:1px dashed #cbd5e1;padding-left:12px;box-sizing:border-box;">
+          <td class="cpn-barcode-${id}" width="150" style="width:150px;text-align:center;vertical-align:middle;border-left:1px dashed #cbd5e1;padding-left:12px;box-sizing:border-box;">
             <div style="color:${accent};font-size:15px;font-weight:900;line-height:1.2;">
               ${discount}
             </div>
@@ -447,7 +615,7 @@ function circularCouponClip(p: any, id: string): string {
             <div style="letter-spacing:2px;font-family:monospace;font-size:13px;color:#334155;margin:3px 0 2px 0;line-height:1;">
               ||||| | |||| || |||
             </div>
-            <div style=\"color:#64748b;font-size:8.5px;font-weight:700;letter-spacing:1px;\">
+            <div style="color:#64748b;font-size:8.5px;font-weight:700;letter-spacing:1px;">
               ${p.cartNote ?? 'AUTO-APPLIED IN CART'}
             </div>
           </td>
@@ -474,16 +642,48 @@ function liveScarcityMeter(p: any, id: string): string {
   const discount = discountCallout(p, '88% CLAIMED')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .scarcity-tbl-${id},
+    .scarcity-tbl-${id} tbody,
+    .scarcity-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .scarcity-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .scarcity-meter-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .scarcity-box-${id} {
+      display: inline-block !important;
+      width: 100% !important;
+      max-width: 280px !important;
+      margin: 0 auto !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;">
   <tr>
-    <td style="background-color:${bgCol};border-radius:8px;${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+    <td style="background-color:${bgCol};border-radius:0;${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
+      <table class="scarcity-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Title & Subtitle -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="scarcity-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="margin-bottom:6px;">
-              <span style="display:inline-block;background-color:${accent};color:#0f172a;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;">
+              <span style="display:inline-block;background-color:${accent};color:#0f172a;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:0;">
                 ${tag}
               </span>
               <span style="color:#fb923c;font-size:11px;font-weight:800;margin-left:8px;">
@@ -499,15 +699,15 @@ function liveScarcityMeter(p: any, id: string): string {
           </td>
 
           <!-- Scarcity Bar & Counter -->
-          <td width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
-            <div style="background-color:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px 12px;text-align:left;">
+          <td class="scarcity-meter-col-${id}" width="200" style="width:200px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
+            <div class="scarcity-box-${id}" style="background-color:#1e293b;border:1px solid #334155;border-radius:0;padding:8px 12px;text-align:left;">
               <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                <span style=\"color:#f8fafc;font-size:10px;font-weight:800;\">${p.scarcityLabel ?? 'ALMOST SOLD OUT'}</span>
+                <span style="color:#f8fafc;font-size:10px;font-weight:800;">${p.scarcityLabel ?? 'ALMOST SOLD OUT'}</span>
                 <span style="color:${accent};font-size:10px;font-weight:900;float:right;">${discount}</span>
               </div>
               <!-- Progress Bar -->
-              <div style="width:100%;height:8px;background-color:#334155;border-radius:4px;overflow:hidden;margin:4px 0;">
-                <div style="width:88%;height:100%;background-color:${accent};border-radius:4px;"></div>
+              <div style="width:100%;height:8px;background-color:#334155;border-radius:0;overflow:hidden;margin:4px 0;">
+                <div style="width:88%;height:100%;background-color:${accent};border-radius:0;"></div>
               </div>
               <div style="color:#38bdf8;font-size:9.5px;font-weight:700;margin-top:3px;text-align:center;">
                 &#9888; Only a few units remaining in stock
@@ -536,15 +736,15 @@ function multibuyVolumeMatrix(p: any, id: string): string {
   const tag = badgeText(p, 'TIERED VOLUME PRICING')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Header Bar -->
   <tr>
     <td style="background-color:#f8fafc;border-bottom:1px solid #e2e8f0;${pad(p, 12, 18, 12, 18)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td style="text-align:left;">
-            <span style="display:inline-block;background-color:#dbeafe;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
+            <span style="display:inline-block;background-color:#dbeafe;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:0;">
               ${tag}
             </span>
             <span style="color:${textCol};font-size:14px;font-weight:900;margin-left:8px;vertical-align:middle;">
@@ -565,21 +765,21 @@ function multibuyVolumeMatrix(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="8" border="0" style="border-collapse:separate;">
         <tr>
           <!-- Tier 1 -->
-          <td width="33%" align="center" style="background-color:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:10px 8px;">
+          <td width="33%" align="center" style="background-color:#f8fafc;border:1px solid #cbd5e1;border-radius:0;padding:10px 8px;">
             <div style=\"color:#64748b;font-size:10px;font-weight:800;text-transform:uppercase;\">${p.tier1Label ?? 'BUY 1 ITEM'}</div>
             <div style=\"color:#0f172a;font-size:14px;font-weight:900;margin:3px 0;\">${p.tier1Price ?? 'STANDARD PRICE'}</div>
             <div style=\"color:#64748b;font-size:10px;font-weight:600;\">${p.tier1Note ?? 'Standard Value'}</div>
           </td>
 
           <!-- Tier 2 (Highlighted) -->
-          <td width="33%" align="center" style="background-color:#eff6ff;border:1.5px solid ${accent};border-radius:6px;padding:10px 8px;position:relative;">
+          <td width="33%" align="center" style="background-color:#eff6ff;border:1.5px solid ${accent};border-radius:0;padding:10px 8px;position:relative;">
             <div style="color:${accent};font-size:10px;font-weight:900;text-transform:uppercase;">${p.tier2Label ?? '★ BUY 2 ITEMS ★'}</div>
             <div style="color:${accent};font-size:16px;font-weight:900;margin:3px 0;">${p.tier2Price ?? 'EXTRA 10% OFF'}</div>
             <div style="color:#1d4ed8;font-size:10px;font-weight:700;">${p.tier2Note ?? 'Most Popular Choice'}</div>
           </td>
 
           <!-- Tier 3 -->
-          <td width="33%" align="center" style="background-color:#f0fdf4;border:1.5px solid #16a34a;border-radius:6px;padding:10px 8px;">
+          <td width="33%" align="center" style="background-color:#f0fdf4;border:1.5px solid #16a34a;border-radius:0;padding:10px 8px;">
             <div style="color:#15803d;font-size:10px;font-weight:900;text-transform:uppercase;">${p.tier3Label ?? 'BUY 3 OR MORE'}</div>
             <div style="color:#15803d;font-size:16px;font-weight:900;margin:3px 0;">${p.tier3Price ?? 'EXTRA 20% OFF'}</div>
             <div style="color:#16a34a;font-size:10px;font-weight:800;">${p.tier3Note ?? 'Maximum Bulk Savings'}</div>
@@ -607,14 +807,47 @@ function scandinavianEditorial(p: any, id: string): string {
   const discount = discountCallout(p, 'SPECIAL INVITATION SAVINGS')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:6px;background-color:${bgCol};">
+<style>
+  @media only screen and (max-width: 680px) {
+    .scan-tbl-${id},
+    .scan-tbl-${id} tbody,
+    .scan-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .scan-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .scan-pill-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .scan-pill-${id} {
+      display: inline-block !important;
+      border-left: none !important;
+      border-top: 1px solid #d4d4d8 !important;
+      padding-left: 0 !important;
+      padding-top: 10px !important;
+      text-align: center !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:0;background-color:${bgCol};">
   <tr>
-    <td style="background-color:${bgCol};border-radius:6px;${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td style="background-color:${bgCol};border-radius:0;${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
+      <table class="scan-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <!-- Editorial Typography Header -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="scan-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="color:${accent};font-size:9.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;">
               ${tag}
             </div>
@@ -627,12 +860,12 @@ function scandinavianEditorial(p: any, id: string): string {
           </td>
 
           <!-- Subtle Right Pill -->
-          <td width="180" style="width:180px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
-            <div style="display:inline-block;border-left:1px solid #d4d4d8;padding-left:14px;text-align:left;">
+          <td class="scan-pill-col-${id}" width="180" style="width:180px;text-align:right;vertical-align:middle;padding-left:16px;box-sizing:border-box;">
+            <div class="scan-pill-${id}" style="display:inline-block;border-left:1px solid #d4d4d8;padding-left:14px;text-align:left;">
               <div style="color:#18181b;font-size:12.5px;font-weight:700;letter-spacing:0.5px;">
                 ${discount}
               </div>
-              <div style=\"color:#71717a;font-size:10px;font-weight:500;margin-top:2px;\">
+              <div style="color:#71717a;font-size:10px;font-weight:500;margin-top:2px;">
                 ${p.applyNote ?? 'Applied at eBay purchase'}
               </div>
             </div>
@@ -661,8 +894,42 @@ function cyberTerminalDeal(p: any, id: string): string {
   const discount = discountCallout(p, 'SPECIAL HARDWARE RATE')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #1e293b;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+<style>
+  @media only screen and (max-width: 680px) {
+    .cyb-tbl-${id},
+    .cyb-tbl-${id} tbody,
+    .cyb-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .cyb-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .cyb-specs-${id} {
+      font-size: 9.5px !important;
+      line-height: 1.5 !important;
+      margin-top: 6px !important;
+    }
+    .cyb-box-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .cyb-box-${id} {
+      display: inline-block !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #1e293b;border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Terminal Top Bar -->
   <tr>
     <td style="background-color:#0f172a;border-bottom:1px solid #1e293b;padding:5px 14px;">
@@ -674,10 +941,10 @@ function cyberTerminalDeal(p: any, id: string): string {
   </tr>
   <tr>
     <td style="background-color:${bgCol};${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+      <table class="cyb-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Content -->
-          <td style="text-align:left;vertical-align:middle;box-sizing:border-box;">
+          <td class="cyb-text-${id}" style="text-align:left;vertical-align:middle;box-sizing:border-box;">
             <div style="color:${cyan};font-size:10px;font-weight:900;letter-spacing:1.5px;font-family:monospace;margin-bottom:4px;">
               ${tag}
             </div>
@@ -688,18 +955,18 @@ function cyberTerminalDeal(p: any, id: string): string {
               ${subtitle}
             </div>
             <!-- Spec Checklist -->
-            <div style="color:${emerald};font-size:10.5px;font-weight:700;font-family:monospace;">
+            <div class="cyb-specs-${id}" style="color:${emerald};font-size:10.5px;font-weight:700;font-family:monospace;">
               [&#10003;] FACTORY SEALED &nbsp;&bull;&nbsp; [&#10003;] DISPATCH <24H &nbsp;&bull;&nbsp; [&#10003;] 100% AUTHENTIC
             </div>
           </td>
 
           <!-- Right Status Box -->
-          <td width="170" style="width:170px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
-            <div style="background-color:#0f172a;border:1px solid ${cyan};border-radius:6px;padding:8px 12px;text-align:center;">
+          <td class="cyb-box-col-${id}" width="170" style="width:170px;text-align:right;vertical-align:middle;padding-left:14px;box-sizing:border-box;">
+            <div class="cyb-box-${id}" style="background-color:#0f172a;border:1px solid ${cyan};border-radius:0;padding:8px 12px;text-align:center;">
               <div style="color:${cyan};font-size:13px;font-weight:900;line-height:1.2;font-family:monospace;">
                 ${discount}
               </div>
-              <div style=\"color:#38bdf8;font-size:9.5px;font-weight:700;margin-top:3px;\">
+              <div style="color:#38bdf8;font-size:9.5px;font-weight:700;margin-top:3px;">
                 ${p.activationNote ?? 'Instant Activation'}
               </div>
             </div>
@@ -727,23 +994,60 @@ function holidayGiftRibbon(p: any, id: string): string {
   const discount = discountCallout(p, 'PEACE-OF-MIND GUARANTEE')
 
   return `<!--[riazify:limited_time_offer:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:8px;overflow:hidden;background-color:${bgCol};">
+<style>
+  @media only screen and (max-width: 680px) {
+    .hol-tbl-${id},
+    .hol-tbl-${id} tbody,
+    .hol-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .hol-icon-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 6px !important;
+      box-sizing: border-box !important;
+    }
+    .hol-text-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 !important;
+      margin-bottom: 14px !important;
+      box-sizing: border-box !important;
+    }
+    .hol-box-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-left: 0 !important;
+      box-sizing: border-box !important;
+    }
+    .hol-box-${id} {
+      display: inline-block !important;
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:0;overflow:hidden;background-color:${bgCol};">
   <tr>
     <td style="background-color:${bgCol};${pad(p, 16, 22, 16, 22)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
+      <table class="hol-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Left Icon & Details -->
-          <td width="42" style="width:42px;vertical-align:middle;text-align:center;box-sizing:border-box;">
+          <td class="hol-icon-${id}" width="42" style="width:42px;vertical-align:middle;text-align:center;box-sizing:border-box;">
             <div style="font-size:26px;line-height:1;">🎀</div>
           </td>
 
-          <td style="text-align:left;vertical-align:middle;padding:0 12px;box-sizing:border-box;">
+          <td class="hol-text-${id}" style="text-align:left;vertical-align:middle;padding:0 12px;box-sizing:border-box;">
             <div style="margin-bottom:4px;">
-              <span style="display:inline-block;background-color:#022c22;color:${gold};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;border:1px solid ${gold};">
+              <span style="display:inline-block;background-color:#022c22;color:${gold};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:0;border:1px solid ${gold};">
                 ${tag}
               </span>
-              <span style=\"color:#a7f3d0;font-size:11px;font-weight:700;margin-left:8px;\">
+              <span style="color:#a7f3d0;font-size:11px;font-weight:700;margin-left:8px;">
                 ${p.dispatchGuarantee ?? 'Guaranteed Pre-Holiday Dispatch'}
               </span>
             </div>
@@ -756,8 +1060,8 @@ function holidayGiftRibbon(p: any, id: string): string {
           </td>
 
           <!-- Right Guarantee Box -->
-          <td width="170" style="width:170px;text-align:right;vertical-align:middle;padding-left:12px;box-sizing:border-box;">
-            <div style="background-color:#022c22;border:1px solid ${gold};border-radius:6px;padding:8px 12px;text-align:center;">
+          <td class="hol-box-col-${id}" width="170" style="width:170px;text-align:right;vertical-align:middle;padding-left:12px;box-sizing:border-box;">
+            <div class="hol-box-${id}" style="background-color:#022c22;border:1px solid ${gold};border-radius:0;padding:8px 12px;text-align:center;">
               <div style="color:${gold};font-size:12px;font-weight:900;line-height:1.2;">
                 ${discount}
               </div>

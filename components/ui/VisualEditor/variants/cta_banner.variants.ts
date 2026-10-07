@@ -26,11 +26,18 @@ function bg(p: CtaBannerProps): string {
 function mobileStyle(): string {
   return `<style>
 @media only screen and (max-width:600px){
-  .ctab-col{display:block!important;width:100%!important;}
-  .ctab-btn{width:100%!important;text-align:center!important;}
+  .ctab-col{display:block!important;width:100%!important;box-sizing:border-box!important;}
+  .ctab-btn{width:100%!important;text-align:center!important;box-sizing:border-box!important;}
   .ctab-hide-mobile{display:none!important;}
-  .ctab-pt{padding-top:12px!important;}
-  .ctab-full{width:100%!important;}
+  .ctab-pt{padding-top:14px!important;padding-left:0!important;text-align:center!important;}
+  .ctab-full{width:100%!important;box-sizing:border-box!important;border-right:none!important;border-bottom:1px solid #e5e7eb!important;margin-bottom:10px!important;padding-bottom:12px!important;}
+  .ctab-full:last-child{border-bottom:none!important;margin-bottom:0!important;}
+  /* Social Proof mobile fix (Centered in middle on mobile) */
+  .ctab-social-left{display:block!important;width:100%!important;border-right:none!important;border-bottom:1px solid rgba(150,150,150,0.25)!important;padding-right:0!important;padding-bottom:14px!important;box-sizing:border-box!important;text-align:center!important;}
+  .ctab-social-right{display:block!important;width:100%!important;padding-left:0!important;padding-top:14px!important;box-sizing:border-box!important;text-align:center!important;}
+  /* Announcement mobile fix */
+  .ctab-ann-tag{display:block!important;width:100%!important;padding-right:0!important;margin-bottom:6px!important;}
+  .ctab-ann-text{display:block!important;width:100%!important;padding-right:0!important;}
 }
 </style>`
 }
@@ -42,8 +49,8 @@ function trustBar(p: CtaBannerProps, id: string): string {
   const subClr = p.subTextColor ?? '#6b7280'
   return `${mobileStyle()}
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${p.bgColor ?? '#ffffff'};border-bottom:3px solid ${ac};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;background-color:${p.bgColor ?? '#ffffff'};border-bottom:3px solid ${ac};">
   <tr>
     <td style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -64,21 +71,13 @@ function trustBar(p: CtaBannerProps, id: string): string {
               </tr>
             </table>
           </td>
-          <!-- Right: trust pills -->
+          <!-- Right: trust pills (Fluid Wrapping on Mobile) -->
           <td class="ctab-col ctab-pt" valign="middle" style="width:50%;text-align:right;">
-            <table cellpadding="0" cellspacing="0" border="0" align="right">
-              <tr>
-                <td style="padding:0 4px;">
-                  <span style="display:inline-block;background-color:#f3f4f6;color:${subClr};font-family:Arial,sans-serif;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;">&#10003;&nbsp;Genuine Items</span>
-                </td>
-                <td style="padding:0 4px;">
-                  <span style="display:inline-block;background-color:#f3f4f6;color:${subClr};font-family:Arial,sans-serif;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;">&#128274;&nbsp;Secure Payment</span>
-                </td>
-                <td style="padding:0 4px;">
-                  <span style="display:inline-block;background-color:#f3f4f6;color:${subClr};font-family:Arial,sans-serif;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;">&#9889;&nbsp;Fast Dispatch</span>
-                </td>
-              </tr>
-            </table>
+            <div style="display:inline-block;text-align:left;">
+              <span style="display:inline-block;background-color:#f3f4f6;color:${subClr};font-family:Arial,sans-serif;font-size:11px;font-weight:600;padding:4px 9px;border-radius:0;margin:2px 3px;white-space:nowrap;">&#10003;&nbsp;Genuine Items</span>
+              <span style="display:inline-block;background-color:#f3f4f6;color:${subClr};font-family:Arial,sans-serif;font-size:11px;font-weight:600;padding:4px 9px;border-radius:0;margin:2px 3px;white-space:nowrap;">&#128274;&nbsp;Secure Payment</span>
+              <span style="display:inline-block;background-color:#f3f4f6;color:${subClr};font-family:Arial,sans-serif;font-size:11px;font-weight:600;padding:4px 9px;border-radius:0;margin:2px 3px;white-space:nowrap;">&#9889;&nbsp;Fast Dispatch</span>
+            </div>
           </td>
         </tr>
       </table>
@@ -93,20 +92,26 @@ function splitAction(p: CtaBannerProps, id: string): string {
   const headClr = p.textColor ?? '#ffffff'
   const subClr = p.subTextColor ?? 'rgba(255,255,255,0.7)'
   return `${mobileStyle()}
+<style>
+@media only screen and (max-width:600px){
+  .ctab-split-content{text-align:center!important;padding:20px 16px 10px 16px!important;}
+  .ctab-split-action{text-align:center!important;padding:10px 16px 20px 16px!important;}
+}
+</style>
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;${bg(p)}border-radius:10px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;${bg(p)}border-radius:0;overflow:hidden;">
   <tr>
-    <!-- Left 60%: content -->
-    <td class="ctab-col" valign="middle" style="width:60%;${pad(p)}padding-right:0;">
+    <!-- Left 60%: content (Centered on mobile) -->
+    <td class="ctab-col ctab-split-content" valign="middle" style="width:60%;${pad(p)}padding-right:0;box-sizing:border-box;">
       <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:${headClr};line-height:1.3;">${p.headingText ?? 'Got Questions? We\'re Here to Help!'}</p>
       <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${subClr};line-height:1.6;">${p.subText ?? 'Our expert team responds within 1 business hour'}</p>
     </td>
     <!-- Divider -->
     <td class="ctab-hide-mobile" width="1" style="background-color:rgba(255,255,255,0.2);padding:0;width:1px;">&nbsp;</td>
-    <!-- Right 40%: button -->
-    <td class="ctab-col ctab-pt" valign="middle" style="width:40%;text-align:center;padding:${p.paddingTop ?? 16}px 24px;">
-      <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:13px 28px;background-color:${ac};color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;">${(p as any).buttonText ?? 'Contact Seller'}</a>
+    <!-- Right 40%: button (Centered in middle on mobile) -->
+    <td class="ctab-col ctab-split-action" valign="middle" style="width:40%;text-align:center;padding:${p.paddingTop ?? 16}px 24px;box-sizing:border-box;">
+      <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:13px 28px;background-color:${ac};color:#ffffff;text-decoration:none;border-radius:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;">${(p as any).buttonText ?? 'Contact Seller'}</a>
     </td>
   </tr>
 </table>`
@@ -119,10 +124,14 @@ function flashDeal(p: CtaBannerProps, id: string): string {
 <style>
 @keyframes ctabGradSpin{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .ctab-flash-btn{background:linear-gradient(270deg,#ff6b00,#ff0040,#ff6b00);background-size:200% 200%;animation:ctabGradSpin 2.5s ease infinite;}
+@media only screen and (max-width:600px){
+  .ctab-flash-content{text-align:center!important;padding:20px 16px 12px 16px!important;}
+  .ctab-flash-action{text-align:center!important;padding:4px 16px 20px 16px!important;}
+}
 </style>
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;border-radius:10px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-radius:0;overflow:hidden;">
   <!-- Urgency ribbon row -->
   <tr>
     <td colspan="3" style="background-color:#b91c1c;padding:6px 20px;text-align:center;">
@@ -134,12 +143,14 @@ function flashDeal(p: CtaBannerProps, id: string): string {
     <td style="background:linear-gradient(135deg,#dc2626,#ea580c);padding:0;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="ctab-col" valign="middle" style="width:65%;padding:20px 16px 20px 24px;">
+          <!-- Content: Centered on mobile -->
+          <td class="ctab-col ctab-flash-content" valign="middle" style="width:65%;padding:20px 16px 20px 24px;box-sizing:border-box;">
             <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:900;color:#ffffff;line-height:1.25;text-transform:uppercase;">${p.headingText ?? 'Exclusive Deal — Save Big Today!'}</p>
             <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;">${p.subText ?? 'Don\'t miss out — limited stock available at this price'}</p>
           </td>
-          <td class="ctab-col ctab-pt" valign="middle" style="width:35%;text-align:center;padding:20px 24px 20px 8px;">
-            <a href="${(p as any).linkUrl ?? '#'}" class="ctab-flash-btn" style="display:inline-block;padding:14px 24px;color:#ffffff;text-decoration:none;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;border:2px solid rgba(255,255,255,0.4);">${(p as any).buttonText ?? 'CLAIM OFFER NOW'}</a>
+          <!-- Button: Centered in middle on mobile -->
+          <td class="ctab-col ctab-flash-action" valign="middle" style="width:35%;text-align:center;padding:20px 24px 20px 8px;box-sizing:border-box;">
+            <a href="${(p as any).linkUrl ?? '#'}" class="ctab-flash-btn" style="display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;border-radius:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;border:2px solid rgba(255,255,255,0.4);">${(p as any).buttonText ?? 'CLAIM OFFER NOW'}</a>
           </td>
         </tr>
       </table>
@@ -156,23 +167,23 @@ function darkPremium(p: CtaBannerProps, id: string): string {
   return `${mobileStyle()}
 <!--[riazify:cta_banner:${id}]-->
 <!-- Outer gold border wrapper -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:#d4af37;border-radius:11px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;background-color:#d4af37;border-radius:0;">
   <tr>
     <td style="padding:1px;">
       <!-- Inner purple border wrapper -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background-color:#7530fb;border-radius:10px;">
+        style="background-color:#7530fb;border-radius:0;">
         <tr>
           <td style="padding:1px;">
             <!-- Inner dark bg -->
             <table width="100%" cellpadding="0" cellspacing="0" border="0"
-              style="background-color:#0a0a0f;border-radius:9px;">
+              style="background-color:#0a0a0f;border-radius:0;">
               <tr>
                 <td style="${pad(p)}text-align:center;">
                   <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:900;color:${headClr};letter-spacing:0.04em;line-height:1.25;">${p.headingText ?? 'Premium Quality. Guaranteed.'}</p>
                   <p style="margin:0 0 18px;font-family:Arial,sans-serif;font-size:14px;color:${subClr};letter-spacing:0.02em;line-height:1.7;">${p.subText ?? 'Authenticated &bull; Certified &bull; Trusted Since 2015'}</p>
-                  <a href="${ctaLinkUrl}" style="display:inline-block;padding:11px 30px;border:1px solid #d4af37;color:#d4af37;text-decoration:none;border-radius:6px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">${(p as any).buttonText ?? 'View Store'} &rarr;</a>
+                  <a href="${ctaLinkUrl}" style="display:inline-block;padding:11px 30px;border:1px solid #d4af37;color:#d4af37;text-decoration:none;border-radius:0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">${(p as any).buttonText ?? 'View Store'} &rarr;</a>
                 </td>
               </tr>
             </table>
@@ -192,8 +203,8 @@ function iconValue(p: CtaBannerProps, id: string): string {
   const subClr = p.subTextColor ?? '#6b7280'
   return `${mobileStyle()}
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${bgClr};border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;background-color:${bgClr};border:1px solid #e5e7eb;border-radius:0;overflow:hidden;">
   <tr>
     <td style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -233,8 +244,8 @@ function ribbon(p: CtaBannerProps, id: string): string {
   const headClr = p.textColor ?? '#ffffff'
   return `${mobileStyle()}
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${bgClr};border-left:4px solid ${ac};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;background-color:${bgClr};border-left:4px solid ${ac};">
   <tr>
     <td style="padding:10px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -243,7 +254,7 @@ function ribbon(p: CtaBannerProps, id: string): string {
             <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${headClr};letter-spacing:0.05em;text-transform:uppercase;">${p.headingText ?? 'STORE-WIDE SALE &mdash; Extra 10% Off All Orders'}</span>
           </td>
           <td valign="middle" style="text-align:right;white-space:nowrap;">
-            <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:6px 16px;border:1px solid ${ac};color:${ac};text-decoration:none;border-radius:4px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.03em;">${(p as any).buttonText ?? 'SHOP NOW'}</a>
+            <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:6px 16px;border:1px solid ${ac};color:${ac};text-decoration:none;border-radius:0;font-family:Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:0.03em;">${(p as any).buttonText ?? 'SHOP NOW'}</a>
           </td>
         </tr>
       </table>
@@ -259,13 +270,13 @@ function gradientHero(p: CtaBannerProps, id: string): string {
   const ac = accent(p)
   return `${mobileStyle()}
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;border-radius:12px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-radius:0;overflow:hidden;">
   <tr>
     <td style="background:linear-gradient(135deg,${p.gradientFrom ?? '#7530fb'} 0%,#2d1b8e 50%,#0a0a0f 100%);${pad(p)}text-align:center;">
       <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:900;color:${headClr};letter-spacing:0.02em;line-height:1.25;">${p.headingText ?? 'Buy with Confidence Today'}</p>
       <p style="margin:0 0 22px;font-family:Arial,sans-serif;font-size:14px;color:${subClr};line-height:1.7;">${p.subText ?? 'Trusted eBay seller with 100% positive feedback &bull; Same-day dispatch'}</p>
-      <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:14px 36px;background-color:#ffffff;color:${ac};text-decoration:none;border-radius:8px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;letter-spacing:0.03em;">${(p as any).buttonText ?? 'Shop Our Store'} &rarr;</a>
+      <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:14px 36px;background-color:#ffffff;color:${ac};text-decoration:none;border-radius:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;letter-spacing:0.03em;">${(p as any).buttonText ?? 'Shop Our Store'} &rarr;</a>
     </td>
   </tr>
 </table>`
@@ -279,23 +290,23 @@ function socialProof(p: CtaBannerProps, id: string): string {
   const subClr = p.subTextColor ?? '#6b7280'
   return `${mobileStyle()}
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${bgClr};border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;background-color:${bgClr};border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
   <tr>
     <td style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <!-- Stars + Rating -->
-          <td class="ctab-col" valign="middle" style="width:55%;padding-right:20px;border-right:1px solid #e5e7eb;">
+          <td class="ctab-col ctab-social-left" valign="middle" style="width:55%;padding-right:20px;border-right:1px solid rgba(150,150,150,0.25);">
             <p style="margin:0 0 2px;font-family:Arial,sans-serif;font-size:24px;color:#f59e0b;line-height:1;">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
             <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:900;color:${ac};line-height:1.1;">4.9 <span style="font-size:16px;font-weight:600;color:${headClr};">/ 5</span></p>
             <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${subClr};">2,400+ Verified Sales &bull; 100% Positive Feedback</p>
           </td>
           <!-- Tagline + CTA -->
-          <td class="ctab-col ctab-pt" valign="middle" style="width:45%;padding-left:20px;">
+          <td class="ctab-col ctab-social-right" valign="middle" style="width:45%;padding-left:20px;">
             <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headClr};line-height:1.4;">${p.headingText ?? 'Trusted by thousands of happy buyers'}</p>
             <p style="margin:0 0 12px;font-family:Arial,sans-serif;font-size:12px;color:${subClr};">${p.subText ?? 'Authorised UK retailer since 2015'}</p>
-            <a href="${(p as any).linkUrl ?? '#'}" style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${ac};text-decoration:none;border-bottom:1px solid ${ac};padding-bottom:1px;">${(p as any).buttonText ?? 'View Our Store'} &rarr;</a>
+            <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${ac};text-decoration:none;border-bottom:1px solid ${ac};padding-bottom:1px;">${(p as any).buttonText ?? 'View Our Store'} &rarr;</a>
           </td>
         </tr>
       </table>
@@ -310,24 +321,31 @@ function announcement(p: CtaBannerProps, id: string): string {
   const headClr = p.textColor ?? '#1e1535'
   const bgTint = (p as any).bgColor ?? '#f5f0ff'
   return `${mobileStyle()}
+<style>
+@media only screen and (max-width:600px){
+  .ctab-ann-tag{display:block!important;width:100%!important;text-align:center!important;padding:0!important;margin-bottom:6px!important;}
+  .ctab-ann-text{display:block!important;width:100%!important;text-align:center!important;padding:0!important;margin-bottom:6px!important;}
+  .ctab-ann-date{display:block!important;width:100%!important;text-align:center!important;padding:0!important;}
+}
+</style>
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${bgTint};border:1px solid ${ac}22;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;background-color:${bgTint};border:1px solid ${ac}22;">
   <tr>
     <td style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <!-- Announcement pill -->
-          <td valign="middle" style="white-space:nowrap;padding-right:14px;">
-            <span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:0.1em;text-transform:uppercase;">ANNOUNCEMENT</span>
+          <!-- Announcement pill (Centered on mobile) -->
+          <td class="ctab-ann-tag" valign="middle" style="white-space:nowrap;padding-right:12px;width:1%;">
+            <span style="display:inline-block;background-color:${ac};color:#ffffff;font-family:Arial,sans-serif;font-size:10px;font-weight:800;padding:4px 10px;border-radius:0;letter-spacing:0.1em;text-transform:uppercase;">ANNOUNCEMENT</span>
           </td>
-          <!-- Headline -->
-          <td valign="middle" style="padding-right:14px;">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:600;color:${headClr};letter-spacing:0.05em;">${p.headingText ?? 'New Returns Policy — Effective 1st November 2025'}</span>
+          <!-- Headline (Centered on mobile) -->
+          <td class="ctab-ann-text" valign="middle" style="padding-right:12px;">
+            <span style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${headClr};letter-spacing:0.02em;line-height:1.4;">${p.headingText ?? 'New Returns Policy — Effective 1st November 2025'}</span>
           </td>
-          <!-- Date pill -->
-          <td valign="middle" style="white-space:nowrap;text-align:right;" class="ctab-hide-mobile">
-            <span style="display:inline-block;background-color:#e5e7eb;color:#6b7280;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:0.05em;">TODAY ONLY</span>
+          <!-- Date pill (Centered on mobile) -->
+          <td class="ctab-ann-date" valign="middle" style="white-space:nowrap;text-align:right;width:1%;">
+            <span style="display:inline-block;background-color:#e5e7eb;color:#6b7280;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:4px 10px;border-radius:0;letter-spacing:0.05em;">TODAY ONLY</span>
           </td>
         </tr>
       </table>
@@ -342,20 +360,26 @@ function twoTone(p: CtaBannerProps, id: string): string {
   const headClr = p.textColor ?? '#ffffff'
   const subClr = p.subTextColor ?? '#6b7280'
   return `${mobileStyle()}
+<style>
+@media only screen and (max-width:600px){
+  .ctab-twotone-top{text-align:center!important;padding:20px 16px!important;}
+  .ctab-twotone-bottom{text-align:center!important;padding:20px 16px!important;}
+}
+</style>
 <!--[riazify:cta_banner:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;border-radius:10px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-radius:0;overflow:hidden;">
   <tr>
-    <!-- Left panel: accent bg, white text -->
-    <td class="ctab-col" valign="middle" style="width:50%;background-color:${ac};padding:${p.paddingTop ?? 24}px 24px ${p.paddingBottom ?? 24}px 24px;">
+    <!-- Top panel on mobile: accent bg, white text (Centered) -->
+    <td class="ctab-col ctab-twotone-top" valign="middle" style="width:50%;background-color:${ac};padding:${p.paddingTop ?? 24}px 24px ${p.paddingBottom ?? 24}px 24px;box-sizing:border-box;">
       <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:900;color:${headClr};line-height:1.3;">${p.headingText ?? 'Unsure About Sizing?'}</p>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">We measure every item before listing. No surprises.</p>
+      <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.6;">We measure every item before listing. No surprises.</p>
     </td>
-    <!-- Right panel: white bg, dark text + CTA -->
-    <td class="ctab-col ctab-pt" valign="middle" style="width:50%;background-color:#ffffff;padding:${p.paddingTop ?? 24}px 24px ${p.paddingBottom ?? 24}px 24px;">
-      <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:900;color:#1e1535;line-height:1.3;">${p.subText ?? 'Our Experts Are Here.'}</p>
+    <!-- Bottom panel on mobile: white bg (Text & Button Centered in middle) -->
+    <td class="ctab-col ctab-twotone-bottom" valign="middle" style="width:50%;background-color:#ffffff;padding:${p.paddingTop ?? 24}px 24px ${p.paddingBottom ?? 24}px 24px;box-sizing:border-box;">
+      <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:900;color:#1e1535;line-height:1.3;">${p.subText ?? 'Our Experts Are Here.'}</p>
       <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:13px;color:${subClr};line-height:1.6;">Message us — we respond within the hour.</p>
-      <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:11px 24px;background-color:${ac};color:#ffffff;text-decoration:none;border-radius:6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;">${(p as any).buttonText ?? 'Ask a Question'} &rarr;</a>
+      <a href="${(p as any).linkUrl ?? '#'}" style="display:inline-block;padding:12px 28px;background-color:${ac};color:#ffffff;text-decoration:none;border-radius:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:800;">${(p as any).buttonText ?? 'Shop Now'} &rarr;</a>
     </td>
   </tr>
 </table>`

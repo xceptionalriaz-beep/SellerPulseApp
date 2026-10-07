@@ -153,7 +153,7 @@ function ebayBlueOfficialShield(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border-radius:10px;overflow:hidden;background-color:${bgCol};box-shadow:0 4px 14px rgba(0,83,160,0.18);">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border-radius:0;overflow:hidden;background-color:${bgCol};margin:0;border-collapse:collapse;table-layout:fixed;box-shadow:0 4px 14px rgba(0,83,160,0.18);">
   <tr>
     <td style="${pad(p, 20, 24, 20, 24)}text-align:center;box-sizing:border-box;">
       <!-- Shield Emblem & Category Tag -->
@@ -201,7 +201,7 @@ function luxuryAtelierWaxSeal(p: any, id: string): string {
   const romanNumerals = ['I', 'II', 'III', 'IV']
   const cardsHtml = points.slice(0, 3).map((pt, i) => {
     return `<td width="33.33%" valign="top" style="padding:5px;box-sizing:border-box;">
-      <div style="background-color:#121214;border:1px solid #27272a;border-top:2px solid ${gold};padding:12px 10px;text-align:center;box-sizing:border-box;border-radius:4px;">
+      <div style="background-color:#121214;border:1px solid #27272a;border-top:2px solid ${gold};padding:12px 10px;text-align:center;box-sizing:border-box;border-radius:0;">
         <div style="color:${gold};font-size:10px;letter-spacing:1px;font-weight:700;font-family:Arial,sans-serif;">
           ${romanNumerals[i] ?? '•'}. PILLAR
         </div>
@@ -215,10 +215,10 @@ function luxuryAtelierWaxSeal(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:8px;background-color:${bgCol};box-shadow:0 6px 24px rgba(0,0,0,0.5);">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:0;background-color:${bgCol};box-shadow:0 6px 24px rgba(0,0,0,0.5);">
   <tr>
     <td style="padding:4px;box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(212,175,55,0.4);border-radius:4px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(212,175,55,0.4);border-radius:0;">
         <!-- Crest Header -->
         <tr>
           <td style="background-color:#141416;border-bottom:1px solid ${gold};padding:18px 20px 14px 20px;text-align:center;box-sizing:border-box;">
@@ -289,7 +289,7 @@ function sneakerStreetwearPass(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #27272a;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #27272a;border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Top Hangtag Header -->
   <tr>
     <td style="background-color:#121216;border-bottom:2px solid ${volt};padding:10px 16px;box-sizing:border-box;">
@@ -364,7 +364,7 @@ function securityTamperEvident(p: any, id: string): string {
 
   const itemsHtml = points.map(pt => {
     return `<td width="33.33%" valign="top" style="padding:5px;box-sizing:border-box;">
-      <div style="background-color:rgba(15,23,42,0.8);border:1px solid #334155;border-radius:6px;padding:10px 8px;text-align:center;box-sizing:border-box;">
+      <div style="background-color:rgba(15,23,42,0.8);border:1px solid #334155;border-radius:0;padding:10px 8px;text-align:center;box-sizing:border-box;">
         <div style="font-size:14px;margin-bottom:3px;">🔒</div>
         <div style="color:#ffffff;font-size:12px;font-weight:800;">${pt.title}</div>
         <div style="color:#94a3b8;font-size:10px;margin-top:2px;">Audit Confirmed</div>
@@ -374,7 +374,7 @@ function securityTamperEvident(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #334155;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #334155;border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Holographic Simulated Gradient Band -->
   <tr>
     <td style="background:linear-gradient(90deg, #0284c7 0%, #7c3aed 50%, #059669 100%);padding:4px 16px;text-align:center;box-sizing:border-box;">
@@ -432,7 +432,7 @@ function psaGradedSlabVault(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #cbd5e1;border-radius:8px;overflow:hidden;background-color:${bgCol};box-shadow:0 3px 12px rgba(0,0,0,0.06);">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #cbd5e1;border-radius:0;overflow:hidden;background-color:${bgCol};box-shadow:0 3px 12px rgba(0,0,0,0.06);">
   <!-- Top Red Slab Label Header -->
   <tr>
     <td style="background-color:${red};padding:10px 18px;box-sizing:border-box;">
@@ -480,7 +480,7 @@ function psaGradedSlabVault(p: any, id: string): string {
   <!-- Criteria Matrix Bar -->
   <tr>
     <td style="padding:8px 14px 14px 14px;box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 4px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:0;padding:8px 4px;">
         <tr>
           ${rowsHtml}
         </tr>
@@ -515,7 +515,7 @@ function manufacturerOemSeal(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #334155;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #334155;border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Top Stamped Header -->
   <tr>
     <td style="background-color:#0f172a;border-bottom:1px solid #334155;padding:8px 16px;box-sizing:border-box;">
@@ -581,7 +581,7 @@ function swissMinimalistDossier(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:8px;background-color:${bgCol};">
+  style="width:100%;max-width:100%;box-sizing:border-box;border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:0;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -629,7 +629,7 @@ function tripleBadgeCrestMatrix(p: any, id: string): string {
   const icons = ['🛡', '🔍', '↩']
   const cardsHtml = points.slice(0, 3).map((pt, i) => {
     return `<td width="33.33%" valign="top" style="padding:6px;box-sizing:border-box;">
-      <div style="background-color:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px 10px;text-align:center;box-sizing:border-box;">
+      <div style="background-color:#f8fafc;border:1.5px solid #e2e8f0;border-radius:0;padding:14px 10px;text-align:center;box-sizing:border-box;">
         <div style="font-size:20px;margin-bottom:6px;">${icons[i]}</div>
         <div style="color:${textCol};font-size:13px;font-weight:900;margin-bottom:3px;">${pt.title}</div>
         <div style="color:#64748b;font-size:10.5px;line-height:1.4;">${pt.sub ?? 'Guaranteed 100% Genuine'}</div>
@@ -639,7 +639,7 @@ function tripleBadgeCrestMatrix(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:10px;background-color:${bgCol};box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:0;background-color:${bgCol};margin:0;border-collapse:collapse;table-layout:fixed;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
   <tr>
     <td style="${pad(p, 18, 20, 18, 20)}box-sizing:border-box;">
       <!-- Title -->
@@ -690,7 +690,7 @@ function vintageNotaryParchment(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #d6d3d1;border-radius:6px;background-color:${bgCol};">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #d6d3d1;border-radius:0;background-color:${bgCol};margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
     <td style="padding:4px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #d6d3d1;padding:16px 20px;text-align:center;">
@@ -765,7 +765,7 @@ function sportsMemorabiliaHolotag(p: any, id: string): string {
 
   return `<!--[riazify:authenticity_guarantee:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #1e3a5f;border-radius:8px;overflow:hidden;background-color:${bgCol};box-shadow:0 4px 18px rgba(0,0,0,0.4);">
+  style="width:100%;max-width:100%;box-sizing:border-box;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #1e3a5f;border-radius:0;overflow:hidden;background-color:${bgCol};box-shadow:0 4px 18px rgba(0,0,0,0.4);">
   <!-- Hologram Pass Header -->
   <tr>
     <td style="background-color:#0c1a2e;border-bottom:1px solid #1e3a5f;padding:10px 18px;box-sizing:border-box;">

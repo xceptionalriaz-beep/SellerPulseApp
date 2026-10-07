@@ -18,117 +18,117 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    thumbnail?: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  thumbnail?: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared Helpers & Dynamic Resolvers ─────────────────────────────────────
 
 function pad(p: any, defaultT = 16, defaultR = 24, defaultB = 16, defaultL = 24): string {
-    const top = p.paddingTop ?? defaultT
-    const right = p.paddingRight ?? defaultR
-    const bottom = p.paddingBottom ?? defaultB
-    const left = p.paddingLeft ?? defaultL
-    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+  const top = p.paddingTop ?? defaultT
+  const right = p.paddingRight ?? defaultR
+  const bottom = p.paddingBottom ?? defaultB
+  const left = p.paddingLeft ?? defaultL
+  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
 function font(p: any, defaultFamily = 'Arial, Helvetica, sans-serif'): string {
-    return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
+  return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
 }
 
 export interface ComparisonRow {
-    feature: string
-    ourValue: string
-    competitorValue: string
-    highlight?: boolean
+  feature: string
+  ourValue: string
+  competitorValue: string
+  highlight?: boolean
 }
 
 const DEFAULT_ROWS: ComparisonRow[] = [
-    { feature: 'Quality', ourValue: '★★★★★', competitorValue: '★★★', highlight: true },
-    { feature: 'Warranty', ourValue: '2 Years', competitorValue: '6 Months', highlight: true },
-    { feature: 'UK Stock', ourValue: '✓ Yes', competitorValue: 'X No', highlight: true },
-    { feature: 'Returns', ourValue: '30 Days', competitorValue: '14 Days', highlight: true },
+  { feature: 'Quality', ourValue: '★★★★★', competitorValue: '★★★', highlight: true },
+  { feature: 'Warranty', ourValue: '2 Years', competitorValue: '6 Months', highlight: true },
+  { feature: 'UK Stock', ourValue: '✓ Yes', competitorValue: 'X No', highlight: true },
+  { feature: 'Returns', ourValue: '30 Days', competitorValue: '14 Days', highlight: true },
 ]
 
 function getComparisonRows(p: any): ComparisonRow[] {
-    // If array of 3-element arrays: [['Feature', 'Our Product', 'Competitor'], ['Quality', '★★★★★', '★★★'], ...]
-    if (Array.isArray(p.rows) && p.rows.length > 0) {
-        const list: ComparisonRow[] = []
-        p.rows.forEach((r: any, idx: number) => {
-            if (Array.isArray(r)) {
-                // Skip header row if it matches "Feature"
-                if (idx === 0 && (r[0]?.toLowerCase().includes('feature') || r[1]?.toLowerCase().includes('our'))) {
-                    return
-                }
-                list.push({
-                    feature: r[0] ?? `Feature ${idx}`,
-                    ourValue: r[1] ?? '✓ Included',
-                    competitorValue: r[2] ?? '✕ Not Included',
-                    highlight: true,
-                })
-            } else if (typeof r === 'object' && r !== null) {
-                list.push({
-                    feature: r.feature ?? r.key ?? r.title ?? `Feature ${idx + 1}`,
-                    ourValue: r.ourValue ?? r.ours ?? r.ourProduct ?? r.value ?? '✓ Included',
-                    competitorValue: r.competitorValue ?? r.theirs ?? r.competitor ?? '✕ None',
-                    highlight: r.highlight !== false,
-                })
-            }
+  // If array of 3-element arrays: [['Feature', 'Our Product', 'Competitor'], ['Quality', '★★★★★', '★★★'], ...]
+  if (Array.isArray(p.rows) && p.rows.length > 0) {
+    const list: ComparisonRow[] = []
+    p.rows.forEach((r: any, idx: number) => {
+      if (Array.isArray(r)) {
+        // Skip header row if it matches "Feature"
+        if (idx === 0 && (r[0]?.toLowerCase().includes('feature') || r[1]?.toLowerCase().includes('our'))) {
+          return
+        }
+        list.push({
+          feature: r[0] ?? `Feature ${idx}`,
+          ourValue: r[1] ?? '✓ Included',
+          competitorValue: r[2] ?? '✕ Not Included',
+          highlight: true,
         })
-        if (list.length > 0) return list
-    }
-
-    // If text lines with pipe delimiter: "Quality | ★★★★★ | ★★★"
-    if (typeof p.content === 'string' && p.content.includes('|')) {
-        const lines = p.content.split('\n').filter((l: string) => l.includes('|'))
-        const list: ComparisonRow[] = []
-        lines.forEach((line: string, idx: number) => {
-            const parts = line.split('|').map((s: string) => s.trim())
-            if (idx === 0 && parts[0]?.toLowerCase().includes('feature')) return
-            if (parts.length >= 2) {
-                list.push({
-                    feature: parts[0],
-                    ourValue: parts[1],
-                    competitorValue: parts[2] ?? '✕',
-                    highlight: true,
-                })
-            }
+      } else if (typeof r === 'object' && r !== null) {
+        list.push({
+          feature: r.feature ?? r.key ?? r.title ?? `Feature ${idx + 1}`,
+          ourValue: r.ourValue ?? r.ours ?? r.ourProduct ?? r.value ?? '✓ Included',
+          competitorValue: r.competitorValue ?? r.theirs ?? r.competitor ?? '✕ None',
+          highlight: r.highlight !== false,
         })
-        if (list.length > 0) return list
-    }
+      }
+    })
+    if (list.length > 0) return list
+  }
 
-    return DEFAULT_ROWS
+  // If text lines with pipe delimiter: "Quality | ★★★★★ | ★★★"
+  if (typeof p.content === 'string' && p.content.includes('|')) {
+    const lines = p.content.split('\n').filter((l: string) => l.includes('|'))
+    const list: ComparisonRow[] = []
+    lines.forEach((line: string, idx: number) => {
+      const parts = line.split('|').map((s: string) => s.trim())
+      if (idx === 0 && parts[0]?.toLowerCase().includes('feature')) return
+      if (parts.length >= 2) {
+        list.push({
+          feature: parts[0],
+          ourValue: parts[1],
+          competitorValue: parts[2] ?? '✕',
+          highlight: true,
+        })
+      }
+    })
+    if (list.length > 0) return list
+  }
+
+  return DEFAULT_ROWS
 }
 
 function resolveBg(p: any, fallback = '#ffffff'): string {
-    return p.bgColor ?? p.backgroundColor ?? fallback
+  return p.bgColor ?? p.backgroundColor ?? fallback
 }
 
 function resolveText(p: any, fallback = '#1e1535'): string {
-    return p.textColor ?? fallback
+  return p.textColor ?? fallback
 }
 
 function resolveAccent(p: any, fallback = '#7530fb'): string {
-    return p.accentColor ?? p.ourColor ?? fallback
+  return p.accentColor ?? p.ourColor ?? fallback
 }
 
 function resolveHeaderBg(p: any, fallback = '#7530fb'): string {
-    return p.headerBg ?? p.headerBackground ?? fallback
+  return p.headerBg ?? p.headerBackground ?? fallback
 }
 
 function resolveHeaderText(p: any, fallback = '#ffffff'): string {
-    return p.headerText ?? p.headerTextColor ?? fallback
+  return p.headerText ?? p.headerTextColor ?? fallback
 }
 
 function resolveAltRowBg(p: any, fallback = '#f8f7ff'): string {
-    return p.altRowBg ?? p.rowAltBg ?? fallback
+  return p.altRowBg ?? p.rowAltBg ?? fallback
 }
 
 function resolveBorder(p: any, fallback = '#ede9fe'): string {
-    return p.borderColor ?? p.borderColour ?? fallback
+  return p.borderColor ?? p.borderColour ?? fallback
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -136,20 +136,20 @@ function resolveBorder(p: any, fallback = '#ede9fe'): string {
 // Purple header with 3 columns, clean alternating rows matching user's canvas
 // ─────────────────────────────────────────────────────────────────────────────
 function classicHeaderTable(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const headerBg = resolveHeaderBg(p, '#7530fb')
-    const headerText = resolveHeaderText(p, '#ffffff')
-    const altBg = resolveAltRowBg(p, '#f8f7ff')
-    const borderCol = resolveBorder(p, '#ede9fe')
-    const accent = resolveAccent(p, '#7530fb')
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const headerBg = resolveHeaderBg(p, '#7530fb')
+  const headerText = resolveHeaderText(p, '#ffffff')
+  const altBg = resolveAltRowBg(p, '#f8f7ff')
+  const borderCol = resolveBorder(p, '#ede9fe')
+  const accent = resolveAccent(p, '#7530fb')
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map((r, i) => {
-        const isAlt = i % 2 === 1
-        const rowBg = isAlt ? altBg : '#ffffff'
+  const rowsHtml = rows.map((r, i) => {
+    const isAlt = i % 2 === 1
+    const rowBg = isAlt ? altBg : '#ffffff'
 
-        return `
+    return `
       <tr style="background-color:${rowBg};">
         <td style="padding:11px 16px;font-family:${f};font-size:13px;font-weight:600;color:#1e1535;border:1px solid ${borderCol};width:34%;">
           ${r.feature}
@@ -161,11 +161,11 @@ function classicHeaderTable(p: any, id: string): string {
           ${r.competitorValue}
         </td>
       </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -194,17 +194,17 @@ function classicHeaderTable(p: any, id: string): string {
 // "Our Product" column is physically elevated with winner ribbon & contrast border
 // ─────────────────────────────────────────────────────────────────────────────
 function spotlightWinnerColumn(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const royalBlue = resolveAccent(p, '#2563eb')
-    const emerald = '#16a34a'
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const royalBlue = resolveAccent(p, '#2563eb')
+  const emerald = '#16a34a'
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map((r, i) => {
-        const isAlt = i % 2 === 1
-        const baseBg = isAlt ? '#f8fafc' : '#ffffff'
+  const rowsHtml = rows.map((r, i) => {
+    const isAlt = i % 2 === 1
+    const baseBg = isAlt ? '#f8fafc' : '#ffffff'
 
-        return `
+    return `
       <tr style="border-bottom:1px solid #e2e8f0;">
         <td style="padding:12px 16px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#0f172a;background-color:${baseBg};">
           ${r.feature}
@@ -216,11 +216,11 @@ function spotlightWinnerColumn(p: any, id: string): string {
           ${r.competitorValue}
         </td>
       </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -261,12 +261,12 @@ function spotlightWinnerColumn(p: any, id: string): string {
 // Side-by-side cards with central "VS" medallion badge (Authentic vs Cheap Clones)
 // ─────────────────────────────────────────────────────────────────────────────
 function versusHeadToHeadCards(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const emerald = '#16a34a'
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const emerald = '#16a34a'
+  const rows = getComparisonRows(p)
 
-    const ourPointsHtml = rows.map(r => `
+  const ourPointsHtml = rows.map(r => `
     <div style="padding:7px 10px;background-color:#ffffff;border:1px solid #bbf7d0;border-radius:6px;margin-bottom:6px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
@@ -277,7 +277,7 @@ function versusHeadToHeadCards(p: any, id: string): string {
       </table>
     </div>`).join('')
 
-    const compPointsHtml = rows.map(r => `
+  const compPointsHtml = rows.map(r => `
     <div style="padding:7px 10px;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:6px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
@@ -288,15 +288,46 @@ function versusHeadToHeadCards(p: any, id: string): string {
       </table>
     </div>`).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .vs-table-${id},
+    .vs-table-${id} tbody,
+    .vs-table-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .vs-card-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      margin: 0 auto !important;
+    }
+    .vs-badge-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      padding: 12px 0 !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+    }
+    .vs-badge-col-${id} div {
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table class="vs-table-${id}" width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <!-- Left Card: Our Premium Item -->
-          <td width="48%" valign="top" style="padding:16px;background-color:#f0fdf4;border:2px solid #86efac;border-radius:10px;box-sizing:border-box;">
+          <td class="vs-card-col-${id}" width="48%" valign="top" style="padding:16px;background-color:#f0fdf4;border:2px solid #86efac;border-radius:10px;box-sizing:border-box;">
             <div style="display:inline-block;padding:3px 8px;background-color:#16a34a;border-radius:12px;font-family:Arial,sans-serif;font-size:10px;font-weight:900;color:#ffffff;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">
               ✓ PREMIUM GRADE
             </div>
@@ -307,14 +338,14 @@ function versusHeadToHeadCards(p: any, id: string): string {
           </td>
 
           <!-- Center VS Separator -->
-          <td width="4%" align="center" valign="middle">
+          <td class="vs-badge-col-${id}" width="4%" align="center" valign="middle">
             <div style="width:28px;height:28px;background-color:#0f172a;border-radius:50%;text-align:center;line-height:28px;color:#ffffff;font-family:Arial,sans-serif;font-size:11px;font-weight:900;margin:0 auto;">
               VS
             </div>
           </td>
 
           <!-- Right Card: Generic Competitors -->
-          <td width="48%" valign="top" style="padding:16px;background-color:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;box-sizing:border-box;">
+          <td class="vs-card-col-${id}" width="48%" valign="top" style="padding:16px;background-color:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;box-sizing:border-box;">
             <div style="display:inline-block;padding:3px 8px;background-color:#94a3b8;border-radius:12px;font-family:Arial,sans-serif;font-size:10px;font-weight:800;color:#ffffff;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">
               ✕ CHEAP CLONES
             </div>
@@ -336,17 +367,17 @@ function versusHeadToHeadCards(p: any, id: string): string {
 // Visual performance scorebars (e.g. Build, Longevity, Tolerance) for tools & tech
 // ─────────────────────────────────────────────────────────────────────────────
 function horizontalMetricBars(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const accent = resolveAccent(p, '#2563eb')
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const accent = resolveAccent(p, '#2563eb')
+  const rows = getComparisonRows(p)
 
-    const barsHtml = rows.map((r, i) => {
-        // Generate high vs low percentages for visual bars
-        const ourPct = 95 - (i * 3)
-        const compPct = 40 + (i * 5)
+  const barsHtml = rows.map((r, i) => {
+    // Generate high vs low percentages for visual bars
+    const ourPct = 95 - (i * 3)
+    const compPct = 40 + (i * 5)
 
-        return `
+    return `
       <div style="margin-bottom:12px;padding:12px 14px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
           <tr>
@@ -382,11 +413,11 @@ function horizontalMetricBars(p: any, id: string): string {
           </tr>
         </table>
       </div>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <div style="margin-bottom:12px;">
@@ -409,16 +440,16 @@ function horizontalMetricBars(p: any, id: string): string {
 // Clean engineering matrix with status chips and laboratory certification badge
 // ─────────────────────────────────────────────────────────────────────────────
 function technicalSpecMatrix(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const darkNavy = '#0f172a'
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const darkNavy = '#0f172a'
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map((r, i) => {
-        const isAlt = i % 2 === 1
-        const rowBg = isAlt ? '#f8fafc' : '#ffffff'
+  const rowsHtml = rows.map((r, i) => {
+    const isAlt = i % 2 === 1
+    const rowBg = isAlt ? '#f8fafc' : '#ffffff'
 
-        return `
+    return `
       <tr style="background-color:${rowBg};border-bottom:1px solid #e2e8f0;">
         <td style="padding:10px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:800;color:#0f172a;">
           ${r.feature}
@@ -434,11 +465,11 @@ function technicalSpecMatrix(p: any, id: string): string {
           </span>
         </td>
       </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -466,15 +497,15 @@ function technicalSpecMatrix(p: any, id: string): string {
 // Multi-tier product comparison for variation listings (Standard vs Pro vs Ultra)
 // ─────────────────────────────────────────────────────────────────────────────
 function goodBetterBestTiers(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map((r, i) => {
-        const isAlt = i % 2 === 1
-        const baseBg = isAlt ? '#f8fafc' : '#ffffff'
+  const rowsHtml = rows.map((r, i) => {
+    const isAlt = i % 2 === 1
+    const baseBg = isAlt ? '#f8fafc' : '#ffffff'
 
-        return `
+    return `
       <tr style="border-bottom:1px solid #e2e8f0;">
         <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#0f172a;background-color:${baseBg};">
           ${r.feature}
@@ -489,11 +520,11 @@ function goodBetterBestTiers(p: any, id: string): string {
           ✓ Enhanced
         </td>
       </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -517,11 +548,11 @@ function goodBetterBestTiers(p: any, id: string): string {
 // Wide letter-spaced uppercase typography with delicate 1px hairlines for designer goods
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalistHairlineEditorial(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map(r => `
+  const rowsHtml = rows.map(r => `
     <tr style="border-bottom:1px solid #e4e4e7;">
       <td style="padding:12px 6px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#18181b;letter-spacing:0.5px;">
         ${r.feature}
@@ -534,9 +565,9 @@ function minimalistHairlineEditorial(p: any, id: string): string {
       </td>
     </tr>`).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
       <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:800;letter-spacing:2px;color:#71717a;text-transform:uppercase;margin-bottom:4px;">
@@ -564,17 +595,17 @@ function minimalistHairlineEditorial(p: any, id: string): string {
 // Stealth high-tech matrix for gaming, PC components, audio, tactical gear
 // ─────────────────────────────────────────────────────────────────────────────
 function darkTerminalMatrix(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#090d16')
-    const cyan = '#06b6d4'
-    const emerald = '#10b981'
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#090d16')
+  const cyan = '#06b6d4'
+  const emerald = '#10b981'
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map((r, i) => {
-        const isAlt = i % 2 === 1
-        const rowBg = isAlt ? '#0d1322' : '#090d16'
+  const rowsHtml = rows.map((r, i) => {
+    const isAlt = i % 2 === 1
+    const rowBg = isAlt ? '#0d1322' : '#090d16'
 
-        return `
+    return `
       <tr style="background-color:${rowBg};border-bottom:1px solid #1e293b;">
         <td style="padding:10px 14px;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:700;color:#f8fafc;">
           ${r.feature}
@@ -586,11 +617,11 @@ function darkTerminalMatrix(p: any, id: string): string {
           [- ${r.competitorValue} -]
         </td>
       </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};border:1.5px solid #1e293b;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};border:1.5px solid #1e293b;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;border-bottom:1px solid #1e293b;padding-bottom:8px;">
@@ -629,62 +660,82 @@ function darkTerminalMatrix(p: any, id: string): string {
 // High-converting visual icons with unmistakable green vs red distinction
 // ─────────────────────────────────────────────────────────────────────────────
 function crossReferenceChecklist(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const rows = getComparisonRows(p)
 
-    const rowsHtml = rows.map((r, i) => {
-        const isAlt = i % 2 === 1
-        const rowBg = isAlt ? '#f8fafc' : '#ffffff'
+  const rowsHtml = rows.map((r, i) => {
+    const isAlt = i % 2 === 1
+    const rowBg = isAlt ? '#f8fafc' : '#ffffff'
 
-        return `
+    return `
       <tr style="background-color:${rowBg};border-bottom:1px solid #e2e8f0;">
-        <td style="padding:12px 16px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#0f172a;">
+        <td class="chk-cell-${id}" style="padding:10px 12px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#0f172a;width:32%;">
           ${r.feature}
         </td>
-        <td align="center" style="padding:12px 16px;background-color:#f0fdf4;">
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
+        <td class="chk-cell-${id}" align="center" style="padding:10px 8px;background-color:#f0fdf4;width:34%;">
+          <table width="86" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;width:86px;">
             <tr>
-              <td style="width:20px;height:20px;background-color:#16a34a;border-radius:50%;text-align:center;line-height:20px;color:#ffffff;font-size:11px;font-weight:900;">
-                ✓
+              <td valign="middle" align="left" style="width:20px;line-height:1;padding:0;">
+                <div style="width:18px;height:18px;min-width:18px;min-height:18px;max-width:18px;max-height:18px;background-color:#16a34a;border-radius:50%;text-align:center;line-height:18px;color:#ffffff;font-size:10px;font-weight:900;display:block;">
+                  ✓
+                </div>
               </td>
-              <td style="padding-left:8px;font-family:Arial,sans-serif;font-size:13px;font-weight:900;color:#166534;">
+              <td valign="middle" align="left" style="padding-left:8px;font-family:Arial,sans-serif;font-size:12px;font-weight:900;color:#166534;white-space:nowrap;">
                 ${r.ourValue}
               </td>
             </tr>
           </table>
         </td>
-        <td align="center" style="padding:12px 16px;background-color:#fef2f2;">
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
+        <td class="chk-cell-${id}" align="center" style="padding:10px 8px;background-color:#fef2f2;width:34%;">
+          <table width="94" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;width:94px;">
             <tr>
-              <td style="width:20px;height:20px;background-color:#ef4444;border-radius:50%;text-align:center;line-height:20px;color:#ffffff;font-size:11px;font-weight:900;">
-                ✕
+              <td valign="middle" align="left" style="width:20px;line-height:1;padding:0;">
+                <div style="width:18px;height:18px;min-width:18px;min-height:18px;max-width:18px;max-height:18px;background-color:#ef4444;border-radius:50%;text-align:center;line-height:18px;color:#ffffff;font-size:10px;font-weight:900;display:block;">
+                  ✕
+                </div>
               </td>
-              <td style="padding-left:8px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#991b1b;">
+              <td valign="middle" align="left" style="padding-left:8px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#991b1b;white-space:nowrap;">
                 ${r.competitorValue}
               </td>
             </tr>
           </table>
         </td>
       </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .chk-outer-${id} {
+      padding: 12px 6px !important;
+    }
+    .chk-th-${id} {
+      padding: 10px 4px !important;
+      font-size: 11px !important;
+      letter-spacing: 0 !important;
+    }
+    .chk-cell-${id} {
+      padding: 8px 4px !important;
+      font-size: 11px !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
-    <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td class="chk-outer-${id}" style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="border:1.5px solid #cbd5e1;border-radius:8px;border-collapse:separate;overflow:hidden;background-color:#ffffff;">
+        style="border:1.5px solid #cbd5e1;border-radius:8px;border-collapse:separate;overflow:hidden;background-color:#ffffff;width:100%;">
         <tr style="background-color:#0f172a;">
-          <th width="40%" align="left" style="padding:14px 16px;color:#ffffff;font-family:Arial,sans-serif;font-size:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;">
-            FEATURE CHECKLIST
+          <th class="chk-th-${id}" width="32%" align="left" style="padding:12px 10px;color:#ffffff;font-family:Arial,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;">
+            FEATURE
           </th>
-          <th width="30%" align="center" style="padding:14px 16px;background-color:#16a34a;color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;">
+          <th class="chk-th-${id}" width="34%" align="center" style="padding:12px 8px;background-color:#16a34a;color:#ffffff;font-family:Arial,sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;">
             ✓ OUR PRODUCT
           </th>
-          <th width="30%" align="center" style="padding:14px 16px;background-color:#dc2626;color:#ffffff;font-family:Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;">
-            ✕ COMPETITORS
+          <th class="chk-th-${id}" width="34%" align="center" style="padding:12px 8px;background-color:#dc2626;color:#ffffff;font-family:Arial,sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;">
+            ✕ COMPETITOR
           </th>
         </tr>
         ${rowsHtml}
@@ -700,11 +751,11 @@ function crossReferenceChecklist(p: any, id: string): string {
 // Engineered specifically for 0-scroll rapid phone shopping on eBay app
 // ─────────────────────────────────────────────────────────────────────────────
 function compactMobileSplitPills(p: any, id: string): string {
-    const f = font(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const rows = getComparisonRows(p)
+  const f = font(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const rows = getComparisonRows(p)
 
-    const pillsHtml = rows.map(r => `
+  const pillsHtml = rows.map(r => `
     <div style="margin-bottom:8px;padding:8px 12px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
@@ -725,9 +776,9 @@ function compactMobileSplitPills(p: any, id: string): string {
       </table>
     </div>`).join('')
 
-    return `<!--[riazify:product_comparison:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+  return `<!--[riazify:product_comparison:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 12, 16, 12, 16)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
@@ -760,8 +811,8 @@ function compactMobileSplitPills(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
-    // 1. Classic Header Table
-    'comp-classic-header-table': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 1. Classic Header Table
+  'comp-classic-header-table': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#ede9fe" stroke-width="1"/>
     <rect width="80" height="11" rx="4" fill="#7530fb"/>
     <rect x="5" y="4" width="20" height="3.5" rx="0.5" fill="#ffffff"/>
@@ -780,8 +831,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <line x1="59" y1="24.5" x2="69" y2="24.5" stroke="#9ca3af" stroke-width="1.2"/>
   </svg>`,
 
-    // 2. Spotlight Winner Column
-    'comp-spotlight-winner-column': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 2. Spotlight Winner Column
+  'comp-spotlight-winner-column': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
     <rect width="80" height="10" fill="#0f172a"/>
     {/* Center Elevated Winner Column */}
@@ -802,8 +853,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <circle cx="41" cy="35" r="1.5" fill="#16a34a"/>
   </svg>`,
 
-    // 3. Versus Head-to-Head Cards
-    'comp-versus-head-to-head-cards': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 3. Versus Head-to-Head Cards
+  'comp-versus-head-to-head-cards': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     {/* Left Green Card */}
     <rect x="4" y="5" width="33" height="38" rx="3" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
@@ -823,8 +874,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <line x1="46" y1="30" x2="72" y2="30" stroke="#94a3b8" stroke-width="1.2"/>
   </svg>`,
 
-    // 4. Horizontal Metric Bars
-    'comp-horizontal-metric-bars': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 4. Horizontal Metric Bars
+  'comp-horizontal-metric-bars': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <rect x="5" y="4" width="22" height="3" rx="1" fill="#2563eb"/>
     {/* Row 1 */}
@@ -841,8 +892,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <rect x="5" y="39" width="52" height="3.5" rx="1.5" fill="#2563eb"/>
   </svg>`,
 
-    // 5. Technical Spec Matrix
-    'comp-technical-spec-matrix': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 5. Technical Spec Matrix
+  'comp-technical-spec-matrix': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
     <rect width="80" height="9" fill="#0f172a"/>
     <line x1="4" y1="4.5" x2="24" y2="4.5" stroke="#ffffff" stroke-width="1.2"/>
@@ -856,8 +907,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <rect x="33" y="30" width="16" height="4.5" rx="1" fill="#ecfdf5"/>
   </svg>`,
 
-    // 6. 3-Tier Good / Better / Best Lineup
-    'comp-good-better-best-tiers': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 6. 3-Tier Good / Better / Best Lineup
+  'comp-good-better-best-tiers': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
     <rect width="80" height="9" fill="#0f172a"/>
     {/* Middle Blue Column */}
@@ -872,8 +923,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <circle cx="40" cy="34" r="1.5" fill="#2563eb"/>
   </svg>`,
 
-    // 7. Minimalist Hairline Editorial
-    'comp-minimalist-hairline-editorial': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 7. Minimalist Hairline Editorial
+  'comp-minimalist-hairline-editorial': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e4e4e7" stroke-width="1"/>
     <line x1="6" y1="8" x2="28" y2="8" stroke="#18181b" stroke-width="1.5"/>
     <line x1="6" y1="14" x2="74" y2="14" stroke="#18181b" stroke-width="1"/>
@@ -888,8 +939,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <circle cx="65" cy="34" r="1.5" stroke="#a1a1aa" fill="none"/>
   </svg>`,
 
-    // 8. Obsidian & Cyan Cyber Matrix
-    'comp-dark-terminal-matrix': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 8. Obsidian & Cyan Cyber Matrix
+  'comp-dark-terminal-matrix': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" stroke-width="1"/>
     <rect width="80" height="8" fill="#0f172a"/>
     <line x1="4" y1="4" x2="28" y2="4" stroke="#06b6d4" stroke-width="1.2"/>
@@ -902,8 +953,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <rect x="30" y="31" width="18" height="4.5" fill="#0c1322" stroke="#06b6d4" stroke-width="0.7"/>
   </svg>`,
 
-    // 9. Bold Green Check vs Red Cross Matrix
-    'comp-cross-reference-checklist': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 9. Bold Green Check vs Red Cross Matrix
+  'comp-cross-reference-checklist': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
     <rect width="80" height="9" fill="#0f172a"/>
     <rect x="33" y="0" width="22" height="9" fill="#16a34a"/>
@@ -919,8 +970,8 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
     <circle cx="69" cy="34" r="2.5" fill="#ef4444"/>
   </svg>`,
 
-    // 10. High-Density Mobile Split Pills
-    'comp-compact-mobile-split-pills': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+  // 10. High-Density Mobile Split Pills
+  'comp-compact-mobile-split-pills': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
     <rect x="4" y="3" width="20" height="4" rx="1" fill="#2563eb"/>
     {/* 3 Mobile Pill Rows */}
@@ -942,18 +993,18 @@ export const PRODUCT_COMPARISON_THUMBNAILS: Record<string, string> = {
 }
 
 export function getProductComparisonThumbnailSvg(id: string): string {
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^comp[-_]/, '')
-        .replace(/_/g, '-')
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^comp[-_]/, '')
+    .replace(/_/g, '-')
 
-    const key = Object.keys(PRODUCT_COMPARISON_THUMBNAILS).find(k => {
-        const kClean = k.toLowerCase().replace(/^comp[-_]/, '').replace(/_/g, '-')
-        return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
-    })
+  const key = Object.keys(PRODUCT_COMPARISON_THUMBNAILS).find(k => {
+    const kClean = k.toLowerCase().replace(/^comp[-_]/, '').replace(/_/g, '-')
+    return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
+  })
 
-    return key ? PRODUCT_COMPARISON_THUMBNAILS[key] : PRODUCT_COMPARISON_THUMBNAILS['comp-classic-header-table']
+  return key ? PRODUCT_COMPARISON_THUMBNAILS[key] : PRODUCT_COMPARISON_THUMBNAILS['comp-classic-header-table']
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -961,76 +1012,76 @@ export function getProductComparisonThumbnailSvg(id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const productComparisonVariants: BlockVariant[] = [
-    {
-        id: 'comp-classic-header-table',
-        label: 'Classic Header Table',
-        description: 'Current classic 3-column comparison table with purple header (KEPT 100% IDENTICAL)',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-classic-header-table'],
-        toHtml(props, id) { return classicHeaderTable(props, id) },
-    },
-    {
-        id: 'comp-spotlight-winner-column',
-        label: 'Spotlight Winner Column',
-        description: 'Elevated green flagship column with official badge and prominent checkmarks',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-spotlight-winner-column'],
-        toHtml(props, id) { return spotlightWinnerColumn(props, id) },
-    },
-    {
-        id: 'comp-versus-head-to-head-cards',
-        label: 'Head-to-Head VS Cards',
-        description: 'Dual-card boxing match layout (Our Authentic vs Cheap Clones) with central VS badge',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-versus-head-to-head-cards'],
-        toHtml(props, id) { return versusHeadToHeadCards(props, id) },
-    },
-    {
-        id: 'comp-horizontal-metric-bars',
-        label: 'Performance Metric Bars',
-        description: 'Visual progress scorebars for durability, speed, battery & tolerance comparisons',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-horizontal-metric-bars'],
-        toHtml(props, id) { return horizontalMetricBars(props, id) },
-    },
-    {
-        id: 'comp-technical-spec-matrix',
-        label: 'Pro Technical Benchmark',
-        description: 'Engineering matrix with status chips and laboratory certification tolerance badge',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-technical-spec-matrix'],
-        toHtml(props, id) { return technicalSpecMatrix(props, id) },
-    },
-    {
-        id: 'comp-good-better-best-tiers',
-        label: '3-Tier Lineup Comparison',
-        description: 'Good / Better / Best 3-tier comparison matrix for multi-variation listings',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-good-better-best-tiers'],
-        toHtml(props, id) { return goodBetterBestTiers(props, id) },
-    },
-    {
-        id: 'comp-minimalist-hairline-editorial',
-        label: 'Minimalist Hairline Split',
-        description: 'Delicate 1px hairlines and uppercase tracking for designer apparel & luxury goods',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-minimalist-hairline-editorial'],
-        toHtml(props, id) { return minimalistHairlineEditorial(props, id) },
-    },
-    {
-        id: 'comp-dark-terminal-matrix',
-        label: 'Obsidian Cyan Cyber HUD',
-        description: 'Stealth dark telemetry differential matrix for gaming peripherals & PC hardware',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-dark-terminal-matrix'],
-        toHtml(props, id) { return darkTerminalMatrix(props, id) },
-    },
-    {
-        id: 'comp-cross-reference-checklist',
-        label: 'Shield Check vs Red Cross',
-        description: 'High-contrast green checkmark vs red cross comparison for fast buyer comprehension',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-cross-reference-checklist'],
-        toHtml(props, id) { return crossReferenceChecklist(props, id) },
-    },
-    {
-        id: 'comp-compact-mobile-split-pills',
-        label: 'Mobile Compact Split Pills',
-        description: 'High-density horizontal comparison pills taking minimal vertical screen height on phones',
-        thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-compact-mobile-split-pills'],
-        toHtml(props, id) { return compactMobileSplitPills(props, id) },
-    },
+  {
+    id: 'comp-classic-header-table',
+    label: 'Classic Header Table',
+    description: 'Current classic 3-column comparison table with purple header (KEPT 100% IDENTICAL)',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-classic-header-table'],
+    toHtml(props, id) { return classicHeaderTable(props, id) },
+  },
+  {
+    id: 'comp-spotlight-winner-column',
+    label: 'Spotlight Winner Column',
+    description: 'Elevated green flagship column with official badge and prominent checkmarks',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-spotlight-winner-column'],
+    toHtml(props, id) { return spotlightWinnerColumn(props, id) },
+  },
+  {
+    id: 'comp-versus-head-to-head-cards',
+    label: 'Head-to-Head VS Cards',
+    description: 'Dual-card boxing match layout (Our Authentic vs Cheap Clones) with central VS badge',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-versus-head-to-head-cards'],
+    toHtml(props, id) { return versusHeadToHeadCards(props, id) },
+  },
+  {
+    id: 'comp-horizontal-metric-bars',
+    label: 'Performance Metric Bars',
+    description: 'Visual progress scorebars for durability, speed, battery & tolerance comparisons',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-horizontal-metric-bars'],
+    toHtml(props, id) { return horizontalMetricBars(props, id) },
+  },
+  {
+    id: 'comp-technical-spec-matrix',
+    label: 'Pro Technical Benchmark',
+    description: 'Engineering matrix with status chips and laboratory certification tolerance badge',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-technical-spec-matrix'],
+    toHtml(props, id) { return technicalSpecMatrix(props, id) },
+  },
+  {
+    id: 'comp-good-better-best-tiers',
+    label: '3-Tier Lineup Comparison',
+    description: 'Good / Better / Best 3-tier comparison matrix for multi-variation listings',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-good-better-best-tiers'],
+    toHtml(props, id) { return goodBetterBestTiers(props, id) },
+  },
+  {
+    id: 'comp-minimalist-hairline-editorial',
+    label: 'Minimalist Hairline Split',
+    description: 'Delicate 1px hairlines and uppercase tracking for designer apparel & luxury goods',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-minimalist-hairline-editorial'],
+    toHtml(props, id) { return minimalistHairlineEditorial(props, id) },
+  },
+  {
+    id: 'comp-dark-terminal-matrix',
+    label: 'Obsidian Cyan Cyber HUD',
+    description: 'Stealth dark telemetry differential matrix for gaming peripherals & PC hardware',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-dark-terminal-matrix'],
+    toHtml(props, id) { return darkTerminalMatrix(props, id) },
+  },
+  {
+    id: 'comp-cross-reference-checklist',
+    label: 'Shield Check vs Red Cross',
+    description: 'High-contrast green checkmark vs red cross comparison for fast buyer comprehension',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-cross-reference-checklist'],
+    toHtml(props, id) { return crossReferenceChecklist(props, id) },
+  },
+  {
+    id: 'comp-compact-mobile-split-pills',
+    label: 'Mobile Compact Split Pills',
+    description: 'High-density horizontal comparison pills taking minimal vertical screen height on phones',
+    thumbnail: PRODUCT_COMPARISON_THUMBNAILS['comp-compact-mobile-split-pills'],
+    toHtml(props, id) { return compactMobileSplitPills(props, id) },
+  },
 ]
 
 // Backwards-compatible aliases
@@ -1042,17 +1093,17 @@ export const comparisonVariants = productComparisonVariants
  * and matches shorthand IDs seamlessly.
  */
 export function getProductComparisonVariant(id: string): BlockVariant {
-    if (!id) return productComparisonVariants[0]
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^comp[-_]/, '')
-        .replace(/_/g, '-')
+  if (!id) return productComparisonVariants[0]
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^comp[-_]/, '')
+    .replace(/_/g, '-')
 
-    const found = productComparisonVariants.find(v => {
-        const vClean = v.id.toLowerCase().replace(/^comp[-_]/, '').replace(/_/g, '-')
-        return v.id === id || vClean === clean || v.id.endsWith(clean) || clean.includes(vClean)
-    })
+  const found = productComparisonVariants.find(v => {
+    const vClean = v.id.toLowerCase().replace(/^comp[-_]/, '').replace(/_/g, '-')
+    return v.id === id || vClean === clean || v.id.endsWith(clean) || clean.includes(vClean)
+  })
 
-    return found ?? productComparisonVariants[0]
+  return found ?? productComparisonVariants[0]
 }

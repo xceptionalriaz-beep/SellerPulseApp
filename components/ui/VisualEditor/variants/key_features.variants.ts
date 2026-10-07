@@ -169,10 +169,7 @@ function resolveSubtitle(p: any, fallback = 'Engineered for uncompromising perfo
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG Icon Helpers (eBay & Webmail Safe Inline SVG Strings)
-// ─────────────────────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
-// 1. CLASSIC CARDS GRID (CURRENT STYLE — 100% KEPT IDENTICAL)
+// 1. CLASSIC CARDS GRID (Current Style — Centered Vertical Stack on Mobile)
 // Clean 2x2 / 4-card bordered grid with crisp icons, bold headers, and descriptive text
 // ─────────────────────────────────────────────────────────────────────────────
 function classicCardsGrid(p: any, id: string): string {
@@ -190,6 +187,18 @@ function classicCardsGrid(p: any, id: string): string {
   const subtitle = resolveSubtitle(p, 'Engineered for uncompromising performance, durability, and seamless installation')
   const items = getFeatures(p)
 
+  const mobileStyle = `<style>
+@media only screen and (max-width:680px) {
+  .feat-classic-row-${id} { display:block !important; width:100% !important; }
+  .feat-classic-col-${id} { display:block !important; width:100% !important; padding:4px 0 !important; }
+  .feat-card-table-${id} { text-align:center !important; }
+  .feat-card-inner-tr-${id} { display:block !important; width:100% !important; text-align:center !important; }
+  .feat-icon-td-${id} { display:block !important; width:100% !important; padding:0 0 10px 0 !important; text-align:center !important; }
+  .feat-icon-box-${id} { margin:0 auto !important; display:inline-block !important; }
+  .feat-text-td-${id} { display:block !important; width:100% !important; text-align:center !important; padding:0 !important; }
+}
+</style>`
+
   // Render cards in pairs for 2-column email/eBay table stability
   const rows: string[] = []
   for (let i = 0; i < items.length; i += 2) {
@@ -197,17 +206,17 @@ function classicCardsGrid(p: any, id: string): string {
     const right = items[i + 1]
 
     rows.push(`
-      <tr>
-        <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
-            <tr>
-              <td valign="top" width="40" style="padding-right:12px;">
-                <div data-feature-index="${i}" style="width:36px;height:36px;border-radius:8px;background:${iconBg};border:1px solid ${iconBorderColor};text-align:center;line-height:36px;cursor:pointer;">
+      <tr class="feat-classic-row-${id}">
+        <td class="feat-classic-col-${id}" width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
+          <table class="feat-card-table-${id}" width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:${cardBg};border:1px solid ${borderCol};border-radius:0;padding:16px;height:100%;box-sizing:border-box;">
+            <tr class="feat-card-inner-tr-${id}">
+              <td class="feat-icon-td-${id}" valign="top" width="40" style="padding-right:12px;">
+                <div data-feature-index="${i}" class="feat-icon-box-${id}" style="width:36px;height:36px;border-radius:0;background:${iconBg};border:1px solid ${iconBorderColor};text-align:center;line-height:36px;cursor:pointer;">
                   ${getIconSvg(left.icon || 'shield', accent, 18)}
                 </div>
               </td>
-              <td valign="top">
+              <td class="feat-text-td-${id}" valign="top">
                 <div style="font-family:${f};font-size:14px;font-weight:700;color:${textCol};margin-bottom:6px;line-height:1.3;">
                   ${left.title}
                 </div>
@@ -219,16 +228,16 @@ function classicCardsGrid(p: any, id: string): string {
           </table>
         </td>
         ${right ? `
-        <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:${cardBg};border:1px solid ${borderCol};border-radius:8px;padding:16px;height:100%;box-sizing:border-box;">
-            <tr>
-              <td valign="top" width="40" style="padding-right:12px;">
-                <div data-feature-index="${i + 1}" style="width:36px;height:36px;border-radius:8px;background:${iconBg};border:1px solid ${iconBorderColor};text-align:center;line-height:36px;cursor:pointer;">
+        <td class="feat-classic-col-${id}" width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
+          <table class="feat-card-table-${id}" width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:${cardBg};border:1px solid ${borderCol};border-radius:0;padding:16px;height:100%;box-sizing:border-box;">
+            <tr class="feat-card-inner-tr-${id}">
+              <td class="feat-icon-td-${id}" valign="top" width="40" style="padding-right:12px;">
+                <div data-feature-index="${i + 1}" class="feat-icon-box-${id}" style="width:36px;height:36px;border-radius:0;background:${iconBg};border:1px solid ${iconBorderColor};text-align:center;line-height:36px;cursor:pointer;">
                   ${getIconSvg(right.icon || 'check', accent, 18)}
                 </div>
               </td>
-              <td valign="top">
+              <td class="feat-text-td-${id}" valign="top">
                 <div style="font-family:${f};font-size:14px;font-weight:700;color:${textCol};margin-bottom:6px;line-height:1.3;">
                   ${right.title}
                 </div>
@@ -244,15 +253,16 @@ function classicCardsGrid(p: any, id: string): string {
   }
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+${mobileStyle}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Header Section -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
         <tr>
           <td>
-            <div style="display:inline-block;padding:3px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;font-family:${f};font-size:10px;font-weight:800;letter-spacing:1px;color:${accent};text-transform:uppercase;margin-bottom:6px;">
+            <div style="display:inline-block;padding:3px 10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:0;font-family:${f};font-size:10px;font-weight:800;letter-spacing:1px;color:${accent};text-transform:uppercase;margin-bottom:6px;">
               ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:20px;font-weight:800;color:${textCol};letter-spacing:-0.3px;margin-bottom:4px;">
@@ -278,6 +288,10 @@ function classicCardsGrid(p: any, id: string): string {
 // 2. TECH BENTO FLAGSHIP (Asymmetrical Modern Bento Grid)
 // 1 large flagship hero card (full width or 60%) + 3 compact technical spec tiles
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. TECH BENTO FLAGSHIP (Asymmetrical Modern Bento Grid — Responsive Mobile)
+// 1 large flagship hero card (full width or 60%) + 3 compact technical spec tiles
+// ─────────────────────────────────────────────────────────────────────────────
 function techBentoFlagship(p: any, id: string): string {
   const f = font(p)
   const bgCol = resolveBg(p, '#ffffff')
@@ -285,21 +299,32 @@ function techBentoFlagship(p: any, id: string): string {
   const borderCol = resolveBorder(p, '#cbd5e1')
   const accent = resolveAccent(p, '#0284c7')
   const descCol = p.descriptionColor ?? '#64748b'
-  const cardBg = p.cardBg ?? '#f8fafc'
   const eyebrow = p.eyebrowText ?? 'BENTO ARCHITECTURE • CORE ATTRIBUTES'
   const heading = resolveHeading(p, 'Engineered Advantages')
   const items = getFeatures(p)
   const hero = items[0]
   const rest = items.slice(1, 4)
 
+  const mobileStyle = `<style>
+@media only screen and (max-width:680px) {
+  .bento-hero-row-${id} { display:block !important; width:100% !important; }
+  .bento-hero-left-${id} { display:block !important; width:100% !important; text-align:center !important; }
+  .bento-hero-left-${id} .bento-badge,
+  .bento-hero-left-${id} .bento-desc { margin-left:auto !important; margin-right:auto !important; text-align:center !important; }
+  .bento-hero-right-${id} { display:block !important; width:100% !important; text-align:center !important; margin-top:14px !important; }
+  .bento-hero-right-${id} > div { margin:0 auto !important; display:inline-block !important; }
+  .bento-tile-${id} { display:block !important; width:100% !important; padding:4px 0 !important; }
+}
+</style>`
+
   const restTilesHtml = rest.map((item, idx) => `
-    <td width="33.33%" valign="top" style="padding:5px;box-sizing:border-box;">
+    <td width="33.33%" valign="top" class="bento-tile-${id}" style="padding:5px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:#f8fafc;border:1px solid ${borderCol};border-radius:8px;padding:14px;box-sizing:border-box;">
+        style="background:#f8fafc;border:1px solid ${borderCol};border-radius:0;padding:14px;box-sizing:border-box;">
         <tr>
           <td>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-family:${f};font-size:9px;font-weight:900;color:#64748b;letter-spacing:1px;background:#e2e8f0;padding:2px 7px;border-radius:4px;text-transform:uppercase;">
+              <span style="font-family:${f};font-size:9px;font-weight:900;color:#64748b;letter-spacing:1px;background:#e2e8f0;padding:2px 7px;border-radius:0;text-transform:uppercase;">
                 ${item.badge || `SPEC 0${idx + 2}`}
               </span>
               ${item.metric ? `<span style="font-family:${f};font-size:10px;font-weight:800;color:${accent};">${item.metric}</span>` : ''}
@@ -317,8 +342,9 @@ function techBentoFlagship(p: any, id: string): string {
   `).join('')
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+${mobileStyle}
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Bento Header -->
@@ -337,24 +363,24 @@ function techBentoFlagship(p: any, id: string): string {
 
       <!-- Flagship Hero Card (Full Width Bento Tier 1) -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);border-radius:10px;border:1px solid #334155;margin-bottom:10px;box-sizing:border-box;">
+        style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);border-radius:0;border:1px solid #334155;margin-bottom:10px;box-sizing:border-box;">
         <tr>
           <td style="padding:20px 24px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td valign="top">
-                  <div style="display:inline-block;padding:3px 8px;background:rgba(2,132,199,0.25);border:1px solid ${accent};border-radius:4px;font-family:${f};font-size:10px;font-weight:800;color:#38bdf8;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
+              <tr class="bento-hero-row-${id}">
+                <td valign="top" class="bento-hero-left-${id}">
+                  <div class="bento-badge" style="display:inline-block;padding:3px 8px;background:rgba(2,132,199,0.25);border:1px solid ${accent};border-radius:0;font-family:${f};font-size:10px;font-weight:800;color:#38bdf8;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">
                     ★ PRIMARY FLAGSHIP ADVANTAGE
                   </div>
                   <div style="font-family:${f};font-size:18px;font-weight:800;color:#ffffff;line-height:1.3;margin-bottom:6px;">
                     ${hero.title}
                   </div>
-                  <div style="font-family:${f};font-size:13px;color:#94a3b8;line-height:1.5;max-width:520px;">
+                  <div class="bento-desc" style="font-family:${f};font-size:13px;color:#94a3b8;line-height:1.5;max-width:520px;">
                     ${hero.description}
                   </div>
                 </td>
-                <td width="110" align="right" valign="middle">
-                  <div style="background:#1e293b;border:1px solid #475569;border-radius:8px;padding:10px 14px;text-align:center;">
+                <td width="110" align="right" valign="middle" class="bento-hero-right-${id}">
+                  <div style="background:#1e293b;border:1px solid #475569;border-radius:0;padding:10px 14px;text-align:center;">
                     <div style="font-family:${f};font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">METRIC</div>
                     <div style="font-family:${f};font-size:14px;font-weight:900;color:#38bdf8;">${hero.metric || 'GRADE A+'}</div>
                   </div>
@@ -398,7 +424,7 @@ function industrialSpecBars(p: any, id: string): string {
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td width="36" valign="middle" align="center">
-              <span style="display:inline-block;width:24px;height:24px;background:#0f172a;color:#ffffff;font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:900;line-height:24px;text-align:center;border-radius:2px;">
+              <span style="display:inline-block;width:24px;height:24px;background:#0f172a;color:#ffffff;font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:900;line-height:24px;text-align:center;border-radius:0;">
                 0${idx + 1}
               </span>
             </td>
@@ -411,7 +437,7 @@ function industrialSpecBars(p: any, id: string): string {
               </div>
             </td>
             <td width="140" align="right" valign="middle">
-              <span style="display:inline-block;padding:4px 8px;background:#fef3c7;border:1px solid #fde68a;border-radius:2px;font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;color:#92400e;text-transform:uppercase;">
+              <span style="display:inline-block;padding:4px 8px;background:#fef3c7;border:1px solid #fde68a;border-radius:0;font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;color:#92400e;text-transform:uppercase;">
                 [ ${item.metric || 'FACTORY VERIFIED'} ]
               </span>
             </td>
@@ -423,13 +449,13 @@ function industrialSpecBars(p: any, id: string): string {
   `).join('')
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Industrial Hazard Stripe Header -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:#0f172a;border-left:5px solid ${accent};border-radius:4px;margin-bottom:12px;box-sizing:border-box;">
+        style="background:#0f172a;border-left:5px solid ${accent};border-radius:0;margin-bottom:12px;box-sizing:border-box;">
         <tr>
           <td style="padding:14px 18px;">
             <div style="font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;">
@@ -492,8 +518,8 @@ function minimalistHairlineEditorial(p: any, id: string): string {
   }
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 20, 24, 24, 24)}box-sizing:border-box;">
       <!-- Editorial Title -->
@@ -546,7 +572,7 @@ function staggeredTimelineFlow(p: any, id: string): string {
       <tr>
         <!-- Timeline Marker Column -->
         <td width="44" valign="top" align="center" style="padding-right:12px;">
-          <div style="width:30px;height:30px;border-radius:15px;background:${idx === 0 ? accent : '#f1f5f9'};border:2px solid ${idx === 0 ? accent : '#cbd5e1'};color:${idx === 0 ? '#ffffff' : '#475569'};font-family:${f};font-size:12px;font-weight:900;line-height:26px;text-align:center;">
+          <div style="width:30px;height:30px;border-radius:0;background:${idx === 0 ? accent : '#f1f5f9'};border:2px solid ${idx === 0 ? accent : '#cbd5e1'};color:${idx === 0 ? '#ffffff' : '#475569'};font-family:${f};font-size:12px;font-weight:900;line-height:26px;text-align:center;">
             ${idx + 1}
           </div>
           ${!isLast ? `<div style="width:2px;height:42px;background:#cbd5e1;margin:4px auto 0 auto;"></div>` : ''}
@@ -554,14 +580,14 @@ function staggeredTimelineFlow(p: any, id: string): string {
         <!-- Step Content Card -->
         <td valign="top" style="padding-bottom:${isLast ? '0' : '16px'};">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background:${cardBg};border:1px solid ${borderCol};border-left:3px solid ${idx === 0 ? accent : '#94a3b8'};border-radius:6px;padding:12px 16px;">
+            style="background:${cardBg};border:1px solid ${borderCol};border-left:3px solid ${idx === 0 ? accent : '#94a3b8'};border-radius:0;padding:12px 16px;">
             <tr>
               <td>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
                   <span style="font-family:${f};font-size:13px;font-weight:800;color:${textCol};">
                     ${item.title}
                   </span>
-                  ${item.badge ? `<span style="font-family:${f};font-size:9px;font-weight:800;color:${accent};background:#eef2ff;padding:2px 6px;border-radius:4px;text-transform:uppercase;">${item.badge}</span>` : ''}
+                  ${item.badge ? `<span style="font-family:${f};font-size:9px;font-weight:800;color:${accent};background:#eef2ff;padding:2px 6px;border-radius:0;text-transform:uppercase;">${item.badge}</span>` : ''}
                 </div>
                 <div style="font-family:${f};font-size:12px;color:${descCol};line-height:1.45;">
                   ${item.description}
@@ -575,8 +601,8 @@ function staggeredTimelineFlow(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Timeline Header -->
@@ -624,14 +650,14 @@ function splitHeroBenefitRail(p: any, id: string): string {
     <tr>
       <td style="padding-bottom:8px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"
-          style="background:#ffffff;border:1px solid ${borderCol};border-radius:6px;padding:10px 14px;box-sizing:border-box;">
+          style="background:#ffffff;border:1px solid ${borderCol};border-radius:0;padding:10px 14px;box-sizing:border-box;">
           <tr>
             <td width="28" valign="top">
-              <span style="display:inline-block;width:20px;height:20px;border-radius:10px;background:#ecfdf5;border:1px solid #a7f3d0;color:#059669;font-size:11px;font-weight:900;line-height:18px;text-align:center;">
-                ✓
-              </span>
+              <div data-feature-index="${idx}" style="display:inline-block;width:22px;height:22px;border-radius:0;background:#ecfdf5;border:1px solid #a7f3d0;text-align:center;line-height:20px;cursor:pointer;vertical-align:middle;box-sizing:border-box;">
+                ${getIconSvg(item.icon || 'check', '#059669', 13)}
+              </div>
             </td>
-            <td valign="top" style="padding-left:6px;">
+            <td valign="top" style="padding-left:8px;">
               <div style="font-family:${f};font-size:13px;font-weight:700;color:${textCol};">
                 ${item.title}
               </div>
@@ -646,16 +672,16 @@ function splitHeroBenefitRail(p: any, id: string): string {
   `).join('')
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:#f8fafc;border:1px solid ${borderCol};border-radius:10px;overflow:hidden;">
+        style="background:#f8fafc;border:1px solid ${borderCol};border-radius:0;overflow:hidden;">
         <tr>
           <!-- Left 35% Branded Spine Column -->
           <td width="35%" valign="top" style="background:#0f172a;padding:24px 20px;box-sizing:border-box;">
-            <div style="display:inline-block;padding:3px 8px;background:rgba(5,150,105,0.25);border:1px solid ${accent};border-radius:4px;font-family:${f};font-size:9px;font-weight:800;color:#34d399;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">
+            <div style="display:inline-block;padding:3px 8px;background:rgba(5,150,105,0.25);border:1px solid ${accent};border-radius:0;font-family:${f};font-size:9px;font-weight:800;color:#34d399;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">
               ${eyebrow}
             </div>
             <div style="font-family:${f};font-size:18px;font-weight:800;color:#ffffff;line-height:1.3;margin-bottom:8px;">
@@ -664,7 +690,7 @@ function splitHeroBenefitRail(p: any, id: string): string {
             <div style="font-family:${f};font-size:12px;color:#94a3b8;line-height:1.5;margin-bottom:16px;">
               ${pledgeText}
             </div>
-            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:10px;text-align:center;">
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:0;padding:10px;text-align:center;">
               <div style="font-family:${f};font-size:10px;font-weight:800;color:#34d399;text-transform:uppercase;">
                 ${guaranteeTitle}
               </div>
@@ -705,7 +731,7 @@ function cyberDarkTelemetry(p: any, id: string): string {
   const tilesHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:6px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:${cardBg};border:1px solid ${borderCol};border-top:2px solid ${idx === 0 ? accent : '#334155'};border-radius:4px;padding:14px;box-sizing:border-box;">
+        style="background:${cardBg};border:1px solid ${borderCol};border-top:2px solid ${idx === 0 ? accent : '#334155'};border-radius:0;padding:14px;box-sizing:border-box;">
         <tr>
           <td>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -739,8 +765,8 @@ function cyberDarkTelemetry(p: any, id: string): string {
   }
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Cyber HUD Header -->
@@ -755,7 +781,7 @@ function cyberDarkTelemetry(p: any, id: string): string {
             </div>
           </td>
           <td align="right" valign="middle">
-            <span style="display:inline-block;padding:3px 8px;background:rgba(6,182,212,0.15);border:1px solid ${accent};border-radius:2px;font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;color:${accent};">
+            <span style="display:inline-block;padding:3px 8px;background:rgba(6,182,212,0.15);border:1px solid ${accent};border-radius:0;font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;color:${accent};">
               STATUS: PASS 100%
             </span>
           </td>
@@ -793,7 +819,7 @@ function circularBadgeQuadrant(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center" style="padding-bottom:10px;">
-            <div data-feature-index="${idx}" style="width:48px;height:48px;border-radius:24px;background:${iconBg};border:2px solid ${iconBorderColor};text-align:center;line-height:48px;cursor:pointer;">
+            <div data-feature-index="${idx}" style="width:48px;height:48px;border-radius:0;background:${iconBg};border:2px solid ${iconBorderColor};text-align:center;line-height:48px;cursor:pointer;">
               ${getIconSvg(item.icon || 'shield', accent, 22)}
             </div>
           </td>
@@ -813,8 +839,8 @@ function circularBadgeQuadrant(p: any, id: string): string {
   `).join('')
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Centered Section Header -->
@@ -833,7 +859,7 @@ function circularBadgeQuadrant(p: any, id: string): string {
 
       <!-- 4-Column Circular Emblem Row -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:#faf5ff;border:1px solid #ede9fe;border-radius:10px;padding:12px 6px;">
+        style="background:#faf5ff;border:1px solid #ede9fe;border-radius:0;padding:12px 6px;">
         <tr>
           ${columnsHtml}
         </tr>
@@ -863,7 +889,7 @@ function accordionStyleLedger(p: any, id: string): string {
     <tr>
       <td style="padding-bottom:6px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0"
-          style="background:#ffffff;border:1px solid ${borderCol};border-radius:6px;overflow:hidden;box-sizing:border-box;">
+          style="background:#ffffff;border:1px solid ${borderCol};border-radius:0;overflow:hidden;box-sizing:border-box;">
           <tr style="background:${cardBg};border-bottom:1px solid ${borderCol};">
             <td style="padding:10px 14px;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -879,7 +905,7 @@ function accordionStyleLedger(p: any, id: string): string {
                     </span>
                   </td>
                   <td align="right" valign="middle">
-                    <span style="display:inline-block;padding:2px 8px;background:#fff7ed;border:1px solid #ffedd5;border-radius:4px;font-family:${f};font-size:10px;font-weight:700;color:${accent};text-transform:uppercase;">
+                    <span style="display:inline-block;padding:2px 8px;background:#fff7ed;border:1px solid #ffedd5;border-radius:0;font-family:${f};font-size:10px;font-weight:700;color:${accent};text-transform:uppercase;">
                       ${item.badge || 'VERIFIED'}
                     </span>
                   </td>
@@ -900,8 +926,8 @@ function accordionStyleLedger(p: any, id: string): string {
   `).join('')
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 24, 20, 24)}box-sizing:border-box;">
       <!-- Ledger Header -->
@@ -946,10 +972,12 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
   const chipsHtml = items.map((item, idx) => `
     <td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background:${cardBg};border:1px solid ${borderCol};border-radius:20px;padding:6px 12px;box-sizing:border-box;">
+        style="background:${cardBg};border:1px solid ${borderCol};border-radius:0;padding:6px 12px;box-sizing:border-box;">
         <tr>
           <td width="20" valign="middle">
-            <span style="color:${accent};font-size:12px;font-weight:900;">✓</span>
+            <div data-feature-index="${idx}" style="display:inline-block;cursor:pointer;line-height:1;vertical-align:middle;">
+              ${getIconSvg(item.icon || 'check', accent, 13)}
+            </div>
           </td>
           <td valign="middle">
             <div style="font-family:${f};font-size:11px;font-weight:800;color:${textCol};line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
@@ -975,8 +1003,8 @@ function compactMobileCapsuleStrip(p: any, id: string): string {
   }
 
   return `<!--[riazify:key_features:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
+<table border-radius:width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;max-width:100% !important;0;font-family:${f};border-collapse:collapse;margin:0 auto;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 12, 18, 14, 18)}box-sizing:border-box;">
       <!-- Mobile Micro Header -->

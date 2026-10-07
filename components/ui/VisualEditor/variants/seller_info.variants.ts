@@ -29,12 +29,35 @@ function badge(p: SellerInfoProps): string {
   return `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;margin-left:8px;vertical-align:middle;letter-spacing:0.03em;">${p.badgeText ?? 'Top Rated Seller'}</span>`
 }
 
+const SAMPLE_LOGO_URL = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=160&auto=format&fit=crop&q=80'
+
+function renderSellerAvatar(
+  p: any,
+  size: number,
+  shape: 'circle' | 'rounded' = 'circle',
+  extraWrapStyle: string = ''
+): string {
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+  const logoUrl = p.logoUrl || p.avatarUrl || SAMPLE_LOGO_URL
+  const borderRadius = shape === 'circle' ? '50%' : '10px'
+
+  return `<div data-slot="logo" data-slot-type="image" data-prop="logoUrl" data-tab="image" data-open-tab="image" data-label="Store Logo" title="Click to replace logo" style="display:inline-block;cursor:pointer;position:relative;width:${size}px;height:${size}px;border-radius:${borderRadius};vertical-align:middle;box-sizing:border-box;background-color:#ffffff;line-height:0;${extraWrapStyle}">
+    <img src="${logoUrl}" alt="${sellerDisplayName}" style="width:100%;height:100%;border-radius:${borderRadius};object-fit:cover;display:block;box-sizing:border-box;margin:0;padding:0;" />
+  </div>`
+}
+
 function mobileStyle(): string {
   return `<style>
-@media only screen and (max-width:600px){
+@media only screen and (max-width:680px){
+  .si-table{width:100%!important;min-width:100%!important;}
+  .si-pad{padding:14px 10px!important;}
   .si-col{display:block!important;width:100%!important;text-align:center!important;}
-  .si-avatar{margin:0 auto 12px!important;}
-  .si-right{padding-left:0!important;padding-top:12px!important;}
+  .si-avatar{margin:0 auto 10px!important;text-align:center!important;width:100%!important;}
+  .si-avatar table{margin:0 auto!important;}
+  .si-right{padding-left:0!important;padding-top:6px!important;text-align:center!important;}
+  .si-metrics{margin:0 auto!important;width:100%!important;text-align:center!important;}
+  .si-metrics tr{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:4px 10px!important;}
+  .si-metrics td{display:inline-block!important;padding:2px 4px!important;text-align:center!important;}
   .si-grid-cell{display:block!important;width:100%!important;padding-bottom:12px!important;}
   .si-card{display:block!important;width:100%!important;margin-bottom:10px!important;}
   .si-hide{display:none!important;}
@@ -45,27 +68,29 @@ function mobileStyle(): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 1 — authority-split
-// Two-column: avatar/logo left + store identity + metrics right
+// Two-column: avatar/logo left + store identity + metrics right (Centered on Mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 function authoritySplit(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
   const text = txt(p)
   const background = bg(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="si-table"
+  style="width:100% !important;min-width:100% !important;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
   <tr>
-    <td style="${pad(p)}">
+    <td class="si-pad" style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="si-col si-avatar" valign="top" style="width:90px;">
-            <table cellpadding="0" cellspacing="0" border="0">
+          <!-- Avatar: Centered with its TOP RATED pill on Mobile -->
+          <td class="si-col si-avatar" valign="top" style="width:90px;text-align:center;">
+            <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
-                <td style="width:72px;height:72px;background-color:${accent};border-radius:50%;text-align:center;vertical-align:middle;">
-                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#ffffff;line-height:72px;">
-                    ${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}
-                  </span>
+                <td style="width:72px;height:72px;text-align:center;vertical-align:middle;">
+                  ${renderSellerAvatar(p, 72, 'circle')}
                 </td>
               </tr>
               <tr>
@@ -75,14 +100,16 @@ function authoritySplit(p: SellerInfoProps, id: string): string {
               </tr>
             </table>
           </td>
+          <!-- Details: Centered on Mobile -->
           <td class="si-col si-right" valign="middle" style="padding-left:16px;">
             <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:${text};">
-              ${p.sellerName ?? '{{SELLER_NAME}}'}${badge(p)}
+              ${sellerDisplayName}${badge(p)}
             </p>
             <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;">
               ${p.tagline ?? 'Trusted eBay Seller Since 2010'}
             </p>
-            <table cellpadding="0" cellspacing="0" border="0">
+            <!-- Metrics: Centered row with feedback and authorized partner -->
+            <table class="si-metrics" cellpadding="0" cellspacing="0" border="0" align="left" style="margin:0;">
               <tr>
                 <td style="padding-right:16px;">
                   <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};">&#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}</span>
@@ -103,38 +130,75 @@ function authoritySplit(p: SellerInfoProps, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 2 — inline-ribbon
-// Single-row sleek horizontal ribbon, left accent border
+// Single-row sleek horizontal ribbon (Clean responsive stack on mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 function inlineRibbon(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
   const text = txt(p)
   const background = bg(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${background};border-left:4px solid ${accent};">
+<style>
+  @media only screen and (max-width:680px){
+    .sir-container-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .sir-pad-${id} {
+      padding: 12px 10px !important;
+      text-align: center !important;
+    }
+    .sir-tr-${id} {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 5px !important;
+      width: 100% !important;
+    }
+    .sir-cell-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 !important;
+    }
+    .sir-dot-${id} {
+      display: none !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="sir-container-${id}"
+  style="width:100% !important;min-width:100% !important;background-color:${background};border-left:4px solid ${accent};border:1px solid #e5e7eb;border-left-width:4px;border-radius:4px;">
   <tr>
-    <td style="${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td valign="middle" style="width:24px;padding-right:10px;">
-            <svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 1L2 4.5V10C2 14.5 5.5 18.7 10 20C14.5 18.7 18 14.5 18 10V4.5L10 1Z" fill="${accent}" opacity="0.15" stroke="${accent}" stroke-width="1.5" stroke-linejoin="round"/>
-              <path d="M7 11L9 13L13 9" stroke="${accent}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+    <td class="sir-pad-${id}" style="${pad(p)}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+        <tr class="sir-tr-${id}">
+          <!-- Identity Line: Icon + Store Name + Top Rated Badge -->
+          <td class="sir-cell-${id}" valign="middle" style="padding-right:10px;">
+            <span style="display:inline-block;vertical-align:middle;margin-right:8px;">
+              <svg width="18" height="20" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">
+                <path d="M10 1L2 4.5V10C2 14.5 5.5 18.7 10 20C14.5 18.7 18 14.5 18 10V4.5L10 1Z" fill="${accent}" opacity="0.15" stroke="${accent}" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M7 11L9 13L13 9" stroke="${accent}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${text};vertical-align:middle;">${sellerDisplayName}</span>
+            <span style="display:inline-block;vertical-align:middle;">${badge(p)}</span>
           </td>
-          <td valign="middle" style="padding-right:10px;">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${text};">${p.sellerName ?? '{{SELLER_NAME}}'}</span>
+          <!-- Dot Separator (Desktop only) -->
+          <td class="sir-dot-${id}" valign="middle" style="padding-right:10px;color:#d1d5db;font-size:16px;">&bull;</td>
+          <!-- Tagline -->
+          <td class="sir-cell-${id}" valign="middle" style="padding-right:10px;">
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</span>
           </td>
-          <td valign="middle" style="padding-right:10px;color:#d1d5db;font-size:16px;">&bull;</td>
-          <td valign="middle" style="padding-right:10px;">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;">${p.tagline ?? 'Trusted Seller Since 2010'}</span>
+          <!-- Dot Separator (Desktop only) -->
+          <td class="sir-dot-${id}" valign="middle" style="padding-right:10px;color:#d1d5db;font-size:16px;">&bull;</td>
+          <!-- Feedback Metric -->
+          <td class="sir-cell-${id}" valign="middle" style="padding-right:10px;">
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};">&#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}</span>
           </td>
-          <td valign="middle" style="padding-right:10px;color:#d1d5db;font-size:16px;">&bull;</td>
-          <td valign="middle" style="padding-right:10px;">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};">${p.feedbackText ?? '99.8% Positive Feedback'}</span>
-          </td>
-          <td valign="middle">${badge(p)}</td>
         </tr>
       </table>
     </td>
@@ -153,8 +217,8 @@ function metricsGrid(p: SellerInfoProps, id: string): string {
   const background = bg(p)
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
   <tr>
     <td style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
@@ -218,37 +282,62 @@ function metricsGrid(p: SellerInfoProps, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 4 — dark-executive
-// Dark premium profile — charcoal bg, neon accent border, white type
+// Dark premium profile — charcoal bg, neon accent border (Full-Width on Mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 function darkExecutive(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:#1e1535;border:1px solid ${accent};border-radius:8px;">
+<style>
+  @media only screen and (max-width:680px){
+    .si-de-pad-${id} {
+      padding: 16px 12px !important;
+      text-align: center !important;
+    }
+    .si-de-btn-${id} {
+      padding-left: 0 !important;
+      padding-top: 12px !important;
+      text-align: center !important;
+    }
+    .si-de-badges-${id} {
+      margin: 0 auto !important;
+    }
+    .si-de-badges-${id} tr {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="si-table"
+  style="width:100% !important;min-width:100% !important;background-color:#1e1535;border:1px solid ${accent};border-radius:8px;overflow:hidden;">
   <tr>
-    <td style="${pad(p)}">
+    <td class="si-de-pad-${id}" style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="si-col si-avatar" valign="middle" style="width:64px;">
-            <table cellpadding="0" cellspacing="0" border="0">
+          <!-- Avatar Circle: Centered on Mobile -->
+          <td class="si-col si-avatar" valign="middle" style="width:64px;text-align:center;">
+            <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
-                <td style="width:56px;height:56px;background-color:${accent};border-radius:50%;text-align:center;vertical-align:middle;">
-                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#ffffff;line-height:56px;">
-                    ${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}
-                  </span>
+                <td style="width:56px;height:56px;text-align:center;vertical-align:middle;">
+                  ${renderSellerAvatar(p, 56, 'circle')}
                 </td>
               </tr>
             </table>
           </td>
+          <!-- Details & Badges: Centered on Mobile -->
           <td class="si-col si-right" valign="middle" style="padding-left:16px;">
             <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:#ffffff;">
-              ${p.sellerName ?? '{{SELLER_NAME}}'}
+              ${sellerDisplayName}
             </p>
             <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#a0a0b8;">
               ${p.tagline ?? 'Trusted eBay Seller Since 2010'}
             </p>
-            <table cellpadding="0" cellspacing="0" border="0">
+            <table class="si-de-badges-${id}" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="padding-right:8px;">
                   <span style="display:inline-block;background-color:rgba(184,250,51,0.15);border:1px solid #b8fa33;color:#b8fa33;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;">
@@ -259,8 +348,9 @@ function darkExecutive(p: SellerInfoProps, id: string): string {
               </tr>
             </table>
           </td>
-          <td class="si-col si-center-mobile" valign="middle" style="text-align:right;padding-left:12px;">
-            <a href="https://www.ebay.com/str/{{SELLER_NAME}}" style="display:inline-block;background-color:transparent;border:1px solid ${accent};color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;padding:7px 16px;border-radius:4px;text-decoration:none;">Visit Store &#8594;</a>
+          <!-- Visit Store CTA: Right on desktop, centered bottom on mobile -->
+          <td class="si-col si-de-btn-${id}" valign="middle" style="text-align:right;padding-left:12px;">
+            <a href="https://www.ebay.com/str/{{SELLER_NAME}}" style="display:inline-block;background-color:transparent;border:1px solid ${accent};color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;padding:7px 18px;border-radius:4px;text-decoration:none;">Visit Store &#8594;</a>
           </td>
         </tr>
       </table>
@@ -272,45 +362,123 @@ function darkExecutive(p: SellerInfoProps, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 5 — storefront-split
-// Left: store identity. Right: bullet guarantee list
+// Left: store identity. Right: bullet guarantee list (Full-width & responsive)
 // ─────────────────────────────────────────────────────────────────────────────
 function storefrontSplit(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
   const text = txt(p)
   const background = bg(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .si-sf-table-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .si-sf-pad-${id} {
+      padding: 16px 14px !important;
+    }
+    .si-sf-left-${id} {
+      display: block !important;
+      width: 100% !important;
+      border-right: none !important;
+      border-bottom: 1px solid #e5e7eb !important;
+      padding-right: 0 !important;
+      padding-bottom: 14px !important;
+      text-align: center !important;
+    }
+    .si-sf-left-inner-${id} {
+      margin: 0 auto !important;
+      text-align: center !important;
+    }
+    .si-sf-avatar-wrap-${id} {
+      margin: 0 auto 10px auto !important;
+      display: inline-block !important;
+    }
+    .si-sf-right-${id} {
+      display: block !important;
+      width: 100% !important;
+      padding-left: 0 !important;
+      padding-top: 14px !important;
+      text-align: center !important;
+    }
+    .si-sf-benefits-table-${id} {
+      margin: 0 auto !important;
+      display: inline-table !important;
+      text-align: left !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="si-table si-sf-table-${id}"
+  style="width:100% !important;min-width:100% !important;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;box-sizing:border-box;">
   <tr>
-    <td style="${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td class="si-pad si-sf-pad-${id}" style="${pad(p)}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100% !important;">
         <tr>
-          <td class="si-col" valign="middle" style="width:50%;padding-right:20px;border-right:1px solid #e5e7eb;">
-            <table cellpadding="0" cellspacing="0" border="0">
+          <!-- LEFT: Store Identity & Rating -->
+          <td class="si-col si-sf-left-${id}" valign="middle" style="width:50%;padding-right:20px;border-right:1px solid #e5e7eb;box-sizing:border-box;">
+            <table class="si-sf-left-inner-${id}" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
               <tr>
-                <td style="padding-bottom:8px;">
-                  <div style="width:48px;height:48px;background-color:${accent};border-radius:10px;text-align:center;line-height:48px;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;color:#ffffff;">${(p.sellerName ?? '{{SELLER_NAME}}').charAt(0).toUpperCase()}</span>
+                <td style="padding-bottom:8px;text-align:inherit;">
+                  <div class="si-sf-avatar-wrap-${id}">
+                    ${renderSellerAvatar(p, 48, 'rounded')}
                   </div>
                 </td>
               </tr>
               <tr>
-                <td>
-                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:${text};">${p.sellerName ?? '{{SELLER_NAME}}'}</p>
-                  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
-                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};">&#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}</p>
+                <td style="text-align:inherit;">
+                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:${text};line-height:1.2;">
+                    ${sellerDisplayName}${badge(p)}
+                  </p>
+                  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;line-height:1.3;">
+                    ${p.tagline ?? 'Trusted eBay Seller Since 2010'}
+                  </p>
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};line-height:1.2;">
+                    &#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}
+                  </p>
                 </td>
               </tr>
             </table>
           </td>
-          <td class="si-col si-right" valign="middle" style="width:50%;padding-left:20px;">
-            <table cellpadding="0" cellspacing="0" border="0">
-              <tr><td style="padding-bottom:8px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Why Buy From Us?</span></td></tr>
-              <tr><td style="padding-bottom:6px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};"><span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; 100% Authentic Products</span></td></tr>
-              <tr><td style="padding-bottom:6px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};"><span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; Fast &amp; Secure Fulfilment</span></td></tr>
-              <tr><td style="padding-bottom:6px;"><span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};"><span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; Hassle-Free Returns</span></td></tr>
-              <tr><td><span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};"><span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; 24/7 Customer Support</span></td></tr>
+
+          <!-- RIGHT: Four Trust Guarantees -->
+          <td class="si-col si-sf-right-${id}" valign="middle" style="width:50%;padding-left:20px;box-sizing:border-box;">
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">
+              Why Buy From Us?
+            </div>
+            <table class="si-sf-benefits-table-${id}" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
+              <tr>
+                <td style="padding-bottom:6px;vertical-align:middle;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};display:inline-block;">
+                    <span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; 100% Authentic Products
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:6px;vertical-align:middle;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};display:inline-block;">
+                    <span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; Fast &amp; Secure Fulfilment
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:6px;vertical-align:middle;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};display:inline-block;">
+                    <span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; Hassle-Free Returns
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align:middle;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${text};display:inline-block;">
+                    <span style="color:#10b981;font-weight:700;">&#10003;</span>&nbsp; 24/7 Customer Support
+                  </span>
+                </td>
+              </tr>
             </table>
           </td>
         </tr>
@@ -330,8 +498,8 @@ function glassCard(p: SellerInfoProps, id: string): string {
   const text = txt(p)
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:12px;padding:3px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:12px;padding:3px;">
   <tr>
     <td>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
@@ -341,11 +509,7 @@ function glassCard(p: SellerInfoProps, id: string): string {
             <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
                 <td style="text-align:center;padding:0;">
-                  <div style="width:68px;height:68px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:34px;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;display:inline-flex;align-items:center;justify-content:center;text-align:center;margin:0 auto;">
-                    <span style="font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:700;color:#ffffff;line-height:1;">
-                      ${(p.sellerName ?? 'S').replace('{{SELLER_NAME}}', 'S').charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  ${renderSellerAvatar(p, 68, 'circle', `border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;`)}
                 </td>
               </tr>
             </table>
@@ -370,13 +534,42 @@ function glassCard(p: SellerInfoProps, id: string): string {
             <table width="100%" cellpadding="0" cellspacing="0" border="0"
               style="background-color:rgba(117,48,251,0.06);border-radius:8px;border:1px solid ${accent}22;">
               <tr>
-                <td style="padding:8px 12px;text-align:center;">
-                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${text};opacity:0.75;">
-                    &#10003;&nbsp;Authorized Retailer
-                    &nbsp;<span style="color:${accent};">&bull;</span>&nbsp;
-                    &#9889;&nbsp;Fast Dispatch
-                    &nbsp;<span style="color:${accent};">&bull;</span>&nbsp;
-                    &#128260;&nbsp;Easy Returns
+                <td style="padding:10px 12px;text-align:center;line-height:1.7;">
+                  <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${text};opacity:0.85;display:inline-block;">
+
+                    <!-- Authorized Retailer (Shield Check Icon) -->
+                    <span style="display:inline-block;white-space:nowrap;margin:0 4px;vertical-align:middle;">
+                      <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                        <path d="M10 2L3 5v5c0 4.5 3.1 8.7 7 9.8 3.9-1.1 7-5.3 7-9.8V5l-7-3z" fill="${accent}" fill-opacity="0.18" stroke="${accent}" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M7 10l2 2 4-4" stroke="${accent}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Authorized Retailer
+                    </span>
+
+                    <span style="color:${accent};font-size:12px;vertical-align:middle;margin:0 3px;">&bull;</span>
+
+                    <!-- Fast Dispatch (Clean Delivery Truck Icon - 100% matches others) -->
+                    <span style="display:inline-block;white-space:nowrap;margin:0 4px;vertical-align:middle;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                        <path d="M5 18H3c-.6 0-1-.4-1-1V5c0-.6.4-1 1-1h11c.6 0 1 .4 1 1v4" stroke="${accent}" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M14 9h4.5l3.5 4.5V17c0 .6-.4 1-1 1h-2" stroke="${accent}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="7" cy="18" r="2" stroke="${accent}" stroke-width="1.8"/>
+                        <circle cx="17" cy="18" r="2" stroke="${accent}" stroke-width="1.8"/>
+                      </svg>
+                      Fast Dispatch
+                    </span>
+
+                    <span style="color:${accent};font-size:12px;vertical-align:middle;margin:0 3px;">&bull;</span>
+
+                    <!-- Easy Returns (Circular Return Icon) -->
+                    <span style="display:inline-block;white-space:nowrap;margin:0 4px;vertical-align:middle;">
+                      <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-2px;margin-right:4px;">
+                        <path d="M3.5 8.5h8.5a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H5" stroke="${accent}" stroke-width="1.6" stroke-linecap="round"/>
+                        <path d="M6.5 5.5L3.5 8.5l3 3" stroke="${accent}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Easy Returns
+                    </span>
+
                   </span>
                 </td>
               </tr>
@@ -391,33 +584,33 @@ function glassCard(p: SellerInfoProps, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VARIANT 7 — vertical-profile
-// Centered vertical stack — avatar → name → divider → pill → CTA link
+// VARIANT 7 — vertical-profile (Tall Store Card)
+// Centered vertical stack with full-width CTA button
 // ─────────────────────────────────────────────────────────────────────────────
 function verticalProfile(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
   const text = txt(p)
   const background = bg(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+  const avatarLetter = (p.sellerName && !p.sellerName.includes('{{') ? p.sellerName.charAt(0) : 'S').toUpperCase()
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="si-table"
+  style="width:100% !important;min-width:100% !important;background-color:${background};border:1px solid #e5e7eb;border-radius:8px;box-sizing:border-box;">
   <tr>
-    <td style="${pad(p)};text-align:center;">
+    <td class="si-pad" style="${pad(p)};text-align:center;">
       <!-- Avatar: fixed 72x72 table cell forces true circle -->
       <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
         <tr>
           <td style="text-align:center;padding:0;">
-            <div style="width:72px;height:72px;background-color:${accent};border-radius:36px;border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;display:inline-flex;align-items:center;justify-content:center;text-align:center;margin:0 auto;">
-              <span style="font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#ffffff;line-height:1;">
-                ${(p.sellerName ?? 'S').replace('{{SELLER_NAME}}', 'S').charAt(0).toUpperCase()}
-              </span>
-            </div>
+            ${renderSellerAvatar(p, 72, 'circle', `border:3px solid #ffffff;box-shadow:0 0 0 3px ${accent}44;`)}
           </td>
         </tr>
       </table>
       <!-- Store name -->
-      <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:${text};">${p.sellerName ?? '{{SELLER_NAME}}'}</p>
+      <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:${text};">${sellerDisplayName}</p>
       <!-- Tagline -->
       <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6b7280;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</p>
       <!-- Accent divider line -->
@@ -443,11 +636,14 @@ function verticalProfile(p: SellerInfoProps, id: string): string {
           </td>
         </tr>
       </table>` : '<div style="height:14px;"></div>'}
-      <!-- Store CTA link -->
-      <table cellpadding="0" cellspacing="0" border="0" align="center">
+      <!-- Store CTA Button (True Capsule Curve Pill) -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;margin:0 auto;border-collapse:separate;">
         <tr>
-          <td style="border:1px solid ${accent};border-radius:4px;padding:6px 18px;">
-            <a href="https://www.ebay.com/str/{{SELLER_NAME}}" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};text-decoration:none;">View My eBay Store</a>
+          <td align="center" style="width:100%;padding:0;border:none;background:transparent;">
+            <a href="https://www.ebay.com/str/{{SELLER_NAME}}"
+               style="display:block;width:100%;box-sizing:border-box;padding:11px 24px;border:1.5px solid ${accent};border-radius:50px;-webkit-border-radius:50px;-moz-border-radius:50px;background-color:transparent;color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;text-decoration:none;text-align:center;">
+              View My eBay Store
+            </a>
           </td>
         </tr>
       </table>
@@ -459,47 +655,130 @@ function verticalProfile(p: SellerInfoProps, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VARIANT 8 — trust-ribbon-duo
-// Row 1: accent identity bar | Row 2: 4 trust chip pills
+// Row 1: accent identity bar | Row 2: 4 trust chip pills (Vector Icons & Mobile Fix)
 // ─────────────────────────────────────────────────────────────────────────────
 function trustRibbonDuo(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
   const text = txt(p)
   const background = bg(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .si-trd-table-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .si-trd-head-row-${id} {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      gap: 6px !important;
+      width: 100% !important;
+    }
+    .si-trd-head-left-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 !important;
+    }
+    .si-trd-head-right-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 !important;
+    }
+    .si-trd-chips-${id} tr {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 8px !important;
+      width: 100% !important;
+    }
+    .si-trd-chip-${id} {
+      display: inline-block !important;
+      width: auto !important;
+      padding: 0 !important;
+      text-align: center !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="si-table si-trd-table-${id}"
+  style="width:100% !important;min-width:100% !important;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;box-sizing:border-box;">
+
+  <!-- Row 1: Brand Accent Bar -->
   <tr>
-    <td style="background-color:${accent};padding:10px 20px;">
+    <td style="background-color:${accent};padding:11px 20px;box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td valign="middle">
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;">${p.sellerName ?? '{{SELLER_NAME}}'}</span>
-            <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:rgba(255,255,255,0.75);margin-left:8px;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</span>
+        <tr class="si-trd-head-row-${id}">
+          <td class="si-trd-head-left-${id}" valign="middle">
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;vertical-align:middle;">${sellerDisplayName}</span>
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:rgba(255,255,255,0.8);margin-left:8px;vertical-align:middle;">${p.tagline ?? 'Trusted eBay Seller Since 2010'}</span>
           </td>
-          <td valign="middle" style="text-align:right;">
-            ${p.showBadge ? `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;">${p.badgeText ?? 'Top Rated Seller'}</span>` : ''}
+          <td class="si-trd-head-right-${id}" valign="middle" style="text-align:right;">
+            ${p.showBadge ? `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;vertical-align:middle;">${p.badgeText ?? 'Top Rated Seller'}</span>` : ''}
           </td>
         </tr>
       </table>
     </td>
   </tr>
+
+  <!-- Row 2: Trust Chips (Vector SVG Icons) -->
   <tr>
-    <td style="background-color:${background};padding:10px 20px;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td style="background-color:${background};padding:10px 16px;box-sizing:border-box;">
+      <table class="si-trd-chips-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;">
         <tr>
-          <td class="si-card" valign="middle" style="padding-right:6px;">
-            <span style="display:inline-block;background-color:#f3f4f6;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;">&#9733; ${p.feedbackText ?? '99.8% Positive'}</span>
+
+          <!-- Chip 1: Feedback Star -->
+          <td class="si-trd-chip-${id}" valign="middle" style="padding-right:6px;text-align:center;">
+            <span style="display:inline-flex;align-items:center;background-color:#ffffff;border:1px solid #e5e7eb;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,0.03);white-space:nowrap;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" style="display:inline-block;vertical-align:middle;margin-right:5px;">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              ${p.feedbackText ?? '99.8% Positive Feedback'}
+            </span>
           </td>
-          <td class="si-card" valign="middle" style="padding-right:6px;">
-            <span style="display:inline-block;background-color:#f3f4f6;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;">&#9889; Fast Dispatch</span>
+
+          <!-- Chip 2: Fast Dispatch -->
+          <td class="si-trd-chip-${id}" valign="middle" style="padding-right:6px;text-align:center;">
+            <span style="display:inline-flex;align-items:center;background-color:#ffffff;border:1px solid #e5e7eb;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,0.03);white-space:nowrap;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;">
+                <path d="M5 18H3c-.6 0-1-.4-1-1V5c0-.6.4-1 1-1h11c.6 0 1 .4 1 1v4"/>
+                <path d="M14 9h4.5l3.5 4.5V17c0 .6-.4 1-1 1h-2"/>
+                <circle cx="7" cy="18" r="2"/>
+                <circle cx="17" cy="18" r="2"/>
+              </svg>
+              Fast Dispatch
+            </span>
           </td>
-          <td class="si-card" valign="middle" style="padding-right:6px;">
-            <span style="display:inline-block;background-color:#f3f4f6;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;">&#128172; 24/7 Support</span>
+
+          <!-- Chip 3: 24/7 Support -->
+          <td class="si-trd-chip-${id}" valign="middle" style="padding-right:6px;text-align:center;">
+            <span style="display:inline-flex;align-items:center;background-color:#ffffff;border:1px solid #e5e7eb;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,0.03);white-space:nowrap;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              24/7 Support
+            </span>
           </td>
-          <td class="si-card" valign="middle">
-            <span style="display:inline-block;background-color:#f3f4f6;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;">&#128260; Easy Returns</span>
+
+          <!-- Chip 4: Easy Returns -->
+          <td class="si-trd-chip-${id}" valign="middle" style="text-align:center;">
+            <span style="display:inline-flex;align-items:center;background-color:#ffffff;border:1px solid #e5e7eb;color:${text};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;box-shadow:0 1px 2px rgba(0,0,0,0.03);white-space:nowrap;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              Easy Returns
+            </span>
           </td>
+
         </tr>
       </table>
     </td>
@@ -514,29 +793,68 @@ function trustRibbonDuo(p: SellerInfoProps, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 function spotlightBanner(p: SellerInfoProps, id: string): string {
   const accent = ac(p)
+  const sellerDisplayName = p.sellerName && !p.sellerName.includes('{{') ? p.sellerName : 'Trusted Seller'
+
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:8px;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .si-sb-table-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .si-sb-pad-${id} {
+      padding: 18px 14px !important;
+      text-align: center !important;
+    }
+    .si-sb-left-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 0 14px 0 !important;
+    }
+    .si-sb-right-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding: 0 !important;
+    }
+    .si-sb-btn-${id} {
+      display: inline-block !important;
+      width: auto !important;
+      padding: 10px 24px !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="si-table si-sb-table-${id}"
+  style="width:100% !important;min-width:100% !important;background:linear-gradient(135deg,${accent} 0%,#1e1535 100%);border-radius:8px;box-sizing:border-box;overflow:hidden;">
   <tr>
-    <td style="${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td class="si-pad si-sb-pad-${id}" style="${pad(p)}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100% !important;">
         <tr>
-          <td class="si-col" valign="middle" style="width:65%;">
-            <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;color:#ffffff;">
-              ${p.sellerName ?? '{{SELLER_NAME}}'}
+          <!-- Left: Store Identity & Rating -->
+          <td class="si-col si-sb-left-${id}" valign="middle" style="width:65%;">
+            <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;color:#ffffff;line-height:1.2;">
+              ${sellerDisplayName}
               ${p.showBadge ? `<span style="display:inline-block;background-color:#b8fa33;color:#1e1535;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;margin-left:8px;vertical-align:middle;">${p.badgeText ?? 'TOP RATED'}</span>` : ''}
             </p>
-            <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:rgba(255,255,255,0.7);">
+            <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:rgba(255,255,255,0.75);line-height:1.3;">
               ${p.tagline ?? 'Trusted eBay Seller Since 2010'}
             </p>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#b8fa33;">
-              &#9733; ${p.feedbackText ?? '99.8% Positive Feedback'}
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#b8fa33;line-height:1.2;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#b8fa33" stroke="#b8fa33" stroke-width="1" style="display:inline-block;vertical-align:-1px;margin-right:4px;">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              ${p.feedbackText ?? '99.8% Positive Feedback'}
             </p>
           </td>
-          <td class="si-col si-center-mobile" valign="middle" style="width:35%;text-align:right;">
+
+          <!-- Right: View My Store CTA -->
+          <td class="si-col si-sb-right-${id}" valign="middle" style="width:35%;text-align:right;">
             <a href="https://www.ebay.com/str/{{SELLER_NAME}}"
-              style="display:inline-block;background-color:#ffffff;color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;text-decoration:none;">
+              class="si-sb-btn-${id}"
+              style="display:inline-block;background-color:#ffffff;color:${accent};font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;padding:10px 22px;border-radius:6px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,0.15);">
               View My Store &#8594;
             </a>
           </td>
@@ -558,8 +876,8 @@ function compactCardRow(p: SellerInfoProps, id: string): string {
   const background = bg(p)
   return `${mobileStyle()}
 <!--[riazify:seller_info:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;background-color:${background};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;background-color:${background};">
   <tr>
     <td style="${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">

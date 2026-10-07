@@ -18,107 +18,107 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    thumbnail?: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  thumbnail?: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared Helpers & Dynamic Resolvers ─────────────────────────────────────
 function pad(p: any, defaultT = 16, defaultR = 20, defaultB = 16, defaultL = 20): string {
-    const top = p.paddingTop ?? defaultT
-    const right = p.paddingRight ?? defaultR
-    const bottom = p.paddingBottom ?? defaultB
-    const left = p.paddingLeft ?? defaultL
-    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+  const top = p.paddingTop ?? defaultT
+  const right = p.paddingRight ?? defaultR
+  const bottom = p.paddingBottom ?? defaultB
+  const left = p.paddingLeft ?? defaultL
+  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
 function font(p: any, defaultFamily = 'Arial, Helvetica, sans-serif'): string {
-    return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
+  return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : defaultFamily
 }
 
 function titleText(p: any, fallback = 'Item Specifics'): string {
-    return p.titleText ?? p.heading ?? p.title ?? fallback
+  return p.titleText ?? p.heading ?? p.title ?? fallback
 }
 
 interface SpecRow {
-    key: string
-    value: string
+  key: string
+  value: string
 }
 
 const DEFAULT_ROWS: SpecRow[] = [
-    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
-    { key: 'Brand', value: '{{BRAND}}' },
-    { key: 'Model', value: '{{MODEL}}' },
-    { key: 'MPN / Part #', value: '{{MPN}}' },
-    { key: 'EAN / UPC', value: '{{EAN}}' },
-    { key: 'Colour', value: '{{COLOUR}}' },
-    { key: 'Size / Dimensions', value: '{{SIZE}}' },
-    { key: 'Material', value: '{{MATERIAL}}' },
+  { key: 'Condition', value: '{{ITEM_CONDITION}}' },
+  { key: 'Brand', value: '{{BRAND}}' },
+  { key: 'Model', value: '{{MODEL}}' },
+  { key: 'MPN / Part #', value: '{{MPN}}' },
+  { key: 'EAN / UPC', value: '{{EAN}}' },
+  { key: 'Colour', value: '{{COLOUR}}' },
+  { key: 'Size / Dimensions', value: '{{SIZE}}' },
+  { key: 'Material', value: '{{MATERIAL}}' },
 ]
 
 function getRows(p: any): SpecRow[] {
-    if (Array.isArray(p.rows) && p.rows.length > 0) {
-        return p.rows
-    }
-    return DEFAULT_ROWS
+  if (Array.isArray(p.rows) && p.rows.length > 0) {
+    return p.rows
+  }
+  return DEFAULT_ROWS
 }
 
 const KNOWN_DEFAULT_BGS = [
-    '#ffffff', // White
-    '#f8fafc', // Slate 50
-    '#f8f7ff', // Purple 50
-    '#dc2626', // Red
-    '#1e1535', // Dark Purple
-    '#0f172a', // Slate 900
-    '#18181b', // Zinc 900
-    '#09090b', // Zinc 950
-    '#090d16', // Dark Navy
-    '#064e3b', // Emerald
-    '#fffdfa', // Cream Ivory
-    '#f0fdf4', // Mint Green
+  '#ffffff', // White
+  '#f8fafc', // Slate 50
+  '#f8f7ff', // Purple 50
+  '#dc2626', // Red
+  '#1e1535', // Dark Purple
+  '#0f172a', // Slate 900
+  '#18181b', // Zinc 900
+  '#09090b', // Zinc 950
+  '#090d16', // Dark Navy
+  '#064e3b', // Emerald
+  '#fffdfa', // Cream Ivory
+  '#f0fdf4', // Mint Green
 ]
 
 function resolveBg(p: any, signatureBg: string): string {
-    if (!p.bgColor) return signatureBg
-    const val = p.bgColor.toLowerCase().trim()
-    if (KNOWN_DEFAULT_BGS.includes(val)) {
-        return signatureBg
-    }
-    return p.bgColor
+  if (!p.bgColor) return signatureBg
+  const val = p.bgColor.toLowerCase().trim()
+  if (KNOWN_DEFAULT_BGS.includes(val)) {
+    return signatureBg
+  }
+  return p.bgColor
 }
 
 function resolveText(p: any, signatureText: string): string {
-    if (!p.keyColor && !p.textColor) return signatureText
-    const val = (p.keyColor ?? p.textColor).toLowerCase().trim()
-    if (
-        val === '#1e1535' ||
-        val === '#ffffff' ||
-        val === '#0f172a' ||
-        val === '#18181b' ||
-        val === '#1c1917' ||
-        val === '#f4f4f5' ||
-        val === '#fafafa'
-    ) {
-        return signatureText
-    }
-    return p.keyColor ?? p.textColor
+  if (!p.keyColor && !p.textColor) return signatureText
+  const val = (p.keyColor ?? p.textColor).toLowerCase().trim()
+  if (
+    val === '#1e1535' ||
+    val === '#ffffff' ||
+    val === '#0f172a' ||
+    val === '#18181b' ||
+    val === '#1c1917' ||
+    val === '#f4f4f5' ||
+    val === '#fafafa'
+  ) {
+    return signatureText
+  }
+  return p.keyColor ?? p.textColor
 }
 
 function resolveAccent(p: any, signatureAccent: string): string {
-    const custom = p.headerBg ?? p.accentColor
-    if (!custom) return signatureAccent
-    const val = custom.toLowerCase().trim()
-    const KNOWN_ACCENTS = [
-        '#7530fb', '#b8fa33', '#f59e0b', '#b91c1c', '#d4af37',
-        '#0284c7', '#f97316', '#2563eb', '#71717a', '#06b6d4',
-        '#fbbf24', '#10b981', '#16a34a'
-    ]
-    if (KNOWN_ACCENTS.includes(val)) {
-        return signatureAccent
-    }
-    return custom
+  const custom = p.headerBg ?? p.accentColor
+  if (!custom) return signatureAccent
+  const val = custom.toLowerCase().trim()
+  const KNOWN_ACCENTS = [
+    '#7530fb', '#b8fa33', '#f59e0b', '#b91c1c', '#d4af37',
+    '#0284c7', '#f97316', '#2563eb', '#71717a', '#06b6d4',
+    '#fbbf24', '#10b981', '#16a34a'
+  ]
+  if (KNOWN_ACCENTS.includes(val)) {
+    return signatureAccent
+  }
+  return custom
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -126,17 +126,17 @@ function resolveAccent(p: any, signatureAccent: string): string {
 // Clean alternating zebra table with rounded frame and subtle header badge
 // ─────────────────────────────────────────────────────────────────────────────
 function dualColumnZebraCard(p: any, id: string): string {
-    const f = font(p)
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const keyCol = resolveText(p, '#0f172a')
-    const valCol = '#475569'
-    const accent = resolveAccent(p, '#2563eb')
-    const title = titleText(p, 'ITEM SPECIFICS & TECHNICAL DATA')
+  const f = font(p)
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const keyCol = resolveText(p, '#0f172a')
+  const valCol = '#475569'
+  const accent = resolveAccent(p, '#2563eb')
+  const title = titleText(p, 'ITEM SPECIFICS & TECHNICAL DATA')
 
-    const rowsHtml = rows.map((r, i) => {
-        const rowBg = i % 2 === 0 ? '#f8fafc' : '#ffffff'
-        return `<tr>
+  const rowsHtml = rows.map((r, i) => {
+    const rowBg = i % 2 === 0 ? '#f8fafc' : '#ffffff'
+    return `<tr>
       <td width="35%" style="padding:10px 16px;background-color:${rowBg};border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;font-size:12.5px;font-weight:700;color:${keyCol};box-sizing:border-box;">
         ${r.key}
       </td>
@@ -144,14 +144,14 @@ function dualColumnZebraCard(p: any, id: string): string {
         ${r.value}
       </td>
     </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <!-- Header Bar -->
   <tr>
-    <td style="background-color:#0f172a;padding:12px 18px;box-sizing:border-box;">
+    <td colspan="2" style="background-color:#0f172a;padding:12px 18px;box-sizing:border-box;width:100%;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td style="text-align:left;vertical-align:middle;">
@@ -180,24 +180,24 @@ function dualColumnZebraCard(p: any, id: string): string {
 // Modern SaaS / Apple-style 2-column bento micro-cards for tech, audio & gadgets
 // ─────────────────────────────────────────────────────────────────────────────
 function twoColumnCardGrid(p: any, id: string): string {
-    const f = font(p)
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const keyCol = resolveText(p, '#0f172a')
-    const accent = resolveAccent(p, '#2563eb')
-    const title = titleText(p, 'Key Technical Specifications')
+  const f = font(p)
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const keyCol = resolveText(p, '#0f172a')
+  const accent = resolveAccent(p, '#2563eb')
+  const title = titleText(p, 'Key Technical Specifications')
 
-    // Split rows into pairs of 2
-    const pairs: SpecRow[][] = []
-    for (let i = 0; i < rows.length; i += 2) {
-        pairs.push(rows.slice(i, i + 2))
-    }
+  // Split rows into pairs of 2
+  const pairs: SpecRow[][] = []
+  for (let i = 0; i < rows.length; i += 2) {
+    pairs.push(rows.slice(i, i + 2))
+  }
 
-    const gridHtml = pairs.map(pair => {
-        const col1 = pair[0]
-        const col2 = pair[1]
+  const gridHtml = pairs.map(pair => {
+    const col1 = pair[0]
+    const col2 = pair[1]
 
-        const cell1 = `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
+    const cell1 = `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -213,7 +213,7 @@ function twoColumnCardGrid(p: any, id: string): string {
       </div>
     </td>`
 
-        const cell2 = col2 ? `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
+    const cell2 = col2 ? `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -229,12 +229,12 @@ function twoColumnCardGrid(p: any, id: string): string {
       </div>
     </td>` : `<td width="50%"></td>`
 
-        return `<tr>${cell1}${cell2}</tr>`
-    }).join('')
+    return `<tr>${cell1}${cell2}</tr>`
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;padding:6px;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;padding:6px;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 14, 16, 14, 16)}box-sizing:border-box;">
       <!-- Title -->
@@ -257,26 +257,26 @@ function twoColumnCardGrid(p: any, id: string): string {
 // Deep technical blueprint with drawing headers, coordinate ticks & modular parameter blocks
 // ─────────────────────────────────────────────────────────────────────────────
 function industrialBlueprintMatrix(p: any, id: string): string {
-    const f = font(p, 'Courier New, monospace')
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#0c1a2e')
-    const textCol = resolveText(p, '#e0f2fe')
-    const cyan = resolveAccent(p, '#38bdf8')
-    const title = titleText(p, 'TECHNICAL BLUEPRINT // OEM SPECIFICATION MATRIX')
+  const f = font(p, 'Courier New, monospace')
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#0c1a2e')
+  const textCol = resolveText(p, '#e0f2fe')
+  const cyan = resolveAccent(p, '#38bdf8')
+  const title = titleText(p, 'TECHNICAL BLUEPRINT // OEM SPECIFICATION MATRIX')
 
-    // Split into pairs of 2 modular blueprint parameter cells
-    const pairs: SpecRow[][] = []
-    for (let i = 0; i < rows.length; i += 2) {
-        pairs.push(rows.slice(i, i + 2))
-    }
+  // Split into pairs of 2 modular blueprint parameter cells
+  const pairs: SpecRow[][] = []
+  for (let i = 0; i < rows.length; i += 2) {
+    pairs.push(rows.slice(i, i + 2))
+  }
 
-    const cellsHtml = pairs.map((pair, rowIdx) => {
-        const col1 = pair[0]
-        const col2 = pair[1]
-        const num1 = String(rowIdx * 2 + 1).padStart(2, '0')
-        const num2 = String(rowIdx * 2 + 2).padStart(2, '0')
+  const cellsHtml = pairs.map((pair, rowIdx) => {
+    const col1 = pair[0]
+    const col2 = pair[1]
+    const num1 = String(rowIdx * 2 + 1).padStart(2, '0')
+    const num2 = String(rowIdx * 2 + 2).padStart(2, '0')
 
-        const box1 = `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
+    const box1 = `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
       <div style="background-color:#081322;border:1px solid #1e3a5f;border-left:3px solid ${cyan};padding:8px 12px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -293,7 +293,7 @@ function industrialBlueprintMatrix(p: any, id: string): string {
       </div>
     </td>`
 
-        const box2 = col2 ? `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
+    const box2 = col2 ? `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
       <div style="background-color:#081322;border:1px solid #1e3a5f;border-left:3px solid ${cyan};padding:8px 12px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -310,18 +310,42 @@ function industrialBlueprintMatrix(p: any, id: string): string {
       </div>
     </td>` : `<td width="50%"></td>`
 
-        return `<tr>${box1}${box2}</tr>`
-    }).join('')
+    return `<tr>${box1}${box2}</tr>`
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #1e3a5f;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .ib-hdr-tbl-${id},
+    .ib-hdr-tbl-${id} tbody,
+    .ib-hdr-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .ib-hdr-left-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 8px !important;
+      box-sizing: border-box !important;
+    }
+    .ib-hdr-right-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #1e3a5f;border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <!-- CAD Blueprint Title Block Header -->
   <tr>
     <td style="background-color:#07111e;border-bottom:2px solid #1e3a5f;padding:12px 18px;box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table class="ib-hdr-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <td style="text-align:left;vertical-align:middle;">
+          <td class="ib-hdr-left-${id}" style="text-align:left;vertical-align:middle;">
             <div style="color:${cyan};font-size:9.5px;font-weight:800;letter-spacing:2px;font-family:monospace;">
               ✦ CAD DRAWING REF: #SPEC-9942 // REV 4.2
             </div>
@@ -329,7 +353,7 @@ function industrialBlueprintMatrix(p: any, id: string): string {
               ${title}
             </div>
           </td>
-          <td style="text-align:right;vertical-align:middle;color:#38bdf8;font-size:10px;font-family:monospace;">
+          <td class="ib-hdr-right-${id}" style="text-align:right;vertical-align:middle;color:#38bdf8;font-size:10px;font-family:monospace;">
             <span style="display:inline-block;border:1px solid #1e3a5f;padding:3px 8px;border-radius:3px;background-color:#081322;">
               SCALE: 1:1 OEM
             </span>
@@ -370,57 +394,81 @@ function industrialBlueprintMatrix(p: any, id: string): string {
 // Left-side editorial headline feature block with right-side staggered hairline ledger
 // ─────────────────────────────────────────────────────────────────────────────
 function boutiqueHairlineEditorial(p: any, id: string): string {
-    const f = font(p, 'Georgia, serif')
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const keyCol = resolveText(p, '#18181b')
-    const accent = resolveAccent(p, '#71717a')
-    const title = titleText(p, 'Specification Archive')
+  const f = font(p, 'Georgia, serif')
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const keyCol = resolveText(p, '#18181b')
+  const accent = resolveAccent(p, '#71717a')
+  const title = titleText(p, 'Specification Archive')
 
-    const itemsHtml = rows.map((r, i) => {
-        const isLast = i === rows.length - 1
-        return `<tr>
-      <td style="padding:8px 0;border-bottom:${isLast ? 'none' : '1px solid #f4f4f5'};vertical-align:top;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  const itemsHtml = rows.map((r, i) => {
+    const isLast = i === rows.length - 1
+    return `<tr>
+      <td style="padding:8px 0;border-bottom:${isLast ? 'none' : '1px solid #f4f4f5'};vertical-align:middle;box-sizing:border-box;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
           <tr>
-            <td width="40%" style="font-family:Arial,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${accent};">
+            <td width="45%" style="font-family:Arial,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${accent};text-align:left;vertical-align:middle;">
               ${r.key}
             </td>
-            <td width="60%" style="font-family:Arial,sans-serif;font-size:13px;font-weight:600;color:${keyCol};text-align:right;">
+            <td width="55%" style="font-family:Arial,sans-serif;font-size:13px;font-weight:600;color:${keyCol};text-align:right;vertical-align:middle;">
               ${r.value}
             </td>
           </tr>
         </table>
       </td>
     </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:8px;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .bhe-left-col-${id},
+    .bhe-right-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .bhe-left-col-${id} {
+      padding-right: 0 !important;
+      border-right: none !important;
+      border-bottom: 1px solid #e4e4e7 !important;
+      padding-bottom: 16px !important;
+      margin-bottom: 16px !important;
+      text-align: center !important;
+    }
+    .bhe-line-${id} {
+      margin: 12px auto !important;
+    }
+    .bhe-right-col-${id} {
+      padding-left: 0 !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:8px;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
           <!-- Left Column: Editorial Feature Spine -->
-          <td width="36%" valign="top" style="padding-right:20px;border-right:1px solid #e4e4e7;box-sizing:border-box;">
+          <td class="bhe-left-col-${id}" width="36%" valign="top" style="padding-right:20px;border-right:1px solid #e4e4e7;box-sizing:border-box;">
             <div style="font-family:Arial,sans-serif;color:${accent};font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;">
               VOL. SPEC &bull; ISSUE 01
             </div>
             <div style="font-family:${f};color:${keyCol};font-size:22px;font-weight:400;letter-spacing:-0.3px;line-height:1.2;margin-top:10px;">
               ${title}
             </div>
-            <div style="width:28px;height:1.5px;background-color:${keyCol};margin:14px 0;"></div>
+            <div class="bhe-line-${id}" style="width:28px;height:1.5px;background-color:${keyCol};margin:14px 0;"></div>
             <div style="font-family:Arial,sans-serif;color:#71717a;font-size:11px;line-height:1.5;">
               Curated technical dossier and manufacturing attributes for authentic collector reference.
             </div>
-            <div style="margin-top:20px;display:inline-block;border:1px solid #e4e4e7;padding:4px 8px;border-radius:4px;font-family:Arial,sans-serif;font-size:9.5px;font-weight:700;color:#18181b;">
+            <div style="margin-top:16px;display:inline-block;border:1px solid #e4e4e7;padding:4px 10px;border-radius:4px;font-family:Arial,sans-serif;font-size:9.5px;font-weight:700;color:#18181b;">
               ✓ VERIFIED DATA
             </div>
           </td>
           <!-- Right Column: Staggered Hairline Ledger -->
-          <td width="64%" valign="top" style="padding-left:20px;box-sizing:border-box;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <td class="bhe-right-col-${id}" width="64%" valign="top" style="padding-left:20px;box-sizing:border-box;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
               ${itemsHtml}
             </table>
           </td>
@@ -437,41 +485,84 @@ function boutiqueHairlineEditorial(p: any, id: string): string {
 // Authentic freight docket ticket with perforated cut line, barcode & inspector stamp
 // ─────────────────────────────────────────────────────────────────────────────
 function stampedManifestLedger(p: any, id: string): string {
-    const f = font(p, 'Courier New, monospace')
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#fffefb')
-    const textCol = resolveText(p, '#1c1917')
-    const stampRed = resolveAccent(p, '#b91c1c')
-    const title = titleText(p, 'OFFICIAL COURIER WAYBILL & ITEM MANIFEST')
+  const f = font(p, 'Courier New, monospace')
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#fffefb')
+  const textCol = resolveText(p, '#1c1917')
+  const stampRed = resolveAccent(p, '#b91c1c')
+  const title = titleText(p, 'OFFICIAL COURIER WAYBILL & ITEM MANIFEST')
 
-    const rowsHtml = rows.map((r, i) => {
-        const num = String(i + 1).padStart(2, '0')
-        const borderB = i === rows.length - 1 ? '' : 'border-bottom:1px dashed #d6d3d1;'
-        return `<tr>
-      <td width="10%" style="padding:8px 6px;font-family:monospace;font-size:11px;font-weight:700;color:#78716c;${borderB}">
+  const rowsHtml = rows.map((r, i) => {
+    const num = String(i + 1).padStart(2, '0')
+    const borderB = i === rows.length - 1 ? '' : 'border-bottom:1px dashed #d6d3d1;'
+    return `<tr>
+      <td width="12%" style="padding:8px 4px;font-family:monospace;font-size:11px;font-weight:700;color:#78716c;text-align:left;vertical-align:middle;${borderB}">
         #${num}
       </td>
-      <td width="35%" style="padding:8px 6px;font-family:monospace;font-size:11px;font-weight:700;color:#57534e;text-transform:uppercase;${borderB}">
+      <td width="38%" style="padding:8px 4px;font-family:monospace;font-size:11px;font-weight:700;color:#57534e;text-transform:uppercase;text-align:left;vertical-align:middle;${borderB}">
         ${r.key}
       </td>
-      <td width="55%" style="padding:8px 6px;font-family:Arial,sans-serif;font-size:12.5px;font-weight:800;color:${textCol};${borderB}">
+      <td width="50%" style="padding:8px 6px;font-family:Arial,sans-serif;font-size:12.5px;font-weight:800;color:${textCol};text-align:right;vertical-align:middle;${borderB}">
         ${r.value}
       </td>
     </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #d6d3d1;border-radius:6px;background-color:${bgCol};box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+  return `<!--[riazify:item_specifics:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .vsm-perf-tbl-${id},
+    .vsm-perf-tbl-${id} tbody,
+    .vsm-perf-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+    }
+    .vsm-perf-left-${id},
+    .vsm-perf-right-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+    }
+    .vsm-perf-right-${id} {
+      margin-top: 3px !important;
+    }
+    .vsm-title-tbl-${id},
+    .vsm-title-tbl-${id} tbody,
+    .vsm-title-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .vsm-title-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      padding-right: 0 !important;
+      margin-bottom: 10px !important;
+      box-sizing: border-box !important;
+    }
+    .vsm-stamp-col-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+    }
+    .vsm-stamp-box-${id} {
+      margin: 0 auto !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #d6d3d1;border-radius:6px;background-color:${bgCol};box-shadow:0 1px 3px rgba(0,0,0,0.05);">
   <!-- Top Perforation Header -->
   <tr>
     <td style="background-color:#f5f5f4;border-bottom:1px dashed #a8a29e;padding:8px 16px;box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table class="vsm-perf-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <td style="color:#78716c;font-size:9.5px;letter-spacing:1px;font-family:monospace;">
+          <td class="vsm-perf-left-${id}" style="color:#78716c;font-size:9.5px;letter-spacing:1px;font-family:monospace;">
             ✂ CUT ALONG PERFORATION &bull; DOCKET #WAYBILL-88392-EB
           </td>
-          <td align="right" style="color:#44403c;font-size:9.5px;font-weight:700;font-family:monospace;">
+          <td class="vsm-perf-right-${id}" align="right" style="color:#44403c;font-size:9.5px;font-weight:700;font-family:monospace;">
             DISPATCH LOT // VERIFIED
           </td>
         </tr>
@@ -480,10 +571,10 @@ function stampedManifestLedger(p: any, id: string): string {
   </tr>
   <!-- Manifest Title & Inspector Stamp Section -->
   <tr>
-    <td style="padding:14px 18px 8px 18px;box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <td style="padding:14px 18px 10px 18px;box-sizing:border-box;">
+      <table class="vsm-title-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">
         <tr>
-          <td valign="top" style="padding-right:12px;">
+          <td class="vsm-title-col-${id}" valign="top" style="padding-right:12px;">
             <div style="color:#78716c;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">
               CUSTOMS &amp; WAREHOUSE INVENTORY RECORD
             </div>
@@ -494,9 +585,9 @@ function stampedManifestLedger(p: any, id: string): string {
               ||| | ||||| || |||||| | |||| | |||||||| |||
             </div>
           </td>
-          <td width="140" align="right" valign="top">
+          <td class="vsm-stamp-col-${id}" width="140" align="right" valign="top">
             <!-- Simulated Red Rubber Stamp -->
-            <div style="display:inline-block;border:2px solid ${stampRed};padding:4px 8px;border-radius:4px;transform:rotate(-2deg);text-align:center;">
+            <div class="vsm-stamp-box-${id}" style="display:inline-block;border:2px solid ${stampRed};padding:4px 8px;border-radius:4px;transform:rotate(-2deg);text-align:center;">
               <div style="color:${stampRed};font-size:8.5px;font-weight:900;letter-spacing:1px;font-family:monospace;">★ INSPECTED ★</div>
               <div style="color:${stampRed};font-size:10.5px;font-weight:900;font-family:Arial,sans-serif;">100% VERIFIED</div>
               <div style="color:${stampRed};font-size:7.5px;font-weight:700;font-family:monospace;">EBAY COURIER LOT</div>
@@ -523,15 +614,15 @@ function stampedManifestLedger(p: any, id: string): string {
 // Grouped dual-tone rounded pill chips engineered for rapid mobile thumb-scanning
 // ─────────────────────────────────────────────────────────────────────────────
 function pillTagCluster(p: any, id: string): string {
-    const f = font(p)
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const accent = resolveAccent(p, '#7530fb')
-    const title = titleText(p, 'Item Specifications Summary')
+  const f = font(p)
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const accent = resolveAccent(p, '#7530fb')
+  const title = titleText(p, 'Item Specifications Summary')
 
-    const pillsHtml = rows.map(r => {
-        return `<div style="display:inline-block;background-color:#ffffff;border:1.5px solid #e2e8f0;border-radius:999px;margin:4px 3px;vertical-align:top;box-shadow:0 1px 2px rgba(0,0,0,0.03);overflow:hidden;">
+  const pillsHtml = rows.map(r => {
+    return `<div style="display:inline-block;background-color:#ffffff;border:1.5px solid #e2e8f0;border-radius:999px;margin:4px 3px;vertical-align:top;box-shadow:0 1px 2px rgba(0,0,0,0.03);overflow:hidden;">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td style="background-color:#f1f5f9;padding:6px 10px;font-size:10px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.5px;border-right:1px solid #e2e8f0;">
@@ -543,29 +634,60 @@ function pillTagCluster(p: any, id: string): string {
         </tr>
       </table>
     </div>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #ede9fe;border-radius:10px;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .ptc-hdr-tbl-${id},
+    .ptc-hdr-tbl-${id} tbody,
+    .ptc-hdr-tbl-${id} tr {
+      display: block !important;
+      width: 100% !important;
+    }
+    .ptc-hdr-left-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 6px !important;
+    }
+    .ptc-hdr-title-${id} {
+      display: block !important;
+      margin-left: 0 !important;
+      margin-top: 4px !important;
+      font-size: 15px !important;
+    }
+    .ptc-hdr-right-${id} {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 12px !important;
+    }
+    .ptc-pills-wrap-${id} {
+      text-align: center !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #ede9fe;border-radius:10px;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+      <table class="ptc-hdr-tbl-${id}" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
         <tr>
-          <td>
+          <td class="ptc-hdr-left-${id}">
             <span style="display:inline-block;background-color:#f3eeff;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px;">
               CAPSULE MATRIX
             </span>
-            <span style="color:${textCol};font-size:15px;font-weight:900;margin-left:8px;vertical-align:middle;">
+            <span class="ptc-hdr-title-${id}" style="color:${textCol};font-size:15px;font-weight:900;margin-left:8px;vertical-align:middle;">
               ${title}
             </span>
           </td>
-          <td align="right" style="color:#64748b;font-size:11px;font-weight:600;">
+          <td class="ptc-hdr-right-${id}" align="right" style="color:#64748b;font-size:11px;font-weight:600;">
             ${rows.length} verified tags
           </td>
         </tr>
       </table>
-      <div>
+      <div class="ptc-pills-wrap-${id}">
         ${pillsHtml}
       </div>
     </td>
@@ -579,27 +701,27 @@ function pillTagCluster(p: any, id: string): string {
 // Radically distinct terminal HUD cards with hex addresses, status LEDs & telemetry meters
 // ─────────────────────────────────────────────────────────────────────────────
 function darkTerminalConsole(p: any, id: string): string {
-    const f = font(p, 'Consolas, Monaco, Courier New, monospace')
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#070b12')
-    const textCol = resolveText(p, '#f8fafc')
-    const cyan = resolveAccent(p, '#06b6d4')
-    const emerald = '#10b981'
-    const title = titleText(p, 'SYS.HARDWARE // TELEMETRY DIAGNOSTIC')
+  const f = font(p, 'Consolas, Monaco, Courier New, monospace')
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#070b12')
+  const textCol = resolveText(p, '#f8fafc')
+  const cyan = resolveAccent(p, '#06b6d4')
+  const emerald = '#10b981'
+  const title = titleText(p, 'SYS.HARDWARE // TELEMETRY DIAGNOSTIC')
 
-    // Split into pairs of 2 modular telemetry blocks
-    const pairs: SpecRow[][] = []
-    for (let i = 0; i < rows.length; i += 2) {
-        pairs.push(rows.slice(i, i + 2))
-    }
+  // Split into pairs of 2 modular telemetry blocks
+  const pairs: SpecRow[][] = []
+  for (let i = 0; i < rows.length; i += 2) {
+    pairs.push(rows.slice(i, i + 2))
+  }
 
-    const hudBlocksHtml = pairs.map((pair, rowIdx) => {
-        const col1 = pair[0]
-        const col2 = pair[1]
-        const hex1 = `0x${(rowIdx * 2 + 10).toString(16).toUpperCase()}`
-        const hex2 = `0x${(rowIdx * 2 + 11).toString(16).toUpperCase()}`
+  const hudBlocksHtml = pairs.map((pair, rowIdx) => {
+    const col1 = pair[0]
+    const col2 = pair[1]
+    const hex1 = `0x${(rowIdx * 2 + 10).toString(16).toUpperCase()}`
+    const hex2 = `0x${(rowIdx * 2 + 11).toString(16).toUpperCase()}`
 
-        const block1 = `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
+    const block1 = `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <div style="background-color:#0c1322;border:1px solid #1e293b;border-top:2px solid ${cyan};border-radius:4px;padding:8px 12px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -616,7 +738,7 @@ function darkTerminalConsole(p: any, id: string): string {
       </div>
     </td>`
 
-        const block2 = col2 ? `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
+    const block2 = col2 ? `<td width="50%" valign="top" style="padding:4px;box-sizing:border-box;">
       <div style="background-color:#0c1322;border:1px solid #1e293b;border-top:2px solid ${cyan};border-radius:4px;padding:8px 12px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -633,12 +755,12 @@ function darkTerminalConsole(p: any, id: string): string {
       </div>
     </td>` : `<td width="50%"></td>`
 
-        return `<tr>${block1}${block2}</tr>`
-    }).join('')
+    return `<tr>${block1}${block2}</tr>`
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #1e293b;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #1e293b;border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <!-- Terminal Prompt Bar -->
   <tr>
     <td style="background-color:#0f172a;border-bottom:1px solid #1e293b;padding:8px 14px;box-sizing:border-box;">
@@ -704,28 +826,28 @@ function darkTerminalConsole(p: any, id: string): string {
 // Top 2 primary attributes in prominent boxes with secondary specs below
 // ─────────────────────────────────────────────────────────────────────────────
 function splitKeyHighlightCard(p: any, id: string): string {
-    const f = font(p)
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const accent = resolveAccent(p, '#2563eb')
-    const title = titleText(p, 'Primary Specifications & Details')
+  const f = font(p)
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const accent = resolveAccent(p, '#2563eb')
+  const title = titleText(p, 'Primary Specifications & Details')
 
-    const top1 = rows[0] ?? { key: 'Brand', value: '{{BRAND}}' }
-    const top2 = rows[1] ?? { key: 'Model', value: '{{MODEL}}' }
-    const rest = rows.slice(2)
+  const top1 = rows[0] ?? { key: 'Brand', value: '{{BRAND}}' }
+  const top2 = rows[1] ?? { key: 'Model', value: '{{MODEL}}' }
+  const rest = rows.slice(2)
 
-    const restHtml = rest.map((r, i) => {
-        const isEven = i % 2 === 0
-        return `<tr style="background-color:${isEven ? '#f8fafc' : '#ffffff'};">
+  const restHtml = rest.map((r, i) => {
+    const isEven = i % 2 === 0
+    return `<tr style="background-color:${isEven ? '#f8fafc' : '#ffffff'};">
       <td width="35%" style="padding:9px 14px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:700;color:#64748b;box-sizing:border-box;">${r.key}</td>
       <td width="65%" style="padding:9px 14px;border-bottom:1px solid #e2e8f0;font-size:12.5px;font-weight:800;color:${textCol};box-sizing:border-box;">${r.value}</td>
     </tr>`
-    }).join('')
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;background-color:${bgCol};">
+  return `<!--[riazify:item_specifics:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 14, 16, 14, 16)}box-sizing:border-box;">
       <div style="color:${textCol};font-size:15px;font-weight:900;margin-bottom:10px;">${title}</div>
@@ -761,39 +883,46 @@ function splitKeyHighlightCard(p: any, id: string): string {
 // 3 equal-width columns allowing 12+ specifics to fit in half the vertical space
 // ─────────────────────────────────────────────────────────────────────────────
 function compactThreeColumnStrip(p: any, id: string): string {
-    const f = font(p)
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#ffffff')
-    const textCol = resolveText(p, '#0f172a')
-    const accent = resolveAccent(p, '#0284c7')
-    const title = titleText(p, 'Complete Item Specifications Matrix')
+  const f = font(p)
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#ffffff')
+  const textCol = resolveText(p, '#0f172a')
+  const accent = resolveAccent(p, '#0284c7')
+  const title = titleText(p, 'Complete Item Specifications Matrix')
 
-    // Split into triplets of 3
-    const triplets: SpecRow[][] = []
-    for (let i = 0; i < rows.length; i += 3) {
-        triplets.push(rows.slice(i, i + 3))
-    }
+  // Split into triplets of 3
+  const triplets: SpecRow[][] = []
+  for (let i = 0; i < rows.length; i += 3) {
+    triplets.push(rows.slice(i, i + 3))
+  }
 
-    const rowsHtml = triplets.map((trip, idx) => {
-        const bg = idx % 2 === 0 ? '#f8fafc' : '#ffffff'
-        const cells = trip.map(col => `
+  const rowsHtml = triplets.map((trip, idx) => {
+    const bg = idx % 2 === 0 ? '#f8fafc' : '#ffffff'
+    const cells = trip.map(col => `
       <td width="33.3%" valign="top" style="padding:8px 10px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;box-sizing:border-box;">
         <div style="color:#64748b;font-size:9.5px;font-weight:700;text-transform:uppercase;">${col.key}</div>
         <div style="color:${textCol};font-size:12px;font-weight:800;margin-top:1px;">${col.value}</div>
       </td>
     `).join('')
-        return `<tr style="background-color:${bg};">${cells}</tr>`
-    }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+    // Pad empty cells if the final row has fewer than 3 columns
+    const emptyCols = 3 - trip.length
+    const emptyCells = emptyCols > 0
+      ? Array(emptyCols).fill('<td width="33.3%" style="border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;box-sizing:border-box;"></td>').join('')
+      : ''
+
+    return `<tr style="background-color:${bg};">${cells}${emptyCells}</tr>`
+  }).join('')
+
+  return `<!--[riazify:item_specifics:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
   <tr>
-    <td style="background-color:#f1f5f9;border-bottom:1px solid #e2e8f0;padding:10px 16px;box-sizing:border-box;">
-      <span style="color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;">
+    <td colspan="3" style="background-color:#f1f5f9;border-bottom:1px solid #e2e8f0;padding:10px 16px;box-sizing:border-box;width:100%;">
+      <span style="display:inline-block;color:${accent};font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase;">
         SPEC MATRIX &bull;
       </span>
-      <span style="color:${textCol};font-size:14px;font-weight:800;margin-left:6px;">
+      <span style="color:${textCol};font-size:14px;font-weight:800;margin-left:6px;vertical-align:middle;">
         ${title}
       </span>
     </td>
@@ -808,28 +937,28 @@ function compactThreeColumnStrip(p: any, id: string): string {
 // Double 18k gold hairline plaque frame with Roman numeral ledger & wax lot seal
 // ─────────────────────────────────────────────────────────────────────────────
 function luxuryGoldAccentBand(p: any, id: string): string {
-    const f = font(p, 'Georgia, Garamond, serif')
-    const rows = getRows(p)
-    const bgCol = resolveBg(p, '#09090b')
-    const textCol = resolveText(p, '#fafafa')
-    const gold = resolveAccent(p, '#d4af37')
-    const title = titleText(p, 'CERTIFICATE OF PROVENANCE & TECHNICAL SPECIFICATIONS')
+  const f = font(p, 'Georgia, Garamond, serif')
+  const rows = getRows(p)
+  const bgCol = resolveBg(p, '#09090b')
+  const textCol = resolveText(p, '#fafafa')
+  const gold = resolveAccent(p, '#d4af37')
+  const title = titleText(p, 'CERTIFICATE OF PROVENANCE & TECHNICAL SPECIFICATIONS')
 
-    const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+  const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
-    // Split into pairs of 2 luxury gold-inset spec cards
-    const pairs: SpecRow[][] = []
-    for (let i = 0; i < rows.length; i += 2) {
-        pairs.push(rows.slice(i, i + 2))
-    }
+  // Split into pairs of 2 luxury gold-inset spec cards
+  const pairs: SpecRow[][] = []
+  for (let i = 0; i < rows.length; i += 2) {
+    pairs.push(rows.slice(i, i + 2))
+  }
 
-    const cardsHtml = pairs.map((pair, rowIdx) => {
-        const col1 = pair[0]
-        const col2 = pair[1]
-        const rom1 = romanNumerals[rowIdx * 2] ?? `0${rowIdx * 2 + 1}`
-        const rom2 = romanNumerals[rowIdx * 2 + 1] ?? `0${rowIdx * 2 + 2}`
+  const cardsHtml = pairs.map((pair, rowIdx) => {
+    const col1 = pair[0]
+    const col2 = pair[1]
+    const rom1 = romanNumerals[rowIdx * 2] ?? `0${rowIdx * 2 + 1}`
+    const rom2 = romanNumerals[rowIdx * 2 + 1] ?? `0${rowIdx * 2 + 2}`
 
-        const card1 = `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
+    const card1 = `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
       <div style="background-color:#121214;border:1px solid #27272a;border-left:2px solid ${gold};padding:10px 14px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -849,7 +978,7 @@ function luxuryGoldAccentBand(p: any, id: string): string {
       </div>
     </td>`
 
-        const card2 = col2 ? `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
+    const card2 = col2 ? `<td width="50%" valign="top" style="padding:5px;box-sizing:border-box;">
       <div style="background-color:#121214;border:1px solid #27272a;border-left:2px solid ${gold};padding:10px 14px;box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
@@ -869,12 +998,12 @@ function luxuryGoldAccentBand(p: any, id: string): string {
       </div>
     </td>` : `<td width="50%"></td>`
 
-        return `<tr>${card1}${card2}</tr>`
-    }).join('')
+    return `<tr>${card1}${card2}</tr>`
+  }).join('')
 
-    return `<!--[riazify:item_specifics:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:8px;background-color:${bgCol};box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+  return `<!--[riazify:item_specifics:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100%;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:8px;background-color:${bgCol};box-shadow:0 4px 20px rgba(0,0,0,0.4);">
   <tr>
     <td style="padding:4px;box-sizing:border-box;">
       <!-- Inner Plaque Hairline Border -->
@@ -927,7 +1056,7 @@ function luxuryGoldAccentBand(p: any, id: string): string {
 // SVG Thumbnail Representations for Visual Editor Carousel & Panels
 // ─────────────────────────────────────────────────────────────────────────────
 export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
-    'is-dual-column-zebra-card': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-dual-column-zebra-card': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
   <path d="M2 6C2 3.79086 3.79086 2 6 2H114C116.209 2 118 3.79086 118 6V18H2V6Z" fill="#0f172a"/>
   <rect x="6" y="6" width="22" height="6" rx="2" fill="#2563eb"/>
@@ -954,7 +1083,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="48" y="62" width="36" height="4" rx="1" fill="#64748b"/>
 </svg>`,
 
-    'is-two-column-card-grid': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-two-column-card-grid': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
   <circle cx="8" cy="10" r="2.5" fill="#2563eb"/>
   <rect x="14" y="8" width="28" height="4" rx="1" fill="#2563eb"/>
@@ -975,7 +1104,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="67" y="55" width="30" height="5" rx="1.5" fill="#0f172a"/>
 </svg>`,
 
-    'is-industrial-blueprint-matrix': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-industrial-blueprint-matrix': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#0c1a2e" stroke="#1e3a5f" stroke-width="1.5"/>
   <path d="M2 5C2 3.34315 3.34315 2 5 2H115C116.657 2 118 3.34315 118 5V16H2V5Z" fill="#07111e"/>
   <line x1="2" y1="16" x2="118" y2="16" stroke="#1e3a5f" stroke-width="1"/>
@@ -1005,7 +1134,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="90" y="69.5" width="24" height="2" fill="#38bdf8"/>
 </svg>`,
 
-    'is-boutique-hairline-editorial': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-boutique-hairline-editorial': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e4e4e7" stroke-width="1.2"/>
   <rect x="6" y="8" width="22" height="2.5" rx="0.5" fill="#71717a"/>
   <rect x="6" y="14" width="30" height="6" rx="1" fill="#18181b"/>
@@ -1030,7 +1159,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <line x1="48" y1="60" x2="114" y2="60" stroke="#f4f4f5" stroke-width="0.8"/>
 </svg>`,
 
-    'is-stamped-manifest-ledger': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-stamped-manifest-ledger': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#fffefb" stroke="#d6d3d1" stroke-width="1.5"/>
   <rect x="2" y="2" width="116" height="11" fill="#f5f5f4"/>
   <line x1="2" y1="13" x2="118" y2="13" stroke="#a8a29e" stroke-dasharray="2,2" stroke-width="0.8"/>
@@ -1067,7 +1196,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="58" y="64" width="35" height="3.5" fill="#1c1917"/>
 </svg>`,
 
-    'is-pill-tag-cluster': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-pill-tag-cluster': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#ede9fe" stroke-width="1.2"/>
   <rect x="6" y="7" width="28" height="6" rx="2" fill="#f3eeff"/>
   <rect x="10" y="9" width="20" height="2.5" fill="#7530fb"/>
@@ -1098,7 +1227,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="82" y="59.5" width="26" height="3" fill="#0f172a"/>
 </svg>`,
 
-    'is-dark-terminal-console': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-dark-terminal-console': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#070b12" stroke="#1e293b" stroke-width="1.2"/>
   <path d="M2 5C2 3.34315 3.34315 2 5 2H115C116.657 2 118 3.34315 118 5V14H2V5Z" fill="#0f172a"/>
   <line x1="2" y1="14" x2="118" y2="14" stroke="#1e293b" stroke-width="0.8"/>
@@ -1134,7 +1263,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="95" y="70" width="19" height="2" fill="#06b6d4"/>
 </svg>`,
 
-    'is-split-key-highlight-card': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-split-key-highlight-card': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
   <rect x="6" y="7" width="52" height="4.5" rx="1" fill="#0f172a"/>
   <rect x="6" y="16" width="51" height="25" rx="3" fill="#eff6ff" stroke="#3b82f6" stroke-width="1"/>
@@ -1152,7 +1281,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="48" y="60.5" width="40" height="3.5" fill="#0f172a"/>
 </svg>`,
 
-    'is-compact-three-column-strip': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-compact-three-column-strip': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2"/>
   <path d="M2 5C2 3.34315 3.34315 2 5 2H115C116.657 2 118 3.34315 118 5V16H2V5Z" fill="#f1f5f9"/>
   <line x1="2" y1="16" x2="118" y2="16" stroke="#e2e8f0" stroke-width="0.8"/>
@@ -1179,7 +1308,7 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
   <rect x="82" y="55" width="25" height="5" fill="#0f172a"/>
 </svg>`,
 
-    'is-luxury-gold-accent-band': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+  'is-luxury-gold-accent-band': `<svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
   <rect x="2" y="2" width="116" height="71" rx="4" fill="#09090b" stroke="#d4af37" stroke-width="1.5"/>
   <rect x="4.5" y="4.5" width="111" height="66" rx="2" fill="none" stroke="#d4af37" stroke-width="0.6" stroke-opacity="0.4"/>
   <rect x="5" y="5" width="110" height="17" fill="#141416"/>
@@ -1216,101 +1345,101 @@ export const ITEM_SPECIFICS_THUMBNAILS: Record<string, string> = {
 }
 
 export function getItemSpecificsThumbnailSvg(id: string): string {
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^is[-_]/, '')
-        .replace(/^item[-_]/, '')
-        .replace(/^specifics[-_]/, '')
-        .replace(/_/g, '-')
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^is[-_]/, '')
+    .replace(/^item[-_]/, '')
+    .replace(/^specifics[-_]/, '')
+    .replace(/_/g, '-')
 
-    const key = Object.keys(ITEM_SPECIFICS_THUMBNAILS).find(k => {
-        const kClean = k
-            .toLowerCase()
-            .replace(/^is[-_]/, '')
-            .replace(/^item[-_]/, '')
-            .replace(/^specifics[-_]/, '')
-            .replace(/_/g, '-')
-        return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
-    })
+  const key = Object.keys(ITEM_SPECIFICS_THUMBNAILS).find(k => {
+    const kClean = k
+      .toLowerCase()
+      .replace(/^is[-_]/, '')
+      .replace(/^item[-_]/, '')
+      .replace(/^specifics[-_]/, '')
+      .replace(/_/g, '-')
+    return k === id || kClean === clean || k.endsWith(clean) || clean.includes(kClean)
+  })
 
-    return key ? ITEM_SPECIFICS_THUMBNAILS[key] : ITEM_SPECIFICS_THUMBNAILS['is-dual-column-zebra-card']
+  return key ? ITEM_SPECIFICS_THUMBNAILS[key] : ITEM_SPECIFICS_THUMBNAILS['is-dual-column-zebra-card']
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Exported Variant Registry (All 10 Radically Distinct Architectures)
 // ─────────────────────────────────────────────────────────────────────────────
 export const itemSpecificsVariants: BlockVariant[] = [
-    {
-        id: 'is-dual-column-zebra-card',
-        label: 'Executive Zebra Card',
-        description: 'Corporate 2-column alternating zebra table with rounded frame and dark header',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-dual-column-zebra-card'],
-        toHtml(props, id) { return dualColumnZebraCard(props, id) },
-    },
-    {
-        id: 'is-two-column-card-grid',
-        label: '2-Column Bento Grid',
-        description: 'Modern 2-column bento micro-card spec grid for tech, gadgets and audio',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-two-column-card-grid'],
-        toHtml(props, id) { return twoColumnCardGrid(props, id) },
-    },
-    {
-        id: 'is-industrial-blueprint-matrix',
-        label: 'Industrial Blueprint',
-        description: 'CAD / Schematic blueprint matrix with coordinate ticks & modular parameter blocks',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-industrial-blueprint-matrix'],
-        toHtml(props, id) { return industrialBlueprintMatrix(props, id) },
-    },
-    {
-        id: 'is-boutique-hairline-editorial',
-        label: 'Scandinavian Hairline',
-        description: 'Asymmetrical Scandinavian fashion magazine editorial split with vertical feature spine',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-boutique-hairline-editorial'],
-        toHtml(props, id) { return boutiqueHairlineEditorial(props, id) },
-    },
-    {
-        id: 'is-stamped-manifest-ledger',
-        label: 'Vintage Stamped Manifest',
-        description: 'Authentic courier waybill manifest ticket with perforated cut line & inspector stamp',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-stamped-manifest-ledger'],
-        toHtml(props, id) { return stampedManifestLedger(props, id) },
-    },
-    {
-        id: 'is-pill-tag-cluster',
-        label: 'Pill Tag Cluster',
-        description: 'Ergonomic dual-tone capsule pill badge cluster for lightning-fast mobile scan',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-pill-tag-cluster'],
-        toHtml(props, id) { return pillTagCluster(props, id) },
-    },
-    {
-        id: 'is-dark-terminal-console',
-        label: 'Dark Cyber Console',
-        description: 'Modular Cyber Diagnostics Telemetry HUD with hex addresses & telemetry cards',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-dark-terminal-console'],
-        toHtml(props, id) { return darkTerminalConsole(props, id) },
-    },
-    {
-        id: 'is-split-key-highlight-card',
-        label: 'Hero Spec Highlight Split',
-        description: 'Top primary specs in prominent hero boxes with secondary details below',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-split-key-highlight-card'],
-        toHtml(props, id) { return splitKeyHighlightCard(props, id) },
-    },
-    {
-        id: 'is-compact-three-column-strip',
-        label: '3-Column Compact Strip',
-        description: 'High-density 3-column quick-scan matrix for large catalogs and multi-attributes',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-compact-three-column-strip'],
-        toHtml(props, id) { return compactThreeColumnStrip(props, id) },
-    },
-    {
-        id: 'is-luxury-gold-accent-band',
-        label: 'Luxury Gold Provenance',
-        description: 'Official Atelier Certificate of Provenance Dossier with double gold plaque frame',
-        thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-luxury-gold-accent-band'],
-        toHtml(props, id) { return luxuryGoldAccentBand(props, id) },
-    },
+  {
+    id: 'is-dual-column-zebra-card',
+    label: 'Executive Zebra Card',
+    description: 'Corporate 2-column alternating zebra table with rounded frame and dark header',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-dual-column-zebra-card'],
+    toHtml(props, id) { return dualColumnZebraCard(props, id) },
+  },
+  {
+    id: 'is-two-column-card-grid',
+    label: '2-Column Bento Grid',
+    description: 'Modern 2-column bento micro-card spec grid for tech, gadgets and audio',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-two-column-card-grid'],
+    toHtml(props, id) { return twoColumnCardGrid(props, id) },
+  },
+  {
+    id: 'is-industrial-blueprint-matrix',
+    label: 'Industrial Blueprint',
+    description: 'CAD / Schematic blueprint matrix with coordinate ticks & modular parameter blocks',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-industrial-blueprint-matrix'],
+    toHtml(props, id) { return industrialBlueprintMatrix(props, id) },
+  },
+  {
+    id: 'is-boutique-hairline-editorial',
+    label: 'Scandinavian Hairline',
+    description: 'Asymmetrical Scandinavian fashion magazine editorial split with vertical feature spine',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-boutique-hairline-editorial'],
+    toHtml(props, id) { return boutiqueHairlineEditorial(props, id) },
+  },
+  {
+    id: 'is-stamped-manifest-ledger',
+    label: 'Vintage Stamped Manifest',
+    description: 'Authentic courier waybill manifest ticket with perforated cut line & inspector stamp',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-stamped-manifest-ledger'],
+    toHtml(props, id) { return stampedManifestLedger(props, id) },
+  },
+  {
+    id: 'is-pill-tag-cluster',
+    label: 'Pill Tag Cluster',
+    description: 'Ergonomic dual-tone capsule pill badge cluster for lightning-fast mobile scan',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-pill-tag-cluster'],
+    toHtml(props, id) { return pillTagCluster(props, id) },
+  },
+  {
+    id: 'is-dark-terminal-console',
+    label: 'Dark Cyber Console',
+    description: 'Modular Cyber Diagnostics Telemetry HUD with hex addresses & telemetry cards',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-dark-terminal-console'],
+    toHtml(props, id) { return darkTerminalConsole(props, id) },
+  },
+  {
+    id: 'is-split-key-highlight-card',
+    label: 'Hero Spec Highlight Split',
+    description: 'Top primary specs in prominent hero boxes with secondary details below',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-split-key-highlight-card'],
+    toHtml(props, id) { return splitKeyHighlightCard(props, id) },
+  },
+  {
+    id: 'is-compact-three-column-strip',
+    label: '3-Column Compact Strip',
+    description: 'High-density 3-column quick-scan matrix for large catalogs and multi-attributes',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-compact-three-column-strip'],
+    toHtml(props, id) { return compactThreeColumnStrip(props, id) },
+  },
+  {
+    id: 'is-luxury-gold-accent-band',
+    label: 'Luxury Gold Provenance',
+    description: 'Official Atelier Certificate of Provenance Dossier with double gold plaque frame',
+    thumbnail: ITEM_SPECIFICS_THUMBNAILS['is-luxury-gold-accent-band'],
+    toHtml(props, id) { return luxuryGoldAccentBand(props, id) },
+  },
 ]
 
 // Backwards-compatible aliases
@@ -1322,33 +1451,33 @@ export const specificsVariants = itemSpecificsVariants
  * and matches shorthand IDs seamlessly.
  */
 export function getItemSpecificsVariant(id: string): BlockVariant {
-    if (!id) return itemSpecificsVariants[0]
-    const clean = id
-        .toLowerCase()
-        .trim()
-        .replace(/^is[-_]/, '')
-        .replace(/^item[-_]/, '')
-        .replace(/^specifics[-_]/, '')
-        .replace(/_/g, '-')
+  if (!id) return itemSpecificsVariants[0]
+  const clean = id
+    .toLowerCase()
+    .trim()
+    .replace(/^is[-_]/, '')
+    .replace(/^item[-_]/, '')
+    .replace(/^specifics[-_]/, '')
+    .replace(/_/g, '-')
 
-    const match = itemSpecificsVariants.find(v => {
-        const vClean = v.id
-            .toLowerCase()
-            .replace(/^is[-_]/, '')
-            .replace(/^item[-_]/, '')
-            .replace(/^specifics[-_]/, '')
-            .replace(/_/g, '-')
+  const match = itemSpecificsVariants.find(v => {
+    const vClean = v.id
+      .toLowerCase()
+      .replace(/^is[-_]/, '')
+      .replace(/^item[-_]/, '')
+      .replace(/^specifics[-_]/, '')
+      .replace(/_/g, '-')
 
-        return (
-            v.id === id ||
-            vClean === clean ||
-            v.id.endsWith(clean) ||
-            clean.includes(vClean) ||
-            vClean.includes(clean)
-        )
-    })
+    return (
+      v.id === id ||
+      vClean === clean ||
+      v.id.endsWith(clean) ||
+      clean.includes(vClean) ||
+      vClean.includes(clean)
+    )
+  })
 
-    return match ?? itemSpecificsVariants[0]
+  return match ?? itemSpecificsVariants[0]
 }
 
 export const getSpecificsVariant = getItemSpecificsVariant

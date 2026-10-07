@@ -1830,6 +1830,65 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
         </svg>
     ),
 
+    // ── Minimal 6-Grid: main image + 4 thumbs left, 2 thumbs top-right above details
+    'hp-minimal-6grid': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Background */}
+            <rect width="80" height="44" rx="3" fill="#f5f4f0" />
+            {/* Left col: main image top */}
+            <rect x="3" y="3" width="32" height="22" rx="2" fill={light} stroke={col} strokeWidth="0.7" strokeDasharray="2 1" />
+            <circle cx="19" cy="12" r="4" fill={col} opacity="0.25" />
+            <path d="M4 24 l5-5 4 3 4-5 5 6H4z" fill={col} opacity="0.2" />
+            {/* 4 thumbs in 2x2 grid bottom-left */}
+            <rect x="3" y="27" width="15" height="7" rx="1.5" fill={col} opacity="0.18" />
+            <rect x="20" y="27" width="15" height="7" rx="1.5" fill={col} opacity="0.18" />
+            <rect x="3" y="36" width="15" height="7" rx="1.5" fill={col} opacity="0.12" />
+            <rect x="20" y="36" width="15" height="7" rx="1.5" fill={col} opacity="0.12" />
+            {/* Right: cream panel */}
+            <rect x="38" y="3" width="39" height="38" rx="3" fill="#faf9f6" />
+            {/* 2 feature thumbs at top of right panel */}
+            <rect x="41" y="5" width="15" height="7" rx="1.5" fill={col} opacity="0.22" stroke={col} strokeWidth="0.5" />
+            <rect x="59" y="5" width="15" height="7" rx="1.5" fill={col} opacity="0.22" stroke={col} strokeWidth="0.5" />
+            {/* Category label */}
+            <rect x="42" y="15" width="14" height="2" rx="1" fill={col} opacity="0.3" />
+            {/* Title lines */}
+            <rect x="42" y="19" width="31" height="3" rx="1" fill={col} opacity="0.75" />
+            <rect x="42" y="24" width="22" height="3" rx="1" fill={col} opacity="0.55" />
+            {/* Thin accent rule */}
+            <rect x="42" y="29" width="10" height="1.5" rx="1" fill={col} opacity="1" />
+            {/* Price */}
+            <rect x="42" y="33" width="18" height="3" rx="1" fill={col} opacity="0.9" />
+            {/* Bullets */}
+            <rect x="42" y="38" width="28" height="1.5" rx="0.75" fill={col} opacity="0.2" />
+        </svg>
+    ),
+
+    // ── Studio Flagship: full-width top header + studio image left + guarantee dossier right
+    'hp-studio-flagship': (col, light) => (
+        <svg viewBox="0 0 80 44" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="44" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            {/* Top Header Band across 100% width */}
+            <rect x="0" y="0" width="80" height="12" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="4" y="3" width="12" height="2.5" fill={col} />
+            <rect x="18" y="3" width="18" height="2" fill="#16a34a" opacity="0.8" />
+            <rect x="4" y="7" width="46" height="3" fill="#0f172a" />
+            <rect x="58" y="4" width="18" height="4.5" fill={col} />
+            {/* Below Header: Image Left 50% */}
+            <rect x="4" y="15" width="34" height="20" fill={light} stroke="#cbd5e1" strokeWidth="0.6" />
+            <circle cx="21" cy="23" r="3.5" fill={col} opacity="0.25" />
+            <path d="M5 33 l5-4 4 2 5-4 5 6H5z" fill={col} opacity="0.2" />
+            {/* 4 thumbs under image */}
+            {[0, 1, 2, 3].map(i => (
+                <rect key={i} x={4 + i * 9} y="37" width="7" height="4" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="0.4" />
+            ))}
+            {/* Below Header: 3-Tier Guarantee Dossier Right 50% */}
+            <rect x="42" y="15" width="34" height="7" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="42" y="23" width="34" height="7" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="42" y="31" width="34" height="7" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <rect x="42" y="40" width="30" height="2" fill={col} opacity="0.3" />
+        </svg>
+    ),
+
     // ── Flash Sale: red urgency banner top, image+SAVE badge left, giant price right
     'hp-flash-sale': (col, _light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
@@ -6081,6 +6140,370 @@ const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="6" y="10" width="4" height="28" fill="#f59e0b" />
         </svg>
     ),
+
+    'rect-elevated-shadow-plinth': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="5" fill="#000000" fillOpacity="0.08" />
+            <rect x="8" y="9" width="64" height="28" rx="5" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="16" y1="23" x2="64" y2="23" stroke="#0f172a" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'rect-chamfer-tactical-cut': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <path d="M14 12 L72 12 L72 32 L66 38 L8 38 L8 18 Z" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+            <line x1="8" y1="18" x2="8" y2="38" stroke="#38bdf8" strokeWidth="2" />
+        </svg>
+    ),
+
+    'rect-perforated-ticket-stub': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="4" fill="#fefce8" stroke="#fef08a" strokeWidth="1" />
+            <line x1="20" y1="10" x2="20" y2="38" stroke="#ca8a04" strokeWidth="1" strokeDasharray="2 2" />
+            <line x1="60" y1="10" x2="60" y2="38" stroke="#ca8a04" strokeWidth="1" strokeDasharray="2 2" />
+        </svg>
+    ),
+
+    'rect-cyber-neon-outline': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="3" fill="#090d16" stroke="#b8fa33" strokeWidth="1.5" />
+            <line x1="16" y1="24" x2="64" y2="24" stroke="#ffffff" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'rect-regal-notary-certificate': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1" />
+            <rect x="10" y="8" width="60" height="32" rx="2" stroke="#d6d3d1" strokeWidth="1" />
+            <circle cx="40" cy="24" r="2.5" fill="#b45309" />
+        </svg>
+    ),
+
+    'rect-checkered-racing-flag': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#27272a" strokeWidth="1" />
+            <rect x="8" y="10" width="8" height="28" fill="#ffffff" />
+            <rect x="8" y="10" width="4" height="7" fill="#000000" />
+            <rect x="12" y="17" width="4" height="7" fill="#000000" />
+            <rect x="8" y="24" width="4" height="7" fill="#000000" />
+            <rect x="12" y="31" width="4" height="7" fill="#000000" />
+        </svg>
+    ),
+
+    'rect-bracket-architect': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <path d="M12 12 L8 12 L8 36 L12 36" stroke="#94a3b8" strokeWidth="2" fill="none" />
+            <path d="M68 12 L72 12 L72 36 L68 36" stroke="#94a3b8" strokeWidth="2" fill="none" />
+            <line x1="18" y1="24" x2="62" y2="24" stroke="#0f172a" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'rect-stacked-paper-memo': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="11" y="13" width="60" height="26" rx="3" fill="#1e293b" />
+            <rect x="8" y="10" width="60" height="26" rx="3" fill="#ffffff" stroke="#1e293b" strokeWidth="1" />
+            <line x1="16" y1="23" x2="56" y2="23" stroke="#1e293b" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'rect-dot-matrix-receipt': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="64" height="28" rx="3" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="2 3" />
+            <line x1="16" y1="24" x2="64" y2="24" stroke="#64748b" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'rect-caution-diagonal-hazard': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#27272a" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="6" fill="#f59e0b" />
+            <line x1="12" y1="8" x2="16" y2="14" stroke="#18181b" strokeWidth="2" />
+            <line x1="22" y1="8" x2="26" y2="14" stroke="#18181b" strokeWidth="2" />
+            <line x1="32" y1="8" x2="36" y2="14" stroke="#18181b" strokeWidth="2" />
+            <line x1="42" y1="8" x2="46" y2="14" stroke="#18181b" strokeWidth="2" />
+            <line x1="52" y1="8" x2="56" y2="14" stroke="#18181b" strokeWidth="2" />
+            <line x1="62" y1="8" x2="66" y2="14" stroke="#18181b" strokeWidth="2" />
+        </svg>
+    ),
+
+    // ── Trust & Satisfaction Badge (10 Styles) ─────────────────────────────────
+    'trust-banner-soft': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="68" height="28" rx="4" fill="#f3eeff" />
+            <circle cx="20" cy="24" r="4" stroke="#7530fb" strokeWidth="1.2" fill="none" />
+            <line x1="28" y1="24" x2="66" y2="24" stroke="#7530fb" strokeWidth="1.6" />
+        </svg>
+    ),
+
+    'trust-seal-ribbon-badge': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="4" height="32" fill={col} />
+            <circle cx="20" cy="24" r="7" fill="#f8f7ff" stroke={col} strokeWidth="1" />
+            <line x1="32" y1="18" x2="48" y2="18" stroke={col} strokeWidth="1.2" />
+            <line x1="32" y1="24" x2="70" y2="24" stroke="#0f172a" strokeWidth="1.6" />
+            <line x1="32" y1="30" x2="62" y2="30" stroke="#64748b" strokeWidth="1" />
+        </svg>
+    ),
+
+    'trust-split-counter-bar': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#1e293b" strokeWidth="1" />
+            <rect x="6" y="8" width="22" height="32" fill={col} />
+            <line x1="10" y1="21" x2="24" y2="21" stroke="#ffffff" strokeWidth="1.8" />
+            <line x1="12" y1="27" x2="22" y2="27" stroke="#ffffff" strokeWidth="1" />
+            <line x1="34" y1="21" x2="72" y2="21" stroke="#ffffff" strokeWidth="1.6" />
+            <line x1="34" y1="28" x2="66" y2="28" stroke="#94a3b8" strokeWidth="1" />
+        </svg>
+    ),
+
+    'trust-gold-gilded-crest': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#fde68a" strokeWidth="1" />
+            <rect x="10" y="8" width="60" height="32" stroke="#ca8a04" strokeWidth="0.8" />
+            <circle cx="40" cy="17" r="1.5" fill="#b45309" />
+            <line x1="20" y1="24" x2="60" y2="24" stroke="#1c1917" strokeWidth="1.5" />
+            <line x1="24" y1="30" x2="56" y2="30" stroke="#78716c" strokeWidth="1" />
+        </svg>
+    ),
+
+    'trust-cyber-shield-tech': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#090d16" stroke="#1e293b" strokeWidth="1" />
+            <rect x="6" y="8" width="3" height="32" fill="#b8fa33" />
+            <circle cx="18" cy="24" r="4.5" stroke="#b8fa33" strokeWidth="1" />
+            <line x1="28" y1="22" x2="54" y2="22" stroke="#ffffff" strokeWidth="1.5" />
+            <line x1="28" y1="28" x2="48" y2="28" stroke="#94a3b8" strokeWidth="1" />
+            <rect x="58" y="20" width="16" height="8" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'trust-clean-hairline-capsule': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="14" x2="74" y2="14" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="34" x2="74" y2="34" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="20" cy="24" r="3.5" fill="#f1f5f9" />
+            <path d="M18.5 24l1 1 2-2" stroke="#0f172a" strokeWidth="1" fill="none" />
+            <line x1="28" y1="24" x2="68" y2="24" stroke="#0f172a" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'trust-money-back-stamp': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fff5f5" stroke="#fca5a5" strokeWidth="1" strokeDasharray="3 2" />
+            <rect x="10" y="14" width="18" height="20" rx="3" fill="#ffffff" stroke="#dc2626" strokeWidth="1.2" />
+            <line x1="13" y1="22" x2="25" y2="22" stroke="#dc2626" strokeWidth="1.5" />
+            <line x1="34" y1="21" x2="70" y2="21" stroke="#991b1b" strokeWidth="1.6" />
+            <line x1="34" y1="28" x2="64" y2="28" stroke="#7f1d1d" strokeWidth="1" />
+        </svg>
+    ),
+
+    'trust-handshake-pledge': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#faf5ff" stroke="#e9d5ff" strokeWidth="1" />
+            <circle cx="28" cy="17" r="1.5" fill="#eab308" />
+            <circle cx="34" cy="17" r="1.5" fill="#eab308" />
+            <circle cx="40" cy="17" r="1.5" fill="#eab308" />
+            <circle cx="46" cy="17" r="1.5" fill="#eab308" />
+            <circle cx="52" cy="17" r="1.5" fill="#eab308" />
+            <line x1="18" y1="25" x2="62" y2="25" stroke="#581c87" strokeWidth="1.6" />
+            <line x1="24" y1="31" x2="56" y2="31" stroke="#7e22ce" strokeWidth="1" />
+        </svg>
+    ),
+
+    'trust-industrial-motors-spec': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#18181b" stroke="#27272a" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="3" fill="#f59e0b" />
+            <circle cx="16" cy="26" r="4.5" stroke="#f59e0b" strokeWidth="1" />
+            <line x1="26" y1="22" x2="48" y2="22" stroke="#f59e0b" strokeWidth="1.2" />
+            <line x1="26" y1="28" x2="70" y2="28" stroke="#ffffff" strokeWidth="1.6" />
+        </svg>
+    ),
+
+    'trust-verified-buyer-pill': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="16" width="64" height="16" rx="8" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="14" y="21" width="5" height="6" rx="1" stroke="#0284c7" strokeWidth="1" />
+            <line x1="24" y1="24" x2="50" y2="24" stroke="#0f172a" strokeWidth="1.5" />
+            <circle cx="56" cy="24" r="2" fill="#16a34a" />
+        </svg>
+    ),
+
+    // ── Features Bar (10 Professional Layout Styles) ────────────────────────
+    'feat-simple-centered': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Col 1 */}
+            <circle cx="16" cy="16" r="3.5" fill={col || '#7530fb'} />
+            <line x1="9" y1="26" x2="23" y2="26" stroke="#1e1535" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="11" y1="31" x2="21" y2="31" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+            {/* Col 2 */}
+            <circle cx="40" cy="16" r="3.5" fill={col || '#7530fb'} />
+            <line x1="33" y1="26" x2="47" y2="26" stroke="#1e1535" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="35" y1="31" x2="45" y2="31" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+            {/* Col 3 */}
+            <circle cx="64" cy="16" r="3.5" fill={col || '#7530fb'} />
+            <line x1="57" y1="26" x2="71" y2="26" stroke="#1e1535" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="59" y1="31" x2="69" y2="31" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-divided-columns': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <line x1="27" y1="6" x2="27" y2="42" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="53" y1="6" x2="53" y2="42" stroke="#e2e8f0" strokeWidth="1" />
+            {/* 3 items */}
+            <circle cx="14" cy="18" r="3" fill={col || '#7530fb'} />
+            <line x1="7" y1="28" x2="21" y2="28" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="40" cy="18" r="3" fill={col || '#7530fb'} />
+            <line x1="33" y1="28" x2="47" y2="28" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="66" cy="18" r="3" fill={col || '#7530fb'} />
+            <line x1="59" y1="28" x2="73" y2="28" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-badge-cards': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" fill="#ffffff" />
+            {/* Card 1 */}
+            <rect x="4" y="6" width="22" height="36" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="15" cy="16" r="3" fill={col || '#7530fb'} />
+            <line x1="8" y1="26" x2="22" y2="26" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Card 2 */}
+            <rect x="29" y="6" width="22" height="36" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="40" cy="16" r="3" fill={col || '#7530fb'} />
+            <line x1="33" y1="26" x2="47" y2="26" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Card 3 */}
+            <rect x="54" y="6" width="22" height="36" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="65" cy="16" r="3" fill={col || '#7530fb'} />
+            <line x1="58" y1="26" x2="72" y2="26" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-horizontal-media': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            {/* Item 1 */}
+            <circle cx="10" cy="24" r="3.5" fill={col || '#7530fb'} />
+            <line x1="16" y1="21" x2="32" y2="21" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="16" y1="27" x2="28" y2="27" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+            {/* Item 2 */}
+            <circle cx="48" cy="24" r="3.5" fill={col || '#7530fb'} />
+            <line x1="54" y1="21" x2="70" y2="21" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="54" y1="27" x2="66" y2="27" stroke="#94a3b8" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-circular-plinths': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Col 1 */}
+            <circle cx="16" cy="17" r="7" fill={light || '#f3eeff'} stroke="#ede9fe" strokeWidth="0.8" />
+            <circle cx="16" cy="17" r="2.5" fill={col || '#7530fb'} />
+            <line x1="8" y1="31" x2="24" y2="31" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Col 2 */}
+            <circle cx="40" cy="17" r="7" fill={light || '#f3eeff'} stroke="#ede9fe" strokeWidth="0.8" />
+            <circle cx="40" cy="17" r="2.5" fill={col || '#7530fb'} />
+            <line x1="32" y1="31" x2="48" y2="31" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Col 3 */}
+            <circle cx="64" cy="17" r="7" fill={light || '#f3eeff'} stroke="#ede9fe" strokeWidth="0.8" />
+            <circle cx="64" cy="17" r="2.5" fill={col || '#7530fb'} />
+            <line x1="56" y1="31" x2="72" y2="31" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-accent-top-bars': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" fill="#ffffff" />
+            {/* Box 1 */}
+            <rect x="4" y="8" width="22" height="32" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="4" y="8" width="22" height="2" fill={col || '#7530fb'} />
+            <circle cx="15" cy="19" r="2.5" fill={col || '#7530fb'} />
+            <line x1="8" y1="28" x2="22" y2="28" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Box 2 */}
+            <rect x="29" y="8" width="22" height="32" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="29" y="8" width="22" height="2" fill={col || '#7530fb'} />
+            <circle cx="40" cy="19" r="2.5" fill={col || '#7530fb'} />
+            <line x1="33" y1="28" x2="47" y2="28" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Box 3 */}
+            <rect x="54" y="8" width="22" height="32" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="54" y="8" width="22" height="2" fill={col || '#7530fb'} />
+            <circle cx="65" cy="19" r="2.5" fill={col || '#7530fb'} />
+            <line x1="58" y1="28" x2="72" y2="28" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-dark-executive': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="2" fill="#0f172a" stroke="#1e293b" strokeWidth="1" />
+            <line x1="27" y1="6" x2="27" y2="42" stroke="#1e293b" strokeWidth="1" />
+            <line x1="53" y1="6" x2="53" y2="42" stroke="#1e293b" strokeWidth="1" />
+            {/* 3 items */}
+            <circle cx="14" cy="17" r="3" fill="#b8fa33" />
+            <line x1="7" y1="27" x2="21" y2="27" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="40" cy="17" r="3" fill="#b8fa33" />
+            <line x1="33" y1="27" x2="47" y2="27" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="66" cy="17" r="3" fill="#b8fa33" />
+            <line x1="59" y1="27" x2="73" y2="27" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-stitched-coupon': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" fill="#ffffff" />
+            {/* Card 1 */}
+            <rect x="4" y="6" width="22" height="36" rx="2" fill="#fffdfa" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="2 1.5" />
+            <circle cx="15" cy="17" r="3" fill={col || '#7530fb'} />
+            <line x1="8" y1="27" x2="22" y2="27" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Card 2 */}
+            <rect x="29" y="6" width="22" height="36" rx="2" fill="#fffdfa" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="2 1.5" />
+            <circle cx="40" cy="17" r="3" fill={col || '#7530fb'} />
+            <line x1="33" y1="27" x2="47" y2="27" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Card 3 */}
+            <rect x="54" y="6" width="22" height="36" rx="2" fill="#fffdfa" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="2 1.5" />
+            <circle cx="65" cy="17" r="3" fill={col || '#7530fb'} />
+            <line x1="58" y1="27" x2="72" y2="27" stroke="#1e1535" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-minimal-hairline': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" fill="#ffffff" />
+            <line x1="0" y1="6" x2="80" y2="6" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="0" y1="42" x2="80" y2="42" stroke="#e2e8f0" strokeWidth="1" />
+            {/* 3 items */}
+            <circle cx="14" cy="20" r="2.5" fill="#0f172a" />
+            <line x1="7" y1="29" x2="21" y2="29" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="40" cy="20" r="2.5" fill="#0f172a" />
+            <line x1="33" y1="29" x2="47" y2="29" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="66" cy="20" r="2.5" fill="#0f172a" />
+            <line x1="59" y1="29" x2="73" y2="29" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
+    'feat-numbered-steps': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" fill="#ffffff" />
+            {/* Card 1 */}
+            <rect x="4" y="6" width="22" height="36" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <text x="8" y="16" fill="#64748b" fontSize="6" fontFamily="monospace" fontWeight="bold">01</text>
+            <circle cx="20" cy="14" r="2" fill={col || '#7530fb'} />
+            <line x1="8" y1="26" x2="22" y2="26" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Card 2 */}
+            <rect x="29" y="6" width="22" height="36" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <text x="33" y="16" fill="#64748b" fontSize="6" fontFamily="monospace" fontWeight="bold">02</text>
+            <circle cx="45" cy="14" r="2" fill={col || '#7530fb'} />
+            <line x1="33" y1="26" x2="47" y2="26" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+            {/* Card 3 */}
+            <rect x="54" y="6" width="22" height="36" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <text x="58" y="16" fill="#64748b" fontSize="6" fontFamily="monospace" fontWeight="bold">03</text>
+            <circle cx="70" cy="14" r="2" fill={col || '#7530fb'} />
+            <line x1="58" y1="26" x2="72" y2="26" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
+    ),
 }
 
 function VariantThumbnail({ variantId, isSelected }: { variantId: string; isSelected: boolean }) {
@@ -6520,7 +6943,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}

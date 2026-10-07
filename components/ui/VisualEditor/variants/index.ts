@@ -48,6 +48,9 @@ export { faqBlockVariants, getFaqBlockVariant, faqVariants, faqSectionVariants, 
 export { whyBuyFromUsVariants, getWhyBuyFromUsVariant, WHY_BUY_FROM_US_THUMBNAILS } from './why_buy_from_us.variants'
 export { urgencyBarVariants, getUrgencyBarVariant } from './urgency_bar.variants'
 export { rectangleVariants, getRectangleVariant } from './rectangle.variants'
+export { trustBadgeVariants, getTrustBadgeVariant } from './trust_badge.variants'
+export { featureVariants, featuresVariants, getFeatureVariant, getFeaturesVariant } from './features.variants'
+
 
 // Imports for registry
 import { heroHeaderVariants } from './hero_header.variants'
@@ -96,6 +99,8 @@ import { faqBlockVariants } from './faq_block.variants'
 import { whyBuyFromUsVariants } from './why_buy_from_us.variants'
 import { urgencyBarVariants } from './urgency_bar.variants'
 import { rectangleVariants } from './rectangle.variants'
+import { trustBadgeVariants } from './trust_badge.variants'
+import { featureVariants } from './features.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -172,6 +177,11 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'urgency_stock': urgencyBarVariants,
     'rectangle': rectangleVariants,
     'shape': rectangleVariants,
+    'trust_badge_block': trustBadgeVariants,
+    'trust_badge': trustBadgeVariants,
+    'trust_satisfaction': trustBadgeVariants,
+    'features': featureVariants,
+    'features_bar': featureVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

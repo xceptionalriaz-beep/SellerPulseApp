@@ -118,26 +118,44 @@ function cosmeticGradeSplit(p: any, id: string): string {
   const accent = p.accentColor ?? '#7530fb'
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;">
+<style>
+@media only screen and (max-width: 620px) {
+  .cd-split-left {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 10px !important;
+  }
+  .cd-split-gap {
+    display: none !important;
+  }
+  .cd-split-right {
+    display: block !important;
+    width: 100% !important;
+  }
+}
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bgCol};${pad(p)}">
-      <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#1e1535;">
+      <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:15px;font-weight:800;color:#1e1535;">
         Condition: <span style="color:${accent};">${condition}</span>
       </p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td width="30%" style="padding:8px;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;text-align:center;">
-            <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#166534;">
+          <!-- Left Cosmetic Grade Stars Box -->
+          <td class="cd-split-left" width="30%" valign="middle" style="padding:10px 12px;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:0;text-align:center;box-sizing:border-box;">
+            <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;font-weight:800;color:#166534;letter-spacing:0.5px;white-space:nowrap;">
               ${p.badgeLabel ?? 'COSMETIC GRADE'}
             </p>
-            <p style="margin:4px 0 0;font-size:20px;color:#16a34a;">
+            <p style="margin:4px 0 0;font-size:20px;color:#16a34a;letter-spacing:2px;line-height:1;">
               &#9733;&#9733;&#9733;&#9733;&#9733;
             </p>
           </td>
-          <td width="4%"></td>
-          <td width="66%" style="padding:12px;background-color:#f8f7ff;border:1px solid #ede9fe;border-radius:6px;vertical-align:top;">
-            <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;line-height:1.7;">
+          <td class="cd-split-gap" width="4%"></td>
+          <!-- Right Notes Box -->
+          <td class="cd-split-right" width="66%" valign="top" style="padding:12px 14px;background-color:#f8f7ff;border:1px solid #ede9fe;border-radius:0;box-sizing:border-box;">
+            <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#1f1d2e;line-height:1.6;font-weight:500;">
               ${notes}
             </p>
           </td>
@@ -162,40 +180,56 @@ function certifiedRefurbDiagnostic(p: any, id: string): string {
   const notes = condNotes(p, 'Unit in pristine mechanical condition. Thoroughly sanitized, factory reset, and tested across all hardware modules.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;overflow:hidden;background-color:${bgCol};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:1.5px solid #e2e8f0;border-radius:0;overflow:hidden;background-color:${bgCol};">
   <!-- Top Technical Header -->
   <tr>
-    <td style="background-color:#0f172a;padding:10px 18px;box-sizing:border-box;">
+    <td style="background-color:#0f172a;padding:10px 16px;box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-refurb-hdr-left { display: block !important; width: 100% !important; }
+        .cd-refurb-hdr-right { display: block !important; width: 100% !important; text-align: left !important; margin-top: 4px !important; }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td>
-            <span style="background-color:${accent};color:#ffffff;font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;">
-              ${p.headerBadge ?? '30-POINT DIAGNOSTIC AUDIT'}
+          <td class="cd-refurb-hdr-left" valign="middle">
+            <span style="display:inline-block;background-color:${accent};color:#ffffff;font-size:9px;font-weight:900;letter-spacing:0.8px;text-transform:uppercase;padding:2px 6px;border-radius:0;white-space:nowrap;">
+              ${p.headerBadge ?? '30-POINT DIAGNOSTIC'}
             </span>
-            <span style="color:#ffffff;font-size:13.5px;font-weight:800;margin-left:8px;letter-spacing:0.3px;">
+            <span style="color:#ffffff;font-size:13px;font-weight:800;margin-left:6px;letter-spacing:0.2px;">
               ${condition}
             </span>
           </td>
-          <td align="right" style="color:#22c55e;font-size:10.5px;font-weight:700;font-family:monospace;">
+          <td class="cd-refurb-hdr-right" align="right" valign="middle" style="color:#22c55e;font-size:10.5px;font-weight:700;font-family:monospace;white-space:nowrap;">
             ${p.statusBadge ?? '[100% OPERATIONAL]'}
           </td>
         </tr>
       </table>
     </td>
   </tr>
-  <!-- 3 Checkpoints Strip -->
+  <!-- 3 Checkpoints Strip (Clean on Mobile) -->
   <tr>
-    <td style="background-color:#f8fafc;border-bottom:1px solid #e2e8f0;padding:8px 18px;box-sizing:border-box;">
+    <td style="background-color:#f8fafc;border-bottom:1px solid #e2e8f0;padding:8px 16px;box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-refurb-col {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding: 3px 0 !important;
+        }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td width="33%" style="font-size:11px;font-weight:700;color:#166534;">
-            ${p.check1 ?? '✓ Battery &bull; 85%+ Capacity Tested'}
+          <td class="cd-refurb-col" width="33%" style="font-size:11px;font-weight:700;color:#166534;">
+            ${p.check1 ?? '✓ Battery &bull; 85%+ Tested'}
           </td>
-          <td width="33%" style="font-size:11px;font-weight:700;color:#166534;text-align:center;">
+          <td class="cd-refurb-col" width="33%" style="font-size:11px;font-weight:700;color:#166534;text-align:center;">
             ${p.check2 ?? '✓ Screen &bull; Zero Dead Pixels'}
           </td>
-          <td width="33%" style="font-size:11px;font-weight:700;color:#166534;text-align:right;">
+          <td class="cd-refurb-col" width="33%" style="font-size:11px;font-weight:700;color:#166534;text-align:right;">
             ${p.check3 ?? '✓ Reset &bull; Sanitized &amp; Ready'}
           </td>
         </tr>
@@ -230,50 +264,56 @@ function archivalVintageTier(p: any, id: string): string {
   const notes = condNotes(p, 'Carefully preserved in collector sleeve. Minor edge handling consistent with gentle storage. Spine completely tight with zero splits.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #d6d3d1;border-radius:6px;background-color:${bgCol};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:2px solid #d6d3d1;border-radius:0;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 14, 16, 14, 16)}box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-tier-hdr-left { display: block !important; width: 100% !important; margin-bottom: 6px !important; }
+        .cd-tier-hdr-right { display: block !important; width: 100% !important; text-align: left !important; }
+      }
+      </style>
       <!-- Title & Archival Tier -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
         <tr>
-          <td>
-            <span style="color:#78716c;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">
-              COLLECTOR CONDITION APPRAISAL &bull;
+          <td class="cd-tier-hdr-left" valign="middle">
+            <span style="color:#78716c;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">
+              COLLECTOR APPRAISAL &bull;
             </span>
-            <span style="color:${textCol};font-size:15px;font-weight:900;margin-left:6px;">
+            <span style="color:${textCol};font-size:14px;font-weight:900;margin-left:4px;">
               ${condition}
             </span>
           </td>
-          <td align="right">
-            <span style="background-color:#ecfdf5;color:${emerald};border:1px solid #a7f3d0;font-size:10px;font-weight:900;padding:3px 8px;border-radius:3px;">
+          <td class="cd-tier-hdr-right" align="right" valign="middle">
+            <span style="display:inline-block;background-color:#ecfdf5;color:${emerald};border:1px solid #a7f3d0;font-size:9.5px;font-weight:900;padding:2px 7px;border-radius:0;white-space:nowrap;">
               ARCHIVAL VERIFIED
             </span>
           </td>
         </tr>
       </table>
-      <!-- 5-Step Visual Tier Bar -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #d6d3d1;border-radius:4px;overflow:hidden;margin-bottom:12px;text-align:center;">
+      <!-- 5-Step Visual Tier Bar (Mobile Safe) -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;table-layout:fixed;border:1px solid #d6d3d1;border-radius:0;overflow:hidden;margin-bottom:12px;text-align:center;">
         <tr>
-          <td width="20%" style="padding:6px;background-color:#f5f5f4;color:#a8a29e;font-size:10px;font-weight:700;border-right:1px solid #d6d3d1;">
+          <td width="20%" style="padding:6px 2px;background-color:#f5f5f4;color:#a8a29e;font-size:8.5px;font-weight:700;border-right:1px solid #d6d3d1;white-space:nowrap;">
             MINT
           </td>
-          <td width="20%" style="padding:6px;background-color:${emerald};color:#ffffff;font-size:10px;font-weight:900;border-right:1px solid #d6d3d1;">
-            ★ NEAR MINT
+          <td width="20%" style="padding:6px 2px;background-color:${emerald};color:#ffffff;font-size:8.5px;font-weight:900;border-right:1px solid #d6d3d1;white-space:nowrap;">
+            ★&nbsp;NEAR&nbsp;MINT
           </td>
-          <td width="20%" style="padding:6px;background-color:#f5f5f4;color:#78716c;font-size:10px;font-weight:700;border-right:1px solid #d6d3d1;">
-            VERY FINE
+          <td width="20%" style="padding:6px 2px;background-color:#f5f5f4;color:#78716c;font-size:8.5px;font-weight:700;border-right:1px solid #d6d3d1;white-space:nowrap;">
+            VERY&nbsp;FINE
           </td>
-          <td width="20%" style="padding:6px;background-color:#f5f5f4;color:#a8a29e;font-size:10px;font-weight:700;border-right:1px solid #d6d3d1;">
+          <td width="20%" style="padding:6px 2px;background-color:#f5f5f4;color:#a8a29e;font-size:8.5px;font-weight:700;border-right:1px solid #d6d3d1;white-space:nowrap;">
             GOOD
           </td>
-          <td width="20%" style="padding:6px;background-color:#f5f5f4;color:#a8a29e;font-size:10px;font-weight:700;">
+          <td width="20%" style="padding:6px 2px;background-color:#f5f5f4;color:#a8a29e;font-size:8.5px;font-weight:700;white-space:nowrap;">
             FAIR
           </td>
         </tr>
       </table>
       <!-- Flaw & Preservation Ledger -->
-      <div style="background-color:#ffffff;border:1px dashed #d6d3d1;border-radius:4px;padding:10px 14px;box-sizing:border-box;">
+      <div style="background-color:#ffffff;border:1px dashed #d6d3d1;border-radius:0;padding:10px 14px;box-sizing:border-box;">
         <div style="color:#78716c;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">
           PRESERVATION &amp; FLAW DISCLOSURE:
         </div>
@@ -300,14 +340,14 @@ function openBoxInventoryAudit(p: any, id: string): string {
   const notes = condNotes(p, 'Customer return in flawless working order. Verified complete with original retail packaging, cables, documentation, and all factory accessories.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #ede9fe;border-radius:8px;background-color:${bgCol};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:1.5px solid #ede9fe;border-radius:0;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
         <tr>
           <td>
-            <span style="background-color:#f5f3ff;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;">
+            <span style="background-color:#f5f3ff;color:${accent};font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:0;">
               📦 OPEN BOX VERIFICATION
             </span>
             <span style="color:${textCol};font-size:15px;font-weight:900;margin-left:8px;vertical-align:middle;">
@@ -319,11 +359,26 @@ function openBoxInventoryAudit(p: any, id: string): string {
           </td>
         </tr>
       </table>
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-openbox-left {
+          display: block !important;
+          width: 100% !important;
+          padding-right: 0 !important;
+          margin-bottom: 10px !important;
+        }
+        .cd-openbox-right {
+          display: block !important;
+          width: 100% !important;
+          padding-left: 0 !important;
+        }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <!-- Left Column: Accessory Checklist -->
-          <td width="38%" valign="top" style="padding-right:12px;box-sizing:border-box;">
-            <div style="background-color:#faf5ff;border:1px solid #f3e8ff;border-radius:6px;padding:10px 12px;box-sizing:border-box;">
+          <td class="cd-openbox-left" width="38%" valign="top" style="padding-right:12px;box-sizing:border-box;">
+            <div style="background-color:#faf5ff;border:1px solid #f3e8ff;border-radius:0;padding:10px 12px;box-sizing:border-box;">
               <div style="color:${accent};font-size:10px;font-weight:900;letter-spacing:0.5px;margin-bottom:6px;">
                 AUDIT CHECKLIST:
               </div>
@@ -331,13 +386,13 @@ function openBoxInventoryAudit(p: any, id: string): string {
                 ${p.check1 ?? '✓ Retail Packaging Present'}<br>
                 ${p.check2 ?? '✓ All Cables Included'}<br>
                 ${p.check3 ?? '✓ Manuals &amp; Inserts Present'}<br>
-                ${p.check4 ?? '✓ No Cosmetic Imperfections'}
+                ${p.check4 ?? '✓ Verified Intact'}
               </div>
             </div>
           </td>
           <!-- Right Column: Condition Notes -->
-          <td width="62%" valign="top" style="padding-left:4px;box-sizing:border-box;">
-            <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 14px;box-sizing:border-box;">
+          <td class="cd-openbox-right" width="62%" valign="top" style="padding-left:4px;box-sizing:border-box;">
+            <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:0;padding:12px 14px;box-sizing:border-box;">
               <div style="color:#64748b;font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">
                 CONDITION SUMMARY:
               </div>
@@ -367,29 +422,35 @@ function honestWearTransparency(p: any, id: string): string {
   const notes = condNotes(p, 'Gently worn 2-3 times with excellent fabric integrity. No stains, pulls, tears, or loose stitching. Stored in a smoke-free, pet-free home environment.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #fed7aa;border-radius:8px;background-color:${bgCol};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:1.5px solid #fed7aa;border-radius:0;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-wear-hdr-left { display: block !important; width: 100% !important; margin-bottom: 6px !important; }
+        .cd-wear-hdr-right { display: block !important; width: 100% !important; text-align: left !important; }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
         <tr>
-          <td>
-            <span style="background-color:#fff7ed;color:#c2410c;font-size:9.5px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;">
-              🔍 TRANSPARENT WEAR REPORT
+          <td class="cd-wear-hdr-left" valign="middle">
+            <span style="display:inline-block;background-color:#fff7ed;color:#c2410c;font-size:9px;font-weight:900;letter-spacing:0.8px;text-transform:uppercase;padding:2px 7px;border-radius:0;white-space:nowrap;">
+              🔍 WEAR REPORT
             </span>
-            <span style="color:${textCol};font-size:15px;font-weight:900;margin-left:8px;vertical-align:middle;">
+            <span style="color:${textCol};font-size:14px;font-weight:900;margin-left:6px;vertical-align:middle;">
               ${condition}
             </span>
           </td>
-          <td align="right">
-            <span style="background-color:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:10px;font-weight:800;padding:3px 8px;border-radius:3px;">
+          <td class="cd-wear-hdr-right" align="right" valign="middle">
+            <span style="display:inline-block;background-color:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:0;white-space:nowrap;">
               ${p.ratingBadge ?? 'RATING: 9 / 10'}
             </span>
           </td>
         </tr>
       </table>
       <!-- Quoted Honest Disclosure Box -->
-      <div style="background-color:#fffaf5;border-left:3px solid ${amber};border-radius:4px;padding:12px 16px;box-sizing:border-box;">
+      <div style="background-color:#fffaf5;border-left:3px solid ${amber};border-radius:0;padding:12px 16px;box-sizing:border-box;">
         <div style="color:#9a3412;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">
           HONEST SELLER DISCLOSURE &amp; INSPECTION NOTES:
         </div>
@@ -419,20 +480,26 @@ function partsRepairWarning(p: any, id: string): string {
   const notes = condNotes(p, 'Device powers on but displays blinking error code E-04. Sold strictly as-is for spare components, teardown, or repair projects. No returns accepted for stated defects.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #334155;border-radius:8px;overflow:hidden;background-color:${bgCol};">
-  <!-- Top Warning Ribbon -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:2px solid #334155;border-radius:0;overflow:hidden;background-color:${bgCol};">
+  <!-- Top Warning Ribbon (Mobile Safe) -->
   <tr>
-    <td style="background-color:#b45309;padding:8px 16px;box-sizing:border-box;">
+    <td style="background-color:#b45309;padding:8px 14px;box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-warn-left { display: block !important; width: 100% !important; margin-bottom: 2px !important; }
+        .cd-warn-right { display: block !important; width: 100% !important; text-align: left !important; }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td>
-            <span style="color:#ffffff;font-size:11.5px;font-weight:900;letter-spacing:1px;font-family:Arial,sans-serif;">
-              ${p.warningBanner ?? '⚠ AS-IS SALVAGE NOTICE &bull; FOR PARTS / REPAIR ONLY'}
+          <td class="cd-warn-left">
+            <span style="color:#ffffff;font-size:11px;font-weight:900;letter-spacing:0.5px;font-family:Arial,sans-serif;">
+              ${p.warningBanner ?? '⚠ AS-IS SALVAGE NOTICE &bull; FOR PARTS ONLY'}
             </span>
           </td>
-          <td align="right" style="color:#fef3c7;font-size:10px;font-weight:700;font-family:monospace;">
-            ${p.statusBadge ?? 'NON-FUNCTIONING'}
+          <td class="cd-warn-right" align="right" style="color:#fef3c7;font-size:9.5px;font-weight:700;font-family:monospace;white-space:nowrap;">
+            ${p.statusBadge ?? '[NON-FUNCTIONAL]'}
           </td>
         </tr>
       </table>
@@ -445,7 +512,7 @@ function partsRepairWarning(p: any, id: string): string {
         ${condition}
       </div>
       <!-- Defect Diagnosis Box -->
-      <div style="background-color:#0f172a;border:1px solid #334155;border-left:3px solid #dc2626;border-radius:4px;padding:10px 14px;margin-bottom:8px;box-sizing:border-box;">
+      <div style="background-color:#0f172a;border:1px solid #334155;border-left:3px solid #dc2626;border-radius:0;padding:10px 14px;margin-bottom:8px;box-sizing:border-box;">
         <div style="color:#f87171;font-size:10px;font-weight:800;letter-spacing:1px;font-family:monospace;margin-bottom:3px;">
           [DIAGNOSED DEFECTS &amp; SALVAGE DISCLOSURE]:
         </div>
@@ -475,11 +542,11 @@ function jewelerCuratorProvenance(p: any, id: string): string {
   const notes = condNotes(p, 'Case and bezel retain sharp factory bevels with no deep scratches or dings. Dial and indices 100% original. Movement tested on timegrapher keeping accurate timing.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid ${gold};border-radius:8px;background-color:${bgCol};box-shadow:0 4px 18px rgba(0,0,0,0.4);">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:2px solid ${gold};border-radius:0;background-color:${bgCol};box-shadow:0 4px 18px rgba(0,0,0,0.4);">
   <tr>
     <td style="padding:4px;box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(212,175,55,0.4);border-radius:4px;padding:16px 20px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid rgba(212,175,55,0.4);border-radius:0;padding:16px 20px;">
         <!-- Plaque Title -->
         <tr>
           <td style="text-align:center;padding-bottom:10px;">
@@ -496,7 +563,7 @@ function jewelerCuratorProvenance(p: any, id: string): string {
         </tr>
         <!-- Appraisal Ledger Text -->
         <tr>
-          <td style="background-color:#141416;border:1px solid #27272a;border-radius:4px;padding:12px 16px;">
+          <td style="background-color:#141416;border:1px solid #27272a;border-radius:0;padding:12px 16px;">
             <div style="color:${textCol};font-size:13px;line-height:1.7;font-weight:400;">
               ${notes}
             </div>
@@ -525,41 +592,57 @@ function automotiveCoreFitment(p: any, id: string): string {
   const notes = condNotes(p, 'Removed from low-mileage donor vehicle. Thoroughly inspected for structural integrity with zero cracks, stripped threads, or fluid leaks.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:2px solid #1e293b;border-radius:8px;overflow:hidden;background-color:${bgCol};">
-  <!-- Mechanical Header Bar -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:2px solid #1e293b;border-radius:0;overflow:hidden;background-color:${bgCol};">
+  <!-- Mechanical Header Bar (Mobile Safe) -->
   <tr>
-    <td style="background-color:#1e293b;padding:8px 16px;box-sizing:border-box;">
+    <td style="background-color:#1e293b;padding:8px 14px;box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-mech-hdr-left { display: block !important; width: 100% !important; margin-bottom: 3px !important; }
+        .cd-mech-hdr-right { display: block !important; width: 100% !important; text-align: left !important; }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td>
-            <span style="color:${amber};font-size:10px;font-weight:900;letter-spacing:1px;font-family:monospace;">
-              ⚙ MECHANICAL COMPONENT AUDIT &bull;
+          <td class="cd-mech-hdr-left" valign="middle">
+            <span style="color:${amber};font-size:9.5px;font-weight:900;letter-spacing:0.8px;font-family:monospace;">
+              ⚙ MECHANICAL AUDIT &bull;
             </span>
-            <span style="color:#ffffff;font-size:13.5px;font-weight:800;margin-left:6px;">
+            <span style="color:#ffffff;font-size:13px;font-weight:800;margin-left:4px;">
               ${condition}
             </span>
           </td>
-          <td align="right" style="color:#22c55e;font-size:10px;font-family:monospace;font-weight:700;">
-            ${p.benchStatus ?? 'BENCH TESTED: 100% OK'}
+          <td class="cd-mech-hdr-right" align="right" valign="middle" style="color:#22c55e;font-size:9.5px;font-family:monospace;font-weight:700;white-space:nowrap;">
+            ${p.benchStatus ?? 'BENCH TESTED: OK'}
           </td>
         </tr>
       </table>
     </td>
   </tr>
-  <!-- 3 Physical Assessment Metrics -->
+  <!-- 3 Physical Assessment Metrics (Mobile Safe) -->
   <tr>
     <td style="background-color:#090d16;border-bottom:1px solid #1e293b;padding:8px 16px;box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-auto-col {
+          display: block !important;
+          width: 100% !important;
+          text-align: left !important;
+          padding: 2px 0 !important;
+        }
+      }
+      </style>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td width="33%" style="color:#94a3b8;font-size:10.5px;font-family:monospace;">
+          <td class="cd-auto-col" width="33%" style="color:#94a3b8;font-size:10px;font-family:monospace;">
             ${p.metric1 ?? '[1] HOUSING: INTACT'}
           </td>
-          <td width="33%" style="color:#94a3b8;font-size:10.5px;font-family:monospace;text-align:center;">
-            ${p.metric2 ?? '[2] MOUNTS: ZERO CRACKS'}
+          <td class="cd-auto-col" width="33%" style="color:#94a3b8;font-size:10px;font-family:monospace;text-align:center;">
+            ${p.metric2 ?? '[2] MOUNTS: 0 CRACKS'}
           </td>
-          <td width="33%" style="color:#94a3b8;font-size:10.5px;font-family:monospace;text-align:right;">
-            ${p.metric3 ?? '[3] OEM FIT: DIRECT BOLT-ON'}
+          <td class="cd-auto-col" width="33%" style="color:#94a3b8;font-size:10px;font-family:monospace;text-align:right;">
+            ${p.metric3 ?? '[3] FIT: DIRECT BOLT'}
           </td>
         </tr>
       </table>
@@ -590,8 +673,8 @@ function scandinavianMinimalLedger(p: any, id: string): string {
   const notes = condNotes(p, 'Exhibition display piece with virtually zero signs of handling. Materials retain original matte texture and finish.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1px solid #e4e4e7;border-radius:8px;background-color:${bgCol};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:1px solid #e4e4e7;border-radius:0;background-color:${bgCol};">
   <tr>
     <td style="${pad(p, 18, 24, 18, 24)}box-sizing:border-box;">
       <div style="border-bottom:1px solid #18181b;padding-bottom:8px;margin-bottom:10px;">
@@ -628,52 +711,70 @@ function mobileCompactBadgeStrip(p: any, id: string): string {
   const notes = condNotes(p, 'Unopened retail package with intact factory seals. 100% manufacturer warranty included.')
 
   return `<!--[riazify:condition_details:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;margin:0 auto;border:1.5px solid #e2e8f0;border-radius:8px;background-color:${bgCol};box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;font-family:${f};border-collapse:collapse;border:1.5px solid #e2e8f0;border-radius:0;background-color:${bgCol};box-shadow:0 2px 8px rgba(0,0,0,0.04);">
   <tr>
     <td style="${pad(p, 14, 18, 14, 18)}box-sizing:border-box;">
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-strip-hdr-left { display: block !important; width: 100% !important; margin-bottom: 6px !important; }
+        .cd-strip-hdr-right { display: block !important; width: 100% !important; text-align: left !important; }
+      }
+      </style>
       <!-- Header Capsule Line -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
         <tr>
-          <td align="left" valign="middle">
-            <span style="display:inline-block;padding:4px 10px;background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${blue};letter-spacing:0.5px;text-transform:uppercase;">
-              ✓ VERIFIED CONDITION
+          <td class="cd-strip-hdr-left" align="left" valign="middle">
+            <span style="display:inline-block;padding:3px 8px;background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:0;font-family:Arial,sans-serif;font-size:10px;font-weight:800;color:${blue};letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;">
+              ✓ VERIFIED
             </span>
-            <span style="display:inline-block;margin-left:8px;font-family:Arial,sans-serif;font-size:15px;font-weight:900;color:${textCol};">
+            <span style="display:inline-block;margin-left:6px;font-family:Arial,sans-serif;font-size:14px;font-weight:900;color:${textCol};">
               ${condition}
             </span>
           </td>
-          <td align="right" valign="middle">
-            <span style="display:inline-block;padding:3px 8px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;letter-spacing:0.5px;">
-              ID: EB-${id.slice(0, 6).toUpperCase()} &bull; 100% AUDITED
+          <td class="cd-strip-hdr-right" align="right" valign="middle">
+            <span style="display:inline-block;padding:2px 7px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:0;font-family:Arial,sans-serif;font-size:9.5px;font-weight:700;color:#64748b;letter-spacing:0.5px;white-space:nowrap;">
+              100% AUDITED LOT
             </span>
           </td>
         </tr>
       </table>
 
+      <style>
+      @media only screen and (max-width: 620px) {
+        .cd-chip-box {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 6px !important;
+        }
+        .cd-chip-spacer {
+          display: none !important;
+        }
+      }
+      </style>
       <!-- 3-Chip Inspection Matrix -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
         <tr>
-          <td width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;box-sizing:border-box;">
-            <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+          <td class="cd-chip-box" width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:0;box-sizing:border-box;">
+            <div style="font-family:Arial,sans-serif;font-size:9.5px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
               ${p.chip1Label ?? 'PHYSICAL HOUSING'}
             </div>
             <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:${textCol};margin-top:2px;">
               ${p.chip1Value ?? 'Pristine Condition'}
             </div>
           </td>
-          <td width="2%"></td>
-          <td width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;box-sizing:border-box;">
-            <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+          <td class="cd-chip-spacer" width="2%"></td>
+          <td class="cd-chip-box" width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:0;box-sizing:border-box;">
+            <div style="font-family:Arial,sans-serif;font-size:9.5px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
               ${p.chip2Label ?? 'FUNCTIONAL CHECK'}
             </div>
             <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:${emerald};margin-top:2px;">
               ${p.chip2Value ?? '100% Tested Working'}
             </div>
           </td>
-          <td width="2%"></td>
-          <td width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;box-sizing:border-box;">
-            <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+          <td class="cd-chip-spacer" width="2%"></td>
+          <td class="cd-chip-box" width="32%" style="padding:8px 10px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:0;box-sizing:border-box;">
+            <div style="font-family:Arial,sans-serif;font-size:9.5px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
               ${p.chip3Label ?? 'ACCESSORIES'}
             </div>
             <div style="font-family:Arial,sans-serif;font-size:12px;font-weight:800;color:${textCol};margin-top:2px;">
@@ -684,7 +785,7 @@ function mobileCompactBadgeStrip(p: any, id: string): string {
       </table>
 
       <!-- Full-Width Notes Card with Left Blue Accent -->
-      <div style="padding:10px 14px;background-color:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid ${blue};border-radius:0 6px 6px 0;margin-bottom:8px;">
+      <div style="padding:10px 14px;background-color:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid ${blue};border-radius:0;margin-bottom:8px;">
         <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">
           SELLER INSPECTION &amp; CONDITION NOTES
         </div>
@@ -693,17 +794,17 @@ function mobileCompactBadgeStrip(p: any, id: string): string {
         </div>
       </div>
 
-      <!-- Bottom Micro Reassurance -->
+      <!-- Bottom Micro Reassurance (Mobile-Safe) -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="left">
-            <span style="font-family:Arial,sans-serif;font-size:10px;color:#94a3b8;font-weight:600;">
-              🛡️ Hand-inspected prior to secure dispatch &bull; Packaged in anti-static wrap
-            </span>
+            <div style="font-family:Arial,sans-serif;font-size:9.5px;color:#94a3b8;font-weight:600;line-height:1.4;">
+              🛡️ Hand-inspected &bull; Packaged securely in anti-static wrap
+            </div>
           </td>
-          <td align="right">
-            <span style="font-family:Arial,sans-serif;font-size:10px;color:${blue};font-weight:700;">
-              ZERO-SURPRISE GUARANTEE
+          <td align="right" style="white-space:nowrap;padding-left:8px;">
+            <span style="font-family:Arial,sans-serif;font-size:9.5px;color:${blue};font-weight:800;white-space:nowrap;">
+              GUARANTEED
             </span>
           </td>
         </tr>

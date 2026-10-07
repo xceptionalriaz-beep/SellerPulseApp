@@ -312,7 +312,7 @@ function variantGrid2x2(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. HORIZONTAL STRIP (Slim Inline Row with Dividers)
+// 3. HORIZONTAL STRIP (Slim Inline Row with Dividers — Straight Vertical Column Alignment)
 // ─────────────────────────────────────────────────────────────────────────────
 function variantHorizontalStrip(p: any, id: string): string {
   const badges = resolveBadges(p).slice(0, 4)
@@ -321,22 +321,62 @@ function variantHorizontalStrip(p: any, id: string): string {
   const borderColor = p.borderColor ?? '#ede9fe'
 
   const items = badges.map((b: any, i: number) => `
-    ${i > 0 ? `<td style="padding:0 10px;color:${borderColor};font-size:16px;">|</td>` : ''}
-    <td style="white-space:nowrap;vertical-align:middle;padding:0 4px;">
-      <span data-feature-index="${i}" style="vertical-align:middle;margin-right:6px;display:inline-block;cursor:pointer;">
+    ${i > 0 ? `<td class="hzs-sep-${id}" style="padding:0 10px;color:${borderColor};font-size:16px;">|</td>` : ''}
+    <td class="hzs-cell-${id}" style="white-space:nowrap;vertical-align:middle;padding:0 6px;">
+      <span data-feature-index="${i}" style="vertical-align:middle;margin-right:7px;display:inline-block;cursor:pointer;flex-shrink:0;">
         ${getVectorIconSvg(b.icon, iconColor, 16)}
       </span>
-      <span style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${textColor};vertical-align:middle;">
+      <span class="hzs-text-${id}" style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${textColor};vertical-align:middle;">
         ${b.text}
       </span>
     </td>`).join('')
 
   return `<!--[riazify:trust_badges:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px;margin:0 auto;border-collapse:collapse;background-color:${p.bgColor ?? '#f8f7ff'};border-top:1px solid ${borderColor};border-bottom:1px solid ${borderColor};font-family:Arial,Helvetica,sans-serif;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .hzs-container-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .hzs-inner-${id} {
+      width: 100% !important;
+      max-width: 320px !important;
+      margin: 0 auto !important;
+    }
+    .hzs-tr-${id} {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: center !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .hzs-cell-${id} {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      width: 50% !important;
+      box-sizing: border-box !important;
+      padding: 7px 4px 7px 12px !important;
+      text-align: left !important;
+    }
+    .hzs-sep-${id} {
+      display: none !important;
+    }
+    .hzs-text-${id} {
+      font-size: 11px !important;
+      letter-spacing: -0.2px !important;
+      text-align: left !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="hzs-container-${id}"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;border-collapse:collapse;background-color:${p.bgColor ?? '#f8f7ff'};border-top:1px solid ${borderColor};border-bottom:1px solid ${borderColor};font-family:Arial,Helvetica,sans-serif;">
   <tr>
     <td style="${pad(p)}text-align:center;">
-      <table cellpadding="0" cellspacing="0" border="0" align="center" style="border-collapse:collapse;margin:0 auto;">
-        <tr>${items}</tr>
+      <table class="hzs-inner-${id}" cellpadding="0" cellspacing="0" border="0" align="center" style="border-collapse:collapse;margin:0 auto;width:100%;">
+        <tr class="hzs-tr-${id}">${items}</tr>
       </table>
     </td>
   </tr>
@@ -376,7 +416,7 @@ function variantIconOnly(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. TEXT ONLY (Clean Rounded Pill Badges)
+// 5. TEXT ONLY (Clean Rounded Pill Badges — Responsive 2×2 on Mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 function variantTextOnly(p: any, id: string): string {
   const badges = resolveBadges(p)
@@ -385,18 +425,57 @@ function variantTextOnly(p: any, id: string): string {
   const textColor = p.textColor ?? '#0f172a'
 
   const pills = badges.map((b: any) => `
-    <td style="padding:0 4px;">
-      <span style="display:inline-block;background-color:${badgeBg};border:1px solid ${borderColor};border-radius:20px;padding:6px 14px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${textColor};white-space:nowrap;">
+    <td class="txo-cell-${id}" style="padding:0 4px;">
+      <span class="txo-pill-${id}" style="display:inline-block;background-color:${badgeBg};border:1px solid ${borderColor};border-radius:20px;padding:6px 14px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${textColor};white-space:nowrap;">
         &bull; ${b.text}
       </span>
     </td>`).join('')
 
   return `<!--[riazify:trust_badges:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px;margin:0 auto;border-collapse:collapse;background-color:${p.bgColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .txo-container-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .txo-inner-${id} {
+      width: 100% !important;
+      max-width: 330px !important;
+      margin: 0 auto !important;
+    }
+    .txo-tr-${id} {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 6px 0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .txo-cell-${id} {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 50% !important;
+      padding: 2px 4px !important;
+      box-sizing: border-box !important;
+    }
+    .txo-pill-${id} {
+      width: 100% !important;
+      padding: 6px 8px !important;
+      font-size: 10px !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="txo-container-${id}"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;border-collapse:collapse;background-color:${p.bgColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;">
   <tr>
     <td style="${pad(p)}text-align:center;">
-      <table cellpadding="0" cellspacing="0" border="0" align="center" style="border-collapse:collapse;margin:0 auto;">
-        <tr>${pills}</tr>
+      <table class="txo-inner-${id}" cellpadding="0" cellspacing="0" border="0" align="center" style="border-collapse:collapse;margin:0 auto;width:100%;">
+        <tr class="txo-tr-${id}">${pills}</tr>
       </table>
     </td>
   </tr>
@@ -445,27 +524,60 @@ function variantCredibility(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. ACCENT RIBBON (Continuous Full-Width Reassurance Bar)
+// 7. ACCENT RIBBON (Continuous Reassurance Bar — Top-Centered Icons on Mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 function variantAccentRibbon(p: any, id: string): string {
   const badges = resolveBadges(p).slice(0, 4)
   const accent = p.accentColor ?? '#7530fb'
 
-  const cells = badges.map(b => `
-    <td style="padding:10px 12px;text-align:center;border-right:1px solid rgba(255,255,255,0.15);">
-      <span style="display:inline-block;vertical-align:middle;margin-right:6px;">
+  const cells = badges.map((b, i) => `
+    <td class="acb-cell-${id}" width="25%" style="width:25%;padding:10px 10px;text-align:center;border-right:${i < badges.length - 1 ? '1px solid rgba(255,255,255,0.2)' : 'none'};vertical-align:middle;box-sizing:border-box;">
+      <span class="acb-icon-${id}" style="display:inline-block;vertical-align:middle;margin-right:6px;">
         ${getVectorIconSvg(b.icon, '#ffffff', 16)}
       </span>
-      <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:800;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;vertical-align:middle;">
+      <span class="acb-text-${id}" style="font-family:Arial,sans-serif;font-size:11px;font-weight:800;color:#ffffff;letter-spacing:0.5px;text-transform:uppercase;vertical-align:middle;">
         ${b.text}
       </span>
     </td>`).join('')
 
   return `<!--[riazify:trust_badges:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px;margin:0 auto;border-collapse:collapse;background-color:${accent};font-family:Arial,Helvetica,sans-serif;">
+<style>
+  @media only screen and (max-width: 680px) {
+    .acb-container-${id} {
+      width: 100% !important;
+      min-width: 100% !important;
+    }
+    .acb-cell-${id} {
+      padding: 10px 4px !important;
+      text-align: center !important;
+      vertical-align: top !important;
+    }
+    .acb-icon-${id} {
+      display: block !important;
+      margin: 0 auto 5px auto !important;
+      text-align: center !important;
+    }
+    .acb-icon-${id} svg {
+      width: 18px !important;
+      height: 18px !important;
+      display: block !important;
+      margin: 0 auto !important;
+    }
+    .acb-text-${id} {
+      display: block !important;
+      font-size: 9.5px !important;
+      line-height: 1.25 !important;
+      letter-spacing: 0.2px !important;
+      text-align: center !important;
+    }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  class="acb-container-${id}"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;border-collapse:collapse;background-color:${accent};border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
   <tr>
     <td style="padding:0;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100% !important;table-layout:fixed;border-collapse:collapse;">
         <tr>${cells}</tr>
       </table>
     </td>

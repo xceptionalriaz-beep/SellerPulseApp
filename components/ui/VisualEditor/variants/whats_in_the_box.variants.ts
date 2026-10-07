@@ -91,7 +91,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
@@ -115,7 +115,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
             const cards = items.map(item =>
                 `<tr>
                     <td style="padding-bottom:8px;">
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:0;">
                             <tr>
                                 <td width="40" style="padding:10px 6px 10px 12px;text-align:center;vertical-align:middle;">
                                     <div style="display:inline-block;width:24px;height:24px;background-color:${bulletColor};border-radius:50%;text-align:center;line-height:24px;">
@@ -129,7 +129,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">${cards}</table>
@@ -161,7 +161,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                     </tr>`
                 ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -203,7 +203,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
@@ -231,7 +231,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${darkBg};${pad(p)}">
         <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${darkAccent};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
@@ -262,7 +262,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </td>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};text-align:center;">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table>
@@ -292,10 +292,10 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             }).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e7eb;border-radius:0;overflow:hidden;">
             <tr style="background-color:${accentColor};">
                 <th style="padding:8px 12px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;text-align:left;">Item</th>
                 <th width="60" style="padding:8px 12px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;text-align:center;">Qty</th>
@@ -327,7 +327,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                             <tr>
                                 <td valign="middle" style="padding-bottom:8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${textColor};line-height:1.4;">${name}</td>
                                 <td width="40" valign="middle" align="right" style="padding-bottom:8px;">
-                                    <span style="display:inline-block;padding:3px 10px;background-color:${accentColor};border-radius:12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">${qty}</span>
+                                    <span style="display:inline-block;padding:3px 10px;background-color:${accentColor};border-radius:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">${qty}</span>
                                 </td>
                             </tr>
                         </table>
@@ -335,7 +335,7 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             }).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;">
     <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table>
@@ -358,8 +358,10 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
             const textColor = p.textColor ?? '#1f1d2e'
             const imageUrl = (p as any).splitImageUrl ?? ''
             const imageHtml = imageUrl
-                ? `<img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:6px;" />`
-                : `<div style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`
+                ? `<div data-slot="splitImageUrl" data-slot-type="image" data-slot-key="splitImageUrl" data-block-id="${id}" style="width:100%;cursor:pointer;">
+                     <img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:0;" />
+                   </div>`
+                : `<div data-slot="splitImageUrl" data-slot-type="image" data-slot-key="splitImageUrl" data-block-id="${id}" style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`
             const rows = items.map(item =>
                 `<tr>
                     <td width="20" valign="top" style="padding-right:6px;padding-bottom:8px;font-size:14px;color:${bulletColor};">&#10003;</td>
@@ -367,8 +369,8 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-    <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;background-color:${p.bgColor ?? '#ffffff'};">
+    <tr><td style="${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
@@ -397,8 +399,10 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
             const textColor = p.textColor ?? '#1f1d2e'
             const imageUrl = (p as any).splitImageUrl ?? ''
             const imageHtml = imageUrl
-                ? `<img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:6px;" />`
-                : `<div style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`
+                ? `<div data-slot="splitImageUrl" data-slot-type="image" data-slot-key="splitImageUrl" data-block-id="${id}" style="width:100%;cursor:pointer;">
+                     <img src="${imageUrl}" alt="What's In The Box" border="0" width="100%" style="width:100%;height:auto;display:block;border-radius:0;" />
+                   </div>`
+                : `<div data-slot="splitImageUrl" data-slot-type="image" data-slot-key="splitImageUrl" data-block-id="${id}" style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG}</div>`
             const rows = items.map(item =>
                 `<tr>
                     <td width="20" valign="top" style="padding-right:6px;padding-bottom:8px;font-size:14px;color:${bulletColor};">&#10003;</td>
@@ -406,8 +410,8 @@ export const whatsInTheBoxVariants: BlockVariant[] = [
                 </tr>`
             ).join('')
             return `<!-- BLOCK:whats_in_the_box:${id} -->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-    <tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0 auto;background-color:${p.bgColor ?? '#ffffff'};">
+    <tr><td style="${pad(p)}">
         <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${headingColor};">${getHeading(p)}</p>
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>

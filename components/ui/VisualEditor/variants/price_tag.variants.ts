@@ -7,39 +7,39 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
-    id: string
-    label: string
-    description: string
-    toHtml: (props: any, id: string) => string
+  id: string
+  label: string
+  description: string
+  toHtml: (props: any, id: string) => string
 }
 
 // ─── Shared helpers & Token Sanitization ─────────────────────────────────────
 function pad(p: any): string {
-    const top = p.paddingTop ?? 16
-    const right = p.paddingRight ?? 22
-    const bottom = p.paddingBottom ?? 16
-    const left = p.paddingLeft ?? 22
-    return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+  const top = p.paddingTop ?? 16
+  const right = p.paddingRight ?? 22
+  const bottom = p.paddingBottom ?? 16
+  const left = p.paddingLeft ?? 22
+  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
 function bg(p: any, defaultBg = '#ffffff'): string {
-    return p.bgColor ?? defaultBg
+  return p.bgColor ?? defaultBg
 }
 
 function priceCol(p: any, defaultCol = '#1e1535'): string {
-    return p.priceColor ?? p.textColor ?? defaultCol
+  return p.priceColor ?? p.textColor ?? defaultCol
 }
 
 function strikeCol(p: any): string {
-    return p.strikeColor ?? p.originalColor ?? '#94a3b8'
+  return p.strikeColor ?? p.originalColor ?? '#94a3b8'
 }
 
 function badgeBg(p: any, defaultBg = '#dc2626'): string {
-    return p.badgeBg ?? p.badgeColor ?? defaultBg
+  return p.badgeBg ?? p.badgeColor ?? defaultBg
 }
 
 function badgeTxt(p: any, defaultTxt = '#ffffff'): string {
-    return p.badgeText ?? p.badgeTextColor ?? defaultTxt
+  return p.badgeText ?? p.badgeTextColor ?? defaultTxt
 }
 
 /**
@@ -50,64 +50,64 @@ function badgeTxt(p: any, defaultTxt = '#ffffff'): string {
  * realistic defaults while preserving any real user-configured values.
  */
 function itemPrice(p: any): string {
-    const val = p.itemPrice ?? p.price
-    if (
-        !val ||
-        typeof val !== 'string' ||
-        val.trim() === '' ||
-        val.includes('{{ITEM_PRICE') ||
-        val.includes('{{PRICE')
-    ) {
-        return p.preserveTokens ? '{{ITEM_PRICE}}' : '$19.99'
-    }
-    return val.trim()
+  const val = p.itemPrice ?? p.price
+  if (
+    !val ||
+    typeof val !== 'string' ||
+    val.trim() === '' ||
+    val.includes('{{ITEM_PRICE') ||
+    val.includes('{{PRICE')
+  ) {
+    return p.preserveTokens ? '{{ITEM_PRICE}}' : '$19.99'
+  }
+  return val.trim()
 }
 
 function origPrice(p: any): string {
-    const val = p.originalPrice ?? p.wasPrice ?? p.msrp
-    if (
-        !val ||
-        typeof val !== 'string' ||
-        val.trim() === '' ||
-        val.includes('{{ORIGINAL_PRICE') ||
-        val.includes('{{MSRP')
-    ) {
-        return p.preserveTokens ? '{{ORIGINAL_PRICE}}' : '$29.99'
-    }
-    return val.trim()
+  const val = p.originalPrice ?? p.wasPrice ?? p.msrp
+  if (
+    !val ||
+    typeof val !== 'string' ||
+    val.trim() === '' ||
+    val.includes('{{ORIGINAL_PRICE') ||
+    val.includes('{{MSRP')
+  ) {
+    return p.preserveTokens ? '{{ORIGINAL_PRICE}}' : '$29.99'
+  }
+  return val.trim()
 }
 
 function discPercent(p: any): string {
-    const val = p.discountPercent ?? p.savingsPercent
-    if (
-        val == null ||
-        (typeof val !== 'string' && typeof val !== 'number') ||
-        String(val).trim() === '' ||
-        String(val).includes('{{DISCOUNT_PERCENT') ||
-        String(val).includes('ORIGINAL_PRICE')
-    ) {
-        return p.preserveTokens ? '{{DISCOUNT_PERCENT}}' : '33'
-    }
-    const str = String(val).trim()
-    return str.endsWith('%') ? str.slice(0, -1) : str
+  const val = p.discountPercent ?? p.savingsPercent
+  if (
+    val == null ||
+    (typeof val !== 'string' && typeof val !== 'number') ||
+    String(val).trim() === '' ||
+    String(val).includes('{{DISCOUNT_PERCENT') ||
+    String(val).includes('ORIGINAL_PRICE')
+  ) {
+    return p.preserveTokens ? '{{DISCOUNT_PERCENT}}' : '33'
+  }
+  const str = String(val).trim()
+  return str.endsWith('%') ? str.slice(0, -1) : str
 }
 
 function discAmount(p: any): string {
-    const val = p.discountAmount ?? p.savingsAmount
-    if (
-        !val ||
-        typeof val !== 'string' ||
-        val.trim() === '' ||
-        val.includes('{{DISCOUNT_AMOUNT') ||
-        val.includes('ORIGINAL_PRICE')
-    ) {
-        return p.preserveTokens ? '{{DISCOUNT_AMOUNT}}' : '$10.00'
-    }
-    return val.trim()
+  const val = p.discountAmount ?? p.savingsAmount
+  if (
+    !val ||
+    typeof val !== 'string' ||
+    val.trim() === '' ||
+    val.includes('{{DISCOUNT_AMOUNT') ||
+    val.includes('ORIGINAL_PRICE')
+  ) {
+    return p.preserveTokens ? '{{DISCOUNT_AMOUNT}}' : '$10.00'
+  }
+  return val.trim()
 }
 
 function font(p: any): string {
-    return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : 'Arial, sans-serif'
+  return p.fontFamily ? `${p.fontFamily}, Arial, sans-serif` : 'Arial, sans-serif'
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,27 +117,33 @@ function font(p: any): string {
 // Uses responsive flex gap alignment to guarantee zero badge clipping or wrapping.
 // ─────────────────────────────────────────────────────────────────────────────
 function classicStrike(p: any, id: string): string {
-    const f = font(p)
-    const bColor = p.borderColor ?? '#e2e8f0'
-    return `<!--[riazify:price_tag:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  const f = font(p)
+  const bColor = p.borderColor ?? '#e2e8f0'
+  return `<!--[riazify:price_tag:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .pt-cs-wrap-${id} { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 10px !important; }
+    .pt-cs-col-${id} { text-align: center !important; width: 100% !important; min-width: 0 !important; }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;font-family:${f};border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bg(p)};${pad(p)}border:1px solid ${bColor};border-radius:10px;box-sizing:border-box;">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;width:100%;box-sizing:border-box;">
-        <!-- Left: Original Retail / Strikethrough -->
-        <div style="flex:1 1 140px;min-width:120px;text-align:left;box-sizing:border-box;">
+      <div class="pt-cs-wrap-${id}" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;width:100%;box-sizing:border-box;">
+        <!-- Top: Original Retail / Strikethrough (Centered on Mobile) -->
+        <div class="pt-cs-col-${id}" style="flex:1 1 140px;min-width:120px;text-align:left;box-sizing:border-box;">
           <span style="font-size:10.5px;font-weight:700;color:${strikeCol(p)};text-transform:uppercase;letter-spacing:1px;display:block;margin:0 0 3px 0;line-height:1.2;">Original Price</span>
           <span style="font-size:16px;font-weight:600;color:${strikeCol(p)};text-decoration:line-through;line-height:1.2;white-space:nowrap;">Was ${origPrice(p)}</span>
         </div>
 
-        <!-- Center: Current Active Price -->
-        <div style="flex-shrink:0;text-align:center;padding:0 6px;box-sizing:border-box;">
+        <!-- Center: Current Active Price (Centered on Mobile) -->
+        <div class="pt-cs-col-${id}" style="flex-shrink:0;text-align:center;padding:0 6px;box-sizing:border-box;">
           <span style="font-size:34px;font-weight:900;color:${priceCol(p)};line-height:1.15;letter-spacing:-0.5px;white-space:nowrap;display:inline-block;">${itemPrice(p)}</span>
         </div>
 
-        <!-- Right: Contained Savings Badge -->
-        <div style="flex:1 1 140px;min-width:120px;text-align:right;box-sizing:border-box;">
+        <!-- Bottom: Contained Savings Badge (Centered on Mobile) -->
+        <div class="pt-cs-col-${id}" style="flex:1 1 140px;min-width:120px;text-align:right;box-sizing:border-box;">
           <span style="display:inline-block;box-sizing:border-box;background-color:${badgeBg(p)};color:${badgeTxt(p)};font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;padding:8px 16px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.12);white-space:nowrap;line-height:1.2;max-width:100%;">
             SAVE ${discPercent(p)}%
           </span>
@@ -154,10 +160,10 @@ function classicStrike(p: any, id: string): string {
 // Compact single-line horizontal strip. Perfect under title or for tight spaces.
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalistInline(p: any, id: string): string {
-    const f = font(p)
-    return `<!--[riazify:price_tag:${id}]-->
+  const f = font(p)
+  return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  style="width:100%;width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bg(p, '#f8fafc')};padding:12px 18px;border-radius:8px;border:1px solid #e2e8f0;box-sizing:border-box;">
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:12px 14px;width:100%;box-sizing:border-box;">
@@ -179,15 +185,15 @@ function minimalistInline(p: any, id: string): string {
 // Vertical card stack: Top MSRP label, huge centered price, bottom accent bar.
 // ─────────────────────────────────────────────────────────────────────────────
 function stackedDealCard(p: any, id: string): string {
-    const f = font(p)
-    const accent = badgeBg(p, '#1e1535')
-    const accentTxt = badgeTxt(p, '#b8fa33')
-    const topPad = p.paddingTop ?? 20
-    const sidePad = p.paddingRight ?? 22
-    const botPad = p.paddingBottom ?? 16
-    return `<!--[riazify:price_tag:${id}]-->
+  const f = font(p)
+  const accent = badgeBg(p, '#1e1535')
+  const accentTxt = badgeTxt(p, '#b8fa33')
+  const topPad = p.paddingTop ?? 20
+  const sidePad = p.paddingRight ?? 22
+  const botPad = p.paddingBottom ?? 16
+  return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  style="width:100%;width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bg(p)};border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.04);box-sizing:border-box;">
       <div style="padding:${topPad}px ${sidePad}px ${botPad}px;text-align:center;box-sizing:border-box;">
@@ -218,17 +224,24 @@ function stackedDealCard(p: any, id: string): string {
 // Flex layout ensures the pill badge never wraps awkwardly or spills over.
 // ─────────────────────────────────────────────────────────────────────────────
 function discountBadgePill(p: any, id: string): string {
-    const f = font(p)
-    const pillCol = badgeBg(p, '#8fff00')
-    const pillTxt = badgeTxt(p, '#0a0d08')
-    return `<!--[riazify:price_tag:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  const f = font(p)
+  const pillCol = badgeBg(p, '#8fff00')
+  const pillTxt = badgeTxt(p, '#0a0d08')
+  return `<!--[riazify:price_tag:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .pt-dbp-wrap-${id} { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 12px !important; }
+    .pt-dbp-left-${id} { text-align: center !important; width: 100% !important; min-width: 0 !important; }
+    .pt-dbp-right-${id} { text-align: center !important; width: 100% !important; }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;font-family:${f};border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bg(p, '#f8fafc')};${pad(p)}border:1px solid #e2e8f0;border-radius:12px;box-sizing:border-box;">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
-        <!-- Left: Pricing Info -->
-        <div style="flex:1 1 200px;min-width:180px;text-align:left;box-sizing:border-box;">
+      <div class="pt-dbp-wrap-${id}" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
+        <!-- Left: Pricing Info (Centered on Mobile) -->
+        <div class="pt-dbp-left-${id}" style="flex:1 1 200px;min-width:180px;text-align:left;box-sizing:border-box;">
           <div style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px 0;line-height:1.2;">
             Special Listing Price
           </div>
@@ -241,8 +254,8 @@ function discountBadgePill(p: any, id: string): string {
           </div>
         </div>
 
-        <!-- Right: Prominent Contained Pill Badge -->
-        <div style="flex-shrink:0;text-align:right;box-sizing:border-box;">
+        <!-- Right: Prominent Contained Pill Badge (Centered on Mobile) -->
+        <div class="pt-dbp-right-${id}" style="flex-shrink:0;text-align:right;box-sizing:border-box;">
           <div style="display:inline-block;box-sizing:border-box;background-color:${pillCol};color:${pillTxt};font-size:12.5px;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;padding:10px 20px;border-radius:100px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,0.08);white-space:nowrap;line-height:1.2;max-width:100%;">
             SAVE ${discPercent(p)}%
           </div>
@@ -260,17 +273,23 @@ function discountBadgePill(p: any, id: string): string {
 // Responsive flex wrap ensures graceful column stacking on mobile.
 // ─────────────────────────────────────────────────────────────────────────────
 function dualToneSplit(p: any, id: string): string {
-    const f = font(p)
-    const rightBg = p.accentColor ?? '#1e1535'
-    const rightAccent = p.badgeColor ?? '#b8fa33'
-    return `<!--[riazify:price_tag:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  const f = font(p)
+  const rightBg = p.accentColor ?? '#1e1535'
+  const rightAccent = p.badgeColor ?? '#b8fa33'
+  return `<!--[riazify:price_tag:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .pt-dts-left-${id} { text-align: center !important; width: 100% !important; min-width: 0 !important; padding: 18px 16px !important; }
+    .pt-dts-right-${id} { width: 100% !important; min-width: 0 !important; flex: 1 1 100% !important; padding: 16px 14px !important; }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;font-family:${f};border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bg(p)};border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;padding:0;box-sizing:border-box;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
       <div style="display:flex;flex-wrap:wrap;width:100%;align-items:stretch;box-sizing:border-box;">
-        <!-- Left: Price details -->
-        <div style="flex:1 1 260px;min-width:200px;padding:20px 24px;text-align:left;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;">
+        <!-- Left: Price details (Centered on Mobile) -->
+        <div class="pt-dts-left-${id}" style="flex:1 1 260px;min-width:200px;padding:20px 24px;text-align:left;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;">
           <div style="font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px 0;line-height:1.2;">
             Buy It Now Price
           </div>
@@ -282,8 +301,8 @@ function dualToneSplit(p: any, id: string): string {
           </div>
         </div>
 
-        <!-- Right: High-contrast Accent Zone -->
-        <div style="flex:0 1 170px;min-width:140px;background-color:${rightBg};padding:20px 16px;text-align:center;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;">
+        <!-- Right: High-contrast Accent Zone (Full 100% Width on Mobile) -->
+        <div class="pt-dts-right-${id}" style="flex:0 1 170px;min-width:140px;background-color:${rightBg};padding:20px 16px;text-align:center;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;">
           <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1.5px;line-height:1.2;margin:0;">
             Save Today
           </div>
@@ -307,11 +326,18 @@ function dualToneSplit(p: any, id: string): string {
 // Padding is placed directly on <td> for bulletproof cross-client consistency.
 // ─────────────────────────────────────────────────────────────────────────────
 function urgencyBanner(p: any, id: string): string {
-    const f = font(p)
-    const urgencyBg = p.bannerBg ?? '#dc2626'
-    return `<!--[riazify:price_tag:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  const f = font(p)
+  const urgencyBg = p.bannerBg ?? '#dc2626'
+  return `<!--[riazify:price_tag:${id}]-->
+<style>
+  @media only screen and (max-width: 680px) {
+    .pt-ub-row-${id} { flex-direction: column !important; align-items: center !important; text-align: center !important; gap: 12px !important; padding: 16px 14px !important; }
+    .pt-ub-left-${id} { text-align: center !important; width: 100% !important; min-width: 0 !important; }
+    .pt-ub-right-${id} { text-align: center !important; width: 100% !important; }
+  }
+</style>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="width:100% !important;min-width:100% !important;margin:0 auto;font-family:${f};border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="border:1px solid #fecaca;border-radius:10px;overflow:hidden;background-color:${bg(p)};padding:0;box-sizing:border-box;">
       <!-- Top Alert Bar -->
@@ -321,9 +347,9 @@ function urgencyBanner(p: any, id: string): string {
         </span>
       </div>
 
-      <!-- Main Price Row -->
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding:18px 22px;box-sizing:border-box;width:100%;">
-        <div style="flex:1 1 180px;min-width:160px;text-align:left;box-sizing:border-box;">
+      <!-- Main Price Row (Centered on Mobile) -->
+      <div class="pt-ub-row-${id}" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding:18px 22px;box-sizing:border-box;width:100%;">
+        <div class="pt-ub-left-${id}" style="flex:1 1 180px;min-width:160px;text-align:left;box-sizing:border-box;">
           <span style="font-size:10.5px;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:0.8px;display:block;margin:0 0 3px 0;line-height:1.2;">
             Flash Deal Active
           </span>
@@ -335,7 +361,7 @@ function urgencyBanner(p: any, id: string): string {
           </div>
         </div>
 
-        <div style="flex-shrink:0;text-align:right;box-sizing:border-box;">
+        <div class="pt-ub-right-${id}" style="flex-shrink:0;text-align:right;box-sizing:border-box;">
           <div style="display:inline-block;box-sizing:border-box;background-color:#fee2e2;border:1px solid #fca5a5;padding:8px 16px;border-radius:6px;text-align:center;white-space:nowrap;max-width:100%;">
             <span style="font-size:11.5px;font-weight:800;color:#b91c1c;text-transform:uppercase;display:block;line-height:1.2;letter-spacing:0.5px;">
               Save ${discAmount(p)} (${discPercent(p)}%)
@@ -355,10 +381,10 @@ function urgencyBanner(p: any, id: string): string {
 // Overflow wrapper prevents matrix collapsing on narrow mobile viewports.
 // ─────────────────────────────────────────────────────────────────────────────
 function wholesaleB2b(p: any, id: string): string {
-    const f = font(p)
-    return `<!--[riazify:price_tag:${id}]-->
+  const f = font(p)
+  return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  style="width:100%;width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bg(p)};border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;padding:0;box-sizing:border-box;">
       <div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;">
@@ -408,15 +434,15 @@ function wholesaleB2b(p: any, id: string): string {
 // and high-end typography hierarchy. Flex container prevents badge overflow.
 // ─────────────────────────────────────────────────────────────────────────────
 function modernGlassmorphism(p: any, id: string): string {
-    const f = font(p)
-    const prCol = priceCol(p, '#1e1b4b')
-    const stCol = strikeCol(p)
-    const acCol = p.accentColor ?? '#4338ca'
-    const disc = discPercent(p)
+  const f = font(p)
+  const prCol = priceCol(p, '#1e1b4b')
+  const stCol = strikeCol(p)
+  const acCol = p.accentColor ?? '#4338ca'
+  const disc = discPercent(p)
 
-    return `<!--[riazify:price_tag:${id}]-->
+  return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  style="width:100%;width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bg(p, '#ffffff')};${pad(p)}border:1px solid #e0e7ff;border-radius:12px;box-shadow:0 4px 14px rgba(79,70,229,0.06);box-sizing:border-box;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
@@ -467,12 +493,12 @@ function modernGlassmorphism(p: any, id: string): string {
 // Contained layout prevents neon boxes from colliding with parent borders.
 // ─────────────────────────────────────────────────────────────────────────────
 function highContrastFlash(p: any, id: string): string {
-    const f = font(p)
-    const darkBg = p.bgColor ?? '#0f172a'
-    const neonCol = p.badgeColor ?? '#8fff00'
-    return `<!--[riazify:price_tag:${id}]-->
+  const f = font(p)
+  const darkBg = p.bgColor ?? '#0f172a'
+  const neonCol = p.badgeColor ?? '#8fff00'
+  return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  style="width:100%;width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${darkBg};${pad(p)}border-radius:12px;border-left:5px solid ${neonCol};box-sizing:border-box;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;width:100%;box-sizing:border-box;">
@@ -516,11 +542,11 @@ function highContrastFlash(p: any, id: string): string {
 // Best for luxury goods, watches, jewelry, and high-ticket electronics.
 // ─────────────────────────────────────────────────────────────────────────────
 function eliteLuxury(p: any, id: string): string {
-    const f = p.fontFamily ? `${p.fontFamily}, Georgia, serif` : 'Georgia, serif'
-    const gold = p.accentColor ?? '#d97706'
-    return `<!--[riazify:price_tag:${id}]-->
+  const f = p.fontFamily ? `${p.fontFamily}, Georgia, serif` : 'Georgia, serif'
+  const gold = p.accentColor ?? '#d97706'
+  return `<!--[riazify:price_tag:${id}]-->
 <table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;font-family:${f};border-collapse:collapse;">
+  style="width:100%;width:100% !important;min-width:100% !important;font-family:${f};border-collapse:collapse;">
   <tr>
     <td style="background-color:${bg(p, '#ffffff')};${pad(p)}border:1px solid #d1d5db;border-top:3px solid ${gold};border-radius:6px;text-align:center;box-sizing:border-box;">
       <div style="font-size:10.5px;font-weight:700;color:${gold};text-transform:uppercase;letter-spacing:2.5px;margin:0 0 8px 0;line-height:1.2;">
@@ -547,68 +573,68 @@ function eliteLuxury(p: any, id: string): string {
 // REGISTRY
 // ─────────────────────────────────────────────────────────────────────────────
 export const priceTagVariants: BlockVariant[] = [
-    {
-        id: 'classic-strike',
-        label: 'Classic Strike',
-        description: 'Traditional layout with strikethrough original price, bold current price, and red savings badge',
-        toHtml(props, id) { return classicStrike(props, id) },
-    },
-    {
-        id: 'minimalist-inline',
-        label: 'Minimalist Inline',
-        description: 'Compact single-line horizontal strip for titles and tight vertical spaces',
-        toHtml(props, id) { return minimalistInline(props, id) },
-    },
-    {
-        id: 'stacked-deal-card',
-        label: 'Stacked Deal Card',
-        description: 'Vertical card with top retail MSRP, huge centered price, and bottom full-width savings bar',
-        toHtml(props, id) { return stackedDealCard(props, id) },
-    },
-    {
-        id: 'discount-badge-pill',
-        label: 'Discount Badge Pill',
-        description: 'Prominent current price paired with an eye-catching floating discount pill badge',
-        toHtml(props, id) { return discountBadgePill(props, id) },
-    },
-    {
-        id: 'dual-tone-split',
-        label: 'Dual-Tone Split',
-        description: 'Modern 2-column split box: clean pricing on left, solid contrast accent block on right',
-        toHtml(props, id) { return dualToneSplit(props, id) },
-    },
-    {
-        id: 'urgency-banner',
-        label: 'Urgency Banner',
-        description: 'Urgent promotional banner header with countdown/stock notice above price',
-        toHtml(props, id) { return urgencyBanner(props, id) },
-    },
-    {
-        id: 'wholesale-b2b',
-        label: 'Wholesale / B2B',
-        description: 'Grid matrix comparing MSRP, Our Price, Total Savings, and Unit Economics',
-        toHtml(props, id) { return wholesaleB2b(props, id) },
-    },
-    {
-        id: 'modern-glassmorphism',
-        label: 'Modern Glassmorphism',
-        description: 'SaaS-grade pricing card with refined borders, delicate typography, and clean hierarchy',
-        toHtml(props, id) { return modernGlassmorphism(props, id) },
-    },
-    {
-        id: 'high-contrast-flash',
-        label: 'High-Contrast Flash',
-        description: 'Deep dark background with electric neon accents and flash sale banner',
-        toHtml(props, id) { return highContrastFlash(props, id) },
-    },
-    {
-        id: 'elite-luxury',
-        label: 'Elite Luxury',
-        description: 'Understated premium elegance with fine borders, gold accents, and luxury typography',
-        toHtml(props, id) { return eliteLuxury(props, id) },
-    },
+  {
+    id: 'classic-strike',
+    label: 'Classic Strike',
+    description: 'Traditional layout with strikethrough original price, bold current price, and red savings badge',
+    toHtml(props, id) { return classicStrike(props, id) },
+  },
+  {
+    id: 'minimalist-inline',
+    label: 'Minimalist Inline',
+    description: 'Compact single-line horizontal strip for titles and tight vertical spaces',
+    toHtml(props, id) { return minimalistInline(props, id) },
+  },
+  {
+    id: 'stacked-deal-card',
+    label: 'Stacked Deal Card',
+    description: 'Vertical card with top retail MSRP, huge centered price, and bottom full-width savings bar',
+    toHtml(props, id) { return stackedDealCard(props, id) },
+  },
+  {
+    id: 'discount-badge-pill',
+    label: 'Discount Badge Pill',
+    description: 'Prominent current price paired with an eye-catching floating discount pill badge',
+    toHtml(props, id) { return discountBadgePill(props, id) },
+  },
+  {
+    id: 'dual-tone-split',
+    label: 'Dual-Tone Split',
+    description: 'Modern 2-column split box: clean pricing on left, solid contrast accent block on right',
+    toHtml(props, id) { return dualToneSplit(props, id) },
+  },
+  {
+    id: 'urgency-banner',
+    label: 'Urgency Banner',
+    description: 'Urgent promotional banner header with countdown/stock notice above price',
+    toHtml(props, id) { return urgencyBanner(props, id) },
+  },
+  {
+    id: 'wholesale-b2b',
+    label: 'Wholesale / B2B',
+    description: 'Grid matrix comparing MSRP, Our Price, Total Savings, and Unit Economics',
+    toHtml(props, id) { return wholesaleB2b(props, id) },
+  },
+  {
+    id: 'modern-glassmorphism',
+    label: 'Modern Glassmorphism',
+    description: 'SaaS-grade pricing card with refined borders, delicate typography, and clean hierarchy',
+    toHtml(props, id) { return modernGlassmorphism(props, id) },
+  },
+  {
+    id: 'high-contrast-flash',
+    label: 'High-Contrast Flash',
+    description: 'Deep dark background with electric neon accents and flash sale banner',
+    toHtml(props, id) { return highContrastFlash(props, id) },
+  },
+  {
+    id: 'elite-luxury',
+    label: 'Elite Luxury',
+    description: 'Understated premium elegance with fine borders, gold accents, and luxury typography',
+    toHtml(props, id) { return eliteLuxury(props, id) },
+  },
 ]
 
 export function getPriceTagVariant(id: string): BlockVariant {
-    return priceTagVariants.find(v => v.id === id) ?? priceTagVariants[0]
+  return priceTagVariants.find(v => v.id === id) ?? priceTagVariants[0]
 }

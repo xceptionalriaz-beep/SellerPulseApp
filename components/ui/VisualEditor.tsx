@@ -392,8 +392,18 @@ export default function VisualEditor({
 
     const handleSelectBlock = useCallback((id: string) => {
         setSelectedId(id);
+        setSelectedSubSlot(null);
         setActiveDropSlot(null);
         setActiveSlotEdit(null);
+        // Clear active slot highlight in all iframes when just selecting the block
+        document.querySelectorAll('iframe[data-block-id]').forEach(el => {
+            try {
+                (el as HTMLIFrameElement).contentWindow?.postMessage({
+                    type: 'RIAZIFY_UPDATE_ACTIVE_SLOT',
+                    propKey: null
+                }, '*');
+            } catch { }
+        });
     }, []);
 
     // ── Lock / Hide block ────────────────────────────────────────────────────
@@ -858,6 +868,42 @@ export default function VisualEditor({
                             images[propIndex] = { ...images[propIndex], src: url, alt }
                             return { ...b, props: { ...bp, images } } as Block
                         }
+                        // ONLY applies to Logo Bar — completely safe for Hero, Gallery, Banners, etc.
+                        if (target?.type === 'logo_bar') {
+                            const logoMatch = effectivePropKey.match(/(\d)/)
+                            const num = logoMatch ? logoMatch[1] : '1'
+                            return {
+                                ...b,
+                                props: {
+                                    ...bp,
+                                    [effectivePropKey]: url,
+                                    [`logo_${num}`]: url,
+                                    [`logo${num}`]: url,
+                                    [`logo${num}Url`]: url,
+                                }
+                            } as Block
+                        }
+
+                        // If it's hero_product, insert raw image URL directly (no <img> wrapper)
+                        if (target?.type === 'hero_product' || (target?.type as string) === 'product_hero') {
+                            return { ...b, props: { ...bp, [effectivePropKey]: url } } as Block
+                        }
+
+                        // If it's seller_info, insert logo/avatar image URL directly
+                        if (target?.type === 'seller_info' || (target?.type as string) === 'sellerInfo') {
+                            return {
+                                ...b,
+                                props: {
+                                    ...bp,
+                                    [effectivePropKey]: url,
+                                    logoUrl: url,
+                                    avatarUrl: url,
+                                    logo: url,
+                                    avatar: url,
+                                }
+                            } as Block
+                        }
+
                         // If it's a layout slot (like leftImage), wrap in an img tag and sync into rows for sidebar_layout
                         if (['leftImage', 'leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'].includes(effectivePropKey)) {
                             const isImageSlot = (effectivePropKey === 'leftImage');
@@ -1093,27 +1139,30 @@ export default function VisualEditor({
         const handler = (event: MessageEvent) => {
             if (event.data?.type === 'RIAZIFY_SELECT_SLOT') {
                 const { propKey, blockId } = event.data;
-                const VALID_SLOTS: DropSlot[] = ['leftImage', 'leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
-                if (VALID_SLOTS.includes(propKey)) {
-                    setActiveDropSlot({ blockId, slot: propKey });
-                    if (blockId) {
-                        setSelectedId(blockId);
-                        // Also set selectedSubSlot so ImagesTab knows which slot to use
-                        setSelectedSubSlot(propKey);
-                        const targetBlock = blocks.find(b => b.id === blockId);
-                        // Image slot → Images tab; content slot → Content tab; full block → no auto switch
-                        if (propKey.toLowerCase().includes('image') || propKey.toLowerCase().includes('leftimage')) {
-                            setActiveTab('images');
-                        } else if (propKey.toLowerCase().includes('content') || propKey.toLowerCase().includes('rightcontent')) {
-                            setActiveTab('content');
-                        } else {
-                            setActiveTab('content');
-                        }
-                    } else {
-                        setActiveTab('content');
-                    }
-                    setPanelOpen(true);
+
+                // 💡 If propKey is null or empty, the user clicked blank space to UNSELECT
+                if (!propKey) {
+                    setSelectedSubSlot(null);
+                    setActiveDropSlot(null);
+                    setActiveSlotEdit(null);
+                    return;
                 }
+
+                if (blockId) {
+                    setSelectedId(blockId);
+                }
+                setSelectedSubSlot(propKey);
+                setActiveDropSlot({ blockId, slot: propKey as any });
+
+                // Any image/thumbnail/logo slot click opens Images tab, otherwise Content tab
+                const propKeyLower = propKey.toLowerCase();
+                const isImage = propKeyLower.includes('image') || propKeyLower.includes('thumb') || propKeyLower.includes('src') || propKeyLower.includes('logo') || propKeyLower.includes('img');
+                if (isImage) {
+                    setActiveTab('images');
+                } else {
+                    setActiveTab('content');
+                }
+                setPanelOpen(true);
             } else if (event.data?.type === 'RIAZIFY_EDIT_SLOT_CONTENT') {
                 const { blockId, propKey, currentHtml } = event.data;
                 if (blockId && propKey) {
@@ -1461,28 +1510,49 @@ export default function VisualEditor({
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
                         if (selectedFeatureIndex === null) return;
-                        // Find block by ID (supports why_buy_from_us, key_features_grid, trust_badges, etc.)
+                        // Find block by ID (supports all block types)
                         const idx = selectedIconBlockId
                             ? blocks.findIndex(b => b.id === selectedIconBlockId)
                             : selectedId
                                 ? blocks.findIndex(b => b.id === selectedId)
-                                : blocks.findIndex(b => b.type === 'key_features_grid' || b.type === 'why_buy_from_us' || b.type === 'trust_badges');
+                                : -1;
                         if (idx < 0) return;
                         const block = blocks[idx];
                         const p = block.props as any;
 
-                        // Detect which array holds the icons (reasons, points, features, badges, or items)
+                        const updatedProps = { ...p };
+
+                        // 1. Update any existing array of features, reasons, points, badges, or items
                         const allKeys = ['reasons', 'points', 'features', 'badges', 'items'];
                         const matchedKeys = allKeys.filter(k => Array.isArray(p[k]));
-                        const keysToUpdate = matchedKeys.length > 0 ? matchedKeys : ['features'];
 
-                        const updatedProps = { ...p };
-                        for (const key of keysToUpdate) {
-                            const list = p[key] ?? [];
-                            updatedProps[key] = list.map((item: any, i: number) =>
-                                i === selectedFeatureIndex ? { ...item, icon: iconId } : item
-                            );
+                        if (matchedKeys.length > 0) {
+                            for (const key of matchedKeys) {
+                                const list = p[key] ?? [];
+                                updatedProps[key] = list.map((item: any, i: number) =>
+                                    i === selectedFeatureIndex ? { ...(typeof item === 'object' ? item : {}), icon: iconId } : item
+                                );
+                            }
+                        } else {
+                            // If no array exists (e.g. Money Back Guarantee), create and populate features array
+                            const features = Array.isArray(p.features) ? [...p.features] : [];
+                            while (features.length <= selectedFeatureIndex) {
+                                features.push({ icon: '' });
+                            }
+                            features[selectedFeatureIndex] = {
+                                ...(typeof features[selectedFeatureIndex] === 'object' ? features[selectedFeatureIndex] : {}),
+                                icon: iconId
+                            };
+                            updatedProps.features = features;
                         }
+
+                        // 2. Also store under direct icon keys for universal block compatibility
+                        if (!Array.isArray(updatedProps.icons)) {
+                            updatedProps.icons = Array.isArray(p.icons) ? [...p.icons] : [];
+                        }
+                        updatedProps.icons[selectedFeatureIndex] = iconId;
+                        updatedProps[`icon${selectedFeatureIndex + 1}`] = iconId;
+                        updatedProps[`icon_${selectedFeatureIndex}`] = iconId;
 
                         const updatedBlock = { ...block, props: updatedProps };
                         const newBlocks = [...blocks];

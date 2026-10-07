@@ -27,7 +27,7 @@
 //   onMoveUp        — called with block id to move up
 //   onMoveDown      — called with block id to move down
 // ─────────────────────────────────────────────────────────────────────────────
-
+import { SLOT_SELECTION_CSS } from './slotSelection'
 import React, { useState, useRef, useCallback } from 'react'
 import {
     Layout, Columns2, Columns3, Square,
@@ -257,9 +257,17 @@ export default function Canvas({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={(e) => {
-                // Only deselect when clicking the canvas background itself,
-                // not a child block or toolbar button
-                if (e.target === e.currentTarget) onDeselect?.()
+                const target = e.target as HTMLElement
+                // Deselect when clicking canvas background or whitespace (outside block cards and buttons)
+                if (!target.closest('[data-block-id]') && !target.closest('button')) {
+                    onDeselect?.()
+                    // Clear active slot outline in all block iframes
+                    document.querySelectorAll('iframe').forEach(iframe => {
+                        try {
+                            iframe.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey: null }, '*')
+                        } catch (err) { }
+                    })
+                }
             }}
         >
             {/* ── Zoom wrapper — scale() must be on an inner div, NOT the scroll root.
@@ -1139,30 +1147,11 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     overflow: hidden;
     width: ${previewWidth}px;
   }
-  table { border-collapse: collapse; width: 100%; }
+  table { border-collapse: collapse; }
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }
   a[href] { text-decoration: underline; color: #7530fb; }
-  /* Dropzone visual feedback */
-  div[data-canvas-dropzone]
-  div[data-canvas-dropzone][data-canvas-dropzone-active="true"] {
-    outline: 3px solid #7530fb !important;
-    outline-offset: 2px !important;
-    border-radius: 8px !important;
-  }
-  /* Active sub-slot visual indicator — highly specific with !important */
-  div[data-canvas-dropzone].riazify-active-slot,
-  div[data-canvas-dropzone][data-canvas-dropzone-active="true"],
-  img[data-slot].riazify-active-slot {
-    outline: 3px solid #7530fb !important;
-    outline-offset: 2px !important;
-    border-radius: 8px !important;
-    background-color: #f3eeff !important;
-    box-shadow: 0 0 0 3px rgba(117,48,251,0.25) !important;
-  }
-  img[data-slot].riazify-active-slot {
-    transition: outline 0.15s ease !important;
-  }
+  ${SLOT_SELECTION_CSS}
   /* Selected icon wrapper highlight */
   [data-feature-index].riazify-icon-selected {
     outline: 3px solid #7530fb !important;
@@ -1394,15 +1383,89 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       }
     });
 
-    document.querySelectorAll('img[data-slot]').forEach(function(img) {
-      img.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var slot = img.getAttribute('data-slot');
+    // ── Universal Image & Thumbnail Click Listener ──
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      if (!target) return;
+
+      // 1. If element has explicit data-slot
+      var slotEl = target.closest('[data-slot]');
+      if (slotEl) {
+        var slot = slotEl.getAttribute('data-slot');
         if (slot && window.parent) {
+          e.preventDefault();
+          e.stopPropagation();
           window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: BLOCK_ID }, '*');
+          return;
         }
-      });
+      }
+
+// 2. If thumbnail label clicked in hero_product
+      var thumbLabel = target.closest('label[for*="_"]');
+      if (thumbLabel) {
+        var forAttr = thumbLabel.getAttribute('for') || '';
+        var match = forAttr.match(/_([0-9])$/);
+        if (match) {
+          var num = parseInt(match[1], 10);
+          var propKey = num === 0 ? 'leftImage' : ('thumb' + num);
+          if (window.parent) {
+            window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: propKey, blockId: BLOCK_ID }, '*');
+          }
+          return;
+        }
+      }
+
+      // 3. ONLY trigger if clicking an actual <img> or a dedicated image placeholder box
+      var clickedImg = target.tagName === 'IMG' ? target : target.closest('img');
+      var clickedPlaceholder = target.closest('div[data-slot], [class*="img-placeholder"], [class*="hp-placeholder"], [class*="-st-"], [class*="stacked"]');
+
+      // Also catch clicking directly on "Click to add image" text or SVG in Stacked style
+      if (!clickedPlaceholder && (target.textContent || '').indexOf('Click to add image') >= 0) {
+        clickedPlaceholder = target.closest('div');
+      }
+
+      // If clicking inside a thumbnail cell
+      var thumbTd = target.closest('td[width="25%"], td[width="50%"], td[width="10%"], td[width="12%"]');
+      if (thumbTd && (clickedImg || clickedPlaceholder || target.closest('label') || target.tagName === 'DIV')) {
+        var parentTable = thumbTd.closest('table');
+        if (parentTable) {
+          var allCells = Array.from(parentTable.querySelectorAll('td[width]'));
+          var idx = allCells.indexOf(thumbTd);
+          var thumbKey = 'thumb' + (idx >= 0 ? idx + 1 : 1);
+          if (window.parent) {
+            window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: thumbKey, blockId: BLOCK_ID }, '*');
+          }
+          return;
+        }
+      }
+
+      // If clicking directly on the main big image or main placeholder (including Stacked)
+      if (clickedImg || clickedPlaceholder) {
+        var isMainImg = (clickedImg && clickedImg.closest('[class*="-main-"], [class*="-m0-"], [class*="hp-ir-img-"], [class*="-st-"], [class*="stacked"]')) || clickedPlaceholder;
+        if (isMainImg && window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: 'leftImage', blockId: BLOCK_ID }, '*');
+          return;
+        }
+      }
+
+      // 💡 Check if clicked element is ANY slot, dropzone, placeholder, button, or media
+      var isSlotOrInteractive = target.closest(
+        '[data-slot], [data-canvas-dropzone], [data-canvas-overlay], [data-feature-index], [class*="placeholder"], [class*="-st-"], [class*="stacked"], [style*="dashed"], img, label, a, button'
+      ) || (target.textContent || '').indexOf('Click to add image') >= 0;
+
+      // Only unselect when clicking genuine blank space
+      if (!isSlotOrInteractive) {
+        // Clear both slot and icon selection highlights
+        document.querySelectorAll('.riazify-active-slot').forEach(function(el) {
+          el.classList.remove('riazify-active-slot');
+        });
+        document.querySelectorAll('[data-feature-index].riazify-icon-selected').forEach(function(el) {
+          el.classList.remove('riazify-icon-selected');
+        });
+        if (window.parent) {
+          window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: null, blockId: BLOCK_ID }, '*');
+        }
+      }
     });
     // Icon click — detect clicks on feature icon wrappers [data-feature-index]
     document.addEventListener('click', function(e) {
@@ -1515,28 +1578,48 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       }
       if (msgEvent.data && msgEvent.data.type === 'RIAZIFY_UPDATE_ACTIVE_SLOT') {
         var prop = msgEvent.data.propKey;
-        // Highlight the dropzone container (clear visual target for full-width and thumbnails)
-        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
-          zone.classList.remove('riazify-active-slot');
-          // ALSO remove from parent container if needed
-          if (zone.getAttribute('data-canvas-dropzone') !== prop) {
-              zone.classList.remove('riazify-active-slot');
+        // Clear all previous highlights
+        document.querySelectorAll('.riazify-active-slot').forEach(function(el) {
+          el.classList.remove('riazify-active-slot');
+        });
+        if (!prop) return;
+
+        // 1. Highlight standard dropzones & data-slot containers
+        document.querySelectorAll('div[data-canvas-dropzone="' + prop + '"], div[data-slot="' + prop + '"], [data-slot="' + prop + '"]').forEach(function(el) {
+          el.classList.add('riazify-active-slot');
+        });
+
+        // 2. Highlight hero_product thumbnail slots (thumb1 to thumb6) on both blank placeholders and images
+        if (prop.startsWith('thumb')) {
+          var num = parseInt(prop.replace('thumb', ''), 10);
+
+          // Target the specific thumbnail cell (1st, 2nd, 3rd, 4th cell)
+          var allThumbCells = document.querySelectorAll('td[width="25%"], td[width="50%"], td[width="10%"], td[width="12%"]');
+          if (allThumbCells.length >= num) {
+            var targetCell = allThumbCells[num - 1];
+            // Highlight the placeholder div inside this thumbnail cell
+            var innerBox = targetCell.querySelector('div, label');
+            if (innerBox) {
+              innerBox.classList.add('riazify-active-slot');
+            }
           }
-        });
-        document.querySelectorAll('img[data-slot]').forEach(function(img) {
-          img.classList.remove('riazify-active-slot');
-        });
-        // Apply only to the clicked/updated sub-slot
-        document.querySelectorAll('div[data-canvas-dropzone]').forEach(function(zone) {
-          if (zone.getAttribute('data-canvas-dropzone') === prop) {
-            zone.classList.add('riazify-active-slot');
-          }
-        });
-        document.querySelectorAll('img[data-slot]').forEach(function(img) {
-          if (img.getAttribute('data-slot') === prop) {
-            img.classList.add('riazify-active-slot');
-          }
-        });
+
+          // Also highlight by label ID or variant thumbnail class
+          document.querySelectorAll('label[for$="_' + num + '"] div, label[for$="_' + num + '"], [class*="-t' + num + '-"] div').forEach(function(el) {
+            el.classList.add('riazify-active-slot');
+          });
+        } else if (prop === 'leftImage' || prop === 'src' || prop === 'imageUrl') {
+          // Highlight main image slot across all styles (blank placeholder or image)
+          document.querySelectorAll('[class*="-m0-"], [class*="hp-main-"], [class*="-st-"], [class*="stacked"], .hp-sf-col-img, label[for$="_0"], div[data-slot="leftImage"]').forEach(function(el) {
+            el.classList.add('riazify-active-slot');
+          });
+          // Also highlight main placeholder directly
+          document.querySelectorAll('div[style*="dashed"]').forEach(function(d) {
+            if (!d.closest('td[width="25%"], td[width="50%"], td[width="10%"], td[width="12%"]')) {
+              d.classList.add('riazify-active-slot');
+            }
+          });
+        }
       }
     });
     // Overlay click triggers asset picker/modal
@@ -1560,30 +1643,32 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         } catch {
             return ''
         }
-    }, [block.type, block.id, props, activeCategory])
+    }, [block.type, block.id, JSON.stringify(block.props), activeCategory, previewWidth])
 
     // Auto-resize iframe to fit content height
     const [height, setHeight] = React.useState(80)
 
-    // Content hash to force iframe remount when html changes
-    // This is critical for drag-and-drop: without a changing key, React
-    // reuses the same iframe instance and the new srcDoc may not reload
-    // in all browsers, causing content to not visually update after drop.
-    // We use block.props as a proxy for content changes — when the slot
-    // content updates via drag-and-drop, props changes and the key changes,
-    // forcing React to unmount/remount the iframe so srcDoc reloads.
-    // Cheap content key: sum of char codes of the JSON string.
-    // Avoids calling JSON.stringify on every render for large props objects
-    // while still forcing iframe remount when any prop value changes.
-    const propsHash = React.useMemo(() => {
+    // Force live real-time update in canvas whenever any property changes
+    React.useEffect(() => {
+        const iframe = iframeRef.current
+        if (!iframe) return
         try {
-            const s = JSON.stringify(props)
-            let h = 0
-            for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
-            return h
-        } catch { return 0 }
-    }, [props])
-    const htmlKey = `${block.id}-${block.type}-${propsHash}`
+            const doc = iframe.contentDocument || iframe.contentWindow?.document
+            if (doc) {
+                doc.open()
+                doc.write(html)
+                doc.close()
+                setTimeout(() => {
+                    const h = doc.body?.scrollHeight || doc.body?.offsetHeight
+                    if (h) setHeight(Math.max(40, h + 4))
+                }, 50)
+            }
+        } catch (e) {
+            iframe.srcdoc = html
+        }
+    }, [html])
+
+    const htmlKey = `${block.id}-${block.type}-${JSON.stringify(block.props)}`
 
     const onLoad = React.useCallback(() => {
         // iframeRef is a stable ref object — reading .current inside the callback

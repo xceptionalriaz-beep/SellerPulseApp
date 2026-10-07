@@ -37,8 +37,12 @@ function pad(p: any, defaultT = 16, defaultR = 24, defaultB = 16, defaultL = 24)
   return `padding:${top}px ${right}px ${bottom}px ${left}px;`
 }
 
-function resolveText(p: any, fallback = '{{SECTION_LABEL}}'): string {
-  return p.text ?? p.label ?? p.labelText ?? p.heading ?? fallback
+function resolveText(p: any, fallback = 'SECTION OVERVIEW'): string {
+  const raw = p.text ?? p.label ?? p.labelText ?? p.heading
+  if (raw && raw !== '{{SECTION_LABEL}}' && String(raw).trim() !== '') {
+    return raw
+  }
+  return fallback
 }
 
 function resolveAccent(p: any, fallback = '#7530fb'): string {
@@ -63,11 +67,11 @@ function resolveAlign(p: any, fallback = 'left'): string {
 function classicPillCapsule(p: any, id: string): string {
   const bgCol = resolveBg(p, '#ffffff')
   const accentCol = resolveAccent(p, '#7530fb')
-  const text = resolveText(p, '{{SECTION_LABEL}}')
+  const text = resolveText(p, 'SECTION OVERVIEW')
   const fontSize = p.fontSize ?? 11
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <span style="display:inline-block;padding:4px 14px;background-color:#f3eeff;color:${accentCol};font-family:Arial,Helvetica,sans-serif;font-size:${fontSize}px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-radius:20px;border:1px solid #ede9fe;">
@@ -90,7 +94,7 @@ function minimalistHairlineAccent(p: any, id: string): string {
   const fontSize = p.fontSize ?? 11
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;vertical-align:middle;">
@@ -122,7 +126,7 @@ function editorialSerifCrest(p: any, id: string): string {
   const text = resolveText(p, 'AUTHENTICITY & HERITAGE')
   const fontSize = p.fontSize ?? 11
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -153,7 +157,7 @@ function industrialSpecBadge(p: any, id: string): string {
   const fontSize = p.fontSize ?? 11
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;vertical-align:middle;">
@@ -186,7 +190,7 @@ function segmentedDualtoneChip(p: any, id: string): string {
   const fontSize = p.fontSize ?? 11
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;background-color:#ffffff;">
@@ -214,7 +218,7 @@ function numberedIndexRule(p: any, id: string): string {
   const text = resolveText(p, 'PRODUCT DETAILS & SPECS')
   const fontSize = p.fontSize ?? 11
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -246,7 +250,7 @@ function officialVerificationSeal(p: any, id: string): string {
   const fontSize = p.fontSize ?? 10
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;border:1.5px solid #0f172a;background-color:#ffffff;border-radius:2px;">
@@ -278,7 +282,7 @@ function boldContrastBanner(p: any, id: string): string {
   const fontSize = p.fontSize ?? 11
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <div style="display:inline-block;padding:5px 14px;background-color:${accentCol};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:${fontSize}px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;border-radius:3px;box-shadow:2px 2px 0px #0f172a;">
@@ -299,7 +303,7 @@ function tailorStitchedParchment(p: any, id: string): string {
   const fontSize = p.fontSize ?? 10
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;background-color:#fffdfa;border:1px dashed #d6d3d1;border-radius:3px;">
@@ -329,7 +333,7 @@ function compactDotBullet(p: any, id: string): string {
   const fontSize = p.fontSize ?? 11
   const align = resolveAlign(p, 'left')
 
-  return `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;">
   <tr>
     <td align="${align}" style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}">
       <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;vertical-align:middle;">

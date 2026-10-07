@@ -11,18 +11,21 @@ export interface BlockVariant {
 }
 
 function wrap(id: string, inner: string, p: any): string {
-    const align = p.align ?? 'center'
+    // Reads p.alignment from your sidebar control, with fallbacks
+    const rawAlign = p.alignment ?? p.align ?? p.textAlign ?? 'center'
+    const align = rawAlign === 'left' ? 'left' : rawAlign === 'right' ? 'right' : 'center'
     const alignAttr = align === 'left' ? 'align="left"' : align === 'right' ? 'align="right"' : 'align="center"'
-    const wrapperAlign = align === 'left' ? 'text-align:left;' : align === 'right' ? 'text-align:right;' : 'text-align:center;'
-    const widthStyle = p.fullWidth ? 'width:100%;' : 'display:inline-block;'
+    const wrapperAlign = `text-align:${align};`
+    // Keeps the button compact/short unless "Full width" toggle is turned ON
+    const widthStyle = p.fullWidth ? 'width:100%;' : 'display:inline-block;width:auto !important;'
 
     return `<!--[riazify:button_block:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;background-color:${p.containerBg ?? 'transparent'};padding:12px 0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:100%;background-color:${p.containerBg ?? 'transparent'};padding:12px 0;">
   <tr>
-    <td style="${wrapperAlign}">
+    <td width="100%" align="${align}" style="width:100%;${wrapperAlign}box-sizing:border-box;">
       <table cellpadding="0" cellspacing="0" border="0" ${alignAttr} style="${widthStyle}">
         <tr>
-          <td>
+          <td align="${align}">
             ${inner}
           </td>
         </tr>
@@ -41,7 +44,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Solid Primary',
         description: 'Standard high-contrast button with solid background',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);">${p.label ?? 'Buy Now'}</a>`
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);">${p.label ?? 'Buy Now'}</a>`
             return wrap(id, inner, p)
         },
     },
@@ -52,7 +55,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Outline / Ghost',
         description: 'Clean transparent button with a colored border',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:transparent;color:${p.bgColor ?? '#7530fb'};border:2px solid ${p.bgColor ?? '#7530fb'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${(p.paddingV ?? 14) - 2}px ${(p.paddingH ?? 28) - 2}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;">${p.label ?? 'View Details'}</a>`
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:transparent;color:${p.bgColor ?? '#7530fb'};border:2px solid ${p.bgColor ?? '#7530fb'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${(p.paddingV ?? 14) - 2}px ${(p.paddingH ?? 28) - 2}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;">${p.label ?? 'View Details'}</a>`
             return wrap(id, inner, p)
         },
     },
@@ -74,7 +77,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Lifted Shadow',
         description: 'Solid button with prominent drop shadow for depth',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.18);">${p.label ?? 'Add to Cart'}</a>`
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.18);">${p.label ?? 'Add to Cart'}</a>`
             return wrap(id, inner, p)
         },
     },
@@ -87,7 +90,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         toHtml(p: any, id: string): string {
             const bg1 = p.bgColor ?? '#7530fb'
             const bg2 = p.gradientTo ?? '#a855f7'
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background:linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%);background-color:${bg1};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;box-shadow:0 4px 15px rgba(117,48,251,0.3);">${p.label ?? 'Special Offer'}</a>`
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background:linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%);background-color:${bg1};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;box-shadow:0 4px 15px rgba(117,48,251,0.3);">${p.label ?? 'Special Offer'}</a>`
             return wrap(id, inner, p)
         },
     },
@@ -98,7 +101,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Icon + Text',
         description: 'Button featuring a leading icon for better engagement',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;">
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="text-align:center;vertical-align:middle;">
@@ -118,7 +121,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Text + Icon',
         description: 'Button featuring a trailing arrow/icon',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;">
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="text-align:center;vertical-align:middle;">
@@ -138,7 +141,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Full-Width Fluid',
         description: 'Stretches across the full container width for mobile conversion',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;width:100%;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 16}px 0;border-radius:${p.borderRadius ?? 8}px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.12);">${p.label ?? 'Proceed to Checkout'}</a>`
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;width:100%;background-color:${p.bgColor ?? '#7530fb'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '700'};text-decoration:none;padding:${p.paddingV ?? 16}px 0;border-radius:${p.borderRadius ?? 0}px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.12);">${p.label ?? 'Proceed to Checkout'}</a>`
             // Force fullWidth to true for this variant
             return wrap(id, inner, { ...p, fullWidth: true })
         },
@@ -161,7 +164,7 @@ export const buttonBlockVariants: BlockVariant[] = [
         label: 'Pulsing Alert',
         description: 'High-urgency solid button with subtle attention border',
         toHtml(p: any, id: string): string {
-            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#dc2626'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '800'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 8}px;text-align:center;border:2px solid #b91c1c;box-shadow:0 0 0 4px rgba(220,38,38,0.25);">${p.label ?? '⚡ Claim Deal Now'}</a>`
+            const inner = `<a href="${p.url ?? '#'}" target="_blank" style="display:block;background-color:${p.bgColor ?? '#dc2626'};color:${p.textColor ?? '#ffffff'};font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 16}px;font-weight:${p.fontWeight ?? '800'};text-decoration:none;padding:${p.paddingV ?? 14}px ${p.paddingH ?? 28}px;border-radius:${p.borderRadius ?? 0}px;text-align:center;border:2px solid #b91c1c;box-shadow:0 0 0 4px rgba(220,38,38,0.25);">${p.label ?? '⚡ Claim Deal Now'}</a>`
             return wrap(id, inner, p)
         },
     },

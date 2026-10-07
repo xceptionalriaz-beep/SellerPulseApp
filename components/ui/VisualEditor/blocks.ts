@@ -934,7 +934,11 @@ export interface FeaturesProps extends CommonProps {
     features: Array<{ icon: string; label: string; subText?: string }>
     iconColor: string
     textColor: string
-    variant: string
+    variant?: string
+    iconBg?: string
+    cardBg?: string
+    subTextColor?: string
+    accentColor?: string
 }
 
 // ── Why Buy From Us ──────────────────────────────────────────────────────────
@@ -1150,9 +1154,13 @@ export interface UrgencyTimerBlockProps extends CommonProps {
 }
 
 export interface TrustBadgeBlockProps extends CommonProps {
+    variant?: string
     badgeText: string
-    bgColor: string
+    text?: string
+    subtext?: string
+    subText?: string
     textColor: string
+    color?: string
 }
 
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
@@ -1208,6 +1216,7 @@ import { getFaqBlockVariant } from './variants/faq_block.variants'
 import { getWhyBuyFromUsVariant } from './variants/why_buy_from_us.variants'
 import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
 import { getRectangleVariant } from './variants/rectangle.variants'
+import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1982,23 +1991,25 @@ ${rows}
         label: 'Features Bar',
         category: 'Media',
         icon: 'grid-2x2',
-        description: 'Icon-based feature highlights',
+        description: 'Icon-based feature highlights — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
             paddingTop: 20,
             paddingBottom: 20,
             features: [
-                { icon: '⭐', label: 'Top Quality', subText: 'Premium Materials' },
-                { icon: '🚚', label: 'Fast Shipping', subText: 'Tracked Delivery' },
-                { icon: '↩️', label: 'Easy Returns', subText: '30-Day Policy' },
+                { icon: 'star', label: 'Top Quality', subText: 'Premium Materials' },
+                { icon: 'truck', label: 'Fast Shipping', subText: 'Tracked Delivery' },
+                { icon: 'return', label: 'Easy Returns', subText: '30-Day Policy' },
             ],
             iconColor: '#7530fb',
             textColor: '#1e1535',
+            subTextColor: '#6b7280',
+            iconBg: '#f3eeff',
             variant: 'simple-centered',
         } as FeaturesProps,
         toHtml(props, id) {
             const p = props as FeaturesProps
-            return _getFeatureVariant(p.variant ?? 'simple-centered').toHtml(p, id)
+            return wrapBlock('features', id, _getFeatureVariant(p.variant ?? 'simple-centered').toHtml(p, id), p)
         },
     },
 
@@ -4013,23 +4024,21 @@ ${thumbCells}
             label: 'Trust & Satisfaction Badge',
             category: 'Content' as BlockCategory,
             icon: 'shield',
-            description: '100% Satisfaction Guarantee badge',
+            description: '100% Satisfaction Guarantee badge — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
+                variant: 'trust-banner-soft',
                 paddingTop: 16,
                 paddingBottom: 16,
                 badgeText: '100% Satisfaction Guaranteed or Your Money Back',
+                text: '100% Satisfaction Guaranteed or Your Money Back',
                 bgColor: '#f3eeff',
                 textColor: '#7530fb',
             } as TrustBadgeBlockProps,
             toHtml(props, id) {
-                const p = props as TrustBadgeBlockProps
-                return wrapBlock('trust_badge_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor ?? '#f3eeff'};${pad(p)}border:1px solid ${(p as any).borderColor ?? '#e9e3ff'};border-radius:${p.borderRadius}px;text-align:center;">
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:15px;font-weight:800;color:${(p as any).accentColor ?? p.textColor ?? '#7530fb'};">&#128737; ${p.badgeText}</p>
-  </td></tr>
-</table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'trust-banner-soft'
+                return wrapBlock('trust_badge_block' as BlockType, id, getTrustBadgeVariant(variantId).toHtml(p, id), p)
             },
         },
 

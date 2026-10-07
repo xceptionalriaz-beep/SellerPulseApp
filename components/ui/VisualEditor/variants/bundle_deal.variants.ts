@@ -70,14 +70,14 @@ function triTierColumns(p: any, id: string): string {
   }).join(`<td style="width:1px;background-color:rgba(255,255,255,0.08);"></td>`)
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};text-align:center;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="border:1px solid rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;">
+        style="border:1px solid rgba(255,255,255,0.08);border-radius:0;overflow:hidden;">
         <tr>${cells}</tr>
       </table>
     </td>
@@ -117,12 +117,12 @@ function horizontalRibbon(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:6px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="background-color:rgba(255,255,255,0.05);border-radius:4px;">
+        style="background-color:rgba(255,255,255,0.05);border-radius:0;">
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
             <span style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;
@@ -189,14 +189,14 @@ function stackedRows(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="border:1px solid rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;">
+        style="border:1px solid rgba(255,255,255,0.08);border-radius:0;overflow:hidden;">
         ${rows}
       </table>
     </td>
@@ -227,7 +227,7 @@ function floatingPillGrid(p: any, id: string): string {
     return `<td style="width:33%;padding:0 6px;text-align:center;vertical-align:top;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
             style="background-color:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
-              border-radius:10px;overflow:hidden;">
+              border-radius:0;overflow:hidden;">
             <tr>
               <td style="padding:16px 12px 14px;text-align:center;">
                 ${pill}
@@ -245,10 +245,10 @@ function floatingPillGrid(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};text-align:center;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -280,7 +280,7 @@ function splitHero(p: any, id: string): string {
     return `<tr>
           <td style="padding:6px 0;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0"
-              style="background-color:rgba(255,255,255,0.07);border-radius:6px;">
+              style="background-color:rgba(255,255,255,0.07);border-radius:0;">
               <tr>
                 <td style="padding:10px 14px;">
                   <span style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;
@@ -297,10 +297,10 @@ function splitHero(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td width="42%" style="vertical-align:middle;padding-right:24px;
@@ -357,14 +357,14 @@ function minimalMonochrome(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:#ffffff;${pad(p)}border:1px solid #e5e7eb;border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:#ffffff;${pad(p)}border:1px solid #e5e7eb;border-radius:0;">
       <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;
         color:#111827;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+        style="border:1px solid #e5e7eb;border-radius:0;overflow:hidden;">
         <tr>${cells}</tr>
       </table>
     </td>
@@ -404,7 +404,7 @@ function executiveHighlight(p: any, id: string): string {
                 color:rgba(255,255,255,0.3);">Base price</div>`
     return `<td style="width:33%;padding:0 6px;vertical-align:top;text-align:center;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background-color:rgba(255,255,255,0.06);${border}border-radius:8px;overflow:hidden;">
+            style="background-color:rgba(255,255,255,0.06);${border}border-radius:0;overflow:hidden;">
             <tr>
               <td style="padding:14px 12px;text-align:center;">
                 ${topBar}
@@ -422,10 +422,10 @@ function executiveHighlight(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};text-align:center;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -460,7 +460,7 @@ function darkEscalator(p: any, id: string): string {
                 color:${subColor};">Base price</div>`
     return `<td style="width:33%;padding:0 5px;text-align:center;vertical-align:top;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0"
-            style="background-color:${t.cardBg};border-radius:8px;overflow:hidden;">
+            style="background-color:${t.cardBg};border-radius:0;overflow:hidden;">
             <tr>
               <td style="padding:18px 10px;text-align:center;">
                 <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;
@@ -476,10 +476,10 @@ function darkEscalator(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};text-align:center;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -517,7 +517,7 @@ function trophyPodium(p: any, id: string): string {
             color:${priceCol(p)};margin-bottom:4px;">${t.price}</div>
           ${badge}
           <div style="margin-top:8px;background-color:${t.color};height:${t.height}px;
-            border-radius:6px 6px 0 0;display:table;width:100%;">
+            border-radius:0;display:table;width:100%;">
             <div style="display:table-cell;vertical-align:middle;text-align:center;">
               <div style="font-family:Arial,sans-serif;font-size:24px;">${t.rank === '1st' ? '&#127942;' : t.rank === '2nd' ? '&#129352;' : '&#129353;'
       }</div>
@@ -527,17 +527,17 @@ function trophyPodium(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 20px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};text-align:center;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>${columns}</tr>
         <tr>
           <td colspan="3" style="height:3px;background-color:rgba(255,255,255,0.1);
-            border-radius:0 0 4px 4px;padding:0;"></td>
+            border-radius:0;padding:0;"></td>
         </tr>
       </table>
     </td>
@@ -577,10 +577,10 @@ function countdownStrip(p: any, id: string): string {
   }).join('')
 
   return `<!--[riazify:bundle_deal:${id}]-->
-<table width="700" cellpadding="0" cellspacing="0" border="0" align="center"
-  style="width:100%;max-width:700px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center"
+  style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;table-layout:fixed;">
   <tr>
-    <td style="background-color:#dc2626;padding:8px 16px;border-radius:6px 6px 0 0;text-align:center;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:#dc2626;padding:8px 16px;border-radius:0;text-align:center;">
       <span style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;
         color:#ffffff;letter-spacing:2px;text-transform:uppercase;">
         &#9888; Limited Time Offer &nbsp;&#8226;&nbsp; Ends: ${p.offerEnds ?? '{{OFFER_ENDS}}'}
@@ -588,11 +588,11 @@ function countdownStrip(p: any, id: string): string {
     </td>
   </tr>
   <tr>
-    <td style="background-color:${bg(p)};${pad(p)}border-radius:0 0 8px 8px;">
+    <td width="100%" style="width:100%;box-sizing:border-box;background-color:${bg(p)};${pad(p)}border-radius:0;">
       <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;
         color:${priceCol(p)};text-align:center;">${heading(p)}</p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0"
-        style="border:1px solid rgba(255,255,255,0.08);border-radius:6px;overflow:hidden;">
+        style="border:1px solid rgba(255,255,255,0.08);border-radius:0;overflow:hidden;">
         <tr>${cells}</tr>
       </table>
     </td>
