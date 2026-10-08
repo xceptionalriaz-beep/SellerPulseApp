@@ -126,7 +126,24 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
                 values[f.key] = f.defaultExample
             }
         })
-        return substituteAll(html, values)
+        const substituted = substituteAll(html, values)
+        const hideScrollbarStyle = `
+            <style>
+                html, body {
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                ::-webkit-scrollbar, *::-webkit-scrollbar {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                }
+            </style>
+        `
+        if (substituted.includes('</head>')) {
+            return substituted.replace('</head>', `${hideScrollbarStyle}</head>`)
+        }
+        return hideScrollbarStyle + substituted
     }, [html, testValues])
 
     // ── Load from eBay Item ID ─────────────────────────────────────────────
@@ -198,19 +215,21 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            overflowY: 'auto',
-            padding: '16px 16px 32px',
+            overflow: 'hidden',
+            padding: '12px 16px 0',
+            boxSizing: 'border-box',
         }}>
             {/* Browser chrome */}
             <div style={{
                 width: '100%',
-                maxWidth: device.width,
+                maxWidth: deviceWidth === 'desktop' ? '100%' : device.width,
+                flex: 1,
+                minHeight: 0,
                 transition: 'max-width 0.3s ease',
                 backgroundColor: C.surface,
-                borderRadius: 10,
+                borderRadius: '10px 10px 0 0',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                 overflow: 'hidden',
-                minHeight: 400,
                 display: 'flex',
                 flexDirection: 'column',
             }}>
@@ -239,7 +258,7 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
                         paddingLeft: 8,
                     }}>
                         <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
-                            eBay Listing Preview · {device.width}px
+                            eBay Listing Preview · {deviceWidth === 'desktop' ? 'Full Canvas Width' : `${device.width}px`}
                         </span>
                     </div>
                 </div>
@@ -253,28 +272,14 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
                     style={{
                         width: '100%',
                         flex: 1,
+                        height: '100%',
                         border: 'none',
-                        minHeight: 500,
+                        minHeight: 0,
                         display: 'block',
                         backgroundColor: '#ffffff',
                     }}
                 />
             </div>
-
-            {/* Size label */}
-            <p style={{
-                marginTop: 10, marginBottom: 0,
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: 11, color: C.muted,
-                textAlign: 'center',
-            }}>
-                {device.label} · {device.width}px wide
-                {Object.keys(testValues).length > 0 && (
-                    <span style={{ color: C.success, marginLeft: 8, fontWeight: 600 }}>
-                        · Test data active
-                    </span>
-                )}
-            </p>
         </div>
     )
 

@@ -12,15 +12,15 @@
 //   onIconSelect(id)       — fires with the icon ID when user clicks
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase'
 import {
     ICON_LIBRARY,
     ICON_CATEGORIES,
     CATEGORY_LABELS,
     getIconSvg,
-    getCustomIcons,
-    saveCustomIcon,
-    deleteCustomIcon,
+    customIconToEntry,
+    type CustomIconRecord,
     type IconCategory,
     type IconEntry,
 } from './IconLibrary'
@@ -216,54 +216,80 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
     const [activeIcon, setActiveIcon] = useState<string | null>(null)
     const [activeCategory, setActiveCategory] = useState<IconCategory | 'all' | 'custom' | null>(null)
     const [customIcons, setCustomIcons] = useState<IconEntry[]>([])
+    const [uploading, setUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const supabase = createClient()
 
-    useEffect(() => {
-        setCustomIcons(getCustomIcons())
-    }, [])
+    const loadCustomIcons = useCallback(async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { data, error } = await supabase
+            .from('user_custom_icons' as any)
+            .select('id, label, svg_content')
+            .order('created_at', { ascending: false })
+        if (error) { console.error('[IconsPanel] load:', error); return }
+        const rows = (data ?? []) as { id: string; label: string; svg_content: string }[]
+        setCustomIcons(rows.map(row => customIconToEntry({
+            id: row.id,
+            label: row.label,
+            svgContent: row.svg_content,
+        })))
+    }, [supabase])
+
+    useEffect(() => { loadCustomIcons() }, [loadCustomIcons])
 
     const iconColor = C.primary
     const noBlock = selectedFeatureIndex === null
 
     function handleUploadClick() {
-        fileInputRef.current?.click()
+        if (!uploading) fileInputRef.current?.click()
     }
 
     function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
         if (!file) return
-
-        // Strict SVG validation
         const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')
         if (!isSvg) {
             alert('Please select an SVG file (.svg). Raster images (PNG, JPG) are not allowed.')
             e.target.value = ''
             return
         }
-
         const cleanLabel = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').slice(0, 16)
-        const newId = `custom-${Date.now()}`
-
         const reader = new FileReader()
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
             const text = (event.target?.result as string) || ''
-            // Extract the inner paths/shapes from the SVG tag
             const innerMatch = text.match(/<svg[^>]*>([\s\S]*?)<\/svg>/i)
             const svgContent = innerMatch ? innerMatch[1] : text
-
-            saveCustomIcon({ id: newId, label: cleanLabel, svgContent, isImage: false })
-            setCustomIcons(getCustomIcons())
-            handleSelect(newId)
+            setUploading(true)
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) { alert('Please sign in to upload icons.'); return }
+                const { data, error } = await supabase
+                    .from('user_custom_icons' as any)
+                    .insert({ user_id: user.id, label: cleanLabel, svg_content: svgContent })
+                    .select('id')
+                    .single()
+                if (error) throw error
+                await loadCustomIcons()
+                handleSelect((data as { id: string }).id)
+            } catch (err) {
+                console.error('[IconsPanel] upload:', err)
+                alert('Failed to save icon. Please try again.')
+            } finally {
+                setUploading(false)
+            }
         }
         reader.readAsText(file)
-
-        // Reset input value so same file can be uploaded again if needed
         e.target.value = ''
     }
 
-    function handleDeleteCustom(id: string) {
-        deleteCustomIcon(id)
-        setCustomIcons(getCustomIcons())
+    async function handleDeleteCustom(id: string) {
+        const { error } = await supabase
+            .from('user_custom_icons' as any)
+            .delete()
+            .eq('id', id)
+        if (error) { console.error('[IconsPanel] delete:', error); return }
+        setCustomIcons(prev => prev.filter(ic => ic.id !== id))
         if (activeIcon === id) setActiveIcon(null)
     }
 

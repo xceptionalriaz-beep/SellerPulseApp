@@ -3834,73 +3834,30 @@ export function getAllIcons(): IconEntry[] {
  * Drop-in replacement for the local getIconSvg() in key_features.variants.ts.
  * Falls back to the star icon for unknown IDs.
  */
-// ─── Custom User-Uploaded Icons Storage ───────────────────────────────────────
-const CUSTOM_ICONS_KEY = 'riazify_custom_user_icons'
-
+// ─── Custom Icon Type (stored in Supabase user_custom_icons) ─────────────────
 export interface CustomIconRecord {
     id: string
     label: string
     svgContent: string
-    isImage?: boolean
 }
 
-export function getCustomIcons(): IconEntry[] {
-    if (typeof window === 'undefined') return []
-    try {
-        const raw = localStorage.getItem(CUSTOM_ICONS_KEY)
-        if (!raw) return []
-        const parsed = JSON.parse(raw) as CustomIconRecord[]
-        return parsed.map(item => ({
-            id: item.id,
-            label: item.label,
-            svg: (c: string, s: number) => {
-                if (item.isImage) {
-                    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;"><image href="${item.svgContent}" width="24" height="24" preserveAspectRatio="xMidYMid meet"/></svg>`
-                }
-                return wrap(c, s, item.svgContent)
-            }
-        }))
-    } catch {
-        return []
-    }
-}
-
-export function saveCustomIcon(entry: CustomIconRecord): void {
-    if (typeof window === 'undefined') return
-    try {
-        const raw = localStorage.getItem(CUSTOM_ICONS_KEY)
-        const list: CustomIconRecord[] = raw ? JSON.parse(raw) : []
-        list.unshift(entry)
-        localStorage.setItem(CUSTOM_ICONS_KEY, JSON.stringify(list))
-    } catch (e) {
-        console.error('Failed to save custom icon', e)
-    }
-}
-
-export function deleteCustomIcon(id: string): void {
-    if (typeof window === 'undefined') return
-    try {
-        const raw = localStorage.getItem(CUSTOM_ICONS_KEY)
-        if (!raw) return
-        const list = (JSON.parse(raw) as CustomIconRecord[]).filter(item => item.id !== id)
-        localStorage.setItem(CUSTOM_ICONS_KEY, JSON.stringify(list))
-    } catch (e) {
-        console.error('Failed to delete custom icon', e)
+/** Converts a DB row into an IconEntry usable by the panel */
+export function customIconToEntry(item: CustomIconRecord): IconEntry {
+    return {
+        id: item.id,
+        label: item.label,
+        svg: (c: string, s: number) => wrap(c, s, item.svgContent),
     }
 }
 
 /**
- * Renders one icon as an inline SVG string.
- * Checks custom user uploads first, then built-in categories, falling back to star.
+ * Renders one built-in icon as an inline SVG string.
+ * Custom icons are fetched async from Supabase in the component.
  */
 export function getIconSvg(id: string, color = '#2563eb', size = 20): string {
     const normalized = (id ?? '').toLowerCase()
 
-    // 1. Check custom uploaded icons first
-    const customMatch = getCustomIcons().find(e => e.id.toLowerCase() === normalized)
-    if (customMatch) return customMatch.svg(color, size)
-
-    // 2. Check built-in categories
+    // Check built-in categories
     for (const cat of ICON_CATEGORIES) {
         const match = ICON_LIBRARY[cat].find(e => e.id === normalized)
         if (match) return match.svg(color, size)
