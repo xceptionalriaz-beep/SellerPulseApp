@@ -6557,6 +6557,195 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <circle cx="11" cy="35" r="1.5" fill="#f59e0b" />
         </svg>
     ),
+
+    // ── Info Box (6 Professional Retail Layout Styles) ────────────────────────
+    'info-classic-banner': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#ede9fe" strokeWidth="1.2" />
+            <circle cx="13" cy="24" r="6" fill="#eff6ff" />
+            <circle cx="13" cy="21.5" r="1.2" fill="#3b82f6" />
+            <rect x="12" y="23.5" width="2" height="4.5" rx="1" fill="#3b82f6" />
+            <rect x="24" y="16" width="34" height="4" rx="1.5" fill="#1e40af" />
+            <rect x="24" y="23" width="48" height="2.5" rx="1" fill="#93c5fd" />
+            <rect x="24" y="28" width="36" height="2.5" rx="1" fill="#93c5fd" />
+        </svg>
+    ),
+
+    'info-accent-pillar': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="2" y="6" width="3.5" height="36" rx="1" fill={col || '#2563eb'} />
+            <rect x="10" y="12" width="20" height="4.5" rx="2" fill="#dbeafe" />
+            <rect x="33" y="12.5" width="34" height="3.5" rx="1" fill="#0f172a" />
+            <rect x="10" y="21" width="60" height="2.5" rx="1" fill="#64748b" />
+            <rect x="10" y="26" width="46" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'info-floating-capsule': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="6" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1.2" />
+            <circle cx="14" cy="24" r="6" fill="#dcfce7" stroke="#86efac" strokeWidth="0.8" />
+            <path d="M11 24l2 2 4-4" stroke="#16a34a" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="25" y="16" width="36" height="4" rx="1.5" fill="#14532d" />
+            <rect x="25" y="23" width="48" height="2.5" rx="1" fill="#4ade80" />
+            <rect x="25" y="28" width="34" height="2.5" rx="1" fill="#4ade80" />
+        </svg>
+    ),
+
+    'info-split-bullet-deck': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="2" y="6" width="76" height="9" rx="1" fill="#1e293b" />
+            <rect x="7" y="9" width="28" height="2.5" rx="1" fill="#f8fafc" />
+            <rect x="6" y="19" width="68" height="2.5" rx="1" fill="#475569" />
+            <line x1="6" y1="26" x2="74" y2="26" stroke="#e2e8f0" strokeWidth="0.8" strokeDasharray="2 1" />
+            <circle cx="10" cy="33" r="1.5" fill="#10b981" />
+            <rect x="13" y="32" width="12" height="2" rx="0.8" fill="#0f172a" />
+            <circle cx="34" cy="33" r="1.5" fill="#10b981" />
+            <rect x="37" y="32" width="12" height="2" rx="0.8" fill="#0f172a" />
+            <circle cx="58" cy="33" r="1.5" fill="#10b981" />
+            <rect x="61" y="32" width="12" height="2" rx="0.8" fill="#0f172a" />
+        </svg>
+    ),
+
+    'info-minimal-editorial': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" fill="#ffffff" />
+            <line x1="2" y1="6" x2="78" y2="6" stroke="#0f172a" strokeWidth="2" />
+            <line x1="2" y1="42" x2="78" y2="42" stroke="#0f172a" strokeWidth="2" />
+            <rect x="6" y="14" width="16" height="3" rx="1" fill="#64748b" />
+            <rect x="6" y="20" width="14" height="3" rx="1" fill="#0f172a" />
+            <line x1="26" y1="12" x2="26" y2="36" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="31" y="16" width="42" height="2.5" rx="1" fill="#334155" />
+            <rect x="31" y="22" width="34" height="2.5" rx="1" fill="#334155" />
+            <rect x="31" y="28" width="38" height="2" rx="1" fill="#059669" />
+        </svg>
+    ),
+
+    'info-dark-obsidian-alert': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#0f172a" />
+            <circle cx="12" cy="24" r="5" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+            <circle cx="12" cy="21.5" r="1" fill="#38bdf8" />
+            <rect x="11.2" y="23" width="1.6" height="3.5" rx="0.8" fill="#38bdf8" />
+            <rect x="22" y="14" width="22" height="3.5" rx="1" fill="#082f49" stroke="#0369a1" strokeWidth="0.5" />
+            <rect x="47" y="14" width="26" height="3.5" rx="1" fill="#ffffff" />
+            <rect x="22" y="23" width="50" height="2.5" rx="1" fill="#64748b" />
+            <rect x="22" y="29" width="38" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    // ── Shipping Info Bar (10 Professional Retail Layout Styles) ──────────────
+    'ship-classic-card': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#e5e7eb" strokeWidth="1" />
+            <rect x="5" y="10" width="3" height="28" rx="1.5" fill="#16a34a" />
+            <rect x="12" y="14" width="18" height="20" rx="3" fill="#f0fdf4" />
+            <rect x="34" y="15" width="38" height="4" rx="1" fill="#1e1535" />
+            <rect x="34" y="23" width="30" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'ship-three-pillar-strip': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="28" y1="8" x2="28" y2="40" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="54" y1="8" x2="54" y2="40" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="15" cy="18" r="3" fill="#d97706" />
+            <rect x="7" y="26" width="16" height="3" rx="1" fill="#0f172a" />
+            <circle cx="41" cy="18" r="3" fill="#16a34a" />
+            <rect x="33" y="26" width="16" height="3" rx="1" fill="#0f172a" />
+            <circle cx="67" cy="18" r="3" fill="#2563eb" />
+            <rect x="59" y="26" width="16" height="3" rx="1" fill="#0f172a" />
+        </svg>
+    ),
+
+    'ship-dispatch-cutoff-bar': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#fde68a" strokeWidth="1" />
+            <rect x="2" y="6" width="76" height="9" fill="#fffbeb" />
+            <rect x="6" y="9" width="30" height="3" rx="1" fill="#92400e" />
+            <rect x="62" y="8" width="12" height="5" rx="1.5" fill="#d97706" />
+            <rect x="6" y="20" width="46" height="4" rx="1" fill="#0f172a" />
+            <rect x="6" y="27" width="56" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'ship-carrier-post-ticket': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#fafaf9" stroke="#d6d3d1" strokeWidth="1" strokeDasharray="3 2" />
+            <rect x="6" y="11" width="16" height="26" rx="2" fill="#f0f9ff" stroke="#0369a1" strokeWidth="0.8" />
+            <rect x="8" y="14" width="12" height="2" fill="#0369a1" />
+            <rect x="26" y="13" width="22" height="3" rx="1" fill="#0369a1" />
+            <rect x="26" y="20" width="44" height="4" rx="1" fill="#1c1917" />
+            <rect x="26" y="27" width="36" height="2.5" rx="1" fill="#78716c" />
+        </svg>
+    ),
+
+    'ship-stepper-timeline': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="18" y1="20" x2="62" y2="20" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="15" cy="20" r="4.5" fill="#dcfce7" stroke="#16a34a" strokeWidth="1" />
+            <rect x="7" y="28" width="16" height="3" rx="1" fill="#0f172a" />
+            <circle cx="40" cy="20" r="4.5" fill="#dbeafe" stroke="#2563eb" strokeWidth="1" />
+            <rect x="32" y="28" width="16" height="3" rx="1" fill="#0f172a" />
+            <circle cx="65" cy="20" r="4.5" fill="#f1f5f9" stroke="#64748b" strokeWidth="1" />
+            <rect x="57" y="28" width="16" height="3" rx="1" fill="#0f172a" />
+        </svg>
+    ),
+
+    'ship-dark-obsidian-cargo': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#0f172a" />
+            <rect x="6" y="14" width="16" height="20" rx="3" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+            <rect x="26" y="12" width="22" height="4" rx="1" fill="#082f49" stroke="#0369a1" strokeWidth="0.5" />
+            <rect x="26" y="19" width="46" height="4" rx="1" fill="#ffffff" />
+            <rect x="26" y="26" width="38" height="2.5" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'ship-minimalist-swiss': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" fill="#ffffff" />
+            <line x1="2" y1="6" x2="78" y2="6" stroke="#0f172a" strokeWidth="2" />
+            <line x1="2" y1="42" x2="78" y2="42" stroke="#0f172a" strokeWidth="2" />
+            <rect x="6" y="15" width="18" height="3" rx="1" fill="#64748b" />
+            <line x1="28" y1="12" x2="28" y2="36" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="33" y="16" width="40" height="3.5" rx="1" fill="#0f172a" />
+            <rect x="33" y="23" width="30" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'ship-warehouse-direct': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="6" y="15" width="42" height="4" rx="1" fill="#0f172a" />
+            <rect x="6" y="23" width="36" height="2.5" rx="1" fill="#64748b" />
+            <rect x="52" y="15" width="22" height="18" rx="2" fill="#f0fdf4" stroke="#86efac" strokeWidth="0.8" />
+            <rect x="55" y="22" width="16" height="3" rx="1" fill="#166534" />
+        </svg>
+    ),
+
+    'ship-compact-capsule': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="14" width="76" height="20" rx="10" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="10" cy="24" r="3" fill="#16a34a" />
+            <rect x="16" y="22" width="36" height="4" rx="1" fill="#0f172a" />
+            <rect x="58" y="20" width="16" height="8" rx="4" fill="#dcfce7" />
+        </svg>
+    ),
+
+    'ship-white-glove-security': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect x="2" y="6" width="76" height="36" rx="4" fill="#ffffff" stroke="#bbf7d0" strokeWidth="1" />
+            <circle cx="14" cy="24" r="6" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" />
+            <path d="M12 24l2 2 3-3" stroke="#16a34a" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="25" y="16" width="44" height="4" rx="1" fill="#0f172a" />
+            <rect x="25" y="23" width="36" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

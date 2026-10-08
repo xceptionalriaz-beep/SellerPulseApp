@@ -201,6 +201,7 @@ export type BlockProps =
     | InternationalShippingProps
     | HighlightTextProps
     | WhyBuyFromUsProps
+    | InfoBoxProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -1165,6 +1166,16 @@ export interface TrustBadgeBlockProps extends CommonProps {
     color?: string
 }
 
+export interface InfoBoxProps extends CommonProps {
+    variant?: string
+    title?: string
+    heading?: string
+    description?: string
+    text?: string
+    iconColor?: string
+    accentColor?: string
+}
+
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
 export interface RawHtmlProps extends CommonProps {
     code: string              // raw HTML — passed through sanitiseHtml on export
@@ -1220,6 +1231,8 @@ import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
 import { getRectangleVariant } from './variants/rectangle.variants'
 import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 import { getTestimonialsVariant } from './variants/testimonials.variants'
+import { getInfoBoxVariant } from './variants/info_box.variants'
+import { getShippingInfoVariant } from './variants/shipping_info.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2106,14 +2119,15 @@ ${thumbCells}
         label: 'Shipping Info Bar',
         category: 'eBay Specific',
         icon: 'truck',
-        description: 'White card with Lucide truck icon + green accent stripe',
+        description: 'Fast dispatch and delivery guarantees — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
+            variant: 'ship-classic-card',
             paddingTop: 16,
             paddingBottom: 16,
-            shippingText: '{{SHIPPING_TIME}}',
+            shippingText: '{{SHIPPING_TIME}} — Fast & Free UK Delivery',
             dispatchText: 'Same Day Dispatch Before 3pm',
-            locationText: 'UK-Based Seller — Fast & Tracked',
+            locationText: 'UK-Based Seller — Fully Tracked',
             bgColor: '#ffffff',
             textColor: '#1e1535',
             iconColor: '#16a34a',
@@ -2122,31 +2136,9 @@ ${thumbCells}
             borderRadius: 8,
         } as ShippingInfoProps,
         toHtml(props, id) {
-            const p = props as ShippingInfoProps
-            return wrapBlock('shipping_info', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;border:1px solid #e5e7eb;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td width="4" style="width:4px;background-color:${p.accentColor ?? '#16a34a'};border-radius:2px;">&nbsp;</td>
-          <td style="padding:0 0 0 14px;vertical-align:middle;">
-            <table cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td width="36" height="36" style="width:36px;height:36px;text-align:center;background-color:${p.iconBg ?? '#f0fdf4'};color:${p.iconColor ?? '#16a34a'};border-radius:8px;font-size:18px;line-height:36px;vertical-align:middle;">truck</td>
-                <td style="padding-left:12px;vertical-align:middle;">
-                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${p.textColor};line-height:1.4;">${p.shippingText}</p>
-                  <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#475569;line-height:1.5;">${p.dispatchText} &bull; ${p.locationText}</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'ship-classic-card'
+            return wrapBlock('shipping_info', id, getShippingInfoVariant(variantId).toHtml(p, id), p)
         },
     },
 
@@ -2714,12 +2706,27 @@ ${thumbCells}
             label: 'Info Box',
             category: 'Content' as BlockCategory,
             icon: 'info',
-            description: 'Blue informational notice with icon',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Informational notice with icon — 5 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'info-classic-banner',
+                title: 'Important Information',
+                description: 'This item ships from a UK warehouse. All items are genuine. VAT invoice available on request.',
+                bgColor: '#ffffff',
+                textColor: '#1e40af',
+                borderColor: '#ede9fe',
+                iconColor: '#3b82f6',
+                accentColor: '#2563eb',
+                showBorder: true,
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                return wrapBlock('info_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#eff6ff'};${pad(p)}border:1px solid ${p.borderColor ?? '#bfdbfe'};border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;color:${p.accentColor ?? '#3b82f6'};">&#8505;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#1e40af'};">Important Information</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#1d4ed8'};line-height:1.6;">This item ships from a UK warehouse. All items are genuine. VAT invoice available on request.</p></td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'info-classic-banner'
+                return wrapBlock('info_box' as BlockType, id, getInfoBoxVariant(variantId).toHtml(p, id), p)
             },
         },
 

@@ -52,6 +52,8 @@ export { rectangleVariants, getRectangleVariant } from './rectangle.variants'
 export { trustBadgeVariants, getTrustBadgeVariant } from './trust_badge.variants'
 export { featureVariants, featuresVariants, getFeatureVariant, getFeaturesVariant } from './features.variants'
 export { testimonialsVariants, testimonialVariants, getTestimonialsVariant, getTestimonialVariant, TESTIMONIALS_THUMBNAILS } from './testimonials.variants'
+export { infoBoxVariants, getInfoBoxVariant, INFOBOX_THUMBNAILS, infoboxVariants } from './info_box.variants'
+export { shippingInfoVariants, shippingVariants, getShippingInfoVariant } from './shipping_info.variants'
 
 
 // Imports for registry
@@ -104,6 +106,8 @@ import { rectangleVariants } from './rectangle.variants'
 import { trustBadgeVariants } from './trust_badge.variants'
 import { featureVariants } from './features.variants'
 import { testimonialsVariants } from './testimonials.variants'
+import { infoBoxVariants } from './info_box.variants'
+import { shippingInfoVariants } from './shipping_info.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -190,6 +194,13 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'testimonial': testimonialsVariants,
     'customer_reviews': testimonialsVariants,
     'reviews': testimonialsVariants,
+    'info_box': infoBoxVariants,
+    'infobox': infoBoxVariants,
+    'info': infoBoxVariants,
+    'notice': infoBoxVariants,
+    'shipping_info': shippingInfoVariants,
+    'shipping_info_bar': shippingInfoVariants,
+    'shipping_bar': shippingInfoVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {
