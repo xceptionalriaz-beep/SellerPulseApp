@@ -295,39 +295,7 @@ export default function Canvas({
                 minHeight: '100%',
                 width: '100%',
             }}>
-                {/* ── Device mode indicator badge ── */}
-                <div style={{
-                    position: 'absolute',
-                    bottom: 14,
-                    right: 14,
-                    zIndex: 20,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    backgroundColor: 'rgba(255,255,255,0.92)',
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 20,
-                    padding: '4px 10px',
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: C.secondary,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                    backdropFilter: 'blur(6px)',
-                    pointerEvents: 'none',
-                    letterSpacing: '0.04em',
-                    textTransform: 'uppercase',
-                }}>
-                    <span style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: '50%',
-                        backgroundColor: deviceWidth === 'desktop' ? C.primary : deviceWidth === 'tablet' ? '#f59e0b' : '#10b981',
-                        display: 'inline-block',
-                        flexShrink: 0,
-                    }} />
-                    {deviceWidth === 'desktop' ? 'Desktop · 1000px' : deviceWidth === 'tablet' ? 'Tablet · 768px' : 'Mobile · 375px'}
-                </div>
+                {/* ── Device mode indicator badge removed ── */}
 
                 {/* ── Drop overlay — handled by EmptyState when canvas is empty ── */}
 

@@ -3841,7 +3841,7 @@ export interface CustomIconRecord {
     svgContent: string
 }
 
-/** Converts a DB row into an IconEntry usable by the panel */
+/** Converts a Supabase DB row into an IconEntry usable by the panel */
 export function customIconToEntry(item: CustomIconRecord): IconEntry {
     return {
         id: item.id,
@@ -3856,12 +3856,9 @@ export function customIconToEntry(item: CustomIconRecord): IconEntry {
  */
 export function getIconSvg(id: string, color = '#2563eb', size = 20): string {
     const normalized = (id ?? '').toLowerCase()
-
-    // Check built-in categories
     for (const cat of ICON_CATEGORIES) {
         const match = ICON_LIBRARY[cat].find(e => e.id === normalized)
         if (match) return match.svg(color, size)
     }
-    // Fallback: star
     return ICON_LIBRARY.trust.find(e => e.id === 'star')!.svg(color, size)
 }
