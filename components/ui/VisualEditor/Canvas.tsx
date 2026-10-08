@@ -754,24 +754,30 @@ function BlockCard({
                 overflow: 'visible',
             }}
         >
-            {/* ── Selected label badge — sits above block top-left ── */}
+
+            {/* ── Selected label badge — sleek designer tab attached to top-left ── */}
             {isSelected && (
                 <div style={{
                     position: 'absolute',
-                    top: -22,
-                    left: 12,
-                    backgroundColor: C.primary,
+                    top: -17,
+                    left: 0,
+                    background: 'var(--primary, #6366f1)',
                     color: '#fff',
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: 20,
-                    letterSpacing: '0.04em',
-                    zIndex: 4,
+                    padding: '1px 6px',
+                    borderRadius: '3px 3px 0 0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3.5,
+                    zIndex: 25,
                     pointerEvents: 'none',
+                    letterSpacing: '0.02em',
+                    boxShadow: '0 -2px 4px rgba(0,0,0,0.06)',
+                    lineHeight: '14px',
                 }}>
-                    {(() => { const I = BLOCK_ICONS[def.icon]; return I ? <I size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 3 }} /> : null })()} {def.label}
+                    {(() => { const I = BLOCK_ICONS[def.icon]; return I ? <I size={9.5} strokeWidth={2.2} /> : null })()}
+                    <span>{def.label}</span>
                 </div>
             )}
 
@@ -820,13 +826,11 @@ function BlockCard({
                 <div
                     ref={el => {
                         if (!el) return
-                        // For desktop: scale = container / 700 so content fills the full stage width.
-                        // For tablet/mobile: the wrapper is already constrained to previewWidth,
-                        // so scale stays 1 — content renders at true device width, no shrinking.
+                        // Scale proportionally so content stretches 100% from left to right with 0px gap
                         const recalcScale = () => {
                             if (deviceWidth === 'desktop') {
                                 const w = el.getBoundingClientRect().width
-                                const scale = w > 32 ? ((w - 32) / 1000) : 1
+                                const scale = w > 0 ? (w / 1000) : 1
                                 el.style.setProperty('--canvas-scale', String(scale))
                             } else {
                                 el.style.setProperty('--canvas-scale', '1')
@@ -1624,8 +1628,36 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         }
     }, [block.type, block.id, JSON.stringify(block.props), activeCategory, previewWidth])
 
-    // Auto-resize iframe to fit content height
-    const [height, setHeight] = React.useState(80)
+    // Auto-resize iframe to exact true content height
+    const [height, setHeight] = React.useState(60)
+
+    // Measure the exact tight content boundary (zero artificial padding)
+    const measureHeight = React.useCallback(() => {
+        const iframe = iframeRef.current
+        if (!iframe) return
+        try {
+            const doc = iframe.contentDocument || iframe.contentWindow?.document
+            if (!doc || !doc.body) return
+
+            // 1. Measure the exact bounding rectangle of the root template element (e.g. <table> or <div>)
+            const firstChild = doc.body.firstElementChild as HTMLElement | null
+            let contentH = 0
+
+            if (firstChild) {
+                const rect = firstChild.getBoundingClientRect()
+                contentH = Math.ceil(rect.height || firstChild.offsetHeight)
+            }
+
+            // 2. Fallback if no child found
+            if (!contentH || contentH < 10) {
+                contentH = Math.ceil(doc.body.scrollHeight)
+            }
+
+            if (contentH > 0) {
+                setHeight(contentH)
+            }
+        } catch (e) { /* cross-origin guard */ }
+    }, [])
 
     // Force live real-time update in canvas whenever any property changes
     React.useEffect(() => {
@@ -1637,33 +1669,36 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                 doc.open()
                 doc.write(html)
                 doc.close()
-                setTimeout(() => {
-                    const h = doc.body?.scrollHeight || doc.body?.offsetHeight
-                    if (h) setHeight(Math.max(40, h + 4))
-                }, 50)
+
+                measureHeight()
+                setTimeout(measureHeight, 50)
+                setTimeout(measureHeight, 180)
+
+                // Re-measure accurately when images finish loading
+                Array.from(doc.images || []).forEach(img => {
+                    if (!img.complete) {
+                        img.addEventListener('load', measureHeight)
+                    }
+                })
+
+                // Observe the actual template root element for content changes
+                if (doc.body && (window as any).ResizeObserver) {
+                    const target = doc.body.firstElementChild || doc.body
+                    const ro = new ResizeObserver(measureHeight)
+                    ro.observe(target)
+                }
             }
         } catch (e) {
             iframe.srcdoc = html
         }
-    }, [html])
+    }, [html, measureHeight])
 
     const htmlKey = `${block.id}-${block.type}-${JSON.stringify(block.props)}`
 
     const onLoad = React.useCallback(() => {
-        // iframeRef is a stable ref object — reading .current inside the callback
-        // is intentional and safe. No deps needed; the ref never changes identity.
-        const iframe = iframeRef.current
-        if (!iframe) return
-        try {
-            const doc = iframe.contentDocument
-            if (!doc) return
-            const body = doc.body
-            if (!body) return
-            const h = body.scrollHeight || body.offsetHeight
-            setHeight(Math.max(40, h + 4))
-        } catch { /* cross-origin guard */ }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+        measureHeight()
+        setTimeout(measureHeight, 100)
+    }, [measureHeight])
 
     if (!html) {
         // Fallback for blocks with no toHtml
@@ -1680,8 +1715,15 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     }
 
     return (
-        <div style={{ width: '100%', overflow: 'hidden' }}>
+        <div style={{
+            width: '100%',
+            // Scale container height proportionally so transformed iframes are NEVER cut off
+            height: `calc(${height}px * var(--canvas-scale, 1))`,
+            overflow: 'hidden',
+        }}>
             <div style={{
+                width: '100%',
+                height: '100%',
                 overflow: 'hidden',
                 transformOrigin: 'top left',
             }}>
@@ -1694,11 +1736,8 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                     scrolling="no"
                     data-block-id={block.id}
                     style={{
-                        // Desktop: iframe is 700px and scaled up to fill the stage.
-                        // Tablet: iframe is 480px, rendered 1:1 inside 480px wrapper.
-                        // Mobile: iframe is 375px, rendered 1:1 inside 375px wrapper.
                         width: `${previewWidth}px`,
-                        height: height,
+                        height: `${height}px`,
                         border: 'none',
                         display: 'block',
                         pointerEvents: 'auto',

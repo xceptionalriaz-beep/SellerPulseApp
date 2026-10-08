@@ -3380,6 +3380,15 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <SliderInput label="Border width" value={props.borderWidth ?? 0} min={0} max={8} suffix="px" onChange={v => updateProps({ borderWidth: v })} />
                         <SliderInput label="Border radius" value={props.borderRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
                     </Section>
+                    <Section title="Accent">
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#2563eb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
                 </>
             )
 
@@ -5327,9 +5336,16 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <TextInput label="Alt text" value={props.alt ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ alt: v })} />
                         {phButton('alt', 'alt text')}
                     </Section>
+                    <Section title="Layout">
+                        <SelectInput label="Image fit" value={(props as any).objectFit ?? 'cover'} options={[{ v: 'cover', l: 'Cover' }, { v: 'contain', l: 'Contain' }, { v: 'fill', l: 'Fill' }, { v: 'none', l: 'None' }]} onChange={v => updateProps({ objectFit: v } as any)} />
+                        <SelectInput label="Alignment" value={(props as any).align ?? 'center'} options={[{ v: 'left', l: 'Left' }, { v: 'center', l: 'Center' }, { v: 'right', l: 'Right' }]} onChange={v => updateProps({ align: v } as any)} />
+                        <NumberInput label="Max width" value={(props as any).maxWidth ?? 800} min={0} max={1600} suffix="px" onChange={v => updateProps({ maxWidth: v } as any)} />
+                    </Section>
                     <Section title="Caption">
+                        <ToggleRow label="Show caption" value={(props as any).showCaption ?? true} onChange={v => updateProps({ showCaption: v } as any)} />
                         <TextInput label="Caption text" value={props.caption ?? ''} onChange={v => updateProps({ caption: v })} />
                         {phButton('caption', 'caption')}
+                        <ColorRow label="Caption colour" value={(props as any).captionColor ?? '#6b7280'} onChange={v => updateProps({ captionColor: v } as any)} />
                     </Section>
                 </>
             )
