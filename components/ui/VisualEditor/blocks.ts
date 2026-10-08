@@ -61,6 +61,7 @@ export type BlockType =
     | 'badge_row'
     | 'faq_block'
     | 'testimonial_block'
+    | 'testimonials'
     | 'compatibility_block'
     | 'bundle_discount_banner'
     | 'store_nav_bar'
@@ -1091,6 +1092,7 @@ export interface FAQBlockProps extends CommonProps {
 
 // ── Testimonial Block ───────────────────────────────────────────────
 export interface TestimonialBlockProps extends CommonProps {
+    variant?: string
     testimonials: Array<{
         text: string
         author: string
@@ -1217,6 +1219,7 @@ import { getWhyBuyFromUsVariant } from './variants/why_buy_from_us.variants'
 import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
 import { getRectangleVariant } from './variants/rectangle.variants'
 import { getTrustBadgeVariant } from './variants/trust_badge.variants'
+import { getTestimonialsVariant } from './variants/testimonials.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1318,12 +1321,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 ? `padding:${p.innerPaddingTop ?? 0}px ${p.innerPaddingRight ?? 0}px ${p.innerPaddingBottom ?? 0}px ${p.innerPaddingLeft ?? 0}px;`
                 : ''
             const align = p.contentAlign ? `text-align:${p.contentAlign};` : ''
-            const maxInner = p.capWidth && p.innerMaxWidth ? `max-width:${p.innerMaxWidth}px;margin:0 auto;` : ''
+            const maxInner = p.capWidth && p.innerMaxWidth ? `max-width:${p.innerMaxWidth}px;margin:0 auto;` : 'width:100%;'
             return wrapBlock('full_width_section', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}${border}${radius}">
-      <div style="${innerPad}${align}${maxInner}">${p.content}</div>
+    <td style="background-color:${p.bgColor};${pad(p)}${border}${radius};width:100%;">
+      <div style="${innerPad}${align}${maxInner};width:100%;">${p.content}</div>
     </td>
   </tr>
 </table>`
@@ -1371,7 +1374,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         </tr>
             `).join('')
             return wrapBlock('two_column', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -1423,7 +1426,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         </tr>
             `).join('')
             return wrapBlock('three_column', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -1444,7 +1447,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Centered container with max-width',
         defaultProps: {
             ...DEFAULT_COMMON,
-            maxWidth: 600,
+            maxWidth: 1000,
             content: CONTENT_PLACEHOLDER,
             borderColor: '#ede9fe',
             borderWidth: 1,
@@ -1457,7 +1460,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const align = p.textAlign ? `text-align:${p.textAlign};` : ''
             const overflow = p.overflowHidden ? 'overflow:hidden;' : ''
             return wrapBlock('container', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};padding:${p.paddingTop}px ${p.paddingRight}px ${p.paddingBottom}px ${p.paddingLeft}px;">
       <table width="${p.maxWidth}" cellpadding="0" cellspacing="0" border="0" align="center"
@@ -2571,7 +2574,7 @@ ${thumbCells}
         </tr>
                 `).join('')
                 return wrapBlock('four_column' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -2593,7 +2596,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps
                 return wrapBlock('spacer' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="height:${(p.paddingTop || 24) + (p.paddingBottom || 24)}px;background-color:${p.bgColor};font-size:1px;line-height:1px;">&nbsp;</td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;"><tr><td style="height:${(p.paddingTop || 24) + (p.paddingBottom || 24)}px;background-color:${p.bgColor};font-size:1px;line-height:1px;">&nbsp;</td></tr></table>`)
             },
         },
 
@@ -2616,7 +2619,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as any
                 return wrapBlock('border_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:${p.borderWidth || 2}px solid ${p.borderColor || '#7530fb'};border-radius:${p.borderRadius || 8}px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:${p.fontSize || 14}px;color:${p.textColor || '#1f1d2e'};">${p.content || 'Your content goes here inside this decorative border box.'}</p></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;"><tr><td style="background-color:${p.bgColor};${pad(p)}border:${p.borderWidth || 2}px solid ${p.borderColor || '#7530fb'};border-radius:${p.borderRadius || 8}px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:${p.fontSize || 14}px;color:${p.textColor || '#1f1d2e'};">${p.content || 'Your content goes here inside this decorative border box.'}</p></td></tr></table>`)
             },
         },
 
@@ -2639,7 +2642,7 @@ ${thumbCells}
                 const leftWidth = p.imageWidth ?? 70
                 const rightWidth = 100 - leftWidth
                 return wrapBlock('sidebar_layout' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
@@ -3797,9 +3800,10 @@ ${thumbCells}
             label: 'Testimonials',
             category: 'Content' as BlockCategory,
             icon: 'quote',
-            description: 'Customer reviews and star ratings',
+            description: 'Customer reviews and star ratings — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
+                variant: 'test-classic-grid',
                 paddingTop: 20,
                 paddingBottom: 20,
                 testimonials: [
@@ -3812,235 +3816,11 @@ ${thumbCells}
                 starColor: '#f59e0b',
             } as TestimonialBlockProps,
             toHtml(props, id) {
-                const p = props as TestimonialBlockProps
-                const cards = (p.testimonials || []).map(t => {
-                    const stars = '&#9733;'.repeat(t.rating || 5)
-                    return `<td width="33%" style="padding:12px;vertical-align:top;text-align:center;">
-                        <div style="background-color:${(p as any).cardBg ?? p.bgColor ?? '#f8f7ff'};border:1px solid ${(p as any).cardBorder ?? p.borderColor ?? '#e9e3ff'};border-radius:8px;padding:16px;">
-                            <p style="margin:0 0 8px;font-size:16px;color:${p.starColor};">${stars}</p>
-                            <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:13px;font-style:italic;color:${p.textColor};line-height:1.5;">${t.text}</p>
-                            <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${p.authorColor};">— ${t.author}</p>
-                        </div>
-                    </td>`
-                }).join('')
-                return wrapBlock('testimonial_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cards}</tr></table>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'compatibility_block' as BlockType,
-            label: 'Compatibility Checker',
-            category: 'Content' as BlockCategory,
-            icon: 'check',
-            description: 'Fits/does not fit table for technical items',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                paddingTop: 16,
-                paddingBottom: 16,
-                title: 'Check Compatibility',
-                compatibleModels: ['Model A 2020+', 'Model B Pro', 'Model C'],
-                incompatibleModels: ['Old Model X', 'Legacy Series'],
-                iconColor: '#16a34a',
-                compatibleColor: '#166534',
-                incompatibleColor: '#991b1b',
-            } as CompatibilityBlockProps,
-            toHtml(props, id) {
-                const p = props as CompatibilityBlockProps
-                const compatRows = (p.compatibleModels || []).map(m =>
-                    `<tr><td style="padding:6px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.compatibleColor};border-bottom:1px solid #e5e7eb;">&#10003; ${m}</td></tr>`
-                ).join('')
-                const incompatRows = (p.incompatibleModels || []).map(m =>
-                    `<tr><td style="padding:6px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.incompatibleColor};border-bottom:1px solid #e5e7eb;">&#10007; ${m}</td></tr>`
-                ).join('')
-                return wrapBlock('compatibility_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr><td style="padding:10px 14px;border-bottom:2px solid #16a34a;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.iconColor};">Compatible Models</td></tr>
-      ${compatRows}
-      <tr><td style="padding:10px 14px;border-top:2px solid #dc2626;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#dc2626;">Not Compatible</td></tr>
-      ${compatRows}
-    </table>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'bundle_discount_banner' as BlockType,
-            label: 'Bundle Discount',
-            category: 'Content' as BlockCategory,
-            icon: 'gift',
-            description: 'Save X% when buying multiple items',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                paddingTop: 20,
-                paddingBottom: 20,
-                discountPercentage: 15,
-                minimumQty: 2,
-                bannerText: 'Buy {{QUANTITY}} or more and save!',
-                bgColor: '#7530fb',
-                textColor: '#ffffff',
-                accentColor: '#b8fa33',
-            } as BundleDiscountBannerProps,
-            toHtml(props, id) {
-                const p = props as BundleDiscountBannerProps
-                return wrapBlock('bundle_discount_banner' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background:linear-gradient(135deg,${p.bgColor},#1e1535);${pad(p)}text-align:center;border-radius:${p.borderRadius}px;">
-    <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.accentColor};text-transform:uppercase;letter-spacing:2px;">Special Offer</p>
-    <p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:28px;font-weight:800;color:${p.textColor};">Save ${p.discountPercentage}%!</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.8);">Buy ${p.minimumQty} or more items to unlock this discount</p>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'store_nav_bar' as BlockType,
-            label: 'Store Category Nav',
-            category: 'Content' as BlockCategory,
-            icon: 'menu',
-            description: 'Horizontal navigation bar linking store categories',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                paddingTop: 10,
-                paddingBottom: 10,
-                bgColor: '#1e1535',
-                links: [
-                    { label: 'Electronics', url: '#' },
-                    { label: 'Home & Garden', url: '#' },
-                    { label: 'Fashion', url: '#' },
-                    { label: 'Deals', url: '#' },
-                ],
-                textColor: '#ffffff',
-                hoverColor: '#b8fa33',
-                fontSize: 12,
-                fontWeight: '700',
-            } as StoreNavBarProps,
-            toHtml(props, id) {
-                const p = props as StoreNavBarProps
-                const cells = (p.links || []).map(l =>
-                    `<td style="padding:0 12px;"><a href="${l.url}" style="font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};color:${p.textColor};text-decoration:none;">${l.label}</a></td>`
-                ).join('')
-                return wrapBlock('store_nav_bar' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;border-radius:${p.borderRadius}px;">
-    <table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'shipping_policy_block' as BlockType,
-            label: 'Shipping Policy',
-            category: 'Content' as BlockCategory,
-            icon: 'truck',
-            description: 'Fast dispatch and delivery details card',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                paddingTop: 16,
-                paddingBottom: 16,
-                title: 'Fast & Reliable Shipping',
-                policyText: 'We ship all orders within 24 hours of payment clearance via tracked carrier services.',
-                deliveryTime: 'Estimated delivery: 2-5 business days',
-                accentColor: '#7530fb',
-            } as ShippingPolicyBlockProps,
-            toHtml(props, id) {
-                const p = props as ShippingPolicyBlockProps
-                return wrapBlock('shipping_policy_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.accentColor};">&#128666; ${p.title}</td></tr>
-      <tr><td style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:13px;color:${(p as any).textColor ?? '#4b5563'};line-height:1.5;">${p.policyText}</td></tr>
-      <tr><td style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${(p as any).textColor ?? '#1e1535'};">${p.deliveryTime}</td></tr>
-    </table>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'payment_methods_block' as BlockType,
-            label: 'Payment Methods',
-            category: 'Content' as BlockCategory,
-            icon: 'credit-card',
-            description: 'Accepted payment badges and security notice',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                paddingTop: 16,
-                paddingBottom: 16,
-                title: 'Secure Checkout via eBay Managed Payments',
-                showPayPal: true,
-                showCreditCards: true,
-            } as PaymentMethodsBlockProps,
-            toHtml(props, id) {
-                const p = props as PaymentMethodsBlockProps
-                return wrapBlock('payment_methods_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor};${pad(p)}border:1px solid ${p.borderColor};border-radius:${p.borderRadius}px;text-align:center;">
-    <p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${(p as any).textColor ?? '#1e1535'};">${p.title}</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${(p as any).accentColor ?? '#6b7280'};">We accept all major credit cards, debit cards, and secure payment options handled directly by eBay.</p>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'urgency_timer_block' as BlockType,
-            label: 'Limited Time Offer',
-            category: 'Content' as BlockCategory,
-            icon: 'clock',
-            description: 'Scarcity banner to boost conversion rate',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                paddingTop: 14,
-                paddingBottom: 14,
-                text: 'Limited Time Promotional Price — Order Soon!',
-                timerColor: '#dc2626',
-                bgColor: '#fef2f2',
-            } as UrgencyTimerBlockProps,
-            toHtml(props, id) {
-                const p = props as UrgencyTimerBlockProps
-                return wrapBlock('urgency_timer_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr><td style="background-color:${p.bgColor ?? '#fef2f2'};${pad(p)}border:1px solid ${(p as any).borderColor ?? '#fecaca'};border-radius:${p.borderRadius}px;text-align:center;">
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${p.timerColor ?? '#dc2626'};">&#9202; <span style="color:${(p as any).textColor ?? p.timerColor ?? '#92400e'};">${p.text}</span></p>
-  </td></tr>
-</table>`)
-            },
-        },
-
-        {
-            type: 'trust_badge_block' as BlockType,
-            label: 'Trust & Satisfaction Badge',
-            category: 'Content' as BlockCategory,
-            icon: 'shield',
-            description: '100% Satisfaction Guarantee badge — 10 layout styles',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                variant: 'trust-banner-soft',
-                paddingTop: 16,
-                paddingBottom: 16,
-                badgeText: '100% Satisfaction Guaranteed or Your Money Back',
-                text: '100% Satisfaction Guaranteed or Your Money Back',
-                bgColor: '#f3eeff',
-                textColor: '#7530fb',
-            } as TrustBadgeBlockProps,
-            toHtml(props, id) {
                 const p = props as any
-                const variantId = p.variant ?? 'trust-banner-soft'
-                return wrapBlock('trust_badge_block' as BlockType, id, getTrustBadgeVariant(variantId).toHtml(p, id), p)
+                const variantId = p.variant ?? 'test-classic-grid'
+                return wrapBlock('testimonial_block' as BlockType, id, getTestimonialsVariant(variantId).toHtml(p, id), p)
             },
         },
-
     )
 
 

@@ -6434,6 +6434,129 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <line x1="58" y1="26" x2="72" y2="26" stroke="#0f172a" strokeWidth="1.4" strokeLinecap="round" />
         </svg>
     ),
+
+    // ── Testimonials & Verified Reviews (10 Variants) ──────────────────────────
+    'test-classic-grid': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="6" y="10" width="20" height="28" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="30" y="10" width="20" height="28" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="54" y="10" width="20" height="28" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="10" cy="15" r="1.5" fill="#f59e0b" />
+            <circle cx="34" cy="15" r="1.5" fill="#f59e0b" />
+            <circle cx="58" cy="15" r="1.5" fill="#f59e0b" />
+        </svg>
+    ),
+
+    'test-verified-badge-row': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="2" y="4" width="76" height="11" fill="#f1f5f9" />
+            <circle cx="8" cy="9.5" r="2.5" fill="#16a34a" />
+            <rect x="14" y="8" width="30" height="3" rx="1.5" fill="#0f172a" />
+            <rect x="6" y="19" width="20" height="20" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="30" y="19" width="20" height="20" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="54" y="19" width="20" height="20" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'test-featured-spotlight-split': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="6" y="9" width="40" height="30" rx="3" fill={light} stroke={col} strokeWidth="1.2" />
+            <rect x="50" y="9" width="24" height="13" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="50" y="26" width="24" height="13" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="12" cy="15" r="2" fill="#f59e0b" />
+        </svg>
+    ),
+
+    'test-speech-bubble-cards': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="6" y="8" width="20" height="18" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <polygon points="12,26 16,26 12,30" fill="#cbd5e1" />
+            <circle cx="16" cy="35" r="3" fill={col} />
+            <rect x="30" y="8" width="20" height="18" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <polygon points="36,26 40,26 36,30" fill="#cbd5e1" />
+            <circle cx="40" cy="35" r="3" fill="#0284c7" />
+            <rect x="54" y="8" width="20" height="18" rx="3" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <polygon points="60,26 64,26 60,30" fill="#cbd5e1" />
+            <circle cx="64" cy="35" r="3" fill="#059669" />
+        </svg>
+    ),
+
+    'test-minimal-swiss-ledger': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" fill="#ffffff" />
+            <line x1="2" y1="5" x2="78" y2="5" stroke="#0f172a" strokeWidth="2" />
+            <line x1="2" y1="43" x2="78" y2="43" stroke="#0f172a" strokeWidth="2" />
+            <line x1="6" y1="17" x2="74" y2="17" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="30" x2="74" y2="30" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="10" cy="11" r="1.5" fill="#f59e0b" />
+            <circle cx="10" cy="23.5" r="1.5" fill="#f59e0b" />
+            <circle cx="10" cy="36.5" r="1.5" fill="#f59e0b" />
+        </svg>
+    ),
+
+    'test-dark-obsidian-matrix': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#0b0f19" stroke="#1e293b" strokeWidth="1.2" />
+            <rect x="6" y="10" width="20" height="28" rx="2" fill="#131c2e" stroke="#334155" strokeWidth="0.8" />
+            <rect x="30" y="10" width="20" height="28" rx="2" fill="#131c2e" stroke="#334155" strokeWidth="0.8" />
+            <rect x="54" y="10" width="20" height="28" rx="2" fill="#131c2e" stroke="#334155" strokeWidth="0.8" />
+            <circle cx="10" cy="15" r="1.5" fill="#fbbf24" />
+            <circle cx="34" cy="15" r="1.5" fill="#fbbf24" />
+            <circle cx="58" cy="15" r="1.5" fill="#fbbf24" />
+        </svg>
+    ),
+
+    'test-timeline-delivery-audit': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="6" y="10" width="20" height="28" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="7.5" y="12" width="17" height="5" rx="1.5" fill="#e0f2fe" />
+            <rect x="30" y="10" width="20" height="28" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="31.5" y="12" width="17" height="5" rx="1.5" fill="#e0f2fe" />
+            <rect x="54" y="10" width="20" height="28" rx="2" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="55.5" y="12" width="17" height="5" rx="1.5" fill="#e0f2fe" />
+        </svg>
+    ),
+
+    'test-quote-pillar-columns': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="6" y="10" width="20" height="28" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="6" y1="10" x2="6" y2="38" stroke={col} strokeWidth="2.5" />
+            <rect x="30" y="10" width="20" height="28" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="30" y1="10" x2="30" y2="38" stroke={col} strokeWidth="2.5" />
+            <rect x="54" y="10" width="20" height="28" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="54" y1="10" x2="54" y2="38" stroke={col} strokeWidth="2.5" />
+        </svg>
+    ),
+
+    'test-certified-seal-stamps': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="6" y="10" width="20" height="28" rx="2" fill="#ffffff" stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="2 1" />
+            <circle cx="16" cy="17" r="3.5" fill="#fef3c7" stroke="#b45309" strokeWidth="0.8" />
+            <rect x="30" y="10" width="20" height="28" rx="2" fill="#ffffff" stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="2 1" />
+            <circle cx="40" cy="17" r="3.5" fill="#fef3c7" stroke="#b45309" strokeWidth="0.8" />
+            <rect x="54" y="10" width="20" height="28" rx="2" fill="#ffffff" stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="2 1" />
+            <circle cx="64" cy="17" r="3.5" fill="#fef3c7" stroke="#b45309" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'test-compact-horizontal-ticker': (col: string, light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" className="w-full h-9">
+            <rect x="2" y="4" width="76" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1.2" />
+            <rect x="6" y="9" width="68" height="8" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="6" y="20" width="68" height="8" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="6" y="31" width="68" height="8" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="11" cy="13" r="1.5" fill="#f59e0b" />
+            <circle cx="11" cy="24" r="1.5" fill="#f59e0b" />
+            <circle cx="11" cy="35" r="1.5" fill="#f59e0b" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

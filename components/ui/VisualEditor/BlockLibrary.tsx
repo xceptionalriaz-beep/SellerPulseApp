@@ -220,26 +220,19 @@ interface BlockLibraryProps {
 export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, draggedType }: BlockLibraryProps) {
     const [search, setSearch] = useState('')
     const [hoveredType, setHovered] = useState<BlockType | null>(null)
-    const [collapsed, setCollapsed] = useState<Set<BlockCategory>>(new Set())
 
+    // Strictly show ONLY Layout blocks in the Blocks tab
+    const layoutDefs = BLOCK_DEFINITIONS.filter(d => d.category === 'Layout')
     const query = search.trim().toLowerCase()
     const filteredDefs = query
-        ? BLOCK_DEFINITIONS.filter(d => d.label.toLowerCase().includes(query) || d.category.toLowerCase().includes(query))
-        : BLOCK_DEFINITIONS
+        ? layoutDefs.filter(d => d.label.toLowerCase().includes(query))
+        : layoutDefs
 
     const handleDragStart = useCallback((e: React.DragEvent, type: BlockType) => {
         e.dataTransfer.setData('text/plain', type)
         e.dataTransfer.effectAllowed = 'copy'
         onDragStart(type)
     }, [onDragStart])
-
-    const toggleCategory = (cat: BlockCategory) => {
-        setCollapsed(prev => {
-            const next = new Set(prev)
-            next.has(cat) ? next.delete(cat) : next.add(cat)
-            return next
-        })
-    }
 
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: C.bg, overflow: 'hidden' }}>
@@ -248,7 +241,7 @@ export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, dragg
             <div style={{ padding: '10px 12px 8px', borderBottom: `1px solid ${C.border}`, backgroundColor: C.surface, flexShrink: 0 }}>
                 <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: C.muted, pointerEvents: 'none' }}>⌕</span>
-                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search blocks..."
+                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search layout blocks..."
                         style={{ width: '100%', boxSizing: 'border-box' as const, padding: '7px 10px 7px 28px', border: `1px solid ${C.inputBorder}`, borderRadius: 8, backgroundColor: C.bg, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.body, outline: 'none' }}
                         onFocus={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.boxShadow = `0 0 0 3px ${C.primary}22` }}
                         onBlur={e => { e.currentTarget.style.borderColor = C.inputBorder; e.currentTarget.style.boxShadow = 'none' }}
@@ -257,41 +250,39 @@ export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, dragg
                 </div>
             </div>
 
-            {/* Grid */}
-            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', paddingBottom: 16 }}>
-                {query ? (
-                    <div style={{ padding: '8px 10px 0' }}>
-                        {filteredDefs.length === 0
-                            ? <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.muted }}>No blocks match "{search}"</div>
-                            : <><p style={{ margin: '8px 0', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{filteredDefs.length} result{filteredDefs.length !== 1 ? 's' : ''}</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                                    {filteredDefs.map(def => <VisualCard key={def.type} def={def} hovered={hoveredType === def.type} dragging={draggedType === def.type} accentColor={CATEGORY_COLORS[def.category]} onHover={setHovered} onAdd={onAddBlock} onDragStart={handleDragStart} onDragEnd={onDragEnd} />)}
-                                </div></>
-                        }
+            {/* Layout Blocks Grid */}
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '10px 10px 16px' }}>
+                {filteredDefs.length === 0 ? (
+                    <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.muted }}>
+                        No layout blocks match "{search}"
                     </div>
                 ) : (
-                    BLOCK_CATEGORIES.map(cat => {
-                        if (cat === 'Content') return null
-                        const defs = BLOCK_DEFINITIONS.filter(d => d.category === cat)
-                        const isCollapsed = collapsed.has(cat)
-                        return (
-                            <div key={cat}>
-                                <button onClick={() => toggleCategory(cat)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 6px', background: 'none', border: 'none', cursor: 'pointer' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                                        <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: CATEGORY_COLORS[cat], display: 'inline-block' }} />
-                                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: C.secondary, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>{cat}</span>
-                                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>{defs.length}</span>
-                                    </div>
-                                    <ChevronDown size={13} style={{ color: C.muted, transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
-                                </button>
-                                {!isCollapsed && (
-                                    <div style={{ padding: '0 10px 4px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                                        {defs.map(def => <VisualCard key={def.type} def={def} hovered={hoveredType === def.type} dragging={draggedType === def.type} accentColor={CATEGORY_COLORS[def.category]} onHover={setHovered} onAdd={onAddBlock} onDragStart={handleDragStart} onDragEnd={onDragEnd} />)}
-                                    </div>
-                                )}
-                            </div>
-                        )
-                    })
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8, padding: '0 4px' }}>
+                            <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: CATEGORY_COLORS['Layout'], display: 'inline-block' }} />
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: C.secondary, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>
+                                Layout
+                            </span>
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
+                                {filteredDefs.length}
+                            </span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                            {filteredDefs.map(def => (
+                                <VisualCard
+                                    key={def.type}
+                                    def={def}
+                                    hovered={hoveredType === def.type}
+                                    dragging={draggedType === def.type}
+                                    accentColor={CATEGORY_COLORS['Layout']}
+                                    onHover={setHovered}
+                                    onAdd={onAddBlock}
+                                    onDragStart={handleDragStart}
+                                    onDragEnd={onDragEnd}
+                                />
+                            ))}
+                        </div>
+                    </div>
                 )}
             </div>
 

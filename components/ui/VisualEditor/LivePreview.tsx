@@ -365,7 +365,6 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
             minHeight: 0,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
             position: 'relative',
         }}>
             {/* ── Preview toolbar ── */}
