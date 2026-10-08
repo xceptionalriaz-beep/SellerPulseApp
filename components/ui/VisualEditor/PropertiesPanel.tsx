@@ -894,7 +894,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -1736,9 +1736,19 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? '#f0fdf4'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#166534'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Icon colour" value={props.iconColor ?? '#16a34a'} onChange={v => updateProps({ iconColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#16a34a'} onChange={v => updateProps({ accentColor: v })} />
                     </Section>
                     <Section title="Layout">
                         <SliderInput label="Border radius" value={props.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput label="Font family" value={(props as any).fontFamily ?? 'inherit'} options={[{ v: 'inherit', l: 'Theme default' }, { v: 'Arial, Helvetica, sans-serif', l: 'Arial' }, { v: 'Georgia, serif', l: 'Georgia' }, { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' }, { v: 'Verdana, sans-serif', l: 'Verdana' }]} onChange={v => updateProps({ fontFamily: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -2765,9 +2775,19 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#eff6ff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Heading colour" value={(props as any).headingColor ?? '#1e40af'} onChange={v => updateProps({ headingColor: v } as any)} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#1e40af'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#bfdbfe'} onChange={v => updateProps({ borderColor: v })} />
                         <ColorRow label="Icon colour" value={props.accentColor ?? '#3b82f6'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput label="Font family" value={(props as any).fontFamily ?? 'inherit'} options={[{ v: 'inherit', l: 'Theme default' }, { v: 'Arial, Helvetica, sans-serif', l: 'Arial' }, { v: 'Georgia, serif', l: 'Georgia' }, { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' }, { v: 'Verdana, sans-serif', l: 'Verdana' }]} onChange={v => updateProps({ fontFamily: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -2912,20 +2932,6 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Typography">
                         <SliderInput label="Font size" value={props.fontSize ?? 15} min={12} max={24} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                         <SliderInput label="Line height" value={props.lineHeight ?? 1.6} min={1} max={2.5} step={0.05} onChange={v => updateProps({ lineHeight: v })} />
-                    </Section>
-                </>
-            )
-
-        case 'social_links':
-            return (
-                <>
-                    <Section title="Colours">
-                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Icon colour" value={props.iconColor ?? '#7530fb'} onChange={v => updateProps({ iconColor: v })} />
-                        <ColorRow label="Label colour" value={props.labelColor ?? '#1e1535'} onChange={v => updateProps({ labelColor: v })} />
-                    </Section>
-                    <Section title="Size">
-                        <SliderInput label="Icon size" value={props.iconSize ?? 28} min={16} max={48} suffix="px" onChange={v => updateProps({ iconSize: v })} />
                     </Section>
                 </>
             )
@@ -4954,18 +4960,6 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
 
-        case 'social_links':
-            return (
-                <>
-                    <Section title="Label">
-                        <TextInput label="Follow text" value={props.followText ?? 'Follow us for deals & updates'} onChange={v => updateProps({ followText: v })} />
-                        <ColorRow label="Label colour" value={props.labelColor ?? '#6b7280'} onChange={v => updateProps({ labelColor: v })} />
-                    </Section>
-                    <Section title="Colours">
-                        <ColorRow label="Background" value={props.bgColor ?? '#f8f7ff'} onChange={v => updateProps({ bgColor: v })} />
-                    </Section>
-                </>
-            )
 
         // ── LOWER PRIORITY BLOCKS ────────────────────────────────────────────
 

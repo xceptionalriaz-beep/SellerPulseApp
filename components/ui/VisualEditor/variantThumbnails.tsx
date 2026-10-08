@@ -6746,6 +6746,103 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="25" y="23" width="36" height="2.5" rx="1" fill="#64748b" />
         </svg>
     ),
+
+    // ── Store Header (10 Professional Retail Layout Styles) ───────────────────
+    'sh-classic-banner': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill={col || '#7530fb'} />
+            <rect x="18" y="14" width="44" height="6" rx="2" fill="#ffffff" />
+            <rect x="24" y="24" width="32" height="3" rx="1.5" fill="#ffffff" opacity="0.75" />
+        </svg>
+    ),
+
+    'sh-authority-split-badges': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="0" y1="46" x2="80" y2="46" stroke="#0f172a" strokeWidth="2" />
+            <rect x="6" y="13" width="34" height="6" rx="1" fill="#0f172a" />
+            <rect x="6" y="22" width="26" height="3" rx="1" fill="#64748b" />
+            <rect x="52" y="16" width="22" height="6" rx="2" fill="#fef3c7" stroke="#fde68a" strokeWidth="0.8" />
+            <rect x="52" y="25" width="22" height="6" rx="2" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="0.8" />
+        </svg>
+    ),
+
+    'sh-boutique-luxury-crest': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e7e5e4" strokeWidth="1" />
+            <line x1="0" y1="4" x2="80" y2="4" stroke="#b45309" strokeWidth="2" />
+            <polygon points="40,11 41.5,14.5 45,14.5 42,17 43.5,20.5 40,18.5 36.5,20.5 38,17 35,14.5 38.5,14.5" fill="#d97706" />
+            <rect x="18" y="24" width="44" height="5" rx="1" fill="#1c1917" />
+            <rect x="26" y="32" width="28" height="2.5" rx="1" fill="#78716c" />
+        </svg>
+    ),
+
+    'sh-dark-obsidian-flagship': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <line x1="0" y1="46" x2="80" y2="46" stroke="#38bdf8" strokeWidth="2" />
+            <rect x="6" y="12" width="18" height="4" rx="2" fill="#082f49" stroke="#0369a1" strokeWidth="0.6" />
+            <rect x="28" y="12" width="36" height="5" rx="1" fill="#ffffff" />
+            <rect x="6" y="23" width="54" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'sh-pill-badge-navigator': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="14" width="36" height="6" rx="1" fill="#0f172a" />
+            <rect x="6" y="23" width="28" height="3" rx="1" fill="#64748b" />
+            <rect x="52" y="18" width="22" height="12" rx="6" fill="#10b981" />
+        </svg>
+    ),
+
+    'sh-heritage-merchant-seal': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fffdfa" stroke="#d6d3d1" strokeWidth="1" strokeDasharray="3 2" />
+            <circle cx="16" cy="24" r="8" fill="#fef3c7" stroke="#b45309" strokeWidth="1.2" />
+            <rect x="30" y="15" width="42" height="6" rx="1" fill="#1c1917" />
+            <rect x="30" y="24" width="34" height="3" rx="1" fill="#78716c" />
+        </svg>
+    ),
+
+    'sh-warehouse-depot-banner': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect width="80" height="10" fill="#f8fafc" />
+            <rect x="6" y="3" width="38" height="3.5" rx="1" fill="#166534" />
+            <rect x="6" y="16" width="44" height="6" rx="1" fill="#0f172a" />
+            <rect x="6" y="25" width="36" height="3" rx="1" fill="#475569" />
+        </svg>
+    ),
+
+    'sh-split-accent-pillar': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="0" y="0" width="4" height="48" rx="1" fill={col || '#7530fb'} />
+            <rect x="10" y="14" width="44" height="6" rx="1" fill="#0f172a" />
+            <rect x="10" y="23" width="36" height="3" rx="1" fill="#475569" />
+        </svg>
+    ),
+
+    'sh-compact-mobile-capsule': (_col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" />
+            <rect x="4" y="14" width="72" height="20" rx="10" fill="#ffffff" stroke="#ede9fe" strokeWidth="1.2" />
+            <circle cx="14" cy="24" r="4" fill="#7530fb" />
+            <rect x="22" y="21" width="24" height="6" rx="1" fill="#0f172a" />
+            <rect x="50" y="22.5" width="20" height="3" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'sh-two-tone-brand-ribbon': (col: string, _light: string) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#1e1535" />
+            <rect width="80" height="4" fill="#b8fa33" />
+            <rect x="8" y="14" width="42" height="6" rx="1" fill="#ffffff" />
+            <rect x="8" y="23" width="34" height="3" rx="1" fill="rgba(255,255,255,0.7)" />
+            <rect x="58" y="17" width="16" height="6" rx="2" fill="#b8fa33" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

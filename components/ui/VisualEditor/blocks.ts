@@ -1233,6 +1233,7 @@ import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 import { getTestimonialsVariant } from './variants/testimonials.variants'
 import { getInfoBoxVariant } from './variants/info_box.variants'
 import { getShippingInfoVariant } from './variants/shipping_info.variants'
+import { getStoreHeaderVariant } from './variants/store_header.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -3455,44 +3456,21 @@ ${thumbCells}
             label: 'Store Header',
             category: 'Header & Footer' as BlockCategory,
             icon: 'store',
-            description: 'Logo, store name and tagline banner',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#7530fb' } as unknown as BlockProps,
-            toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                return wrapBlock('store_header' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#7530fb'};${pad(p)}text-align:center;"><h1 style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize ?? 24}px;font-weight:700;color:${p.textColor ?? '#ffffff'};">{{SELLER_NAME}}</h1><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${p.accentColor ?? 'rgba(255,255,255,0.7)'};">Quality products &middot; Fast dispatch &middot; Trusted eBay seller</p></td></tr></table>`)
-            },
-        },
-
-        {
-            type: 'category_nav' as BlockType,
-            label: 'Category Navigation',
-            category: 'Header & Footer' as BlockCategory,
-            icon: 'menu',
-            description: 'Horizontal store category link bar — 10 layout styles',
+            description: 'Logo, store name and tagline banner — 10 layout styles',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                bgColor: '#1e1535',
+                variant: 'sh-classic-banner',
+                storeName: '{{SELLER_NAME}}',
+                tagline: 'Quality products · Fast dispatch · Trusted eBay seller',
+                bgColor: '#7530fb',
                 textColor: '#ffffff',
-                linkColor: '#ffffff',
-                activeColor: '#b8fa33',
-                variant: 'cat-classic-dark',
-                categories: ['Electronics', 'Clothing', 'Home & Garden', 'Collectibles', 'Auto Parts'],
-                paddingTop: 10,
-                paddingBottom: 10,
+                accentColor: '#b8fa33',
+                fontSize: 24,
             } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & {
-                    variant?: string
-                    categories?: any
-                    bgColor?: string
-                    linkColor?: string
-                    activeColor?: string
-                    textColor?: string
-                    fontSize?: number
-                }
-                const variantId = p.variant ?? 'cat-classic-dark'
-                return wrapBlock('category_nav' as BlockType, id, _getCategoryNavVariant(variantId).toHtml(p, id))
+                const p = props as any
+                const variantId = p.variant ?? 'sh-classic-banner'
+                return wrapBlock('store_header' as BlockType, id, getStoreHeaderVariant(variantId).toHtml(p, id), p)
             },
         },
 
@@ -3589,21 +3567,6 @@ ${thumbCells}
             },
         },
 
-        {
-            type: 'social_links' as BlockType,
-            label: 'Social Links Bar',
-            category: 'Header & Footer' as BlockCategory,
-            icon: 'share',
-            description: 'Social media icon links row',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
-            toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                const socials = [{ icon: '&#128248;', label: 'Instagram', color: '#e1306c' }, { icon: '&#128444;', label: 'Facebook', color: '#1877f2' }, { icon: '&#128140;', label: 'Twitter', color: '#1da1f2' }, { icon: '&#127910;', label: 'YouTube', color: '#ff0000' }]
-                const cells = socials.map(s => `<td style="padding:0 10px;text-align:center;"><p style="margin:0 0 2px;font-size:${p.iconSize ?? 28}px;color:${p.iconColor ?? s.color};">${s.icon}</p><p style="margin:0;font-family:Arial,sans-serif;font-size:10px;color:${p.labelColor ?? s.color};font-weight:700;">${s.label}</p></td>`).join('')
-                return wrapBlock('social_links' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#f8f7ff'};${pad(p)}text-align:center;"><p style="margin:0 0 10px;font-family:Arial,sans-serif;font-size:12px;color:${p.labelColor ?? '#6b7280'};">Follow us for deals &amp; updates</p><table align="center" cellpadding="0" cellspacing="0" border="0"><tr>${cells}</tr></table></td></tr></table>`)
-            },
-        },
 
         {
             type: 'breadcrumb_bar' as BlockType,
@@ -3646,8 +3609,14 @@ ${thumbCells}
             defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
+                const text = p.text || '{{PRODUCT_TITLE}}'
+                const textColor = p.textColor || p.color || '#1e1535'
+                const accentColor = p.accentColor || '#7530fb'
+                const fontSize = p.fontSize || 28
+                const align = p.align || 'left'
+
                 return wrapBlock('page_title' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:700;color:#1e1535;line-height:1.2;">{{PRODUCT_TITLE}}</h1><div style="width:60px;height:4px;background-color:#7530fb;border-radius:2px;"></div></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;margin:0 auto;box-sizing:border-box;"><tr><td style="background-color:${p.bgColor};${pad(p)}box-sizing:border-box;"><h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:${fontSize}px;font-weight:700;color:${textColor};line-height:1.2;text-align:${align};">${text}</h1><div style="width:60px;height:4px;background-color:${accentColor};border-radius:2px;${align === 'center' ? 'margin:0 auto;' : align === 'right' ? 'margin-left:auto;' : ''}"></div></td></tr></table>`)
             },
         },
 
