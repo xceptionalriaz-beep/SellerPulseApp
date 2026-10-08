@@ -64,18 +64,48 @@ interface TestField {
 }
 
 const TEST_FIELDS: TestField[] = [
+    // ── Core product ──────────────────────────────────────────────────────────
     { key: 'title', placeholder: '{{PRODUCT_TITLE}}', label: 'Product Title', defaultExample: 'Sony WH-1000XM5 Wireless Headphones' },
     { key: 'price', placeholder: '{{ITEM_PRICE}}', label: 'Price', defaultExample: '£249.99' },
+    { key: 'originalPrice', placeholder: '{{ORIGINAL_PRICE}}', label: 'Original Price', defaultExample: '£349.99' },
     { key: 'imageUrl', placeholder: '{{MAIN_IMAGE_URL}}', label: 'Main Image URL', defaultExample: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&h=700&fit=crop&auto=format&q=80' },
     { key: 'description', placeholder: '{{ITEM_DESCRIPTION}}', label: 'Description', defaultExample: 'Premium wireless headphones with industry-leading noise cancellation.' },
     { key: 'condition', placeholder: '{{ITEM_CONDITION}}', label: 'Condition', defaultExample: 'Brand New' },
-    { key: 'seller', placeholder: '{{SELLER_NAME}}', label: 'Seller Name', defaultExample: 'TechStore_UK' },
-    { key: 'category', placeholder: '{{DEPARTMENT}}', label: 'Category', defaultExample: 'Electronics' },
-    { key: 'sku', placeholder: '{{ITEM_SKU}}', label: 'SKU', defaultExample: 'WH1000XM5-BLK' },
     { key: 'brand', placeholder: '{{BRAND}}', label: 'Brand', defaultExample: 'Sony' },
+    { key: 'sku', placeholder: '{{ITEM_SKU}}', label: 'SKU', defaultExample: 'WH1000XM5-BLK' },
+    { key: 'quantity', placeholder: '{{QUANTITY}}', label: 'Stock Quantity', defaultExample: '3' },
+    // ── Seller & trust ────────────────────────────────────────────────────────
+    { key: 'seller', placeholder: '{{SELLER_NAME}}', label: 'Seller Name', defaultExample: 'TechStore_UK' },
+    { key: 'feedbackScore', placeholder: '{{FEEDBACK_SCORE}}', label: 'Feedback Score', defaultExample: '12,450' },
+    { key: 'feedbackPct', placeholder: '{{FEEDBACK_PERCENT}}', label: 'Feedback %', defaultExample: '99.4' },
+    { key: 'watchers', placeholder: '{{WATCHERS}}', label: 'Watchers', defaultExample: '24' },
+    // ── Logistics ─────────────────────────────────────────────────────────────
     { key: 'shipping', placeholder: '{{SHIPPING_TIME}}', label: 'Shipping Time', defaultExample: '1-2 Business Days' },
     { key: 'returns', placeholder: '{{RETURN_POLICY}}', label: 'Returns', defaultExample: '30-Day Free Returns' },
-    { key: 'quantity', placeholder: '{{QUANTITY}}', label: 'Stock Quantity', defaultExample: '3' },
+    { key: 'warranty', placeholder: '{{WARRANTY}}', label: 'Warranty', defaultExample: '12-Month Manufacturer Warranty' },
+    // ── Specs ─────────────────────────────────────────────────────────────────
+    { key: 'category', placeholder: '{{DEPARTMENT}}', label: 'Category', defaultExample: 'Electronics' },
+    { key: 'colour', placeholder: '{{COLOUR}}', label: 'Colour', defaultExample: 'Midnight Black' },
+    { key: 'size', placeholder: '{{SIZE}}', label: 'Size', defaultExample: 'One Size' },
+    { key: 'material', placeholder: '{{MATERIAL}}', label: 'Material', defaultExample: 'Premium Plastic & Metal' },
+    // ── Gallery images ────────────────────────────────────────────────────────
+    { key: 'lifestyleImage', placeholder: '{{LIFESTYLE_IMAGE_URL}}', label: 'Lifestyle Image URL', defaultExample: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&h=500&fit=crop&auto=format&q=80' },
+    { key: 'gallery1', placeholder: '{{GALLERY_IMAGE_1}}', label: 'Gallery Image 1', defaultExample: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&h=500&fit=crop&auto=format&q=80' },
+    { key: 'gallery2', placeholder: '{{GALLERY_IMAGE_2}}', label: 'Gallery Image 2', defaultExample: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&h=500&fit=crop&auto=format&q=80' },
+    { key: 'gallery3', placeholder: '{{GALLERY_IMAGE_3}}', label: 'Gallery Image 3', defaultExample: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=700&h=500&fit=crop&auto=format&q=80' },
+    // ── Related / cross-sell ──────────────────────────────────────────────────
+    { key: 'relatedTitle1', placeholder: '{{RELATED_TITLE_1}}', label: 'Related Title 1', defaultExample: 'Sony WF-1000XM5 Earbuds' },
+    { key: 'relatedPrice1', placeholder: '{{RELATED_PRICE_1}}', label: 'Related Price 1', defaultExample: '£199.99' },
+    { key: 'relatedImage1', placeholder: '{{RELATED_IMAGE_1}}', label: 'Related Image 1', defaultExample: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&h=200&fit=crop&auto=format&q=80' },
+    { key: 'relatedTitle2', placeholder: '{{RELATED_TITLE_2}}', label: 'Related Title 2', defaultExample: 'Sony SRS-XB43 Speaker' },
+    { key: 'relatedPrice2', placeholder: '{{RELATED_PRICE_2}}', label: 'Related Price 2', defaultExample: '£149.99' },
+    { key: 'relatedImage2', placeholder: '{{RELATED_IMAGE_2}}', label: 'Related Image 2', defaultExample: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=200&h=200&fit=crop&auto=format&q=80' },
+    { key: 'relatedTitle3', placeholder: '{{RELATED_TITLE_3}}', label: 'Related Title 3', defaultExample: 'Sony MDR-7506 Headphones' },
+    { key: 'relatedPrice3', placeholder: '{{RELATED_PRICE_3}}', label: 'Related Price 3', defaultExample: '£89.99' },
+    { key: 'relatedImage3', placeholder: '{{RELATED_IMAGE_3}}', label: 'Related Image 3', defaultExample: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=200&h=200&fit=crop&auto=format&q=80' },
+    { key: 'relatedTitle4', placeholder: '{{RELATED_TITLE_4}}', label: 'Related Title 4', defaultExample: 'Sony INZONE H9 Headset' },
+    { key: 'relatedPrice4', placeholder: '{{RELATED_PRICE_4}}', label: 'Related Price 4', defaultExample: '£229.99' },
+    { key: 'relatedImage4', placeholder: '{{RELATED_IMAGE_4}}', label: 'Related Image 4', defaultExample: 'https://images.unsplash.com/photo-1612444530582-fc66183b16f7?w=200&h=200&fit=crop&auto=format&q=80' },
 ]
 
 type TestValues = Record<string, string>
