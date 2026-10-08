@@ -70,7 +70,7 @@ const TEST_FIELDS: TestField[] = [
     { key: 'description', placeholder: '{{ITEM_DESCRIPTION}}', label: 'Description', defaultExample: 'Premium wireless headphones with industry-leading noise cancellation.' },
     { key: 'condition', placeholder: '{{ITEM_CONDITION}}', label: 'Condition', defaultExample: 'Brand New' },
     { key: 'seller', placeholder: '{{SELLER_NAME}}', label: 'Seller Name', defaultExample: 'TechStore_UK' },
-    { key: 'category', placeholder: '{{ITEM_CATEGORY}}', label: 'Category', defaultExample: 'Electronics' },
+    { key: 'category', placeholder: '{{DEPARTMENT}}', label: 'Category', defaultExample: 'Electronics' },
     { key: 'sku', placeholder: '{{ITEM_SKU}}', label: 'SKU', defaultExample: 'WH1000XM5-BLK' },
     { key: 'brand', placeholder: '{{BRAND}}', label: 'Brand', defaultExample: 'Sony' },
     { key: 'shipping', placeholder: '{{SHIPPING_TIME}}', label: 'Shipping Time', defaultExample: '1-2 Business Days' },
@@ -175,6 +175,8 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
                 category: item.categoryName ?? '',
                 sku: item.itemId ?? '',
                 brand: item.brand ?? '',
+                shipping: item.shippingTime ?? item.estimatedDelivery ?? '1-3 Business Days',
+                returns: item.returnPolicy ?? '30-Day Returns',
             })
             setTestSuccess(true)
             setTimeout(() => setTestSuccess(false), 3000)
