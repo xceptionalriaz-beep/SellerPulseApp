@@ -3450,6 +3450,7 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Card background" value={props.cardBg ?? '#f8f7ff'} onChange={v => updateProps({ cardBg: v })} />
                         <ColorRow label="Card border" value={props.cardBorder ?? '#e9e3ff'} onChange={v => updateProps({ cardBorder: v })} />
+                        <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
                         <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Author colour" value={props.authorColor ?? '#6b7280'} onChange={v => updateProps({ authorColor: v })} />
