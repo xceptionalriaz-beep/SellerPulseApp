@@ -3453,6 +3453,16 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Star colour" value={props.starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v })} />
                         <ColorRow label="Text colour" value={props.textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Author colour" value={props.authorColor ?? '#6b7280'} onChange={v => updateProps({ authorColor: v })} />
+                        <ColorRow label="Accent colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput label="Font family" value={(props as any).fontFamily ?? 'inherit'} options={[{ v: 'inherit', l: 'Theme default' }, { v: 'Arial, Helvetica, sans-serif', l: 'Arial' }, { v: 'Georgia, serif', l: 'Georgia' }, { v: '"Trebuchet MS", sans-serif', l: 'Trebuchet MS' }, { v: 'Verdana, sans-serif', l: 'Verdana' }]} onChange={v => updateProps({ fontFamily: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
