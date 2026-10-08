@@ -1226,11 +1226,10 @@ import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 
 export const IMAGE_PLACEHOLDER_SVG = `<svg viewBox="0 0 4 3" preserveAspectRatio="xMidYMid meet" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:6px;">
   <rect width="4" height="3" fill="#f3eeff" rx="0.12"/>
-  <rect width="4" height="3" fill="none" stroke="#c4b5fd" stroke-width="0.06" stroke-dasharray="0.18 0.1" rx="0.12"/>
-  <rect x="0.85" y="0.55" width="2.3" height="1.6" rx="0.1" fill="#ede9fe"/>
-  <circle cx="1.35" cy="1.05" r="0.22" fill="#c4b5fd"/>
-  <path d="M0.85 1.8 L1.6 1.1 L2.2 1.7 L2.6 1.35 L3.15 1.9 L3.15 2.15 L0.85 2.15Z" fill="#c4b5fd" opacity="0.7"/>
-  <text x="2" y="2.65" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="0.22" fill="#7530fb" font-weight="600">Click to add image</text>
+  <rect x="1.3" y="0.75" width="1.4" height="0.98" rx="0.08" fill="#ede9fe"/>
+  <circle cx="1.62" cy="1.05" r="0.13" fill="#c4b5fd"/>
+  <path d="M1.3 1.52 L1.75 1.08 L2.1 1.45 L2.35 1.22 L2.7 1.58 L2.7 1.73 L1.3 1.73Z" fill="#c4b5fd" opacity="0.7"/>
+  <text x="2" y="2.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="0.17" fill="#7530fb" font-weight="700">Add Image</text>
 </svg>`
 
 export const CONTENT_PLACEHOLDER = `<div data-canvas-dropzone="content" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`

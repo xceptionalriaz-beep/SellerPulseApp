@@ -23,6 +23,7 @@ export { whatsInTheBoxVariants, getWhatsInTheBoxVariant } from './whats_in_the_b
 export { heroProductVariants, getHeroProductVariant } from './hero_product.variants'
 export { ctaBannerVariants, getCtaBannerVariant } from './cta_banner.variants'
 export { sellerInfoVariants, getSellerInfoVariant } from './seller_info.variants'
+export { singleImageVariants, getSingleImageVariant } from './single_image.variants'
 export { logoBarVariants, getLogoBarVariant } from './logo_bar.variants'
 export { bundleDealVariants, getBundleDealVariant } from './bundle_deal.variants'
 export { moneyBackVariants, getMoneyBackVariant } from './money_back.variants'

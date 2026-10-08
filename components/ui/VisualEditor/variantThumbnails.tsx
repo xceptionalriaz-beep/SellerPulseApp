@@ -1693,6 +1693,281 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="20" y="41" width="40" height="3" rx="1.5" fill={col} opacity="0.25" />
         </svg>
     ),
+    // ── single_image: Circular Ring Spotlight (cir) ─────────────────────────
+    'circular-ring-spotlight': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="41" rx="16" ry="2.5" fill={col} opacity="0.18" />
+            <circle cx="40" cy="22" r="16" stroke={col} strokeWidth="1" strokeDasharray="2 1.5" opacity="0.5" />
+            <circle cx="40" cy="22" r="12" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <circle cx="40" cy="22" r="8" fill={col} opacity="0.12" />
+            <circle cx="40" cy="20" r="2.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    'cir': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="41" rx="16" ry="2.5" fill={col} opacity="0.18" />
+            <circle cx="40" cy="22" r="16" stroke={col} strokeWidth="1" strokeDasharray="2 1.5" opacity="0.5" />
+            <circle cx="40" cy="22" r="12" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <circle cx="40" cy="22" r="8" fill={col} opacity="0.12" />
+            <circle cx="40" cy="20" r="2.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    // ── single_image: Archway Portal (arc) ──────────────────────────────────
+    'arch-portal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="42" rx="18" ry="2.5" fill={col} opacity="0.15" />
+            <path d="M26 40V18C26 10.3 32.3 4 40 4C47.7 4 54 10.3 54 18V40H26Z" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <path d="M29 39V19C29 13 34 8 40 8C46 8 51 13 51 19V39H29Z" fill={col} opacity="0.1" />
+            <circle cx="40" cy="22" r="4" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    'arc': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="42" rx="18" ry="2.5" fill={col} opacity="0.15" />
+            <path d="M26 40V18C26 10.3 32.3 4 40 4C47.7 4 54 10.3 54 18V40H26Z" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <path d="M29 39V19C29 13 34 8 40 8C46 8 51 13 51 19V39H29Z" fill={col} opacity="0.1" />
+            <circle cx="40" cy="22" r="4" fill={col} opacity="0.5" />
+        </svg>
+    ),
+    // ── single_image: Viewfinder Studio (vie) ───────────────────────────────
+    'viewfinder-corners': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="14" y="6" width="52" height="34" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <path d="M18 13V9H22" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M62 13V9H58" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M18 33V37H22" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M62 33V37H58" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="40" cy="23" r="5" stroke={col} strokeWidth="0.8" strokeDasharray="1.5 1.5" />
+            <line x1="40" y1="20" x2="40" y2="26" stroke={col} strokeWidth="0.8" />
+            <line x1="37" y1="23" x2="43" y2="23" stroke={col} strokeWidth="0.8" />
+        </svg>
+    ),
+    'vie': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="14" y="6" width="52" height="34" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <path d="M18 13V9H22" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M62 13V9H58" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M18 33V37H22" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M62 33V37H58" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="40" cy="23" r="5" stroke={col} strokeWidth="0.8" strokeDasharray="1.5 1.5" />
+            <line x1="40" y1="20" x2="40" y2="26" stroke={col} strokeWidth="0.8" />
+            <line x1="37" y1="23" x2="43" y2="23" stroke={col} strokeWidth="0.8" />
+        </svg>
+    ),
+    // ── single_image: Diagonal Geometric Cut (dia) ──────────────────────────
+    'diagonal-cut': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <path d="M26 6H66C68 6 70 8 70 11V36L58 42H14C12 42 10 40 10 37V17L26 6Z" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <polygon points="10,17 26,6 26,17" fill={col} opacity="0.25" />
+            <polygon points="70,36 58,42 58,36" fill={col} opacity="0.25" />
+            <circle cx="40" cy="24" r="5" fill={col} opacity="0.4" />
+        </svg>
+    ),
+    'dia': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <path d="M26 6H66C68 6 70 8 70 11V36L58 42H14C12 42 10 40 10 37V17L26 6Z" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <polygon points="10,17 26,6 26,17" fill={col} opacity="0.25" />
+            <polygon points="70,36 58,42 58,36" fill={col} opacity="0.25" />
+            <circle cx="40" cy="24" r="5" fill={col} opacity="0.4" />
+        </svg>
+    ),
+    // ── single_image: Trust & Authenticity Banner (tru) ─────────────────────
+    'trust-guarantee-badge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="5" width="64" height="38" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="5" width="64" height="7" rx="2" fill="#059669" />
+            <line x1="12" y1="8.5" x2="38" y2="8.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="40" cy="23" r="5" fill={col} opacity="0.25" />
+            <rect x="18" y="36" width="44" height="3" rx="1" fill="#f1f5f9" />
+        </svg>
+    ),
+    'tru': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="5" width="64" height="38" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="5" width="64" height="7" rx="2" fill="#059669" />
+            <line x1="12" y1="8.5" x2="38" y2="8.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="40" cy="23" r="5" fill={col} opacity="0.25" />
+            <rect x="18" y="36" width="44" height="3" rx="1" fill="#f1f5f9" />
+        </svg>
+    ),
+    // ── single_image: Luxury Certified Seal (lux) ───────────────────────────
+    'luxury-certified-seal': (_col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="4" width="64" height="40" rx="3" fill="#ffffff" stroke="#d1d5db" strokeWidth="1.2" />
+            <rect x="11" y="7" width="58" height="34" rx="2" stroke="#d97706" strokeWidth="0.6" strokeDasharray="2 1" />
+            <circle cx="40" cy="21" r="7" fill="#fef3c7" stroke="#d97706" strokeWidth="1" />
+            <polygon points="40,16 41.5,19.5 45,19.5 42,22 43.5,25.5 40,23.5 36.5,25.5 38,22 35,19.5 38.5,19.5" fill="#d97706" />
+            <line x1="22" y1="36" x2="58" y2="36" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'lux': (_col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="4" width="64" height="40" rx="3" fill="#ffffff" stroke="#d1d5db" strokeWidth="1.2" />
+            <rect x="11" y="7" width="58" height="34" rx="2" stroke="#d97706" strokeWidth="0.6" strokeDasharray="2 1" />
+            <circle cx="40" cy="21" r="7" fill="#fef3c7" stroke="#d97706" strokeWidth="1" />
+            <polygon points="40,16 41.5,19.5 45,19.5 42,22 43.5,25.5 40,23.5 36.5,25.5 38,22 35,19.5 38.5,19.5" fill="#d97706" />
+            <line x1="22" y1="36" x2="58" y2="36" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    // ── single_image: Promo Flash Deal (dea) ─────────────────────────────────
+    'deal-flash-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="5" width="64" height="38" rx="5" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <rect x="8" y="5" width="64" height="8" rx="2" fill={col} />
+            <path d="M14 7l-1.5 2.5h2.5l-1.5 3 3.5-3.5h-2.5l1.5-2z" fill="#ffffff" />
+            <line x1="20" y1="9" x2="46" y2="9" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="40" cy="24" r="5" fill={col} opacity="0.2" />
+            <rect x="24" y="35" width="32" height="4" rx="2" fill="#fee2e2" />
+        </svg>
+    ),
+    'dea': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="5" width="64" height="38" rx="5" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <rect x="8" y="5" width="64" height="8" rx="2" fill={col} />
+            <path d="M14 7l-1.5 2.5h2.5l-1.5 3 3.5-3.5h-2.5l1.5-2z" fill="#ffffff" />
+            <line x1="20" y1="9" x2="46" y2="9" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="40" cy="24" r="5" fill={col} opacity="0.2" />
+            <rect x="24" y="35" width="32" height="4" rx="2" fill="#fee2e2" />
+        </svg>
+    ),
+    // ── single_image: Studio Floating Pedestal (stu) ────────────────────────
+    'studio-pedestal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="37" rx="22" ry="4" fill="#000000" opacity="0.18" />
+            <ellipse cx="40" cy="35" rx="20" ry="3.5" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="34" y="14" width="12" height="18" rx="3" fill={col} opacity="0.75" />
+            <circle cx="40" cy="18" r="2.5" fill="#ffffff" opacity="0.8" />
+            <line x1="28" y1="44" x2="52" y2="44" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'stu': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="37" rx="22" ry="4" fill="#000000" opacity="0.18" />
+            <ellipse cx="40" cy="35" rx="20" ry="3.5" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="34" y="14" width="12" height="18" rx="3" fill={col} opacity="0.75" />
+            <circle cx="40" cy="18" r="2.5" fill="#ffffff" opacity="0.8" />
+            <line x1="28" y1="44" x2="52" y2="44" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    // ── single_image: Stadium Capsule Pod (sta) ─────────────────────────────
+    'stadium-capsule-pod': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="43" rx="14" ry="2.5" fill={col} opacity="0.18" />
+            <rect x="26" y="5" width="28" height="38" rx="14" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <rect x="29" y="8" width="22" height="32" rx="11" fill={col} opacity="0.1" />
+            <circle cx="40" cy="22" r="4.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    'sta': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="43" rx="14" ry="2.5" fill={col} opacity="0.18" />
+            <rect x="26" y="5" width="28" height="38" rx="14" fill="#ffffff" stroke={col} strokeWidth="1.2" />
+            <rect x="29" y="8" width="22" height="32" rx="11" fill={col} opacity="0.1" />
+            <circle cx="40" cy="22" r="4.5" fill={col} opacity="0.6" />
+        </svg>
+    ),
+    // ── single_image: Geometric Prism Spotlight (geo) ───────────────────────
+    'geometric-prism-spotlight': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Background Canvas */}
+            <rect width="80" height="48" rx="5" fill={light} />
+
+            {/* Main Showcase Card */}
+            <rect x="6" y="4" width="68" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+
+            {/* Corner Facet Shading */}
+            <polygon points="56,4 74,4 74,20 60,16" fill={col} opacity="0.14" />
+            <polygon points="6,28 6,44 22,44 18,32" fill={col} opacity="0.14" />
+
+            {/* 4 Corner Geometric Brackets */}
+            <path d="M10 12V8H14" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M70 12V8H66" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M10 36V40H14" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M70 36V40H66" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+
+            {/* Spotlight Glow & Product Subject */}
+            <ellipse cx="40" cy="22" rx="16" ry="10" fill={col} opacity="0.08" />
+            <circle cx="40" cy="22" r="6.5" fill={col} opacity="0.32" />
+
+            {/* Ground Pedestal Shadow & Prism Line */}
+            <ellipse cx="40" cy="35" rx="14" ry="1.6" fill="#000000" opacity="0.15" />
+            <line x1="33" y1="38" x2="47" y2="38" stroke={col} strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'geo': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Background Canvas */}
+            <rect width="80" height="48" rx="5" fill={light} />
+
+            {/* Main Showcase Card */}
+            <rect x="6" y="4" width="68" height="40" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+
+            {/* Corner Facet Shading */}
+            <polygon points="56,4 74,4 74,20 60,16" fill={col} opacity="0.14" />
+            <polygon points="6,28 6,44 22,44 18,32" fill={col} opacity="0.14" />
+
+            {/* 4 Corner Geometric Brackets */}
+            <path d="M10 12V8H14" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M70 12V8H66" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M10 36V40H14" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M70 36V40H66" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+
+            {/* Spotlight Glow & Product Subject */}
+            <ellipse cx="40" cy="22" rx="16" ry="10" fill={col} opacity="0.08" />
+            <circle cx="40" cy="22" r="6.5" fill={col} opacity="0.32" />
+
+            {/* Ground Pedestal Shadow & Prism Line */}
+            <ellipse cx="40" cy="35" rx="14" ry="1.6" fill="#000000" opacity="0.15" />
+            <line x1="33" y1="38" x2="47" y2="38" stroke={col} strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    // ── single_image: Dynamic Diagonal Split (diagonal-split-stage / spl) ───
+    'diagonal-split-stage': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <rect x="8" y="6" width="64" height="36" rx="6" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <path d="M48 6L72 6C74 6 76 8 76 10V38C76 40 74 42 72 42H32L48 6Z" fill={col} opacity="0.25" />
+            <line x1="48" y1="6" x2="32" y2="42" stroke={col} strokeWidth="1.2" />
+            <circle cx="34" cy="24" r="5" fill={col} opacity="0.75" />
+        </svg>
+    ),
+    // ── single_image: Sculpted Armor Shield (scu) ───────────────────────────
+    'sculpted-armor-shield': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="43" rx="16" ry="2.5" fill={col} opacity="0.15" />
+            <path d="M40 6L60 10C60 25 51 38 40 42C29 38 20 25 20 10L40 6Z" fill="#ffffff" stroke={col} strokeWidth="1.3" strokeLinejoin="round" />
+            <path d="M40 10L55 13C55 24 48 35 40 38C32 35 25 24 25 13L40 10Z" fill={col} opacity="0.12" />
+            <circle cx="40" cy="22" r="3.5" fill={col} opacity="0.65" />
+        </svg>
+    ),
+    'scu': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="5" fill={light} />
+            <ellipse cx="40" cy="43" rx="16" ry="2.5" fill={col} opacity="0.15" />
+            <path d="M40 6L60 10C60 25 51 38 40 42C29 38 20 25 20 10L40 6Z" fill="#ffffff" stroke={col} strokeWidth="1.3" strokeLinejoin="round" />
+            <path d="M40 10L55 13C55 24 48 35 40 38C32 35 25 24 25 13L40 10Z" fill={col} opacity="0.12" />
+            <circle cx="40" cy="22" r="3.5" fill={col} opacity="0.65" />
+        </svg>
+    ),
     // ── logo_bar: flat-row ────────────────────────────────────────────────────
     'flat-row': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
@@ -6172,8 +6447,64 @@ export function VariantThumbnail({
     isSelected: boolean
 }) {
     const col = isSelected ? C.primary : C.secondary
-    const light = isSelected ? C.primaryLight : '#f3f4f6'
-    const render = VARIANT_THUMBNAILS[variantId]
+    const light = isSelected ? C.primaryLight : '#f3eeff'
+
+    // Smart multi-lookup: supports exact key, lowercase, with hyphens, with underscores, and 3-letter alias
+    const cleanId = (variantId || '').trim().toLowerCase()
+    const hyphenId = cleanId.replace(/_/g, '-')
+    const underscoreId = cleanId.replace(/-/g, '_')
+    const prefixId = cleanId.slice(0, 3)
+
+    // Specific mapping for single image styles
+    const singleImageAliases: Record<string, string> = {
+        'cir': 'circular-ring-spotlight',
+        'circular': 'circular-ring-spotlight',
+        'circular_ring_spotlight': 'circular-ring-spotlight',
+        'arc': 'arch-portal',
+        'arch': 'arch-portal',
+        'arch_portal': 'arch-portal',
+        'vie': 'viewfinder-corners',
+        'viewfinder': 'viewfinder-corners',
+        'viewfinder_corners': 'viewfinder-corners',
+        'dia': 'diagonal-cut',
+        'diagonal': 'diagonal-cut',
+        'diagonal_cut': 'diagonal-cut',
+        'tru': 'trust-guarantee-badge',
+        'trust': 'trust-guarantee-badge',
+        'trust_guarantee_badge': 'trust-guarantee-badge',
+        'lux': 'luxury-certified-seal',
+        'luxury': 'luxury-certified-seal',
+        'luxury_certified_seal': 'luxury-certified-seal',
+        'dea': 'deal-flash-ribbon',
+        'deal': 'deal-flash-ribbon',
+        'deal_flash_ribbon': 'deal-flash-ribbon',
+        'stu': 'studio-pedestal',
+        'studio': 'studio-pedestal',
+        'studio_pedestal': 'studio-pedestal',
+        'sta': 'stadium-capsule-pod',
+        'stadium': 'stadium-capsule-pod',
+        'stadium_capsule_pod': 'stadium-capsule-pod',
+        'geo': 'geometric-prism-spotlight',
+        'geometric': 'geometric-prism-spotlight',
+        'geometric_prism_spotlight': 'geometric-prism-spotlight',
+        'diagonal_split_stage': 'diagonal-split-stage',
+        'diagonal-split-stage': 'diagonal-split-stage',
+        'spl': 'diagonal-split-stage',
+        'scu': 'sculpted-armor-shield',
+        'sculpted': 'sculpted-armor-shield',
+        'sculpted_armor_shield': 'sculpted-armor-shield',
+    }
+
+    const resolvedKey =
+        VARIANT_THUMBNAILS[variantId] ? variantId :
+            VARIANT_THUMBNAILS[cleanId] ? cleanId :
+                VARIANT_THUMBNAILS[hyphenId] ? hyphenId :
+                    VARIANT_THUMBNAILS[underscoreId] ? underscoreId :
+                        (singleImageAliases[cleanId] && VARIANT_THUMBNAILS[singleImageAliases[cleanId]]) ? singleImageAliases[cleanId] :
+                            VARIANT_THUMBNAILS[prefixId] ? prefixId :
+                                null
+
+    const render = resolvedKey ? VARIANT_THUMBNAILS[resolvedKey] : null
 
     if (render) return render(col, light)
 
@@ -6181,7 +6512,7 @@ export function VariantThumbnail({
     return (
         <div
             style={{
-                height: 32,
+                height: 36,
                 backgroundColor: light,
                 borderRadius: 4,
                 display: 'flex',

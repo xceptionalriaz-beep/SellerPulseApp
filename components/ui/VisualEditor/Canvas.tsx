@@ -240,6 +240,19 @@ export default function Canvas({
         setReorderOver(null)
     }, [])
 
+    // ── Listen for block selection clicks from inside iframes ──
+    React.useEffect(() => {
+        const handleIframeClick = (e: MessageEvent) => {
+            if (e.data?.type === 'RIAZIFY_SELECT_BLOCK' && e.data.blockId) {
+                if (!lockedIds.has(e.data.blockId)) {
+                    onSelect(e.data.blockId)
+                }
+            }
+        }
+        window.addEventListener('message', handleIframeClick)
+        return () => window.removeEventListener('message', handleIframeClick)
+    }, [onSelect, lockedIds])
+
     // ─────────────────────────────────────────────────────────────────────────
     // RENDER
     // ─────────────────────────────────────────────────────────────────────────
@@ -717,29 +730,27 @@ function BlockCard({
             }}
             style={{
                 position: 'relative',
+                zIndex: isSelected ? 20 : hovered ? 10 : 1,
                 marginBottom: 8,
-                borderRadius: 10,
+                borderRadius: 0,
                 opacity: isBeingDragged ? 0.4 : isHidden ? 0.35 : 1,
                 filter: !searchMatch ? 'opacity(0.25) grayscale(0.5)' : undefined,
                 outline: isLocked
                     ? `2px solid #d97706`
-                    : `2px solid ${isSelected
-                        ? C.primary
-                        : hovered
-                            ? C.primaryBorder
-                            : 'transparent'
-                    }`,
-                backgroundColor: C.surface,
-                cursor: isLocked ? 'not-allowed' : 'pointer',
-                transition: 'border-color 0.15s, box-shadow 0.15s, opacity 0.15s',
-                // Universal shadow from block props — falls back to selection/hover shadow
-                boxShadow: (block.props as any).showShadow
-                    ? `${(block.props as any).shadowX ?? 0}px ${(block.props as any).shadowY ?? 4}px ${(block.props as any).shadowBlur ?? 12}px ${(block.props as any).shadowSpread ?? 0}px ${(block.props as any).shadowColor ?? 'rgba(0,0,0,0.10)'}`
                     : isSelected
-                        ? `0 0 0 3px ${C.primary}22, 0 2px 8px ${C.primary}18`
+                        ? `2px solid ${C.primary}`
                         : hovered
-                            ? `0 2px 12px ${C.primary}12`
-                            : '0 1px 4px rgba(0,0,0,0.06)',
+                            ? `2px dashed ${C.primaryBorder}`
+                            : '2px solid transparent',
+                outlineOffset: 0,
+                backgroundColor: 'transparent',
+                cursor: isLocked ? 'not-allowed' : 'pointer',
+                transition: 'outline 0.15s, opacity 0.15s, box-shadow 0.15s',
+                boxShadow: isSelected
+                    ? '0 0 0 3px rgba(117, 48, 251, 0.20)'
+                    : (block.props as any).showShadow
+                        ? `${(block.props as any).shadowX ?? 0}px ${(block.props as any).shadowY ?? 4}px ${(block.props as any).shadowBlur ?? 12}px ${(block.props as any).shadowSpread ?? 0}px ${(block.props as any).shadowColor ?? 'rgba(0,0,0,0.10)'}`
+                        : 'none',
                 overflow: 'visible',
             }}
         >
@@ -990,46 +1001,7 @@ function BlockCard({
                 </div>
             )}
 
-            {/* ── Bottom type label (always visible) ── */}
-            <div style={{
-                borderTop: `1px solid ${C.border}`,
-                padding: '5px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-            }}>
-                <span style={{
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 10,
-                    color: C.muted,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                }}>
-                    {(() => { const I = BLOCK_ICONS[def.icon]; return I ? <I size={10} style={{ display: 'inline', verticalAlign: 'middle' }} /> : null })()}
-                    <span>{def.label}</span>
-                    <span style={{
-                        backgroundColor: C.bg,
-                        border: `1px solid ${C.border}`,
-                        borderRadius: 4,
-                        padding: '1px 5px',
-                        fontSize: 9,
-                        color: C.muted,
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                    }}>
-                        {def.category}
-                    </span>
-                </span>
-                <span style={{
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontSize: 9,
-                    color: C.border,
-                }}>
-                    #{index + 1}
-                </span>
-            </div>
+            {/* ── Bottom type label removed: only pure template renders ── */}
         </div>
     )
 }
@@ -1178,6 +1150,13 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   var BLOCK_ID = "${block.id}";
   var BLOCK_TYPE = "${block.type}";
   document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Select block in canvas when clicked anywhere inside the iframe ──
+    document.addEventListener('click', function() {
+      if (window.parent) {
+        window.parent.postMessage({ type: 'RIAZIFY_SELECT_BLOCK', blockId: BLOCK_ID }, '*');
+      }
+    }, true);
 
     // Anchor click handler inside the canvas editor.
     // - href="#" or empty → block navigation silently (nothing happens).

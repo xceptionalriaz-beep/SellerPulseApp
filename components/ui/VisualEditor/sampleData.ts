@@ -725,17 +725,9 @@ export function renderForCanvas(
     })
 
     // 2) Replace any <img src="...{{TOKEN}}..."> with the SVG placeholder.
-    //    All tokenised images (product_image, hero_product, image, gallery_row,
-    //    cross_sell, etc.) show the same clean SVG on canvas instead of Unsplash
-    //    photos — so the editor always looks like a blank canvas ready to fill.
-    //
-    //    Two cases:
-    //    a) img has position:absolute (used in fixed-height cells like gallery
-    //       strip, magazine grid, inverted-magazine, comparison) — replace with
-    //       an absolutely-positioned div so it still fills its parent cell.
-    //    b) img is normal flow (single, fullwidth, split, zoom, lifestyle,
-    //       polaroid, before-after) — replace with a block-level div that
-    //       maintains a natural 4:3 aspect ratio so the block has visible height.
+    //    Remove the inner dashed rect border so only the container border shows.
+    const borderlessSvg = IMAGE_PLACEHOLDER_SVG.replace(/<rect\b[^>]*stroke-dasharray[^>]*\/?>/gi, '')
+
     out = out.replace(
         /<img\b([^>]*)src="[^"]*\{\{[^}]*\}\}[^"]*"([^>]*)>/gi,
         (_m, before, after) => {
@@ -743,10 +735,10 @@ export function renderForCanvas(
             const isAbsolute = /position\s*:\s*absolute/i.test(attrs)
             if (isAbsolute) {
                 // Fill the fixed-height parent cell completely
-                return `<div style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG.replace('preserveAspectRatio="xMidYMid meet" width="100%"', 'preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="display:block;border-radius:6px;position:absolute;top:0;left:0;"')}</div>`
+                return `<div style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:pointer;">${borderlessSvg.replace('preserveAspectRatio="xMidYMid meet" width="100%"', 'preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="display:block;border-radius:6px;position:absolute;top:0;left:0;"')}</div>`
             }
             // Normal flow — natural 4:3 block so the block has visible height
-            return `<div style="width:100%;cursor:pointer;">${IMAGE_PLACEHOLDER_SVG.replace('preserveAspectRatio="xMidYMid meet" width="100%"', 'preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="display:block;border-radius:6px;"')}</div>`
+            return `<div style="width:100%;cursor:pointer;">${borderlessSvg.replace('preserveAspectRatio="xMidYMid meet" width="100%"', 'preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="display:block;border-radius:6px;"')}</div>`
         }
     )
 

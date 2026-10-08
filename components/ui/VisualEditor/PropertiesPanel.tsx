@@ -2685,6 +2685,12 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Text colour" value={props.textColor ?? '#9a3412'} onChange={v => updateProps({ textColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? '#ea580c'} onChange={v => updateProps({ accentColor: v })} />
                     </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={props.paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v })} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={props.paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v })} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={props.paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v })} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={props.paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v })} />
+                    </Section>
                 </>
             )
 
@@ -6510,12 +6516,24 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
 
         case 'authenticity_guarantee':
             return (
-                <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        ✅ This block displays a fixed authenticity guarantee badge — no editable attributes.
-                        Use the Styles tab to adjust colours and spacing.
-                    </InfoBox>
-                </div>
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={(props as any).bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v } as any)} />
+                        <ColorRow label="Text colour" value={(props as any).textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v } as any)} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                    </Section>
+                    <Section title="Typography">
+                        <SelectInput label="Font family" value={(props as any).fontFamily ?? ''}
+                            options={[{ v: '', l: 'Default (Arial)' }, { v: 'Georgia, serif', l: 'Georgia' }, { v: 'Verdana, sans-serif', l: 'Verdana' }, { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' }, { v: 'monospace', l: 'Monospace' }]}
+                            onChange={v => updateProps({ fontFamily: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Top" min={0} max={120} suffix="px" value={(props as any).paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={(props as any).paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Left" min={0} max={120} suffix="px" value={(props as any).paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Right" min={0} max={120} suffix="px" value={(props as any).paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
+                </>
             )
 
         case 'condition_details': {
@@ -6634,6 +6652,16 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
         }
+
+        case 'authenticity_guarantee':
+            return (
+                <>
+                    <Section title="Content">
+                        <TextInput label="Title" value={(props as any).heading ?? (props as any).bannerTitle ?? '100% Authenticity Guaranteed'} onChange={v => updateProps({ heading: v, bannerTitle: v } as any)} />
+                        <TextareaInput label="Description" value={(props as any).subText ?? (props as any).description ?? ''} rows={3} placeholder="Every item verified genuine. Sourced directly from authorised distributors." onChange={v => updateProps({ subText: v, description: v } as any)} />
+                    </Section>
+                </>
+            )
 
         case 'international_shipping':
             return (
