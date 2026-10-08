@@ -366,6 +366,7 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
+            position: 'relative',
         }}>
             {/* ── Preview toolbar ── */}
             <div style={{
@@ -514,14 +515,34 @@ export default function LivePreview({ html, deviceWidth, onDeviceChange, onClose
                 </div>
             )}
 
-            {/* ── Test data panel ── */}
+            {/* ── Test data panel (popup overlay) ── */}
             {showTestPanel && (
-                <TestDataPanel
-                    testValues={testValues}
-                    onUpdateField={updateField}
-                    onLoadExample={handleLoadExample}
-                    onReset={handleReset}
-                />
+                <>
+                    <div
+                        onClick={() => setShowTestPanel(false)}
+                        style={{ position: 'fixed', inset: 0, zIndex: 99 }}
+                    />
+                    <div style={{
+                        position: 'absolute',
+                        top: 44,
+                        right: 0,
+                        zIndex: 100,
+                        width: 520,
+                        maxHeight: 'calc(100vh - 100px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+                        borderRadius: '0 0 10px 10px',
+                        overflow: 'hidden',
+                    }}>
+                        <TestDataPanel
+                            testValues={testValues}
+                            onUpdateField={updateField}
+                            onLoadExample={handleLoadExample}
+                            onReset={handleReset}
+                        />
+                    </div>
+                </>
             )}
 
             {/* ── iframe content ── */}
@@ -590,9 +611,10 @@ function TestDataPanel({
     return (
         <div style={{
             backgroundColor: C.surface,
-            borderBottom: `1px solid ${C.border}`,
-            flexShrink: 0,
-            maxHeight: 260,
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            minHeight: 0,
             overflowY: 'auto',
         }}>
             {/* Header */}
