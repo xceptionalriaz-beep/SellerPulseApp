@@ -606,7 +606,7 @@ function variantDarkObsidianMatrix(p: any, id: string): string {
   }).join('')
 
   return `
-    <table id="${id}" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;margin:0 auto;font-family:Arial,sans-serif;background-color:#0b0f19;border:1px solid #1e293b;border-radius:10px;box-sizing:border-box;">
+    <table id="${id}" width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;margin:0 auto;font-family:Arial,sans-serif;background-color:#0b0f19;border:none;border-radius:10px;box-sizing:border-box;">
       <tr>
         <td style="${pad(p, 18, 10, 18, 10)}">
           <div style="text-align:center;margin-bottom:14px;">
