@@ -266,7 +266,7 @@ export default function IconsPanel({ selectedFeatureIndex, onIconSelect }: Icons
                 if (!user) { alert('Please sign in to upload icons.'); return }
                 const { data, error } = await supabase
                     .from('user_custom_icons' as any)
-                    .insert({ user_id: user.id, label: cleanLabel, svg_content: svgContent })
+                    .insert([{ user_id: user.id, label: cleanLabel, svg_content: svgContent }] as never[])
                     .select('id')
                     .single()
                 if (error) throw error
