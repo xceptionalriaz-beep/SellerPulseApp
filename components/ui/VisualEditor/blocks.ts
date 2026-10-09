@@ -378,6 +378,7 @@ export interface DividerProps extends CommonProps {
     thickness: number         // px
     lineStyle: 'solid' | 'dashed' | 'dotted' | 'gradient'
     widthPercent: number      // 0–100
+    variant?: string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1244,6 +1245,7 @@ import { getStoreHeaderVariant } from './variants/store_header.variants'
 import { getHeadingVariant } from './variants/heading.variants'
 import { getParagraphVariant } from './variants/paragraph.variants'
 import { getBulletListVariant } from './variants/bullet_list.variants'
+import { getDividerVariant } from './variants/divider.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1597,33 +1599,21 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         label: 'Divider',
         category: 'Content',
         icon: 'minus',
-        description: 'Horizontal divider line',
+        description: 'Horizontal divider line — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
-            paddingTop: 8,
-            paddingBottom: 8,
-            color: '#ede9fe',
+            variant: 'div-minimal-diamond',
+            paddingTop: 16,
+            paddingBottom: 16,
+            color: '#7530fb',
             thickness: 1,
             lineStyle: 'solid',
             widthPercent: 100,
         } as DividerProps,
         toHtml(props, id) {
-            const p = props as DividerProps
-            let hrStyle: string
-            if (p.lineStyle === 'gradient') {
-                hrStyle = `border:none;height:${p.thickness}px;background:linear-gradient(to right,#7530fb,#b8fa33);width:${p.widthPercent}%;margin:0 auto;display:block;`
-            } else {
-                hrStyle = `border:none;border-top:${p.thickness}px ${p.lineStyle} ${p.color};width:${p.widthPercent}%;margin:0 auto;display:block;`
-            }
-            return wrapBlock('divider', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <hr style="${hrStyle}" />
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'div-minimal-diamond'
+            return wrapBlock('divider', id, getDividerVariant(variantId).toHtml(p, id), p)
         },
     },
 

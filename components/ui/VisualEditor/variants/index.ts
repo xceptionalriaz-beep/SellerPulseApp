@@ -58,6 +58,7 @@ export { storeHeaderVariants, storeheaderVariants, getStoreHeaderVariant } from 
 export { headingVariants, headingBlockVariants, getHeadingVariant, } from './heading.variants'
 export { paragraphVariants, paragraphBlockVariants, getParagraphVariant, PARAGRAPH_THUMBNAILS } from './paragraph.variants'
 export { bulletListVariants, bulletListBlockVariants, getBulletListVariant, BULLET_LIST_THUMBNAILS } from './bullet_list.variants'
+export { dividerVariants, dividerBlockVariants, getDividerVariant, DIVIDER_THUMBNAILS } from './divider.variants'
 
 
 // Imports for registry
@@ -116,6 +117,7 @@ import { storeHeaderVariants } from './store_header.variants'
 import { headingVariants } from './heading.variants'
 import { paragraphVariants } from './paragraph.variants'
 import { bulletListVariants } from './bullet_list.variants'
+import { dividerVariants } from './divider.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -221,6 +223,9 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'bulletlist': bulletListVariants,
     'bullets': bulletListVariants,
     'list': bulletListVariants,
+    'divider': dividerVariants,
+    'separator': dividerVariants,
+    'hr': dividerVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

@@ -7266,6 +7266,386 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="18" y="29.5" width="40" height="2.5" rx="1" fill="#0f172a" />
         </svg>
     ),
+
+    // ── Divider (10 Professional Layout Styles) ──────────────────────────────
+    'div-minimal-diamond': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="33" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="36.5" y="20.5" width="7" height="7" rx="1" transform="rotate(45 40 24)" fill={col} />
+            <line x1="47" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'minimal-diamond': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="33" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="36.5" y="20.5" width="7" height="7" rx="1" transform="rotate(45 40 24)" fill={col} />
+            <line x1="47" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'div-badge-pill': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="23" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="25" y="16" width="30" height="16" rx="8" fill={light} stroke={col} strokeWidth="1" />
+            <rect x="31" y="22.5" width="18" height="3" rx="1.5" fill={col} />
+            <line x1="57" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'badge-pill': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="23" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="25" y="16" width="30" height="16" rx="8" fill={light} stroke={col} strokeWidth="1" />
+            <rect x="31" y="22.5" width="18" height="3" rx="1.5" fill={col} />
+            <line x1="57" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'div-gradient-taper': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <defs>
+                <linearGradient id="div_taper_thumb" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor={col} stopOpacity="0" />
+                    <stop offset="50%" stopColor={col} stopOpacity="1" />
+                    <stop offset="100%" stopColor={col} stopOpacity="0" />
+                </linearGradient>
+            </defs>
+            <rect x="8" y="22" width="64" height="4" rx="2" fill="url(#div_taper_thumb)" />
+        </svg>
+    ),
+    'gradient-taper': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <defs>
+                <linearGradient id="div_taper_thumb_alt" x1="0" y1="0" x2="80" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor={col} stopOpacity="0" />
+                    <stop offset="50%" stopColor={col} stopOpacity="1" />
+                    <stop offset="100%" stopColor={col} stopOpacity="0" />
+                </linearGradient>
+            </defs>
+            <rect x="8" y="22" width="64" height="4" rx="2" fill="url(#div_taper_thumb_alt)" />
+        </svg>
+    ),
+
+    'div-executive-pinstripe': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="21" x2="72" y2="21" stroke={col} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="8" y1="27" x2="72" y2="27" stroke="#cbd5e1" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'executive-pinstripe': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="21" x2="72" y2="21" stroke={col} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="8" y1="27" x2="72" y2="27" stroke="#cbd5e1" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'div-trust-crest': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <circle cx="40" cy="24" r="8" fill={col} />
+            <polygon points="40,19 41.5,22.5 45,22.5 42,25 43.5,28.5 40,26.5 36.5,28.5 38,25 35,22.5 38.5,22.5" fill="#ffffff" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'trust-crest': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <circle cx="40" cy="24" r="8" fill={col} />
+            <polygon points="40,19 41.5,22.5 45,22.5 42,25 43.5,28.5 40,26.5 36.5,28.5 38,25 35,22.5 38.5,22.5" fill="#ffffff" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'div-artisan-dots': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="33" cy="24" r="2" fill={col} opacity="0.6" />
+            <circle cx="40" cy="24" r="3" fill={col} />
+            <circle cx="47" cy="24" r="2" fill={col} opacity="0.6" />
+            <line x1="54" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'artisan-dots': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="33" cy="24" r="2" fill={col} opacity="0.6" />
+            <circle cx="40" cy="24" r="3" fill={col} />
+            <circle cx="47" cy="24" r="2" fill={col} opacity="0.6" />
+            <line x1="54" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'div-shadow-groove': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="23" x2="72" y2="23" stroke="#94a3b8" strokeWidth="1.5" />
+            <line x1="8" y1="25" x2="72" y2="25" stroke="#ffffff" strokeWidth="1.5" />
+        </svg>
+    ),
+    'shadow-groove': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="23" x2="72" y2="23" stroke="#94a3b8" strokeWidth="1.5" />
+            <line x1="8" y1="25" x2="72" y2="25" stroke="#ffffff" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'div-sport-slash': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="27" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <line x1="32" y1="31" x2="37" y2="17" stroke={col} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="38" y1="31" x2="43" y2="17" stroke={col} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="44" y1="31" x2="49" y2="17" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="53" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'sport-slash': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="27" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <line x1="32" y1="31" x2="37" y2="17" stroke={col} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="38" y1="31" x2="43" y2="17" stroke={col} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="44" y1="31" x2="49" y2="17" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="53" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'div-tailored-stitch': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="72" y2="24" stroke={col} strokeWidth="2.2" strokeDasharray="5 3.5" strokeLinecap="round" />
+        </svg>
+    ),
+    'tailored-stitch': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="72" y2="24" stroke={col} strokeWidth="2.2" strokeDasharray="5 3.5" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'div-clean-hairline': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="72" y2="24" stroke="#64748b" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+    ),
+    'clean-hairline': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="72" y2="24" stroke="#64748b" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+    ),
+
+    // ── Divider: 11 - 20 (New Styles) ────────────────────────────────────────
+    'tech_hexagon': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="30" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <polygon points="36,19 40,19 42,24 40,29 36,29 34,24" stroke={col} strokeWidth="1.2" fill="none" />
+            <polygon points="42,19 46,19 48,24 46,29 42,29 40,24" stroke={col} strokeWidth="1.2" fill="none" />
+            <line x1="50" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-tech-hexagon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="30" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <polygon points="36,19 40,19 42,24 40,29 36,29 34,24" stroke={col} strokeWidth="1.2" fill="none" />
+            <polygon points="42,19 46,19 48,24 46,29 42,29 40,24" stroke={col} strokeWidth="1.2" fill="none" />
+            <line x1="50" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'heritage_laurel': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="30" y2="24" stroke="#d4af37" strokeWidth="1.2" />
+            <circle cx="40" cy="24" r="7" stroke="#d4af37" strokeWidth="1" fill="none" />
+            <circle cx="40" cy="24" r="2.5" fill="#d4af37" />
+            <line x1="50" y1="24" x2="72" y2="24" stroke="#d4af37" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-heritage-laurel': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="30" y2="24" stroke="#d4af37" strokeWidth="1.2" />
+            <circle cx="40" cy="24" r="7" stroke="#d4af37" strokeWidth="1" fill="none" />
+            <circle cx="40" cy="24" r="2.5" fill="#d4af37" />
+            <line x1="50" y1="24" x2="72" y2="24" stroke="#d4af37" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'barcode_hash': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M29 18h-2v12h2m22-12h2v12h-2" stroke={col} strokeWidth="1.2" fill="none" />
+            <line x1="33" y1="19" x2="33" y2="29" stroke="#0f172a" strokeWidth="2" />
+            <line x1="37" y1="19" x2="37" y2="29" stroke="#0f172a" strokeWidth="1" />
+            <line x1="41" y1="19" x2="41" y2="29" stroke="#0f172a" strokeWidth="2.5" />
+            <line x1="45" y1="19" x2="45" y2="29" stroke="#0f172a" strokeWidth="1" />
+            <line x1="54" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-barcode-hash': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M29 18h-2v12h2m22-12h2v12h-2" stroke={col} strokeWidth="1.2" fill="none" />
+            <line x1="33" y1="19" x2="33" y2="29" stroke="#0f172a" strokeWidth="2" />
+            <line x1="37" y1="19" x2="37" y2="29" stroke="#0f172a" strokeWidth="1" />
+            <line x1="41" y1="19" x2="41" y2="29" stroke="#0f172a" strokeWidth="2.5" />
+            <line x1="45" y1="19" x2="45" y2="29" stroke="#0f172a" strokeWidth="1" />
+            <line x1="54" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'electric_spark': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="32" y2="24" stroke="#f59e0b" strokeWidth="1.5" />
+            <path d="M42 15l-4 7h5l-4 9 8-10h-5l3-6z" fill="#f59e0b" />
+            <line x1="48" y1="24" x2="72" y2="24" stroke="#f59e0b" strokeWidth="1.5" />
+        </svg>
+    ),
+    'div-electric-spark': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="32" y2="24" stroke="#f59e0b" strokeWidth="1.5" />
+            <path d="M42 15l-4 7h5l-4 9 8-10h-5l3-6z" fill="#f59e0b" />
+            <line x1="48" y1="24" x2="72" y2="24" stroke="#f59e0b" strokeWidth="1.5" />
+        </svg>
+    ),
+
+    'cross_stitch': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M33 21l6 6m0-6l-6 6m7-6l6 6m0-6l-6 6m7-6l6 6m0-6l-6 6" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-cross-stitch': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M33 21l6 6m0-6l-6 6m7-6l6 6m0-6l-6 6m7-6l6 6m0-6l-6 6" stroke={col} strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'chevron_flow': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="31" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M36 19l5 5-5 5m6-10l5 5-5 5" stroke={col} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="49" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-chevron-flow': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="31" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M36 19l5 5-5 5m6-10l5 5-5 5" stroke={col} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="49" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'ticket_perforated': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <path d="M12 19a5 5 0 0 1 0 10" stroke="#cbd5e1" strokeWidth="1.5" fill="none" />
+            <line x1="18" y1="24" x2="62" y2="24" stroke={col} strokeWidth="1.8" strokeDasharray="4 3" />
+            <path d="M68 19a5 5 0 0 0 0 10" stroke="#cbd5e1" strokeWidth="1.5" fill="none" />
+        </svg>
+    ),
+    'div-ticket-perforated': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <path d="M12 19a5 5 0 0 1 0 10" stroke="#cbd5e1" strokeWidth="1.5" fill="none" />
+            <line x1="18" y1="24" x2="62" y2="24" stroke={col} strokeWidth="1.8" strokeDasharray="4 3" />
+            <path d="M68 19a5 5 0 0 0 0 10" stroke="#cbd5e1" strokeWidth="1.5" fill="none" />
+        </svg>
+    ),
+
+    'tricolor_ribbon': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="31" y="20" width="6" height="8" fill={col} rx="1" />
+            <rect x="37" y="20" width="6" height="8" fill="#f59e0b" rx="1" />
+            <rect x="43" y="20" width="6" height="8" fill="#0f172a" rx="1" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-tricolor-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <rect x="31" y="20" width="6" height="8" fill={col} rx="1" />
+            <rect x="37" y="20" width="6" height="8" fill="#f59e0b" rx="1" />
+            <rect x="43" y="20" width="6" height="8" fill="#0f172a" rx="1" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'soundwave_pulse': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <line x1="30" y1="21" x2="30" y2="27" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="34" y1="17" x2="34" y2="31" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="38" y1="13" x2="38" y2="35" stroke={col} strokeWidth="2.2" strokeLinecap="round" />
+            <line x1="42" y1="15" x2="42" y2="33" stroke={col} strokeWidth="2" strokeLinecap="round" />
+            <line x1="46" y1="18" x2="46" y2="30" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="50" y1="21" x2="50" y2="27" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="54" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-soundwave-pulse': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <line x1="30" y1="21" x2="30" y2="27" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="34" y1="17" x2="34" y2="31" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="38" y1="13" x2="38" y2="35" stroke={col} strokeWidth="2.2" strokeLinecap="round" />
+            <line x1="42" y1="15" x2="42" y2="33" stroke={col} strokeWidth="2" strokeLinecap="round" />
+            <line x1="46" y1="18" x2="46" y2="30" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="50" y1="21" x2="50" y2="27" stroke={col} strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="54" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+
+    'shield_honor': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M40 15l7 3.5v5c0 5-3.5 8.5-7 9.5-3.5-1-7-4.5-7-9.5v-5l7-3.5z" fill="#16a34a" />
+            <path d="M37.5 24l2 2 3.5-3.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
+    'div-shield-honor': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="28" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+            <path d="M40 15l7 3.5v5c0 5-3.5 8.5-7 9.5-3.5-1-7-4.5-7-9.5v-5l7-3.5z" fill="#16a34a" />
+            <path d="M37.5 24l2 2 3.5-3.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
