@@ -1,0 +1,1 @@
+- [x] Remove row addition features and associated UI elements completely

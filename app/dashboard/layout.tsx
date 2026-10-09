@@ -1,0 +1,1337 @@
+﻿'use client'
+// app/dashboard/layout.tsx
+// ---------------------------------------------------------------
+// Converted from: lib/pages/dashboard_page.dart
+//
+// What the Dart version had:
+//   ? 60px slim dark sidebar rail (desktop)
+//   ? Lime active state with left border indicator + scale animation
+//   ? Shield logo at top of sidebar
+//   ? Tooltip on each sidebar icon
+//   ? Top navbar ? "Riazify" brand text + notification bell + avatar
+//   ? Avatar ? Google photo OR DiceBear OR initials fallback
+//   ? Notification bell ? hover lime, pulse animation, red badge
+//   ? Bottom-right Windows-style toast (4s, progress bar)
+//   ? Mobile drawer (hamburger menu)
+//   ? Logout button
+//   ? Admin nav item (only for admin role)
+//   ? Polls notifications every 60 seconds
+//   ? Location verification prompt
+//   ? Role-based routing
+//
+// NEW (presence system):
+//   ? useHeartbeat ? updates last_seen every 2 min (invisible)
+//   ? usePresence  ? joins Supabase Realtime channel so admin
+//                    CRM shows who is online right now
+//
+// NEW (kill switch visibility):
+//   ? Tools hidden from sidebar when kill switch is OFF
+//   ? Re-appear when kill switch is turned back ON
+// ---------------------------------------------------------------
+
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { useBrand } from '@/hooks/useBrand'
+import AdminSettingsModal from '@/components/admin/AdminSettingsModal'
+import {
+  Shield, LayoutDashboard, Search, Type, Calculator,
+  Package, Radar, ShieldCheck, Settings,
+  ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
+  Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
+  Globe, History, RotateCcw, Upload, Sparkles, Palette,
+  LayoutTemplate, User, Settings2, ChevronRight,
+} from 'lucide-react'
+import { createClient } from '@/lib/supabase'
+import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
+import { useToast } from '@/components/ui/AppToast'
+import ProDropdown from '@/components/ui/ProDropdown'
+import { cn, initials } from '@/lib/utils'
+import type { Profile } from '@/types/database'
+
+// -- Presence system --------------------------------------------
+import { useHeartbeat } from '@/hooks/useHeartbeat'
+import { usePresence } from '@/hooks/usePresence'
+import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
+import SupportModal from '@/components/dashboard/SupportModal'
+import SecurityTab from '@/app/dashboard/profile/tabs/SecurityTab'
+import AnnouncementBanner from '@/components/dashboard/AnnouncementBanner'
+import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
+
+// -- Nav items (mirrors Dart sidebar exactly) -------------------
+const isInUserMode = typeof window !== 'undefined' && sessionStorage.getItem('riazify_usermode') === '1'
+
+const NAV_ITEMS = [
+  { icon: LayoutDashboard, label: 'Dashboard', href: isInUserMode ? '/dashboard?usermode=1' : '/dashboard' },
+  { icon: Search, label: 'Product Research', href: '/dashboard/product-research' },
+  { icon: Type, label: 'Title Builder', href: '/dashboard/title-builder' },
+  { icon: Calculator, label: 'Profit Calculator', href: '/dashboard/tools/profit-calculator' },
+  { icon: ListChecks, label: 'Listings', href: '/dashboard/listing-generator' },
+  { icon: Palette, label: 'Design Studio', href: '/dashboard/design' },
+  { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
+  { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
+  { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
+]
+
+// -- Design Studio sub-sidebar tabs ----------------------------
+const DESIGN_STUDIO_TABS = [
+  { id: 'templates', label: 'Template Gallery', icon: LayoutTemplate, description: 'Browse pre-made eBay templates' },
+  { id: 'library', label: 'Block Library', icon: BookOpen, description: '37 ready-made HTML blocks' },
+  { id: 'my-templates', label: 'My Templates', icon: User, description: 'Your saved custom templates' },
+  { id: 'settings', label: 'Studio Settings', icon: Settings2, description: 'Manage design preferences' },
+]
+
+// -- Kill switch ? nav label mapping ---------------------------
+// Maps kill_switches.title ? NAV_ITEMS label
+// When a switch is OFF ? that nav item is hidden from sidebar
+const KILL_SWITCH_MAP: Record<string, string> = {
+  'Title Builder': 'Title Builder',
+  'Product Research': 'eBay Product Research Tool',
+  'Profit Calculator': 'Profit Calculator',
+  'Listings': 'Listing Generator',
+  'Inventory': 'Inventory Manager',
+  'Competitor Research': 'Competitor Research',
+  'Orders': 'Orders Management',
+}
+
+// ── ResetButton — spins icon on click ─────────────────────────
+function ResetButton() {
+  const [spinning, setSpinning] = useState(false)
+  const [deg, setDeg] = useState(0)
+  function handleReset() {
+    if (spinning) return
+    setSpinning(true)
+    setDeg(prev => prev - 360)
+    window.dispatchEvent(new CustomEvent('tb:reset'))
+    setTimeout(() => setSpinning(false), 600)
+  }
+  return (
+    <button
+      title="Reset Title Builder"
+      onClick={handleReset}
+      className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+      style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
+      <RotateCcw
+        size={15}
+        style={{
+          transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: `rotate(${deg}deg)`,
+        }}
+      />
+    </button>
+  )
+}
+
+// ── SearchBar — handles focus border state ─────────────────────
+function SearchBar({ onGenerate, searchInput, setSearchInput }: {
+  onGenerate: () => void
+  searchInput: string
+  setSearchInput: (v: string) => void
+}) {
+  const [focused, setFocused] = useState(false)
+  const [btnHovered, setBtnHovered] = useState(false)
+
+  return (
+    <div className="flex items-center w-full h-9 rounded-lg border overflow-hidden transition-all duration-150"
+      style={{
+        borderColor: focused ? '#7530fb' : '#e5e0f5',
+        backgroundColor: '#ffffff',
+        boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.10)' : 'none',
+      }}>
+
+      {/* Search icon */}
+      <div className="flex items-center px-2.5 shrink-0">
+        <Search size={13} style={{ color: focused ? '#7530fb' : '#c4b5fd' }} />
+      </div>
+
+      {/* Input */}
+      <input
+        value={searchInput}
+        onChange={e => setSearchInput(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && onGenerate()}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder="Paste a keyword or competitor ID..."
+        className="flex-1 h-full bg-transparent text-[13px] outline-none"
+        style={{ color: '#1e1535', caretColor: '#7530fb' }}
+      />
+
+      {/* Divider */}
+      <div style={{ width: 1, height: '60%', backgroundColor: '#e5e0f5', flexShrink: 0 }} />
+
+      {/* Generate button — inside the pill */}
+      <button
+        onClick={onGenerate}
+        onMouseEnter={() => setBtnHovered(true)}
+        onMouseLeave={() => setBtnHovered(false)}
+        className="h-full px-4 text-[13px] font-bold shrink-0 transition-all duration-150"
+        style={{
+          backgroundColor: btnHovered ? '#7530fb' : 'transparent',
+          color: btnHovered ? '#ffffff' : '#7530fb',
+        }}>
+        Generate
+      </button>
+
+    </div>
+  )
+}
+
+// ── ExcludeInput — handles focus border state ──────────────────
+function ExcludeInput({ exclude, setExclude }: {
+  exclude: string
+  setExclude: (v: string) => void
+}) {
+  const [focused, setFocused] = useState(false)
+  return (
+    <div className="flex items-center h-9 rounded-lg border px-3 gap-2 transition-all duration-150"
+      style={{
+        borderColor: focused ? '#7530fb' : exclude ? '#7530fb' : '#ede9fe',
+        backgroundColor: '#ffffff',
+        minWidth: 160,
+        boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
+      }}>
+      <input
+        type="text"
+        placeholder="Exclude Phrase..."
+        value={exclude}
+        onChange={e => setExclude(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className="flex-1 bg-transparent text-[13px] font-semibold outline-none"
+        style={{ color: '#1e1535', outline: 'none', boxShadow: 'none' }}
+      />
+      {exclude && (
+        <button onClick={() => setExclude('')} style={{ color: '#9ca3af', flexShrink: 0 }}>
+          <X size={13} />
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── ListingStudioTopBar ────────────────────────────────────────
+function ListingStudioTopBar() {
+  const [aiDropdownOpen, setAiDropdownOpen] = useState(false)
+  const [wizardStep, setWizardStep] = useState<number | null>(null)
+
+  useEffect(() => {
+    function onStepChange(e: Event) {
+      const step = (e as CustomEvent).detail?.step ?? null
+      setWizardStep(step)
+    }
+    function onBackToDashboard() { setWizardStep(null) }
+    window.addEventListener('lg:stepChange', onStepChange)
+    window.addEventListener('lg:backToDashboard', onBackToDashboard)
+    return () => {
+      window.removeEventListener('lg:stepChange', onStepChange)
+      window.removeEventListener('lg:backToDashboard', onBackToDashboard)
+    }
+  }, [])
+
+  const STEP_LABELS: Record<number, string> = {
+    1: 'Step 1 — Product & SEO',
+    2: 'Step 2 — Photos & Description',
+    3: 'Step 3 — Price & Shipping',
+    4: 'Step 4 — Audit & Publish',
+  }
+
+  const aiOptions = [
+    { icon: '🔗', label: 'URL to Listing', mode: 'ai_url', desc: 'Paste any supplier or product URL' },
+    { icon: '📷', label: 'Image to Listing', mode: 'ai_image', desc: 'Upload a photo, AI reads the product' },
+    { icon: '#', label: 'Barcode to Listing', mode: 'ai_barcode', desc: 'Type or scan EAN / UPC barcode' },
+    { icon: 'T', label: 'Title to Listing', mode: 'ai_title', desc: 'Type a product name to search' },
+  ]
+
+  return (
+    <div className="flex items-center gap-3 flex-1 min-w-0">
+      {/* Brand + page name */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: '#f3eeff' }}>
+          <ListChecks size={15} style={{ color: '#7530fb' }} />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[17px] font-extrabold" style={{ color: '#7530fb', fontFamily: 'Syne, sans-serif' }}>
+            Listing Studio
+          </span>
+          {wizardStep && (
+            <>
+              <span style={{ color: '#ede9fe', fontSize: 16 }}>›</span>
+              <span className="text-[13px] font-semibold" style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}>
+                New Listing
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1" />
+
+      {/* Hide buttons when in wizard */}
+      {!wizardStep && (
+        <>
+          {/* Bulk Upload */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('lg:bulkUpload'))}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+            style={{ backgroundColor: '#f3eeff', color: '#7530fb', border: '1px solid #ede9fe', fontFamily: 'DM Sans, sans-serif' }}>
+            <Upload size={14} />
+            Bulk Upload
+          </button>
+
+          {/* AI Listing dropdown */}
+          <div className="relative">
+            <AIButton chevron onClick={() => setAiDropdownOpen(o => !o)}>
+              AI Listing
+            </AIButton>
+
+            {aiDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setAiDropdownOpen(false)} />
+                <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] rounded-2xl overflow-hidden"
+                  style={{ backgroundColor: '#ffffff', border: '1px solid #ede9fe', boxShadow: '0 8px 32px rgba(117,48,251,0.15)' }}>
+                  <div className="px-4 py-3" style={{ borderBottom: '1px solid #ede9fe', backgroundColor: '#f3eeff' }}>
+                    <p className="text-[12px] font-bold" style={{ color: '#7530fb', fontFamily: 'Syne, sans-serif' }}>AI Listing</p>
+                    <p className="text-[11px]" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>Let AI build your listing automatically</p>
+                  </div>
+                  {aiOptions.map(opt => (
+                    <button key={opt.mode}
+                      onClick={() => { setAiDropdownOpen(false); window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: opt.mode } })) }}
+                      className="w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f8f7ff]"
+                      style={{ borderBottom: '1px solid #f3eeff' }}>
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-bold shrink-0 mt-0.5"
+                        style={{ backgroundColor: '#f3eeff', color: '#7530fb' }}>{opt.icon}</span>
+                      <div>
+                        <p className="text-[13px] font-semibold" style={{ color: '#1e1535', fontFamily: 'DM Sans, sans-serif' }}>{opt.label}</p>
+                        <p className="text-[11px]" style={{ color: '#9ca3af', fontFamily: 'DM Sans, sans-serif' }}>{opt.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* List New Item */}
+          <PrimaryButton onClick={() => window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'manual' } }))}>
+            List New Item
+          </PrimaryButton>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── TitleBuilderTopBar ─────────────────────────────────────────
+// Renders inside the shared dashboard header when on /dashboard/title-builder.
+// Uses ProDropdown for all filter selectors — consistent with the rest of the app.
+function TitleBuilderTopBar({ pathname }: { pathname: string }) {
+
+  const [searchInput, setSearchInput] = useState('')
+
+  // Filter values
+  const [shipFrom, setShipFrom] = useState('')
+  const [condition, setCondition] = useState('')
+  const [category, setCategory] = useState('')
+  const [exclude, setExclude] = useState('')
+
+  // Listen for auto-detected category from search results
+  useEffect(() => {
+    function onCategoryDetected(e: Event) {
+      const { category: detected } = (e as CustomEvent).detail
+      if (detected) setCategory(detected)
+    }
+    window.addEventListener('tb:categoryDetected', onCategoryDetected)
+    return () => window.removeEventListener('tb:categoryDetected', onCategoryDetected)
+  }, [])
+
+  function handleGenerate() {
+    const input = searchInput.trim()
+    if (!input) return
+    window.dispatchEvent(new CustomEvent('tb:generate', {
+      detail: { input, shipFrom, condition, category, exclude }
+    }))
+  }
+
+  const activeCount = [shipFrom, condition, category, exclude].filter(Boolean).length
+
+  return (
+    <div className="flex items-center gap-2 flex-1 min-w-0">
+
+      {/* Brand */}
+      <div className="flex items-center gap-1 h-full shrink-0">
+        <span className="text-[17px] font-extrabold mr-2" style={{ color: '#7530fb' }}>TitleMaster AI</span>
+        <span className="px-3 h-[60px] text-[12px] font-medium relative flex items-center"
+          style={{ color: '#1e1535' }}>
+          Title Builder
+          <span className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: '#7530fb' }} />
+        </span>
+      </div>
+
+      {/* Search bar */}
+      <div className="flex flex-1 max-w-lg">
+        <SearchBar onGenerate={handleGenerate} searchInput={searchInput} setSearchInput={setSearchInput} />
+      </div>
+
+      {/* ── FILTER DROPDOWNS ── */}
+      <div className="flex items-center gap-1.5 shrink-0">
+
+        <ProDropdown prefix="Ships From:" currentValue={shipFrom || '__all'} width={190}
+          options={[
+            { val: '__all', label: 'All Locations', enabled: true },
+            { val: 'US', label: 'United States', enabled: true, flagCode: 'us' },
+            { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
+            { val: 'CN', label: 'China', enabled: true, flagCode: 'cn' },
+            { val: 'DE', label: 'Germany', enabled: true, flagCode: 'de' },
+            { val: 'AU', label: 'Australia', enabled: true, flagCode: 'au' },
+            { val: 'CA', label: 'Canada', enabled: true, flagCode: 'ca' },
+          ]}
+          onChanged={v => setShipFrom(v === '__all' ? '' : v)} />
+
+        <ProDropdown prefix="Condition:" currentValue={condition || '__all'} width={175}
+          options={[
+            { val: '__all', label: 'All Conditions', enabled: true },
+            { val: 'NEW', label: 'New', enabled: true },
+            { val: 'USED', label: 'Used', enabled: true },
+            { val: 'REFURBISHED', label: 'Refurbished', enabled: true },
+          ]}
+          onChanged={v => setCondition(v === '__all' ? '' : v)} />
+
+        <ProDropdown prefix="Category:" currentValue={category || '__auto'} width={200}
+          options={[
+            { val: '__auto', label: 'Auto-Detect', enabled: true },
+            { val: 'electronics', label: 'Electronics', enabled: true },
+            { val: 'clothing', label: 'Clothing & Fashion', enabled: true },
+            { val: 'automotive', label: 'Automotive', enabled: true },
+            { val: 'homeGarden', label: 'Home & Garden', enabled: true },
+            { val: 'sports', label: 'Sports & Outdoors', enabled: true },
+            { val: 'toys', label: 'Toys & Games', enabled: true },
+            { val: 'health', label: 'Health & Beauty', enabled: true },
+            { val: 'collectibles', label: 'Collectibles', enabled: true },
+            { val: 'pets', label: 'Pet Supplies', enabled: true },
+            { val: 'baby', label: 'Baby', enabled: true },
+          ]}
+          onChanged={v => setCategory(v === '__auto' ? '' : v)} />
+
+        <ExcludeInput exclude={exclude} setExclude={setExclude} />
+
+        {activeCount > 0 && (
+          <button onClick={() => { setShipFrom(''); setCondition(''); setCategory(''); setExclude('') }}
+            className="flex items-center gap-1 px-2 h-8 rounded-full text-[10px] font-black whitespace-nowrap"
+            style={{ backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+            ✕ {activeCount} filter{activeCount > 1 ? 's' : ''}
+          </button>
+        )}
+
+      </div>
+    </div>
+  )
+}
+
+
+// -- Sidebar Item -----------------------------------------------
+function SidebarItem({
+  icon: Icon, label, href, isActive, onClick
+}: {
+  icon: React.ElementType
+  label: string
+  href: string
+  isActive: boolean
+  onClick?: () => void
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      title={label}
+      className="relative flex items-center justify-center w-[60px] h-[52px] group"
+    >
+      {isActive && (
+        <div className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-[10px]" />
+      )}
+      <div className={cn(
+        'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-250',
+        isActive
+          ? 'bg-accent scale-100'
+          : 'bg-transparent group-hover:bg-white/10 scale-95 group-hover:scale-100'
+      )}>
+        <Icon
+          size={isActive ? 20 : 19}
+          className={cn(isActive ? 'text-dark' : 'text-white group-hover:text-white')}
+        />
+      </div>
+    </Link>
+  )
+}
+
+// -- Notification Bell ------------------------------------------
+function NotificationBell({
+  count, isPulsing, onClick
+}: {
+  count: number
+  isPulsing: boolean
+  onClick: () => void
+}) {
+  const [hovering, setHovering] = useState(false)
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      className="relative p-2 rounded-full transition-all duration-200"
+      style={{
+        backgroundColor: hovering ? 'rgba(117,48,251,0.15)' : 'rgba(255,255,255,0.8)',
+        animation: isPulsing ? 'pulsePrimary 0.6s ease-in-out 3' : 'none',
+      }}
+    >
+      <Bell
+        size={22}
+        className={cn(
+          'transition-colors duration-200',
+          hovering ? 'text-accentDeep' :
+            count > 0 ? 'text-red-700' : 'text-[#9ca3af]'
+        )}
+      />
+      {count > 0 && (
+        <span className="absolute top-1 right-1 w-4 h-4 bg-red-700 rounded-full flex items-center justify-center">
+          <span className="text-white text-[8px] font-extrabold">
+            {count > 9 ? '9+' : count}
+          </span>
+        </span>
+      )}
+    </button>
+  )
+}
+
+// -- Avatar -----------------------------------------------------
+function UserAvatar({
+  profile, onClick
+}: {
+  profile: Profile | null
+  onClick: () => void
+}) {
+  const STYLE_BG: Record<string, string> = {
+    'avataaars': 'b6e3f4', 'big-smile': 'ffd5dc',
+    'adventurer': 'c0aede', 'notionists': 'd1fae5',
+    'lorelei': 'ffdfbf', 'micah': 'dbeafe',
+    'open-peeps': 'fde68a', 'personas': 'e0e7ff',
+  }
+  const AVATAR_COLORS = [
+    { bg: '#7530fb', text: '#1e1535' }, { bg: '#0ea5e9', text: '#ffffff' },
+    { bg: '#8b5cf6', text: '#ffffff' }, { bg: '#f97316', text: '#ffffff' },
+    { bg: '#ec4899', text: '#ffffff' }, { bg: '#14b8a6', text: '#ffffff' },
+    { bg: '#ef4444', text: '#ffffff' }, { bg: '#6366f1', text: '#ffffff' },
+  ]
+  const name = profile?.name || profile?.email || 'U'
+  const seed = encodeURIComponent(profile?.id || profile?.email || 'default')
+  const styleKey = STYLE_BG[profile?.avatar_url || ''] ? (profile?.avatar_url || 'avataaars') : 'avataaars'
+  const bg = STYLE_BG[styleKey] ?? 'b6e3f4'
+  const dicebearUrl = `https://api.dicebear.com/9.x/${styleKey}/svg?seed=${seed}&backgroundColor=${bg}&backgroundType=solid`
+  const hash = Math.abs(name.split('').reduce((h, c) => c.charCodeAt(0) + ((h << 5) - h), 0)) % 8
+  const colors = AVATAR_COLORS[hash]
+  const ini = initials(name)
+  const [imgError, setImgError] = useState(false)
+
+  return (
+    <button
+      onClick={onClick}
+      className="w-8 h-8 rounded-2xl overflow-hidden flex items-center justify-center hover:opacity-90 transition-opacity"
+      style={{ backgroundColor: colors.bg }}
+    >
+      {!imgError ? (
+        <img
+          src={dicebearUrl}
+          alt="avatar"
+          className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <span style={{ color: colors.text, fontWeight: 700, fontSize: 13 }}>{ini}</span>
+      )}
+    </button>
+  )
+}
+
+// -- Live Notification Toast (bottom-right, Windows-style) ------
+function NotifToast({
+  title, message, onTap, onDismiss, bottomOffset
+}: {
+  title: string
+  message: string
+  onTap: () => void
+  onDismiss: () => void
+  bottomOffset: number
+}) {
+  const [progress, setProgress] = useState(100)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(p => Math.max(0, p - (100 / 40)))
+    }, 100)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div
+      className="fixed z-50 w-[320px] rounded-[14px] overflow-hidden border border-primary/25 shadow-[0_8px_20px_rgba(0,0,0,0.3)] animate-slide-up cursor-pointer"
+      style={{ right: 20, bottom: 20 + bottomOffset, backgroundColor: '#1e1535' }}
+      onClick={onTap}
+    >
+      <div className="flex items-start gap-3 p-3.5 pr-3">
+        <div className="w-9 h-9 rounded-[10px] bg-accent/12 flex items-center justify-center shrink-0">
+          <Bell size={18} className="text-accent" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-white text-[13px] font-bold truncate">{title}</span>
+            <span className="text-[8px] font-extrabold text-accent bg-accent/15 px-1.5 py-0.5 rounded-full tracking-wide shrink-0">NEW</span>
+          </div>
+          <p className="text-white/55 text-[11px] leading-relaxed line-clamp-2">{message}</p>
+          <div className="flex items-center justify-between mt-1.5">
+            <span className="text-white/30 text-[10px]">Just now</span>
+            <span className="text-accent/70 text-[10px] font-semibold">Tap to view</span>
+          </div>
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDismiss() }}
+          className="text-white/30 hover:text-white/60 transition-colors shrink-0 mt-0.5"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      <div className="h-[3px] bg-white/5">
+        <div className="h-full bg-accent transition-all duration-100" style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  )
+}
+
+// --------------------------------------------------------------
+// DASHBOARD LAYOUT
+// --------------------------------------------------------------
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const toast = useToast()
+  const supabase = createClient()
+  const { brand } = useBrand()
+  const [showAdminSettings, setShowAdminSettings] = useState(false)
+  const [subSidebarOpen, setSubSidebarOpen] = useState(false)
+
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [notifCount, setNotifCount] = useState(0)
+  const [prevCount, setPrevCount] = useState(0)
+  const [bellPulsing, setBellPulsing] = useState(false)
+  const [showNotifPanel, setShowNotifPanel] = useState(false)
+  const [toasts, setToasts] = useState<Array<{ id: string; title: string; message: string }>>([])
+
+  // -- Kill switch visibility state -------------------------------
+  const [disabledTools, setDisabledTools] = useState<Set<string>>(new Set())
+  const [showSupport, setShowSupport] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showAffiliateMenu, setShowAffiliateMenu] = useState(false)
+  const [sectionPerms, setSectionPerms] = useState<Record<string, boolean> | null>(null)
+  const [sidebarMode, setSidebarMode] = useState<'hide' | 'ghost'>('hide')
+  const [showMoreAnalytics, setShowMoreAnalytics] = useState(false)
+  const [activeAdminTab, setActiveAdminTab] = useState<string | null>(searchParams.get('settings'))
+  const [activeAnalyticsTab, setActiveAnalyticsTab] = useState<string | null>(searchParams.get('analytics'))
+  const [emailUnverified, setEmailUnverified] = useState(false)
+
+  const isUserMode = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('usermode') === '1' ||
+    sessionStorage.getItem('riazify_usermode') === '1'
+  )
+  const isAdmin = profile?.role === 'admin' && !isUserMode
+  const isDesignPage = pathname.startsWith('/dashboard/design')
+  const profileLoaded = profile !== null
+  const [cachedIsAdmin, setCachedIsAdmin] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Auto open sub-sidebar when on design page, close when leaving
+  useEffect(() => {
+    setSubSidebarOpen(isDesignPage)
+  }, [isDesignPage])
+
+  useEffect(() => {
+    setMounted(true)
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('riazify_role='))
+    const role = cookie ? cookie.split('=')[1].trim() : localStorage.getItem('riazify_role')
+    const isUserMode = new URLSearchParams(window.location.search).get('usermode') === '1'
+    if (isUserMode) sessionStorage.setItem('riazify_usermode', '1')
+    const isAdminCached = role === 'admin' && !isUserMode
+    setCachedIsAdmin(isAdminCached)
+    if (isAdminCached && !window.location.pathname.startsWith('/dashboard/admin') && !isUserMode) {
+      router.push('/dashboard/admin')
+    }
+  }, [])
+
+  // -- Presence system --------------------------------------------
+  useHeartbeat()
+  usePresence()
+
+  // -- Load profile + kill switches ------------------------------
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/auth/login'); return }
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (data) {
+        setProfile(data as Profile)
+        localStorage.setItem('riazify_role', (data as any).role || 'user')
+        document.cookie = `riazify_role=${(data as any).role || 'user'};path=/;max-age=86400`
+        const isUserMode = new URLSearchParams(window.location.search).get('usermode') === '1' || sessionStorage.getItem('riazify_usermode') === '1'
+        setCachedIsAdmin((data as any).role === 'admin' && !isUserMode)
+        if ((data as any).role === 'admin' && !window.location.pathname.startsWith('/dashboard/admin') && !isUserMode) {
+          router.push('/dashboard/admin')
+        }
+        // Load section permissions via API (bypasses RLS, always fresh)
+        if (!(data as any).is_super_admin) {
+          try {
+            const res = await fetch('/api/admin/get-my-permissions')
+            const permsData = await res.json()
+            const userPerms = permsData?.section_permissions ?? {}
+            const roleId = (data as any).role_id
+            let mergedPerms: Record<string, boolean> = {}
+            if (roleId) {
+              const { data: roleData } = await (supabase.from('admin_roles') as any)
+                .select('section_permissions')
+                .eq('id', roleId)
+                .single()
+              if (roleData?.section_permissions) {
+                mergedPerms = { ...roleData.section_permissions }
+              }
+            }
+            if (Object.keys(userPerms).length > 0) {
+              mergedPerms = { ...mergedPerms, ...userPerms }
+            }
+            if (Object.keys(mergedPerms).length > 0) {
+              setSectionPerms(mergedPerms)
+            }
+            // Load sidebar mode
+            setSidebarMode(((data as any)?.sidebar_mode ?? 'hide') as 'hide' | 'ghost')
+          } catch { }
+        }
+      }
+      if (user && !user.email_confirmed_at) setEmailUnverified(true)
+
+      // -- Fetch kill switches to hide disabled tools from sidebar --
+      try {
+        const { data: switches } = await (supabase.from('kill_switches') as any)
+          .select('title, is_enabled, is_visible')
+        const disabled = new Set<string>(
+          (switches ?? [])
+            .filter((s: any) => !s.is_visible)
+            .map((s: any) => s.title as string)
+        )
+        setDisabledTools(disabled)
+      } catch { /* non-critical ? show all tools if check fails */ }
+    }
+    loadProfile()
+  }, [])
+
+  // -- Reload permissions every 5 minutes ------------------------
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/admin/get-my-permissions')
+        const permsData = await res.json()
+        if (!(permsData?.is_super_admin)) {
+          const userPerms = permsData?.section_permissions ?? {}
+          if (Object.keys(userPerms).length > 0) setSectionPerms(userPerms)
+        }
+      } catch { }
+    }, 300000) // 5 minutes
+    return () => clearInterval(interval)
+  }, [])
+
+  // -- Reload kill switches every 60 seconds ----------------------
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const { data: switches } = await (supabase.from('kill_switches') as any)
+          .select('title, is_enabled, is_visible')
+        const disabled = new Set<string>(
+          (switches ?? [])
+            .filter((s: any) => !s.is_visible)
+            .map((s: any) => s.title as string)
+        )
+        setDisabledTools(disabled)
+      } catch { /* non-critical */ }
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [supabase])
+
+  // -- Filter nav items based on kill switches --------------------
+  const visibleNavItems = NAV_ITEMS.filter(item => {
+    const switchTitle = KILL_SWITCH_MAP[item.label]
+    if (!switchTitle) return true
+    return !disabledTools.has(switchTitle)
+  }).map(item => ({
+    ...item,
+    href: item.href === '/dashboard' && isUserMode ? '/dashboard?usermode=1' : item.href,
+  }))
+
+  // -- Load notification count ------------------------------------
+  const loadNotifCount = useCallback(async () => {
+    if (!profile) return
+    try {
+      if (profile.role === 'admin' && !isUserMode) {
+        const { count } = await supabase
+          .from('admin_notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_read', false)
+        const n = count ?? 0
+        if (n > prevCount && prevCount !== 0) {
+          setBellPulsing(true)
+          setTimeout(() => setBellPulsing(false), 1500)
+        }
+        setPrevCount(n)
+        setNotifCount(n)
+      } else {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { count } = await supabase
+          .from('protected_orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('risk_level', 'HIGH')
+        const n = count ?? 0
+        setPrevCount(n)
+        setNotifCount(n)
+      }
+    } catch { }
+  }, [profile, prevCount])
+
+  useEffect(() => {
+    loadNotifCount()
+    const timer = setInterval(loadNotifCount, 60000)
+    return () => clearInterval(timer)
+  }, [loadNotifCount])
+
+  // -- Logout -----------------------------------------------------
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/auth/login')
+    router.refresh()
+  }
+
+  function openNotifPanel() { setShowNotifPanel(true) }
+  function removeToast(id: string) { setToasts(prev => prev.filter(t => t.id !== id)) }
+
+  return (
+    <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg, #f8f7ff)' }}>
+      {showNotifPanel && (
+        <NotificationsPanelOverlay onClose={() => setShowNotifPanel(false)} forceUser={isUserMode} />
+      )}
+
+      {/* -- TOP NAVBAR (FULL WIDTH) -- */}
+      <header className="h-[60px] flex items-center px-6 shrink-0 border-b z-30"
+        style={{ borderColor: '#ede9fe', backgroundColor: '#ffffff' }}>
+        <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
+          <Menu size={28} />
+        </button>
+
+        {pathname.startsWith('/dashboard/title-builder') ? (
+          /* ── Title Builder top bar ── */
+          <TitleBuilderTopBar pathname={pathname} />
+        ) : pathname.startsWith('/dashboard/listing-generator') ? (
+          /* ── Listing Studio top bar ── */
+          <ListingStudioTopBar />
+        ) : (
+          /* ── Default greeting ── */
+          (() => {
+            const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
+            const hour = new Date().getHours()
+            const isMain = pathname === '/dashboard'
+            const isOrders = pathname === '/dashboard/orders'
+            const isAdminP = pathname.startsWith('/dashboard/admin')
+            const greeting = isMain
+              ? (hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
+                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
+                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                    : `Good night, ${firstName}!`)
+              : isOrders ? `Welcome back, ${firstName}!`
+                : isAdminP ? (hour >= 17 && hour < 21 ? `Good evening, ${firstName}!` : `Working late, ${firstName}!`)
+                  : null
+            return greeting ? (
+              <div className="flex flex-col min-w-0">
+                <span className="font-extrabold tracking-tight truncate"
+                  style={{ fontSize: 22, color: '#1e1535', fontFamily: 'Inter, sans-serif' }}>
+                  {greeting}
+                </span>
+              </div>
+            ) : <div className="flex-1" />
+          })()
+        )}
+
+        {!pathname.startsWith('/dashboard/title-builder') && !pathname.startsWith('/dashboard/listing-generator') && <div className="flex-1" />}
+
+        {/* Title Builder extra icons */}
+        {pathname.startsWith('/dashboard/title-builder') && (
+          <>
+            <ResetButton />
+            <div className="w-1.5" />
+            <button title="Settings"
+              onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+              style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
+              <Settings size={15} />
+            </button>
+            <div className="w-3" />
+          </>
+        )}
+
+        <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
+        <div className="w-[15px]" />
+        <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
+      </header>
+
+      {/* -- SIDEBAR + CONTENT ROW -- */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+
+        {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
+        {!mounted ? (
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: 0, backgroundColor: '#1e1535' }} />
+        ) : ((cachedIsAdmin || isAdmin) && !isUserMode) ? (
+          /* -- ADMIN SIDEBAR -- */
+          <aside className="hidden lg:flex w-[220px] shrink-0 flex-col" style={{ minHeight: 0, backgroundColor: '#1e1535' }}>
+            {/* Logo */}
+            <button
+              onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null); router.push('/dashboard/admin') }}
+              className="flex items-center gap-2.5 px-5 pt-6 pb-4 hover:opacity-80 transition-opacity w-full text-left"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#7530fb' }}>
+                <ShieldAlert size={16} className="text-dark" />
+              </div>
+              <span className="text-[16px] font-extrabold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>Admin</span>
+            </button>
+
+            <div className="flex flex-col flex-1 px-2 py-3 gap-0.5 overflow-y-auto scrollbar-none" style={{ scrollbarWidth: 'none' }}>
+              {/* Dashboard */}
+              <Link href="/dashboard/admin" scroll={false}
+                onClick={() => { setActiveAdminTab(null); setActiveAnalyticsTab(null) }}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-transparent group"
+                style={{ color: pathname === '/dashboard/admin' && !searchParams.has('settings') && !searchParams.has('analytics') && !activeAdminTab && !activeAnalyticsTab ? '#7530fb' : 'rgba(255,255,255,1)' }}>
+                <LayoutDashboard size={16} className="group-hover:!text-accent transition-colors" style={{ color: 'inherit' }} />
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }} className="group-hover:!text-accent transition-colors">Dashboard</span>
+              </Link>
+
+              {/* Admin Settings */}
+              <div style={{ height: 8 }} />
+              {[
+                { icon: Users, label: 'User CRM', tab: 0, permKey: 'user_crm' },
+                { icon: BarChart2, label: 'Revenue', tab: 0, permKey: 'founder_ops', key: 'revenue', isAnalytics: true },
+                { icon: MessageCircle, label: 'Tickets', tab: 14, permKey: 'tickets' },
+                { icon: CreditCard, label: 'Payments', tab: 13, permKey: 'payments' },
+                { icon: DollarSign, label: 'Promos & Codes', tab: 3, permKey: 'promos' },
+                { icon: Power, label: 'Kill Switches', tab: 4, permKey: 'kill_switches' },
+                { icon: Settings, label: 'Plan Limits', tab: 5, permKey: 'plan_limits' },
+                { icon: FileText, label: 'Emails', tab: 6, permKey: 'emails' },
+                { icon: Zap, label: 'Webhooks', tab: 7, permKey: 'webhooks' },
+                { icon: Shield, label: 'Role Builder', tab: 1, permKey: 'role_builder' },
+                { icon: Key, label: 'Security Logs', tab: 2, permKey: 'security_logs' },
+                { icon: Trophy, label: 'Gamification', tab: 8, permKey: 'gamification' },
+                { icon: Key, label: 'API Vault', tab: 9, permKey: 'api_vault' },
+                { icon: DollarSign, label: 'Affiliate Center', tab: 25, permKey: 'affiliate_center', key: 'affiliate', hasChild: true },
+                { icon: DollarSign, label: 'Affiliate Vault', tab: 10, permKey: 'affiliate_vault', isChild: true, key: 'affiliate' },
+                { icon: BarChart2, label: 'Founder Ops', tab: 11, permKey: 'founder_ops' },
+                { icon: Mail, label: 'Marketing', tab: 12, permKey: 'marketing' },
+                { icon: BookOpen, label: 'Blog', tab: 15, permKey: 'blog' },
+                { icon: Wrench, label: 'Changelog', tab: 16, permKey: 'changelog' },
+                { icon: Briefcase, label: 'Careers', tab: 17, permKey: 'careers' },
+                { icon: FileText, label: 'Page Editor', tab: 18, permKey: 'page_editor' },
+                { icon: Zap, label: 'API Fleet', tab: 19, permKey: 'api_fleet' },
+                { icon: Trophy, label: 'Feature Roadmap', tab: 20, permKey: 'feature_roadmap' },
+                { icon: Shield, label: 'VeRO Command Center', tab: 21, permKey: 'vero_center' },
+                { icon: BarChart2, label: 'Infrastructure Monitor', tab: 22, permKey: 'infra_monitor' },
+                { icon: Search, label: 'Competitor X-Ray', tab: 23, permKey: 'competitor_xray' },
+                { icon: Package, label: 'Chrome Extension', tab: 24, permKey: 'chrome_extension' },
+                { icon: Palette, label: 'Templates', tab: 26, permKey: 'templates' },
+
+              ].filter(item => {
+                // Super admin or no permissions set ? show all
+                if (!sectionPerms || (profile as any)?.is_super_admin) return true
+                // If item has no permKey ? always show
+                if (!(item as any).permKey) return true
+                // Ghost mode � show all tabs
+                if (sidebarMode === 'ghost') return true
+                // Hide mode � only show if explicitly set to true
+                return sectionPerms[(item as any).permKey] === true
+              }).map((item) => {
+                const isActive = (item as any).isAnalytics
+                  ? activeAnalyticsTab === (item as any).key
+                  : (item as any).isChild
+                    ? activeAdminTab === String(item.tab) + '-child'
+                    : activeAdminTab === String(item.tab)
+                const isLocked = sidebarMode === 'ghost' && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] !== true
+                if ((item as any).isChild && !showAffiliateMenu) return null
+                return (
+                  <button key={item.label}
+                    onClick={() => {
+                      if ((item as any).isAnalytics) {
+                        setActiveAnalyticsTab((item as any).key)
+                        setActiveAdminTab(null)
+                        router.push(`/dashboard/admin?analytics=${(item as any).key}`, { scroll: false })
+                        window.dispatchEvent(new CustomEvent('admin-analytics-tab', { detail: item.tab }))
+                      } else {
+                        setActiveAdminTab(String(item.tab) + ((item as any).isChild ? '-child' : ''))
+                        setActiveAnalyticsTab(null)
+                        router.push(`/dashboard/admin?settings=${item.tab}`, { scroll: false })
+                        window.dispatchEvent(new CustomEvent('admin-settings-tab', { detail: item.tab }))
+                      }
+                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-white/10 w-full text-left group"
+                    style={{ backgroundColor: 'transparent', paddingLeft: (item as any).isChild ? 24 : 12 }}>
+                    <item.icon size={15} style={{ color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#7530fb' : 'rgba(255,255,255,1)', flexShrink: 0, transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-accent'} />
+                    <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: isActive ? 700 : 500, flex: 1, color: isLocked ? 'rgba(255,255,255,0.3)' : isActive ? '#7530fb' : 'rgba(255,255,255,1)', transition: 'color 0.15s' }} className={isLocked ? '' : 'group-hover:!text-accent'}>{item.label}</span>
+                    {(item as any).hasChild && (
+                      <ChevronDown size={13} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAffiliateMenu(v => !v) }}
+                        style={{ color: 'rgba(255,255,255,0.4)', transform: showAffiliateMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                    )}
+                    {!isActive && !(item as any).hasChild && sectionPerms && (profile as any)?.is_super_admin !== true && (item as any).permKey && sectionPerms[(item as any).permKey] === true && (
+                      <Eye size={10} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
+                    )}
+                    {isLocked && (
+                      <Lock size={10} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
+                    )}
+                    {!(item as any).hasChild && !(item as any).isChild && isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#7530fb' }} />}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Settings + Logout */}
+            <div className="px-2 pb-6" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 12 }}>
+              <button
+                onClick={() => setShowAdminSettings(true)}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
+                style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <Settings size={15} />
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }}>Settings</span>
+              </button>
+              <button onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors w-full"
+                style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <LogOut size={15} />
+                <span style={{ fontFamily: 'Inter,sans-serif', fontSize: 12, fontWeight: 500 }}>Log Out</span>
+              </button>
+            </div>
+          </aside>
+        ) : (
+          /* -- USER SIDEBAR -- */
+          <aside className="hidden lg:flex w-[60px] shrink-0 flex-col h-screen rounded-none m-0 border-r border-[#2d224d]" style={{ backgroundColor: '#1e1535' }}>
+            <div className="flex justify-center pt-[30px] pb-[35px]">
+              <button onClick={() => router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard')} title="Home" className="hover:opacity-80 transition-opacity">
+                <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 24, height: 24 }} />
+              </button>
+            </div>
+            <div className="flex flex-col flex-1">
+              {visibleNavItems.map((item) => {
+                if (item.label === 'Design Studio') {
+                  // Design Studio toggles the sub-sidebar; stays active when on design page
+                  return (
+                    <button
+                      key={item.href}
+                      title={item.label}
+                      onClick={() => {
+                        if (!isDesignPage) router.push(item.href)
+                        setSubSidebarOpen(v => !v)
+                      }}
+                      className="relative flex items-center justify-center w-[60px] h-[52px] group"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      {isDesignPage && (
+                        <div className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-[10px]" />
+                      )}
+                      <div className={cn(
+                        'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-250',
+                        isDesignPage
+                          ? 'bg-accent scale-100'
+                          : 'bg-transparent group-hover:bg-white/10 scale-95 group-hover:scale-100'
+                      )}>
+                        <item.icon
+                          size={isDesignPage ? 20 : 19}
+                          className={cn(isDesignPage ? 'text-dark' : 'text-white group-hover:text-white')}
+                        />
+                      </div>
+                    </button>
+                  )
+                }
+                return (
+                  <SidebarItem key={item.href} icon={item.icon} label={item.label} href={item.href} isActive={pathname === item.href} />
+                )
+              })}
+              {/* Admin uses separate sidebar */}
+            </div>
+            <div className="pb-6 flex flex-col items-center gap-2">
+              <button onClick={() => setShowSettings(true)} title="Security Settings" className="p-2 text-white hover:text-white/80 transition-colors">
+                <Settings size={20} />
+              </button>
+              <button onClick={() => setShowSupport(true)} title="Help & Support" className="p-2 text-white hover:text-white/80 transition-colors">
+                <MessageCircle size={20} />
+              </button>
+              <button onClick={handleLogout} title="Log Out" className="p-2 text-white hover:text-white/80 transition-colors">
+                <LogOut size={20} />
+              </button>
+            </div>
+          </aside>
+        )}
+
+        {/* -- DESIGN STUDIO SUB-SIDEBAR -- */}
+        {isDesignPage && subSidebarOpen && (
+          <div
+            className="hidden lg:flex flex-col shrink-0 h-screen"
+            style={{
+              width: 220,
+              backgroundColor: '#ffffff',
+              borderRight: '1px solid #ede9fe',
+              boxShadow: '2px 0 12px rgba(117,48,251,0.06)',
+            }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-4 pt-5 pb-4 shrink-0"
+              style={{ borderBottom: '1px solid #f3eeff' }}
+            >
+              <span
+                className="text-[16px] font-bold whitespace-nowrap"
+                style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}
+              >
+                Design Studio
+              </span>
+              <button
+                onClick={() => setSubSidebarOpen(false)}
+                title="Close panel"
+                className="w-6 h-6 flex items-center justify-center rounded-full transition-all hover:opacity-70"
+                style={{ backgroundColor: '#f3eeff', border: '1px solid #ede9fe', cursor: 'pointer', flexShrink: 0 }}
+              >
+                <ChevronRight size={12} style={{ color: '#7530fb' }} />
+              </button>
+            </div>
+
+            {/* Tab list */}
+            <nav className="flex flex-col pt-2 flex-1 overflow-y-auto">
+              {DESIGN_STUDIO_TABS.map(tab => {
+                const currentTab = searchParams.get('tab') || 'templates'
+                const isActive = currentTab === tab.id
+                const Icon = tab.icon
+                return (
+                  <Link
+                    key={tab.id}
+                    href={`/dashboard/design?tab=${tab.id}`}
+                    className="relative flex items-center gap-2.5 px-4 py-2.5 transition-all"
+                    style={{
+                      textDecoration: 'none',
+                      backgroundColor: isActive ? '#f3eeff' : 'transparent',
+                    }}
+                  >
+                    {isActive && (
+                      <div
+                        className="absolute right-0 top-1/2 -translate-y-1/2 rounded-l-full"
+                        style={{ width: 3, height: 22, backgroundColor: '#7530fb' }}
+                      />
+                    )}
+                    <Icon
+                      size={15}
+                      style={{ flexShrink: 0, color: isActive ? '#7530fb' : '#9ca3af' }}
+                    />
+                    <span
+                      className="text-[13px] whitespace-nowrap truncate"
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#7530fb' : '#1f1d2e',
+                      }}
+                    >
+                      {tab.label}
+                    </span>
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+        )}
+
+        {/* -- MAIN CONTENT -- */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
+
+          {/* -- TEAM SWITCHER BANNER -- */}
+          <TeamSwitcherBanner />
+
+          {/* -- PAGE CONTENT -- */}
+          <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: pathname.startsWith('/dashboard/title-builder') || pathname.startsWith('/dashboard/listing-generator') ? 'hidden' : 'auto' }}>
+            {emailUnverified && (
+              <div className="flex items-center justify-between px-4 py-2.5"
+                style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
+                <span style={{ color: '#92400e', fontSize: 13 }}>
+                  ?? Please verify your email to unlock all features
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (user?.email) {
+                        await supabase.auth.resend({ type: 'signup', email: user.email })
+                        alert('Verification email sent! Check your inbox.')
+                      }
+                    }}
+                    className="text-[12px] font-bold px-3 py-1 rounded-lg"
+                    style={{ backgroundColor: '#fbbf24', color: '#92400e' }}>
+                    Resend Email
+                  </button>
+                  <button
+                    onClick={() => setEmailUnverified(false)}
+                    className="text-[12px] px-2"
+                    style={{ color: '#92400e' }}>
+                    ?
+                  </button>
+                </div>
+              </div>
+            )}
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <AnnouncementBanner />
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {/* -- MOBILE DRAWER -- */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <div className="relative w-[250px] bg-dark flex flex-col z-10 animate-slide-right">
+            <div className="pt-[50px] pb-[30px] flex flex-col items-center">
+              <button onClick={() => { router.push(isUserMode ? '/dashboard?usermode=1' : '/dashboard'); setMobileOpen(false) }}>
+                <img src={brand.logo_icon} alt={brand.brand_name} style={{ width: 36, height: 36 }} />
+              </button>
+              <span className="text-accent text-base font-extrabold tracking-wide mt-1.5">Riazify</span>
+            </div>
+
+            <nav className="flex-1 px-4 space-y-0.5">
+              {/* Mobile also uses visibleNavItems */}
+              {visibleNavItems.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                const isExternalTool = item.href.startsWith('/tools/')
+
+                if (isExternalTool) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
+                        isActive ? 'bg-accent text-dark' : 'text-white hover:bg-white/10'
+                      )}
+                    >
+                      <Icon size={20} />
+                      <span className={cn('text-sm', isActive ? 'font-bold' : 'font-normal')}>
+                        {item.label}
+                      </span>
+                    </a>
+                  )
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-[10px] transition-all',
+                      isActive ? 'bg-accent text-dark' : 'text-white hover:bg-white/10'
+                    )}
+                  >
+                    <Icon size={20} />
+                    <span className={cn('text-sm', isActive ? 'font-bold' : 'font-normal')}>
+                      {item.label}
+                    </span>
+                  </Link>
+                )
+              })}
+
+              {/* Admin uses separate sidebar */}
+            </nav>
+
+            <button
+              onClick={() => { setShowSupport(true); setMobileOpen(false) }}
+              className="flex items-center gap-3 mx-4 px-3 py-2.5 text-white hover:text-white/80 transition-colors"
+            >
+              <MessageCircle size={20} />
+              <span className="text-sm font-semibold">Help & Support</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 mx-4 mb-8 px-3 py-2.5 text-white/40 hover:text-white/60 transition-colors"
+            >
+              <LogOut size={20} />
+              <span className="text-sm font-semibold">Log Out</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
+
+      {showSettings && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowSettings(false) }}
+        >
+          <div
+            className="w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col"
+            style={{ backgroundColor: '#F4F7FA', maxHeight: '90vh' }}
+          >
+            <div
+              className="flex items-center justify-between px-6 py-4 shrink-0"
+              style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #E2E8F0', borderRadius: '16px 16px 0 0' }}
+            >
+              <div className="flex items-center gap-2">
+                <Shield size={16} style={{ color: '#0F172A' }} />
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 700, color: '#0F172A' }}>Security Settings</span>
+              </div>
+              <button onClick={() => setShowSettings(false)} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                <X size={16} style={{ color: '#94A3B8' }} />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-6">
+              <SecurityTab />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAdminSettings && <AdminSettingsModal onClose={() => setShowAdminSettings(false)} />}
+      {/* -- BOTTOM-RIGHT TOASTS -- */}
+      {toasts.map((t, i) => (
+        <NotifToast
+          key={t.id}
+          title={t.title}
+          message={t.message}
+          bottomOffset={i * 90}
+          onTap={() => { removeToast(t.id); openNotifPanel() }}
+          onDismiss={() => removeToast(t.id)}
+        />
+      ))}
+    </div>
+  )
+}
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </Suspense>
+  )
+}

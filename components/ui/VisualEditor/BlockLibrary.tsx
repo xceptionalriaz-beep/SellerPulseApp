@@ -1,0 +1,339 @@
+'use client'
+import React, { useState, useCallback } from 'react'
+import { ChevronDown } from 'lucide-react'
+import {
+    BLOCK_CATEGORIES,
+    BLOCK_DEFINITIONS,
+    BlockType,
+    BlockCategory,
+    BlockDefinition,
+} from './blocks'
+
+const C = {
+    bg: '#f8f7ff', surface: '#ffffff', border: '#ede9fe',
+    primary: '#7530fb', primaryLight: '#f3eeff',
+    dark: '#1e1535', body: '#1f1d2e', secondary: '#6b7280',
+    muted: '#9ca3af', inputBorder: '#e5e0f5',
+}
+
+const CATEGORY_COLORS: Record<BlockCategory, string> = {
+    'Layout': '#7530fb', 'Content': '#0ea5e9', 'Product': '#16a34a',
+    'Media': '#d97706', 'eBay Specific': '#16a34a', 'Conversion': '#ef4444',
+    // Brand-consistent tail: 'Header & Footer' uses the deep brand purple
+    // (matches `C.dark` above), 'Typography' uses the secondary slate so the
+    // two new categories visually balance the existing six.
+    'Header & Footer': '#1e1535', 'Typography': '#6b7280',
+}
+
+// ── SVG visual previews ───────────────────────────────────────────────────────
+const P: Record<string, () => JSX.Element> = {
+    full_width_section: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="14" y="14" width="72" height="5" rx="2" fill="#c4b5fd" /><rect x="20" y="23" width="60" height="3" rx="1.5" fill="#ddd6fe" /><rect x="26" y="30" width="48" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
+
+    two_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="43" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="53" y="4" width="43" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="10" y="12" width="31" height="4" rx="2" fill="#c4b5fd" /><rect x="59" y="12" width="31" height="4" rx="2" fill="#c4b5fd" /></svg>,
+
+    three_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="3" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="36" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="69" y="4" width="28" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="7" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="40" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /><rect x="73" y="12" width="20" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    four_column: () => <svg viewBox="0 0 100 44" fill="none"><rect x="3" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="27" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="51" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="75" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="5" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /><rect x="29" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /><rect x="53" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /><rect x="77" y="12" width="18" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    spacer: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="18" width="92" height="8" rx="2" fill="#ede9fe" /><line x1="50" y1="4" x2="50" y2="18" stroke="#7530fb" strokeWidth="1" strokeDasharray="3 3" /><line x1="50" y1="26" x2="50" y2="40" stroke="#7530fb" strokeWidth="1" strokeDasharray="3 3" /></svg>,
+
+    border_box: () => <svg viewBox="0 0 100 44" fill="none"><rect x="10" y="6" width="80" height="32" rx="6" stroke="#7530fb" strokeWidth="2" fill="#f3eeff" /><rect x="20" y="14" width="60" height="4" rx="2" fill="#c4b5fd" /><rect x="20" y="22" width="45" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
+
+    container: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f8f7ff" stroke="#ddd6fe" strokeWidth="1" strokeDasharray="4 2" /><rect x="14" y="10" width="72" height="24" rx="3" fill="#f3eeff" stroke="#c4b5fd" strokeWidth="1" /><rect x="24" y="17" width="52" height="4" rx="2" fill="#c4b5fd" /><rect x="28" y="25" width="44" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    sidebar_layout: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="66" height="36" rx="3" fill="#ddd6fe" /><rect x="74" y="4" width="22" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="78" y="10" width="14" height="3" rx="1.5" fill="#1e1535" opacity="0.6" /><rect x="78" y="16" width="14" height="2" rx="1" fill="#c4b5fd" /></svg>,
+
+    heading: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="13" width="80" height="8" rx="4" fill="#7530fb" opacity="0.85" /><rect x="22" y="27" width="56" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
+
+    paragraph: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="9" width="80" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="10" y="15" width="75" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="10" y="21" width="80" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="10" y="27" width="65" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="10" y="33" width="45" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    bullet_list: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><circle cx="14" cy="13" r="3" fill="#7530fb" opacity="0.7" /><rect x="21" y="11" width="60" height="3" rx="1.5" fill="#c4b5fd" /><circle cx="14" cy="22" r="3" fill="#7530fb" opacity="0.7" /><rect x="21" y="20" width="52" height="3" rx="1.5" fill="#c4b5fd" /><circle cx="14" cy="31" r="3" fill="#7530fb" opacity="0.7" /><rect x="21" y="29" width="58" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    divider: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="20" width="80" height="2" rx="1" fill="#7530fb" opacity="0.4" /><circle cx="50" cy="21" r="5" fill="#7530fb" opacity="0.25" /></svg>,
+
+    product_title: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="9" width="80" height="8" rx="3" fill="#1e1535" opacity="0.85" /><rect x="10" y="21" width="36" height="3" rx="1.5" fill="#7530fb" opacity="0.5" /><rect x="10" y="29" width="55" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
+
+    price_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="10" width="50" height="11" rx="4" fill="#7530fb" opacity="0.9" /><rect x="66" y="12" width="22" height="7" rx="3" fill="#b8fa33" /><rect x="10" y="28" width="28" height="3" rx="1.5" fill="#ddd6fe" /><rect x="42" y="29" width="18" height="2" rx="1" fill="#c4b5fd" /></svg>,
+
+    product_image: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="18" y="6" width="64" height="32" rx="4" fill="#ddd6fe" /><circle cx="50" cy="16" r="6" fill="#c4b5fd" /><path d="M18 33 Q50 20 82 33" stroke="#c4b5fd" strokeWidth="2.5" fill="none" strokeLinecap="round" /></svg>,
+
+    product_description: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="6" y="7" width="5" height="22" rx="2.5" fill="#7530fb" /><rect x="16" y="9" width="50" height="5" rx="2" fill="#1e1535" opacity="0.75" /><rect x="16" y="18" width="74" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="16" y="24" width="68" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="16" y="30" width="50" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    specs_table: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="10" rx="3" fill="#7530fb" opacity="0.85" /><rect x="4" y="14" width="92" height="8" fill="#f3eeff" /><rect x="4" y="22" width="92" height="8" fill="#faf8ff" /><rect x="4" y="30" width="92" height="8" fill="#f3eeff" /><rect x="8" y="16.5" width="26" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="52" y="16.5" width="36" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="24.5" width="26" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="52" y="24.5" width="30" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="32.5" width="26" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="52" y="32.5" width="36" height="2.5" rx="1.25" fill="#c4b5fd" /></svg>,
+
+    image: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="10" y="7" width="80" height="30" rx="3" fill="#ddd6fe" /><circle cx="26" cy="17" r="5" fill="#c4b5fd" /><path d="M10 32 L30 20 L52 28 L68 16 L94 30" stroke="#c4b5fd" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>,
+
+    banner: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#1e1535" /><rect x="14" y="11" width="72" height="7" rx="3" fill="white" opacity="0.9" /><rect x="24" y="22" width="52" height="3" rx="1.5" fill="white" opacity="0.45" /><rect x="34" y="29" width="32" height="7" rx="3.5" fill="#b8fa33" /></svg>,
+
+    gallery_row: () => <svg viewBox="0 0 100 44" fill="none"><rect x="3" y="4" width="28" height="36" rx="3" fill="#ddd6fe" /><circle cx="12" cy="14" r="4" fill="#c4b5fd" /><path d="M3 34 Q17 24 31 34" stroke="#c4b5fd" strokeWidth="2" fill="none" /><rect x="36" y="4" width="28" height="36" rx="3" fill="#ddd6fe" /><circle cx="45" cy="14" r="4" fill="#c4b5fd" /><path d="M36 34 Q50 24 64 34" stroke="#c4b5fd" strokeWidth="2" fill="none" /><rect x="69" y="4" width="28" height="36" rx="3" fill="#ddd6fe" /><circle cx="78" cy="14" r="4" fill="#c4b5fd" /><path d="M69 34 Q83 24 97 34" stroke="#c4b5fd" strokeWidth="2" fill="none" /></svg>,
+
+    trust_badges: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="7" y="7" width="28" height="30" rx="4" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="21" cy="18" r="5" fill="#7530fb" opacity="0.3" /><rect x="11" y="26" width="20" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="36" y="7" width="28" height="30" rx="4" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="50" cy="18" r="5" fill="#7530fb" opacity="0.3" /><rect x="40" y="26" width="20" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="65" y="7" width="28" height="30" rx="4" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="79" cy="18" r="5" fill="#7530fb" opacity="0.3" /><rect x="69" y="26" width="20" height="2.5" rx="1.25" fill="#c4b5fd" /></svg>,
+
+    shipping_info: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" /><rect x="8" y="8" width="14" height="14" rx="3" fill="#16a34a" opacity="0.25" /><path d="M12 15 L14 17 L18 12" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="26" y="10" width="50" height="4" rx="2" fill="#16a34a" opacity="0.6" /><rect x="26" y="18" width="64" height="2.5" rx="1.25" fill="#bbf7d0" /><rect x="26" y="24" width="56" height="2.5" rx="1.25" fill="#bbf7d0" /><rect x="26" y="30" width="44" height="2.5" rx="1.25" fill="#bbf7d0" /></svg>,
+
+    returns_policy: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#eff6ff" stroke="#bfdbfe" strokeWidth="1" /><rect x="8" y="8" width="14" height="14" rx="3" fill="#3b82f6" opacity="0.25" /><path d="M15 11 C13 11 11 13 11 15 L11 17 M11 17 L14 14 M11 17 L13.5 19.5" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" /><rect x="26" y="10" width="50" height="4" rx="2" fill="#3b82f6" opacity="0.6" /><rect x="26" y="18" width="64" height="2.5" rx="1.25" fill="#bfdbfe" /><rect x="26" y="24" width="56" height="2.5" rx="1.25" fill="#bfdbfe" /><rect x="26" y="30" width="44" height="2.5" rx="1.25" fill="#bfdbfe" /></svg>,
+
+    seller_info: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><circle cx="20" cy="20" r="12" fill="#ddd6fe" /><circle cx="20" cy="16" r="5" fill="#c4b5fd" /><path d="M8 32 Q20 26 32 32" fill="#c4b5fd" /><rect x="36" y="11" width="40" height="5" rx="2" fill="#1e1535" opacity="0.7" /><rect x="36" y="20" width="56" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="36" y="26" width="48" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="36" y="33" width="32" height="5" rx="2.5" fill="#7530fb" opacity="0.4" /></svg>,
+
+    cta_banner: () => <svg viewBox="0 0 100 44" fill="none"><defs><linearGradient id="g1" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#7530fb" /><stop offset="1" stopColor="#1e1535" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#g1)" /><rect x="18" y="10" width="64" height="7" rx="3" fill="white" opacity="0.9" /><rect x="26" y="21" width="48" height="3" rx="1.5" fill="white" opacity="0.45" /><rect x="32" y="28" width="36" height="8" rx="4" fill="#b8fa33" /></svg>,
+
+    policy_tabs: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="22" height="11" rx="3" fill="#7530fb" /><rect x="27" y="4" width="22" height="11" rx="3" fill="#e9d5ff" opacity="0.6" /><rect x="50" y="4" width="22" height="11" rx="3" fill="#e9d5ff" opacity="0.6" /><rect x="73" y="4" width="23" height="11" rx="3" fill="#e9d5ff" opacity="0.6" /><rect x="4" y="15" width="92" height="25" rx="0" fill="white" stroke="#ddd6fe" strokeWidth="0.5" /><rect x="8" y="20" width="84" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="26" width="70" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="8" y="32" width="60" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    nav_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="14" width="92" height="16" rx="3" fill="#1e1535" /><rect x="10" y="19.5" width="13" height="3" rx="1.5" fill="white" opacity="0.8" /><rect x="27" y="19.5" width="13" height="3" rx="1.5" fill="white" opacity="0.8" /><rect x="44" y="19.5" width="13" height="3" rx="1.5" fill="white" opacity="0.8" /><rect x="61" y="19.5" width="13" height="3" rx="1.5" fill="white" opacity="0.8" /><rect x="78" y="17" width="14" height="8" rx="4" fill="#b8fa33" /></svg>,
+
+    urgency_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="14" width="92" height="16" rx="3" fill="#fee2e2" /><circle cx="14" cy="22" r="4" fill="#ef4444" opacity="0.75" /><rect x="22" y="19.5" width="60" height="3" rx="1.5" fill="#ef4444" opacity="0.65" /><rect x="22" y="25.5" width="42" height="2.5" rx="1.25" fill="#fca5a5" /></svg>,
+
+    cross_sell: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="8" width="40" height="28" rx="3" fill="white" stroke="#ddd6fe" strokeWidth="1" /><rect x="52" y="8" width="40" height="28" rx="3" fill="white" stroke="#ddd6fe" strokeWidth="1" /><rect x="12" y="11" width="32" height="14" rx="2" fill="#ddd6fe" /><rect x="12" y="27" width="24" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="12" y="32" width="18" height="3" rx="1.5" fill="#7530fb" opacity="0.35" /><rect x="56" y="11" width="32" height="14" rx="2" fill="#ddd6fe" /><rect x="56" y="27" width="24" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="56" y="32" width="18" height="3" rx="1.5" fill="#7530fb" opacity="0.35" /></svg>,
+
+    button_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="18" y="13" width="64" height="18" rx="9" fill="#7530fb" /><rect x="32" y="19.5" width="36" height="5" rx="2.5" fill="white" opacity="0.9" /></svg>,
+
+    rectangle: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="12" y="10" width="76" height="24" rx="5" fill="#ddd6fe" stroke="#c4b5fd" strokeWidth="1" /></svg>,
+
+    hero_header: () => <svg viewBox="0 0 100 44" fill="none"><defs><linearGradient id="g2" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#7530fb" /><stop offset="1" stopColor="#1e1535" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#g2)" /><rect x="24" y="11" width="52" height="8" rx="4" fill="white" opacity="0.9" /><rect x="32" y="23" width="36" height="3" rx="1.5" fill="white" opacity="0.45" /><rect x="36" y="30" width="28" height="7" rx="3.5" fill="#b8fa33" /></svg>,
+
+    raw_html: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#1e1535" /><rect x="10" y="10" width="20" height="3.5" rx="1.75" fill="#7530fb" opacity="0.8" /><rect x="16" y="17" width="56" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.7" /><rect x="16" y="23" width="44" height="2.5" rx="1.25" fill="#b8fa33" opacity="0.6" /><rect x="16" y="29" width="36" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.5" /><rect x="10" y="33" width="14" height="3.5" rx="1.75" fill="#7530fb" opacity="0.8" /><rect x="32" y="9" width="3" height="26" rx="1.5" fill="#374151" /></svg>,
+
+    // ── New Content Block Previews ──
+
+    faq_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="12" y="10" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="24" y="11" width="50" height="4" rx="2" fill="#1e1535" opacity="0.7" /><rect x="12" y="20" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="24" y="21" width="60" height="4" rx="2" fill="#c4b5fd" /><rect x="12" y="29" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="24" y="30" width="45" height="4" rx="2" fill="#ddd6fe" /></svg>,
+
+    testimonial_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><path d="M14 10 L14 22 L11 22 L11 32 Q11 35 14 35 L20 35 L20 10 Z" fill="#7530fb" opacity="0.4" /><rect x="22" y="10" width="30" height="5" rx="2" fill="#1e1535" opacity="0.7" /><rect x="22" y="18" width="35" height="3" rx="1.5" fill="#7530fb" opacity="0.4" /><rect x="22" y="24" width="25" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    compatibility_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" /><rect x="10" y="8" width="30" height="3" rx="1.5" fill="#16a34a" opacity="0.7" /><rect x="10" y="14" width="75" height="2" rx="1" fill="#16a34a" opacity="0.4" /><rect x="10" y="22" width="30" height="3" rx="1.5" fill="#dc2626" opacity="0.7" /><rect x="10" y="28" width="60" height="2" rx="1" fill="#fca5a5" /></svg>,
+
+    bundle_discount_banner: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#gb)" /><defs><linearGradient id="gb" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#7530fb" /><stop offset="1" stopColor="#b8fa33" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#gb)" opacity="0.85" /><rect x="16" y="11" width="44" height="7" rx="3" fill="white" opacity="0.9" /><rect x="16" y="22" width="36" height="3" rx="1.5" fill="white" opacity="0.7" /></svg>,
+
+    store_nav_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="18" width="92" height="8" rx="3" fill="#1e1535" /><rect x="12" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="26" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="40" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="54" y="20" width="11" height="4" rx="2" fill="white" opacity="0.7" /><rect x="72" y="18" width="18" height="8" rx="4" fill="#b8fa33" /></svg>,
+
+    shipping_policy_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" /><rect x="10" y="8" width="10" height="10" rx="3" fill="#16a34a" opacity="0.3" /><path d="M15 12 L13 15 L18 17" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="26" y="9" width="60" height="4" rx="2" fill="#1e1535" opacity="0.6" /><rect x="26" y="16" width="50" height="3" rx="1.5" fill="#16a34a" opacity="0.4" /><rect x="26" y="22" width="35" height="2.5" rx="1.25" fill="#c4b5fd" /></svg>,
+
+    payment_methods_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#eff6ff" stroke="#93c5fd" strokeWidth="1" /><rect x="10" y="8" width="14" height="10" rx="3" fill="#3b82f6" opacity="0.3" /><path d="M14 12 L13 14 L17 14 L16 12 Z" fill="white" opacity="0.7" /><rect x="10" y="20" width="75" height="4" rx="2" fill="#3b82f6" opacity="0.4" /><rect x="10" y="28" width="55" height="3" rx="1.5" fill="#93c5fd" /></svg>,
+
+    urgency_timer_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#fef2f2" stroke="#fca5a5" strokeWidth="1" /><circle cx="18" cy="22" r="8" fill="#ef4444" opacity="0.3" /><path d="M18 18 V22 L21 24" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="34" y="14" width="44" height="5" rx="2.5" fill="#ef4444" opacity="0.6" /><rect x="34" y="23" width="30" height="3" rx="1.5" fill="#fca5a5" /></svg>,
+
+    trust_badge_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#c4b5fd" strokeWidth="1" /><path d="M50 8 L54 15 L62 15 L56 20 L58 28 L50 23 L42 28 L44 20 L38 15 L46 15 Z" fill="#7530fb" opacity="0.6" /><rect x="20" y="32" width="60" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    hero_product: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="52" height="36" rx="3" fill="#ddd6fe" /><circle cx="22" cy="16" r="7" fill="#c4b5fd" /><path d="M4 33 Q22 24 52 30" stroke="#c4b5fd" strokeWidth="2" fill="none" /><rect x="60" y="6" width="36" height="7" rx="3" fill="#1e1535" opacity="0.8" /><rect x="60" y="17" width="36" height="3" rx="1.5" fill="#7530fb" opacity="0.5" /><rect x="60" y="23" width="28" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="60" y="29" width="22" height="7" rx="3.5" fill="#b8fa33" /></svg>,
+
+    product_variants: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="8" width="38" height="4" rx="2" fill="#1e1535" opacity="0.7" /><circle cx="16" cy="21" r="5" fill="#7530fb" /><circle cx="29" cy="21" r="5" fill="#b8fa33" /><circle cx="42" cy="21" r="5" fill="#ef4444" opacity="0.7" /><circle cx="55" cy="21" r="5" fill="#1e1535" opacity="0.6" /><rect x="10" y="30" width="12" height="6" rx="3" fill="#7530fb" opacity="0.9" /><rect x="25" y="30" width="12" height="6" rx="3" fill="#f3eeff" stroke="#7530fb" strokeWidth="1" /><rect x="40" y="30" width="12" height="6" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="55" y="30" width="12" height="6" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /></svg>,
+
+    compatibility_table: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="9" rx="3" fill="#1e1535" opacity="0.85" /><rect x="4" y="13" width="92" height="7" fill="#f0fdf4" /><circle cx="10" cy="16.5" r="2.5" fill="#16a34a" /><rect x="16" y="15" width="30" height="2.5" rx="1.25" fill="#16a34a" opacity="0.6" /><rect x="58" y="15" width="30" height="2.5" rx="1.25" fill="#16a34a" opacity="0.4" /><rect x="4" y="20" width="92" height="7" fill="#fff7ed" /><circle cx="10" cy="23.5" r="2.5" fill="#f97316" opacity="0.8" /><rect x="16" y="22" width="26" height="2.5" rx="1.25" fill="#f97316" opacity="0.5" /><rect x="58" y="22" width="24" height="2.5" rx="1.25" fill="#fed7aa" /><rect x="4" y="27" width="92" height="7" fill="#fef2f2" /><circle cx="10" cy="30.5" r="2.5" fill="#ef4444" opacity="0.7" /><rect x="16" y="29" width="22" height="2.5" rx="1.25" fill="#fca5a5" /><rect x="58" y="29" width="26" height="2.5" rx="1.25" fill="#fca5a5" /></svg>,
+
+    condition_details: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#fffbeb" stroke="#fde68a" strokeWidth="1" /><rect x="8" y="8" width="16" height="6" rx="3" fill="#f59e0b" opacity="0.8" /><rect x="8" y="8" width="16" height="6" rx="3" fill="#f59e0b" opacity="0.8" /><rect x="27" y="9" width="40" height="4" rx="2" fill="#1e1535" opacity="0.7" /><rect x="8" y="18" width="84" height="2.5" rx="1.25" fill="#fde68a" /><rect x="8" y="24" width="70" height="2.5" rx="1.25" fill="#fde68a" /><rect x="8" y="30" width="55" height="2.5" rx="1.25" fill="#fde68a" /><rect x="8" y="36" width="40" height="2.5" rx="1.25" fill="#fde68a" /></svg>,
+
+    whats_in_the_box: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="10" y="7" width="60" height="5" rx="2" fill="#1e1535" opacity="0.75" /><rect x="8" y="20" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="20" y="22" width="38" height="3" rx="1.5" fill="#c4b5fd" /><rect x="8" y="30" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="20" y="32" width="30" height="3" rx="1.5" fill="#c4b5fd" /><rect x="62" y="16" width="30" height="20" rx="3" fill="#ddd6fe" /><path d="M62 22 L92 22" stroke="#c4b5fd" strokeWidth="1" /><path d="M73 16 L73 36" stroke="#c4b5fd" strokeWidth="1" /></svg>,
+
+    key_features_grid: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="7" y="7" width="42" height="17" rx="3" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="15" cy="13" r="3.5" fill="#7530fb" opacity="0.5" /><rect x="22" y="11" width="22" height="3" rx="1.5" fill="#1e1535" opacity="0.65" /><rect x="22" y="17" width="18" height="2" rx="1" fill="#c4b5fd" /><rect x="52" y="7" width="42" height="17" rx="3" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="60" cy="13" r="3.5" fill="#b8fa33" opacity="0.7" /><rect x="67" y="11" width="22" height="3" rx="1.5" fill="#1e1535" opacity="0.65" /><rect x="67" y="17" width="18" height="2" rx="1" fill="#c4b5fd" /><rect x="7" y="27" width="42" height="11" rx="3" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="15" cy="32" r="3.5" fill="#7530fb" opacity="0.35" /><rect x="22" y="30.5" width="22" height="3" rx="1.5" fill="#c4b5fd" /><rect x="52" y="27" width="42" height="11" rx="3" fill="white" stroke="#ddd6fe" strokeWidth="1" /><circle cx="60" cy="32" r="3.5" fill="#7530fb" opacity="0.35" /><rect x="67" y="30.5" width="22" height="3" rx="1.5" fill="#c4b5fd" /></svg>,
+
+    features_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="8" y="7" width="84" height="9" rx="3" fill="#7530fb" opacity="0.15" /><rect x="12" y="9.5" width="16" height="4" rx="2" fill="#7530fb" opacity="0.7" /><rect x="32" y="9.5" width="14" height="4" rx="2" fill="#c4b5fd" /><rect x="50" y="9.5" width="14" height="4" rx="2" fill="#c4b5fd" /><rect x="68" y="9.5" width="14" height="4" rx="2" fill="#c4b5fd" /><rect x="8" y="19" width="84" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="8" y="25" width="70" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="8" y="31" width="55" height="2.5" rx="1.25" fill="#ede9fe" /></svg>,
+
+    single_image: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="12" y="7" width="76" height="28" rx="4" fill="#ddd6fe" /><circle cx="30" cy="17" r="6" fill="#c4b5fd" /><path d="M12 32 L35 20 L56 28 L72 16 L88 26" stroke="#c4b5fd" strokeWidth="2.5" fill="none" strokeLinecap="round" /><rect x="24" y="38" width="52" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.5" /></svg>,
+
+    video_placeholder: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#1e1535" /><rect x="8" y="7" width="84" height="26" rx="3" fill="#2d1f4e" /><circle cx="50" cy="20" r="9" fill="#7530fb" opacity="0.5" /><path d="M46 16 L56 20 L46 24 Z" fill="white" opacity="0.9" /><rect x="18" y="37" width="64" height="2.5" rx="1.25" fill="#7530fb" opacity="0.35" /></svg>,
+
+    logo_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="1" /><rect x="8" y="14" width="16" height="10" rx="3" fill="#ddd6fe" /><rect x="28" y="14" width="16" height="10" rx="3" fill="#ddd6fe" /><rect x="48" y="14" width="16" height="10" rx="3" fill="#ddd6fe" /><rect x="68" y="14" width="16" height="10" rx="3" fill="#ddd6fe" /><rect x="10" y="17" width="12" height="4" rx="2" fill="#c4b5fd" /><rect x="30" y="17" width="12" height="4" rx="2" fill="#c4b5fd" /><rect x="50" y="17" width="12" height="4" rx="2" fill="#c4b5fd" /><rect x="70" y="17" width="12" height="4" rx="2" fill="#c4b5fd" /><rect x="22" y="14" width="2" height="10" rx="1" fill="#e5e7eb" /><rect x="42" y="14" width="2" height="10" rx="1" fill="#e5e7eb" /><rect x="62" y="14" width="2" height="10" rx="1" fill="#e5e7eb" /></svg>,
+
+    before_after: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="44" height="36" rx="3" fill="#fee2e2" stroke="#fca5a5" strokeWidth="1" /><rect x="52" y="4" width="44" height="36" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" /><rect x="8" y="7" width="18" height="5" rx="2" fill="#ef4444" opacity="0.6" /><rect x="54" y="7" width="18" height="5" rx="2" fill="#16a34a" opacity="0.6" /><rect x="8" y="16" width="36" height="18" rx="2" fill="#fca5a5" opacity="0.5" /><rect x="54" y="16" width="36" height="18" rx="2" fill="#86efac" opacity="0.5" /><path d="M48 22 L52 22 M50 20 L52 22 L50 24" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+
+    product_comparison: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="8" rx="3" fill="#7530fb" opacity="0.85" /><rect x="4" y="12" width="30" height="7" fill="#f3eeff" /><rect x="34" y="12" width="31" height="7" fill="#ede9fe" /><rect x="65" y="12" width="31" height="7" fill="#f3eeff" /><rect x="4" y="19" width="30" height="6" fill="white" /><rect x="34" y="19" width="31" height="6" fill="#f8f7ff" /><rect x="65" y="19" width="31" height="6" fill="white" /><rect x="4" y="25" width="30" height="6" fill="#f3eeff" /><rect x="34" y="25" width="31" height="6" fill="#ede9fe" /><rect x="65" y="25" width="31" height="6" fill="#f3eeff" /><rect x="4" y="31" width="30" height="9" fill="white" /><rect x="34" y="31" width="31" height="9" fill="#f8f7ff" /><rect x="65" y="31" width="31" height="9" fill="white" /><rect x="8" y="14" width="18" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="38" y="14" width="20" height="2.5" rx="1.25" fill="#7530fb" opacity="0.7" /><rect x="69" y="14" width="18" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><path d="M38 22 L43 25 L56 18" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+
+    item_specifics: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="8" width="38" height="3" rx="1.5" fill="#7530fb" opacity="0.7" /><rect x="8" y="13" width="92" height="0.5" rx="0.25" fill="#ddd6fe" /><rect x="8" y="16" width="24" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="46" y="16" width="44" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="22" width="24" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="46" y="22" width="36" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="28" width="24" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="46" y="28" width="40" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="34" width="24" height="2.5" rx="1.25" fill="#6b7280" opacity="0.5" /><rect x="46" y="34" width="28" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    // ── eBay Specific ──────────────────────────────────────────────────────────
+    payment_methods: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#eff6ff" stroke="#bfdbfe" strokeWidth="1" /><rect x="8" y="8" width="20" height="13" rx="3" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.75" /><rect x="8" y="11" width="20" height="4" rx="0" fill="#3b82f6" opacity="0.3" /><rect x="32" y="8" width="20" height="13" rx="3" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.75" /><rect x="32" y="11" width="20" height="4" rx="0" fill="#3b82f6" opacity="0.3" /><rect x="56" y="8" width="20" height="13" rx="3" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.75" /><rect x="56" y="11" width="20" height="4" rx="0" fill="#3b82f6" opacity="0.3" /><rect x="8" y="26" width="60" height="3" rx="1.5" fill="#93c5fd" opacity="0.6" /><rect x="8" y="32" width="40" height="2.5" rx="1.25" fill="#bfdbfe" /></svg>,
+
+    dispatch_timer: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#fef9c3" stroke="#fde68a" strokeWidth="1" /><circle cx="20" cy="22" r="10" fill="#f59e0b" opacity="0.2" stroke="#fbbf24" strokeWidth="1" /><path d="M20 16 V22 L25 25" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="36" y="13" width="50" height="5" rx="2.5" fill="#f59e0b" opacity="0.7" /><rect x="36" y="22" width="40" height="3" rx="1.5" fill="#fbbf24" opacity="0.5" /><rect x="36" y="29" width="30" height="2.5" rx="1.25" fill="#fde68a" /></svg>,
+
+    bundle_deal: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="7" width="26" height="22" rx="3" fill="#ddd6fe" /><rect x="10" y="9" width="22" height="13" rx="2" fill="#c4b5fd" opacity="0.6" /><rect x="12" y="24" width="18" height="2.5" rx="1.25" fill="#7530fb" opacity="0.5" /><rect x="38" y="7" width="26" height="22" rx="3" fill="#ddd6fe" /><rect x="40" y="9" width="22" height="13" rx="2" fill="#c4b5fd" opacity="0.6" /><rect x="42" y="24" width="18" height="2.5" rx="1.25" fill="#7530fb" opacity="0.5" /><rect x="68" y="7" width="26" height="22" rx="3" fill="#ddd6fe" /><rect x="70" y="9" width="22" height="13" rx="2" fill="#c4b5fd" opacity="0.6" /><rect x="72" y="24" width="18" height="2.5" rx="1.25" fill="#7530fb" opacity="0.5" /><rect x="28" y="14" width="10" height="7" rx="2" fill="#b8fa33" /><rect x="58" y="14" width="10" height="7" rx="2" fill="#b8fa33" /><rect x="20" y="33" width="60" height="5" rx="2.5" fill="#7530fb" opacity="0.7" /></svg>,
+
+    feedback_score: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="7" width="84" height="9" rx="3" fill="#7530fb" opacity="0.12" /><rect x="12" y="9.5" width="40" height="4" rx="2" fill="#7530fb" opacity="0.6" /><rect x="60" y="9" width="16" height="5" rx="2.5" fill="#b8fa33" /><rect x="8" y="20" width="84" height="1" fill="#ede9fe" /><path d="M20 28 L22 24 L24 28 L28 28 L25 31 L26 35 L22 32 L18 35 L19 31 L16 28 Z" fill="#f59e0b" opacity="0.8" /><path d="M40 28 L42 24 L44 28 L48 28 L45 31 L46 35 L42 32 L38 35 L39 31 L36 28 Z" fill="#f59e0b" opacity="0.8" /><path d="M60 28 L62 24 L64 28 L68 28 L65 31 L66 35 L62 32 L58 35 L59 31 L56 28 Z" fill="#f59e0b" opacity="0.8" /><path d="M80 28 L82 24 L84 28 L88 28 L85 31 L86 35 L82 32 L78 35 L79 31 L76 28 Z" fill="#e5e7eb" opacity="0.8" /></svg>,
+
+    vat_notice: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" /><rect x="8" y="8" width="14" height="14" rx="3" fill="#16a34a" opacity="0.25" /><text x="11" y="19" fill="#16a34a" fontSize="9" fontWeight="bold" opacity="0.8">%</text><rect x="26" y="10" width="44" height="4" rx="2" fill="#16a34a" opacity="0.6" /><rect x="8" y="26" width="84" height="2.5" rx="1.25" fill="#86efac" /><rect x="8" y="32" width="65" height="2.5" rx="1.25" fill="#bbf7d0" /></svg>,
+
+    international_shipping: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#eff6ff" stroke="#bfdbfe" strokeWidth="1" /><circle cx="20" cy="16" r="8" fill="#3b82f6" opacity="0.15" stroke="#93c5fd" strokeWidth="0.75" /><ellipse cx="20" cy="16" rx="4" ry="8" fill="none" stroke="#93c5fd" strokeWidth="0.75" /><line x1="12" y1="16" x2="28" y2="16" stroke="#93c5fd" strokeWidth="0.75" /><rect x="34" y="9" width="56" height="4" rx="2" fill="#3b82f6" opacity="0.5" /><rect x="34" y="17" width="44" height="3" rx="1.5" fill="#93c5fd" opacity="0.6" /><rect x="8" y="28" width="16" height="5" rx="2" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.5" /><rect x="28" y="28" width="16" height="5" rx="2" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.5" /><rect x="48" y="28" width="16" height="5" rx="2" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.5" /><rect x="68" y="28" width="16" height="5" rx="2" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.5" /></svg>,
+
+    authenticity_guarantee: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#faf5ff" stroke="#e9d5ff" strokeWidth="1" /><path d="M50 7 L56 14 L65 13 L63 22 L70 27 L63 32 L65 41 L56 39 L50 46 L44 39 L35 41 L37 32 L30 27 L37 22 L35 13 L44 14 Z" fill="#7530fb" opacity="0.15" stroke="#7530fb" strokeWidth="0.75" /><path d="M44 22 L48 26 L56 18" stroke="#7530fb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><rect x="8" y="10" width="28" height="3" rx="1.5" fill="#7530fb" opacity="0.5" /><rect x="8" y="17" width="20" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="24" width="24" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    condition_badge: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="13" width="36" height="18" rx="9" fill="#7530fb" opacity="0.15" stroke="#7530fb" strokeWidth="0.75" /><rect x="12" y="19" width="28" height="6" rx="3" fill="#7530fb" opacity="0.6" /><rect x="50" y="13" width="36" height="18" rx="9" fill="#16a34a" opacity="0.12" stroke="#16a34a" strokeWidth="0.75" /><rect x="54" y="19" width="28" height="6" rx="3" fill="#16a34a" opacity="0.5" /></svg>,
+
+    // ── Conversion ─────────────────────────────────────────────────────────────
+    money_back: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" /><circle cx="18" cy="22" r="10" fill="#16a34a" opacity="0.15" stroke="#86efac" strokeWidth="1" /><path d="M18 17 C15 17 13 19 13 22 C13 25 15 27 18 27 L18 25 M18 17 L18 15 M18 27 L18 29" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" /><path d="M16 21 L18 23 L22 19" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="34" y="13" width="56" height="5" rx="2.5" fill="#16a34a" opacity="0.6" /><rect x="34" y="22" width="44" height="3" rx="1.5" fill="#86efac" /><rect x="34" y="29" width="36" height="2.5" rx="1.25" fill="#bbf7d0" /></svg>,
+
+    free_shipping_banner: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="1" /><rect x="4" y="4" width="92" height="11" rx="3" fill="#16a34a" opacity="0.15" /><rect x="22" y="6.5" width="56" height="6" rx="3" fill="#16a34a" opacity="0.7" /><rect x="8" y="20" width="38" height="3" rx="1.5" fill="#86efac" /><rect x="8" y="27" width="28" height="2.5" rx="1.25" fill="#bbf7d0" /><path d="M60 18 L70 18 L74 26 L56 26 Z" fill="#16a34a" opacity="0.25" stroke="#86efac" strokeWidth="0.75" /><rect x="56" y="30" width="18" height="4" rx="2" fill="#16a34a" opacity="0.2" stroke="#86efac" strokeWidth="0.5" /><circle cx="60" cy="34" r="2" fill="#16a34a" opacity="0.4" /><circle cx="70" cy="34" r="2" fill="#16a34a" opacity="0.4" /></svg>,
+
+    why_buy_from_us: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="7" width="84" height="6" rx="3" fill="#7530fb" opacity="0.15" /><rect x="20" y="8.5" width="60" height="3" rx="1.5" fill="#7530fb" opacity="0.6" /><rect x="8" y="16" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="20" y="18" width="70" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="27" width="8" height="8" rx="2" fill="#b8fa33" opacity="0.7" /><rect x="20" y="29" width="60" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="8" y="38" width="8" height="4" rx="2" fill="#7530fb" opacity="0.3" /><rect x="20" y="39" width="50" height="2" rx="1" fill="#ddd6fe" /></svg>,
+
+    satisfaction_guarantee: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#fffbeb" stroke="#fde68a" strokeWidth="1" /><path d="M50 8 L54 16 L63 17 L57 23 L58 32 L50 28 L42 32 L43 23 L37 17 L46 16 Z" fill="#f59e0b" opacity="0.25" stroke="#fbbf24" strokeWidth="0.75" /><path d="M46 20 L49 23 L54 17" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><rect x="8" y="10" width="26" height="4" rx="2" fill="#f59e0b" opacity="0.6" /><rect x="8" y="18" width="20" height="3" rx="1.5" fill="#fbbf24" opacity="0.5" /><rect x="8" y="25" width="24" height="2.5" rx="1.25" fill="#fde68a" /><rect x="8" y="31" width="18" height="2.5" rx="1.25" fill="#fde68a" opacity="0.6" /></svg>,
+
+    limited_time_offer: () => <svg viewBox="0 0 100 44" fill="none"><defs><linearGradient id="lto" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#ef4444" /><stop offset="1" stopColor="#dc2626" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#lto)" opacity="0.9" /><rect x="10" y="8" width="80" height="8" rx="4" fill="white" opacity="0.15" /><rect x="20" y="9.5" width="60" height="5" rx="2.5" fill="white" opacity="0.85" /><rect x="8" y="20" width="40" height="3" rx="1.5" fill="white" opacity="0.5" /><rect x="55" y="18" width="14" height="7" rx="2" fill="white" opacity="0.9" /><rect x="72" y="18" width="14" height="7" rx="2" fill="white" opacity="0.9" /><rect x="57" y="20" width="10" height="3" rx="1.5" fill="#ef4444" opacity="0.8" /><rect x="74" y="20" width="10" height="3" rx="1.5" fill="#ef4444" opacity="0.8" /><rect x="18" y="30" width="64" height="6" rx="3" fill="white" opacity="0.2" /></svg>,
+
+    // ── Header / Footer ────────────────────────────────────────────────────────
+    store_header: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#1e1535" /><rect x="8" y="7" width="30" height="10" rx="3" fill="#7530fb" opacity="0.6" /><rect x="42" y="10" width="12" height="3" rx="1.5" fill="white" opacity="0.6" /><rect x="57" y="10" width="12" height="3" rx="1.5" fill="white" opacity="0.6" /><rect x="72" y="10" width="12" height="3" rx="1.5" fill="white" opacity="0.6" /><rect x="4" y="20" width="92" height="1" fill="#7530fb" opacity="0.3" /><rect x="8" y="24" width="40" height="3" rx="1.5" fill="#c4b5fd" opacity="0.4" /><rect x="8" y="30" width="28" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.25" /></svg>,
+
+    store_footer: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#1e1535" /><rect x="4" y="4" width="92" height="1" fill="#7530fb" opacity="0.4" /><rect x="8" y="8" width="20" height="3" rx="1.5" fill="#7530fb" opacity="0.6" /><rect x="8" y="14" width="14" height="2" rx="1" fill="#c4b5fd" opacity="0.4" /><rect x="8" y="19" width="16" height="2" rx="1" fill="#c4b5fd" opacity="0.3" /><rect x="8" y="24" width="12" height="2" rx="1" fill="#c4b5fd" opacity="0.25" /><rect x="38" y="8" width="20" height="3" rx="1.5" fill="#7530fb" opacity="0.6" /><rect x="38" y="14" width="14" height="2" rx="1" fill="#c4b5fd" opacity="0.4" /><rect x="38" y="19" width="18" height="2" rx="1" fill="#c4b5fd" opacity="0.3" /><rect x="68" y="8" width="20" height="3" rx="1.5" fill="#7530fb" opacity="0.6" /><rect x="68" y="14" width="14" height="2" rx="1" fill="#c4b5fd" opacity="0.4" /><rect x="68" y="19" width="10" height="2" rx="1" fill="#c4b5fd" opacity="0.3" /><rect x="4" y="32" width="92" height="1" fill="#7530fb" opacity="0.2" /><rect x="20" y="35" width="60" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.2" /></svg>,
+
+    breadcrumb_bar: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f8f7ff" stroke="#ede9fe" strokeWidth="1" /><rect x="8" y="19" width="14" height="6" rx="3" fill="#7530fb" opacity="0.15" /><rect x="10" y="20.5" width="10" height="3" rx="1.5" fill="#7530fb" opacity="0.5" /><path d="M25 22 L28 22" stroke="#9ca3af" strokeWidth="1" /><path d="M27 20 L30 22 L27 24" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><rect x="32" y="19" width="18" height="6" rx="3" fill="#7530fb" opacity="0.08" /><rect x="34" y="20.5" width="14" height="3" rx="1.5" fill="#9ca3af" opacity="0.5" /><path d="M53 22 L56 22" stroke="#9ca3af" strokeWidth="1" /><path d="M55 20 L58 22 L55 24" stroke="#9ca3af" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /><rect x="60" y="19" width="22" height="6" rx="3" fill="#7530fb" opacity="0.08" /><rect x="62" y="20.5" width="18" height="3" rx="1.5" fill="#9ca3af" opacity="0.4" /></svg>,
+
+    category_nav: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="8" y="8" width="20" height="28" rx="3" fill="#7530fb" opacity="0.1" /><rect x="10" y="12" width="16" height="3" rx="1.5" fill="#7530fb" opacity="0.7" /><rect x="10" y="18" width="14" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="10" y="24" width="16" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.6" /><rect x="10" y="30" width="12" height="2.5" rx="1.25" fill="#ddd6fe" /><rect x="32" y="8" width="60" height="12" rx="3" fill="white" stroke="#ede9fe" strokeWidth="0.75" /><rect x="36" y="11" width="52" height="3" rx="1.5" fill="#1e1535" opacity="0.6" /><rect x="36" y="16" width="36" height="2" rx="1" fill="#c4b5fd" /></svg>,
+
+    social_links: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="22" y="14" width="14" height="16" rx="7" fill="#1e1535" opacity="0.7" /><rect x="24" y="18" width="10" height="8" rx="2" fill="white" opacity="0.9" /><rect x="42" y="14" width="14" height="16" rx="3" fill="#7530fb" opacity="0.7" /><rect x="44" y="17" width="10" height="10" rx="2" fill="white" opacity="0.9" /><circle cx="52" cy="20" r="2" fill="#7530fb" opacity="0.5" /><rect x="62" y="14" width="14" height="16" rx="7" fill="#1e88e5" opacity="0.7" /><rect x="64" y="18" width="10" height="8" rx="2" fill="white" opacity="0.9" /></svg>,
+
+    page_title: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="10" width="84" height="9" rx="4" fill="#1e1535" opacity="0.8" /><rect x="8" y="23" width="92" height="0.75" fill="#ede9fe" /><rect x="26" y="28" width="48" height="3" rx="1.5" fill="#c4b5fd" opacity="0.6" /><rect x="33" y="34" width="34" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    section_label: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="4" y="18" width="4" height="8" rx="2" fill="#7530fb" opacity="0.8" /><rect x="12" y="19.5" width="40" height="5" rx="2.5" fill="#1e1535" opacity="0.7" /><rect x="56" y="21" width="36" height="1" fill="#ddd6fe" /></svg>,
+
+    // ── Typography ─────────────────────────────────────────────────────────────
+    numbered_list: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="8" width="8" height="8" rx="2" fill="#7530fb" opacity="0.7" /><rect x="10" y="10" width="4" height="4" rx="1" fill="white" opacity="0.9" /><rect x="20" y="10" width="58" height="3" rx="1.5" fill="#c4b5fd" /><rect x="8" y="20" width="8" height="8" rx="2" fill="#7530fb" opacity="0.5" /><rect x="20" y="22" width="50" height="3" rx="1.5" fill="#c4b5fd" /><rect x="8" y="32" width="8" height="8" rx="2" fill="#7530fb" opacity="0.3" /><rect x="20" y="34" width="44" height="3" rx="1.5" fill="#ddd6fe" /></svg>,
+
+    quote_block: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="8" y="4" width="5" height="36" rx="2.5" fill="#7530fb" opacity="0.6" /><text x="16" y="18" fill="#7530fb" fontSize="18" opacity="0.3" fontFamily="Georgia">"</text><rect x="26" y="12" width="60" height="3" rx="1.5" fill="#1e1535" opacity="0.6" /><rect x="26" y="19" width="52" height="2.5" rx="1.25" fill="#c4b5fd" /><rect x="26" y="25" width="56" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.7" /><rect x="26" y="32" width="36" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    warning_box: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#fffbeb" stroke="#fde68a" strokeWidth="1" /><path d="M14 30 L20 10 L26 30 Z" fill="#f59e0b" opacity="0.25" stroke="#fbbf24" strokeWidth="0.75" /><text x="18" y="26" fill="#f59e0b" fontSize="8" fontWeight="bold">!</text><rect x="32" y="11" width="56" height="4" rx="2" fill="#f59e0b" opacity="0.6" /><rect x="32" y="19" width="60" height="2.5" rx="1.25" fill="#fde68a" /><rect x="32" y="25" width="52" height="2.5" rx="1.25" fill="#fde68a" opacity="0.7" /><rect x="32" y="31" width="40" height="2.5" rx="1.25" fill="#fde68a" opacity="0.5" /></svg>,
+
+    highlight_text: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="12" width="84" height="7" rx="2" fill="#b8fa33" opacity="0.5" /><rect x="10" y="13.5" width="60" height="4" rx="2" fill="#1e1535" opacity="0.7" /><rect x="8" y="24" width="70" height="2.5" rx="1.25" fill="#c4b5fd" opacity="0.5" /><rect x="8" y="30" width="55" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    pull_quote: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#faf5ff" stroke="#e9d5ff" strokeWidth="1" /><text x="10" y="24" fill="#7530fb" fontSize="24" opacity="0.2" fontFamily="Georgia">"</text><rect x="24" y="12" width="64" height="5" rx="2.5" fill="#7530fb" opacity="0.5" /><rect x="24" y="21" width="56" height="3" rx="1.5" fill="#c4b5fd" opacity="0.5" /><rect x="24" y="28" width="48" height="3" rx="1.5" fill="#ddd6fe" /><rect x="34" y="34" width="24" height="2.5" rx="1.25" fill="#7530fb" opacity="0.25" /></svg>,
+
+    info_box: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#eff6ff" stroke="#bfdbfe" strokeWidth="1" /><circle cx="16" cy="16" r="7" fill="#3b82f6" opacity="0.2" stroke="#93c5fd" strokeWidth="0.75" /><rect x="15" y="12" width="2" height="5" rx="1" fill="#3b82f6" opacity="0.7" /><circle cx="16" cy="11" r="1" fill="#3b82f6" opacity="0.7" /><rect x="28" y="11" width="56" height="4" rx="2" fill="#3b82f6" opacity="0.5" /><rect x="28" y="19" width="60" height="2.5" rx="1.25" fill="#93c5fd" opacity="0.6" /><rect x="28" y="25" width="50" height="2.5" rx="1.25" fill="#bfdbfe" /><rect x="28" y="31" width="40" height="2.5" rx="1.25" fill="#bfdbfe" opacity="0.6" /></svg>,
+
+    // ── Other missing ──────────────────────────────────────────────────────────
+    badge_row: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><rect x="8" y="15" width="20" height="14" rx="7" fill="#7530fb" opacity="0.15" stroke="#7530fb" strokeWidth="0.5" /><rect x="10" y="19" width="16" height="6" rx="3" fill="#7530fb" opacity="0.5" /><rect x="32" y="15" width="20" height="14" rx="7" fill="#16a34a" opacity="0.15" stroke="#16a34a" strokeWidth="0.5" /><rect x="34" y="19" width="16" height="6" rx="3" fill="#16a34a" opacity="0.45" /><rect x="56" y="15" width="20" height="14" rx="7" fill="#f59e0b" opacity="0.15" stroke="#f59e0b" strokeWidth="0.5" /><rect x="58" y="19" width="16" height="6" rx="3" fill="#f59e0b" opacity="0.45" /><rect x="80" y="15" width="14" height="14" rx="7" fill="#7530fb" opacity="0.1" stroke="#7530fb" strokeWidth="0.5" /></svg>,
+
+    data_table: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="8" rx="3" fill="#7530fb" opacity="0.8" /><rect x="4" y="12" width="46" height="6" fill="#f3eeff" /><rect x="50" y="12" width="46" height="6" fill="#f3eeff" /><rect x="4" y="18" width="46" height="6" fill="white" /><rect x="50" y="18" width="46" height="6" fill="white" /><rect x="4" y="24" width="46" height="6" fill="#f3eeff" /><rect x="50" y="24" width="46" height="6" fill="#f3eeff" /><rect x="4" y="30" width="46" height="10" fill="white" /><rect x="50" y="30" width="46" height="10" fill="white" /><rect x="8" y="14" width="30" height="2" rx="1" fill="#6b7280" opacity="0.5" /><rect x="54" y="14" width="30" height="2" rx="1" fill="#c4b5fd" /><rect x="8" y="20" width="26" height="2" rx="1" fill="#6b7280" opacity="0.5" /><rect x="54" y="20" width="24" height="2" rx="1" fill="#c4b5fd" /><rect x="8" y="26" width="32" height="2" rx="1" fill="#6b7280" opacity="0.5" /><rect x="54" y="26" width="28" height="2" rx="1" fill="#c4b5fd" /></svg>,
+
+    price_tag: () => <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" /><path d="M10 8 L10 22 L30 38 L50 22 L50 8 Z" fill="#7530fb" opacity="0.15" stroke="#7530fb" strokeWidth="0.75" /><circle cx="18" cy="16" r="3" fill="#7530fb" opacity="0.5" /><rect x="56" y="12" width="32" height="7" rx="3.5" fill="#7530fb" opacity="0.7" /><rect x="56" y="23" width="24" height="3" rx="1.5" fill="#c4b5fd" /><rect x="56" y="30" width="18" height="2.5" rx="1.25" fill="#ddd6fe" /></svg>,
+
+    seasonal_banner: () => <svg viewBox="0 0 100 44" fill="none"><defs><linearGradient id="sb" x1="0" y1="0" x2="100" y2="44" gradientUnits="userSpaceOnUse"><stop stopColor="#f59e0b" /><stop offset="1" stopColor="#ef4444" /></linearGradient></defs><rect x="4" y="4" width="92" height="36" rx="3" fill="url(#sb)" opacity="0.85" /><rect x="16" y="10" width="68" height="7" rx="3.5" fill="white" opacity="0.9" /><rect x="24" y="22" width="52" height="3" rx="1.5" fill="white" opacity="0.6" /><rect x="32" y="29" width="36" height="7" rx="3.5" fill="white" opacity="0.2" stroke="white" strokeWidth="0.75" /><circle cx="12" cy="8" r="3" fill="white" opacity="0.3" /><circle cx="88" cy="8" r="3" fill="white" opacity="0.3" /><circle cx="88" cy="36" r="3" fill="white" opacity="0.3" /><circle cx="12" cy="36" r="3" fill="white" opacity="0.3" /></svg>,
+
+}
+
+function Fallback({ color }: { color: string }) {
+    return <svg viewBox="0 0 100 44" fill="none"><rect x="4" y="4" width="92" height="36" rx="3" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="1" /><rect x="16" y="16" width="68" height="5" rx="2" fill={color} opacity="0.5" /><rect x="24" y="26" width="52" height="3" rx="1.5" fill="#ddd6fe" /></svg>
+}
+
+interface BlockLibraryProps {
+    onAddBlock: (type: BlockType) => void
+    onDragStart: (type: BlockType) => void
+    onDragEnd: () => void
+    draggedType: BlockType | null
+}
+
+export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, draggedType }: BlockLibraryProps) {
+    const [search, setSearch] = useState('')
+    const [hoveredType, setHovered] = useState<BlockType | null>(null)
+
+    // Strictly show ONLY Layout blocks in the Blocks tab
+    const layoutDefs = BLOCK_DEFINITIONS.filter(d => d.category === 'Layout')
+    const query = search.trim().toLowerCase()
+    const filteredDefs = query
+        ? layoutDefs.filter(d => d.label.toLowerCase().includes(query))
+        : layoutDefs
+
+    const handleDragStart = useCallback((e: React.DragEvent, type: BlockType) => {
+        e.dataTransfer.setData('text/plain', type)
+        e.dataTransfer.effectAllowed = 'copy'
+        onDragStart(type)
+    }, [onDragStart])
+
+    return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: C.bg, overflow: 'hidden' }}>
+
+            {/* Search */}
+            <div style={{ padding: '10px 12px 8px', borderBottom: `1px solid ${C.border}`, backgroundColor: C.surface, flexShrink: 0 }}>
+                <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: C.muted, pointerEvents: 'none' }}>⌕</span>
+                    <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search layout blocks..."
+                        style={{ width: '100%', boxSizing: 'border-box' as const, padding: '7px 10px 7px 28px', border: `1px solid ${C.inputBorder}`, borderRadius: 8, backgroundColor: C.bg, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.body, outline: 'none' }}
+                        onFocus={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.boxShadow = `0 0 0 3px ${C.primary}22` }}
+                        onBlur={e => { e.currentTarget.style.borderColor = C.inputBorder; e.currentTarget.style.boxShadow = 'none' }}
+                    />
+                    {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: 14, padding: 0 }}>×</button>}
+                </div>
+            </div>
+
+            {/* Layout Blocks Grid */}
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '10px 10px 16px' }}>
+                {filteredDefs.length === 0 ? (
+                    <div style={{ padding: '32px 0', textAlign: 'center', fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.muted }}>
+                        No layout blocks match "{search}"
+                    </div>
+                ) : (
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8, padding: '0 4px' }}>
+                            <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: CATEGORY_COLORS['Layout'], display: 'inline-block' }} />
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700, color: C.secondary, textTransform: 'uppercase' as const, letterSpacing: '0.07em' }}>
+                                Layout
+                            </span>
+                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
+                                {filteredDefs.length}
+                            </span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                            {filteredDefs.map(def => (
+                                <VisualCard
+                                    key={def.type}
+                                    def={def}
+                                    hovered={hoveredType === def.type}
+                                    dragging={draggedType === def.type}
+                                    accentColor={CATEGORY_COLORS['Layout']}
+                                    onHover={setHovered}
+                                    onAdd={onAddBlock}
+                                    onDragStart={handleDragStart}
+                                    onDragEnd={onDragEnd}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: '8px 14px', borderTop: `1px solid ${C.border}`, backgroundColor: C.surface, flexShrink: 0 }}>
+                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted, textAlign: 'center' }}>Click or drag to add</p>
+            </div>
+        </div>
+    )
+}
+
+export interface VisualCardProps {
+    def: BlockDefinition; hovered: boolean; dragging: boolean; accentColor: string
+    onHover: (t: BlockType | null) => void; onAdd: (t: BlockType) => void
+    onDragStart: (e: React.DragEvent, t: BlockType) => void; onDragEnd: () => void
+}
+
+export function VisualCard({ def, hovered, dragging, accentColor, onHover, onAdd, onDragStart, onDragEnd }: VisualCardProps) {
+    const Preview = P[def.type]
+    return (
+        <div
+            draggable
+            onDragStart={e => onDragStart(e, def.type)}
+            onDragEnd={onDragEnd}
+            onMouseEnter={() => onHover(def.type)}
+            onMouseLeave={() => onHover(null)}
+            onClick={() => onAdd(def.type)}
+            title={def.description}
+            style={{
+                borderRadius: 10,
+                border: `1.5px solid ${hovered ? accentColor : C.border}`,
+                backgroundColor: hovered ? C.primaryLight : C.surface,
+                cursor: 'grab',
+                opacity: dragging ? 0.4 : 1,
+                transition: 'border-color 0.12s, background-color 0.12s, transform 0.1s, box-shadow 0.12s',
+                transform: hovered ? 'translateY(-2px)' : 'none',
+                boxShadow: hovered ? `0 4px 12px ${accentColor}22` : '0 1px 3px rgba(0,0,0,0.06)',
+                overflow: 'hidden',
+                userSelect: 'none' as const,
+            }}
+        >
+            {/* Preview thumbnail */}
+            <div style={{ backgroundColor: hovered ? `${accentColor}08` : '#fafafa', borderBottom: `1px solid ${hovered ? accentColor + '22' : C.border}`, padding: 4 }}>
+                {Preview ? <Preview /> : <Fallback color={accentColor} />}
+            </div>
+            {/* Label */}
+            <div style={{ padding: '5px 6px 6px' }}>
+                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: hovered ? C.primary : C.body, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, transition: 'color 0.12s' }}>
+                    {def.label}
+                </p>
+            </div>
+        </div>
+    )
+}
