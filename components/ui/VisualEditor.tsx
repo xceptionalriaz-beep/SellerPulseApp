@@ -1653,7 +1653,7 @@ export default function VisualEditor({
                                 }}
                             />
                         </div>
-                    )}\
+                    )}
                 </div>
 
                 {/* RIGHT — Properties Panel */}

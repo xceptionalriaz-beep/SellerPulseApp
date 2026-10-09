@@ -833,70 +833,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
         <NotificationsPanelOverlay onClose={() => setShowNotifPanel(false)} forceUser={isUserMode} />
       )}
 
-      {/* -- TOP NAVBAR (FULL WIDTH) -- */}
-      <header className="h-[60px] flex items-center px-6 shrink-0 border-b z-30"
-        style={{ borderColor: '#ede9fe', backgroundColor: '#ffffff' }}>
-        <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
-          <Menu size={28} />
-        </button>
-
-        {pathname.startsWith('/dashboard/title-builder') ? (
-          /* ── Title Builder top bar ── */
-          <TitleBuilderTopBar pathname={pathname} />
-        ) : pathname.startsWith('/dashboard/listing-generator') ? (
-          /* ── Listing Studio top bar ── */
-          <ListingStudioTopBar />
-        ) : (
-          /* ── Default greeting ── */
-          (() => {
-            const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
-            const hour = new Date().getHours()
-            const isMain = pathname === '/dashboard'
-            const isOrders = pathname === '/dashboard/orders'
-            const isAdminP = pathname.startsWith('/dashboard/admin')
-            const greeting = isMain
-              ? (hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
-                : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
-                  : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
-                    : `Good night, ${firstName}!`)
-              : isOrders ? `Welcome back, ${firstName}!`
-                : isAdminP ? (hour >= 17 && hour < 21 ? `Good evening, ${firstName}!` : `Working late, ${firstName}!`)
-                  : null
-            return greeting ? (
-              <div className="flex flex-col min-w-0">
-                <span className="font-extrabold tracking-tight truncate"
-                  style={{ fontSize: 22, color: '#1e1535', fontFamily: 'Inter, sans-serif' }}>
-                  {greeting}
-                </span>
-              </div>
-            ) : <div className="flex-1" />
-          })()
-        )}
-
-        {!pathname.startsWith('/dashboard/title-builder') && !pathname.startsWith('/dashboard/listing-generator') && <div className="flex-1" />}
-
-        {/* Title Builder extra icons */}
-        {pathname.startsWith('/dashboard/title-builder') && (
-          <>
-            <ResetButton />
-            <div className="w-1.5" />
-            <button title="Settings"
-              onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
-              style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
-              <Settings size={15} />
-            </button>
-            <div className="w-3" />
-          </>
-        )}
-
-        <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
-        <div className="w-[15px]" />
-        <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
-
-      </header>
-
-      {/* -- SIDEBAR + CONTENT ROW -- */}
+      {/* -- SIDEBAR + CONTENT ROW (full height) -- */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
         {/* -- DESKTOP SIDEBAR RAIL (60px dark) -- */}
@@ -1162,47 +1099,113 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* -- MAIN CONTENT -- */}
+        {/* -- RIGHT PANEL (header + content) -- */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
 
-          {/* -- TEAM SWITCHER BANNER -- */}
-          <TeamSwitcherBanner />
+          {/* -- TOP NAVBAR -- */}
+          <header className="h-[60px] flex items-center px-6 shrink-0 border-b z-30"
+            style={{ borderColor: '#ede9fe', backgroundColor: '#ffffff' }}>
+            <button onClick={() => setMobileOpen(true)} className="lg:hidden mr-3 text-dark">
+              <Menu size={28} />
+            </button>
 
-          {/* -- PAGE CONTENT -- */}
-          <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: pathname.startsWith('/dashboard/title-builder') || pathname.startsWith('/dashboard/listing-generator') ? 'hidden' : 'auto' }}>
-            {emailUnverified && (
-              <div className="flex items-center justify-between px-4 py-2.5"
-                style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
-                <span style={{ color: '#92400e', fontSize: 13 }}>
-                  ?? Please verify your email to unlock all features
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={async () => {
-                      const { data: { user } } = await supabase.auth.getUser()
-                      if (user?.email) {
-                        await supabase.auth.resend({ type: 'signup', email: user.email })
-                        alert('Verification email sent! Check your inbox.')
-                      }
-                    }}
-                    className="text-[12px] font-bold px-3 py-1 rounded-lg"
-                    style={{ backgroundColor: '#fbbf24', color: '#92400e' }}>
-                    Resend Email
-                  </button>
-                  <button
-                    onClick={() => setEmailUnverified(false)}
-                    className="text-[12px] px-2"
-                    style={{ color: '#92400e' }}>
-                    ?
-                  </button>
-                </div>
-              </div>
+            {pathname.startsWith('/dashboard/title-builder') ? (
+              /* ── Title Builder top bar ── */
+              <TitleBuilderTopBar pathname={pathname} />
+            ) : pathname.startsWith('/dashboard/listing-generator') ? (
+              /* ── Listing Studio top bar ── */
+              <ListingStudioTopBar />
+            ) : (
+              /* ── Default greeting ── */
+              (() => {
+                const firstName = profile?.name?.split(' ')[0] || profile?.email?.split('@')[0] || 'Seller'
+                const hour = new Date().getHours()
+                const isMain = pathname === '/dashboard'
+                const isOrders = pathname === '/dashboard/orders'
+                const isAdminP = pathname.startsWith('/dashboard/admin')
+                const greeting = isMain
+                  ? (hour >= 5 && hour < 12 ? `Good morning, ${firstName}!`
+                    : hour >= 12 && hour < 17 ? `Good afternoon, ${firstName}!`
+                      : hour >= 17 && hour < 21 ? `Good evening, ${firstName}!`
+                        : `Good night, ${firstName}!`)
+                  : isOrders ? `Welcome back, ${firstName}!`
+                    : isAdminP ? (hour >= 17 && hour < 21 ? `Good evening, ${firstName}!` : `Working late, ${firstName}!`)
+                      : null
+                return greeting ? (
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-extrabold tracking-tight truncate"
+                      style={{ fontSize: 22, color: '#1e1535', fontFamily: 'Inter, sans-serif' }}>
+                      {greeting}
+                    </span>
+                  </div>
+                ) : <div className="flex-1" />
+              })()
             )}
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-              <AnnouncementBanner />
-              {children}
-            </div>
-          </main>
+
+            {!pathname.startsWith('/dashboard/title-builder') && !pathname.startsWith('/dashboard/listing-generator') && <div className="flex-1" />}
+
+            {/* Title Builder extra icons */}
+            {pathname.startsWith('/dashboard/title-builder') && (
+              <>
+                <ResetButton />
+                <div className="w-1.5" />
+                <button title="Settings"
+                  onClick={() => window.dispatchEvent(new CustomEvent('tb:settings'))}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border transition-all hover:opacity-80"
+                  style={{ borderColor: '#ede9fe', color: '#7530fb' }}>
+                  <Settings size={15} />
+                </button>
+                <div className="w-3" />
+              </>
+            )}
+
+            <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
+            <div className="w-[15px]" />
+            <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
+          </header>
+
+          {/* -- MAIN CONTENT -- */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
+
+            {/* -- TEAM SWITCHER BANNER -- */}
+            <TeamSwitcherBanner />
+
+            {/* -- PAGE CONTENT -- */}
+            <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: pathname.startsWith('/dashboard/title-builder') || pathname.startsWith('/dashboard/listing-generator') ? 'hidden' : 'auto' }}>
+              {emailUnverified && (
+                <div className="flex items-center justify-between px-4 py-2.5"
+                  style={{ backgroundColor: '#fefce8', borderBottom: '1px solid #fbbf24' }}>
+                  <span style={{ color: '#92400e', fontSize: 13 }}>
+                    ?? Please verify your email to unlock all features
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        const { data: { user } } = await supabase.auth.getUser()
+                        if (user?.email) {
+                          await supabase.auth.resend({ type: 'signup', email: user.email })
+                          alert('Verification email sent! Check your inbox.')
+                        }
+                      }}
+                      className="text-[12px] font-bold px-3 py-1 rounded-lg"
+                      style={{ backgroundColor: '#fbbf24', color: '#92400e' }}>
+                      Resend Email
+                    </button>
+                    <button
+                      onClick={() => setEmailUnverified(false)}
+                      className="text-[12px] px-2"
+                      style={{ color: '#92400e' }}>
+                      ?
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <AnnouncementBanner />
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
       </div>
 
