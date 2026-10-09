@@ -1,9 +1,10 @@
 // components/ui/VisualEditor/variants/divider.variants.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// DIVIDER BLOCK VARIANTS (20 Professional eBay-Compliant Styles)
-// 100% Inline CSS & Table Safe • Mobile 375px Responsive
+// DIVIDER BLOCK VARIANTS (20 Professional Compact Styles)
+// Pure Zero-Stretch Layout • Zero White Space Gap • Mobile 375px Responsive
 // ─────────────────────────────────────────────────────────────────────────────
 import type { BlockVariant } from './hero_header.variants'
+import { getIconSvg } from '../IconLibrary'
 
 export interface DividerStyleDefinition {
     id: string
@@ -17,7 +18,6 @@ export interface DividerStyleDefinition {
 // 20 STYLES REGISTRY WITH THUMBNAIL ICONS
 // ─────────────────────────────────────────────────────────────────────────────
 export const DIVIDER_STYLES: DividerStyleDefinition[] = [
-    // 1 - 10 (Original)
     {
         id: 'minimal_diamond',
         name: 'Minimal Diamond',
@@ -78,8 +78,6 @@ export const DIVIDER_STYLES: DividerStyleDefinition[] = [
         description: 'Ultra-thin minimal razor rule with smooth edge clearance',
         previewSvg: `<svg width="48" height="24" viewBox="0 0 48 24" fill="none"><line x1="2" y1="12" x2="46" y2="12" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/></svg>`,
     },
-
-    // 11 - 20 (NEW STYLES)
     {
         id: 'tech_hexagon',
         name: 'Tech Hexagon',
@@ -143,7 +141,7 @@ export const DIVIDER_STYLES: DividerStyleDefinition[] = [
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER: COLOR & STYLE RESOLUTION
+// COLOR & SPACING RESOLVERS
 // ─────────────────────────────────────────────────────────────────────────────
 function resolveDividerColor(p: any): string {
     return p.color || p.dividerColor || p.borderColor || '#7530fb'
@@ -161,14 +159,28 @@ function resolveSpacing(p: any) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1 - 10 RENDERING FUNCTIONS
+// ALL 20 COMPACT RENDERING FUNCTIONS (Powered by getIconSvg from IconLibrary)
 // ─────────────────────────────────────────────────────────────────────────────
 export function variantMinimalDiamond(block: any): string {
     const p = block?.props || block || {}
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;border-collapse:collapse;"><tr><td style="width:45%;vertical-align:middle;border-bottom:1px solid ${color}44;font-size:0;line-height:0;">&nbsp;</td><td style="width:10%;text-align:center;vertical-align:middle;padding:0 12px;font-size:0;line-height:0;"><span style="display:inline-block;transform:rotate(45deg);width:8px;height:8px;background-color:${color};border-radius:1px;"></span></td><td style="width:45%;vertical-align:middle;border-bottom:1px solid ${color}44;font-size:0;line-height:0;">&nbsp;</td></tr></table></div>`
+    const customIcon = p.icon || p.iconName
+    const iconContent = customIcon
+        ? getIconSvg(customIcon, color, 14)
+        : `<span style="display:inline-block;transform:rotate(45deg);width:8px;height:8px;background-color:${color};border-radius:1px;"></span>`
+
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:16px;">
+        <div style="flex:1;height:1px;background-color:${color}44;"></div>
+        <div data-feature-index="0" style="padding:0 12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;" title="Click to replace icon">
+          ${iconContent}
+        </div>
+        <div style="flex:1;height:1px;background-color:${color}44;"></div>
+      </div>
+    </div>`
 }
 
 export function variantBadgePill(block: any): string {
@@ -177,7 +189,16 @@ export function variantBadgePill(block: any): string {
     const width = resolveDividerWidth(p)
     const label = (p.label || p.badgeText || p.text || 'DETAILS').toUpperCase()
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;border-collapse:collapse;"><tr><td style="vertical-align:middle;border-bottom:1px solid #e2e8f0;font-size:0;line-height:0;">&nbsp;</td><td style="width:1%;white-space:nowrap;text-align:center;vertical-align:middle;padding:0 14px;"><div style="display:inline-block;padding:4px 14px;border-radius:9999px;background-color:${color}15;border:1px solid ${color}33;color:${color};font-family:Arial,sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">${label}</div></td><td style="vertical-align:middle;border-bottom:1px solid #e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:24px;">
+        <div style="flex:1;height:1px;background-color:#e2e8f0;"></div>
+        <div style="padding:0 12px;">
+          <div style="display:inline-block;padding:4px 14px;border-radius:9999px;background-color:${color}15;border:1px solid ${color}33;color:${color};font-family:Arial,sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;line-height:14px;text-transform:uppercase;">${label}</div>
+        </div>
+        <div style="flex:1;height:1px;background-color:#e2e8f0;"></div>
+      </div>
+    </div>`
 }
 
 export function variantGradientTaper(block: any): string {
@@ -186,7 +207,10 @@ export function variantGradientTaper(block: any): string {
     const width = resolveDividerWidth(p)
     const thickness = p.thickness || 2
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><div style="width:${width};max-width:850px;height:${thickness}px;margin:0 auto;background:linear-gradient(90deg, transparent 0%, ${color} 50%, transparent 100%);border-radius:999px;">&nbsp;</div></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;height:${thickness}px;margin:0 auto;background:linear-gradient(90deg, transparent 0%, ${color} 50%, transparent 100%);border-radius:999px;">&nbsp;</div>
+    </div>`
 }
 
 export function variantExecutivePinstripe(block: any): string {
@@ -194,7 +218,14 @@ export function variantExecutivePinstripe(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><div style="width:${width};max-width:850px;margin:0 auto;"><div style="height:2px;background-color:${color};border-radius:1px;">&nbsp;</div><div style="height:3px;">&nbsp;</div><div style="height:1px;background-color:${color}44;border-radius:1px;">&nbsp;</div></div></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;">
+        <div style="height:2px;background-color:${color};border-radius:1px;"></div>
+        <div style="height:3px;"></div>
+        <div style="height:1px;background-color:${color}44;border-radius:1px;"></div>
+      </div>
+    </div>`
 }
 
 export function variantTrustCrest(block: any): string {
@@ -202,7 +233,19 @@ export function variantTrustCrest(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;border-collapse:collapse;"><tr><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;font-size:0;line-height:0;">&nbsp;</td><td style="width:36px;text-align:center;vertical-align:middle;padding:0 10px;"><div style="display:inline-block;width:26px;height:26px;border-radius:50%;background-color:${color};color:#ffffff;line-height:26px;text-align:center;font-size:13px;font-weight:bold;">★</div></td><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;font-size:0;line-height:0;">&nbsp;</td></tr></table></div>`
+    const rawIcon = p.icon || p.iconName || 'star'
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:26px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 10px;">
+          <div data-feature-index="0" style="width:26px;height:26px;border-radius:50%;background-color:${color};color:#ffffff;line-height:26px;text-align:center;font-size:13px;font-weight:bold;display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Click to replace icon">
+            ${getIconSvg(rawIcon, '#ffffff', 14)}
+          </div>
+        </div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantArtisanDots(block: any): string {
@@ -210,14 +253,31 @@ export function variantArtisanDots(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;border-collapse:collapse;"><tr><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;font-size:0;line-height:0;">&nbsp;</td><td style="width:50px;text-align:center;vertical-align:middle;padding:0 12px;white-space:nowrap;"><span style="display:inline-block;width:4px;height:4px;border-radius:50%;background-color:${color}88;margin:0 3px;"></span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${color};margin:0 3px;"></span><span style="display:inline-block;width:4px;height:4px;border-radius:50%;background-color:${color}88;margin:0 3px;"></span></td><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;font-size:0;line-height:0;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:14px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 12px;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <span style="display:inline-block;width:4px;height:4px;border-radius:50%;background-color:${color}88;"></span>
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${color};"></span>
+          <span style="display:inline-block;width:4px;height:4px;border-radius:50%;background-color:${color}88;"></span>
+        </div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantShadowGroove(block: any): string {
     const p = block?.props || block || {}
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><div style="width:${width};max-width:850px;margin:0 auto;"><div style="height:1px;background-color:#cbd5e1;">&nbsp;</div><div style="height:1px;background-color:#ffffff;">&nbsp;</div></div></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;">
+        <div style="height:1px;background-color:#cbd5e1;"></div>
+        <div style="height:1px;background-color:#ffffff;"></div>
+      </div>
+    </div>`
 }
 
 export function variantSportSlash(block: any): string {
@@ -225,7 +285,18 @@ export function variantSportSlash(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;border-collapse:collapse;"><tr><td style="vertical-align:middle;border-bottom:1px solid #e2e8f0;font-size:0;line-height:0;">&nbsp;</td><td style="width:42px;text-align:center;vertical-align:middle;padding:0 10px;font-family:monospace;font-size:14px;font-weight:900;letter-spacing:-1px;line-height:14px;white-space:nowrap;"><span style="color:${color};font-style:italic;">/</span><span style="color:${color};font-style:italic;">/</span><span style="color:#94a3b8;font-style:italic;">/</span></td><td style="vertical-align:middle;border-bottom:1px solid #e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:16px;">
+        <div style="flex:1;height:1px;background-color:#e2e8f0;"></div>
+        <div style="padding:0 10px;font-family:monospace;font-size:14px;font-weight:900;letter-spacing:-1px;line-height:14px;">
+          <span style="color:${color};font-style:italic;">/</span>
+          <span style="color:${color};font-style:italic;">/</span>
+          <span style="color:#94a3b8;font-style:italic;">/</span>
+        </div>
+        <div style="flex:1;height:1px;background-color:#e2e8f0;"></div>
+      </div>
+    </div>`
 }
 
 export function variantTailoredStitch(block: any): string {
@@ -234,7 +305,10 @@ export function variantTailoredStitch(block: any): string {
     const width = resolveDividerWidth(p)
     const thickness = p.thickness || 2
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><div style="width:${width};max-width:850px;margin:0 auto;border-top:${thickness}px dashed ${color};opacity:0.85;">&nbsp;</div></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;border-top:${thickness}px dashed ${color};opacity:0.85;"></div>
+    </div>`
 }
 
 export function variantCleanHairline(block: any): string {
@@ -243,18 +317,33 @@ export function variantCleanHairline(block: any): string {
     const width = resolveDividerWidth(p)
     const thickness = p.thickness || 1
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><div style="width:${width};max-width:850px;margin:0 auto;border-top:${thickness}px solid ${color};">&nbsp;</div></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;border-top:${thickness}px solid ${color};"></div>
+    </div>`
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 11 - 20 NEW RENDERING FUNCTIONS
-// ─────────────────────────────────────────────────────────────────────────────
+// 11 - 20 (NEW COMPACT STYLES)
 export function variantTechHexagon(block: any): string {
     const p = block?.props || block || {}
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="width:45%;vertical-align:middle;border-bottom:1px solid ${color}44;">&nbsp;</td><td style="width:10%;text-align:center;vertical-align:middle;padding:0 10px;font-size:14px;color:${color};font-weight:bold;line-height:1;">⬡⬡</td><td style="width:45%;vertical-align:middle;border-bottom:1px solid ${color}44;">&nbsp;</td></tr></table></div>`
+    const customIcon = p.icon || p.iconName
+    const iconContent = customIcon
+        ? getIconSvg(customIcon, color, 14)
+        : '<span style="font-size:14px;line-height:1;">⬡⬡</span>'
+
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:16px;">
+        <div style="flex:1;height:1px;background-color:${color}44;"></div>
+        <div data-feature-index="0" style="padding:0 10px;color:${color};font-weight:bold;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;" title="Click to replace icon">
+          ${iconContent}
+        </div>
+        <div style="flex:1;height:1px;background-color:${color}44;"></div>
+      </div>
+    </div>`
 }
 
 export function variantHeritageLaurel(block: any): string {
@@ -262,7 +351,19 @@ export function variantHeritageLaurel(block: any): string {
     const color = p.color || '#d4af37'
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="width:45%;vertical-align:middle;border-bottom:1px solid ${color}66;">&nbsp;</td><td style="width:36px;text-align:center;vertical-align:middle;padding:0 8px;"><div style="display:inline-block;width:24px;height:24px;border-radius:50%;border:1px solid ${color};color:${color};line-height:24px;font-size:12px;">❦</div></td><td style="width:45%;vertical-align:middle;border-bottom:1px solid ${color}66;">&nbsp;</td></tr></table></div>`
+    const customIcon = p.icon || p.iconName || 'award'
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:24px;">
+        <div style="flex:1;height:1px;background-color:${color}66;"></div>
+        <div style="padding:0 8px;">
+          <div data-feature-index="0" style="width:24px;height:24px;border-radius:50%;border:1px solid ${color};color:${color};display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Click to replace icon">
+            ${getIconSvg(customIcon, color, 12)}
+          </div>
+        </div>
+        <div style="flex:1;height:1px;background-color:${color}66;"></div>
+      </div>
+    </div>`
 }
 
 export function variantBarcodeHash(block: any): string {
@@ -270,7 +371,14 @@ export function variantBarcodeHash(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td><td style="width:48px;text-align:center;vertical-align:middle;padding:0 12px;font-family:monospace;font-size:12px;letter-spacing:1px;font-weight:900;color:${color};">[ ||||| ]</td><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:16px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 12px;font-family:monospace;font-size:12px;letter-spacing:1px;font-weight:900;color:${color};line-height:1;">[ ||||| ]</div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantElectricSpark(block: any): string {
@@ -278,7 +386,17 @@ export function variantElectricSpark(block: any): string {
     const color = p.color || '#f59e0b'
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="width:45%;vertical-align:middle;border-bottom:1.5px solid ${color}55;">&nbsp;</td><td style="width:28px;text-align:center;vertical-align:middle;padding:0 8px;font-size:15px;color:${color};">⚡</td><td style="width:45%;vertical-align:middle;border-bottom:1.5px solid ${color}55;">&nbsp;</td></tr></table></div>`
+    const customIcon = p.icon || p.iconName || 'zap'
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:18px;">
+        <div style="flex:1;height:1.5px;background-color:${color}55;"></div>
+        <div data-feature-index="0" style="padding:0 8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;" title="Click to replace icon">
+          ${getIconSvg(customIcon, color, 15)}
+        </div>
+        <div style="flex:1;height:1.5px;background-color:${color}55;"></div>
+      </div>
+    </div>`
 }
 
 export function variantCrossStitch(block: any): string {
@@ -286,7 +404,14 @@ export function variantCrossStitch(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="width:45%;vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td><td style="width:44px;text-align:center;vertical-align:middle;padding:0 10px;font-family:sans-serif;font-size:11px;font-weight:800;color:${color};letter-spacing:4px;">✕✕✕</td><td style="width:45%;vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:16px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 10px;font-family:sans-serif;font-size:11px;font-weight:800;color:${color};letter-spacing:4px;line-height:1;">✕✕✕</div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantChevronFlow(block: any): string {
@@ -294,7 +419,14 @@ export function variantChevronFlow(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="width:45%;vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td><td style="width:36px;text-align:center;vertical-align:middle;padding:0 8px;font-size:14px;font-weight:900;color:${color};letter-spacing:-1px;">❯❯</td><td style="width:45%;vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:16px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 8px;font-size:14px;font-weight:900;color:${color};letter-spacing:-1px;line-height:1;">❯❯</div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantTicketPerforated(block: any): string {
@@ -302,7 +434,14 @@ export function variantTicketPerforated(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="width:12px;height:12px;border-radius:50%;border:1px solid #cbd5e1;background:#ffffff;">&nbsp;</td><td style="vertical-align:middle;border-bottom:1.5px dashed ${color};padding:0 8px;">&nbsp;</td><td style="width:12px;height:12px;border-radius:50%;border:1px solid #cbd5e1;background:#ffffff;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:12px;">
+        <div style="width:12px;height:12px;border-radius:50%;border:1px solid #cbd5e1;background:#ffffff;"></div>
+        <div style="flex:1;height:1px;border-top:1.5px dashed ${color};margin:0 8px;"></div>
+        <div style="width:12px;height:12px;border-radius:50%;border:1px solid #cbd5e1;background:#ffffff;"></div>
+      </div>
+    </div>`
 }
 
 export function variantTriColorRibbon(block: any): string {
@@ -310,7 +449,18 @@ export function variantTriColorRibbon(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td><td style="width:44px;text-align:center;vertical-align:middle;padding:0 12px;"><span style="display:inline-block;width:10px;height:6px;background:${color};border-radius:1px 0 0 1px;"></span><span style="display:inline-block;width:10px;height:6px;background:#f59e0b;"></span><span style="display:inline-block;width:10px;height:6px;background:#0f172a;border-radius:0 1px 1px 0;"></span></td><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:14px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 12px;display:inline-flex;gap:1px;">
+          <span style="display:inline-block;width:10px;height:6px;background:${color};border-radius:1px 0 0 1px;"></span>
+          <span style="display:inline-block;width:10px;height:6px;background:#f59e0b;"></span>
+          <span style="display:inline-block;width:10px;height:6px;background:#0f172a;border-radius:0 1px 1px 0;"></span>
+        </div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantSoundwavePulse(block: any): string {
@@ -318,14 +468,39 @@ export function variantSoundwavePulse(block: any): string {
     const color = resolveDividerColor(p)
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td><td style="width:48px;text-align:center;vertical-align:middle;padding:0 10px;white-space:nowrap;"><span style="display:inline-block;width:2px;height:8px;background:${color};margin:0 1.5px;border-radius:1px;"></span><span style="display:inline-block;width:2px;height:14px;background:${color};margin:0 1.5px;border-radius:1px;"></span><span style="display:inline-block;width:2.5px;height:20px;background:${color};margin:0 1.5px;border-radius:1px;"></span><span style="display:inline-block;width:2px;height:14px;background:${color};margin:0 1.5px;border-radius:1px;"></span><span style="display:inline-block;width:2px;height:8px;background:${color};margin:0 1.5px;border-radius:1px;"></span></td><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td></tr></table></div>`
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:20px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 10px;display:flex;align-items:center;gap:3px;">
+          <span style="display:inline-block;width:2px;height:8px;background:${color};border-radius:1px;"></span>
+          <span style="display:inline-block;width:2px;height:14px;background:${color};border-radius:1px;"></span>
+          <span style="display:inline-block;width:2.5px;height:20px;background:${color};border-radius:1px;"></span>
+          <span style="display:inline-block;width:2px;height:14px;background:${color};border-radius:1px;"></span>
+          <span style="display:inline-block;width:2px;height:8px;background:${color};border-radius:1px;"></span>
+        </div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 export function variantShieldHonor(block: any): string {
     const p = block?.props || block || {}
     const width = resolveDividerWidth(p)
     const { top, bottom } = resolveSpacing(p)
-    return `<div style="padding:${top}px 12px ${bottom}px 12px;text-align:center;background:${p.bgColor || 'transparent'};"><table border="0" cellpadding="0" cellspacing="0" align="center" style="width:${width};max-width:850px;margin:0 auto;"><tr><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td><td style="width:36px;text-align:center;vertical-align:middle;padding:0 8px;"><div style="display:inline-block;width:22px;height:22px;border-radius:4px;background:#16a34a;color:#ffffff;line-height:22px;font-size:12px;font-weight:bold;">✓</div></td><td style="vertical-align:middle;border-bottom:1px solid #cbd5e1;">&nbsp;</td></tr></table></div>`
+    const customIcon = p.icon || p.iconName || 'check'
+    return `
+    <div style="padding:${top}px 12px ${bottom}px 12px;margin:0 auto;text-align:center;background:${p.bgColor || 'transparent'};line-height:0;">
+      <div style="width:${width};max-width:850px;margin:0 auto;display:flex;align-items:center;justify-content:center;height:22px;">
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+        <div style="padding:0 8px;">
+          <div data-feature-index="0" style="width:22px;height:22px;border-radius:4px;background:#16a34a;color:#ffffff;display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Click to replace icon">
+            ${getIconSvg(customIcon, '#ffffff', 13)}
+          </div>
+        </div>
+        <div style="flex:1;height:1px;background-color:#cbd5e1;"></div>
+      </div>
+    </div>`
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -447,7 +622,7 @@ export const DIVIDER_THUMBNAILS: Record<string, string> = {
     'div-shield-honor': DIVIDER_STYLES[19].previewSvg,
 }
 
-// Uses "label" to match BlockVariant interface (fixes the TypeScript error!)
+// Uses "label" to match BlockVariant interface
 export const dividerVariants: BlockVariant[] = [
     {
         id: 'minimal_diamond',
@@ -509,7 +684,6 @@ export const dividerVariants: BlockVariant[] = [
         description: 'Ultra-thin minimal razor rule with smooth edge clearance',
         toHtml: (p: any) => variantCleanHairline({ props: p }),
     },
-    // New 11 - 20
     {
         id: 'tech_hexagon',
         label: 'Tech Hexagon',

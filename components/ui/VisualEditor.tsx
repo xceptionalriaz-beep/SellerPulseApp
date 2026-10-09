@@ -1509,7 +1509,7 @@ export default function VisualEditor({
                     onLoadTemplate={handleLoadTemplate}
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
-                        // Find block by ID (supports Heading, Features, and all block types)
+                        // Find block by ID (supports Heading, Features, Divider, and all block types)
                         const idx = selectedIconBlockId
                             ? blocks.findIndex(b => b.id === selectedIconBlockId)
                             : selectedId
@@ -1521,7 +1521,18 @@ export default function VisualEditor({
 
                         const updatedProps = { ...p };
 
-                        // 1. Direct single-icon update for Heading, Info Box, Trust Badge, etc.
+                        // ── Single icon blocks (Divider, Heading, Info Box) ──
+                        if (block.type === 'divider' || block.type === 'heading' || block.type === 'info_box' || block.type === 'trust_badge_block') {
+                            updatedProps.icon = iconId;
+                            updatedProps.iconName = iconId;
+                            const updatedBlock = { ...block, props: updatedProps };
+                            const newBlocks = [...blocks];
+                            newBlocks[idx] = updatedBlock as any;
+                            commitBlocks(newBlocks, blocks);
+                            return;
+                        }
+
+                        // 1. Direct single-icon update for other blocks
                         updatedProps.icon = iconId;
                         updatedProps.iconName = iconId;
 
