@@ -70,7 +70,7 @@ function TaskRow({ task, index }: { task: ProcessingTask; index: number }) {
 
     return (
         <div
-            className="flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-400"
+            className="flex items-center gap-4 py-3.5 px-5 rounded-2xl transition-all duration-400"
             style={{
                 backgroundColor: isRunning
                     ? C.primaryLight
@@ -85,22 +85,22 @@ function TaskRow({ task, index }: { task: ProcessingTask; index: number }) {
             }}
         >
             {/* Status icon */}
-            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 flex items-center justify-center shrink-0">
                 {isRunning && (
-                    <Loader2 size={18} className="animate-spin" style={{ color: C.primary }} />
+                    <Loader2 size={20} className="animate-spin" style={{ color: C.primary }} />
                 )}
                 {isDone && (
-                    <CheckCircle2 size={18} style={{ color: C.success }} />
+                    <CheckCircle2 size={20} style={{ color: C.success }} />
                 )}
                 {isFailed && (
-                    <XCircle size={18} style={{ color: C.danger }} />
+                    <XCircle size={20} style={{ color: C.danger }} />
                 )}
                 {isSkipped && (
-                    <SkipForward size={16} style={{ color: C.muted }} />
+                    <SkipForward size={18} style={{ color: C.muted }} />
                 )}
                 {isPending && (
                     <div
-                        className="w-2 h-2 rounded-full"
+                        className="w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: C.muted }}
                     />
                 )}
@@ -108,7 +108,7 @@ function TaskRow({ task, index }: { task: ProcessingTask; index: number }) {
 
             {/* Task label */}
             <span
-                className="flex-1 text-[14px] font-medium"
+                className="flex-1 text-[15px] font-medium"
                 style={{
                     color: isRunning ? C.primary
                         : isDone ? C.success
@@ -132,7 +132,7 @@ function TaskRow({ task, index }: { task: ProcessingTask; index: number }) {
             {/* Detail badge — shown once task completes */}
             {task.detail && !isPending && (
                 <span
-                    className="text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0"
+                    className="text-[12px] font-medium px-2.5 py-1 rounded-full shrink-0"
                     style={{
                         backgroundColor: isDone
                             ? 'rgba(22,163,74,0.12)'
@@ -208,7 +208,7 @@ export default function UrlImportProcessing({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url, platform: platform.platform }),
-                signal: AbortSignal.timeout(60_000),
+                signal: AbortSignal.timeout(5_000),
             })
 
             if (res.ok) {
@@ -341,10 +341,10 @@ export default function UrlImportProcessing({
             >
                 {/* ── Panel ─────────────────────────────────────── */}
                 <div
-                    className="lg-process-in relative w-full max-w-[520px] mx-4 rounded-3xl flex flex-col overflow-hidden"
+                    className="lg-process-in relative w-full max-w-[720px] mx-4 rounded-3xl flex flex-col overflow-hidden"
                     style={{
                         backgroundColor: C.surface,
-                        boxShadow: '0 24px 64px rgba(117,48,251,0.2), 0 4px 20px rgba(0,0,0,0.14)',
+                        boxShadow: '0 32px 80px rgba(117,48,251,0.22), 0 8px 24px rgba(0,0,0,0.14)',
                         maxHeight: '92vh',
                     }}
                 >
@@ -361,33 +361,33 @@ export default function UrlImportProcessing({
                     </div>
 
                     {/* ── Header ──────────────────────────────────── */}
-                    <div className="flex items-center justify-between px-6 pt-5 pb-3 shrink-0">
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between px-8 pt-7 pb-4 shrink-0">
+                        <div className="flex items-center gap-4">
                             {/* Animated icon */}
                             <div
-                                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                                 style={{ backgroundColor: allDone ? C.successBg : C.primaryLight }}
                             >
                                 {allDone
-                                    ? <CheckCircle2 size={20} style={{ color: C.success }} />
-                                    : <Loader2 size={20} className="animate-spin" style={{ color: C.primary }} />
+                                    ? <CheckCircle2 size={24} style={{ color: C.success }} />
+                                    : <Loader2 size={24} className="animate-spin" style={{ color: C.primary }} />
                                 }
                             </div>
 
                             <div>
                                 <p
-                                    className="text-[15px] font-bold leading-tight"
+                                    className="text-[18px] font-bold leading-tight"
                                     style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}
                                 >
                                     {allDone ? 'Import complete' : 'Importing product…'}
                                 </p>
                                 <p
-                                    className="text-[12px]"
+                                    className="text-[13px] mt-0.5"
                                     style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}
                                 >
                                     {allDone
                                         ? 'Opening preview now'
-                                        : 'AI is reading and rewriting for eBay'}
+                                        : 'AI is reading and rewriting for eBay Cassini'}
                                 </p>
                             </div>
                         </div>
@@ -395,25 +395,25 @@ export default function UrlImportProcessing({
                         {/* Close / cancel */}
                         <button
                             onClick={onCancel}
-                            className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                            className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
                             style={{ color: C.secondary }}
                             onMouseEnter={e => (e.currentTarget.style.backgroundColor = C.bg)}
                             onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                             aria-label="Cancel import"
                         >
-                            <X size={16} />
+                            <X size={18} />
                         </button>
                     </div>
 
                     {/* ── Source URL pill ──────────────────────────── */}
-                    <div className="px-6 pb-4 shrink-0">
+                    <div className="px-8 pb-5 shrink-0">
                         <div
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                            className="flex items-center gap-3 px-4 py-3 rounded-2xl"
                             style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}
                         >
                             {/* Platform badge */}
                             <span
-                                className="px-2 py-0.5 rounded-md text-[11px] font-bold shrink-0"
+                                className="px-2.5 py-1 rounded-lg text-[12px] font-bold shrink-0"
                                 style={{
                                     backgroundColor: platformColor + '1a',
                                     color: platformColor,
@@ -423,20 +423,20 @@ export default function UrlImportProcessing({
                                 {platform.displayName}
                             </span>
 
-                            <Link2 size={11} style={{ color: C.muted, flexShrink: 0 }} />
+                            <Link2 size={13} style={{ color: C.muted, flexShrink: 0 }} />
 
                             <span
-                                className="text-[11px] truncate"
+                                className="text-[12px] truncate"
                                 style={{ color: C.secondary, fontFamily: 'DM Mono, monospace' }}
                             >
                                 {displayUrl}
                             </span>
 
                             {/* Elapsed timer */}
-                            <div className="flex items-center gap-1 shrink-0 ml-auto">
-                                <Clock size={10} style={{ color: C.muted }} />
+                            <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                                <Clock size={12} style={{ color: C.muted }} />
                                 <span
-                                    className="text-[11px]"
+                                    className="text-[12px] font-medium"
                                     style={{ color: C.muted, fontFamily: 'DM Mono, monospace' }}
                                 >
                                     {formatElapsed(elapsed)}
@@ -446,7 +446,7 @@ export default function UrlImportProcessing({
                     </div>
 
                     {/* ── Task list ────────────────────────────────── */}
-                    <div className="px-3 pb-2 flex flex-col gap-0.5 overflow-y-auto">
+                    <div className="px-5 pb-3 flex flex-col gap-1 overflow-y-auto">
                         {tasks.map((task, i) => (
                             <TaskRow key={task.id} task={task} index={i} />
                         ))}
@@ -454,11 +454,11 @@ export default function UrlImportProcessing({
 
                     {/* ── Footer ──────────────────────────────────── */}
                     <div
-                        className="flex items-center justify-between gap-3 px-6 py-4 mt-1 shrink-0"
+                        className="flex items-center justify-between gap-3 px-8 py-5 mt-2 shrink-0"
                         style={{ borderTop: `1px solid ${C.border}` }}
                     >
                         <p
-                            className={`text-[12px] ${!allDone ? 'lg-pulse-text' : ''}`}
+                            className={`text-[13px] ${!allDone ? 'lg-pulse-text' : ''}`}
                             style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}
                         >
                             {allDone
@@ -468,7 +468,7 @@ export default function UrlImportProcessing({
 
                         <button
                             onClick={onCancel}
-                            className="shrink-0 px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-75"
+                            className="shrink-0 px-5 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-75"
                             style={{
                                 backgroundColor: C.bg,
                                 color: C.secondary,
