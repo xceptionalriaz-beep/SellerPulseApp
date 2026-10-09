@@ -1239,6 +1239,7 @@ import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
 import { getRectangleVariant } from './variants/rectangle.variants'
 import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 import { getTestimonialsVariant } from './variants/testimonials.variants'
+import { getQuoteBlockVariant } from './variants/quote_block.variants'
 import { getInfoBoxVariant } from './variants/info_box.variants'
 import { getShippingInfoVariant } from './variants/shipping_info.variants'
 import { getStoreHeaderVariant } from './variants/store_header.variants'
@@ -2646,7 +2647,7 @@ ${thumbCells}
                 ],
                 bgColor: '#ffffff',
                 textColor: '#1e1535',
-                numberColor: '#7530fb',
+                accentColor: '#7530fb',
                 paddingTop: 16,
                 paddingBottom: 16,
                 paddingLeft: 24,
@@ -2666,12 +2667,26 @@ ${thumbCells}
             label: 'Quote Block',
             category: 'Content' as BlockCategory,
             icon: 'quote',
-            description: 'Highlighted customer testimonial or review',
-            defaultProps: { ...DEFAULT_COMMON, bgColor: '#f3eeff' } as unknown as BlockProps,
+            description: 'Highlighted customer review, founder pledge or technical praise — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'qb-classic-accent-pillar',
+                bgColor: '#f3eeff',
+                quote: 'Excellent product, exactly as described. Fast delivery and great packaging.',
+                quoteText: 'Excellent product, exactly as described. Fast delivery and great packaging.',
+                text: 'Excellent product, exactly as described. Fast delivery and great packaging.',
+                author: '— Verified Buyer',
+                accentColor: '#7530fb',
+                textColor: '#1f1d2e',
+                paddingTop: 18,
+                paddingBottom: 18,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                return wrapBlock('quote_block' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:#f3eeff;${pad(p)}border-left:4px solid #7530fb;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:22px;color:#7530fb;font-weight:700;">&ldquo;</p><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;line-height:1.7;font-style:italic;">Excellent product, exactly as described. Fast delivery and great packaging.</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;font-weight:700;">— Verified Buyer &#9733;&#9733;&#9733;&#9733;&#9733;</p></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? 'qb-classic-accent-pillar'
+                return wrapBlock('quote_block' as BlockType, id, getQuoteBlockVariant(variantId).toHtml(p, id), p)
             },
         },
 

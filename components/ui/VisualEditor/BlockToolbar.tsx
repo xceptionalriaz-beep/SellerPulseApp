@@ -15,8 +15,9 @@ import {
     Link, Quote, Eraser, Highlighter,
     AlertCircle, AlertTriangle, CheckCircle,
     Store, Search, Package, Anchor,
-    RefreshCw, Trash2,
+    RefreshCw, Trash2, ChevronDown, Check, Type,
 } from 'lucide-react'
+import { FONT_REGISTRY, loadFont, getFontStack, type FontCategory } from './fonts'
 
 const C = {
     bg: '#1e1535',
@@ -32,12 +33,7 @@ const C = {
     danger: '#ef4444',
 }
 
-const FONT_OPTIONS = [
-    { label: 'Standard', value: 'Arial, Helvetica, sans-serif' },
-    { label: 'Modern', value: 'Inter, sans-serif' },
-    { label: 'Classic', value: 'Georgia, serif' },
-    { label: 'Monospace', value: 'Courier New, monospace' },
-]
+// 100+ fonts now loaded dynamically from ./fonts
 
 const miniBtn: React.CSSProperties = {
     display: 'flex',
@@ -105,7 +101,23 @@ export default function BlockToolbar({
     const [showRedirectTooltip, setShowRedirectTooltip] = useState(false)
     const [showHighlightPicker, setShowHighlightPicker] = useState(false)
     const highlightRef = useRef<HTMLDivElement>(null)
+    const [showFontPicker, setShowFontPicker] = useState(false)
+    const [fontSearch, setFontSearch] = useState('')
+    const [selectedCategory, setSelectedCategory] = useState<FontCategory | 'all'>('all')
+    const fontDropdownRef = useRef<HTMLDivElement>(null)
     const safeProps = blockProps ?? {}
+
+    // Close font dropdown on outside click
+    useEffect(() => {
+        if (!showFontPicker) return
+        function handleFontOutside(e: MouseEvent) {
+            if (fontDropdownRef.current && !fontDropdownRef.current.contains(e.target as Node)) {
+                setShowFontPicker(false)
+            }
+        }
+        document.addEventListener('mousedown', handleFontOutside)
+        return () => document.removeEventListener('mousedown', handleFontOutside)
+    }, [showFontPicker])
 
     // Detect existing link in slot HTML
     const slotLinkMatch = slotEdit?.currentHtml?.match(/href=\"([^\"]+)\"/)
@@ -462,25 +474,170 @@ export default function BlockToolbar({
                     <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0', flexShrink: 0 }} />
                 </>
             )}
-            {/* Font Family */}
-            <select
-                value={activeProps.fontFamily || 'Arial, Helvetica, sans-serif'}
-                onChange={(e) => handleFontFamily(e.target.value)}
-                style={{
-                    backgroundColor: '#ffffff',
-                    color: '#1f1d2e',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: 0,
-                    padding: '4px 8px',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                    marginRight: 4,
-                }}
-            >
-                {FONT_OPTIONS.map(font => (
-                    <option key={font.value} value={font.value}>{font.label}</option>
-                ))}
-            </select>
+            {/* ── 100+ Searchable Font Dropdown ── */}
+            <div ref={fontDropdownRef} style={{ position: 'relative', display: 'inline-flex' }}>
+                <button
+                    onClick={() => setShowFontPicker(p => !p)}
+                    title="Change font family"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 6,
+                        height: 28,
+                        minWidth: 105,
+                        maxWidth: 130,
+                        padding: '0 8px',
+                        backgroundColor: showFontPicker ? '#f3eeff' : '#ffffff',
+                        border: `1px solid ${showFontPicker ? '#7530fb' : '#cbd5e1'}`,
+                        borderRadius: 4,
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        color: '#1e1535',
+                        fontFamily: activeProps.fontFamily || 'inherit',
+                        fontWeight: 600,
+                        transition: 'all 0.15s',
+                    }}
+                >
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {(() => {
+                            const raw = activeProps.fontFamily || 'Arial'
+                            const matched = FONT_REGISTRY.find(f => raw.toLowerCase().includes(f.name.toLowerCase()))
+                            return matched?.name || 'Standard'
+                        })()}
+                    </span>
+                    <ChevronDown size={12} color="#7530fb" style={{ flexShrink: 0 }} />
+                </button>
+
+                {showFontPicker && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 6px)',
+                        left: 0,
+                        zIndex: 9999,
+                        width: 340,
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 12,
+                        boxShadow: '0 16px 42px rgba(0,0,0,0.18)',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        fontFamily: 'DM Sans, sans-serif',
+                    }}>
+                        {/* Search Input */}
+                        <div style={{ padding: '9px 12px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, backgroundColor: '#f8fafc' }}>
+                            <Search size={14} color="#7530fb" />
+                            <input
+                                autoFocus
+                                type="text"
+                                value={fontSearch}
+                                onChange={e => setFontSearch(e.target.value)}
+                                placeholder="Search 100+ fonts by name..."
+                                style={{
+                                    width: '100%',
+                                    border: 'none',
+                                    outline: 'none',
+                                    fontSize: 12,
+                                    backgroundColor: 'transparent',
+                                    color: '#1e1535',
+                                    fontFamily: 'DM Sans, sans-serif',
+                                }}
+                            />
+                            {fontSearch && (
+                                <button onClick={() => setFontSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#94a3b8' }}>×</button>
+                            )}
+                        </div>
+
+                        {/* Category Filter Tabs — All fit on one line with NO horizontal scroll */}
+                        <div style={{ display: 'flex', gap: 4, padding: '7px 10px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', justifyContent: 'space-between' }}>
+                            {(['all', 'sans', 'serif', 'display', 'mono', 'system'] as const).map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    style={{
+                                        flex: 1,
+                                        padding: '4px 0',
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        borderRadius: 8,
+                                        border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
+                                        backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
+                                        color: selectedCategory === cat ? '#ffffff' : '#64748b',
+                                        cursor: 'pointer',
+                                        textTransform: 'capitalize',
+                                        textAlign: 'center',
+                                        transition: 'all 0.12s',
+                                    }}
+                                >
+                                    {cat === 'all' ? 'All' : cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Font List — Taller view (420px) showing 12+ fonts at once */}
+                        <div style={{ maxHeight: 420, overflowY: 'auto', padding: '6px 0' }}>
+                            {FONT_REGISTRY
+                                .filter(f => {
+                                    const matchesCat = selectedCategory === 'all' || f.category === selectedCategory
+                                    const matchesSearch = f.name.toLowerCase().includes(fontSearch.toLowerCase().trim())
+                                    return matchesCat && matchesSearch
+                                })
+                                .map(font => {
+                                    const isCurrent = (activeProps.fontFamily || '').toLowerCase().includes(font.name.toLowerCase())
+                                    return (
+                                        <button
+                                            key={font.name}
+                                            onMouseEnter={() => loadFont(font.name)}
+                                            onClick={() => {
+                                                loadFont(font.name)
+                                                // Load into canvas iframe as well
+                                                document.querySelectorAll('iframe').forEach(ifr => {
+                                                    try {
+                                                        const doc = ifr.contentDocument || ifr.contentWindow?.document
+                                                        if (doc) loadFont(font.name, doc)
+                                                    } catch (e) { }
+                                                })
+                                                const stack = getFontStack(font.name)
+                                                handleFontFamily(stack)
+                                                setShowFontPicker(false)
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                padding: '7px 12px',
+                                                border: 'none',
+                                                backgroundColor: isCurrent ? '#f3eeff' : 'transparent',
+                                                cursor: 'pointer',
+                                                textAlign: 'left',
+                                                transition: 'background 0.1s',
+                                            }}
+                                            onMouseOver={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <span style={{
+                                                    fontFamily: `"${font.name}", ${font.fallback}`,
+                                                    fontSize: 13,
+                                                    color: isCurrent ? '#7530fb' : '#1e1535',
+                                                    fontWeight: isCurrent ? 700 : 500,
+                                                }}>
+                                                    {font.name}
+                                                </span>
+                                                <span style={{ fontSize: 9, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                                    {font.category}
+                                                </span>
+                                            </div>
+                                            {isCurrent && <Check size={13} color="#7530fb" />}
+                                        </button>
+                                    )
+                                })}
+                        </div>
+                    </div>
+                )}
+            </div>
             <div style={sepStyle} />
 
             {/* Formatting */}

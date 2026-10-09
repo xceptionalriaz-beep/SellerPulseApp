@@ -1,7 +1,7 @@
 // components/ui/VisualEditor/variants/index.ts
 // Central export for all block variant groups
 
-export type { BlockVariant } from './hero_header.variants'
+export type { BlockVariant } from './section_label.variants'
 
 // Exports
 export { heroHeaderVariants, getHeroVariant } from './hero_header.variants'
@@ -60,6 +60,7 @@ export { paragraphVariants, paragraphBlockVariants, getParagraphVariant, PARAGRA
 export { bulletListVariants, bulletListBlockVariants, getBulletListVariant, BULLET_LIST_THUMBNAILS } from './bullet_list.variants'
 export { dividerVariants, dividerBlockVariants, getDividerVariant, DIVIDER_THUMBNAILS } from './divider.variants'
 export { numberedListVariants, numberedListBlockVariants, getNumberedListVariant, NUMBERED_LIST_THUMBNAILS, NUMBERED_LIST_STYLES } from './numbered_list.variants'
+export { quoteBlockVariants, getQuoteBlockVariant, quoteBlockThumbnails } from './quote_block.variants'
 
 
 // Imports for registry
@@ -85,7 +86,7 @@ import { sellerInfoVariants } from './seller_info.variants'
 import { singleImageVariants } from './single_image.variants'
 import { logoBarVariants } from './logo_bar.variants'
 import { bundleDealVariants } from './bundle_deal.variants'
-import type { BlockVariant } from './hero_header.variants'
+import type { BlockVariant } from './section_label.variants'
 import { moneyBackVariants } from './money_back.variants'
 import { freeShippingVariants } from './free_shipping.variants'
 import { limitedTimeOfferVariants } from './limited_time_offer.variants'
@@ -120,6 +121,7 @@ import { paragraphVariants } from './paragraph.variants'
 import { bulletListVariants } from './bullet_list.variants'
 import { dividerVariants } from './divider.variants'
 import { numberedListVariants } from './numbered_list.variants'
+import { quoteBlockVariants } from './quote_block.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -232,6 +234,8 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'divider': dividerVariants,
     'separator': dividerVariants,
     'hr': dividerVariants,
+    'quote_block': quoteBlockVariants,
+    'quotes': quoteBlockVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

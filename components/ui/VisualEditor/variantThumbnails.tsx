@@ -7782,6 +7782,232 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <line x1="19" y1="38" x2="50" y2="38" stroke="#1e1535" strokeWidth="1.2" />
         </svg>
     ),
+
+    // ── Quote Block Thumbnails (10 Layout Styles) ───────────────────────────
+    'qb-classic-accent-pillar': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="32" rx="3" fill={light || '#f5f3ff'} />
+            <rect x="6" y="8" width="4" height="32" rx="1" fill={col || '#7c3aed'} />
+            <path d="M16 16c-1.5 0-2.5 1-2.5 2.5 0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5c0-3-2-4.5-4-5.5" stroke={col || '#7c3aed'} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <line x1="24" y1="18" x2="68" y2="18" stroke="#1f2937" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="16" y1="26" x2="64" y2="26" stroke="#4b5563" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="42" y1="33" x2="68" y2="33" stroke={col || '#7c3aed'} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-classic-left-border': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="32" rx="3" fill={light || '#f5f3ff'} />
+            <rect x="6" y="8" width="4" height="32" rx="1" fill={col || '#7c3aed'} />
+            <path d="M16 16c-1.5 0-2.5 1-2.5 2.5 0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5c0-3-2-4.5-4-5.5" stroke={col || '#7c3aed'} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <line x1="24" y1="18" x2="68" y2="18" stroke="#1f2937" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="16" y1="26" x2="64" y2="26" stroke="#4b5563" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="42" y1="33" x2="68" y2="33" stroke={col || '#7c3aed'} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-verified-buyer-card': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="22" height="6" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="0.8" />
+            <circle cx="12" cy="13" r="1.5" fill="#16a34a" />
+            <circle cx="36" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="40" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="44" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="48" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="52" cy="13" r="1.2" fill="#f59e0b" />
+            <line x1="8" y1="23" x2="72" y2="23" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="8" y1="29" x2="60" y2="29" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="8" y1="36" x2="34" y2="36" stroke="#16a34a" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-verified-badge-pill': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="22" height="6" rx="3" fill="#f0fdf4" stroke="#86efac" strokeWidth="0.8" />
+            <circle cx="12" cy="13" r="1.5" fill="#16a34a" />
+            <circle cx="36" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="40" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="44" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="48" cy="13" r="1.2" fill="#f59e0b" />
+            <circle cx="52" cy="13" r="1.2" fill="#f59e0b" />
+            <line x1="8" y1="23" x2="72" y2="23" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="8" y1="29" x2="60" y2="29" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="8" y1="36" x2="34" y2="36" stroke="#16a34a" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-editorial-wall-street': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="6" y="8" width="5" height="32" rx="1" fill={col || '#1e3a8a'} />
+            <line x1="16" y1="13" x2="36" y2="13" stroke="#64748b" strokeWidth="1" strokeLinecap="round" />
+            <line x1="16" y1="21" x2="72" y2="21" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="16" y1="27" x2="66" y2="27" stroke="#334155" strokeWidth="1.4" strokeLinecap="round" />
+            <line x1="16" y1="35" x2="48" y2="35" stroke={col || '#1e3a8a'} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-editorial-pullquote': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="6" y="8" width="5" height="32" rx="1" fill={col || '#1e3a8a'} />
+            <line x1="16" y1="13" x2="36" y2="13" stroke="#64748b" strokeWidth="1" strokeLinecap="round" />
+            <line x1="16" y1="21" x2="72" y2="21" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="16" y1="27" x2="66" y2="27" stroke="#334155" strokeWidth="1.4" strokeLinecap="round" />
+            <line x1="16" y1="35" x2="48" y2="35" stroke={col || '#1e3a8a'} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-speech-bubble-tail': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="7" width="64" height="23" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <polygon points="18,30 24,30 18,36" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="14" y1="14" x2="64" y2="14" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="14" y1="21" x2="52" y2="21" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="28" cy="38" r="4.5" fill={col || '#7530fb'} />
+            <line x1="36" y1="38" x2="60" y2="38" stroke="#1e293b" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-speech-bubble-callout': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="7" width="64" height="23" rx="4" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <polygon points="18,30 24,30 18,36" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="14" y1="14" x2="64" y2="14" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="14" y1="21" x2="52" y2="21" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="28" cy="38" r="4.5" fill={col || '#7530fb'} />
+            <line x1="36" y1="38" x2="60" y2="38" stroke="#1e293b" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-nordic-minimal-brackets': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="10" y1="9" x2="70" y2="9" stroke="#94a3b8" strokeWidth="0.8" />
+            <polygon points="40,6 42,9 40,12 38,9" fill={col || '#7530fb'} />
+            <line x1="16" y1="18" x2="64" y2="18" stroke="#18181b" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="20" y1="25" x2="60" y2="25" stroke="#3f3f46" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="10" y1="34" x2="70" y2="34" stroke="#94a3b8" strokeWidth="0.8" />
+            <line x1="28" y1="40" x2="52" y2="40" stroke="#71717a" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-nordic-minimalist': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="10" y1="9" x2="70" y2="9" stroke="#94a3b8" strokeWidth="0.8" />
+            <polygon points="40,6 42,9 40,12 38,9" fill={col || '#7530fb'} />
+            <line x1="16" y1="18" x2="64" y2="18" stroke="#18181b" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="20" y1="25" x2="60" y2="25" stroke="#3f3f46" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="10" y1="34" x2="70" y2="34" stroke="#94a3b8" strokeWidth="0.8" />
+            <line x1="28" y1="40" x2="52" y2="40" stroke="#71717a" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-inspected-technician-dossier': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="6" y="6" width="68" height="36" rx="2" fill="#f8fafc" stroke="#3b82f6" strokeWidth="0.8" strokeDasharray="3 2" />
+            <circle cx="15" cy="15" r="4.5" fill="#eff6ff" stroke="#3b82f6" strokeWidth="1" />
+            <rect x="24" y="12" width="28" height="5" rx="1" fill="#0284c7" />
+            <rect x="56" y="12" width="14" height="5" rx="1.5" fill="#dcfce7" stroke="#16a34a" strokeWidth="0.5" />
+            <line x1="12" y1="25" x2="68" y2="25" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="12" y1="32" x2="56" y2="32" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-technician-field-notes': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="6" y="6" width="68" height="36" rx="2" fill="#f8fafc" stroke="#3b82f6" strokeWidth="0.8" strokeDasharray="3 2" />
+            <circle cx="15" cy="15" r="4.5" fill="#eff6ff" stroke="#3b82f6" strokeWidth="1" />
+            <rect x="24" y="12" width="28" height="5" rx="1" fill="#0284c7" />
+            <rect x="56" y="12" width="14" height="5" rx="1.5" fill="#dcfce7" stroke="#16a34a" strokeWidth="0.5" />
+            <line x1="12" y1="25" x2="68" y2="25" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="12" y1="32" x2="56" y2="32" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-midnight-obsidian-gold': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#1e293b" strokeWidth="1" />
+            <path d="M12 14c-1.2 0-2 .8-2 2 0 1.2.8 2 2 2s2-.8 2-2c0-2.5-1.5-3.8-3-4.5" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <circle cx="68" cy="14" r="1.5" fill="#f59e0b" />
+            <circle cx="63" cy="14" r="1.5" fill="#f59e0b" />
+            <circle cx="58" cy="14" r="1.5" fill="#f59e0b" />
+            <line x1="12" y1="22" x2="68" y2="22" stroke="#f8fafc" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="12" y1="28" x2="54" y2="28" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="12" y1="36" x2="38" y2="36" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-dark-obsidian-seal': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" stroke="#1e293b" strokeWidth="1" />
+            <path d="M12 14c-1.2 0-2 .8-2 2 0 1.2.8 2 2 2s2-.8 2-2c0-2.5-1.5-3.8-3-4.5" stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <circle cx="68" cy="14" r="1.5" fill="#f59e0b" />
+            <circle cx="63" cy="14" r="1.5" fill="#f59e0b" />
+            <circle cx="58" cy="14" r="1.5" fill="#f59e0b" />
+            <line x1="12" y1="22" x2="68" y2="22" stroke="#f8fafc" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="12" y1="28" x2="54" y2="28" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="12" y1="36" x2="38" y2="36" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-split-ribbon-showcase': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="0" y="0" width="20" height="48" fill={col || '#7530fb'} rx="1" />
+            <circle cx="10" cy="16" r="4.5" fill="#ffffff" />
+            <rect x="4" y="27" width="12" height="4" rx="2" fill="#ffffff" opacity="0.9" />
+            <line x1="28" y1="16" x2="72" y2="16" stroke="#1e1535" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="28" y1="24" x2="66" y2="24" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="28" y1="33" x2="52" y2="33" stroke={col || '#7530fb'} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-split-spotlight-quote': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#ede9fe" strokeWidth="1" />
+            <rect x="0" y="0" width="20" height="48" fill={col || '#7530fb'} rx="1" />
+            <circle cx="10" cy="16" r="4.5" fill="#ffffff" />
+            <rect x="4" y="27" width="12" height="4" rx="2" fill="#ffffff" opacity="0.9" />
+            <line x1="28" y1="16" x2="72" y2="16" stroke="#1e1535" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="28" y1="24" x2="66" y2="24" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="28" y1="33" x2="52" y2="33" stroke={col || '#7530fb'} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-certified-guarantee-seal': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fbfcfe" stroke="#dbeafe" strokeWidth="1" />
+            <circle cx="16" cy="24" r="8" fill="#eff6ff" stroke="#1d4ed8" strokeWidth="1.2" />
+            <polygon points="16,20 17,23 20,23 18,25 19,28 16,26 13,28 14,25 12,23 15,23" fill="#1d4ed8" />
+            <line x1="30" y1="16" x2="64" y2="16" stroke="#1d4ed8" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="30" y1="24" x2="72" y2="24" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="30" y1="32" x2="60" y2="32" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'qb-executive-monogram': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#fbfcfe" stroke="#dbeafe" strokeWidth="1" />
+            <circle cx="16" cy="24" r="8" fill="#eff6ff" stroke="#1d4ed8" strokeWidth="1.2" />
+            <polygon points="16,20 17,23 20,23 18,25 19,28 16,26 13,28 14,25 12,23 15,23" fill="#1d4ed8" />
+            <line x1="30" y1="16" x2="64" y2="16" stroke="#1d4ed8" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="30" y1="24" x2="72" y2="24" stroke="#0f172a" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="30" y1="32" x2="60" y2="32" stroke="#475569" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    'qb-compact-horizontal-ticker': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="14" width="68" height="20" rx="10" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="16" cy="24" r="4.5" fill={col || '#7530fb'} />
+            <line x1="25" y1="24" x2="52" y2="24" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="58" cy="24" r="1.2" fill="#f59e0b" />
+            <circle cx="62" cy="24" r="1.2" fill="#f59e0b" />
+            <circle cx="66" cy="24" r="1.2" fill="#f59e0b" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

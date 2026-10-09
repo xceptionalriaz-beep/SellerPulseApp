@@ -894,7 +894,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (props as any).layoutStyle ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : block.type === 'divider' || (block.type as string) === 'separator' ? 'minimal_diamond' : block.type === 'numbered_list' || (block.type as string) === 'numberedlist' || (block.type as string) === 'steps' ? 'num-classic-badge' : 'default')}
+                    currentVariant={(props as any).variant ?? (props as any).layoutStyle ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'quote_block' || (block.type as string) === 'quote' ? 'qb-classic-left-border' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : block.type === 'divider' || (block.type as string) === 'separator' ? 'minimal_diamond' : block.type === 'numbered_list' || (block.type as string) === 'numberedlist' || (block.type as string) === 'steps' ? 'num-classic-badge' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -2928,8 +2928,12 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Text colour" value={props.textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v })} />
-                        <ColorRow label="Number circle colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
+                        <ColorRow label="Text colour" value={props.textColor ?? props.color ?? '#1e1535'} onChange={v => updateProps({ textColor: v, color: v })} />
+                        <ColorRow label="Number circle colour" value={props.accentColor ?? props.numberColor ?? props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v, numberColor: v, bulletColor: v })} />
+                        <ColorRow label="Number text colour" value={props.badgeTextColor ?? props.numberTextColor ?? '#ffffff'} onChange={v => updateProps({ badgeTextColor: v, numberTextColor: v })} />
+                    </Section>
+                    <Section title="Circle Size">
+                        <SliderInput label="Circle size" value={props.badgeSize ?? 28} min={20} max={48} suffix="px" onChange={v => updateProps({ badgeSize: v })} />
                     </Section>
                     <Section title="Typography">
                         <SliderInput label="Font size" value={props.fontSize ?? 15} min={12} max={24} suffix="px" onChange={v => updateProps({ fontSize: v })} />
@@ -5381,15 +5385,19 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'numbered_list':
             return (
                 <Section title="List items">
-                    <InfoBox>One item per line. Use tokens for dynamic content.</InfoBox>
+                    <InfoBox>One item per line. Format: "Step title — description" or plain text.</InfoBox>
                     <TextareaInput
                         label="Items (one per line)"
-                        value={Array.isArray(props.items) ? props.items.join('\n') : 'Step one\nStep two\nStep three'}
+                        value={Array.isArray(props.items) ? props.items.join('\n') : (typeof props.content === 'string' ? props.content : 'Step one — first instruction\nStep two — second instruction\nStep three — third instruction')}
                         rows={5}
-                        onChange={v => updateProps({ items: v.split('\n').filter((s: string) => s.trim()) })}
+                        onChange={v => {
+                            const list = v.split('\n').filter((s: string) => s.trim())
+                            updateProps({ items: list, content: v })
+                        }}
                     />
-                    <ColorRow label="Number bubble colour" value={props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ bulletColor: v })} />
-                    <ColorRow label="Text colour" value={props.color ?? '#1f1d2e'} onChange={v => updateProps({ color: v })} />
+                    <ColorRow label="Number bubble colour" value={props.accentColor ?? props.numberColor ?? props.bulletColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v, numberColor: v, bulletColor: v })} />
+                    <ColorRow label="Number text colour" value={props.badgeTextColor ?? props.numberTextColor ?? '#ffffff'} onChange={v => updateProps({ badgeTextColor: v, numberTextColor: v })} />
+                    <ColorRow label="Text colour" value={props.textColor ?? props.color ?? '#1e1535'} onChange={v => updateProps({ textColor: v, color: v })} />
                 </Section>
             )
 
@@ -6619,9 +6627,11 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <>
                     <Section title="Colours">
-                        <ColorRow label="Background" value={(props as any).bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v } as any)} />
-                        <ColorRow label="Text colour" value={(props as any).textColor ?? '#1e1535'} onChange={v => updateProps({ textColor: v } as any)} />
-                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Background" value={(props as any).bgColor ?? '#0053a0'} onChange={v => updateProps({ bgColor: v, isCustomBg: true } as any)} />
+                        <ColorRow label="Heading colour" value={(props as any).textColor ?? '#ffffff'} onChange={v => updateProps({ textColor: v, isCustomText: true } as any)} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#38bdf8'} onChange={v => updateProps({ accentColor: v, isCustomAccent: true } as any)} />
+                        <ColorRow label="Subtext colour" value={(props as any).subTextColor ?? 'rgba(255,255,255,0.85)'} onChange={v => updateProps({ subTextColor: v } as any)} />
+                        <ColorRow label="Pill / card background" value={(props as any).badgeBg ?? 'rgba(255,255,255,0.12)'} onChange={v => updateProps({ badgeBg: v, cardBg: v } as any)} />
                     </Section>
                     <Section title="Typography">
                         <SelectInput label="Font family" value={(props as any).fontFamily ?? ''}
@@ -6629,10 +6639,12 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             onChange={v => updateProps({ fontFamily: v } as any)} />
                     </Section>
                     <Section title="Spacing">
-                        <NumberInput label="Top" min={0} max={120} suffix="px" value={(props as any).paddingTop ?? 16} onChange={v => updateProps({ paddingTop: v } as any)} />
-                        <NumberInput label="Bottom" min={0} max={120} suffix="px" value={(props as any).paddingBottom ?? 16} onChange={v => updateProps({ paddingBottom: v } as any)} />
-                        <NumberInput label="Left" min={0} max={120} suffix="px" value={(props as any).paddingLeft ?? 20} onChange={v => updateProps({ paddingLeft: v } as any)} />
-                        <NumberInput label="Right" min={0} max={120} suffix="px" value={(props as any).paddingRight ?? 20} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Top" min={0} max={120} suffix="px" value={(props as any).paddingTop ?? 20} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom" min={0} max={120} suffix="px" value={(props as any).paddingBottom ?? 20} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left" min={0} max={120} suffix="px" value={(props as any).paddingLeft ?? 24} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right" min={0} max={120} suffix="px" value={(props as any).paddingRight ?? 24} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
                     </Section>
                 </>
             )
@@ -6753,37 +6765,6 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 </>
             )
         }
-
-        case 'authenticity_guarantee':
-            return (
-                <>
-                    <Section title="Content">
-                        <TextInput label="Title" value={(props as any).heading ?? (props as any).bannerTitle ?? '100% Authenticity Guaranteed'} onChange={v => updateProps({ heading: v, bannerTitle: v } as any)} />
-                        <TextareaInput label="Description" value={(props as any).subText ?? (props as any).description ?? ''} rows={3} placeholder="Every item verified genuine. Sourced directly from authorised distributors." onChange={v => updateProps({ subText: v, description: v } as any)} />
-                    </Section>
-                </>
-            )
-
-        case 'international_shipping':
-            return (
-                <>
-                    <Section title="Notice Content">
-                        <TextInput
-                            label="Heading"
-                            value={props.heading ?? 'International Buyers — Import Duties Notice'}
-                            onChange={v => updateProps({ heading: v })}
-                        />
-                        {phButton('heading', 'heading')}
-                        <TextareaInput
-                            label="Notice text"
-                            value={props.text ?? "Import duties and taxes are not included in the price. These are the buyer's responsibility. Please check your country's customs rules before purchasing."}
-                            rows={4}
-                            onChange={v => updateProps({ text: v })}
-                        />
-                        {phButton('text', 'notice text')}
-                    </Section>
-                </>
-            )
 
         case 'limited_time_offer': {
             const ltov = ((props as any).variant ?? 'lto-flash-sale-ticker') as string

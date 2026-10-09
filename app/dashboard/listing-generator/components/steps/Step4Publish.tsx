@@ -437,11 +437,11 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                     </span>
                                 </div>
 
-                                {/* Editable plain text */}
+                                {/* Read-only plain text preview — do NOT write back to description_html */}
                                 <textarea
+                                    readOnly
                                     value={draft.description_html?.replace(/<[^>]*>/g, '') ?? ''}
-                                    onChange={e => onChange({ description_html: e.target.value })}
-                                    placeholder="Write your product description here..."
+                                    placeholder="No description yet — add one in Step 2."
                                     rows={6}
                                     style={{
                                         width: '100%',
@@ -451,13 +451,12 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                         border: `1px solid ${C.borderInput}`,
                                         borderRadius: 12,
                                         padding: '10px 12px',
-                                        backgroundColor: C.surface,
+                                        backgroundColor: C.bg,
                                         outline: 'none',
-                                        resize: 'vertical',
+                                        resize: 'none',
                                         lineHeight: 1.6,
+                                        cursor: 'default',
                                     }}
-                                    onFocus={e => e.target.style.borderColor = C.primary}
-                                    onBlur={e => e.target.style.borderColor = C.borderInput}
                                 />
 
                                 {/* Preview rendered HTML */}

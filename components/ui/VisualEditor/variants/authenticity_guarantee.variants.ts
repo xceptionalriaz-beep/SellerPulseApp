@@ -17,6 +17,8 @@
 // 10. auth-sports-memorabilia-holotag — Stadium dark navy autographed memorabilia hologram security pass
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { getIconSvg } from '../IconLibrary'
+
 export interface BlockVariant {
   id: string
   label: string
@@ -72,61 +74,22 @@ function getPoints(p: any): AuthPoint[] {
   ]
 }
 
-const KNOWN_DEFAULT_BGS = [
-  '#f8f7ff', // Default purple tint
-  '#ffffff', // White
-  '#f8fafc', // Slate 50
-  '#dc2626', // Red
-  '#1e1535', // Dark Purple
-  '#0f172a', // Slate 900
-  '#18181b', // Zinc 900
-  '#09090b', // Zinc 950
-  '#090d16', // Dark Navy
-  '#064e3b', // Emerald
-  '#fffdfa', // Cream Ivory
-  '#f0fdf4', // Mint Green
-  '#161324', // Deep Plum
-]
-
 function resolveBg(p: any, signatureBg: string): string {
-  if (!p.bgColor) return signatureBg
-  const val = p.bgColor.toLowerCase().trim()
-  if (KNOWN_DEFAULT_BGS.includes(val)) {
-    return signatureBg
-  }
-  return p.bgColor
+  if (p.isCustomBg && p.bgColor) return p.bgColor
+  if (p.bgColor && p.bgColor !== '#f8f7ff') return p.bgColor
+  return signatureBg
 }
 
 function resolveText(p: any, signatureText: string): string {
-  if (!p.textColor) return signatureText
-  const val = p.textColor.toLowerCase().trim()
-  if (
-    val === '#ffffff' ||
-    val === '#7530fb' ||
-    val === '#1e1535' ||
-    val === '#0f172a' ||
-    val === '#18181b' ||
-    val === '#1c1917' ||
-    val === '#f4f4f5' ||
-    val === '#fafafa'
-  ) {
-    return signatureText
-  }
-  return p.textColor
+  if (p.isCustomText && p.textColor) return p.textColor
+  if (p.textColor && p.textColor !== '#1e1535') return p.textColor
+  return signatureText
 }
 
 function resolveAccent(p: any, signatureAccent: string): string {
-  if (!p.accentColor) return signatureAccent
-  const val = p.accentColor.toLowerCase().trim()
-  const KNOWN_ACCENTS = [
-    '#7530fb', '#b8fa33', '#f59e0b', '#b91c1c', '#d4af37',
-    '#0284c7', '#f97316', '#2563eb', '#71717a', '#06b6d4',
-    '#fbbf24', '#10b981', '#16a34a'
-  ]
-  if (KNOWN_ACCENTS.includes(val)) {
-    return signatureAccent
-  }
-  return p.accentColor
+  if (p.isCustomAccent && p.accentColor) return p.accentColor
+  if (p.accentColor && p.accentColor !== '#7530fb') return p.accentColor
+  return signatureAccent
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -138,15 +101,20 @@ function ebayBlueOfficialShield(p: any, id: string): string {
   const bgCol = resolveBg(p, '#0053a0')
   const textCol = resolveText(p, '#ffffff')
   const accent = resolveAccent(p, '#38bdf8')
+  const pillBg = p.badgeBg ?? p.cardBg ?? 'rgba(255,255,255,0.12)'
+  const subTextCol = p.subTextColor ?? 'rgba(255,255,255,0.85)'
+  const eyebrow = p.eyebrowText ?? p.tagText ?? 'VERIFIED RETAIL PEDIGREE'
   const title = authTitle(p, '100% AUTHENTICITY GUARANTEED')
   const sub = authSubtext(p, 'Every item verified genuine. Sourced directly from authorised distributors.')
   const points = getPoints(p)
+  const titleSize = p.fontSize ?? 20
+  const iconSvg = getIconSvg(p.icon || 'shield-check', '#ffffff', 20)
 
   const pillsHtml = points.map(pt => {
     return `<td align="center" style="padding:4px 6px;">
-      <div style="background-color:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:999px;padding:6px 14px;box-sizing:border-box;white-space:nowrap;">
+      <div style="background-color:${pillBg};border:1px solid rgba(255,255,255,0.25);border-radius:999px;padding:6px 14px;box-sizing:border-box;white-space:nowrap;">
         <span style="color:${accent};font-size:12px;font-weight:900;margin-right:5px;">✓</span>
-        <span style="color:#ffffff;font-size:12px;font-weight:700;letter-spacing:0.2px;">${pt.title}</span>
+        <span style="color:${textCol};font-size:12px;font-weight:700;letter-spacing:0.2px;">${pt.title}</span>
       </div>
     </td>`
   }).join('')
@@ -158,19 +126,19 @@ function ebayBlueOfficialShield(p: any, id: string): string {
     <td style="${pad(p, 20, 24, 20, 24)}text-align:center;box-sizing:border-box;">
       <!-- Shield Emblem & Category Tag -->
       <div style="margin-bottom:8px;">
-        <div style="display:inline-block;width:38px;height:38px;border-radius:50%;background-color:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);text-align:center;line-height:36px;font-size:20px;color:#ffffff;margin-bottom:6px;">
-          🛡
+        <div data-feature-index="0" style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background-color:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);cursor:pointer;margin-bottom:6px;" title="Click to replace icon">
+          ${iconSvg}
         </div>
         <div style="color:${accent};font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">
-          VERIFIED RETAIL PEDIGREE
+          ${eyebrow}
         </div>
       </div>
       <!-- Heading -->
-      <div style="color:${textCol};font-size:20px;font-weight:900;letter-spacing:0.5px;margin-bottom:6px;">
+      <div style="color:${textCol};font-size:${titleSize}px;font-weight:900;letter-spacing:0.5px;margin-bottom:6px;">
         ${title}
       </div>
       <!-- Subtitle -->
-      <div style="color:rgba(255,255,255,0.85);font-size:13px;line-height:1.5;max-width:640px;margin:0 auto 16px auto;">
+      <div style="color:${subTextCol};font-size:13px;line-height:1.5;max-width:640px;margin:0 auto 16px auto;">
         ${sub}
       </div>
       <!-- 3 Pill Trust Bar -->
@@ -300,7 +268,7 @@ function sneakerStreetwearPass(p: any, id: string): string {
               LEGIT CHECK: VERIFIED
             </span>
             <span style="color:#a1a1aa;font-size:10px;font-family:monospace;margin-left:8px;">
-              PASS TAG #AUTH-99420-SNKRS
+              ${p.passNumber ?? p.certNumber ?? 'PASS TAG #AUTH-99420-SNKRS'}
             </span>
           </td>
           <td align="right" style="color:${volt};font-size:10px;font-family:monospace;font-weight:700;">
@@ -470,7 +438,7 @@ function psaGradedSlabVault(p: any, id: string): string {
               |||| | ||||| || ||||||
             </div>
             <div style="color:#64748b;font-size:9px;font-family:monospace;margin-top:2px;">
-              CERT #EB-998234-SLAB
+              ${p.certNumber ?? p.passNumber ?? 'CERT #EB-998234-SLAB'}
             </div>
           </td>
         </tr>
@@ -724,7 +692,7 @@ function vintageNotaryParchment(p: any, id: string): string {
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               <tr>
                 <td style="text-align:left;color:#78716c;font-size:10px;font-family:Arial,sans-serif;">
-                  DOCKET LOT: #AUTH-ESTATE-9924
+                  ${p.docketText ?? p.certNumber ?? 'DOCKET LOT: #AUTH-ESTATE-9924'}
                 </td>
                 <td style="text-align:right;color:${red};font-size:10px;font-weight:700;font-family:Arial,sans-serif;">
                   SEAL RECORDED &bull; 100% GENUINE
@@ -778,7 +746,7 @@ function sportsMemorabiliaHolotag(p: any, id: string): string {
             </span>
           </td>
           <td align="right" style="color:${silver};font-size:10px;font-family:monospace;">
-            HOLOGRAM #SPO-77491-AUTH
+            ${p.holoNumber ?? p.certNumber ?? 'HOLOGRAM #SPO-77491-AUTH'}
           </td>
         </tr>
       </table>
