@@ -817,6 +817,13 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     return () => clearInterval(timer)
   }, [loadNotifCount])
 
+  // -- Open notification panel from any child via custom event -----
+  useEffect(() => {
+    const handler = () => setShowNotifPanel(true)
+    window.addEventListener('tb:notifications', handler)
+    return () => window.removeEventListener('tb:notifications', handler)
+  }, [])
+
   // -- Logout -----------------------------------------------------
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -890,9 +897,6 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
           </>
         )}
 
-        <NotificationBell count={notifCount} isPulsing={bellPulsing} onClick={openNotifPanel} />
-        <div className="w-[15px]" />
-        <UserAvatar profile={profile} onClick={() => router.push('/dashboard/profile')} />
       </header>
 
       {/* -- SIDEBAR + CONTENT ROW -- */}
