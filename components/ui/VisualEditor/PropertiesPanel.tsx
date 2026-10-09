@@ -5227,7 +5227,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                         <ColorRow label="Name colour" value={props.nameColor ?? '#ffffff'} onChange={v => updateProps({ nameColor: v })} />
                         <ColorRow label="Tagline colour" value={props.taglineColor ?? 'rgba(255,255,255,0.7)'} onChange={v => updateProps({ taglineColor: v })} />
                         <ColorRow label="Accent colour" value={props.accentColor ?? '#b8fa33'} onChange={v => updateProps({ accentColor: v })} />
-                    </Section>
+                    </Section >
                     <Section title="Spacing">
                         <NumberInput label="Padding top" value={(props as any).paddingTop ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
                         <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
