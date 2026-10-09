@@ -175,7 +175,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'feedback_score': feedbackScoreVariants,
     'feedback': feedbackScoreVariants,
     'pull_quote': pullQuoteVariants,
-    'quote': pullQuoteVariants,
+    'pullquote': pullQuoteVariants,
     'section_label': sectionLabelVariants,
     'label': sectionLabelVariants,
     'breadcrumb_bar': breadcrumbBarVariants,
@@ -235,7 +235,7 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'separator': dividerVariants,
     'hr': dividerVariants,
     'quote_block': quoteBlockVariants,
-    'quotes': quoteBlockVariants,
+    'quote': quoteBlockVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

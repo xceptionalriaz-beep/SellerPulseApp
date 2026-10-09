@@ -113,7 +113,10 @@ function resolveAccent(p: any, fallback = '#7530fb'): string {
 }
 
 function resolveBg(p: any, fallback = '#f3eeff'): string {
-    return p.bgColor ?? fallback
+    if (!p.bgColor || p.bgColor.toLowerCase() === '#f3eeff' || p.bgColor.toLowerCase() === '#ffffff') {
+        return fallback
+    }
+    return p.bgColor
 }
 
 function resolveText(p: any, fallback = '#1f1d2e'): string {
@@ -372,9 +375,10 @@ function inspectedTechnicianDossier(p: any, id: string): string {
 // Solves: Provides maximum contrast on dark or high-performance product listings.
 // ─────────────────────────────────────────────────────────────────────────────
 function midnightObsidianGold(p: any, id: string): string {
-    const bgCol = resolveBg(p, '#0f172a')
-    const textCol = resolveText(p, '#f8fafc')
-    const accentCol = resolveAccent(p, '#f59e0b')
+    const isCustomDarkBg = p.bgColor && !['#f3eeff', '#ffffff', '#f8f8f8', '#f8f7ff', 'transparent'].includes(p.bgColor.toLowerCase())
+    const bgCol = isCustomDarkBg ? p.bgColor : '#0f172a'
+    const textCol = (!p.textColor || p.textColor === '#1f1d2e') ? '#f8fafc' : p.textColor
+    const accentCol = (!p.accentColor || p.accentColor === '#7530fb') ? '#f59e0b' : p.accentColor
     const quote = resolveQuote(p, 'The performance is insane. Packed securely with tamper-proof seal. Five stars without hesitation.')
     const author = resolveAuthor(p, '— Power Buyer & Enthusiast')
     const starsSvg = renderStarsSvg(5, accentCol)
