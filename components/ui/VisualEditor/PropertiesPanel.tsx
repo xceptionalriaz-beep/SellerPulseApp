@@ -894,7 +894,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : 'default')}
+                    currentVariant={(props as any).variant ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                 />
             )}
@@ -5932,13 +5932,24 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
         }
 
-        case 'heading':
+        case 'heading': {
+            const hv = props.variant ?? 'hd-classic-accent-bar'
+            const isIconBadge = hv === 'hd-icon-badge-prefix' || hv === 'icon-badge-prefix'
+            const isEditorial = hv === 'hd-editorial-pill-tag' || hv === 'editorial-pill-tag'
+            const isStepCounter = hv === 'hd-step-counter-header' || hv === 'step-counter-header'
+
             return (
                 <>
-                    <Section title="Content">
-                        <TextInput label="Text" value={props.text ?? 'Section Heading'} onChange={v => updateProps({ text: v })} />
+                    <Section title="Heading Content">
+                        <TextareaInput
+                            label="Heading text"
+                            value={props.text ?? 'Section Heading'}
+                            rows={2}
+                            onChange={v => updateProps({ text: v })}
+                        />
+                        {phButton('text', 'heading')}
                         <SelectInput
-                            label="Level"
+                            label="Heading level"
                             value={props.level ?? 'h2'}
                             options={[
                                 { v: 'h1', l: 'H1 — Page title' },
@@ -5949,8 +5960,54 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                             onChange={v => updateProps({ level: v })}
                         />
                     </Section>
+
+                    {/* Subtitle (Shown for Icon Badge style) */}
+                    {isIconBadge && (
+                        <Section title="Subtitle">
+                            <TextareaInput
+                                label="Subtitle text"
+                                value={props.subtitle ?? 'Verified product specifications & technical details'}
+                                rows={2}
+                                onChange={v => updateProps({ subtitle: v })}
+                            />
+                            {phButton('subtitle', 'subtitle')}
+                        </Section>
+                    )}
+
+                    {/* Badge / Step Text */}
+                    {(isEditorial || isStepCounter) && (
+                        <Section title={isStepCounter ? 'Step Number' : 'Badge Tag'}>
+                            <TextInput
+                                label={isStepCounter ? 'Step number (e.g. 01)' : 'Pill tag text'}
+                                value={props.badgeText ?? (isStepCounter ? '01' : 'SECTION OVERVIEW')}
+                                onChange={v => updateProps({ badgeText: v })}
+                            />
+                        </Section>
+                    )}
+
+                    {/* Icon Selection UI with Inline Picker & Slot Highlight */}
+                    {isIconBadge && (
+                        <Section title="Badge Icon">
+                            <div style={{
+                                padding: '10px',
+                                background: selectedSubSlot === 'icon' ? C.primaryLight : '#fafafa',
+                                border: `1.5px solid ${selectedSubSlot === 'icon' ? C.primary : '#ede9fe'}`,
+                                borderRadius: 8,
+                                marginBottom: 6,
+                            }}>
+                                <p style={{ margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600, color: C.secondary }}>
+                                    Select Icon or click icon on canvas:
+                                </p>
+                                <InlineIconPicker
+                                    value={props.icon ?? 'layers'}
+                                    onChange={v => updateProps({ icon: v, iconName: v })}
+                                />
+                            </div>
+                        </Section>
+                    )}
                 </>
             )
+        }
 
         case 'paragraph':
             return (

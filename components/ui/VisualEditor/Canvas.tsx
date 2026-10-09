@@ -1347,6 +1347,10 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
           e.preventDefault();
           e.stopPropagation();
           window.parent.postMessage({ type: 'RIAZIFY_SELECT_SLOT', propKey: slot, blockId: BLOCK_ID }, '*');
+          // If icon slot clicked, also trigger opening the Icon Library
+          if (slot === 'icon') {
+            window.parent.postMessage({ type: 'RIAZIFY_ICON_CLICK', featureIndex: 0, blockId: BLOCK_ID }, '*');
+          }
           return;
         }
       }

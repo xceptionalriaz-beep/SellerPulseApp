@@ -340,6 +340,9 @@ export interface HeadingProps extends CommonProps {
     letterSpacing: number     // px — converted to em in toHtml
     borderBottom: boolean     // decorative left-border accent
     accentColor: string       // left-border color when borderBottom = true
+    variant?: string
+    subtitle?: string
+    badgeText?: string
 }
 
 // ── Paragraph ────────────────────────────────────────────────────────────────
@@ -351,6 +354,9 @@ export interface ParagraphProps extends CommonProps {
     lineHeight: number        // e.g. 1.7
     letterSpacing: number
     align: 'left' | 'center' | 'right'
+    variant?: string
+    badgeText?: string
+    authorText?: string
 }
 
 // ── Bullet List ──────────────────────────────────────────────────────────────
@@ -363,6 +369,7 @@ export interface BulletListProps extends CommonProps {
     letterSpacing: number     // px — converted to em in toHtml
     bulletColor: string
     bulletStyle: 'disc' | 'check' | 'arrow' | 'star'
+    variant?: string
 }
 
 // ── Divider ───────────────────────────────────────────────────────────────────
@@ -1234,6 +1241,9 @@ import { getTestimonialsVariant } from './variants/testimonials.variants'
 import { getInfoBoxVariant } from './variants/info_box.variants'
 import { getShippingInfoVariant } from './variants/shipping_info.variants'
 import { getStoreHeaderVariant } from './variants/store_header.variants'
+import { getHeadingVariant } from './variants/heading.variants'
+import { getParagraphVariant } from './variants/paragraph.variants'
+import { getBulletListVariant } from './variants/bullet_list.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1495,9 +1505,10 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         label: 'Heading',
         category: 'Content',
         icon: 'heading',
-        description: 'Section heading H1 – H4',
+        description: 'Section heading H1 – H4 — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
+            variant: 'hd-classic-accent-bar',
             text: 'Section Heading',
             level: 'h2',
             color: '#1e1535',
@@ -1508,24 +1519,19 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             letterSpacing: 0,
             borderBottom: true,
             accentColor: '#7530fb',
+            icon: 'layers',
+            iconName: 'layers',
+            features: [{ icon: 'layers' }],
+            subtitle: 'Verified product specifications & technical details',
+            paddingTop: 16,
+            paddingBottom: 16,
+            paddingLeft: 24,
+            paddingRight: 24,
         } as HeadingProps,
         toHtml(props, id) {
-            const p = props as HeadingProps
-            const border = p.borderBottom
-                ? `border-left:4px solid ${p.accentColor};padding-left:12px;`
-                : ''
-            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 22)).toFixed(4)
-            return wrapBlock('heading', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <${p.level} style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight};line-height:${p.lineHeight ?? 1.2};letter-spacing:${lsEm}em;color:${p.color};${textAlign(p.align)}${border}">
-        ${p.text}
-      </${p.level}>
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'hd-classic-accent-bar'
+            return wrapBlock('heading', id, getHeadingVariant(variantId).toHtml(p, id), p)
         },
     },
 
@@ -1534,9 +1540,10 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         label: 'Paragraph',
         category: 'Content',
         icon: 'pilcrow',
-        description: 'Body text paragraph',
+        description: 'Body text paragraph — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
+            variant: 'para-classic-plain',
             text: 'Enter your paragraph text here. You can include {{PRODUCT_TITLE}} and other placeholders.',
             color: '#6b7280',
             fontSize: 14,
@@ -1544,21 +1551,15 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             lineHeight: 1.7,
             letterSpacing: 0,
             align: 'left',
+            paddingTop: 16,
+            paddingBottom: 16,
+            paddingLeft: 24,
+            paddingRight: 24,
         } as ParagraphProps,
         toHtml(props, id) {
-            const p = props as ParagraphProps
-            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 14)).toFixed(4)
-            return wrapBlock('paragraph', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '400'};line-height:${p.lineHeight};letter-spacing:${lsEm}em;color:${p.color};${textAlign(p.align)}">
-        ${p.text}
-      </p>
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'para-classic-plain'
+            return wrapBlock('paragraph', id, getParagraphVariant(variantId).toHtml(p, id), p)
         },
     },
 
@@ -1567,9 +1568,10 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         label: 'Bullet List',
         category: 'Content',
         icon: 'list',
-        description: 'Styled feature list with icons',
+        description: 'Styled feature list with icons — 10 layout styles',
         defaultProps: {
             ...DEFAULT_COMMON,
+            variant: 'bl-classic-check',
             items: ['Feature one — describe your product benefit', 'Feature two — another key selling point', 'Feature three — quality guarantee'],
             color: '#1f1d2e',
             fontSize: 14,
@@ -1578,34 +1580,15 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             letterSpacing: 0,
             bulletColor: '#7530fb',
             bulletStyle: 'check',
+            paddingTop: 16,
+            paddingBottom: 16,
+            paddingLeft: 24,
+            paddingRight: 24,
         } as BulletListProps,
         toHtml(props, id) {
-            const p = props as BulletListProps
-            const bulletMap: Record<string, string> = {
-                disc: '•',
-                check: '&#10003;',
-                arrow: '&#8594;',
-                star: '&#9733;',
-            }
-            const bullet = bulletMap[p.bulletStyle] || '•'
-            const lsEm = ((p.letterSpacing ?? 0) / (p.fontSize ?? 14)).toFixed(4)
-            const rows = p.items.map(item =>
-                `        <tr>
-          <td width="20" valign="top" style="padding-right:8px;padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;color:${p.bulletColor};font-weight:700;">${bullet}</td>
-          <td valign="top" style="padding-bottom:8px;font-family:Arial,sans-serif;font-size:${p.fontSize}px;font-weight:${p.fontWeight ?? '400'};color:${p.color};line-height:${p.lineHeight ?? 1.6};letter-spacing:${lsEm}em;">${item}</td>
-        </tr>`
-            ).join('\n')
-            return wrapBlock('bullet_list', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
-  <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-${rows}
-      </table>
-    </td>
-  </tr>
-</table>`
-            )
+            const p = props as any
+            const variantId = p.variant ?? 'bl-classic-check'
+            return wrapBlock('bullet_list', id, getBulletListVariant(variantId).toHtml(p, id), p)
         },
     },
 

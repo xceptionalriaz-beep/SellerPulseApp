@@ -55,6 +55,9 @@ export { testimonialsVariants, testimonialVariants, getTestimonialsVariant, getT
 export { infoBoxVariants, getInfoBoxVariant, INFOBOX_THUMBNAILS, infoboxVariants } from './info_box.variants'
 export { shippingInfoVariants, shippingVariants, getShippingInfoVariant } from './shipping_info.variants'
 export { storeHeaderVariants, storeheaderVariants, getStoreHeaderVariant } from './store_header.variants'
+export { headingVariants, headingBlockVariants, getHeadingVariant, } from './heading.variants'
+export { paragraphVariants, paragraphBlockVariants, getParagraphVariant, PARAGRAPH_THUMBNAILS } from './paragraph.variants'
+export { bulletListVariants, bulletListBlockVariants, getBulletListVariant, BULLET_LIST_THUMBNAILS } from './bullet_list.variants'
 
 
 // Imports for registry
@@ -110,6 +113,9 @@ import { testimonialsVariants } from './testimonials.variants'
 import { infoBoxVariants } from './info_box.variants'
 import { shippingInfoVariants } from './shipping_info.variants'
 import { storeHeaderVariants } from './store_header.variants'
+import { headingVariants } from './heading.variants'
+import { paragraphVariants } from './paragraph.variants'
+import { bulletListVariants } from './bullet_list.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -205,6 +211,16 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'shipping_bar': shippingInfoVariants,
     'store_header': storeHeaderVariants,
     'storeheader': storeHeaderVariants,
+    'heading': headingVariants,
+    'section_heading': headingVariants,
+    'h2': headingVariants,
+    'paragraph': paragraphVariants,
+    'body': paragraphVariants,
+    'text': paragraphVariants,
+    'bullet_list': bulletListVariants,
+    'bulletlist': bulletListVariants,
+    'bullets': bulletListVariants,
+    'list': bulletListVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

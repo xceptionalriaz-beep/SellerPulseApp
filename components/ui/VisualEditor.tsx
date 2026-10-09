@@ -1509,8 +1509,7 @@ export default function VisualEditor({
                     onLoadTemplate={handleLoadTemplate}
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
-                        if (selectedFeatureIndex === null) return;
-                        // Find block by ID (supports all block types)
+                        // Find block by ID (supports Heading, Features, and all block types)
                         const idx = selectedIconBlockId
                             ? blocks.findIndex(b => b.id === selectedIconBlockId)
                             : selectedId
@@ -1522,7 +1521,12 @@ export default function VisualEditor({
 
                         const updatedProps = { ...p };
 
-                        // 1. Update any existing array of features, reasons, points, badges, or items
+                        // 1. Direct single-icon update for Heading, Info Box, Trust Badge, etc.
+                        updatedProps.icon = iconId;
+                        updatedProps.iconName = iconId;
+
+                        // 2. Update array if block uses features/reasons/points
+                        const featIdx = selectedFeatureIndex ?? 0;
                         const allKeys = ['reasons', 'points', 'features', 'badges', 'items'];
                         const matchedKeys = allKeys.filter(k => Array.isArray(p[k]));
 
@@ -1530,29 +1534,28 @@ export default function VisualEditor({
                             for (const key of matchedKeys) {
                                 const list = p[key] ?? [];
                                 updatedProps[key] = list.map((item: any, i: number) =>
-                                    i === selectedFeatureIndex ? { ...(typeof item === 'object' ? item : {}), icon: iconId } : item
+                                    i === featIdx ? { ...(typeof item === 'object' ? item : {}), icon: iconId } : item
                                 );
                             }
                         } else {
-                            // If no array exists (e.g. Money Back Guarantee), create and populate features array
                             const features = Array.isArray(p.features) ? [...p.features] : [];
-                            while (features.length <= selectedFeatureIndex) {
+                            while (features.length <= featIdx) {
                                 features.push({ icon: '' });
                             }
-                            features[selectedFeatureIndex] = {
-                                ...(typeof features[selectedFeatureIndex] === 'object' ? features[selectedFeatureIndex] : {}),
+                            features[featIdx] = {
+                                ...(typeof features[featIdx] === 'object' ? features[featIdx] : {}),
                                 icon: iconId
                             };
                             updatedProps.features = features;
                         }
 
-                        // 2. Also store under direct icon keys for universal block compatibility
+                        // 3. Store under indexed icon keys
                         if (!Array.isArray(updatedProps.icons)) {
                             updatedProps.icons = Array.isArray(p.icons) ? [...p.icons] : [];
                         }
-                        updatedProps.icons[selectedFeatureIndex] = iconId;
-                        updatedProps[`icon${selectedFeatureIndex + 1}`] = iconId;
-                        updatedProps[`icon_${selectedFeatureIndex}`] = iconId;
+                        updatedProps.icons[featIdx] = iconId;
+                        updatedProps[`icon${featIdx + 1}`] = iconId;
+                        updatedProps[`icon_${featIdx}`] = iconId;
 
                         const updatedBlock = { ...block, props: updatedProps };
                         const newBlocks = [...blocks];

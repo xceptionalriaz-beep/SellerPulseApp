@@ -6843,6 +6843,429 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="58" y="17" width="16" height="6" rx="2" fill="#b8fa33" />
         </svg>
     ),
+
+    // ── Heading & Section Titles (10 Professional Retail Layout Styles) ───────
+    'hd-classic-accent-bar': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="12" width="3.5" height="24" rx="1.5" fill={col} />
+            <rect x="16" y="17" width="52" height="6" rx="1.5" fill="#1e1535" />
+            <rect x="16" y="26" width="34" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+    'classic-accent-bar': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="12" width="3.5" height="24" rx="1.5" fill={col} />
+            <rect x="16" y="17" width="52" height="6" rx="1.5" fill="#1e1535" />
+            <rect x="16" y="26" width="34" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'hd-underline-ribbon': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="15" width="56" height="6.5" rx="1.5" fill="#0f172a" />
+            <rect x="10" y="26" width="26" height="3.5" rx="1.5" fill={col} />
+        </svg>
+    ),
+    'underline-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="15" width="56" height="6.5" rx="1.5" fill="#0f172a" />
+            <rect x="10" y="26" width="26" height="3.5" rx="1.5" fill={col} />
+        </svg>
+    ),
+
+    'hd-centered-hairlines': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+            <polygon points="30,21 33,24 30,27 27,24" fill="#d97706" />
+            <rect x="36" y="20.5" width="24" height="7" rx="1.5" fill="#1c1917" />
+            <polygon points="63,21 66,24 63,27 60,24" fill="#d97706" />
+            <line x1="67" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+        </svg>
+    ),
+    'centered-hairlines': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="24" x2="26" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+            <polygon points="30,21 33,24 30,27 27,24" fill="#d97706" />
+            <rect x="36" y="20.5" width="24" height="7" rx="1.5" fill="#1c1917" />
+            <polygon points="63,21 66,24 63,27 60,24" fill="#d97706" />
+            <line x1="67" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1" />
+        </svg>
+    ),
+
+    'hd-editorial-pill-tag': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="11" width="22" height="6" rx="2" fill={light} stroke="#ddd6fe" strokeWidth="0.8" />
+            <rect x="10" y="21" width="60" height="8" rx="2" fill="#0f172a" />
+            <rect x="10" y="32" width="32" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+    'editorial-pill-tag': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="11" width="22" height="6" rx="2" fill={light} stroke="#ddd6fe" strokeWidth="0.8" />
+            <rect x="10" y="21" width="60" height="8" rx="2" fill="#0f172a" />
+            <rect x="10" y="32" width="32" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'hd-icon-badge-prefix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="14" width="18" height="20" rx="4" fill={light} stroke="#ddd6fe" strokeWidth="0.8" />
+            <polygon points="17,21 20,24 17,27 14,24" fill={col} />
+            <rect x="31" y="17" width="42" height="6" rx="1.5" fill="#0f172a" />
+            <rect x="31" y="26" width="30" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+    'icon-badge-prefix': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="14" width="18" height="20" rx="4" fill={light} stroke="#ddd6fe" strokeWidth="0.8" />
+            <polygon points="17,21 20,24 17,27 14,24" fill={col} />
+            <rect x="31" y="17" width="42" height="6" rx="1.5" fill="#0f172a" />
+            <rect x="31" y="26" width="30" height="3" rx="1" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'hd-swiss-double-rule': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="12" x2="72" y2="12" stroke="#0f172a" strokeWidth="1.6" />
+            <rect x="12" y="20.5" width="56" height="7" rx="1.5" fill="#1e1535" />
+            <line x1="8" y1="36" x2="72" y2="36" stroke="#e2e8f0" strokeWidth="1" />
+        </svg>
+    ),
+    'swiss-double-rule': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="12" x2="72" y2="12" stroke="#0f172a" strokeWidth="1.6" />
+            <rect x="12" y="20.5" width="56" height="7" rx="1.5" fill="#1e1535" />
+            <line x1="8" y1="36" x2="72" y2="36" stroke="#e2e8f0" strokeWidth="1" />
+        </svg>
+    ),
+
+    'hd-dark-slate-ribbon': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <rect x="6" y="11" width="3" height="26" rx="1.5" fill="#38bdf8" />
+            <circle cx="16" cy="24" r="2.5" fill="#38bdf8" />
+            <rect x="23" y="20" width="48" height="7" rx="1.5" fill="#ffffff" />
+        </svg>
+    ),
+    'dark-slate-ribbon': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <rect x="6" y="11" width="3" height="26" rx="1.5" fill="#38bdf8" />
+            <circle cx="16" cy="24" r="2.5" fill="#38bdf8" />
+            <rect x="23" y="20" width="48" height="7" rx="1.5" fill="#ffffff" />
+        </svg>
+    ),
+
+    'hd-step-counter-header': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="18" cy="24" r="8" fill={col} />
+            <rect x="17" y="20" width="2" height="8" fill="#ffffff" />
+            <rect x="32" y="20" width="42" height="7" rx="1.5" fill="#0f172a" />
+        </svg>
+    ),
+    'step-counter-header': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="18" cy="24" r="8" fill={col} />
+            <rect x="17" y="20" width="2" height="8" fill="#ffffff" />
+            <rect x="32" y="20" width="42" height="7" rx="1.5" fill="#0f172a" />
+        </svg>
+    ),
+
+    'hd-outlined-card-frame': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="68" height="28" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="3.5" height="28" rx="1" fill={col} />
+            <rect x="16" y="20" width="48" height="7" rx="1.5" fill="#0f172a" />
+        </svg>
+    ),
+    'outlined-card-frame': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="68" height="28" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="10" width="3.5" height="28" rx="1" fill={col} />
+            <rect x="16" y="20" width="48" height="7" rx="1.5" fill="#0f172a" />
+        </svg>
+    ),
+
+    'hd-split-verified-badge': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="38" x2="74" y2="38" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="19" width="38" height="7" rx="1.5" fill="#0f172a" />
+            <rect x="50" y="17" width="24" height="12" rx="3" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="0.8" />
+            <path d="M54 23l2 2 4-4" stroke="#16a34a" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+    'split-verified-badge': (col, light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="6" y1="38" x2="74" y2="38" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="19" width="38" height="7" rx="1.5" fill="#0f172a" />
+            <rect x="50" y="17" width="24" height="12" rx="3" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="0.8" />
+            <path d="M54 23l2 2 4-4" stroke="#16a34a" strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+    ),
+
+    // ── Paragraph Layout Styles (10 Professional Retail Architectures) ─────────
+    'para-classic-plain': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="14" width="60" height="3" rx="1.5" fill="#94a3b8" />
+            <rect x="10" y="21" width="60" height="3" rx="1.5" fill="#94a3b8" />
+            <rect x="10" y="28" width="40" height="3" rx="1.5" fill="#94a3b8" />
+        </svg>
+    ),
+
+    'para-executive-lead': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="15" width="60" height="5.5" rx="1.5" fill="#0f172a" />
+            <rect x="10" y="25" width="46" height="5.5" rx="1.5" fill="#0f172a" />
+        </svg>
+    ),
+
+    'para-accent-pillar': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="12" width="3" height="24" rx="1.5" fill={col} />
+            <rect x="15" y="15" width="56" height="3" rx="1.5" fill="#1e293b" />
+            <rect x="15" y="22" width="56" height="3" rx="1.5" fill="#64748b" />
+            <rect x="15" y="29" width="36" height="3" rx="1.5" fill="#64748b" />
+        </svg>
+    ),
+
+    'para-disclaimer-card': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="9" width="68" height="30" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="6" y="9" width="3" height="30" fill="#0284c7" />
+            <circle cx="15" cy="19" r="2.5" fill="#0284c7" />
+            <rect x="22" y="17" width="46" height="3.5" rx="1" fill="#0f172a" />
+            <rect x="22" y="25" width="38" height="3" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'para-drop-cap-luxe': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <text x="10" y="27" fontFamily="Georgia,serif" fontSize="18" fontWeight="bold" fill="#b45309">E</text>
+            <rect x="24" y="14" width="46" height="3" rx="1" fill="#1c1917" />
+            <rect x="24" y="20" width="46" height="3" rx="1" fill="#44403c" />
+            <rect x="10" y="28" width="60" height="3" rx="1" fill="#78716c" />
+        </svg>
+    ),
+
+    'para-two-column-split': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Col 1 */}
+            <rect x="8" y="14" width="28" height="3" rx="1" fill="#334155" />
+            <rect x="8" y="20" width="28" height="3" rx="1" fill="#64748b" />
+            <rect x="8" y="26" width="20" height="3" rx="1" fill="#64748b" />
+            {/* Col 2 */}
+            <rect x="44" y="14" width="28" height="3" rx="1" fill="#334155" />
+            <rect x="44" y="20" width="28" height="3" rx="1" fill="#64748b" />
+            <rect x="44" y="26" width="22" height="3" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'para-swiss-double-rule': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="12" x2="72" y2="12" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="10" y="18" width="60" height="3" rx="1" fill="#0f172a" />
+            <rect x="10" y="25" width="48" height="3" rx="1" fill="#475569" />
+            <line x1="8" y1="34" x2="72" y2="34" stroke="#e2e8f0" strokeWidth="1" />
+        </svg>
+    ),
+
+    'para-technical-monospace': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="9" width="68" height="28" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="6" y="9" width="68" height="6" fill="#0f172a" />
+            <line x1="10" y1="12" x2="34" y2="12" stroke="#38bdf8" strokeWidth="1" />
+            <rect x="10" y="20" width="60" height="2.5" rx="0.5" fill="#0f172a" />
+            <rect x="10" y="26" width="42" height="2.5" rx="0.5" fill="#64748b" />
+        </svg>
+    ),
+
+    'para-authoritative-quote': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="30" rx="3" fill="#fcfaf6" stroke="#e7e5e4" strokeWidth="0.8" />
+            <rect x="6" y="8" width="3" height="30" fill="#b45309" />
+            <circle cx="15" cy="17" r="2.5" fill="#b45309" />
+            <rect x="22" y="15" width="48" height="3" rx="1" fill="#1c1917" />
+            <rect x="22" y="21" width="40" height="3" rx="1" fill="#1c1917" />
+            <rect x="22" y="28" width="28" height="2" rx="1" fill="#b45309" />
+        </svg>
+    ),
+
+    'para-category-capsule': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="24" height="6" rx="2" fill="#f3eeff" stroke="#ddd6fe" strokeWidth="0.8" />
+            <rect x="8" y="20" width="64" height="3" rx="1" fill="#334155" />
+            <rect x="8" y="27" width="48" height="3" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    // ── Bullet List (10 Professional Retail Architectures) ───────────────────
+    'bl-classic-check': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <path d="M10 14l2 2 4-4" stroke="#7530fb" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="20" y="12" width="52" height="3.5" rx="1.5" fill="#1e1535" />
+            <path d="M10 24l2 2 4-4" stroke="#7530fb" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="20" y="22" width="52" height="3.5" rx="1.5" fill="#1e1535" />
+            <path d="M10 34l2 2 4-4" stroke="#7530fb" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="20" y="32" width="40" height="3.5" rx="1.5" fill="#1e1535" />
+        </svg>
+    ),
+
+    'bl-two-column-cards': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="9" width="31" height="12" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="11" cy="15" r="2.5" fill="#16a34a" />
+            <rect x="16" y="13.5" width="18" height="3" rx="1" fill="#0f172a" />
+            <rect x="6" y="25" width="31" height="12" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="11" cy="31" r="2.5" fill="#16a34a" />
+            <rect x="16" y="29.5" width="18" height="3" rx="1" fill="#0f172a" />
+            <rect x="43" y="9" width="31" height="12" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="48" cy="15" r="2.5" fill="#16a34a" />
+            <rect x="53" y="13.5" width="18" height="3" rx="1" fill="#0f172a" />
+            <rect x="43" y="25" width="31" height="12" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="48" cy="31" r="2.5" fill="#16a34a" />
+            <rect x="53" y="29.5" width="18" height="3" rx="1" fill="#0f172a" />
+        </svg>
+    ),
+
+    'bl-bold-prefix-highlight': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="12" width="5" height="5" rx="1" fill="#f3eeff" />
+            <rect x="16" y="13" width="20" height="3.5" rx="1" fill="#0f172a" />
+            <rect x="39" y="13.5" width="33" height="2.5" rx="1" fill="#64748b" />
+            <rect x="8" y="22" width="5" height="5" rx="1" fill="#f3eeff" />
+            <rect x="16" y="23" width="20" height="3.5" rx="1" fill="#0f172a" />
+            <rect x="39" y="23.5" width="33" height="2.5" rx="1" fill="#64748b" />
+            <rect x="8" y="32" width="5" height="5" rx="1" fill="#f3eeff" />
+            <rect x="16" y="33" width="16" height="3.5" rx="1" fill="#0f172a" />
+            <rect x="35" y="33.5" width="30" height="2.5" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'bl-enclosed-capsule-pills': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="8" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="12" cy="12" r="2" fill="#16a34a" />
+            <rect x="17" y="10.5" width="52" height="3" rx="1" fill="#0f172a" />
+            <rect x="6" y="19" width="68" height="8" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="12" cy="23" r="2" fill="#16a34a" />
+            <rect x="17" y="21.5" width="52" height="3" rx="1" fill="#0f172a" />
+            <rect x="6" y="30" width="68" height="8" rx="4" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <circle cx="12" cy="34" r="2" fill="#16a34a" />
+            <rect x="17" y="32.5" width="40" height="3" rx="1" fill="#0f172a" />
+        </svg>
+    ),
+
+    'bl-boutique-hairline-ledger': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e7e5e4" strokeWidth="1" />
+            <line x1="8" y1="9" x2="72" y2="9" stroke="#e7e5e4" strokeWidth="1" />
+            <polygon points="12,14 14,16.5 12,19 10,16.5" fill="#b45309" />
+            <rect x="18" y="15" width="54" height="3.5" rx="1" fill="#1c1917" />
+            <line x1="8" y1="24" x2="72" y2="24" stroke="#e7e5e4" strokeWidth="1" />
+            <polygon points="12,29 14,31.5 12,34 10,31.5" fill="#b45309" />
+            <rect x="18" y="30" width="46" height="3.5" rx="1" fill="#1c1917" />
+            <line x1="8" y1="39" x2="72" y2="39" stroke="#e7e5e4" strokeWidth="1" />
+        </svg>
+    ),
+
+    'bl-dark-obsidian-matrix': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#0f172a" />
+            <rect x="6" y="8" width="68" height="8" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+            <rect x="10" y="10.5" width="3" height="3" fill="#38bdf8" />
+            <rect x="16" y="10.5" width="52" height="3" rx="1" fill="#ffffff" />
+            <rect x="6" y="19" width="68" height="8" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+            <rect x="10" y="21.5" width="3" height="3" fill="#38bdf8" />
+            <rect x="16" y="21.5" width="52" height="3" rx="1" fill="#ffffff" />
+            <rect x="6" y="30" width="68" height="8" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+            <rect x="10" y="32.5" width="3" height="3" fill="#38bdf8" />
+            <rect x="16" y="32.5" width="40" height="3" rx="1" fill="#ffffff" />
+        </svg>
+    ),
+
+    'bl-verified-shield-strip': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="12" cy="14" r="3" fill="#f0fdf4" stroke="#16a34a" strokeWidth="1" />
+            <rect x="19" y="11.5" width="24" height="3" rx="1" fill="#0f172a" />
+            <rect x="19" y="16" width="46" height="2" rx="1" fill="#64748b" />
+            <circle cx="12" cy="28" r="3" fill="#f0fdf4" stroke="#16a34a" strokeWidth="1" />
+            <rect x="19" y="25.5" width="24" height="3" rx="1" fill="#0f172a" />
+            <rect x="19" y="30" width="46" height="2" rx="1" fill="#64748b" />
+        </svg>
+    ),
+
+    'bl-numbered-milestones': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="13" cy="14" r="4" fill={col} />
+            <rect x="12" y="11.5" width="2" height="5" fill="#ffffff" />
+            <rect x="22" y="12.5" width="50" height="3.5" rx="1" fill="#0f172a" />
+            <circle cx="13" cy="28" r="4" fill={col} />
+            <rect x="11.5" y="25.5" width="3" height="5" fill="#ffffff" />
+            <rect x="22" y="26.5" width="44" height="3.5" rx="1" fill="#0f172a" />
+        </svg>
+    ),
+
+    'bl-accent-pillar-rail': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="10" width="3" height="24" rx="1.5" fill={col} />
+            <path d="M15 15l1.5 1.5 3-3" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="22" y="13.5" width="48" height="3" rx="1" fill="#1e1535" />
+            <path d="M15 24l1.5 1.5 3-3" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="22" y="22.5" width="48" height="3" rx="1" fill="#1e1535" />
+            <path d="M15 33l1.5 1.5 3-3" stroke={col} strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="22" y="31.5" width="36" height="3" rx="1" fill="#1e1535" />
+        </svg>
+    ),
+
+    'bl-zebra-spec-rows': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="7.5" fill="#f8fafc" />
+            <path d="M10 12l1.5 1.5 3-3" stroke="#2563eb" strokeWidth="1" strokeLinecap="round" />
+            <rect x="18" y="10.5" width="50" height="2.5" rx="1" fill="#0f172a" />
+            <rect x="6" y="17.5" width="68" height="7.5" fill="#ffffff" />
+            <path d="M10 21.5l1.5 1.5 3-3" stroke="#2563eb" strokeWidth="1" strokeLinecap="round" />
+            <rect x="18" y="20" width="50" height="2.5" rx="1" fill="#0f172a" />
+            <rect x="6" y="27" width="68" height="7.5" fill="#f8fafc" />
+            <path d="M10 31l1.5 1.5 3-3" stroke="#2563eb" strokeWidth="1" strokeLinecap="round" />
+            <rect x="18" y="29.5" width="40" height="2.5" rx="1" fill="#0f172a" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
