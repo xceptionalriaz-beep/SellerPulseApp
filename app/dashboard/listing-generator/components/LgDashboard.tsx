@@ -6,7 +6,7 @@
 //   ✓ 4 KPI metric cards (Active, Drafts, VeRO Alerts, Health Score)
 //   ✓ Search + filter toolbar
 //   ✓ Status tabs (All / Active / Drafts / Ended / Scheduled)
-//   ✓ Bulk action bar when rows selected
+//   ✓ Bulk action bar when rows selectedd
 //   ✓ Full data table with all listing details
 //   ✓ Pagination
 //   ✓ Mobile card view
@@ -22,7 +22,8 @@ import {
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/UrlImportProcessing'
-import type { PlatformDetection, UrlImportResult } from '@/app/dashboard/listing-generator/types/url-import.types'
+import UrlImportPreview from '@/app/dashboard/listing-generator/components/ai-import/UrlImportPreview'
+import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -242,8 +243,10 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [showUrlImport, setShowUrlImport] = useState(false)
     const [showProcessing, setShowProcessing] = useState(false)
+    const [showPreview, setShowPreview] = useState(false)
     const [importUrl, setImportUrl] = useState<string>('')
     const [importPlatform, setImportPlatform] = useState<PlatformDetection | null>(null)
+    const [importResult, setImportResult] = useState<UrlImportResult | null>(null)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -1040,7 +1043,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
             </div>
 
-            {/* ── URL to Listing modal — Screen 1 ──────────────────── */}
+            {/* ── Screen 1: URL paste modal ────────────────────────── */}
             {showUrlImport && (
                 <UrlImport
                     onClose={() => setShowUrlImport(false)}
@@ -1053,24 +1056,44 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 />
             )}
 
-            {/* ── Processing overlay — Screen 2 ────────────────────── */}
+            {/* ── Screen 2: Processing overlay ─────────────────────── */}
             {showProcessing && importPlatform && (
                 <UrlImportProcessing
                     url={importUrl}
                     platform={importPlatform}
                     onComplete={(result: UrlImportResult) => {
                         setShowProcessing(false)
-                        // TODO: open Screen 3 (preview) — wire after UrlImportPreview is built
-                        onNewListingProp()
+                        setImportResult(result)
+                        setShowPreview(true)
                     }}
-                    onFailed={(errorCode, message) => {
+                    onFailed={(_errorCode, _message) => {
                         setShowProcessing(false)
-                        // TODO: open Screen 5 (failed) — wire after UrlImportFailed is built
                         onNewListingProp()
                     }}
                     onCancel={() => {
                         setShowProcessing(false)
                         setShowUrlImport(true)
+                    }}
+                />
+            )}
+
+            {/* ── Screen 3: Preview overlay ─────────────────────────── */}
+            {showPreview && importResult && (
+                <UrlImportPreview
+                    result={importResult}
+                    onConfirm={(_listing: ImportedListingData) => {
+                        setShowPreview(false)
+                        onNewListingProp()
+                    }}
+                    onBack={() => {
+                        setShowPreview(false)
+                        setShowProcessing(true)
+                    }}
+                    onCancel={() => {
+                        setShowPreview(false)
+                        setImportResult(null)
+                        setImportPlatform(null)
+                        setImportUrl('')
                     }}
                 />
             )}
