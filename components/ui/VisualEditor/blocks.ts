@@ -1246,6 +1246,7 @@ import { getHeadingVariant } from './variants/heading.variants'
 import { getParagraphVariant } from './variants/paragraph.variants'
 import { getBulletListVariant } from './variants/bullet_list.variants'
 import { getDividerVariant } from './variants/divider.variants'
+import { getNumberedListVariant } from './variants/numbered_list.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -2634,16 +2635,29 @@ ${thumbCells}
             label: 'Numbered List',
             category: 'Content' as BlockCategory,
             icon: 'list',
-            description: 'Step-by-step numbered instructions',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Step-by-step numbered instructions — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'num-classic-badge',
+                items: [
+                    'Step one — first instruction',
+                    'Step two — second instruction',
+                    'Step three — third instruction',
+                ],
+                bgColor: '#ffffff',
+                textColor: '#1e1535',
+                numberColor: '#7530fb',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+                fontSize: 15,
+                lineHeight: 1.6,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps
-                const items = ['Step one — first instruction', 'Step two — second instruction', 'Step three — third instruction']
-                const rows = items.map((item, i) =>
-                    `<tr><td width="28" valign="top" style="padding-right:10px;padding-bottom:10px;"><span style="background-color:#7530fb;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-block;text-align:center;line-height:22px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;">${i + 1}</span></td><td valign="top" style="padding-bottom:10px;font-family:Arial,sans-serif;font-size:14px;color:#1f1d2e;line-height:1.6;">${item}</td></tr>`
-                ).join('')
-                return wrapBlock('numbered_list' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? p.layoutStyle ?? 'num-classic-badge'
+                return wrapBlock('numbered_list' as BlockType, id, getNumberedListVariant(variantId).toHtml(p, id), p)
             },
         },
 

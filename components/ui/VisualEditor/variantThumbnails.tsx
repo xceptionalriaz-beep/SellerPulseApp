@@ -7646,6 +7646,142 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <line x1="52" y1="24" x2="72" y2="24" stroke="#cbd5e1" strokeWidth="1.2" />
         </svg>
     ),
+
+    // ── Numbered List (10 Layout Styles) ──────────────────────────────────
+    'num-classic-badge': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="14" cy="14" r="5" fill="#7530fb" />
+            <line x1="24" y1="14" x2="68" y2="14" stroke="#1e1535" strokeWidth="1.8" />
+            <circle cx="14" cy="26" r="5" fill="#7530fb" />
+            <line x1="24" y1="26" x2="64" y2="26" stroke="#1e1535" strokeWidth="1.8" />
+            <circle cx="14" cy="38" r="5" fill="#7530fb" />
+            <line x1="24" y1="38" x2="58" y2="38" stroke="#1e1535" strokeWidth="1.8" />
+        </svg>
+    ),
+    'num-horizontal-stepper': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="16" y1="20" x2="64" y2="20" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="16" cy="20" r="5" fill="#7530fb" />
+            <line x1="10" y1="30" x2="22" y2="30" stroke="#1e1535" strokeWidth="1.2" />
+            <circle cx="40" cy="20" r="5" fill="#7530fb" />
+            <line x1="34" y1="30" x2="46" y2="30" stroke="#1e1535" strokeWidth="1.2" />
+            <circle cx="64" cy="20" r="5" fill="#7530fb" />
+            <line x1="58" y1="30" x2="70" y2="30" stroke="#1e1535" strokeWidth="1.2" />
+        </svg>
+    ),
+    'num-vertical-spine': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="16" y1="10" x2="16" y2="38" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="16" cy="12" r="4.5" fill="#7530fb" />
+            <line x1="26" y1="12" x2="68" y2="12" stroke="#1e1535" strokeWidth="1.6" />
+            <circle cx="16" cy="24" r="4.5" fill="#7530fb" />
+            <line x1="26" y1="24" x2="62" y2="24" stroke="#1e1535" strokeWidth="1.6" />
+            <circle cx="16" cy="36" r="4.5" fill="#7530fb" />
+            <line x1="26" y1="36" x2="56" y2="36" stroke="#1e1535" strokeWidth="1.6" />
+        </svg>
+    ),
+    'num-step-cards': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="7" width="64" height="9" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="8" y="7" width="3" height="9" fill="#7530fb" />
+            <line x1="16" y1="11.5" x2="62" y2="11.5" stroke="#1e1535" strokeWidth="1.4" />
+            <rect x="8" y="19" width="64" height="9" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="8" y="19" width="3" height="9" fill="#7530fb" />
+            <line x1="16" y1="23.5" x2="58" y2="23.5" stroke="#1e1535" strokeWidth="1.4" />
+            <rect x="8" y="31" width="64" height="9" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="8" y="31" width="3" height="9" fill="#7530fb" />
+            <line x1="16" y1="35.5" x2="52" y2="35.5" stroke="#1e1535" strokeWidth="1.4" />
+        </svg>
+    ),
+    'num-minimal-editorial': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <line x1="8" y1="18" x2="72" y2="18" stroke="#f1f5f9" strokeWidth="1" />
+            <line x1="8" y1="32" x2="72" y2="32" stroke="#f1f5f9" strokeWidth="1" />
+            <line x1="12" y1="12" x2="20" y2="12" stroke="#7530fb" strokeWidth="2" />
+            <line x1="26" y1="12" x2="68" y2="12" stroke="#1e1535" strokeWidth="1.4" />
+            <line x1="12" y1="26" x2="20" y2="26" stroke="#7530fb" strokeWidth="2" />
+            <line x1="26" y1="26" x2="62" y2="26" stroke="#1e1535" strokeWidth="1.4" />
+            <line x1="12" y1="40" x2="20" y2="40" stroke="#7530fb" strokeWidth="2" />
+            <line x1="26" y1="40" x2="56" y2="40" stroke="#1e1535" strokeWidth="1.4" />
+        </svg>
+    ),
+    'num-pill-capsule': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="7" width="64" height="10" rx="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="13" cy="12" r="3.5" fill="#7530fb" />
+            <line x1="20" y1="12" x2="62" y2="12" stroke="#1e1535" strokeWidth="1.4" />
+            <rect x="8" y="20" width="64" height="10" rx="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="13" cy="25" r="3.5" fill="#7530fb" />
+            <line x1="20" y1="25" x2="56" y2="25" stroke="#1e1535" strokeWidth="1.4" />
+            <rect x="8" y="33" width="64" height="10" rx="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="13" cy="38" r="3.5" fill="#7530fb" />
+            <line x1="20" y1="38" x2="50" y2="38" stroke="#1e1535" strokeWidth="1.4" />
+        </svg>
+    ),
+    'num-two-col-grid': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="31" height="14" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="12" cy="15" r="3" fill="#7530fb" />
+            <line x1="18" y1="15" x2="33" y2="15" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="43" y="8" width="31" height="14" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="49" cy="15" r="3" fill="#7530fb" />
+            <line x1="55" y1="15" x2="70" y2="15" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="6" y="26" width="31" height="14" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="12" cy="33" r="3" fill="#7530fb" />
+            <line x1="18" y1="33" x2="33" y2="33" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="43" y="26" width="31" height="14" rx="2" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="0.8" />
+            <circle cx="49" cy="33" r="3" fill="#7530fb" />
+            <line x1="55" y1="33" x2="70" y2="33" stroke="#1e1535" strokeWidth="1.2" />
+        </svg>
+    ),
+    'num-industrial-strip': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="6" y="8" width="68" height="9" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.8" />
+            <rect x="8" y="10" width="10" height="5" fill="#7530fb" />
+            <line x1="22" y1="12.5" x2="66" y2="12.5" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="6" y="20" width="68" height="9" fill="#ffffff" stroke="#94a3b8" strokeWidth="0.8" />
+            <rect x="8" y="22" width="10" height="5" fill="#7530fb" />
+            <line x1="22" y1="24.5" x2="60" y2="24.5" stroke="#1e1535" strokeWidth="1.2" />
+            <rect x="6" y="32" width="68" height="9" fill="#f8fafc" stroke="#94a3b8" strokeWidth="0.8" />
+            <rect x="8" y="34" width="10" height="5" fill="#7530fb" />
+            <line x1="22" y1="36.5" x2="55" y2="36.5" stroke="#1e1535" strokeWidth="1.2" />
+        </svg>
+    ),
+    'num-gradient-ribbon': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <rect x="8" y="7" width="64" height="10" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="7" width="10" height="10" fill="#7530fb" />
+            <line x1="22" y1="12" x2="64" y2="12" stroke="#1e1535" strokeWidth="1.4" />
+            <rect x="8" y="20" width="64" height="10" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="20" width="10" height="10" fill="#7530fb" />
+            <line x1="22" y1="25" x2="58" y2="25" stroke="#1e1535" strokeWidth="1.4" />
+            <rect x="8" y="33" width="64" height="10" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="33" width="10" height="10" fill="#7530fb" />
+            <line x1="22" y1="38" x2="50" y2="38" stroke="#1e1535" strokeWidth="1.4" />
+        </svg>
+    ),
+    'num-compact-mini': (_col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+            <circle cx="12" cy="11" r="3.5" fill="#7530fb" />
+            <line x1="19" y1="11" x2="68" y2="11" stroke="#1e1535" strokeWidth="1.2" />
+            <circle cx="12" cy="20" r="3.5" fill="#7530fb" />
+            <line x1="19" y1="20" x2="62" y2="20" stroke="#1e1535" strokeWidth="1.2" />
+            <circle cx="12" cy="29" r="3.5" fill="#7530fb" />
+            <line x1="19" y1="29" x2="56" y2="29" stroke="#1e1535" strokeWidth="1.2" />
+            <circle cx="12" cy="38" r="3.5" fill="#7530fb" />
+            <line x1="19" y1="38" x2="50" y2="38" stroke="#1e1535" strokeWidth="1.2" />
+        </svg>
+    ),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
