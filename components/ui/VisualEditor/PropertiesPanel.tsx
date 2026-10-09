@@ -2934,6 +2934,8 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Typography">
                         <SliderInput label="Font size" value={props.fontSize ?? 15} min={12} max={24} suffix="px" onChange={v => updateProps({ fontSize: v })} />
                         <SliderInput label="Line height" value={props.lineHeight ?? 1.6} min={1} max={2.5} step={0.05} onChange={v => updateProps({ lineHeight: v })} />
+                        <SliderInput label="Font weight" value={props.fontWeight ?? 400} min={300} max={800} step={100} onChange={v => updateProps({ fontWeight: v })} />
+                        <SliderInput label="Letter spacing" value={(props as any).letterSpacing ?? 0} min={-0.05} max={0.2} step={0.01} onChange={v => updateProps({ letterSpacing: v } as any)} />
                     </Section>
                 </>
             )
