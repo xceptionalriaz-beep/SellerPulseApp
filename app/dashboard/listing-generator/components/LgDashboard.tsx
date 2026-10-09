@@ -1040,14 +1040,37 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
             </div>
 
-            {/* ── URL to Listing modal ─────────────────────────────── */}
+            {/* ── URL to Listing modal — Screen 1 ──────────────────── */}
             {showUrlImport && (
                 <UrlImport
                     onClose={() => setShowUrlImport(false)}
                     onImport={(url, platform) => {
                         setShowUrlImport(false)
-                        // TODO: open Screen 2 (processing) — wired after UrlImportProcessing is built
+                        setImportUrl(url)
+                        setImportPlatform(platform)
+                        setShowProcessing(true)
+                    }}
+                />
+            )}
+
+            {/* ── Processing overlay — Screen 2 ────────────────────── */}
+            {showProcessing && importPlatform && (
+                <UrlImportProcessing
+                    url={importUrl}
+                    platform={importPlatform}
+                    onComplete={(result: UrlImportResult) => {
+                        setShowProcessing(false)
+                        // TODO: open Screen 3 (preview) — wire after UrlImportPreview is built
                         onNewListingProp()
+                    }}
+                    onFailed={(errorCode, message) => {
+                        setShowProcessing(false)
+                        // TODO: open Screen 5 (failed) — wire after UrlImportFailed is built
+                        onNewListingProp()
+                    }}
+                    onCancel={() => {
+                        setShowProcessing(false)
+                        setShowUrlImport(true)
                     }}
                 />
             )}

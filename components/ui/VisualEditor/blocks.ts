@@ -2696,12 +2696,22 @@ ${thumbCells}
             label: 'Warning Box',
             category: 'Content' as BlockCategory,
             icon: 'alert',
-            description: 'Amber warning notice — read before buying',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            description: 'Amber warning notice — 10 layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'wb-amber-classic-card',
+                heading: 'Please Read Before Buying',
+                text: 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 20,
+                paddingRight: 20,
+            } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-                return wrapBlock('warning_box' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#fef9c3'};${pad(p)}border:1px solid ${p.borderColor ?? '#fbbf24'};border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="32" valign="top" style="padding-right:10px;font-size:18px;color:${p.accentColor ?? '#f59e0b'};">&#9888;</td><td valign="top"><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.textColor ?? '#92400e'};">Please Read Before Buying</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#78350f'};line-height:1.6;">Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.</p></td></tr></table></td></tr></table>`)
+                const p = props as any
+                const variantId = p.variant ?? p.layoutStyle ?? 'wb-amber-classic-card'
+                const variant = getWarningBoxVariant(variantId)
+                return wrapBlock('warning_box' as BlockType, id, variant ? variant.toHtml(p, id) : '', p)
             },
         },
 

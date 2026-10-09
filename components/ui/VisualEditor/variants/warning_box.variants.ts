@@ -153,7 +153,7 @@ function amberClassicCard(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const iconSvg = renderAlertTriangleSvg(accentCol, 24)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:1px solid ${borderCol};border-radius:10px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -192,7 +192,7 @@ function criticalRedAlert(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const iconSvg = renderOctagonAlertSvg(accentCol, 24)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:1px solid ${borderCol};border-left:5px solid ${accentCol};border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -240,7 +240,7 @@ function hazardStripeIndustrial(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const iconSvg = renderShieldAlertSvg('#ffffff', 20)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:8px;overflow:hidden;box-sizing:border-box;">
       <!-- Industrial Header Band -->
@@ -292,7 +292,7 @@ function midnightObsidianAmber(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const iconSvg = renderAlertTriangleSvg(accentCol, 22)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:1px solid ${borderCol};border-radius:10px;${pad(p, 18, 22, 18, 22)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -334,7 +334,7 @@ function splitHeaderPill(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const iconSvg = renderAlertTriangleSvg('#ffffff', 18)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:10px;overflow:hidden;box-sizing:border-box;">
       <!-- Amber Header Bar -->
@@ -384,7 +384,7 @@ function pillBadgeMinimal(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const iconSvg = renderAlertTriangleSvg(accentCol, 14)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:1px solid ${borderCol};border-radius:12px;${pad(p, 18, 22, 18, 22)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
@@ -422,7 +422,7 @@ function compatibilityChecklist(p: any, _id: string): string {
     const shieldSvg = renderShieldAlertSvg(accentCol, 24)
     const checkSvg = renderCheckSmallSvg('#16a34a', 15)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:10px;${pad(p, 18, 22, 18, 22)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">
@@ -477,7 +477,7 @@ function securityTamperNotice(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const lockSvg = renderLockAlertSvg(accentCol, 22)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:2px solid ${borderCol};border-radius:10px;${pad(p, 18, 22, 18, 22)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -519,7 +519,7 @@ function floatingCalloutRibbon(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const alertSvg = renderAlertTriangleSvg(accentCol, 20)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:1px solid ${borderCol};border-radius:12px;${pad(p, 18, 22, 18, 22)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
@@ -559,7 +559,7 @@ function compactInlineTicker(p: any, _id: string): string {
     const text = resolveText(p, 'Please check compatibility before purchasing. Returns only accepted if unused and in original packaging.')
     const alertSvg = renderAlertTriangleSvg(accentCol, 18)
 
-    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;margin:0 auto;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;table-layout:fixed;border-collapse:collapse;box-sizing:border-box;">
   <tr>
     <td style="background-color:${bgCol};border:1px solid ${borderCol};border-radius:24px;${pad(p, 10, 18, 10, 18)}box-sizing:border-box;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
