@@ -20,6 +20,9 @@ import {
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
 } from 'lucide-react'
+import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/UrlImport'
+import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/UrlImportProcessing'
+import type { PlatformDetection, UrlImportResult } from '@/app/dashboard/listing-generator/types/url-import.types'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -237,10 +240,21 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [jumpPage, setJumpPage] = useState('')
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
     const [copiedId, setCopiedId] = useState<string | null>(null)
+    const [showUrlImport, setShowUrlImport] = useState(false)
+    const [showProcessing, setShowProcessing] = useState(false)
+    const [importUrl, setImportUrl] = useState<string>('')
+    const [importPlatform, setImportPlatform] = useState<PlatformDetection | null>(null)
 
     // Listen for top bar button events
     useEffect(() => {
-        function onNewListing() { onNewListingProp() }
+        function onNewListing(e: Event) {
+            const mode = (e as CustomEvent).detail?.mode
+            if (mode === 'ai_url') {
+                setShowUrlImport(true)
+            } else {
+                onNewListingProp()
+            }
+        }
         function onBulkUpload() { onBulkUploadProp() }
         window.addEventListener('lg:newListing', onNewListing)
         window.addEventListener('lg:bulkUpload', onBulkUpload)
@@ -1025,6 +1039,19 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 </div>
 
             </div>
+
+            {/* ── URL to Listing modal ─────────────────────────────── */}
+            {showUrlImport && (
+                <UrlImport
+                    onClose={() => setShowUrlImport(false)}
+                    onImport={(url, platform) => {
+                        setShowUrlImport(false)
+                        // TODO: open Screen 2 (processing) — wired after UrlImportProcessing is built
+                        onNewListingProp()
+                    }}
+                />
+            )}
+
         </div>
     )
 }

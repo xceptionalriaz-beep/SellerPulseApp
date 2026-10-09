@@ -61,6 +61,7 @@ export { bulletListVariants, bulletListBlockVariants, getBulletListVariant, BULL
 export { dividerVariants, dividerBlockVariants, getDividerVariant, DIVIDER_THUMBNAILS } from './divider.variants'
 export { numberedListVariants, numberedListBlockVariants, getNumberedListVariant, NUMBERED_LIST_THUMBNAILS, NUMBERED_LIST_STYLES } from './numbered_list.variants'
 export { quoteBlockVariants, getQuoteBlockVariant, quoteBlockThumbnails } from './quote_block.variants'
+export { warningBoxVariants, getWarningBoxVariant, warningBoxThumbnails, warningVariants, getWarningVariant } from './warning_box.variants'
 
 
 // Imports for registry
@@ -122,6 +123,7 @@ import { bulletListVariants } from './bullet_list.variants'
 import { dividerVariants } from './divider.variants'
 import { numberedListVariants } from './numbered_list.variants'
 import { quoteBlockVariants } from './quote_block.variants'
+import { warningBoxVariants } from './warning_box.variants'
 
 // Registry — maps block type to its variant array
 const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
@@ -236,6 +238,8 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'hr': dividerVariants,
     'quote_block': quoteBlockVariants,
     'quote': quoteBlockVariants,
+    'warning_box': warningBoxVariants,
+    'warning': warningBoxVariants,
 }
 
 export function getVariants(blockType: string): BlockVariant[] | null {

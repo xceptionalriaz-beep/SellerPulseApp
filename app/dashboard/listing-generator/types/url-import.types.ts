@@ -171,7 +171,7 @@ export interface PlatformMeta {
 }
 
 export const SUPPORTED_PLATFORMS: PlatformMeta[] = [
-    { key: 'amazon_uk', displayName: 'Amazon.co.uk', domain: 'amazon.co.uk', color: '#FF9900', phase: 1 },
+    { key: 'amazon_uk', displayName: 'Amazon', domain: 'amazon.co.uk', color: '#FF9900', phase: 1 },
     { key: 'aliexpress', displayName: 'AliExpress', domain: 'aliexpress.com', color: '#E62E04', phase: 1 },
     { key: 'argos', displayName: 'Argos', domain: 'argos.co.uk', color: '#CC0000', phase: 1 },
     { key: 'wayfair_uk', displayName: 'Wayfair', domain: 'wayfair.co.uk', color: '#7B2FBE', phase: 1 },
@@ -194,8 +194,8 @@ export function detectPlatformFromUrl(url: string): PlatformDetection | null {
         const host = u.hostname.replace(/^www\./, '').toLowerCase()
 
         const map: Record<string, Pick<PlatformDetection, 'platform' | 'displayName' | 'logoKey' | 'supported' | 'requiresLogin'>> = {
-            'amazon.co.uk': { platform: 'amazon_uk', displayName: 'Amazon.co.uk', logoKey: 'amazon', supported: true, requiresLogin: false },
-            'amazon.com': { platform: 'amazon_us', displayName: 'Amazon.com', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.co.uk': { platform: 'amazon_uk', displayName: 'Amazon', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.com': { platform: 'amazon_us', displayName: 'Amazon', logoKey: 'amazon', supported: true, requiresLogin: false },
             'aliexpress.com': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
             'argos.co.uk': { platform: 'argos', displayName: 'Argos', logoKey: 'argos', supported: true, requiresLogin: false },
             'wayfair.co.uk': { platform: 'wayfair_uk', displayName: 'Wayfair', logoKey: 'wayfair', supported: true, requiresLogin: false },

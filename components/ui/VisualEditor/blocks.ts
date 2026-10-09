@@ -1248,6 +1248,7 @@ import { getParagraphVariant } from './variants/paragraph.variants'
 import { getBulletListVariant } from './variants/bullet_list.variants'
 import { getDividerVariant } from './variants/divider.variants'
 import { getNumberedListVariant } from './variants/numbered_list.variants'
+import { getWarningBoxVariant } from './variants/warning_box.variants'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
