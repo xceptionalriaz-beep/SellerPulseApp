@@ -27,14 +27,11 @@
 //   onTogglePanel   — collapse/expand the content panel
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
     LayoutTemplate, Layers, Settings, Image,
     ShieldCheck, Tag, Bookmark, PanelLeftClose, PanelLeftOpen, Smile,
-    Bell,
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
 
 // ── Design tokens — exact Riazify sidebar system ──────────────────────────────
 const C = {
@@ -131,13 +128,6 @@ export default function IconRail({
                         }}
                     />
                 ))}
-            </div>
-
-            {/* ── Notification bell + Avatar ── */}
-            <RailNotifBell />
-            <div style={{ height: 2 }} />
-            <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 6 }}>
-                <RailAvatar />
             </div>
 
             {/* ── Collapse toggle at bottom ── */}
@@ -287,199 +277,6 @@ function RailIcon({
                 </div>
             )}
         </div>
-    )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// RAIL NOTIFICATION BELL
-// Self-contained — fetches unread count, fires 'tb:notifications' custom event
-// ─────────────────────────────────────────────────────────────────────────────
-function RailNotifBell() {
-    const [count, setCount] = useState(0)
-    const [pulsing, setPulsing] = useState(false)
-    const [hovered, setHovered] = useState(false)
-    const [prevCount, setPrevCount] = useState(0)
-    const supabase = createClient()
-
-    const load = useCallback(async () => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) return
-            const { data: profileData } = await (supabase.from('profiles') as any)
-                .select('role')
-                .eq('id', user.id)
-                .single()
-            let n = 0
-            if (profileData?.role === 'admin') {
-                const { count: c } = await supabase
-                    .from('admin_notifications')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('is_read', false)
-                n = c ?? 0
-            } else {
-                const { count: c } = await supabase
-                    .from('protected_orders')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', user.id)
-                    .eq('risk_level', 'HIGH')
-                n = c ?? 0
-            }
-            if (n > prevCount && prevCount !== 0) {
-                setPulsing(true)
-                setTimeout(() => setPulsing(false), 1500)
-            }
-            setPrevCount(n)
-            setCount(n)
-        } catch { }
-    }, [supabase, prevCount])
-
-    useEffect(() => {
-        load()
-        const t = setInterval(load, 60000)
-        return () => clearInterval(t)
-    }, [load])
-
-    return (
-        <button
-            onClick={() => window.dispatchEvent(new CustomEvent('tb:notifications'))}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            title="Notifications"
-            style={{
-                position: 'relative',
-                width: '100%',
-                height: 40,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: hovered ? C.sidebarActive + 'aa' : 'transparent',
-                transition: 'background-color 0.15s',
-                animation: pulsing ? 'pulseBell 0.6s ease-in-out 3' : 'none',
-            }}
-        >
-            <Bell
-                size={18}
-                style={{
-                    color: count > 0 ? C.danger : hovered ? '#d4cce8' : C.sidebarText,
-                    transition: 'color 0.15s',
-                }}
-            />
-            {count > 0 && (
-                <div style={{
-                    position: 'absolute',
-                    top: 6,
-                    right: 6,
-                    minWidth: 14,
-                    height: 14,
-                    borderRadius: 7,
-                    backgroundColor: C.danger,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0 3px',
-                }}>
-                    <span style={{
-                        fontFamily: 'DM Sans, sans-serif',
-                        fontSize: 9,
-                        fontWeight: 700,
-                        color: '#ffffff',
-                        lineHeight: 1,
-                    }}>
-                        {count > 9 ? '9+' : count}
-                    </span>
-                </div>
-            )}
-        </button>
-    )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// RAIL AVATAR
-// Self-contained — fetches profile from Supabase, navigates to /dashboard/profile
-// ─────────────────────────────────────────────────────────────────────────────
-function RailAvatar() {
-    const [hovered, setHovered] = useState(false)
-    const [imgError, setImgError] = useState(false)
-    const [avatarUrl, setAvatarUrl] = useState('')
-    const [ini, setIni] = useState('U')
-    const [avatarBg, setAvatarBg] = useState('#7530fb')
-    const [avatarText, setAvatarText] = useState('#ffffff')
-    const router = useRouter()
-    const supabase = createClient()
-
-    useEffect(() => {
-        async function load() {
-            try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (!user) return
-                const { data } = await (supabase.from('profiles') as any)
-                    .select('name, email, avatar_url, id')
-                    .eq('id', user.id)
-                    .single()
-                if (!data) return
-                const name: string = data.name || data.email || 'U'
-                const STYLE_BG: Record<string, string> = {
-                    'avataaars': 'b6e3f4', 'big-smile': 'ffd5dc',
-                    'adventurer': 'c0aede', 'notionists': 'd1fae5',
-                    'lorelei': 'ffdfbf', 'micah': 'dbeafe',
-                    'open-peeps': 'fde68a', 'personas': 'e0e7ff',
-                }
-                const AVATAR_COLORS = [
-                    { bg: '#7530fb', text: '#1e1535' }, { bg: '#0ea5e9', text: '#ffffff' },
-                    { bg: '#8b5cf6', text: '#ffffff' }, { bg: '#f97316', text: '#ffffff' },
-                    { bg: '#ec4899', text: '#ffffff' }, { bg: '#14b8a6', text: '#ffffff' },
-                    { bg: '#ef4444', text: '#ffffff' }, { bg: '#6366f1', text: '#ffffff' },
-                ]
-                const styleKey = STYLE_BG[data.avatar_url || ''] ? (data.avatar_url || 'avataaars') : 'avataaars'
-                const bg = STYLE_BG[styleKey] ?? 'b6e3f4'
-                const seed = encodeURIComponent(data.id || data.email || 'default')
-                setAvatarUrl(`https://api.dicebear.com/9.x/${styleKey}/svg?seed=${seed}&backgroundColor=${bg}&backgroundType=solid`)
-                setIni(name.split(' ').map((w: string) => w[0] ?? '').join('').slice(0, 2).toUpperCase())
-                const hash = Math.abs(name.split('').reduce((h: number, c: string) => c.charCodeAt(0) + ((h << 5) - h), 0)) % 8
-                const colors = AVATAR_COLORS[hash]
-                setAvatarBg(colors.bg)
-                setAvatarText(colors.text)
-            } catch { }
-        }
-        load()
-    }, [supabase])
-
-    return (
-        <button
-            onClick={() => router.push('/dashboard/profile')}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            title="Profile"
-            style={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: avatarBg,
-                border: `2px solid ${hovered ? C.indicator : 'transparent'}`,
-                cursor: 'pointer',
-                transition: 'border-color 0.15s',
-                flexShrink: 0,
-            }}
-        >
-            {!imgError && avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                    src={avatarUrl}
-                    alt="avatar"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={() => setImgError(true)}
-                />
-            ) : (
-                <span style={{ color: avatarText, fontWeight: 700, fontSize: 11 }}>{ini}</span>
-            )}
-        </button>
     )
 }
 
