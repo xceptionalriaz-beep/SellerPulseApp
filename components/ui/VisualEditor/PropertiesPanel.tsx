@@ -991,7 +991,9 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'divider':
             return (
                 <Section title="Divider style">
-                    <ColorRow label="Colour" value={props.color ?? '#ede9fe'} onChange={v => updateProps({ color: v })} />
+                    <ColorRow label="Line colour" value={props.color ?? '#ede9fe'} onChange={v => updateProps({ color: v })} />
+                    <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                    <ColorRow label="Accent colour 2" value={(props as any).accentColor2 ?? '#b8fa33'} onChange={v => updateProps({ accentColor2: v } as any)} />
                     <SelectInput label="Style" value={props.lineStyle ?? 'solid'}
                         options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }, { v: 'gradient', l: 'Gradient' }]}
                         onChange={v => updateProps({ lineStyle: v })} />
