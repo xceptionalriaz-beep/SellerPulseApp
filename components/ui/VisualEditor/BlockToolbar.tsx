@@ -515,19 +515,19 @@ export default function BlockToolbar({
                         top: 'calc(100% + 6px)',
                         left: 0,
                         zIndex: 9999,
-                        width: 340,
+                        width: 360,
                         backgroundColor: '#ffffff',
                         border: '1px solid #e2e8f0',
-                        borderRadius: 12,
-                        boxShadow: '0 16px 42px rgba(0,0,0,0.18)',
+                        borderRadius: 14,
+                        boxShadow: '0 20px 48px rgba(0,0,0,0.20)',
                         overflow: 'hidden',
                         display: 'flex',
                         flexDirection: 'column',
                         fontFamily: 'DM Sans, sans-serif',
                     }}>
                         {/* Search Input */}
-                        <div style={{ padding: '9px 12px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, backgroundColor: '#f8fafc' }}>
-                            <Search size={14} color="#7530fb" />
+                        <div style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 9, backgroundColor: '#f8fafc' }}>
+                            <Search size={15} color="#7530fb" />
                             <input
                                 autoFocus
                                 type="text"
@@ -538,18 +538,18 @@ export default function BlockToolbar({
                                     width: '100%',
                                     border: 'none',
                                     outline: 'none',
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     backgroundColor: 'transparent',
                                     color: '#1e1535',
                                     fontFamily: 'DM Sans, sans-serif',
                                 }}
                             />
                             {fontSearch && (
-                                <button onClick={() => setFontSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#94a3b8' }}>×</button>
+                                <button onClick={() => setFontSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, color: '#94a3b8' }}>×</button>
                             )}
                         </div>
 
-                        {/* Category Filter Tabs — All fit on one line with NO horizontal scroll */}
+                        {/* Category Filter Tabs */}
                         <div style={{ display: 'flex', gap: 4, padding: '7px 10px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', justifyContent: 'space-between' }}>
                             {(['all', 'sans', 'serif', 'display', 'mono', 'system'] as const).map(cat => (
                                 <button
@@ -557,8 +557,8 @@ export default function BlockToolbar({
                                     onClick={() => setSelectedCategory(cat)}
                                     style={{
                                         flex: 1,
-                                        padding: '4px 0',
-                                        fontSize: 10,
+                                        padding: '5px 0',
+                                        fontSize: 10.5,
                                         fontWeight: 700,
                                         borderRadius: 8,
                                         border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
@@ -575,8 +575,8 @@ export default function BlockToolbar({
                             ))}
                         </div>
 
-                        {/* Font List — Taller view (420px) showing 12+ fonts at once */}
-                        <div style={{ maxHeight: 420, overflowY: 'auto', padding: '6px 0' }}>
+                        {/* Font List — Longer View (520px) showing 15+ fonts at once with clear large font size */}
+                        <div style={{ maxHeight: 520, overflowY: 'auto', padding: '6px 0' }}>
                             {FONT_REGISTRY
                                 .filter(f => {
                                     const matchesCat = selectedCategory === 'all' || f.category === selectedCategory
@@ -607,7 +607,7 @@ export default function BlockToolbar({
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between',
-                                                padding: '7px 12px',
+                                                padding: '9px 14px',
                                                 border: 'none',
                                                 backgroundColor: isCurrent ? '#f3eeff' : 'transparent',
                                                 cursor: 'pointer',
@@ -617,20 +617,31 @@ export default function BlockToolbar({
                                             onMouseOver={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = '#f8fafc' }}
                                             onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = 'transparent' }}
                                         >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                {/* Bigger, clearer font preview (16px) */}
                                                 <span style={{
                                                     fontFamily: `"${font.name}", ${font.fallback}`,
-                                                    fontSize: 13,
+                                                    fontSize: 16,
                                                     color: isCurrent ? '#7530fb' : '#1e1535',
                                                     fontWeight: isCurrent ? 700 : 500,
+                                                    lineHeight: 1.2,
                                                 }}>
                                                     {font.name}
                                                 </span>
-                                                <span style={{ fontSize: 9, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                                <span style={{
+                                                    fontSize: 9.5,
+                                                    color: '#64748b',
+                                                    backgroundColor: '#f1f5f9',
+                                                    padding: '2px 6px',
+                                                    borderRadius: 4,
+                                                    fontWeight: 600,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.04em',
+                                                }}>
                                                     {font.category}
                                                 </span>
                                             </div>
-                                            {isCurrent && <Check size={13} color="#7530fb" />}
+                                            {isCurrent && <Check size={16} color="#7530fb" strokeWidth={2.5} />}
                                         </button>
                                     )
                                 })}
