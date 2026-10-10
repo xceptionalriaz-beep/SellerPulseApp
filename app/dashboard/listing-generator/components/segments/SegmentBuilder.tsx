@@ -284,30 +284,30 @@ export function SegmentBuilder({
                             <div style={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: 5,
-                                padding: 10,
+                                gap: 4,
+                                padding: 8,
                                 borderRadius: 8,
                                 border: `1.5px solid ${C.borderInput}`,
                                 background: C.bg,
                             }}>
-                                {/* Two columns of swatches */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 5 }}>
+                                {/* Three columns of swatches */}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
                                     {SEGMENT_COLORS.map(hex => (
                                         <button
                                             key={hex}
                                             type="button"
                                             onClick={() => setColor(hex)}
                                             style={{
-                                                width: 28,
-                                                height: 28,
-                                                borderRadius: 6,
+                                                width: 20,
+                                                height: 20,
+                                                borderRadius: 5,
                                                 border: color === hex
-                                                    ? `3px solid ${C.dark}`
+                                                    ? `2px solid ${C.dark}`
                                                     : '2px solid transparent',
                                                 background: hex,
                                                 cursor: 'pointer',
                                                 outline: color === hex ? `2px solid ${hex}` : 'none',
-                                                outlineOffset: 2,
+                                                outlineOffset: 1,
                                             }}
                                         />
                                     ))}

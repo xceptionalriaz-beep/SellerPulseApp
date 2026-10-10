@@ -511,111 +511,111 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     }
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: C.bg }}>
+        <div className="flex h-full" style={{ backgroundColor: C.bg }}>
 
-            {/* METRIC CARDS - fixed */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
+            {/* SEGMENT SIDEBAR — full height, left edge */}
+            <SegmentSidebar
+                segments={segments}
+                customSegments={customSegments}
+                activeSegmentId={activeSegmentId}
+                listings={listings}
+                loading={segLoading}
+                onSelect={id => { setActiveSegmentId(id); setPage(1); clearSelection() }}
+                onCreateSegment={async (payload) => { await createSegment(payload) }}
+                onUpdateSegment={async (id, payload) => { await updateSegment(id, payload) }}
+                onDeleteSegment={async (id) => { await deleteSegment(id) }}
+            />
 
-                {/* Active Listings */}
-                <div className="rounded-2xl p-5 relative overflow-hidden"
-                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.success}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                    <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.success }} />
-                            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Active Listings</span>
-                        </div>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                            style={{ backgroundColor: C.successBg, color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
-                            <TrendingUp size={10} />
-                            {metrics.total} total
-                        </span>
-                    </div>
-                    <p className="text-[36px] font-bold leading-none" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>{metrics.active}</p>
-                </div>
+            {/* MAIN COLUMN — metric cards + toolbar + table */}
+            <div className="flex-1 flex flex-col h-full min-w-0">
 
-                {/* Drafts Ready */}
-                <div className="rounded-2xl p-5"
-                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                    <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: C.primary }} />
-                            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Drafts Ready</span>
-                        </div>
-                        {metrics.drafts > 0 ? (
-                            <button onClick={() => setActiveTab('draft')}
-                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors hover:opacity-80"
-                                style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
-                                View Drafts
-                            </button>
-                        ) : (
-                            <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>No drafts</span>
-                        )}
-                    </div>
-                    <p className="text-[36px] font-bold leading-none" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>{metrics.drafts}</p>
-                </div>
+                {/* METRIC CARDS - fixed */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
 
-                {/* VeRO Alerts */}
-                <div className="rounded-2xl p-5"
-                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${metrics.vero_flagged > 0 ? C.danger : C.success}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                    <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${metrics.vero_flagged > 0 ? 'animate-pulse' : ''}`}
-                                style={{ backgroundColor: metrics.vero_flagged > 0 ? C.danger : C.success }} />
-                            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>VeRO Alerts</span>
-                        </div>
-                        {metrics.vero_flagged > 0 ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                                style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                <AlertTriangle size={10} />
-                                Flagged
-                            </span>
-                        ) : (
+                    {/* Active Listings */}
+                    <div className="rounded-2xl p-5 relative overflow-hidden"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.success}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: C.success }} />
+                                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Active Listings</span>
+                            </div>
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
                                 style={{ backgroundColor: C.successBg, color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
-                                <CheckCircle2 size={10} />
-                                All Clear
+                                <TrendingUp size={10} />
+                                {metrics.total} total
                             </span>
-                        )}
-                    </div>
-                    <p className="text-[36px] font-bold leading-none"
-                        style={{ color: metrics.vero_flagged > 0 ? C.danger : C.success, fontFamily: 'Syne, sans-serif' }}>
-                        {metrics.vero_flagged}
-                    </p>
-                </div>
-
-                {/* Avg Health Score */}
-                <div className="rounded-2xl p-5"
-                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.accent}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                    <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: C.accent }} />
-                            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Avg Health Score</span>
                         </div>
-                        <span className="text-[11px] font-semibold" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>/100</span>
+                        <p className="text-[36px] font-bold leading-none" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>{metrics.active}</p>
                     </div>
-                    <p className="text-[36px] font-bold leading-none mb-2" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>{metrics.avg_health}</p>
-                    <div className="h-1.5 rounded-full" style={{ backgroundColor: C.border }}>
-                        <div className="h-full rounded-full transition-all" style={{ width: `${metrics.avg_health}%`, backgroundColor: C.accent }} />
+
+                    {/* Drafts Ready */}
+                    <div className="rounded-2xl p-5"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: C.primary }} />
+                                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Drafts Ready</span>
+                            </div>
+                            {metrics.drafts > 0 ? (
+                                <button onClick={() => setActiveTab('draft')}
+                                    className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors hover:opacity-80"
+                                    style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                    View Drafts
+                                </button>
+                            ) : (
+                                <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>No drafts</span>
+                            )}
+                        </div>
+                        <p className="text-[36px] font-bold leading-none" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>{metrics.drafts}</p>
                     </div>
+
+                    {/* VeRO Alerts */}
+                    <div className="rounded-2xl p-5"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${metrics.vero_flagged > 0 ? C.danger : C.success}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${metrics.vero_flagged > 0 ? 'animate-pulse' : ''}`}
+                                    style={{ backgroundColor: metrics.vero_flagged > 0 ? C.danger : C.success }} />
+                                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>VeRO Alerts</span>
+                            </div>
+                            {metrics.vero_flagged > 0 ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                    style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                    <AlertTriangle size={10} />
+                                    Flagged
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                                    style={{ backgroundColor: C.successBg, color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
+                                    <CheckCircle2 size={10} />
+                                    All Clear
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-[36px] font-bold leading-none"
+                            style={{ color: metrics.vero_flagged > 0 ? C.danger : C.success, fontFamily: 'Syne, sans-serif' }}>
+                            {metrics.vero_flagged}
+                        </p>
+                    </div>
+
+                    {/* Avg Health Score */}
+                    <div className="rounded-2xl p-5"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.accent}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: C.accent }} />
+                                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Avg Health Score</span>
+                            </div>
+                            <span className="text-[11px] font-semibold" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>/100</span>
+                        </div>
+                        <p className="text-[36px] font-bold leading-none mb-2" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>{metrics.avg_health}</p>
+                        <div className="h-1.5 rounded-full" style={{ backgroundColor: C.border }}>
+                            <div className="h-full rounded-full transition-all" style={{ width: `${metrics.avg_health}%`, backgroundColor: C.accent }} />
+                        </div>
+                    </div>
+
                 </div>
-
-            </div>
-
-            {/* CONTENT AREA — sidebar + toolbar + table */}
-            <div className="flex-1 flex min-h-0">
-
-                {/* SEGMENT SIDEBAR */}
-                <SegmentSidebar
-                    segments={segments}
-                    customSegments={customSegments}
-                    activeSegmentId={activeSegmentId}
-                    listings={listings}
-                    loading={segLoading}
-                    onSelect={id => { setActiveSegmentId(id); setPage(1); clearSelection() }}
-                    onCreateSegment={async (payload) => { await createSegment(payload) }}
-                    onUpdateSegment={async (id, payload) => { await updateSegment(id, payload) }}
-                    onDeleteSegment={async (id) => { await deleteSegment(id) }}
-                />
 
                 {/* TOOLBAR + TABLE — flex col, only tbody scrolls */}
                 <div className="flex-1 flex flex-col min-h-0 px-6 pb-6 pt-4">
@@ -1193,7 +1193,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     </div>
 
                 </div>{/* end toolbar+table */}
-            </div>{/* end content area */}
+            </div>{/* end main column */}
 
             {/* ── Screen 1: URL paste modal ────────────────────────── */}
             {showUrlImport && (

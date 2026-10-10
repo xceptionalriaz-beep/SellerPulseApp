@@ -21,6 +21,9 @@ import {
     FIELD_OPTIONS,
 } from '../../types/segments.types'
 
+import ProDropdown from '@/components/ui/ProDropdown'
+import type { DropdownOption } from '@/components/ui/ProDropdown'
+
 // ── Design tokens (mirrors LgDashboard) ──────────────────────
 const C = {
     bg: '#f8f7ff',
@@ -167,26 +170,36 @@ export function FilterRow({ filter, index, onChange, onRemove }: FilterRowProps)
             }}
         >
             {/* ── Field selector ──────────────────────────── */}
-            <select
-                value={filter.field}
-                onChange={e => handleFieldChange(e.target.value as FilterField)}
-                style={{ ...inputStyle, minWidth: 130, flex: '0 0 auto' }}
-            >
-                {(Object.keys(FILTER_FIELD_LABELS) as FilterField[]).map(f => (
-                    <option key={f} value={f}>{FILTER_FIELD_LABELS[f]}</option>
-                ))}
-            </select>
+            <div style={{ flex: '0 0 auto', minWidth: 140 }}>
+                <ProDropdown
+                    prefix=""
+                    currentValue={filter.field}
+                    options={(Object.keys(FILTER_FIELD_LABELS) as FilterField[]).map(f => ({
+                        val: f,
+                        label: FILTER_FIELD_LABELS[f],
+                        enabled: true,
+                    } as DropdownOption))}
+                    onChanged={v => handleFieldChange(v as FilterField)}
+                    width="full"
+                    maxItems={12}
+                />
+            </div>
 
             {/* ── Operator selector ────────────────────────── */}
-            <select
-                value={filter.op}
-                onChange={e => handleOpChange(e.target.value as FilterOperator)}
-                style={{ ...inputStyle, minWidth: 110, flex: '0 0 auto' }}
-            >
-                {operators.map(op => (
-                    <option key={op} value={op}>{OPERATOR_LABELS[op]}</option>
-                ))}
-            </select>
+            <div style={{ flex: '0 0 auto', minWidth: 120 }}>
+                <ProDropdown
+                    prefix=""
+                    currentValue={filter.op}
+                    options={operators.map(op => ({
+                        val: op,
+                        label: OPERATOR_LABELS[op],
+                        enabled: true,
+                    } as DropdownOption))}
+                    onChanged={v => handleOpChange(v as FilterOperator)}
+                    width="full"
+                    maxItems={8}
+                />
+            </div>
 
             {/* ── Value input(s) ───────────────────────────── */}
             {!noValue && (
