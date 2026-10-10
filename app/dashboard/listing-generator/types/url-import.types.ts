@@ -194,26 +194,74 @@ export function detectPlatformFromUrl(url: string): PlatformDetection | null {
         const u = new URL(url)
         const host = u.hostname.replace(/^www\./, '').toLowerCase()
 
+        // ── Exact domain map ──────────────────────────────────────────────────────
         const map: Record<string, Pick<PlatformDetection, 'platform' | 'displayName' | 'logoKey' | 'supported' | 'requiresLogin'>> = {
-            'amazon.co.uk': { platform: 'amazon_uk', displayName: 'Amazon', logoKey: 'amazon', supported: true, requiresLogin: false },
+            // Amazon — all regional TLDs map to uk or us
+            'amazon.co.uk': { platform: 'amazon_uk', displayName: 'Amazon UK', logoKey: 'amazon', supported: true, requiresLogin: false },
             'amazon.com': { platform: 'amazon_us', displayName: 'Amazon', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.ca': { platform: 'amazon_us', displayName: 'Amazon CA', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.com.au': { platform: 'amazon_us', displayName: 'Amazon AU', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.de': { platform: 'amazon_us', displayName: 'Amazon DE', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.fr': { platform: 'amazon_us', displayName: 'Amazon FR', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.it': { platform: 'amazon_us', displayName: 'Amazon IT', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.es': { platform: 'amazon_us', displayName: 'Amazon ES', logoKey: 'amazon', supported: true, requiresLogin: false },
+            'amazon.co.jp': { platform: 'amazon_us', displayName: 'Amazon JP', logoKey: 'amazon', supported: true, requiresLogin: false },
+            // AliExpress — all regional TLDs treated the same
             'aliexpress.com': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.us': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.co.uk': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.ru': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.fr': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.de': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.es': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.it': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.pl': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.nl': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.pt': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            'aliexpress.com.br': { platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress', supported: true, requiresLogin: false },
+            // Other platforms
             'argos.co.uk': { platform: 'argos', displayName: 'Argos', logoKey: 'argos', supported: true, requiresLogin: false },
             'wayfair.co.uk': { platform: 'wayfair_uk', displayName: 'Wayfair', logoKey: 'wayfair', supported: true, requiresLogin: false },
+            'wayfair.com': { platform: 'wayfair_uk', displayName: 'Wayfair', logoKey: 'wayfair', supported: true, requiresLogin: false },
             'diy.com': { platform: 'bq', displayName: 'B&Q', logoKey: 'bq', supported: true, requiresLogin: false },
             'ebay.co.uk': { platform: 'ebay', displayName: 'eBay', logoKey: 'ebay', supported: true, requiresLogin: false },
-            'ebay.com': { platform: 'ebay', displayName: 'eBay.com', logoKey: 'ebay', supported: true, requiresLogin: false },
+            'ebay.com': { platform: 'ebay', displayName: 'eBay', logoKey: 'ebay', supported: true, requiresLogin: false },
+            'ebay.de': { platform: 'ebay', displayName: 'eBay DE', logoKey: 'ebay', supported: true, requiresLogin: false },
+            'ebay.fr': { platform: 'ebay', displayName: 'eBay FR', logoKey: 'ebay', supported: true, requiresLogin: false },
+            'ebay.com.au': { platform: 'ebay', displayName: 'eBay AU', logoKey: 'ebay', supported: true, requiresLogin: false },
             'banggood.com': { platform: 'banggood', displayName: 'Banggood', logoKey: 'banggood', supported: true, requiresLogin: false },
             'alibaba.com': { platform: 'alibaba', displayName: 'Alibaba', logoKey: 'alibaba', supported: true, requiresLogin: false },
             'temu.com': { platform: 'temu', displayName: 'Temu', logoKey: 'temu', supported: true, requiresLogin: false },
             'dhgate.com': { platform: 'dhgate', displayName: 'DHgate', logoKey: 'dhgate', supported: true, requiresLogin: false },
             'walmart.com': { platform: 'walmart_us' as ImportPlatform, displayName: 'Walmart', logoKey: 'walmart', supported: true, requiresLogin: false },
             'costco.co.uk': { platform: 'costco', displayName: 'Costco', logoKey: 'costco', supported: true, requiresLogin: false },
+            'costco.com': { platform: 'costco', displayName: 'Costco', logoKey: 'costco', supported: true, requiresLogin: false },
         }
 
         const match = map[host]
         if (match) {
             return { ...match, confidence: 'high' }
+        }
+
+        // ── Fuzzy fallback: catch any AliExpress/Amazon TLD not listed above ─────
+        // e.g. aliexpress.com.au, aliexpress.se, amazon.in, amazon.sg
+        if (/^aliexpress\.[a-z.]{2,6}$/.test(host)) {
+            return {
+                platform: 'aliexpress', displayName: 'AliExpress', logoKey: 'aliexpress',
+                confidence: 'high', supported: true, requiresLogin: false,
+            }
+        }
+        if (/^amazon\.[a-z.]{2,6}$/.test(host)) {
+            return {
+                platform: 'amazon_us', displayName: 'Amazon', logoKey: 'amazon',
+                confidence: 'high', supported: true, requiresLogin: false,
+            }
+        }
+        if (/^ebay\.[a-z.]{2,6}$/.test(host)) {
+            return {
+                platform: 'ebay', displayName: 'eBay', logoKey: 'ebay',
+                confidence: 'high', supported: true, requiresLogin: false,
+            }
         }
 
         // Unknown but valid URL

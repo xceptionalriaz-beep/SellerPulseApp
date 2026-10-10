@@ -68,16 +68,29 @@ const PLATFORM_META: Record<string, { displayName: string; logoKey: string; curr
     manomano: { displayName: 'ManoMano', logoKey: 'manomano', currency: 'GBP' },
 }
 
+// ── Normalise AliExpress URL to aliexpress.com ────────────────────────────────
+// Some Apify actors only accept aliexpress.com, not regional TLDs like .us / .ru
+function normaliseAliExpressUrl(url: string): string {
+    try {
+        const u = new URL(url)
+        // Replace any aliexpress.XX TLD with aliexpress.com
+        if (u.hostname.includes('aliexpress.') && !u.hostname.endsWith('aliexpress.com')) {
+            u.hostname = 'www.aliexpress.com'
+        }
+        return u.toString()
+    } catch { return url }
+}
+
 // ── Apify actor IDs per platform ──────────────────────────────────────────────
 // Dedicated actors give cleaner data. Generic cheerio-scraper is the fallback.
 const APIFY_ACTORS: Record<string, { actorId: string; buildInput: (url: string) => object }> = {
     aliexpress: {
         actorId: 'piotrv1001~aliexpress-product-details-scraper',
-        buildInput: (url) => ({ startUrls: [{ url }], maxItems: 1 }),
+        buildInput: (url) => ({ startUrls: [{ url: normaliseAliExpressUrl(url) }], maxItems: 1 }),
     },
     aliexpress_wholesale: {
         actorId: 'piotrv1001~aliexpress-product-details-scraper',
-        buildInput: (url) => ({ startUrls: [{ url }], maxItems: 1 }),
+        buildInput: (url) => ({ startUrls: [{ url: normaliseAliExpressUrl(url) }], maxItems: 1 }),
     },
     amazon_uk: {
         actorId: 'junglee~amazon-crawler',
