@@ -11,7 +11,7 @@ import { useState, type ReactNode } from 'react'
 import {
     X, ArrowLeft,
     CheckCircle2, AlertTriangle, ShieldCheck,
-    Package, Zap,
+    Package, Zap, Info,
     Sparkles, ChevronDown, ChevronUp, Camera,
 } from 'lucide-react'
 import type { ImageImportResult } from './ImageImportProcessing'
@@ -324,6 +324,17 @@ export default function ImageImportPreview({ result, photoCount, onConfirm, onBa
                                 images={listing.images ?? []}
                                 photoCount={photoCount}
                             />
+
+                            {/* Photo re-upload reminder — #8 */}
+                            <div
+                                className="mt-4 flex items-start gap-2.5 px-3 py-2.5 rounded-xl"
+                                style={{ backgroundColor: C.primaryLight, border: `1px solid ${C.border}` }}
+                            >
+                                <Info size={13} style={{ color: C.primary, flexShrink: 0, marginTop: 2 }} />
+                                <p className="text-[11px] leading-relaxed" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                    Your uploaded photos aren&apos;t saved to the draft — re-upload them in the wizard&apos;s <strong>Photos step</strong>.
+                                </p>
+                            </div>
 
                             {/* Original title (AI-detected) */}
                             {listing.title_raw && listing.title_raw !== listing.title_ebay && (
