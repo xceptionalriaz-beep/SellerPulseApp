@@ -49,6 +49,12 @@ interface BarcodeImportProps {
 // ── Max concurrent lookups (avoid hammering free APIs) ────────────────────────
 const MAX_CONCURRENT = 3
 
+// ── Max queue size (prevents accidental bulk overflow) ────────────────────────
+const MAX_QUEUE = 100
+
+// ── Fetch timeout (ms) — items stuck in loading forever is bad UX ─────────────
+const FETCH_TIMEOUT_MS = 30_000
+
 // ── Session persistence key ───────────────────────────────────────────────────
 const SESSION_KEY = 'riazify_barcode_session'
 
@@ -69,7 +75,11 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [bulkDone, setBulkDone] = useState(false)
     const [bulkSavedCount, setBulkSavedCount] = useState(0)
     const [restoreSession, setRestoreSession] = useState<StoredSession | null>(null)
+    // Camera scan feedback: 'added' (green flash) | 'duplicate' (amber) | 'invalid' (red)
+    const [cameraScanFeedback, setCameraScanFeedback] = useState<'added' | 'duplicate' | 'invalid' | null>(null)
     const inFlightRef = useRef<Set<string>>(new Set())
+    // Mirror of queue for synchronous reads (avoids stale closure in camera handler)
+    const queueRef = useRef<BarcodeQueueItem[]>([])
     const inputRef = useRef<HTMLInputElement>(null)
 
     // ── Derived state ─────────────────────────────────────────────────────────
@@ -78,16 +88,25 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const pending = queue.filter(i => i.status === 'pending' || i.status === 'loading')
     const allSelected = found.length > 0 && selected.length === found.length
 
+    // ── Keep queueRef in sync (allows synchronous reads without stale closures) ──
+    useEffect(() => { queueRef.current = queue }, [queue])
+
     // ── Lookup a single barcode via API ───────────────────────────────────────
     const lookupBarcode = useCallback(async (id: string, barcode: string) => {
         // Mark as loading
         setQueue(q => q.map(item => item.id === id ? { ...item, status: 'loading' } : item))
         inFlightRef.current.add(id)
+
+        // Abort after FETCH_TIMEOUT_MS to prevent items stuck loading forever
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
         try {
             const res = await fetch('/api/listing/barcode-import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ barcode }),
+                signal: controller.signal,
             })
             const data: BarcodeImportResponse = await res.json()
             if (data.success && data.result) {
@@ -104,54 +123,69 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                         : item
                 ))
             }
-        } catch {
+        } catch (err) {
+            const isTimeout = err instanceof Error && err.name === 'AbortError'
             setQueue(q => q.map(item =>
-                item.id === id ? { ...item, status: 'error', errorCode: 'network_error' } : item
+                item.id === id
+                    ? { ...item, status: 'error', errorCode: isTimeout ? 'network_error' : 'network_error' }
+                    : item
             ))
         } finally {
+            clearTimeout(timeoutId)
             inFlightRef.current.delete(id)
         }
     }, [])
 
-    // ── Add barcode to queue (deduplication + throttle) ───────────────────────
-    const addBarcode = useCallback((raw: string) => {
+    // ── Add barcode to queue ──────────────────────────────────────────────────
+    // Returns 'added' | 'duplicate' | 'invalid' | 'full' for caller feedback.
+    // Uses queueRef for synchronous duplicate check (no stale closure).
+    const addBarcode = useCallback((raw: string): 'added' | 'duplicate' | 'invalid' | 'full' => {
         const barcode = raw.trim().replace(/[^0-9Xx]/g, '')
         const barcodeType = detectBarcodeType(barcode)
 
-        if (!barcode) return
+        if (!barcode) return 'invalid'
 
         // Check digit validation
         if (!validateCheckDigit(barcode, barcodeType)) {
             setInputError(`Invalid barcode: check digit mismatch — is it typed correctly?`)
-            return
+            return 'invalid'
         }
 
-        // Deduplicate: don't re-queue same barcode
+        // Queue size cap
+        if (queueRef.current.length >= MAX_QUEUE) {
+            setInputError(`Queue is full (${MAX_QUEUE} items max). Remove some items to add more.`)
+            return 'full'
+        }
+
+        // Deduplicate: synchronous check via queueRef, confirmed inside setQueue
+        if (queueRef.current.some(i => i.barcode === barcode)) {
+            setInputError(`${barcode} is already in the queue.`)
+            return 'duplicate'
+        }
+
+        setInputError(null)
+        const newItem: BarcodeQueueItem = {
+            id: crypto.randomUUID().slice(0, 8),
+            barcode,
+            barcodeType,
+            status: 'pending',
+            selected: false,
+            scannedAt: Date.now(),
+        }
+
         setQueue(prev => {
-            if (prev.some(i => i.barcode === barcode)) {
-                setInputError(`${barcode} is already in the queue.`)
-                return prev
-            }
-            setInputError(null)
-
-            const newItem: BarcodeQueueItem = {
-                id: crypto.randomUUID().slice(0, 8),
-                barcode,
-                barcodeType,
-                status: 'pending',
-                selected: false,
-                scannedAt: Date.now(),
-            }
-
-            // Fire lookup if not too many in-flight
-            if (inFlightRef.current.size < MAX_CONCURRENT) {
-                void lookupBarcode(newItem.id, barcode)
-            } else {
-                // Will be picked up by the queue processor effect (below)
-            }
-
+            // Double-check inside setQueue to guard against race conditions
+            if (prev.some(i => i.barcode === barcode)) return prev
+            if (prev.length >= MAX_QUEUE) return prev
             return [newItem, ...prev]
         })
+
+        // Fire lookup if slot available (otherwise auto-retry effect picks it up)
+        if (inFlightRef.current.size < MAX_CONCURRENT) {
+            void lookupBarcode(newItem.id, barcode)
+        }
+
+        return 'added'
     }, [lookupBarcode])
 
     // ── Auto-process pending items when concurrent slots free up ─────────────
@@ -222,6 +256,18 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
         setRestoreSession(null)
         try { localStorage.removeItem(SESSION_KEY) } catch { /* ignore */ }
     }
+
+    // ── Camera scan handler — shows visual feedback on the camera itself ──────
+    const handleCameraDetected = useCallback((barcode: string) => {
+        const result = addBarcode(barcode)
+        // Show feedback on the camera view (not the text input error)
+        if (result === 'duplicate' || result === 'invalid') {
+            setCameraScanFeedback(result)
+        } else {
+            setCameraScanFeedback('added')
+        }
+        setTimeout(() => setCameraScanFeedback(null), 1_500)
+    }, [addBarcode])
 
     // ── Manual input submit ───────────────────────────────────────────────────
     const handleManualSubmit = (e: React.FormEvent) => {
@@ -385,7 +431,8 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                 <BarcodeCamera
                     isActive={cameraActive}
                     onToggle={() => setCameraActive(a => !a)}
-                    onDetected={addBarcode}
+                    onDetected={handleCameraDetected}
+                    scanFeedback={cameraScanFeedback}
                     className="w-full"
                 />
 

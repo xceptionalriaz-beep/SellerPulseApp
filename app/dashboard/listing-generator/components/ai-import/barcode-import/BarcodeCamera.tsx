@@ -38,6 +38,8 @@ interface BarcodeCameraProps {
     onDetected: (barcode: string) => void   // called when a new barcode is scanned
     isActive: boolean                        // parent controls camera on/off
     onToggle: () => void                     // request parent to flip isActive
+    /** Feedback from parent after processing a scan — shown on camera view */
+    scanFeedback?: 'added' | 'duplicate' | 'invalid' | 'full' | null
     className?: string
 }
 
@@ -72,6 +74,7 @@ export default function BarcodeCamera({
     onDetected,
     isActive,
     onToggle,
+    scanFeedback = null,
     className = '',
 }: BarcodeCameraProps) {
     const videoRef = useRef<HTMLVideoElement>(null)
@@ -363,22 +366,58 @@ export default function BarcodeCamera({
                 </div>
             )}
 
-            {/* Last scan badge */}
-            {lastScan && (
-                <div
-                    className="absolute top-3 left-0 right-0 flex justify-center pointer-events-none"
-                >
-                    <div
-                        className="px-3 py-1 rounded-full text-xs font-bold"
-                        style={{
-                            backgroundColor: C.accent,
-                            color: C.text,
-                            fontFamily: 'DM Mono, monospace',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                        }}
-                    >
-                        ✓ {lastScan}
-                    </div>
+            {/* Scan result badge — shows parent feedback or last scan value */}
+            {(scanFeedback || lastScan) && (
+                <div className="absolute top-3 left-0 right-0 flex justify-center pointer-events-none">
+                    {scanFeedback === 'duplicate' ? (
+                        <div
+                            className="px-3 py-1 rounded-full text-xs font-bold"
+                            style={{
+                                backgroundColor: C.warning,
+                                color: '#fff',
+                                fontFamily: 'DM Mono, monospace',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            }}
+                        >
+                            ⚠ Already in queue
+                        </div>
+                    ) : scanFeedback === 'invalid' ? (
+                        <div
+                            className="px-3 py-1 rounded-full text-xs font-bold"
+                            style={{
+                                backgroundColor: C.error,
+                                color: '#fff',
+                                fontFamily: 'DM Mono, monospace',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            }}
+                        >
+                            ✕ Invalid barcode
+                        </div>
+                    ) : scanFeedback === 'full' ? (
+                        <div
+                            className="px-3 py-1 rounded-full text-xs font-bold"
+                            style={{
+                                backgroundColor: C.error,
+                                color: '#fff',
+                                fontFamily: 'DM Mono, monospace',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            }}
+                        >
+                            ✕ Queue full (100 max)
+                        </div>
+                    ) : lastScan ? (
+                        <div
+                            className="px-3 py-1 rounded-full text-xs font-bold"
+                            style={{
+                                backgroundColor: C.accent,
+                                color: C.text,
+                                fontFamily: 'DM Mono, monospace',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            }}
+                        >
+                            ✓ {lastScan}
+                        </div>
+                    ) : null}
                 </div>
             )}
 
