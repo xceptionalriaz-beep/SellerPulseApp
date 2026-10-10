@@ -27,6 +27,8 @@ import UrlImportVeroWarning from '@/app/dashboard/listing-generator/components/a
 import UrlImportFailed from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportFailed'
 import ImageImport from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import ImageImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
+import ImageImportPreview from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportPreview'
+import ImageImportFailed from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportFailed'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -265,9 +267,13 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     // Image import states
     const [showImageImport, setShowImageImport] = useState(false)
     const [showImageProcessing, setShowImageProcessing] = useState(false)
+    const [showImagePreview, setShowImagePreview] = useState(false)
+    const [showImageFailed, setShowImageFailed] = useState(false)
     const [imageImportData, setImageImportData] = useState<ImageImportData | null>(null)
+    const [imageProcessingResult, setImageProcessingResult] = useState<ImageImportResult | null>(null)
     const [imageVeroResult, setImageVeroResult] = useState<ImageImportResult | null>(null)
     const [showImageVeroWarning, setShowImageVeroWarning] = useState(false)
+    const [imageFailedCode, setImageFailedCode] = useState<string | undefined>(undefined)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -284,9 +290,13 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             setImportUrl('')
             setShowImageImport(false)
             setShowImageProcessing(false)
+            setShowImagePreview(false)
+            setShowImageFailed(false)
             setImageImportData(null)
+            setImageProcessingResult(null)
             setImageVeroResult(null)
             setShowImageVeroWarning(false)
+            setImageFailedCode(undefined)
 
             if (mode === 'ai_url') {
                 setShowUrlImport(true)
@@ -1228,26 +1238,14 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     data={imageImportData}
                     onComplete={(result: ImageImportResult) => {
                         setShowImageProcessing(false)
-                        // Gate on VeRO — show warning screen before opening wizard
-                        const veroStatus = result.listing?.vero_status
-                        if (veroStatus === 'warning' || veroStatus === 'flagged') {
-                            setImageVeroResult(result)
-                            setShowImageVeroWarning(true)
-                        } else {
-                            // No VeRO risk — open draft directly
-                            if (result.draft_id) {
-                                onEditDraft(result.draft_id)
-                            } else {
-                                onNewListingProp()
-                            }
-                            loadListings()
-                        }
+                        // Always show preview first so user can review AI output
+                        setImageProcessingResult(result)
+                        setShowImagePreview(true)
                     }}
-                    onFailed={(_errorCode, _message) => {
+                    onFailed={(errorCode, _message) => {
                         setShowImageProcessing(false)
-                        setImageImportData(null)
-                        // Fall back to the upload screen so user can try again
-                        setShowImageImport(true)
+                        setImageFailedCode(errorCode)
+                        setShowImageFailed(true)
                     }}
                     onCancel={() => {
                         setShowImageProcessing(false)
@@ -1257,16 +1255,58 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 />
             )}
 
-            {/* ── Image Import Screen 2b: VeRO Warning ──────────────── */}
+            {/* ── Image Import Screen 3: Preview ────────────────────── */}
+            {showImagePreview && imageProcessingResult?.listing && (
+                <ImageImportPreview
+                    result={imageProcessingResult}
+                    photoCount={imageImportData?.images.length}
+                    onConfirm={(result: ImageImportResult) => {
+                        setShowImagePreview(false)
+                        // Gate on VeRO — show warning screen before opening wizard
+                        const veroStatus = result.listing?.vero_status
+                        if (veroStatus === 'warning' || veroStatus === 'flagged') {
+                            setImageVeroResult(result)
+                            setShowImageVeroWarning(true)
+                        } else {
+                            if (result.draft_id) {
+                                onEditDraft(result.draft_id)
+                            } else {
+                                onNewListingProp()
+                            }
+                            loadListings()
+                            setImageProcessingResult(null)
+                            setImageImportData(null)
+                        }
+                    }}
+                    onBack={() => {
+                        // Go back to upload screen
+                        setShowImagePreview(false)
+                        setImageProcessingResult(null)
+                        setShowImageImport(true)
+                    }}
+                    onCancel={() => {
+                        setShowImagePreview(false)
+                        setImageProcessingResult(null)
+                        setImageImportData(null)
+                    }}
+                />
+            )}
+
+            {/* ── Image Import Screen 3b: VeRO Warning ──────────────── */}
             {showImageVeroWarning && imageVeroResult?.listing && (
                 <UrlImportVeroWarning
                     brand={imageVeroResult.listing.vero_brand ?? imageVeroResult.listing.brand ?? 'Unknown Brand'}
                     riskLevel={imageVeroResult.listing.vero_status === 'flagged' ? 'flagged' : 'warning'}
                     reason={imageVeroResult.listing.vero_reason ?? 'This brand may be registered with eBay\'s VeRO programme.'}
                     onBack={() => {
+                        // Return to preview so user can change the listing
                         setShowImageVeroWarning(false)
-                        setImageVeroResult(null)
-                        setImageImportData(null)
+                        if (imageProcessingResult) {
+                            setShowImagePreview(true)
+                        } else {
+                            setImageVeroResult(null)
+                            setImageImportData(null)
+                        }
                     }}
                     onContinue={() => {
                         setShowImageVeroWarning(false)
@@ -1277,6 +1317,38 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         }
                         loadListings()
                         setImageVeroResult(null)
+                        setImageProcessingResult(null)
+                        setImageImportData(null)
+                    }}
+                />
+            )}
+
+            {/* ── Image Import Screen 4: Failed ─────────────────────── */}
+            {showImageFailed && (
+                <ImageImportFailed
+                    errorCode={imageFailedCode}
+                    photoCount={imageImportData?.images.length}
+                    onTryAgain={() => {
+                        setShowImageFailed(false)
+                        setImageFailedCode(undefined)
+                        setShowImageImport(true)
+                    }}
+                    onTitleMode={() => {
+                        setShowImageFailed(false)
+                        setImageFailedCode(undefined)
+                        setImageImportData(null)
+                        window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'ai_title' } }))
+                    }}
+                    onBarcodeMode={() => {
+                        setShowImageFailed(false)
+                        setImageFailedCode(undefined)
+                        setImageImportData(null)
+                        window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'ai_barcode' } }))
+                    }}
+                    onCancel={() => {
+                        setShowImageFailed(false)
+                        setImageFailedCode(undefined)
+                        setImageImportData(null)
                     }}
                 />
             )}
